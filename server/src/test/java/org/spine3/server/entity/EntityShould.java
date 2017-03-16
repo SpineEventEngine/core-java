@@ -54,6 +54,9 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.currentTimeSeconds;
 
 /**
@@ -183,7 +186,8 @@ public class EntityShould {
 
     @Test
     public void have_zero_version_by_default() {
-        assertEquals(0, entityNew.getVersion().getNumber());
+        assertEquals(0, entityNew.getVersion()
+                                 .getNumber());
     }
 
     @Test
@@ -197,7 +201,8 @@ public class EntityShould {
         final long timeBeforeincrement = currentTimeSeconds();
         entityNew.incrementVersion();
         final long timeAfterIncrement = currentTimeSeconds();
-        assertThat(entityNew.whenModified().getSeconds(),
+        assertThat(entityNew.whenModified()
+                            .getSeconds(),
                    isBetween(timeBeforeincrement, timeAfterIncrement));
     }
 
@@ -212,7 +217,8 @@ public class EntityShould {
     public void increment_version_when_updating_state() {
         entityNew.incrementState(state);
 
-        assertEquals(1, entityNew.getVersion().getNumber());
+        assertEquals(1, entityNew.getVersion()
+                                 .getNumber());
     }
 
     @Test
@@ -233,7 +239,9 @@ public class EntityShould {
 
     @Test
     public void generate_non_zero_hash_code_if_entity_has_non_empty_id_and_state() {
-        assertFalse(entityWithState.getId().trim().isEmpty());
+        assertFalse(entityWithState.getId()
+                                   .trim()
+                                   .isEmpty());
 
         final int hashCode = entityWithState.hashCode();
 
@@ -252,7 +260,6 @@ public class EntityShould {
         assertNotEquals(entityWithState.hashCode(), another.hashCode());
     }
 
-
     private static class EntityWithMessageId
             extends AbstractVersionableEntity<ProjectId, StringValue> {
 
@@ -263,9 +270,8 @@ public class EntityShould {
 
     @Test
     public void obtain_entity_constructor_by_class_and_ID_class() {
-        final Constructor<BareBonesEntity> ctor =
-                AbstractEntity.getConstructor(BareBonesEntity.class,
-                                              Long.class);
+        final Constructor<BareBonesEntity> ctor = getConstructor(BareBonesEntity.class,
+                                                                 Long.class);
 
         assertNotNull(ctor);
     }
@@ -277,9 +283,8 @@ public class EntityShould {
 
         // Create and init the entity.
         final Constructor<BareBonesEntity> ctor =
-                AbstractEntity.getConstructor(BareBonesEntity.class, Long.class);
-        final AbstractVersionableEntity<Long, StringValue> entity =
-                AbstractEntity.createEntity(ctor, id);
+                getConstructor(BareBonesEntity.class, Long.class);
+        final AbstractVersionableEntity<Long, StringValue> entity = createEntity(ctor, id);
 
         final Timestamp after = Timestamps2.getCurrentTime();
 
@@ -287,11 +292,17 @@ public class EntityShould {
         final Interval whileWeCreate = Intervals.between(before, after);
 
         assertEquals(id, entity.getId());
-        assertEquals(0, entity.getVersion().getNumber());
+        assertEquals(0, entity.getVersion()
+                              .getNumber());
         assertTrue(Intervals.contains(whileWeCreate, entity.whenModified()));
         assertEquals(StringValue.getDefaultInstance(), entity.getState());
         assertFalse(entity.isArchived());
         assertFalse(entity.isDeleted());
+    }
+
+    @Test
+    public void have_TypeInfo_utility_class() {
+        assertHasPrivateParameterlessCtor(Entity.TypeInfo.class);
     }
 
     private static Matcher<Long> isBetween(final Long lower, final Long higher) {
@@ -305,7 +316,7 @@ public class EntityShould {
 
             @Override
             public void describeTo(Description description) {
-                description.appendText(" must be between " + lower + " and " + higher +  ' ');
+                description.appendText(" must be between " + lower + " and " + higher + ' ');
             }
         };
     }

@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class FloatFieldValidatorShould {
 
     private static final Float VALUE = 0.5F;

@@ -43,6 +43,7 @@ import java.util.Map;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -58,7 +59,6 @@ import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorag
  * @param <I> the type of IDs of storage records
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public abstract class ProjectionStorageShould<I>
         extends RecordStorageShould<I, ProjectionStorage<I>> {
 
@@ -67,7 +67,7 @@ public abstract class ProjectionStorageShould<I>
     @Override
     protected Message newState(I id) {
         final String projectId = id.getClass()
-                              .getName();
+                                   .getName();
         final Project state = Given.project(projectId,"Projection name " + projectId);
         return state;
     }
@@ -86,6 +86,11 @@ public abstract class ProjectionStorageShould<I>
     @Override
     protected EntityRecord newStorageRecord() {
         return newEntityStorageRecord();
+    }
+
+    @Test
+    public void return_index_of_identifiers() {
+        assertNotNull(storage.index());
     }
 
     @Test

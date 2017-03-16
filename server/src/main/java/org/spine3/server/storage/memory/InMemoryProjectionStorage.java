@@ -26,6 +26,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,6 +54,11 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
+    public Iterator<I> index() {
+        return recordStorage.index();
+    }
+
+    @Override
     public void writeLastHandledEventTime(Timestamp timestamp) {
         checkNotNull(timestamp);
         this.timestampOfLastEvent = timestamp;
@@ -72,16 +78,6 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     public void close() throws Exception {
         recordStorage.close();
         super.close();
-    }
-
-    @Override
-    public boolean markArchived(I id) {
-        return recordStorage().markArchived(id);
-    }
-
-    @Override
-    public boolean markDeleted(I id) {
-        return recordStorage().markDeleted(id);
     }
 
     @Override

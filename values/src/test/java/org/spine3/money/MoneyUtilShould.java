@@ -23,15 +23,13 @@ package org.spine3.money;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class MoneyUtilShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(MoneyUtil.class));
+        assertHasPrivateParameterlessCtor(MoneyUtil.class);
     }
 
     @Test

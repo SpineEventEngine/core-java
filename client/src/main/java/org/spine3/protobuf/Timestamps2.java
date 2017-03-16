@@ -22,7 +22,7 @@ package org.spine3.protobuf;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 
 import javax.annotation.Nullable;
 import java.util.Date;

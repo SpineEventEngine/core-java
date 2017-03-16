@@ -46,6 +46,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations2.seconds;
@@ -55,7 +56,6 @@ import static org.spine3.server.storage.Given.AnEvent.projectCreated;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public abstract class AggregateStorageShould
         extends AbstractStorageShould<ProjectId, AggregateStateRecord, AggregateStorage<ProjectId>> {
 
@@ -111,6 +111,11 @@ public abstract class AggregateStorageShould
         assertTrue(record.get()
                          .getEventList()
                          .isEmpty());
+    }
+
+    @Test
+    public void have_index_of_identifiers() {
+        assertNotNull(storage.index());
     }
 
     @Test

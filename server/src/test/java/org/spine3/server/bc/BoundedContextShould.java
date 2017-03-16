@@ -76,7 +76,6 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();

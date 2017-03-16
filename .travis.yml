@@ -8,17 +8,17 @@ env:
 
 before_install:
   - chmod +x gradlew
-  # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#travis-ci
-  - curl -sL https://github.com/jpm4j/jpm4j.installers/raw/master/dist/biz.aQute.jpm.run.jar >jpm4j.jar
-  - java -jar jpm4j.jar -u init
-  - ~/jpm/bin/jpm install com.codacy:codacy-coverage-reporter:assembly
+  # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#build-from-source.
+  # Manually downloading the latest version from the Maven Central, since the jpm4j stopped working.
+  - curl -sL  http://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar >> codacy-coverage-reporter.jar
   # END of Codacy setup.
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
   - bash <(curl -s https://codecov.io/bash)
-  # Codacy setup. See: https://github.com/codacy/codacy-coverage-reporter#travis-ci
-  - ~/jpm/bin/codacy-coverage-reporter -l Java -r ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+  # Codacy setup. https://github.com/codacy/codacy-coverage-reporter#build-from-source
+  - java -cp ./codacy-coverage-reporter.jar com.codacy.CodacyCoverageReporter -l Java -r ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+  # END of Codacy setup.
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 

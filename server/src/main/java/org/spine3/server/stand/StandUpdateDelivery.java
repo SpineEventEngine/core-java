@@ -24,7 +24,7 @@ package org.spine3.server.stand;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.entity.VersionableEntity;

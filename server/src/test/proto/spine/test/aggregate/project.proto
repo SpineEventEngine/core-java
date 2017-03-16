@@ -31,6 +31,14 @@ message ProjectId {
     string id = 1;
 }
 
+enum Status {
+    PS_UNDEFINED = 0;
+    CREATED = 1;
+    STARTED = 2;
+    DONE = 3;
+    CANCELLED = 4;
+}
+
 message Project {
 
     ProjectId id = 1;
@@ -39,15 +47,21 @@ message Project {
 
     repeated Task task = 3;
 
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        DONE = 3;
-        CANCELLED = 4;
-    }
-
     Status status = 4;
+}
+
+message ProjectLifecycle {
+
+    ProjectId id = 1;
+
+    Status status = 2;
+}
+
+message ProjectDefinition {
+
+    ProjectId id = 1;
+
+    string name = 2;
 }
 
 message TaskId {

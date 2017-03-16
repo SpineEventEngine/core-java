@@ -26,12 +26,11 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class LocalTimesShould {
 
     private static final int hours = 9;
@@ -42,7 +41,7 @@ public class LocalTimesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(LocalTimes.class));
+        assertHasPrivateParameterlessCtor(LocalTimes.class);
     }
 
     @Test

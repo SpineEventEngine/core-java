@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -28,6 +29,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
+import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -41,9 +43,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * @author Dmytro Dashenkov
@@ -97,6 +102,25 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEmpty(empty);
     }
 
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We check in assertion.
+    @Test
+    public void read_single_record_with_mask() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
+        final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
+
+        final Optional<EntityRecord> optional = storage.read(id, idMask);
+        assertTrue(optional.isPresent());
+        final EntityRecord entityRecord = optional.get();
+
+        final Message unpacked = unpack(entityRecord.getState());
+        assertFalse(isDefault(unpacked));
+    }
+
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void read_multiple_records_with_field_mask() {
@@ -125,73 +149,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final List<EntityRecord> readList = newLinkedList(readRecords);
         assertSize(bulkCount, readList);
         for (EntityRecord record : readRecords) {
-            final Message state = AnyPacker.unpack(record.getState());
+            final Message state = unpack(record.getState());
             assertMatchesMask(state, fieldMask);
         }
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_record_as_archived() {
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage();
-
-        // The attempt to mark a record which is not yet stored returns `false`.
-        assertFalse(storage.markArchived(id));
-
-        // Write the record.
-        storage.write(id, record);
-
-        // See it is not archived.
-        assertFalse(storage.read(id)
-                           .get()
-                           .getVisibility()
-                           .getArchived());
-
-        // Mark archived.
-        storage.markArchived(id);
-
-        // See that the record is marked.
-        assertTrue(storage.read(id)
-                          .get()
-                          .getVisibility()
-                          .getArchived());
-
-        // Check that another attempt to mark archived returns `false`.
-        assertFalse(storage.markArchived(id));
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
-    @Test
-    public void mark_record_as_deleted() {
-        final I id = newId();
-        final EntityRecord record = newStorageRecord(id);
-        final RecordStorage<I> storage = getStorage();
-
-        // The attempt to mark a record which is not yet stored returns `false`.
-        assertFalse(storage.markDeleted(id));
-
-        // Write the record.
-        storage.write(id, record);
-
-        // See it is not deleted.
-        assertFalse(storage.read(id)
-                           .get()
-                           .getVisibility()
-                           .getDeleted());
-
-        // Mark deleted.
-        storage.markDeleted(id);
-
-        // See that the record is marked.
-        assertTrue(storage.read(id)
-                          .get()
-                          .getVisibility()
-                          .getDeleted());
-
-        // Check that another attempt to mark deleted returns `false`.
-        assertFalse(storage.markDeleted(id));
     }
 
     @Test
@@ -224,11 +184,57 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
         storage.write(expected);
 
-        final Collection<EntityRecord> actual = newLinkedList(storage.readMultiple(expected.keySet()));
+        final Collection<EntityRecord> actual = newLinkedList(
+                storage.readMultiple(expected.keySet())
+        );
 
         assertEquals(expected.size(), actual.size());
         assertTrue(actual.containsAll(expected.values()));
 
         close(storage);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_write_visibility_to_non_existing_record() {
+        final I id = newId();
+        final RecordStorage<I> storage = getStorage();
+
+        storage.writeLifecycleFlags(id, archived());
+    }
+
+    @Test
+    public void return_absent_visibility_for_missing_record() {
+        final I id = newId();
+        final RecordStorage<I> storage = getStorage();
+        final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
+        assertFalse(optional.isPresent());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
+    @Test
+    public void return_default_visibility_for_new_record() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
+        assertTrue(optional.isPresent());
+        assertEquals(LifecycleFlags.getDefaultInstance(), optional.get());
+    }
+
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
+    @Test
+    public void load_visibility_when_updated() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final RecordStorage<I> storage = getStorage();
+        storage.write(id, record);
+
+        storage.writeLifecycleFlags(id, archived());
+
+        final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
+        assertTrue(optional.isPresent());
+        assertTrue(optional.get().getArchived());
     }
 }

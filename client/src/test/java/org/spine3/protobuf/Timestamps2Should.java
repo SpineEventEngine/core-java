@@ -42,7 +42,7 @@ import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
 import static org.spine3.protobuf.Timestamps2.SECONDS_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.convertToDate;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class Timestamps2Should {
 
@@ -52,7 +52,7 @@ public class Timestamps2Should {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Timestamps2.class));
+        assertHasPrivateParameterlessCtor(Timestamps2.class);
     }
 
     @Test

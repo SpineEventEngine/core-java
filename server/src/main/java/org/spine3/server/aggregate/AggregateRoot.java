@@ -25,6 +25,8 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import org.spine3.server.BoundedContext;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,9 +40,10 @@ import static org.spine3.server.aggregate.AggregatePartRepositoryLookup.createLo
  */
 public class AggregateRoot<I> {
 
-    /** The map from a part class to a repository which manages corresponding aggregate part*/
+    /** The map from a part class to a repository which manages corresponding aggregate part */
     private static final Map<Class<? extends Message>,
-                             AggregatePartRepository<?, ?>> partsAccess = Maps.newConcurrentMap();
+                             AggregatePartRepository<?, ?, ?>> partsAccess =
+                                                               Maps.newConcurrentMap();
 
     /** The bounded context to which the aggregate belongs. */
     private final BoundedContext boundedContext;
@@ -52,13 +55,42 @@ public class AggregateRoot<I> {
      * Creates an new instance.
      *
      * @param boundedContext the bounded context to which the aggregate belongs
-     * @param id the ID of the aggregate
+     * @param id             the ID of the aggregate
      */
     protected AggregateRoot(BoundedContext boundedContext, I id) {
         checkNotNull(boundedContext);
         checkNotNull(id);
         this.boundedContext = boundedContext;
-        this.id = checkNotNull(id);
+        this.id = id;
+    }
+
+    /**
+     * Creates a new {@code AggregateRoot}.
+     *
+     * @param aggregateId    the ID of the aggregate
+     * @param boundedContext the {@code BoundedContext} to use
+     * @param rootClass      the class of the {@code AggregateRoot}
+     * @param <I>            the type of entity IDs
+     * @return new instance
+     */
+    static <I, R extends AggregateRoot<I>> R create(I aggregateId,
+                                                    BoundedContext boundedContext,
+                                                    Class<R> rootClass) {
+        checkNotNull(aggregateId);
+        checkNotNull(boundedContext);
+        checkNotNull(rootClass);
+
+        try {
+            final Constructor<R> rootConstructor =
+                    rootClass.getDeclaredConstructor(boundedContext.getClass(),
+                                                     aggregateId.getClass());
+            rootConstructor.setAccessible(true);
+            final R root = rootConstructor.newInstance(boundedContext, aggregateId);
+            return root;
+        } catch (NoSuchMethodException | InvocationTargetException |
+                InstantiationException | IllegalAccessException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
@@ -71,7 +103,7 @@ public class AggregateRoot<I> {
     /**
      * Obtains the {@code BoundedContext} to which the aggregate belongs.
      */
-    protected BoundedContext getBoundedContext() {
+    private BoundedContext getBoundedContext() {
         return boundedContext;
     }
 
@@ -79,12 +111,16 @@ public class AggregateRoot<I> {
      * Obtains a part state by its class.
      *
      * @param partStateClass the class of the state of the part
-     * @param <S> the type of the part state
+     * @param <S>            the type of the part state
      * @return the state of the part or a default state if the state was not found
+     * @throws IllegalStateException if a repository was not found,
+     *                               or the ID type of the part state does not match
+     *                               the ID type of this {@code AggregateRoot}
      */
-    protected <S extends Message, A extends AggregatePart<I, S, ?>> S getPartState(Class<S> partStateClass) {
-        final AggregatePartRepository<I, A> repo = getRepository(partStateClass);
-        final AggregatePart<I, S, ?> aggregatePart = repo.loadOrCreate(getId());
+    protected <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    S getPartState(Class<S> partStateClass) {
+        final AggregatePartRepository<I, A, ?> repo = getRepository(partStateClass);
+        final AggregatePart<I, S, ?, ?> aggregatePart = repo.loadOrCreate(getId());
         final S partState = aggregatePart.getState();
         return partState;
     }
@@ -92,21 +128,22 @@ public class AggregateRoot<I> {
     /**
      * Obtains a repository for the passed state class.
      *
-     * @throws IllegalStateException
-     *              if a repository was not found,
-     *              or the repository does not match expectations of this {@code AggregateRoot}
+     * @throws IllegalStateException if a repository was not found,
+     *                               or the repository ID type does not match
+     *                               the ID type of this {@code AggregateRoot}
      */
-    private <S extends Message, A extends AggregatePart<I, S, ?>>
-            AggregatePartRepository<I, A> getRepository(Class<S> stateClass) {
+    private <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    AggregatePartRepository<I, A, ?> getRepository(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // We ensure ID type when adding to the map.
-        final AggregatePartRepository<I, A> cached = (AggregatePartRepository<I, A>) partsAccess.get(stateClass);
+        final AggregatePartRepository<I, A, ?> cached =
+                (AggregatePartRepository<I, A, ?>) partsAccess.get(stateClass);
 
         if (cached != null) {
             return cached;
         }
 
         // We don't have a cached instance. Obtain from the `BoundedContext` and cache.
-        final AggregatePartRepository<I, A> repo = lookup(stateClass);
+        final AggregatePartRepository<I, A, ?> repo = lookup(stateClass);
 
         partsAccess.put(stateClass, repo);
 
@@ -114,14 +151,14 @@ public class AggregateRoot<I> {
     }
 
     @VisibleForTesting
-    <S extends Message, A extends AggregatePart<I, S, ?>>
-    AggregatePartRepository<I, A> lookup(Class<S> stateClass) {
+    <S extends Message, A extends AggregatePart<I, S, ?, ?>>
+    AggregatePartRepository<I, A, ?> lookup(Class<S> stateClass) {
         @SuppressWarnings("unchecked") // The type is ensured by getId() result.
         final Class<I> idClass = (Class<I>) getId().getClass();
         final AggregatePartRepositoryLookup<I, S> lookup = createLookup(getBoundedContext(),
                                                                         idClass,
                                                                         stateClass);
-        final AggregatePartRepository<I, A> result = lookup.find();
+        final AggregatePartRepository<I, A, ?> result = lookup.find();
         return result;
     }
 }

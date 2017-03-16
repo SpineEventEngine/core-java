@@ -21,8 +21,10 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Iterator;
 
 /**
  * A view on a repository.
@@ -48,4 +50,14 @@ public interface RepositoryView<I, E extends Entity<I, ?>> {
      */
     @CheckReturnValue
     Optional<E> load(I id);
+
+    /**
+     * Returns an iterator over the entities exposed by the view
+     * that match the passed filter.
+     *
+     * @param filter the {@linkplain Predicate#apply(Object) filtering} predicate
+     * @return new iterator
+     */
+    @CheckReturnValue
+    Iterator<E> iterator(Predicate<E> filter);
 }

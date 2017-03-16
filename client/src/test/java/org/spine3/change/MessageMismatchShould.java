@@ -20,12 +20,11 @@
 
 package org.spine3.change;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.change.MessageMismatch.expectedDefault;
 import static org.spine3.change.MessageMismatch.expectedNotDefault;
 import static org.spine3.change.MessageMismatch.unexpectedValue;
@@ -33,7 +32,7 @@ import static org.spine3.change.MessageMismatch.unpackActual;
 import static org.spine3.change.MessageMismatch.unpackExpected;
 import static org.spine3.change.MessageMismatch.unpackNewValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessageMismatchShould {
 
@@ -45,7 +44,7 @@ public class MessageMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(MessageMismatch.class));
+        assertHasPrivateParameterlessCtor(MessageMismatch.class);
     }
 
     @Test
@@ -98,10 +97,7 @@ public class MessageMismatchShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(MessageMismatch.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(MessageMismatch.class);
     }
 }

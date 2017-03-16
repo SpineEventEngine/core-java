@@ -23,9 +23,10 @@ package org.spine3.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Version;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
+import static org.spine3.base.Identifiers.idFromAny;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -33,15 +34,14 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * Default implementation of {@code EntityStorageConverter} for {@code AbstractVersionableEntity}.
  *
  * @author Alexander Yevsyukov
- * @see Tuple
  */
-class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>, S extends Message>
+class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
     private final Repository<I, E> repository;
     private final FieldMask fieldMask;
 
-    static <I, E extends AbstractVersionableEntity<I, S>, S extends Message>
+    static <I, E extends AbstractEntity<I, S>, S extends Message>
     EntityStorageConverter<I, E, S> forAllFields(Repository<I, E> repository) {
         return new DefaultEntityStorageConverter<>(repository, FieldMask.getDefaultInstance());
     }
@@ -58,33 +58,41 @@ class DefaultEntityStorageConverter<I, E extends AbstractVersionableEntity<I, S>
     }
 
     @Override
-    protected Tuple<I> doForward(E entity) {
+    protected EntityRecord doForward(E entity) {
+        final Any entityId = idToAny(entity.getId());
         final Any stateAny = pack(entity.getState());
-        final Version version = entity.getVersion();
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
-                            .setState(stateAny)
-                            .setVersion(version)
-                            .setVisibility(entity.getVisibility());
+                            .setEntityId(entityId)
+                            .setState(stateAny);
 
-        final Tuple<I> result = tuple(entity.getId(), builder.build());
-        return result;
+        if (entity instanceof AbstractVersionableEntity) {
+            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            builder.setVersion(versionable.getVersion())
+                   .setLifecycleFlags(versionable.getLifecycleFlags());
+        }
+
+        return builder.build();
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    protected E doBackward(Tuple<I> tuple) {
-        final Message unpacked = unpack(tuple.getState()
-                                             .getState());
+    protected E doBackward(EntityRecord entityRecord) {
+        final Message unpacked = unpack(entityRecord.getState());
         final TypeUrl entityStateType = repository.getEntityStateType();
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
 
-        final E entity = repository.create(tuple.getId());
+        final I id = (I) idFromAny(entityRecord.getEntityId());
+        final E entity = repository.create(id);
 
-        final EntityRecord record = tuple.getState();
         if (entity != null) {
-            entity.setState(state, record.getVersion());
-            entity.setVisibility(record.getVisibility());
+            if (entity instanceof AbstractVersionableEntity) {
+                final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+                versionable.setState(state, entityRecord.getVersion());
+                versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
+            } else {
+                entity.injectState(state);
+            }
         }
         return entity;
     }

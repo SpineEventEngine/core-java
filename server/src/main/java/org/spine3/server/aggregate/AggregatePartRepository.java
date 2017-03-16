@@ -22,12 +22,20 @@ package org.spine3.server.aggregate;
 
 import org.spine3.server.BoundedContext;
 
+import java.lang.reflect.Constructor;
+
 /**
  * Common abstract base for repositories that manage {@code AggregatePart}s.
  *
+ * @param <I> the type of part identifiers
+ * @param <A> the type of aggregate parts
+ * @param <R> the type of the aggregate root associated with the type of parts
  * @author Alexander Yevsyukov
  */
-public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?>> extends AggregateRepository<I, A> {
+public abstract class AggregatePartRepository<I,
+                                              A extends AggregatePart<I, ?, ?, R>,
+                                              R extends AggregateRoot<I>>
+                      extends AggregateRepository<I, A> {
 
     /**
      * {@inheritDoc}
@@ -42,5 +50,22 @@ public abstract class AggregatePartRepository<I, A extends AggregatePart<I, ?, ?
     @Override // to expose this method in the same package.
     protected Class<I> getIdClass() {
         return super.getIdClass();
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
+    @Override
+    public A create(I id) {
+        final Constructor<A> entityConstructor = getEntityConstructor();
+        final Class<R> rootClass = AggregatePart.TypeInfo.getRootClass(getEntityClass());
+        final AggregateRoot<I> root = AggregateRoot.create(id, getBoundedContext(), rootClass);
+        final A result = AggregatePart.create(entityConstructor, root);
+        return result;
+    }
+
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // We find constructor for another class.
+    @Override
+    protected Constructor<A> findEntityConstructor() {
+        final Constructor<A> result = AggregatePart.getConstructor(getEntityClass());
+        return result;
     }
 }

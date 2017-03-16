@@ -105,7 +105,7 @@ public interface Entity<I, S extends Message> {
          * @param <I> the entity ID type
          * @return the entity ID class
          */
-        static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+        public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
             checkNotNull(entityClass);
             final Class<I> idClass = getGenericParameterType(entityClass,
                                                              GenericParameter.ID.getIndex());
@@ -119,7 +119,7 @@ public interface Entity<I, S extends Message> {
          * @param <S> the entity state type
          * @return the entity state class
          */
-        static <S extends Message> Class<S> getStateClass(
+        public static <S extends Message> Class<S> getStateClass(
                 Class<? extends Entity> entityClass) {
             final Class<S> result = getGenericParameterType(entityClass,
                                                             GenericParameter.STATE.getIndex());

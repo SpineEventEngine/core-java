@@ -38,6 +38,7 @@ import org.spine3.test.aggregate.event.TaskAdded;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePartRepositoryLookup.createLookup;
 
 public class AggregatePartRepositoryLookupShould {
@@ -48,13 +49,19 @@ public class AggregatePartRepositoryLookupShould {
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
+        final ProjectId id = ProjectId.newBuilder()
+                                      .setId(newUuid())
+                                      .build();
+        final ProjectRoot root = new ProjectRoot(boundedContext, id);
         boundedContext.register(new ProjectPartRepository(boundedContext));
         boundedContext.register(new TaskAggregateRepository(boundedContext));
     }
 
     @Test
     public void find_a_repository() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext, ProjectId.class, Project.class);
+        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                            ProjectId.class,
+                                                            Project.class);
 
         final AggregatePartRepository repository = lookup.find();
         assertNotNull(repository);
@@ -63,19 +70,25 @@ public class AggregatePartRepositoryLookupShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_if_repository_is_not_AggregatePartRepository() {
-        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext, TaskId.class, Task.class);
+        final AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                                  TaskId.class,
+                                                                  Task.class);
         lookup.find();
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_if_repository_not_found() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext, Timestamp.class, StringValue.class);
+        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                            Timestamp.class,
+                                                            StringValue.class);
         lookup.find();
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_if_id_class_does_not_match() {
-        AggregatePartRepositoryLookup lookup = createLookup(boundedContext, TaskId.class, Project.class);
+        AggregatePartRepositoryLookup lookup = createLookup(boundedContext,
+                                                            TaskId.class,
+                                                            Project.class);
         lookup.find();
     }
 
@@ -83,9 +96,25 @@ public class AggregatePartRepositoryLookupShould {
      * Test environment classes
      *****************************/
 
-    private static class ProjectPart extends AggregatePart<ProjectId, Project, Project.Builder> {
-        private ProjectPart(ProjectId id) {
-            super(id);
+    private static class ProjectRoot extends AggregateRoot<ProjectId> {
+
+        /**
+         * Creates an new instance.
+         *
+         * @param boundedContext the bounded context to which the aggregate belongs
+         * @param id             the ID of the aggregate
+         */
+        protected ProjectRoot(BoundedContext boundedContext, ProjectId id) {
+            super(boundedContext, id);
+        }
+    }
+
+    private static class ProjectPart extends AggregatePart<ProjectId,
+                                                           Project,
+                                                           Project.Builder,
+                                                           ProjectRoot> {
+        private ProjectPart(ProjectRoot root) {
+            super(root);
         }
 
         @Assign
@@ -103,15 +132,32 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class ProjectPartRepository extends AggregatePartRepository<ProjectId, ProjectPart> {
+    private static class ProjectPartRepository
+            extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
         private ProjectPartRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }
 
-    private static class TaskAggregate extends AggregatePart<TaskId, Task, Task.Builder> {
-        private TaskAggregate(TaskId id) {
-            super(id);
+    private static class TaskRoot extends AggregateRoot<TaskId> {
+
+        /**
+         * Creates an new instance.
+         *
+         * @param boundedContext the bounded context to which the aggregate belongs
+         * @param id             the ID of the aggregate
+         */
+        protected TaskRoot(BoundedContext boundedContext, TaskId id) {
+            super(boundedContext, id);
+        }
+    }
+
+    private static class TaskAggregatePart extends AggregatePart<TaskId,
+                                                                 Task,
+                                                                 Task.Builder,
+                                                                 TaskRoot> {
+        private TaskAggregatePart(TaskRoot root) {
+            super(root);
         }
 
         @Assign
@@ -130,7 +176,8 @@ public class AggregatePartRepositoryLookupShould {
         }
     }
 
-    private static class TaskAggregateRepository extends AggregateRepository<TaskId, TaskAggregate> {
+    private static class TaskAggregateRepository extends AggregateRepository<TaskId,
+                                                                             TaskAggregatePart> {
         private TaskAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }

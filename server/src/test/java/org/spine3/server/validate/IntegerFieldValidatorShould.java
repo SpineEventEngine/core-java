@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class IntegerFieldValidatorShould {
 
     private static final Integer VALUE = 2;

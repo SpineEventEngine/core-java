@@ -27,12 +27,11 @@ import java.util.Calendar;
 import static java.util.Calendar.getInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class LocalDatesShould {
 
     private static final int year = 2014;
@@ -41,7 +40,7 @@ public class LocalDatesShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(LocalDates.class));
+        assertHasPrivateParameterlessCtor(LocalDates.class);
     }
 
     @Test

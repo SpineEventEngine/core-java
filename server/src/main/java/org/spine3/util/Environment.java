@@ -23,7 +23,7 @@ package org.spine3.util;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 
 import javax.annotation.Nullable;
 
@@ -131,7 +131,8 @@ public final class Environment {
         }
 
         // Check the environment variable. We may run under unknown testing framework or
-        // tests may require production-like mode, which they simulate by setting the property to `false`.
+        // tests may require production-like mode, which they simulate by setting
+        // the property to `false`.
         String testProp = System.getProperty(ENV_KEY_TESTS);
         if (testProp != null) {
             testProp = testProp.replaceAll("\"' ", "");

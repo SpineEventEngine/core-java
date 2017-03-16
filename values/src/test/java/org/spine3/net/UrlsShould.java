@@ -20,25 +20,35 @@
 
 package org.spine3.net;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.net.Url.Record;
 import org.spine3.net.Url.Record.Authorization;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
+@SuppressWarnings({"DuplicateStringLiteralInspection", "LocalVariableNamingConvention"})
 public class UrlsShould {
 
     @Test
+    public void have_private_constructor() {
+        assertHasPrivateParameterlessCtor(Urls.class);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Urls.class);
+    }
+
+    @Test
     public void convert_proper_urls() {
-        final Url url = Urls.of("http://convert-proper-url.com");
+        final Url url = Urls.create("http://convert-proper-url.com");
 
         assertEquals("convert-proper-url.com", url.getRecord()
                                                   .getHost());
@@ -47,15 +57,10 @@ public class UrlsShould {
                                             .getSchema());
     }
 
-    @Test
+    @Test(expected = IllegalArgumentException.class)
     public void fail_on_already_formed_url() {
-        final Url url = Urls.of("http://already-formed-url.com");
-
-        try {
-            Urls.of(url);
-            fail();
-        } catch (IllegalArgumentException ignored) {
-        }
+        final Url url = Urls.create("http://already-formed-url.com");
+        Urls.structurize(url);
     }
 
     @Test
@@ -111,20 +116,6 @@ public class UrlsShould {
     public void convert_to_string_properly() {
         final String rawUrl = "http://foo-bar.com/index";
 
-        assertEquals(rawUrl, Urls.toString(Urls.of(rawUrl)));
-    }
-
-    @Test
-    public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Urls.class));
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Urls.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        assertEquals(rawUrl, Urls.toString(Urls.create(rawUrl)));
     }
 }

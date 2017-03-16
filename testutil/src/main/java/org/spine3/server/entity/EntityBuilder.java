@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.test.ReflectiveBuilder;
 
@@ -39,12 +40,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <E> the type of the entity to build
  * @param <I> the type of the entity identifier
  * @param <S> the type of the entity state
- *
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
 public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S extends Message>
-       extends ReflectiveBuilder<E> {
+             extends ReflectiveBuilder<E> {
 
     /** The class of the entity IDs. */
     private Class<I> idClass;
@@ -118,8 +118,13 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         final S state = state(result);
         final Timestamp timestamp = timestamp();
 
-        result.setState(state, Versions.newVersion(version, timestamp));
+        final Version version = Versions.newVersion(this.version, timestamp);
+        setState(result, state, version);
         return result;
+    }
+
+    protected void setState(E result, S state, Version version) {
+        result.setState(state, version);
     }
 
     /**

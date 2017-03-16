@@ -20,15 +20,20 @@
 
 package org.spine3.server.reflect;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ClassesShould {
     @Test
     public void have_private_ctor() {
-        assertTrue(hasPrivateParameterlessCtor(Classes.class));
+        assertHasPrivateParameterlessCtor(Classes.class);
+    }
+
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Classes.class);
     }
 }

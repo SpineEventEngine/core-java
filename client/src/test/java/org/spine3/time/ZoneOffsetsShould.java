@@ -25,14 +25,12 @@ import org.junit.Test;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
 import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ZoneOffsetsShould {
 
     private static final int MIN_HOURS_OFFSET = -11;
@@ -43,7 +41,7 @@ public class ZoneOffsetsShould {
 
     @Test
     public void has_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(ZoneOffsets.class));
+        assertHasPrivateParameterlessCtor(ZoneOffsets.class);
     }
 
     @Test

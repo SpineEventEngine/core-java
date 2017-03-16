@@ -24,6 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+
 /**
  * @author Alexander Yevsyukov
  */
@@ -31,7 +33,7 @@ public class VersionsShould {
 
     @Test
     public void have_private_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(Versions.class);
+        assertHasPrivateParameterlessCtor(Versions.class);
     }
 
     @Test

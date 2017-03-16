@@ -25,12 +25,13 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -45,8 +46,8 @@ import static com.google.common.base.Preconditions.checkState;
  */
 class InMemoryStandStorage extends StandStorage {
 
-    private static final String TYPE_URL_MISMATCH_MESSAGE_PATTERN
-            = "The typeUrl of the record (%s) does not correspond to id (for type %s)";
+    private static final String TYPE_URL_MISMATCH_MESSAGE_PATTERN =
+            "The typeUrl of the record (%s) does not correspond to id (for type %s)";
 
     private final InMemoryRecordStorage<AggregateStateId> recordStorage;
 
@@ -65,30 +66,34 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type, FieldMask fieldMask) {
+    public ImmutableCollection<EntityRecord> readAllByType(final TypeUrl type,
+                                                           FieldMask fieldMask) {
         final Map<AggregateStateId, EntityRecord> allRecords = readAll(fieldMask);
-        final Map<AggregateStateId, EntityRecord> resultMap = Maps.filterKeys(allRecords, new Predicate<AggregateStateId>() {
-            @Override
-            public boolean apply(@Nullable AggregateStateId stateId) {
-                checkNotNull(stateId);
-                final boolean typeMatches = stateId.getStateType()
-                                                   .equals(type);
-                return typeMatches;
-            }
-        });
-
+        final Map<AggregateStateId, EntityRecord> resultMap = filterByType(allRecords, type);
         final ImmutableList<EntityRecord> result = ImmutableList.copyOf(resultMap.values());
         return result;
     }
 
-    @Override
-    public boolean markArchived(AggregateStateId id) {
-        return recordStorage.markArchived(id);
+    private static Map<AggregateStateId, EntityRecord> filterByType(
+            Map<AggregateStateId, EntityRecord> records,
+            final TypeUrl type) {
+        final Map<AggregateStateId, EntityRecord> result = Maps.filterKeys(
+                records,
+                new Predicate<AggregateStateId>() {
+                    @Override
+                    public boolean apply(@Nullable AggregateStateId stateId) {
+                        checkNotNull(stateId);
+                        final boolean typeMatches = stateId.getStateType()
+                                                           .equals(type);
+                        return typeMatches;
+                    }
+                });
+        return result;
     }
 
     @Override
-    public boolean markDeleted(AggregateStateId id) {
-        return recordStorage.markDeleted(id);
+    public Iterator<AggregateStateId> index() {
+        return recordStorage.index();
     }
 
     @Override
@@ -108,7 +113,8 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<AggregateStateId> ids,
+                                                         FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 
@@ -124,13 +130,13 @@ class InMemoryStandStorage extends StandStorage {
 
     @Override
     protected void writeRecord(AggregateStateId id, EntityRecord record) {
-        final TypeUrl recordType = TypeUrl.of(record.getState()
-                                                    .getTypeUrl());
+        final TypeUrl recordType = TypeUrl.parse(record.getState()
+                                                       .getTypeUrl());
         final TypeUrl recordTypeFromId = id.getStateType();
-        checkState(
-                recordTypeFromId.equals(recordType),
-                String.format(TYPE_URL_MISMATCH_MESSAGE_PATTERN, recordType, recordTypeFromId));
-
+        checkState(recordTypeFromId.equals(recordType),
+                   TYPE_URL_MISMATCH_MESSAGE_PATTERN,
+                   recordType,
+                   recordTypeFromId);
         recordStorage.write(id, record);
     }
 

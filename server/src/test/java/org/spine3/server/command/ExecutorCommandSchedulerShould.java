@@ -44,7 +44,6 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ExecutorCommandSchedulerShould {
 
     private static final long DELAY_MS = 1100;

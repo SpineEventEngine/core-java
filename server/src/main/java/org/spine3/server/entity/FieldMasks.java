@@ -26,8 +26,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -92,9 +92,10 @@ public class FieldMasks {
      * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
-    public static <M extends Message, B extends Message.Builder> Collection<M> applyMask(FieldMask mask,
-                                                                                         Collection<M> messages,
-                                                                                         TypeUrl type) {
+    public static <M extends Message, B extends Message.Builder>
+    Collection<M> applyMask(FieldMask mask,
+                            Collection<M> messages,
+                            TypeUrl type) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
@@ -185,7 +186,8 @@ public class FieldMasks {
         return result;
     }
 
-    @SuppressWarnings("unchecked")      // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
+    @SuppressWarnings("unchecked")
+        // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;

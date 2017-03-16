@@ -39,7 +39,7 @@ import static org.junit.Assert.fail;
  * @param <R> the type of records kept in the storage
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AbstractStorageShould<I, R extends Message, S extends AbstractStorage<I, R>> {
 
     private AbstractStorage<I, R> storage;
@@ -203,9 +203,8 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_close_twice() {
-        closeAndFailIfException(storage);
-
-        storage.read(newId());
+    public void throw_exception_if_close_twice() throws Exception {
+        storage.close();
+        storage.close();
     }
 }

@@ -33,7 +33,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
@@ -62,6 +62,11 @@ class InMemoryCommandStorage extends CommandStorage {
         checkNotDefault(id);
         checkNotDefault(record);
         put(id, record);
+    }
+
+    @Override
+    public Iterator<CommandId> index() {
+        return getStorage().index();
     }
 
     @Override

@@ -32,7 +32,6 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class LongFieldValidatorShould {
 
     private static final Long VALUE = 2L;

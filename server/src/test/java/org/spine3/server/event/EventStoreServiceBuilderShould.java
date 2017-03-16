@@ -31,7 +31,6 @@ import java.util.concurrent.Executor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class EventStoreServiceBuilderShould {
 
     private EventStore.ServiceBuilder builder;

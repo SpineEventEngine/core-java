@@ -36,10 +36,10 @@ import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.TypeName;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
+import org.spine3.type.TypeName;
 
 import java.util.Iterator;
 import java.util.List;
@@ -58,8 +58,8 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.Given.AnEventRecord.projectCreated;
 import static org.spine3.server.storage.Given.EventMessage.projectCreated;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public abstract class EventStorageShould extends AbstractStorageShould<EventId, Event, EventStorage> {
+public abstract class EventStorageShould
+        extends AbstractStorageShould<EventId, Event, EventStorage> {
 
     /** Small positive delta in seconds or nanoseconds. */
     private static final int POSITIVE_DELTA = 10;
@@ -105,6 +105,11 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     }
 
     @Test
+    public void have_index_of_identifiers() {
+        assertNotNull(storage.index());
+    }
+
+    @Test
     public void return_iterator_over_empty_collection_if_read_events_from_empty_storage() {
         final Iterator<Event> iterator = findAll();
 
@@ -132,7 +137,8 @@ public abstract class EventStorageShould extends AbstractStorageShould<EventId, 
     @Test
     public void filter_events_by_type() {
         givenSequentialRecords();
-        final String typeName = TypeName.ofEvent(event1);
+        final String typeName = TypeName.ofEvent(event1)
+                                        .value();
         final EventFilter filter = EventFilter.newBuilder()
                                               .setEventType(typeName)
                                               .build();

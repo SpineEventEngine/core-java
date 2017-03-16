@@ -22,6 +22,9 @@ package org.spine3.server.entity;
 
 import java.lang.reflect.Constructor;
 
+import static org.spine3.server.entity.AbstractEntity.createEntity;
+import static org.spine3.server.entity.AbstractEntity.getConstructor;
+
 /**
  * Default factory that creates entities by invoking constructor that
  * accepts a single ID parameter.
@@ -30,14 +33,15 @@ import java.lang.reflect.Constructor;
  * @param <E> the type of entities to create
  * @author Alexander Yevsyukov
  */
-public class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityFactory<I, E> {
+class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>>
+        implements EntityFactory<I, E> {
 
     private final Repository<I, E> repository;
 
     /** The constructor for creating entity instances. */
     private final Constructor<E> entityConstructor;
 
-    public DefaultEntityFactory(Repository<I, E> repository) {
+    DefaultEntityFactory(Repository<I, E> repository) {
         this.repository = repository;
         this.entityConstructor = getEntityConstructor();
         this.entityConstructor.setAccessible(true);
@@ -46,13 +50,12 @@ public class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements 
     private Constructor<E> getEntityConstructor() {
         final Class<E> entityClass = repository.getEntityClass();
         final Class<I> idClass = repository.getIdClass();
-        final Constructor<E> result = AbstractEntity.getConstructor(entityClass, idClass);
+        final Constructor<E> result = getConstructor(entityClass, idClass);
         return result;
     }
 
-
     @Override
     public E create(I id) {
-        return AbstractEntity.createEntity(this.entityConstructor, id);
+        return createEntity(this.entityConstructor, id);
     }
 }

@@ -25,13 +25,12 @@ import org.spine3.net.Url.Record;
 import org.spine3.net.Url.Record.Authorization;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "DuplicateStringLiteralInspection"})
+@SuppressWarnings("DuplicateStringLiteralInspection")
 public class UrlPrinterShould {
 
     private static final Authorization AUTH =
@@ -50,8 +49,8 @@ public class UrlPrinterShould {
                                               .setSchema(Record.Schema.HTTP))
                   .setAuth(AUTH)
                   .setPath("index")
-                  .addQuery(QueryParameters.parse("key=value"))
-                  .addQuery(QueryParameters.parse("key2=value2"))
+                  .addQuery(UrlQueryParameters.parse("key=value"))
+                  .addQuery(UrlQueryParameters.parse("key2=value2"))
                   .setFragment("frag1")
                   .build();
 
@@ -135,6 +134,6 @@ public class UrlPrinterShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(UrlPrinter.class));
+        assertHasPrivateParameterlessCtor(UrlPrinter.class);
     }
 }

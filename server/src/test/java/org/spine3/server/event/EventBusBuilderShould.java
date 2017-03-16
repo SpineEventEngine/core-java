@@ -39,7 +39,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings({"InstanceMethodNamingConvention", "OptionalGetWithoutIsPresent"})
+@SuppressWarnings("OptionalGetWithoutIsPresent")
 public class EventBusBuilderShould {
 
     private StorageFactory storageFactory;

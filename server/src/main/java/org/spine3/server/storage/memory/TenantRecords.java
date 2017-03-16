@@ -25,18 +25,18 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.Visibility;
+import org.spine3.type.TypeUrl;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
-import static org.spine3.server.entity.Predicates.isRecordVisible;
 
 /**
  * The memory-based storage for {@code EntityStorageRecord} that represents
@@ -50,6 +50,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
     private final Map<I, EntityRecord> filtered = filterValues(records, isRecordVisible());
 
     @Override
+    public Iterator<I> index() {
+        final Iterator<I> result = filtered.keySet()
+                                           .iterator();
+        return result;
+    }
+
+    @Override
     public void put(I id, EntityRecord record) {
         records.put(id, record);
     }
@@ -58,41 +65,6 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
     public Optional<EntityRecord> get(I id) {
         final EntityRecord record = records.get(id);
         return Optional.fromNullable(record);
-    }
-
-    boolean markArchived(I id) {
-        final EntityRecord record = records.get(id);
-        if (record == null) {
-            return false;
-        }
-        final Visibility currentStatus = record.getVisibility();
-        if (currentStatus.getArchived()) {
-            return false;
-        }
-        final EntityRecord archivedRecord = record.toBuilder()
-                                                  .setVisibility(currentStatus.toBuilder()
-                                                                              .setArchived(true))
-                                                  .build();
-        records.put(id, archivedRecord);
-        return true;
-    }
-
-    boolean markDeleted(I id) {
-        final EntityRecord record = records.get(id);
-        if (record == null) {
-            return false;
-        }
-
-        final Visibility currentStatus = record.getVisibility();
-        if (currentStatus.getDeleted()) {
-            return false;
-        }
-        final EntityRecord deletedRecord = record.toBuilder()
-                                                 .setVisibility(currentStatus.toBuilder()
-                                                                             .setDeleted(true))
-                                                 .build();
-        records.put(id, deletedRecord);
-        return true;
     }
 
     boolean delete(I id) {
@@ -119,7 +91,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
                 }
                 EntityRecord.Builder matchingRecord = record.get().toBuilder();
                 final Any state = matchingRecord.getState();
-                final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
+                final TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
                 final Message wholeState = unpack(state);
                 final Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
                 final Any processed = pack(maskedState);
@@ -146,8 +118,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         for (Map.Entry<I, EntityRecord> storageEntry : filtered.entrySet()) {
             final I id = storageEntry.getKey();
             final EntityRecord rawRecord = storageEntry.getValue();
-            final TypeUrl type = TypeUrl.of(rawRecord.getState()
-                                                     .getTypeUrl());
+            final TypeUrl type = TypeUrl.parse(rawRecord.getState()
+                                                        .getTypeUrl());
             final Any recordState = rawRecord.getState();
             final Message stateAsMessage = unpack(recordState);
             final Message processedState = applyMask(fieldMask, stateAsMessage, type);

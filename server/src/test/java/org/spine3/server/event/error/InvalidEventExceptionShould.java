@@ -32,7 +32,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ThrowableResultOfMethodCallIgnored"})
+@SuppressWarnings("ThrowableResultOfMethodCallIgnored")
 public class InvalidEventExceptionShould {
 
     @Test

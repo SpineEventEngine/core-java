@@ -30,7 +30,6 @@ import static org.spine3.protobuf.Values.newStringValue;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class UnsupportedEventExceptionShould {
 
     @Test

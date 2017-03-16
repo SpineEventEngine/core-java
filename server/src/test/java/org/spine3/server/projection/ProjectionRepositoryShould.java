@@ -29,7 +29,6 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
@@ -55,6 +54,7 @@ import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.type.EventClass;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -83,9 +83,10 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
 public class ProjectionRepositoryShould
-        extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection, ProjectId, Project> {
+        extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
+                                            ProjectId,
+                                            Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
@@ -496,15 +497,13 @@ public class ProjectionRepositoryShould
     }
 
     /** Stub projection repository. */
-    private static class TestProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
-        protected TestProjectionRepository(BoundedContext boundedContext) {
+    private static class TestProjectionRepository
+            extends ProjectionRepository<ProjectId, TestProjection, Project> {
+        private TestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
 
-        protected TestProjectionRepository(BoundedContext boundedContext, Duration catchUpMaxDuration) {
-            super(boundedContext, true, catchUpMaxDuration);
-        }
-
+        @SuppressWarnings("unused")
         @Subscribe
         public void apply(ProjectCreated event, EventContext eventContext) {
             // NOP
@@ -512,15 +511,18 @@ public class ProjectionRepositoryShould
     }
 
     /** Stub projection repository with the disabled automatic catch-up */
-    private static class ManualCatchupProjectionRepository extends ProjectionRepository<ProjectId, TestProjection, Project> {
+    private static class ManualCatchupProjectionRepository
+            extends ProjectionRepository<ProjectId, TestProjection, Project> {
         protected ManualCatchupProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext, false);
         }
 
-        protected ManualCatchupProjectionRepository(BoundedContext boundedContext, Duration catchUpMaxDuration) {
+        protected ManualCatchupProjectionRepository(BoundedContext boundedContext,
+                                                    Duration catchUpMaxDuration) {
             super(boundedContext, false, catchUpMaxDuration);
         }
 
+        @SuppressWarnings("unused")
         @Subscribe
         public void apply(ProjectCreated event, EventContext eventContext) {
             // NOP

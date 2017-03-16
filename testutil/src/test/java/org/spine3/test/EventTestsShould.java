@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -33,7 +34,7 @@ public class EventTestsShould {
 
     @Test
     public void have_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(EventTests.class);
+        assertHasPrivateParameterlessCtor(EventTests.class);
     }
 
     @Test

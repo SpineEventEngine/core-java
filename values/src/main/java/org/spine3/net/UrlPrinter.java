@@ -138,7 +138,7 @@ class UrlPrinter {
 
         final int queriesSize = queryList.size();
         for (int i = 0; i < queriesSize; i++) {
-            final String stringQuery = QueryParameters.toString(queryList.get(i));
+            final String stringQuery = UrlQueryParameters.toString(queryList.get(i));
             sb.append(stringQuery);
             if (i != queriesSize - 1) {
                 sb.append(UrlParser.QUERY_SEPARATOR);

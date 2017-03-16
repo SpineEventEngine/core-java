@@ -27,7 +27,7 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.time.ZoneOffset;
@@ -62,6 +62,7 @@ public class Commands {
     private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private Commands() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

@@ -31,7 +31,6 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.RecordStorage;
@@ -41,6 +40,7 @@ import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
 import org.spine3.test.storage.TaskId;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static org.junit.Assert.assertNotNull;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -84,6 +85,12 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @Override
     protected abstract StandStorage getStorage();
+
+    @Test
+    public void have_index_of_identifiers() {
+        final StandStorage storage = getStorage();
+        assertNotNull(storage.index());
+    }
 
     @Test
     public void retrieve_all_records() {

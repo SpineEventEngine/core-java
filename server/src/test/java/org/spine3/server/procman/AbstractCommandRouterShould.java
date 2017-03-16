@@ -28,14 +28,15 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.test.TestCommandFactory;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -91,12 +92,12 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
         // Otherwise we won't be able to post.
         commandBus.register(new CommandDispatcher() {
             @Override
-            public Set<CommandClass> getCommandClasses() {
+            public Set<CommandClass> getMessageClasses() {
                 return CommandClass.setOf(StringValue.class);
             }
 
             @Override
-            public void dispatch(Command request) {
+            public void dispatch(CommandEnvelope envelope) {
                 // Do nothing.
             }
         });

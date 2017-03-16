@@ -26,6 +26,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -51,13 +52,8 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    public boolean markArchived(I id) {
-        return getStorage().markArchived(id);
-    }
-
-    @Override
-    public boolean markDeleted(I id) {
-        return getStorage().markDeleted(id);
+    public Iterator<I> index() {
+        return getStorage().index();
     }
 
     @Override
@@ -66,10 +62,12 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds, FieldMask fieldMask) {
+    protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
+                                                         FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
-        // It is not possible to return an immutable collection, since {@code null} may be present in it.
+        // It is not possible to return an immutable collection,
+        // since {@code null} may be present in it.
         final Collection<EntityRecord> result = new LinkedList<>();
 
         for (I givenId : givenIds) {

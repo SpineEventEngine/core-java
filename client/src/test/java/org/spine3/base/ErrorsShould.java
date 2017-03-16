@@ -20,19 +20,17 @@
 
 package org.spine3.base;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings("InstanceMethodNamingConvention")
 public class ErrorsShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Errors.class));
+        assertHasPrivateParameterlessCtor(Errors.class);
     }
 
     @Test
@@ -59,11 +57,8 @@ public class ErrorsShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Errors.class)
-                                                                     .addDefaultValue(new RuntimeException("exception"))
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(Exception.class, new RuntimeException("null check"))
+                .testAllPublicStaticMethods(Errors.class);
     }
 }

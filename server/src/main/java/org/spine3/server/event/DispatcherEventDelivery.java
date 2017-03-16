@@ -19,7 +19,7 @@
  */
 package org.spine3.server.event;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.Event;
 
 import java.util.concurrent.Executor;

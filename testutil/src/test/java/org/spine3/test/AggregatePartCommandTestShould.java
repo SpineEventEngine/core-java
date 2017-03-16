@@ -25,12 +25,15 @@ import com.google.protobuf.UInt32Value;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.CommandFactory;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.CommandTestShould.newCommandFactory;
 
 /**
@@ -47,11 +50,13 @@ public class AggregatePartCommandTestShould {
 
     @Test
     public void create_an_aggregate_part_in_setUp() {
-        assertFalse(aggregatePartCommandTest.aggregatePart().isPresent());
+        assertFalse(aggregatePartCommandTest.aggregatePart()
+                                            .isPresent());
 
         aggregatePartCommandTest.setUp();
 
-        assertTrue(aggregatePartCommandTest.aggregatePart().isPresent());
+        assertTrue(aggregatePartCommandTest.aggregatePart()
+                                           .isPresent());
     }
 
     /**
@@ -70,9 +75,12 @@ public class AggregatePartCommandTestShould {
     /**
      * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
-    private static final class TimerCounter extends AggregatePart<String, UInt32Value, UInt32Value.Builder> {
-        private TimerCounter(String id) {
-            super(id);
+    private static final class TimerCounter extends AggregatePart<String,
+                                                                  UInt32Value,
+                                                                  UInt32Value.Builder,
+                                                                  TimerCounterRoot> {
+        private TimerCounter(TimerCounterRoot root) {
+            super(root);
         }
 
         @Assign
@@ -101,14 +109,29 @@ public class AggregatePartCommandTestShould {
 
         @Override
         protected TimerCounter createAggregatePart() {
+            final TimerCounterRoot root = new TimerCounterRoot(BoundedContext.newBuilder()
+                                                                             .build(), newUuid());
             final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
-                        .withId(getClass().getName())
-                        .withVersion(5)
-                        .withState(UInt32Value.newBuilder()
-                                              .setValue(42)
-                                              .build())
-                        .build();
+                                             .withRoot(root)
+                                             .withId(getClass().getName())
+                                             .withVersion(5)
+                                             .withState(UInt32Value.newBuilder()
+                                                                   .setValue(42)
+                                                                   .build())
+                                             .build();
             return result;
+        }
+    }
+
+    private static class TimerCounterRoot extends AggregateRoot<String> {
+        /**
+         * Creates an new instance.
+         *
+         * @param boundedContext the bounded context to which the aggregate belongs
+         * @param id             the ID of the aggregate
+         */
+        protected TimerCounterRoot(BoundedContext boundedContext, String id) {
+            super(boundedContext, id);
         }
     }
 }

@@ -23,20 +23,19 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
+import org.spine3.type.CommandClass;
+import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -44,8 +43,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.getMessage;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -57,11 +55,14 @@ import static org.spine3.base.Commands.getMessage;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>, S extends Message>
+public abstract class ProcessManagerRepository<I,
+                                               P extends ProcessManager<I, S>,
+                                               S extends Message>
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcher {
 
-    private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage = GetTargetIdFromCommand.newInstance();
+    private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage =
+            GetTargetIdFromCommand.newInstance();
 
     @Nullable
     private Set<CommandClass> commandClasses;
@@ -76,10 +77,9 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
 
     @Override
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // it is immutable
-    public Set<CommandClass> getCommandClasses() {
+    public Set<CommandClass> getMessageClasses() {
         if (commandClasses == null) {
-            final Class<? extends ProcessManager> pmClass = getEntityClass();
-            commandClasses = CommandHandlingEntity.getCommandClasses(pmClass);
+            commandClasses = ProcessManager.TypeInfo.getCommandClasses(getEntityClass());
         }
         return commandClasses;
     }
@@ -89,8 +89,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     public Set<EventClass> getEventClasses() {
         if (eventClasses == null) {
             final Class<? extends ProcessManager> pmClass = getEntityClass();
-            final Set<Class<? extends Message>> classes = ProcessManager.getHandledEventClasses(pmClass);
-            eventClasses = EventClass.setOf(classes);
+            eventClasses = ProcessManager.TypeInfo.getEventClasses(pmClass);
         }
         return eventClasses;
     }
@@ -101,14 +100,14 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * <p>If there is no stored process manager with such an ID,
      * a new process manager is created and stored after it handles the passed command.
      *
-     * @param command a request to dispatch
+     * @param envelope a request to dispatch
      * @see ProcessManager#dispatchCommand(Message, CommandContext)
      */
     @Override
-    public void dispatch(Command command) {
-        final Message commandMessage = getMessage(checkNotNull(command));
-        final CommandContext context = command.getContext();
-        final CommandClass commandClass = CommandClass.of(commandMessage);
+    public void dispatch(CommandEnvelope envelope) {
+        final Message commandMessage = envelope.getMessage();
+        final CommandContext context = envelope.getCommandContext();
+        final CommandClass commandClass = envelope.getCommandClass();
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
         final P manager = loadOrCreate(id);
@@ -134,7 +133,8 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @throws IllegalArgumentException if events of this type are not handled by the process manager
+     * @throws IllegalArgumentException if events of this type are not handled by
+     *                                  this process manager
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @Override
@@ -176,11 +176,11 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
     }
 
     private void checkCommandClass(CommandClass commandClass) throws IllegalArgumentException {
-        final Set<CommandClass> classes = getCommandClasses();
+        final Set<CommandClass> classes = getMessageClasses();
         if (!classes.contains(commandClass)) {
             final String eventClassName = commandClass.value()
                                                       .getName();
-            throw new IllegalArgumentException("Unexpected command of class: " + eventClassName);
+            throw newIllegalArgumentException("Unexpected command of class: %s", eventClassName);
         }
     }
 
@@ -192,7 +192,7 @@ public abstract class ProcessManagerRepository<I, P extends ProcessManager<I, S>
         if (!classes.contains(eventClass)) {
             final String eventClassName = eventClass.value()
                                                     .getName();
-            throw new IllegalArgumentException("Unexpected event of class: " + eventClassName);
+            throw newIllegalArgumentException("Unexpected event of class: %s", eventClassName);
         }
     }
 

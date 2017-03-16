@@ -25,7 +25,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.matchers.GreaterThan;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
@@ -42,6 +41,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
+import org.spine3.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
@@ -57,8 +57,8 @@ import static org.mockito.Mockito.intThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.server.command.CommandHandlingEntity.getCommandClasses;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -83,6 +83,15 @@ public class AggregateRepositoryShould {
     public void tearDown() throws Exception {
         ProjectAggregate.clearCommandsHandled();
         repository.close();
+    }
+
+    @Test
+    public void call_get_aggregate_constructor_method_only_once(){
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        repositorySpy.create(id);
+        repositorySpy.create(id);
+
+        verify(repositorySpy, times(1)).findEntityConstructor();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
@@ -182,29 +191,33 @@ public class AggregateRepositoryShould {
 
     @Test
     public void expose_classes_of_commands_of_its_aggregate() {
-        final Set<CommandClass> aggregateCommands = getCommandClasses(ProjectAggregate.class);
-        final Set<CommandClass> exposedByRepository = repository.getCommandClasses();
+        final Set<CommandClass> aggregateCommands =
+                Aggregate.TypeInfo.getCommandClasses(ProjectAggregate.class);
+        final Set<CommandClass> exposedByRepository = repository.getMessageClasses();
 
         assertTrue(exposedByRepository.containsAll(aggregateCommands));
     }
 
     @Test
     public void marks_aggregate_archived() {
-        final ProjectId id = createAndStoreAggregate();
+        final ProjectAggregate aggregate = createAndStoreAggregate();
 
-        repository.markArchived(id);
+        // archive the aggregate.
+        aggregate.setArchived(true);
+        repository.store(aggregate);
 
-        assertFalse(repository.load(id)
+        assertFalse(repository.load(aggregate.getId())
                               .isPresent());
     }
 
     @Test
     public void mark_aggregate_deleted() {
-        final ProjectId id = createAndStoreAggregate();
+        final ProjectAggregate aggregate = createAndStoreAggregate();
 
-        repository.markDeleted(id);
+        aggregate.setDeleted(true);
+        repository.store(aggregate);
 
-        assertFalse(repository.load(id)
+        assertFalse(repository.load(aggregate.getId())
                               .isPresent());
     }
 
@@ -241,12 +254,12 @@ public class AggregateRepositoryShould {
         return aggregate;
     }
 
-    private ProjectId createAndStoreAggregate() {
+    private ProjectAggregate createAndStoreAggregate() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
 
         repository.store(aggregate);
-        return id;
+        return aggregate;
     }
 
     private AggregateStorage<ProjectId> givenAggregateStorageMock() {
@@ -261,6 +274,7 @@ public class AggregateRepositoryShould {
      * Test environment classes
      ****************************/
 
+    @SuppressWarnings("RedundantMethodOverride")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
@@ -315,6 +329,26 @@ public class AggregateRepositoryShould {
 
         static void clearCommandsHandled() {
             commandsHandled.clear();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overrides to open the method to this test suite.
+         */
+        @Override
+        protected void setArchived(boolean archived) {
+            super.setArchived(archived);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overrides to open the method to this test suite.
+         */
+        @Override
+        protected void setDeleted(boolean deleted) {
+            super.setDeleted(deleted);
         }
     }
 

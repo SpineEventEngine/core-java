@@ -20,21 +20,30 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Throwables;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
+import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.reflect.Classes;
+import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Exceptions.newIllegalStateException;
+import static org.spine3.util.Exceptions.unsupported;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Abstract base class for repositories.
@@ -43,21 +52,17 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <E> the entity type
  * @author Alexander Yevsyukov
  */
-public abstract class Repository<I, E extends Entity<I, ?>> implements RepositoryView<I, E>, AutoCloseable {
+public abstract class Repository<I, E extends Entity<I, ?>>
+                implements RepositoryView<I, E>,
+                           AutoCloseable {
 
-    /** The index of the declaration of the generic type {@code I} in this class. */
-    private static final int ID_CLASS_GENERIC_INDEX = 0;
-
-    /** The index of the declaration of the generic type {@code E} in this class. */
-    private static final int ENTITY_CLASS_GENERIC_INDEX = 1;
-
-    protected static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
+    private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
     /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
 
     /** The data storage for this repository. */
-    private Storage storage;
+    private Storage<I, ?> storage;
 
     /**
      * Cached value for the entity state type.
@@ -71,7 +76,16 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      *
      * <p>Used to optimize heavy {@link #getEntityClass()} calls.
      **/
+    @Nullable
     private volatile Class<E> entityClass;
+
+    /**
+     * Cached value for the entity ID class.
+     *
+     * <p>Used to optimize heavy {@link #getIdClass()} calls.
+     */
+    @Nullable
+    private volatile Class<I> idClass;
 
     /**
      * Creates the repository in the passed {@link BoundedContext}.
@@ -90,10 +104,11 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     /** Returns the class of IDs used by this repository. */
     @CheckReturnValue
     protected Class<I> getIdClass() {
-        final Class<I> idClass = Classes.getGenericParameterType(getClass(),
-                                                                 ID_CLASS_GENERIC_INDEX);
-        checkIdClass(idClass);
-
+        if (idClass == null) {
+            final Class<I> candidateClass = Entity.TypeInfo.getIdClass(getEntityClass());
+            checkIdClass(candidateClass);
+            idClass = candidateClass;
+        }
         return idClass;
     }
 
@@ -114,16 +129,18 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         try {
             Identifiers.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
-            final Throwable cause = Throwables.getRootCause(e);
-            throw new IllegalStateException(cause);
+            throw wrappedCause(e);
         }
     }
 
     /** Returns the class of entities managed by this repository. */
     @CheckReturnValue
-    protected Class<E> getEntityClass() {
+    public Class<E> getEntityClass() {
         if (entityClass == null) {
-            entityClass = Classes.getGenericParameterType(getClass(), ENTITY_CLASS_GENERIC_INDEX);
+            @SuppressWarnings("unchecked") // By the cast we enforce having generic params.
+            final Class<? extends Repository<I, E>> repoClass =
+                    (Class<? extends Repository<I, E>>) getClass();
+            entityClass = TypeInfo.getEntityClass(repoClass);
         }
         checkNotNull(entityClass);
         return entityClass;
@@ -137,9 +154,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
             final Class<E> entityClass = getEntityClass();
-            final Class<Object> stateClass =
-                    Classes.getGenericParameterType(entityClass,
-                                                    Entity.GenericParameter.STATE.getIndex());
+            final Class<Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -166,23 +181,19 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
     protected abstract void store(E obj);
 
     /**
-     * Marks the entity with the passed ID as {@code archived}.
+     * {@inheritDoc}
      *
-     * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
+     * <p>The returned iterator does not support removal.
+     *
+     * <p>Iteration through entities is performed by {@linkplain #load(Object) loading}
+     * them one by one.
      */
-    protected abstract boolean markArchived(I id);
-
-    /**
-     * Marks the entity with the passed ID as {@code deleted}.
-     *
-     * <p>This method does not delete information. Entities marked as {@code deleted}
-     * can be later physically removed from a storage by custom clean-up operation.
-     *
-     * @param id the ID of the entity
-     * @return {@code true} if the operation was successful, {@code false} otherwise
-     */
-    protected abstract boolean markDeleted(I id);
+    @Override
+    public Iterator<E> iterator(Predicate<E> filter) {
+        final Iterator<E> unfiltered = new EntityIterator<>(this);
+        final Iterator<E> filtered = Iterators.filter(unfiltered, filter);
+        return filtered;
+    }
 
     /**
      * Returns the storage assigned to this repository or {@code null} if
@@ -218,8 +229,8 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw new IllegalStateException(String.format(
-                    "The repository %s already has storage %s.", this, this.storage));
+            throw newIllegalStateException("The repository %s already has storage %s.",
+                                           this, this.storage);
         }
 
         this.storage = createStorage(factory);
@@ -234,7 +245,7 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
      * @param factory the factory to create the storage
      * @return the created storage instance
      */
-    protected abstract Storage createStorage(StorageFactory factory);
+    protected abstract Storage<I, ?> createStorage(StorageFactory factory);
 
     /**
      * Closes the repository by closing the underlying storage.
@@ -248,6 +259,80 @@ public abstract class Repository<I, E extends Entity<I, ?>> implements Repositor
         if (this.storage != null) {
             this.storage.close();
             this.storage = null;
+        }
+    }
+
+    /**
+     * Enumeration of generic type parameters of this class.
+     */
+    enum GenericParameter implements GenericTypeIndex {
+
+        /** The index of the generic type {@code <I>}. */
+        ID(0),
+
+        /** The index of the generic type {@code <E>}. */
+        ENTITY(1);
+
+        private final int index;
+
+        GenericParameter(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return this.index;
+        }
+    }
+
+    private static class TypeInfo {
+
+        private static <E extends Entity<I, ?>, I>
+        Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
+            final Class<E> result = getGenericParameterType(repositoryClass,
+                                                            GenericParameter.ENTITY.getIndex());
+            return result;
+        }
+    }
+
+    /**
+     * An iterator of all entities from the storage.
+     *
+     * <p>This iterator does not allow removal.
+     */
+    private static class EntityIterator<I, E extends Entity<I, ?>>
+            implements Iterator<E> {
+
+        private final Repository<I, E> repository;
+        private final Iterator<I> index;
+
+        private EntityIterator(Repository<I, E> repository) {
+            this.repository = repository;
+            this.index = repository.storage.index();
+        }
+
+        @Override
+        public boolean hasNext() {
+            final boolean result = index.hasNext();
+            return result;
+        }
+
+        @Override
+        public E next() {
+            final I id = index.next();
+            final Optional<E> loaded = repository.load(id);
+            if (!loaded.isPresent()) {
+                final String idStr = idToString(id);
+                throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
+            }
+
+            final E entity = loaded.get();
+            return entity;
+        }
+
+        @Override
+        public void remove() {
+            throw unsupported();
         }
     }
 }

@@ -85,7 +85,7 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Alexander Litus
  */
-@SuppressWarnings({"InstanceMethodNamingConvention", "ClassWithTooManyMethods", "OverlyCoupledClass", "OverlyComplexClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "OverlyComplexClass"})
 public class MessageValidatorShould {
 
     private static final double EQUAL_MIN = 16.5;

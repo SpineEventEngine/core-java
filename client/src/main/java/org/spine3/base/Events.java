@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import java.util.Collections;
@@ -49,7 +49,7 @@ public class Events {
     }
 
     /** Compares two events by their timestamps. */
-    private static final Comparator<Event> EVENT_TIMESTAMP_COMPARATOR = new Comparator<Event>() {
+    private static final Comparator<Event> eventComparator = new Comparator<Event>() {
         @Override
         public int compare(Event o1, Event o2) {
             final Timestamp timestamp1 = getTimestamp(o1);
@@ -81,7 +81,7 @@ public class Events {
      * in chronological order.
      */
     public static Comparator<Event> eventComparator() {
-        return EVENT_TIMESTAMP_COMPARATOR;
+        return eventComparator;
     }
 
     /**
@@ -160,12 +160,13 @@ public class Events {
      *
      * @param context the event context to to get the event producer ID
      * @param <I>     the type of the producer ID wrapped in the passed {@code EventContext}
-     * @return producer ID
+     * @return the producer ID
      */
     public static <I> I getProducer(EventContext context) {
         checkNotNull(context);
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
-        @SuppressWarnings("unchecked") // It is the caller's responsibility to know the type of the wrapped ID.
+        @SuppressWarnings("unchecked")
+            // It is the caller's responsibility to know the type of the wrapped ID.
         final I id = (I) aggregateId;
         return id;
 
@@ -235,7 +236,8 @@ public class Events {
             return Optional.absent();
         }
         final Enrichment.Container enrichments = value.get();
-        final String typeName = TypeName.of(enrichmentClass);
+        final String typeName = TypeName.of(enrichmentClass)
+                                        .value();
         final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {

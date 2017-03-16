@@ -20,11 +20,10 @@
 
 package org.spine3.change;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.change.BooleanMismatch.expectedTrue;
 import static org.spine3.change.LongMismatch.expectedNonZero;
 import static org.spine3.change.LongMismatch.expectedZero;
@@ -32,7 +31,7 @@ import static org.spine3.change.LongMismatch.unexpectedValue;
 import static org.spine3.change.LongMismatch.unpackActual;
 import static org.spine3.change.LongMismatch.unpackExpected;
 import static org.spine3.change.LongMismatch.unpackNewValue;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class LongMismatchShould {
 
@@ -43,7 +42,7 @@ public class LongMismatchShould {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(LongMismatch.class));
+        assertHasPrivateParameterlessCtor(LongMismatch.class);
     }
 
     @Test
@@ -114,10 +113,7 @@ public class LongMismatchShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(LongMismatch.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(LongMismatch.class);
     }
 }

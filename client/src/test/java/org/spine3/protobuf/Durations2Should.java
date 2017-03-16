@@ -46,7 +46,7 @@ import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Durations2.toMinutes;
 import static org.spine3.protobuf.Durations2.toNanos;
 import static org.spine3.protobuf.Durations2.toSeconds;
-import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -56,7 +56,7 @@ public class Durations2Should {
 
     @Test
     public void have_private_constructor() {
-        assertTrue(hasPrivateParameterlessCtor(Durations2.class));
+        assertHasPrivateParameterlessCtor(Durations2.class);
     }
 
     @Test

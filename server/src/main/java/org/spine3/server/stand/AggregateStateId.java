@@ -21,14 +21,14 @@ package org.spine3.server.stand;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 
 /**
  * An identifier for the state of a certain {@link org.spine3.server.aggregate.Aggregate Aggregate}.
  *
- * <p>{@code Aggregate} state is defined by {@link org.spine3.protobuf.TypeUrl TypeUrl}.
+ * <p>{@code Aggregate} state is defined by {@link TypeUrl TypeUrl}.
  *
  * <p>The {@code AggregateStateId} is used to store and access the latest {@code Aggregate}
  * states in a {@link Stand}.

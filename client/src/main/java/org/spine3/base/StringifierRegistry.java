@@ -20,11 +20,14 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.Stringifiers.CommandIdStringifier;
+import org.spine3.base.Stringifiers.EventIdStringifier;
+import org.spine3.base.Stringifiers.TimestampStringifer;
 
 import java.util.Map;
 
@@ -37,14 +40,14 @@ import static java.util.Collections.synchronizedMap;
  *
  * @author Alexander Yevsyukov
  */
-class StringifierRegistry {
+public class StringifierRegistry {
 
-    private final Map<Class<?>, Stringifier<?>> entries = synchronizedMap(
+    private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<Class<?>, Stringifier<?>>builder()
-                            .put(Timestamp.class, new Stringifiers.TimestampIdStringifer())
-                            .put(EventId.class, new Stringifiers.EventIdStringifier())
-                            .put(CommandId.class, new Stringifiers.CommandIdStringifier())
+                    ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
+                            .put(TypeToken.of(Timestamp.class), new TimestampStringifer())
+                            .put(TypeToken.of(EventId.class), new EventIdStringifier())
+                            .put(TypeToken.of(CommandId.class), new CommandIdStringifier())
                             .build()
             )
     );
@@ -53,7 +56,7 @@ class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(Class<I> valueClass, Stringifier<I> converter) {
+    public <I extends Message> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
         checkNotNull(valueClass);
         checkNotNull(converter);
         entries.put(valueClass, converter);
@@ -65,19 +68,35 @@ class StringifierRegistry {
      * @param <I> the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(Class<I> valueClass) {
-        checkNotNull(valueClass);
+    public <I> Optional<Stringifier<I>> get(TypeToken<I> valueToken) {
+        checkNotNull(valueToken);
 
-        final Stringifier<?> func = entries.get(valueClass);
+        final Stringifier<?> func = entries.get(valueToken);
 
-        @SuppressWarnings("unchecked") /** The cast is safe as we check the first type when adding.
-            @see #register(Class, Function) */
-        final Stringifier<I> result = (Stringifier<I>) func;
+        final Stringifier<I> result = cast(func);
         return Optional.fromNullable(result);
     }
 
-    public synchronized <I> boolean hasStringiferFor(Class<I> valueClass) {
-        final boolean contains = entries.containsKey(valueClass);
+    /**
+     * Casts the passed instance.
+     *
+     * <p>The cast is safe as we check the first type when
+     * {@linkplain #register(TypeToken, Stringifier) adding}.
+     */
+    @SuppressWarnings("unchecked")
+    private static <I> Stringifier<I> cast(Stringifier<?> func) {
+        return (Stringifier<I>) func;
+    }
+
+    /**
+     * Tells whether there is a Stringifier registered for the passed type.
+     *
+     * @param valueToken the token with the type info
+     * @param <I> the type to be converted to a string
+     * @return {@code true} if there is a registered stringifier, {@code false} otherwise
+     */
+    public synchronized <I> boolean hasStringifierFor(TypeToken<I> valueToken) {
+        final boolean contains = entries.containsKey(valueToken);
         return contains;
     }
 
