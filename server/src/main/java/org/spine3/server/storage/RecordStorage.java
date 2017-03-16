@@ -81,7 +81,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
         final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
         final Any state = builder.getState();
-        final TypeUrl type = TypeUrl.of(state.getTypeUrl());
+        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
 
         final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);

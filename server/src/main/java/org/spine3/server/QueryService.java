@@ -35,8 +35,6 @@ import org.spine3.type.TypeUrl;
 import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 /**
  * The {@code QueryService} provides a synchronous way to fetch read-side state from the server.
  *
@@ -64,8 +62,6 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
         log().debug("Incoming query: {}", query);
 
         final TypeUrl type = Queries.typeOf(query);
-        checkNotNull(type, "Unknown type for query target");
-
         final BoundedContext boundedContext = typeToContextMap.get(type);
         final Stand stand = boundedContext.getStand();
         try {

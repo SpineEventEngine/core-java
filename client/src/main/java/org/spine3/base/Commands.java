@@ -62,6 +62,7 @@ public class Commands {
     private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private Commands() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

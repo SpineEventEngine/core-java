@@ -58,12 +58,12 @@ public class TypeUrlShould {
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_value() {
-        TypeUrl.of(Tests.<String>nullRef());
+        TypeUrl.parse(Tests.<String>nullRef());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_empty_string() {
-        TypeUrl.of("");
+        TypeUrl.parse("");
     }
 
     @Test
@@ -74,15 +74,16 @@ public class TypeUrlShould {
     }
 
     @Test
-    public void create_from_type_name_string() {
-        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_NAME);
+    public void create_from_type_name() {
+        final TypeUrl typeUrl = TypeName.of(STRING_VALUE_TYPE_NAME)
+                                        .toUrl();
 
         assertIsStringValueUrl(typeUrl);
     }
 
     @Test
     public void create_from_type_url_string() {
-        final TypeUrl typeUrl = TypeUrl.of(STRING_VALUE_TYPE_URL_STR);
+        final TypeUrl typeUrl = TypeUrl.parse(STRING_VALUE_TYPE_URL_STR);
 
         assertIsStringValueUrl(typeUrl);
     }
@@ -127,18 +128,18 @@ public class TypeUrlShould {
 
     @Test
     public void create_by_enum_descriptor_of_google_msg() {
-        assertCreatesTypeUrlFromEnum(Field.Kind.getDescriptor(),
-                                     TypeUrl.Prefix.GOOGLE_APIS.value());
+        assertCreatesTypeUrlFromEnum(TypeUrl.Prefix.GOOGLE_APIS.value(),
+                                     Field.Kind.getDescriptor());
     }
 
     @Test
     public void create_by_enum_descriptor_of_spine_msg() {
-        assertCreatesTypeUrlFromEnum(CommandValidationError.getDescriptor(),
-                                     TypeUrl.Prefix.SPINE.value());
+        assertCreatesTypeUrlFromEnum(TypeUrl.Prefix.SPINE.value(),
+                                     CommandValidationError.getDescriptor());
     }
 
-    private static void assertCreatesTypeUrlFromEnum(EnumDescriptor enumDescriptor,
-                                                     String typeUrlPrefix) {
+    private static void assertCreatesTypeUrlFromEnum(String typeUrlPrefix,
+                                                     EnumDescriptor enumDescriptor) {
         final String expected = composeTypeUrl(typeUrlPrefix, enumDescriptor.getFullName());
 
         final TypeUrl typeUrl = TypeUrl.from(enumDescriptor);
@@ -182,24 +183,29 @@ public class TypeUrlShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
+    public void do_not_accept_value_without_prefix_separator() {
+        TypeUrl.parse("prefix:Type");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_prefix() {
-        TypeUrl.of(" /package.Type");
+        TypeUrl.parse("/package.Type");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_empty_name() {
-        TypeUrl.of("type.prefix/ ");
+        TypeUrl.parse("type.prefix/");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_malformed_type_URL() {
-        TypeUrl.of("prefix/prefix/type.Name");
+        TypeUrl.parse("prefix/prefix/type.Name");
     }
 
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_for_unknown_Java_class() {
-        final TypeUrl url = TypeUrl.of("unknown/JavaClass");
-        url.toMessageClass();
+        final TypeUrl url = TypeUrl.parse("unknown/JavaClass");
+        url.getJavaClass();
     }
 
     @Test

@@ -20,11 +20,11 @@
 
 package org.spine3.change;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.NullToleranceTest;
 import org.spine3.test.TimeTests;
 
 import java.util.UUID;
@@ -355,11 +355,9 @@ public class ChangesShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Changes.class)
-                                                                     .addDefaultValue(ByteString.EMPTY)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(ByteString.class, ByteString.EMPTY)
+                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .testAllPublicStaticMethods(Changes.class);
     }
 }

@@ -21,7 +21,7 @@
 package org.spine3.type;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -45,10 +45,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.type.TypeUrl.composeTypeUrl;
+import static org.spine3.type.KnownTypes.getAllFromPackage;
+import static org.spine3.type.KnownTypes.getDescriptor;
 
 /**
  * @author Alexander Litus
@@ -127,7 +127,7 @@ public class KnownTypesShould {
 
         final String packageName = "spine.test.types";
 
-        final Collection<TypeUrl> packageTypes = KnownTypes.getAllFromPackage(packageName);
+        final Collection<TypeUrl> packageTypes = getAllFromPackage(packageName);
         assertSize(3, packageTypes);
         assertTrue(packageTypes.containsAll(Arrays.asList(taskId, taskName, task)));
     }
@@ -135,7 +135,7 @@ public class KnownTypesShould {
     @Test
     public void return_empty_collection_if_package_is_empty_or_invalid() {
         final String packageName = "com.foo.invalid.package";
-        final Collection<?> emptyTypesCollection = KnownTypes.getAllFromPackage(packageName);
+        final Collection<?> emptyTypesCollection = getAllFromPackage(packageName);
         assertNotNull(emptyTypesCollection);
         assertTrue(emptyTypesCollection.isEmpty());
     }
@@ -144,27 +144,14 @@ public class KnownTypesShould {
     public void do_not_return_types_of_package_by_package_prefix() {
         final String prefix = "spine.test.ty"; // "spine.test.types" is a valid package
 
-        final Collection<TypeUrl> packageTypes = KnownTypes.getAllFromPackage(prefix);
+        final Collection<TypeUrl> packageTypes = getAllFromPackage(prefix);
         assertTrue(packageTypes.isEmpty());
-    }
-
-    @Test
-    public void have_all_valid_java_class_names() {
-        final Set<ClassName> classes = KnownTypes.getJavaClasses();
-        assertFalse(classes.isEmpty());
-        for (ClassName name : classes) {
-            try {
-                Class.forName(name.value());
-            } catch (ClassNotFoundException e) {
-                fail("Invalid Java class name in the '.properties' file: " + name.value());
-            }
-        }
     }
 
     @Test
     public void provide_proto_descriptor_by_type_name() {
         final String typeName = "spine.test.types.Task";
-        final Descriptors.Descriptor typeDescriptor = KnownTypes.getDescriptorForType(typeName);
+        final Descriptor typeDescriptor = (Descriptor) getDescriptor(typeName);
         assertNotNull(typeDescriptor);
         assertEquals(typeName, typeDescriptor.getFullName());
     }
@@ -172,7 +159,7 @@ public class KnownTypesShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_find_invalid_type_descriptor() {
         final String invalidTypeName = "no.such.package.InvalidType";
-        KnownTypes.getDescriptorForType(invalidTypeName);
+        getDescriptor(invalidTypeName);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -182,7 +169,7 @@ public class KnownTypesShould {
 
     @Test(expected = UnknownTypeException.class)
     public void throw_exception_if_no_java_class_name_by_type_url() {
-        final TypeUrl unexpectedUrl = TypeUrl.of(composeTypeUrl("prefix", "unexpected.type"));
+        final TypeUrl unexpectedUrl = TypeUrl.parse("prefix/unexpected.type");
         KnownTypes.getClassName(unexpectedUrl);
     }
 }

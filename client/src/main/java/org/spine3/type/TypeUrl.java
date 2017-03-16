@@ -21,6 +21,7 @@
 package org.spine3.type;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Splitter;
 import com.google.protobuf.Any;
 import com.google.protobuf.AnyOrBuilder;
 import com.google.protobuf.Descriptors;
@@ -38,10 +39,13 @@ import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
 import org.spine3.type.error.UnknownTypeException;
 
+import java.util.List;
 import java.util.Objects;
-import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.Internal.getDefaultInstance;
+import static java.lang.String.format;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -53,12 +57,12 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  * @see Any#getTypeUrl()
- * @see Descriptors.FileDescriptor#getFullName()
+ * @see Descriptors.Descriptor#getFullName()
  */
 public final class TypeUrl {
 
     private static final String SEPARATOR = "/";
-    private static final Pattern typeUrlSeparatorPattern = Pattern.compile(SEPARATOR);
+    private static final Splitter splitter = Splitter.on(SEPARATOR);
 
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
@@ -116,51 +120,37 @@ public final class TypeUrl {
     }
 
     /**
-     * Creates a new instance from the passed type URL or type name.
+     * Creates a new instance from the passed type URL.
      *
-     * @param typeUrlOrName the type URL of the Protobuf message type or its fully-qualified name
+     * @param typeUrl the type URL of the Protobuf message type
      */
     @Internal
-    public static TypeUrl of(String typeUrlOrName) {
-        checkNotEmptyOrBlank(typeUrlOrName, "type URL or name");
-        final TypeUrl typeUrl = isTypeUrl(typeUrlOrName)
-                                ? ofTypeUrl(typeUrlOrName)
-                                : ofTypeName(typeUrlOrName);
-        return typeUrl;
+    public static TypeUrl parse(String typeUrl) {
+        checkNotNull(typeUrl);
+        checkArgument(!typeUrl.isEmpty());
+        checkArgument(isTypeUrl(typeUrl), "Malformed type URL: %s", typeUrl);
+
+        final TypeUrl result = doParse(typeUrl);
+        return result;
     }
 
     private static boolean isTypeUrl(String str) {
         return str.contains(SEPARATOR);
     }
 
-    private static TypeUrl ofTypeUrl(String typeUrl) {
-        final String[] parts = typeUrlSeparatorPattern.split(typeUrl);
-        if (parts.length != 2) {
+    private static TypeUrl doParse(String typeUrl) {
+        final List<String> strings = splitter.splitToList(typeUrl);
+        if (strings.size() != 2) {
             throw malformedTypeUrl(typeUrl);
         }
-
-        final String prefix = parts[0].trim();
-        if (prefix.isEmpty()) {
-            throw malformedTypeUrl(typeUrl);
-        }
-
-        final String typeName = parts[1].trim();
-        if (typeName.isEmpty()) {
-            throw malformedTypeUrl(typeUrl);
-        }
-
+        final String prefix = strings.get(0);
+        final String typeName = strings.get(1);
         return create(prefix, typeName);
     }
 
     private static IllegalArgumentException malformedTypeUrl(String typeUrl) {
-        throw new IllegalArgumentException(
-                new InvalidProtocolBufferException("Invalid Protobuf type URL encountered: "
-                                                   + typeUrl));
-    }
-
-    private static TypeUrl ofTypeName(String typeName) {
-        final TypeUrl typeUrl = KnownTypes.getTypeUrl(typeName);
-        return typeUrl;
+        final String errMsg = format("Invalid Protobuf type URL encountered: %s", typeUrl);
+        throw new IllegalArgumentException(new InvalidProtocolBufferException(errMsg));
     }
 
     /**
@@ -170,7 +160,7 @@ public final class TypeUrl {
      * @return a type URL
      */
     public static TypeUrl ofEnclosed(AnyOrBuilder any) {
-        final TypeUrl typeUrl = ofTypeUrl(any.getTypeUrl());
+        final TypeUrl typeUrl = doParse(any.getTypeUrl());
         return typeUrl;
     }
 
@@ -206,8 +196,8 @@ public final class TypeUrl {
     }
 
     /** Obtains the type URL for the passed message class. */
-    public static TypeUrl of(Class<? extends Message> clazz) {
-        final Message defaultInstance = com.google.protobuf.Internal.getDefaultInstance(clazz);
+    public static TypeUrl of(Class<? extends Message> cls) {
+        final Message defaultInstance = getDefaultInstance(cls);
         final TypeUrl result = of(defaultInstance);
         return result;
     }
@@ -230,8 +220,19 @@ public final class TypeUrl {
      * @throws UnknownTypeException wrapping {@link ClassNotFoundException} if
      *         there is no corresponding Java class
      */
-    public <T extends Message> Class<T> toMessageClass() {
-        return KnownTypes.getClass(this);
+    public <T extends Message> Class<T> getJavaClass() throws UnknownTypeException {
+        return KnownTypes.getJavaClass(this);
+    }
+
+    /**
+     * Obtains a descriptor for the type of this URL.
+     *
+     * @return {@link Descriptor} if the URL represents a proto type,
+     *         {@link EnumDescriptor} if the URL represents a proto enum
+     */
+    @Internal
+    public GenericDescriptor getDescriptor() {
+        return KnownTypes.getDescriptor(typeName);
     }
 
     /**

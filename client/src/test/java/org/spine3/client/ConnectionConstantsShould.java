@@ -17,20 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.protobuf.error;
 
-import com.google.protobuf.Message;
+package org.spine3.client;
+
+import org.junit.Test;
+
+import static org.junit.Assert.assertNotEquals;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * Exception that is thrown when no descriptor for a message class can be found.
- *
- * @author Mikhail Mikhaylov
+ * @author Alexander Yevsyukov
  */
-public class MissingDescriptorException extends RuntimeException {
+public class ConnectionConstantsShould {
 
-    private static final long serialVersionUID = 0L;
+    @Test
+    public void have_utility_ctor() {
+        assertHasPrivateParameterlessCtor(ConnectionConstants.class);
+    }
 
-    public MissingDescriptorException(Class<? extends Message> clazz, Throwable cause) {
-        super("Could not get descriptor for class: " + clazz.getName() + ", cause: " + cause.getMessage(), cause);
+    @Test
+    public void declare_default_grpc_port() {
+        assertNotEquals(0, ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT);
     }
 }

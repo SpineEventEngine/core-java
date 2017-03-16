@@ -45,13 +45,14 @@ import static java.util.Calendar.getInstance;
  * Spine v2 will be based on Java 8 and this class will be deprecated.
  *
  * @author Alexander Aleksandrov
- * @since 0.6.12
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public class Calendars {
 
     private static final String TIME_ZONE_GMT = "GMT";
 
     private Calendars() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -121,7 +122,7 @@ public class Calendars {
     }
 
     /**
-     * Obtains calendar from year, month and day values.
+     * Obtains calendar from year, month, and day values.
      */
     public static Calendar createDate(int year, int month, int day) {
         final Calendar calendar = getInstance();

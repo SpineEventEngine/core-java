@@ -22,7 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
@@ -44,6 +43,7 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Abstract base class for repositories.
@@ -129,8 +129,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         try {
             Identifiers.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
-            final Throwable cause = Throwables.getRootCause(e);
-            throw new IllegalStateException(cause);
+            throw wrappedCause(e);
         }
     }
 

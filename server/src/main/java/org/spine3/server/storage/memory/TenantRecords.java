@@ -91,7 +91,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
                 }
                 EntityRecord.Builder matchingRecord = record.get().toBuilder();
                 final Any state = matchingRecord.getState();
-                final TypeUrl typeUrl = TypeUrl.of(state.getTypeUrl());
+                final TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
                 final Message wholeState = unpack(state);
                 final Message maskedState = applyMask(fieldMask, wholeState, typeUrl);
                 final Any processed = pack(maskedState);
@@ -118,8 +118,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         for (Map.Entry<I, EntityRecord> storageEntry : filtered.entrySet()) {
             final I id = storageEntry.getKey();
             final EntityRecord rawRecord = storageEntry.getValue();
-            final TypeUrl type = TypeUrl.of(rawRecord.getState()
-                                                     .getTypeUrl());
+            final TypeUrl type = TypeUrl.parse(rawRecord.getState()
+                                                        .getTypeUrl());
             final Any recordState = rawRecord.getState();
             final Message stateAsMessage = unpack(recordState);
             final Message processedState = applyMask(fieldMask, stateAsMessage, type);

@@ -36,7 +36,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
 
 import java.lang.reflect.InvocationTargetException;
@@ -211,8 +210,8 @@ public class Sample {
     }
 
     @SuppressWarnings("unchecked") // Reflective class definition retrieving
-    private static <M extends Message> Class<M> classFor(TypeUrl type) {
-        final Class<M> javaClass = KnownTypes.getClass(type);
+    private static <M extends Message> Class<M> classFor(TypeUrl url) {
+        final Class<M> javaClass = url.getJavaClass();
         return javaClass;
     }
 

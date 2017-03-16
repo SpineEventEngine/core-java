@@ -40,7 +40,6 @@ import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
-import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -94,7 +93,8 @@ public class EventEnricher {
      */
     EventEnricher(Builder builder) {
         final LinkedListMultimap<Class<?>, EnrichmentFunction<?, ?>> rawMap = create();
-        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap = synchronizedMultimap(rawMap);
+        final Multimap<Class<?>, EnrichmentFunction<?, ?>> functionMap =
+                synchronizedMultimap(rawMap);
         for (EnrichmentFunction<?, ?> function : builder.getFunctions()) {
             functionMap.put(function.getEventClass(), function);
         }
@@ -109,12 +109,12 @@ public class EventEnricher {
     private void putMsgEnrichers(Multimap<Class<?>, EnrichmentFunction<?, ?>> functionsMap) {
         final ImmutableMultimap<String, String> enrichmentsMap = EventEnrichmentsMap.getInstance();
         for (String enrichmentType : enrichmentsMap.keySet()) {
-            final Class<Message> enrichmentClass = TypeUrl.of(enrichmentType)
-                                                          .toMessageClass();
+            final Class<Message> enrichmentClass = TypeName.of(enrichmentType)
+                                                           .getJavaClass();
             final ImmutableCollection<String> eventTypes = enrichmentsMap.get(enrichmentType);
             for (String eventType : eventTypes) {
-                final Class<Message> eventClass = TypeUrl.of(eventType)
-                                                         .toMessageClass();
+                final Class<Message> eventClass = TypeName.of(eventType)
+                                                          .getJavaClass();
                 final EventMessageEnricher msgEnricher =
                         EventMessageEnricher.newInstance(this,
                                                          eventClass,
@@ -187,8 +187,9 @@ public class EventEnricher {
             this.eventMessage = eventMessage;
             this.eventContext = eventContext;
             final Class<? extends Message> eventClass = EventClass.of(eventMessage)
-                                                             .value();
-            final Collection<EnrichmentFunction<?, ?>> functionsPerClass = parent.functions.get(eventClass);
+                                                                  .value();
+            final Collection<EnrichmentFunction<?, ?>> functionsPerClass =
+                    parent.functions.get(eventClass);
             this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
         }
 
