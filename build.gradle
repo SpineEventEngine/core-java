@@ -38,7 +38,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.2-SNAPSHOT'
+        spineToolsVersion = '0.8.4-SNAPSHOT'
     }
 
     dependencies {
@@ -52,7 +52,10 @@ buildscript {
                                              version: spineToolsVersion
         /* Uncomment the below statement if you want the dependency to be fetched on each build.
            Please note that offline builds will not be available then. */
-                                            //, changing: true
+                                             //, changing: true
+
+        classpath group: 'org.spine3.tools', name: 'javadoc-checker',
+                                             version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -79,6 +82,7 @@ ext {
     jUnitVersion = '4.12'
 
     spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
+    spineJavadocFqnCheckerId = 'org.spine3.tools.javadoc-checker'
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
@@ -106,6 +110,7 @@ subprojects {
 
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
+    apply plugin: 'org.spine3.tools.javadoc-checker'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
