@@ -22,6 +22,7 @@ package org.spine3.server.entity.storagefield;
 
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
+import org.spine3.server.reflect.Getter;
 
 import java.lang.reflect.Method;
 import java.util.Collection;
@@ -65,15 +66,15 @@ public class StorageFieldsExtractor {
 
     private static <E extends Entity<?, ?>> StorageFieldsGenerator<E> newGenerator(
             Class<E> entityClass) {
-        final Collection<EntityFieldGetter<E>> getters = collectGetters(entityClass);
+        final Collection<Getter> getters = collectGetters(entityClass);
         final StorageFieldsGenerator<E> generator = new StorageFieldsGenerator<>(getters);
         fieldGenerators.put(entityClass, generator);
         return generator;
     }
 
-    private static <E extends Entity<?, ?>> Collection<EntityFieldGetter<E>> collectGetters(
+    private static <E extends Entity<?, ?>> Collection<Getter> collectGetters(
             Class<E> entityClass) {
-        final Collection<EntityFieldGetter<E>> getters = new LinkedList<>();
+        final Collection<Getter> getters = new LinkedList<>();
 
         final Method[] publicMethods = entityClass.getMethods();
         for (Method method : publicMethods) {
@@ -86,8 +87,7 @@ public class StorageFieldsExtractor {
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
                                                           .matches();
                 if (nameMatches) {
-                    final EntityFieldGetter<E> getter
-                            = new EntityFieldGetter<>(methodName, method);
+                    final Getter getter = new Getter(methodName, method);
                     getters.add(getter);
                 }
             }

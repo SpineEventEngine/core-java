@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
+import org.spine3.server.reflect.Getter;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -36,20 +37,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class StorageFieldsGenerator<E extends Entity<?, ?>> {
 
-    private final Collection<EntityFieldGetter<E>> getters;
+    private final Collection<Getter> getters;
 
-    StorageFieldsGenerator(Collection<EntityFieldGetter<E>> getters) {
+    StorageFieldsGenerator(Collection<Getter> getters) {
         this.getters = checkNotNull(getters);
     }
 
     public StorageFields generate(E entity) {
         checkNotNull(entity);
         final Map<String, Any> properties = new HashMap<>(getters.size());
-        for (EntityFieldGetter<E> getter : getters) {
-            final String name = getter.getName();
+        for (Getter getter : getters) {
+            final String name = getter.getPropertyName();
             final Object value = getter.get(entity);
-            final Any anyValue = AnyConverters.forType(value.getClass()).toAny(value);
-            properties.put(name, anyValue);
+            //final Any anyValue = AnyConverters.forType(value.getClass()).toAny(value);
+            //properties.put(name, anyValue);
         }
         final Object genericId = entity.getId();
         final Any id = Identifiers.idToAny(genericId);
