@@ -67,9 +67,7 @@ public class Json {
     }
 
     /**
-     * Builds and returns the registry of types known in the application.
-     *
-     * @return {@code JsonFormat.TypeRegistry} instance
+     * Builds the registry of types known in the application.
      */
     private static JsonFormat.TypeRegistry buildForKnownTypes() {
         final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
