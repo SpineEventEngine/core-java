@@ -44,10 +44,6 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  */
 public class Events {
 
-    private Events() {
-        // Prevent instantiation of this utility class.
-    }
-
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = new Comparator<Event>() {
         @Override
@@ -58,7 +54,12 @@ public class Events {
         }
     };
 
+    /** The stringifier for event IDs. */
     private static final Stringifier<EventId> idStringifier = new EventIdStringifier();
+
+    private Events() {
+        // Prevent instantiation of this utility class.
+    }
 
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
@@ -91,7 +92,8 @@ public class Events {
      */
     public static Timestamp getTimestamp(Event event) {
         checkNotNull(event);
-        final Timestamp result = event.getContext().getTimestamp();
+        final Timestamp result = event.getContext()
+                                      .getTimestamp();
         return result;
     }
 
@@ -106,7 +108,7 @@ public class Events {
         checkNotNull(messageOrAny);
         checkNotNull(context);
         final Any packed = (messageOrAny instanceof Any)
-                           ? (Any)messageOrAny
+                           ? (Any) messageOrAny
                            : pack(messageOrAny);
         final Event result = Event.newBuilder()
                                   .setMessage(packed)
@@ -168,7 +170,7 @@ public class Events {
         checkNotNull(context);
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
         @SuppressWarnings("unchecked")
-            // It is the caller's responsibility to know the type of the wrapped ID.
+        // It is the caller's responsibility to know the type of the wrapped ID.
         final I id = (I) aggregateId;
         return id;
 
@@ -216,7 +218,8 @@ public class Events {
         checkNotNull(context);
         if (context.getEnrichment()
                    .getModeCase() == Enrichment.ModeCase.CONTAINER) {
-            return Optional.of(context.getEnrichment().getContainer());
+            return Optional.of(context.getEnrichment()
+                                      .getContainer());
         }
         return Optional.absent();
     }
