@@ -23,6 +23,7 @@ package org.spine3.base;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.base.error.MissingStringifierException;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 
 import java.util.Random;
@@ -95,5 +96,11 @@ public class StringifiersShould {
     public void pass_the_null_tolerance_check() {
         final NullPointerTester tester = new NullPointerTester();
         tester.testStaticMethods(Stringifiers.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @SuppressWarnings("EmptyClass") // is the part of the test.
+    @Test(expected = MissingStringifierException.class)
+    public void raise_exception_on_missing_stringifer() {
+        Stringifiers.toString(new Object() {});
     }
 }
