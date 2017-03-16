@@ -18,45 +18,55 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
-
-import org.spine3.server.entity.Entity;
+package org.spine3.server.reflect;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Dmytro Dashenkov.
  */
-class EntityFieldGetter<E extends Entity<?, ?>> {
+public class Getter {
+
+    private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
+    private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
 
     private final String name;
-    private final Method getter;
+    private final Method method;
+    private final String propertyName;
 
     private boolean initialized;
     private boolean nullable;
 
-    EntityFieldGetter(String name, Method getter) {
+    public Getter(String name, Method method) {
         this.name = checkNotNull(name);
-        this.getter = checkNotNull(getter);
+        this.method = checkNotNull(method);
+        this.propertyName = GETTER_PREFIX_PATTERN.matcher(name)
+                                                 .replaceFirst("")
+                                                 .toLowerCase();
     }
 
     public String getName() {
         return name;
     }
 
-//    public String getPropertyName() {
-//
-//    }
+    public String getPropertyName() {
+        return propertyName;
+    }
 
-    Object get(E entity) {
+    public Class<?> getType() {
+        return method.getReturnType();
+    }
+
+    public Object get(Object entity) {
         initialize();
         final Object property;
         try {
-            property = getter.invoke(entity);
+            property = method.invoke(entity);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
@@ -72,7 +82,7 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
         if (initialized) {
             return;
         }
-        nullable = getter.isAnnotationPresent(Nullable.class);
+        nullable = method.isAnnotationPresent(Nullable.class);
         initialized = true;
     }
 }
