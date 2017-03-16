@@ -36,27 +36,27 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class StorageFieldsGenerator<E extends Entity<?, ?>> {
 
-    private final Collection<EntityFieldGetter<E>> descriptors;
+    private final Collection<EntityFieldGetter<E>> getters;
 
-    StorageFieldsGenerator(Collection<EntityFieldGetter<E>> descriptors) {
-        this.descriptors = checkNotNull(descriptors);
+    StorageFieldsGenerator(Collection<EntityFieldGetter<E>> getters) {
+        this.getters = checkNotNull(getters);
     }
 
     public StorageFields generate(E entity) {
         checkNotNull(entity);
-        final Map<String, Any> properties = new HashMap<>(descriptors.size());
-        for (EntityFieldGetter<E> descriptor : descriptors) {
-            final String name = descriptor.getName();
-            final Object value = descriptor.get(entity);
-            //final Any anyValue = toAny(value);
-            //properties.put(name, anyValue);
+        final Map<String, Any> properties = new HashMap<>(getters.size());
+        for (EntityFieldGetter<E> getter : getters) {
+            final String name = getter.getName();
+            final Object value = getter.get(entity);
+            final Any anyValue = AnyConverters.forType(value.getClass()).toAny(value);
+            properties.put(name, anyValue);
         }
         final Object genericId = entity.getId();
         final Any id = Identifiers.idToAny(genericId);
 
         final StorageFields fields = StorageFields.newBuilder()
                                                   .setEntityId(id)
-                                                  .putAllFields(properties)
+                       //                           .putAllFields(properties)
                                                   .build();
         return fields;
     }

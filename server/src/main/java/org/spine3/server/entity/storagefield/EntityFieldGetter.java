@@ -48,6 +48,10 @@ class EntityFieldGetter<E extends Entity<?, ?>> {
         return name;
     }
 
+//    public String getPropertyName() {
+//
+//    }
+
     Object get(E entity) {
         initialize();
         final Object property;
