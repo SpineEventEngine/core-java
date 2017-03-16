@@ -22,21 +22,15 @@ package org.spine3.base;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
-import org.spine3.test.identifiers.TimestampFieldId;
 
-import java.text.ParseException;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StringifiersShould {
@@ -95,70 +89,6 @@ public class StringifiersShould {
     public void return_false_on_attempt_to_find_unregistered_type() {
         assertFalse(StringifierRegistry.getInstance()
                                        .hasStringifierFor(Random.class));
-    }
-
-    @Test
-    public void convert_command_id_to_string() {
-        final CommandId id = Commands.generateId();
-
-        final String actual = Stringifiers.toString(id, CommandId.class);
-        assertEquals(idToString(id), actual);
-    }
-
-    @Test
-    public void convert_string_to_command_id() {
-        final String id = newUuid();
-        final CommandId expected = CommandId.newBuilder()
-                                            .setUuid(id)
-                                            .build();
-
-        final CommandId actual = Stringifiers.fromString(id, CommandId.class);
-        assertEquals(expected, actual);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
-        final String time = Timestamps2.getCurrentTime()
-                                       .toString();
-        Stringifiers.fromString(time, Timestamp.class);
-    }
-
-    @Test
-    public void convert_string_to_timestamp() throws ParseException {
-        final String date = "1972-01-01T10:00:20.021-05:00";
-        final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = Stringifiers.fromString(date, Timestamp.class);
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_timestamp_to_string() {
-        final Timestamp currentTime = getCurrentTime();
-        final TimestampFieldId id = TimestampFieldId.newBuilder()
-                                                    .setId(currentTime)
-                                                    .build();
-        final String expected = Stringifiers.toString(currentTime, Timestamp.class);
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_event_id_to_string() {
-        final EventId id = Events.generateId();
-        final String actual = Stringifiers.toString(id, EventId.class);
-
-        assertEquals(idToString(id), actual);
-    }
-
-    @Test
-    public void convert_string_to_event_id() {
-        final String id = newUuid();
-        final EventId expected = EventId.newBuilder()
-                                        .setUuid(id)
-                                        .build();
-        final EventId actual = Stringifiers.fromString(id, EventId.class);
-        assertEquals(expected, actual);
     }
 
     @Test

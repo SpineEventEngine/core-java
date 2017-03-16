@@ -42,10 +42,27 @@ public class Stringifiers {
     /**
      * Converts the passed value to the string representation.
      *
+     * <p>Use this method for converting non-generic objects. For generic objects,
+     * please use {@link #toString(Object, Type)}.
+     *
+     * @param object the object to convert
+     * @param <T> the type of the object
+     * @return the string representation of the passed object
+     */
+    public static <T> String toString(T object) {
+        checkNotNull(object);
+        return toString(object, object.getClass());
+    }
+
+    /**
+     * Converts the passed value to the string representation.
+     *
+     * <p>This method must be used of the passed object is a generic type.
+     *
      * @param <T>       the type of the object to convert
      * @param object    to object to convert
-     * @param typeOfT the type token of the passed value
-     * @return the string representation of the passed value
+     * @param typeOfT   the type of the passed object
+     * @return the string representation of the passed object
      * @throws MissingStringifierException if passed value cannot be converted
      */
     public static <T> String toString(T object, Type typeOfT) {

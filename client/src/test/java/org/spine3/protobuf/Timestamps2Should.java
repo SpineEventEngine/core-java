@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.base.Stringifier;
+import org.spine3.base.Stringifiers;
 import org.spine3.test.TimeTests;
 
 import java.util.Date;
@@ -292,11 +293,30 @@ public class Timestamps2Should {
     }
 
     @Test
-    public void provide_webSafe_timestamp_id_stringifier() {
+    public void provide_webSafe_timestamp_stringifier() {
         final Timestamp timestamp = getCurrentTime();
         final Stringifier<Timestamp> stringifier = webSafeTimestampStringifier();
 
         final String str = stringifier.convert(timestamp);
-        assertEquals(timestamp, stringifier.reverse().convert(str));
+        assertEquals(timestamp, stringifier.reverse()
+                                           .convert(str));
+    }
+
+    @Test
+    public void provide_stringifier_for_Timestamp() {
+        final Timestamp timestamp = getCurrentTime();
+
+        final String str = Stringifiers.toString(timestamp);
+        final Timestamp convertedBack = Stringifiers.fromString(str, Timestamp.class);
+
+        assertEquals(timestamp, convertedBack);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
+        // This uses TextFormat printing, for the output won't be parsable.
+        final String time = Timestamps2.getCurrentTime()
+                                       .toString();
+        Stringifiers.fromString(time, Timestamp.class);
     }
 }
