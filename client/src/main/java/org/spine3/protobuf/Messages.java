@@ -19,21 +19,13 @@
  */
 package org.spine3.protobuf;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.util.JsonFormat;
-import org.spine3.type.KnownTypes;
-import org.spine3.type.TypeUrl;
-import org.spine3.type.error.UnknownTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.protobuf.Descriptors.Descriptor;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -61,41 +53,6 @@ public class Messages {
     }
 
     /**
-     * Converts passed message into Json representation.
-     *
-     * @param message the message object
-     * @return Json string
-     */
-    public static String toJson(Message message) {
-        checkNotNull(message);
-        String result;
-        try {
-            result = JsonPrinter.instance().print(message);
-        } catch (InvalidProtocolBufferException e) {
-            throw new UnknownTypeException(e);
-        }
-        checkState(result != null);
-        return result;
-    }
-
-    /**
-     * Builds and returns the registry of types known in the application.
-     *
-     * @return {@code JsonFormat.TypeRegistry} instance
-     */
-    static JsonFormat.TypeRegistry forKnownTypes() {
-        final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Descriptors.GenericDescriptor genericDescriptor = typeUrl.getDescriptor();
-            if (genericDescriptor instanceof Descriptor) {
-                final Descriptor descriptor = (Descriptor) genericDescriptor;
-                builder.add(descriptor);
-            }
-        }
-        return builder.build();
-    }
-
-    /**
      * Creates a new instance of a {@code Message} by its class.
      *
      * <p>This factory method obtains parameterless constructor {@code Message} via
@@ -115,18 +72,6 @@ public class Messages {
                  | IllegalAccessException
                  | InvocationTargetException e) {
             throw new IllegalStateException(e);
-        }
-    }
-
-    private enum JsonPrinter {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final JsonFormat.Printer value = JsonFormat.printer()
-                                                           .usingTypeRegistry(forKnownTypes());
-
-        private static JsonFormat.Printer instance() {
-            return INSTANCE.value;
         }
     }
 }

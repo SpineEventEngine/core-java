@@ -18,27 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate;
-
 /**
- * Thrown to indicate that a method has been passed an illegal or
- * inappropriate argument during the conversion from one type to another.
- *
- * @author Illia Shepilov
- * @see ConversionError
+ * This package provides general exceptions.
  */
-public class IllegalConversionArgumentException extends IllegalArgumentException {
 
-    private static final long serialVersionUID = 1L;
+@ParametersAreNonnullByDefault
+package org.spine3.base.error;
 
-    private final ConversionError conversionError;
-
-    public IllegalConversionArgumentException(ConversionError conversionError) {
-        super();
-        this.conversionError = conversionError;
-    }
-
-    public ConversionError getConversionError() {
-        return conversionError;
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

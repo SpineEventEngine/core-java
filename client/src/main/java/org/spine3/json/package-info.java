@@ -17,23 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.protobuf;
 
-import com.google.protobuf.Message;
-import org.junit.Test;
-import org.spine3.test.Tests;
+/**
+ * This package provides utility classes for working with Json.
+ */
 
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+@ParametersAreNonnullByDefault
+package org.spine3.json;
 
-public class MessagesShould {
-
-    @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Messages.class);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void toText_fail_on_null() {
-        Messages.toText(Tests.<Message>nullRef());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

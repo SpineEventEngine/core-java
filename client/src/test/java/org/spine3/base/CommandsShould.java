@@ -287,4 +287,13 @@ public class CommandsShould {
                                                .getSchedule()
                                                .getSchedulingTime());
     }
+
+    @Test
+    public void provide_stringifier_for_CommandId() {
+        final CommandId id = Commands.generateId();
+
+        final String str = Stringifiers.toString(id);
+        final CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
+        assertEquals(id, convertedBack);
+    }
 }
