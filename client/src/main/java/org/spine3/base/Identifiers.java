@@ -57,7 +57,7 @@ public class Identifiers {
     private static final String EQUAL_SIGN = "=";
 
     private static final Stringifier<Timestamp> timestampIdStringifier =
-            new TimestampIdStringifer();
+            new WebSafeTimestampStringifer();
 
     private Identifiers() {
         // Prevent instantiation of this utility class.
@@ -240,49 +240,66 @@ public class Identifiers {
     /**
      * Obtains a stringifier for IDs based on {@code Timestamp}s.
      *
-     * @see Timestamps#toString(Timestamp)
+     * <p>The stringifier replaces colons in time part of a string representation of a timestamp.
+     *
+     * <p>For example, the following string:
+     * <pre>
+     * "1973-01-01T23:59:59.999999999Z"
+     * </pre>
+     * would be converted to:
+     * <pre>
+     * "1973-01-01T23-59-59.999999999Z"
+     * </pre>
+     *
+     * <p>This stringifier can be convenient for storing IDs based on {@code Timestamp}s.
      */
-    public static Stringifier<Timestamp> timestampIdStringifier() {
+    public static Stringifier<Timestamp> webSafeTimestampStringifier() {
         return timestampIdStringifier;
     }
 
     /**
      * The stringifier for IDs based on {@code Timestamp}s.
      */
-    static class TimestampIdStringifer extends Stringifier<Timestamp> {
+    static class WebSafeTimestampStringifer extends Stringifier<Timestamp> {
 
-        private static final Pattern PATTERN_COLON = Pattern.compile(":");
-        private static final Pattern PATTERN_T = Pattern.compile("T");
+        private static final char COLON = ':';
+        private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
 
         @Override
         protected String toString(Timestamp timestamp) {
-            final String result = stringify(timestamp);
+            String result = Timestamps.toString(timestamp);
+            result = toWebSafe(result);
             return result;
         }
 
         @Override
-        protected Timestamp fromString(String str) {
+        protected Timestamp fromString(String webSafe) {
             try {
-                //TODO:2017-03-15:alexander.yevsyukov: Escape the passed string back
-                return Timestamps.parse(str);
+                final String rfcStr = fromWebSafe(webSafe);
+                return Timestamps.parse(rfcStr);
             } catch (ParseException ignored) {
                 throw conversionArgumentException("Occurred exception during conversion");
             }
         }
 
         /**
-         * Converts the passed timestamp to the string.
-         *
-         * @param timestamp the value to convert
-         * @return the string representation of the timestamp
+         * Converts the passed timestamp string into a web-safe string, replacing colons to dashes.
          */
-        private static String stringify(Timestamp timestamp) {
-            String result = Timestamps.toString(timestamp);
-            result = PATTERN_COLON.matcher(result)
-                                  .replaceAll("-");
-            result = PATTERN_T.matcher(result)
-                              .replaceAll("_T");
+        private static String toWebSafe(String str) {
+            final String result = PATTERN_COLON.matcher(str)
+                                               .replaceAll("-");
             return result;
+        }
+
+        /**
+         * Converts the passed web-safe timestamp representation to the RFC 3339 date string format.
+         */
+        @SuppressWarnings("MagicNumber") // are fixed positions in the timestamp string
+        private static String fromWebSafe(String webSafe) {
+            char[] chars = webSafe.toCharArray();
+            chars[13] = COLON;
+            chars[16] = COLON;
+            return String.valueOf(chars);
         }
     }
 }

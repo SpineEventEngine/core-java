@@ -25,8 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.identifiers.NestedMessageId;
 import org.spine3.test.identifiers.SeveralFieldsId;
 
@@ -204,5 +206,14 @@ public class IdentifiersShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .testStaticMethods(Identifiers.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @Test
+    public void provide_webSafe_timestamp_id_stringifier() {
+        final Timestamp timestamp = Timestamps2.getCurrentTime();
+        final Stringifier<Timestamp> stringifier = Identifiers.webSafeTimestampStringifier();
+
+        final String str = stringifier.convert(timestamp);
+        assertEquals(timestamp, stringifier.reverse().convert(str));
     }
 }
