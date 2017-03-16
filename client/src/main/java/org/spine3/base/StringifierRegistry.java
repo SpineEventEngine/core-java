@@ -56,19 +56,19 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    static <I> Stringifier<I> getStringifier(TypeToken<I> typeToken) {
-        final Optional<Stringifier<I>> stringifierOptional = getInstance().get(typeToken);
+    static <T> Stringifier<T> getStringifier(TypeToken<T> typeToken) {
+        final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeToken);
 
         if (!stringifierOptional.isPresent()) {
             final String exMessage =
                     format("Stringifier for the %s is not provided", typeToken);
             throw conversionArgumentException(exMessage);
         }
-        final Stringifier<I> stringifier = stringifierOptional.get();
+        final Stringifier<T> stringifier = stringifierOptional.get();
         return stringifier;
     }
 
-    public <I extends Message> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
+    public <T extends Message> void register(TypeToken<T> valueClass, Stringifier<T> converter) {
         checkNotNull(valueClass);
         checkNotNull(converter);
         entries.put(valueClass, converter);
@@ -77,15 +77,15 @@ public class StringifierRegistry {
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
-     * @param <I> the type of the values to convert
+     * @param <T> the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(TypeToken<I> valueToken) {
+    public <T> Optional<Stringifier<T>> get(TypeToken<T> valueToken) {
         checkNotNull(valueToken);
 
         final Stringifier<?> func = entries.get(valueToken);
 
-        final Stringifier<I> result = cast(func);
+        final Stringifier<T> result = cast(func);
         return Optional.fromNullable(result);
     }
 
@@ -96,18 +96,18 @@ public class StringifierRegistry {
      * {@linkplain #register(TypeToken, Stringifier) adding}.
      */
     @SuppressWarnings("unchecked")
-    private static <I> Stringifier<I> cast(Stringifier<?> func) {
-        return (Stringifier<I>) func;
+    private static <T> Stringifier<T> cast(Stringifier<?> func) {
+        return (Stringifier<T>) func;
     }
 
     /**
      * Tells whether there is a Stringifier registered for the passed type.
      *
      * @param valueToken the token with the type info
-     * @param <I> the type to be converted to a string
+     * @param <T> the type to be converted to a string
      * @return {@code true} if there is a registered stringifier, {@code false} otherwise
      */
-    public synchronized <I> boolean hasStringifierFor(TypeToken<I> valueToken) {
+    public synchronized <T> boolean hasStringifierFor(TypeToken<T> valueToken) {
         final boolean contains = entries.containsKey(valueToken);
         return contains;
     }

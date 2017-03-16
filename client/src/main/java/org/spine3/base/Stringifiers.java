@@ -42,15 +42,15 @@ public class Stringifiers {
      *
      * @param object    to object to convert
      * @param typeToken the type token of the passed value
-     * @param <I>       the type of the object to convert
+     * @param <T>       the type of the object to convert
      * @return the string representation of the passed value
      * @throws org.spine3.validate.IllegalConversionArgumentException if passed value cannot be converted
      */
-    public static <I> String toString(I object, TypeToken<I> typeToken) {
+    public static <T> String toString(T object, TypeToken<T> typeToken) {
         checkNotNull(object);
         checkNotNull(typeToken);
 
-        final Stringifier<I> stringifier = getStringifier(typeToken);
+        final Stringifier<T> stringifier = getStringifier(typeToken);
         final String result = stringifier.convert(object);
         return result;
     }
@@ -60,16 +60,16 @@ public class Stringifiers {
      *
      * @param valueToParse value to convert
      * @param typeToken    the type token of the returned value
-     * @param <I>          the type of the value to return
+     * @param <T>          the type of the value to return
      * @return the parsed value from string
      * @throws org.spine3.validate.IllegalConversionArgumentException if passed string cannot be parsed
      */
-    public static <I> I fromString(String valueToParse, TypeToken<I> typeToken) {
+    public static <T> T fromString(String valueToParse, TypeToken<T> typeToken) {
         checkNotNull(valueToParse);
         checkNotNull(typeToken);
 
-        final Stringifier<I> stringifier = getStringifier(typeToken);
-        final I result = stringifier.reverse()
+        final Stringifier<T> stringifier = getStringifier(typeToken);
+        final T result = stringifier.reverse()
                                     .convert(valueToParse);
         return result;
     }
