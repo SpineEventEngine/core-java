@@ -38,7 +38,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.4-SNAPSHOT'
+        spineToolsVersion = '0.8.6-SNAPSHOT'
     }
 
     dependencies {
@@ -110,9 +110,7 @@ subprojects {
 
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
-
-    //TODO:2017-03-16:alexander.yevsyukov: Uncomment the below line when the .DS_Store bug is fixed.
-    // apply plugin: 'org.spine3.tools.javadoc-checker'
+    apply plugin: 'org.spine3.tools.javadoc-checker'
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
