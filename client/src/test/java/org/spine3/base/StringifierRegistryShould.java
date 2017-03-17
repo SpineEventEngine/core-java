@@ -17,23 +17,26 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.protobuf;
 
-import com.google.protobuf.Message;
+package org.spine3.base;
+
 import org.junit.Test;
-import org.spine3.test.Tests;
+import org.spine3.base.error.MissingStringifierException;
 
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-public class MessagesShould {
+/**
+ * @author Alexander Yevsyukov
+ */
+public class StringifierRegistryShould {
 
     @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Messages.class);
+    public void have_private_ctor() {
+        assertHasPrivateParameterlessCtor(StringifierRegistry.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void toText_fail_on_null() {
-        Messages.toText(Tests.<Message>nullRef());
+    @Test(expected = MissingStringifierException.class)
+    public void throw_exception_on_attempt_to_get_stringifier_for_unregistered_type() {
+        StringifierRegistry.getStringifier(getClass());
     }
 }
