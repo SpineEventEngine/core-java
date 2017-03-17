@@ -27,11 +27,11 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
@@ -130,7 +130,7 @@ public class AggregateCommandEndpointShould {
         doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
         doReturn(Optional.of(AggregateStateRecord.getDefaultInstance())).when(storage).read(projectId);
         doReturn(storage).when(repositorySpy).aggregateStorage();
-        doReturn(Optional.absent()).when(storage).readVisibility(projectId);
+        doReturn(Optional.absent()).when(storage).readLifecycleFlags(projectId);
 
         repositorySpy.dispatch(cmd);
 

@@ -57,16 +57,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    public void markArchived(I id) {
-        getStorage().markArchived(id);
-    }
-
-    @Override
-    public void markDeleted(I id) {
-        getStorage().markDeleted(id);
-    }
-
-    @Override
     public boolean delete(I id) {
         return getStorage().delete(id);
     }

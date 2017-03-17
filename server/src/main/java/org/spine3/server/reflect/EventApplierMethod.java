@@ -32,6 +32,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A wrapper for event applier method.
@@ -73,9 +74,10 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
 
     private static IllegalStateException missingEventApplier(Class<? extends Aggregate> cls,
                                                       Class<? extends Message> eventClass) {
-        return new IllegalStateException(
-                String.format("Missing event applier for event class %s in aggregate class %s.",
-                              eventClass.getName(), cls.getName()));
+        return newIllegalStateException(
+                "Missing event applier for event class %s in aggregate class %s.",
+                eventClass.getName(),
+                cls.getName());
     }
 
     @VisibleForTesting

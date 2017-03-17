@@ -21,18 +21,19 @@ package org.spine3.server.command.error;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.CommandClass;
+import org.spine3.type.TypeName;
 
 import static java.lang.String.format;
 
 /**
  * Exception that is thrown when a scheduled command was not delivered to the target in time.
  *
- * <p>For example, in the case when a server restarted when it was the time to deliver a scheduled command.
+ * <p>For example, in the case when a server restarted when it was the time to deliver a
+ * scheduled command.
  *
  * @author Alexander Litus
  */
@@ -46,15 +47,20 @@ public class CommandExpiredException extends CommandException {
 
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final String typeName = TypeName.ofCommand(command);
-        final String result = format("A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.",
-                                     commandClass, typeName);
+        final String typeName = TypeName.ofCommand(command)
+                                        .value();
+        final String result = format(
+                "A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.",
+                commandClass,
+                typeName
+        );
         return result;
     }
 
     /** Creates an instance of the command expired error. */
     public static Error commandExpiredError(Message commandMessage) {
-        final String errMsg = format("Scheduled command of type `%s` expired.", CommandClass.of(commandMessage));
+        final String errMsg = format("Scheduled command of type `%s` expired.",
+                                     CommandClass.of(commandMessage));
         final Error.Builder error = Error.newBuilder()
                 .setType(CommandValidationError.getDescriptor().getFullName())
                 .setMessage(errMsg)

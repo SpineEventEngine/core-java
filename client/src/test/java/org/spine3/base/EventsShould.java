@@ -28,8 +28,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeName;
-import org.spine3.test.EventTests;
+import org.spine3.type.TypeName;
 
 import java.util.Comparator;
 import java.util.List;
@@ -51,6 +50,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
@@ -58,7 +58,7 @@ import static org.spine3.validate.Validate.isNotDefault;
 
 public class EventsShould {
 
-    private final EventContext context = EventTests.newEventContext();
+    private final EventContext context = newEventContext();
 
     private final StringValue stringValue = newStringValue(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
@@ -86,9 +86,9 @@ public class EventsShould {
 
     @Test
     public void sort_events_by_time() {
-        final Event event1 = createEvent(stringValue, EventTests.newEventContext(minutesAgo(30)));
-        final Event event2 = createEvent(boolValue, EventTests.newEventContext(minutesAgo(20)));
-        final Event event3 = createEvent(doubleValue, EventTests.newEventContext(secondsAgo(10)));
+        final Event event1 = createEvent(stringValue, newEventContext(minutesAgo(30)));
+        final Event event2 = createEvent(boolValue, newEventContext(minutesAgo(20)));
+        final Event event3 = createEvent(doubleValue, newEventContext(secondsAgo(10)));
         final List<Event> sortedEvents = newArrayList(event1, event2, event3);
         final List<Event> eventsToSort = newArrayList(event2, event1, event3);
 
@@ -99,8 +99,8 @@ public class EventsShould {
 
     @Test
     public void have_event_comparator() {
-        final Event event1 = createEvent(stringValue, EventTests.newEventContext(minutesAgo(120)));
-        final Event event2 = createEvent(boolValue, EventTests.newEventContext(minutesAgo(2)));
+        final Event event1 = createEvent(stringValue, newEventContext(minutesAgo(120)));
+        final Event event2 = createEvent(boolValue, newEventContext(minutesAgo(2)));
 
         final Comparator<Event> comparator = Events.eventComparator();
         assertTrue(comparator.compare(event1, event2) < 0);
@@ -197,10 +197,13 @@ public class EventsShould {
         assertFalse(isEnrichmentEnabled(event));
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure the optional is populated in this method.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+        // We're sure the optional is populated in this method.
     @Test
     public void return_all_event_enrichments() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue), stringValue);
+        final EventContext context = newEventContextWithEnrichment(
+                TypeName.of(stringValue).value(),
+                stringValue);
 
         final Optional<Enrichment.Container> enrichments = Events.getEnrichments(context);
 
@@ -215,12 +218,16 @@ public class EventsShould {
                           .isPresent());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure the optional is populated in this method.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+        // We're sure the optional is populated in this method.
     @Test
     public void return_specific_event_enrichment() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(stringValue), stringValue);
+        final EventContext context = newEventContextWithEnrichment(
+                TypeName.of(stringValue).value(),
+                stringValue);
 
-        final Optional<? extends StringValue> enrichment = Events.getEnrichment(stringValue.getClass(), context);
+        final Optional<? extends StringValue> enrichment =
+                Events.getEnrichment(stringValue.getClass(), context);
 
         assertTrue(enrichment.isPresent());
         assertEquals(stringValue, enrichment.get());
@@ -234,7 +241,9 @@ public class EventsShould {
 
     @Test
     public void return_optional_absent_if_no_needed_event_enrichment_when_getting_one() {
-        final EventContext context = newEventContextWithEnrichment(TypeName.of(boolValue), boolValue);
+        final EventContext context = newEventContextWithEnrichment(
+                TypeName.of(boolValue).value(),
+                boolValue);
         assertFalse(Events.getEnrichment(StringValue.class, context)
                           .isPresent());
     }
@@ -243,7 +252,7 @@ public class EventsShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, EventTests.newEventContext())
+                .setDefault(EventContext.class, newEventContext())
                 .testAllPublicStaticMethods(Events.class);
     }
 
@@ -254,11 +263,20 @@ public class EventsShould {
                           .setContainer(Enrichment.Container.newBuilder()
                                                             .putItems(enrichmentKey,
                                                                       AnyPacker.pack(enrichment)));
-        final EventContext context = EventTests.newEventContext()
+        final EventContext context = newEventContext()
                                                .toBuilder()
                                                .setEnrichment(enrichments.build())
                                                .build();
         return context;
     }
 
+    @Test
+    public void provide_EventId_stringifier() {
+        final EventId id = Events.generateId();
+        
+        final String str = Stringifiers.toString(id);
+        final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
+
+        assertEquals(id, convertedBack);
+    }
 }

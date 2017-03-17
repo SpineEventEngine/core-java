@@ -30,10 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * An abstract base for converters of entities into {@link EntityRecord}.
  *
  * @author Alexander Yevsyukov
- * @see Tuple
  */
 public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
-        extends Converter<E, EntityStorageConverter.Tuple<I>> {
+        extends Converter<E, EntityRecord> {
 
     private final FieldMask fieldMask;
 
@@ -53,26 +52,4 @@ public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extend
      * Creates a copy of this converter modified with the passed filed mask.
      */
     public abstract EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask);
-
-    /**
-     * Creates new tuple of entity ID and corresponding storage record.
-     */
-    public static <I> Tuple<I> tuple(I id, EntityRecord record) {
-        return new Tuple<>(id, record);
-    }
-
-    /**
-     * The tuple of an entity ID and a storage record.
-     *
-     * <p>This data structure is needed for passing entity information to the reverse
-     * conversion.
-     *
-     * @param <I> type of the entity ID
-     */
-    public static class Tuple<I> extends AbstractEntity<I, EntityRecord> {
-        private Tuple(I id, EntityRecord record) {
-            super(id);
-            injectState(record);
-        }
-    }
 }

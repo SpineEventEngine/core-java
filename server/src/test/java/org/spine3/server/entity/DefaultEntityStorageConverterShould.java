@@ -78,7 +78,7 @@ public class DefaultEntityStorageConverterShould {
         final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
                 repository);
 
-        final EntityStorageConverter.Tuple<Long> out = converter.convert(entity);
+        final EntityRecord out = converter.convert(entity);
         final TestEntity back = converter.reverse()
                                          .convert(out);
         assertEquals(entity, back);

@@ -36,10 +36,10 @@ import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.TypeName;
 import org.spine3.server.storage.AbstractStorageShould;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
+import org.spine3.type.TypeName;
 
 import java.util.Iterator;
 import java.util.List;
@@ -137,7 +137,8 @@ public abstract class EventStorageShould
     @Test
     public void filter_events_by_type() {
         givenSequentialRecords();
-        final String typeName = TypeName.ofEvent(event1);
+        final String typeName = TypeName.ofEvent(event1)
+                                        .value();
         final EventFilter filter = EventFilter.newBuilder()
                                               .setEventType(typeName)
                                               .build();

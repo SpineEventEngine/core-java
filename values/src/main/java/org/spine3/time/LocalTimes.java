@@ -46,6 +46,7 @@ import static org.spine3.validate.Validate.checkPositiveOrZero;
 public class LocalTimes {
 
     private LocalTimes() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

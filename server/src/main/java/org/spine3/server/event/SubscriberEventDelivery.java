@@ -23,7 +23,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 

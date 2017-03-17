@@ -23,17 +23,15 @@ package org.spine3.server.command;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Message;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
-import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.storage.AbstractStorage;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -42,8 +40,8 @@ import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Stringifiers.EMPTY_ID;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.checkNotDefault;
 
@@ -55,85 +53,8 @@ import static org.spine3.validate.Validate.checkNotDefault;
 @SPI
 public abstract class CommandStorage extends AbstractStorage<CommandId, CommandRecord> {
 
-    private static final Function<CommandRecord, Command> TO_COMMAND =
-            new Function<CommandRecord, Command>() {
-        @Override
-        public Command apply(@Nullable CommandRecord record) {
-            if (record == null) {
-                return Command.getDefaultInstance();
-            }
-            final Command cmd = record.getCommand();
-            return cmd;
-        }
-    };
-
     protected CommandStorage(boolean multitenant) {
         super(multitenant);
-    }
-
-    /**
-     * Obtains or generates a {@code CommandId} from the passed command.
-     *
-     * <p>We don't have a command ID in the passed command.
-     * But need an ID to store the error in the record associated
-     * with this command. So, the ID will be generated.
-     *
-     * <p>We pass this ID to the record, so that it has an identity.
-     * But this ID does not belong to the command.
-     *
-     * <p>Therefore, commands without ID can be found by records
-     * where `command.context.command_id` field is empty.
-     */
-    private static CommandId getOrGenerateCommandId(Command command) {
-        CommandId id = getId(command);
-        if (idToString(id).equals(EMPTY_ID)) {
-            id = generateId();
-        }
-        return id;
-    }
-
-    /**
-     * Creates a command storage record builder passed on the passed parameters.
-     *
-     * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
-     * the command is not for an entity.
-     *
-     * @param command            a command to convert to a record. This includes instances of faulty
-     *                           commands. An example of such a fault is missing command ID.
-     * @param status             a command status to set in the record
-     * @param generatedCommandId a command ID to used because the passed command does not have own
-     *                           ID. If the command has own ID this parameter is {@code null}.
-     * @return a storage record
-     */
-    @VisibleForTesting
-    static CommandRecord.Builder newRecordBuilder(Command command,
-                                                  CommandStatus status,
-                                                  @Nullable CommandId generatedCommandId) {
-        final CommandContext context = command.getContext();
-
-        final CommandId commandId = generatedCommandId != null
-                                    ? generatedCommandId
-                                    : context.getCommandId();
-
-        final Message commandMessage = Commands.getMessage(command);
-        final String commandType = TypeUrl.of(commandMessage)
-                                          .getSimpleName();
-
-        final CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandId(commandId)
-                             .setCommandType(commandType)
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(status));
-        return builder;
-    }
-
-    /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
-    @VisibleForTesting
-    static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
-        return Iterators.transform(records, TO_COMMAND);
     }
 
     /**
@@ -187,6 +108,27 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
     }
 
     /**
+     * Obtains or generates a {@code CommandId} from the passed command.
+     *
+     * <p>We don't have a command ID in the passed command.
+     * But need an ID to store the error in the record associated
+     * with this command. So, the ID will be generated.
+     *
+     * <p>We pass this ID to the record, so that it has an identity.
+     * But this ID does not belong to the command.
+     *
+     * <p>Therefore, commands without ID can be found by records
+     * where `command.context.command_id` field is empty.
+     */
+    private static CommandId getOrGenerateCommandId(Command command) {
+        CommandId id = getId(command);
+        if (idToString(id).equals(EMPTY_ID)) {
+            id = generateId();
+        }
+        return id;
+    }
+
+    /**
      * Returns an iterator over all commands with the given status.
      *
      * @param status a command status to search by
@@ -216,4 +158,61 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
 
     /** Updates the status of the command with the business failure. */
     protected abstract void updateStatus(CommandId commandId, Failure failure);
+
+    /**
+     * Creates a command storage record builder passed on the passed parameters.
+     *
+     * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
+     * the command is not for an entity.
+     *
+     * @param command
+     *            a command to convert to a record. This includes instances of faulty commands.
+     *            An example of such a fault is missing command ID.
+     * @param status
+     *            a command status to set in the record
+     * @param generatedCommandId
+     *            a command ID to used because the passed command does not have own ID.
+     *            If the command has own ID this parameter is {@code null}.
+     * @return a storage record
+     */
+    @VisibleForTesting
+    static CommandRecord.Builder newRecordBuilder(Command command,
+                                                  CommandStatus status,
+                                                  @Nullable CommandId generatedCommandId) {
+        final CommandContext context = command.getContext();
+
+        final CommandId commandId = generatedCommandId != null
+                                    ? generatedCommandId
+                                    : context.getCommandId();
+
+        final String commandType = TypeName.ofCommand(command)
+                                           .getSimpleName();
+
+        final CommandRecord.Builder builder =
+                CommandRecord.newBuilder()
+                             .setCommandId(commandId)
+                             .setCommandType(commandType)
+                             .setCommand(command)
+                             .setTimestamp(getCurrentTime())
+                             .setStatus(ProcessingStatus.newBuilder()
+                                                        .setCode(status));
+        return builder;
+    }
+
+    /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
+    @VisibleForTesting
+    static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
+        return Iterators.transform(records, TO_COMMAND);
+    }
+
+    private static final Function<CommandRecord, Command> TO_COMMAND = new Function<CommandRecord, Command>() {
+        @Override
+        public Command apply(@Nullable CommandRecord record) {
+            if (record == null) {
+                return Command.getDefaultInstance();
+            }
+            final Command cmd = record.getCommand();
+            return cmd;
+        }
+    };
 }

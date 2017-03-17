@@ -31,7 +31,6 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.storage.RecordStorage;
@@ -41,6 +40,7 @@ import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
 import org.spine3.test.storage.TaskId;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

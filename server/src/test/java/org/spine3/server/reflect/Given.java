@@ -22,28 +22,25 @@ package org.spine3.server.reflect;
 
 import org.spine3.test.reflect.ProjectId;
 import org.spine3.test.reflect.command.CreateProject;
+import org.spine3.test.reflect.command.StartProject;
 import org.spine3.test.reflect.event.ProjectCreated;
 
 import static org.spine3.base.Identifiers.newUuid;
 
 class Given {
 
-    static class AggregateId {
+    private Given() {}
 
-        private AggregateId() {
-        }
-
-        public static ProjectId newProjectId() {
-            final String uuid = newUuid();
-            return ProjectId.newBuilder()
-                            .setId(uuid)
-                            .build();
-        }
+    static ProjectId newProjectId() {
+        final String uuid = newUuid();
+        return ProjectId.newBuilder()
+                        .setId(uuid)
+                        .build();
     }
 
     static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
+        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
         private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
 
         private EventMessage() {
@@ -67,8 +64,14 @@ class Given {
 
         public static CreateProject createProject() {
             return CreateProject.newBuilder()
-                                .setProjectId(AggregateId.newProjectId())
+                                .setProjectId(newProjectId())
                                 .build();
+        }
+
+        public static StartProject startProject() {
+            return StartProject.newBuilder()
+                               .setProjectId(newProjectId())
+                               .build();
         }
     }
 }

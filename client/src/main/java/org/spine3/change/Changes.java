@@ -33,10 +33,12 @@ import static org.spine3.change.Preconditions.checkNotEqual;
  * @author Alexander Yevsyukov
  * @author Alexander Aleksandrov
  */
-@SuppressWarnings("OverlyCoupledClass") /* ... because we want one utility class for all the Changes classes. */
+@SuppressWarnings("OverlyCoupledClass")
+    /* ... because we want one utility class for all the Changes classes. */
 public class Changes {
 
     private Changes() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

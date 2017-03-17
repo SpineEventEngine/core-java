@@ -26,4 +26,3 @@ dependencies {
 apply from: generateDescriptorSetScript
 
 apply plugin: spineProtobufPluginId
-

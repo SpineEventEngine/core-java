@@ -38,7 +38,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * Tests of working with entity status.
+ * Tests of working with entity visibility.
  *
  * <p>When migrating to JUnit 5, this class may become a
  * {@code @Nested} class of {@link EntityShould}.
@@ -70,7 +70,7 @@ public class VisibilityTests {
 
     @Test
     public void return_default_status_after_constructor() {
-        assertEquals(Visibility.getDefaultInstance(), new MiniEntity(1L).getVisibility());
+        assertEquals(LifecycleFlags.getDefaultInstance(), new MiniEntity(1L).getLifecycleFlags());
     }
 
     @Test
@@ -124,12 +124,12 @@ public class VisibilityTests {
 
     @Test
     public void assign_status() {
-        final Visibility status = Visibility.newBuilder()
-                                            .setArchived(true)
-                                            .setDeleted(false)
-                                            .build();
-        entity.setVisibility(status);
-        assertEquals(status, entity.getVisibility());
+        final LifecycleFlags status = LifecycleFlags.newBuilder()
+                                                    .setArchived(true)
+                                                    .setDeleted(false)
+                                                    .build();
+        entity.setLifecycleFlags(status);
+        assertEquals(status, entity.getLifecycleFlags());
     }
 
     @Test(expected = CannotModifyArchivedEntity.class)

@@ -21,13 +21,14 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -38,8 +39,11 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.String.format;
+
 /**
- * A utility class for creating instances of {@code FieldMask} and processing them against instances of {@link Message}.
+ * A utility class for creating instances of {@code FieldMask} and processing them
+ * against instances of {@link Message}.
  *
  * @author Dmytro Dashenkov
  */
@@ -48,23 +52,28 @@ public class FieldMasks {
 
     private static final String CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN =
             "Constructor for type %s could not be found or called: ";
+
     private static final String BUILDER_CLASS_ERROR_LOGGING_PATTERN =
-            "Class for name %s could not be found. Try to rebuild the project. Make sure \"known_types.properties\" exists.";
+            "Class for name %s could not be found. Try to rebuild the project. " +
+            "Make sure \"known_types.properties\" exists.";
+
     private static final String TYPE_CAST_ERROR_LOGGING_PATTERN =
-            "Class %s must be assignable from com.google.protobuf.Message. Try to rebuild the project. Make sure type URL is valid.";
+            "Class %s must be assignable from com.google.protobuf.Message. " +
+            "Try to rebuild the project. Make sure type URL is valid.";
 
     private FieldMasks() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
-     * Creates a new instance of {@code FieldMask} basing on the target type {@link Descriptors.Descriptor descriptor}
-     * and field tags defined in the Protobuf message.
+     * Creates a new instance of {@code FieldMask} basing on the target type
+     * {@link Descriptor descriptor} and field tags defined in the Protobuf message.
      *
-     * @param typeDescriptor {@link Descriptors.Descriptor descriptor} of the type to create a mask for.
+     * @param typeDescriptor {@link Descriptor descriptor} of the type to create a mask for.
      * @param fieldTags      field tags to include into the mask.
      * @return an instance of {@code FieldMask} for the target type with the fields specified.
      */
-    public static FieldMask maskOf(Descriptors.Descriptor typeDescriptor, int... fieldTags) {
+    public static FieldMask maskOf(Descriptor typeDescriptor, int... fieldTags) {
         if (fieldTags.length == 0) {
             return FieldMask.getDefaultInstance();
         }
@@ -83,8 +92,8 @@ public class FieldMasks {
      * Applies the given {@code FieldMask} to given collection of {@link Message}s.
      * Does not change the {@link Collection} itself.
      *
-     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
-     * do not affect the execution result.
+     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are
+     * ignored and do not affect the execution result.
      *
      * @param mask     {@code FieldMask} to apply to each item of the input {@link Collection}.
      * @param messages {@link Message}s to filter.
@@ -92,9 +101,10 @@ public class FieldMasks {
      * @return messages with the {@code FieldMask} applied
      */
     @Nonnull
-    public static <M extends Message, B extends Message.Builder> Collection<M> applyMask(FieldMask mask,
-                                                                                         Collection<M> messages,
-                                                                                         TypeUrl type) {
+    public static <M extends Message, B extends Message.Builder>
+    Collection<M> applyMask(FieldMask mask,
+                            Collection<M> messages,
+                            TypeUrl type) {
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
@@ -116,23 +126,26 @@ public class FieldMasks {
                 IllegalAccessException |
                 InstantiationException e) {
             // If any reflection failure happens, return all the data without any mask applied.
-            log().warn(String.format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN, builderClass.getCanonicalName()), e);
+            log().warn(format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN,
+                              builderClass.getCanonicalName()),
+                       e);
             return Collections.unmodifiableCollection(messages);
         }
         return Collections.unmodifiableList(filtered);
     }
 
     /**
-     * Applies the {@code FieldMask} to the given {@link Message} the {@code mask} parameter is valid.
+     * Applies the {@code FieldMask} to the given {@link Message}
+     * if the {@code mask} parameter is valid.
      *
-     * <p>In case the {@code FieldMask} instance contains invalid field declarations, they are ignored and
-     * do not affect the execution result.
+     * <p>In case the {@code FieldMask} instance contains invalid field declarations,
+     * they are ignored and do not affect the execution result.
      *
      * @param mask    the {@code FieldMask} to apply.
      * @param message the {@link Message} to apply given mask to.
      * @param typeUrl type of given {@link Message}.
-     * @return the message of the same type as the given one with only selected fields if the {@code mask} is valid,
-     * original message otherwise.
+     * @return the message of the same type as the given one with only selected fields if
+     *         the {@code mask} is valid, original message otherwise.
      */
     public static <M extends Message> M applyMask(FieldMask mask, M message, TypeUrl typeUrl) {
         if (!mask.getPathsList()
@@ -142,7 +155,9 @@ public class FieldMasks {
         return message;
     }
 
-    private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask, M message, TypeUrl type) {
+    private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask,
+                                                                            M message,
+                                                                            TypeUrl type) {
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
 
@@ -160,7 +175,9 @@ public class FieldMasks {
                 InvocationTargetException |
                 IllegalAccessException |
                 InstantiationException e) {
-            log().warn(String.format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN, builderClass.getCanonicalName()), e);
+            log().warn(format(CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN,
+                              builderClass.getCanonicalName()),
+                       e);
             return message;
         }
     }
@@ -185,7 +202,8 @@ public class FieldMasks {
         return result;
     }
 
-    @SuppressWarnings("unchecked")      // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
+    @SuppressWarnings("unchecked")
+        // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;
@@ -195,13 +213,13 @@ public class FieldMasks {
             builderClass = (Class<B>) Class.forName(className)
                                            .getClasses()[0];
         } catch (ClassNotFoundException e) {
-            final String message = String.format(
+            final String message = format(
                     BUILDER_CLASS_ERROR_LOGGING_PATTERN,
                     className);
             log().warn(message, e);
             builderClass = null;
         } catch (ClassCastException e) {
-            final String message = String.format(
+            final String message = format(
                     TYPE_CAST_ERROR_LOGGING_PATTERN,
                     className);
             log().warn(message, e);
