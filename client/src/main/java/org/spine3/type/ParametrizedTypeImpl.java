@@ -24,6 +24,7 @@ import com.google.common.base.Objects;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 /**
  * Implementation of the {@code ParameterizedType} interface.
@@ -75,12 +76,12 @@ public class ParametrizedTypeImpl implements ParameterizedType {
         }
         ParametrizedTypeImpl that = (ParametrizedTypeImpl) o;
         return Objects.equal(rawType, that.rawType) &&
-               Objects.equal(typeArguments, that.typeArguments) &&
+               Arrays.equals(typeArguments, that.typeArguments) &&
                Objects.equal(ownerType, that.ownerType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(rawType, typeArguments, ownerType);
+        return Objects.hashCode(rawType, Arrays.hashCode(typeArguments), ownerType);
     }
 }
