@@ -23,9 +23,11 @@ package org.spine3.server.reflect;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * A representation of a Java-style getter method.
@@ -49,9 +51,14 @@ public class Getter {
     public Getter(Method method) {
         this.method = checkNotNull(method);
         this.name = checkNotNull(method.getName());
-        this.propertyName = GETTER_PREFIX_PATTERN.matcher(name)
-                                                 .replaceFirst("")
-                                                 .toLowerCase();
+        final Matcher matcher = GETTER_PREFIX_PATTERN.matcher(name);
+        if (!matcher.find()) {
+            throw new IllegalArgumentException(format("Method %s#%s is not a getter.",
+                                                      method.getDeclaringClass().getName(),
+                                                      name));
+        }
+        this.propertyName = matcher.replaceFirst("")
+                                   .toLowerCase();
     }
 
     /**
