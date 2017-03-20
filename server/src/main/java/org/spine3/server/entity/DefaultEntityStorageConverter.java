@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.server.entity.storagefield.StorageFieldsExtractor;
+import org.spine3.server.entity.storage.StorageFieldsExtractor;
 import org.spine3.type.TypeUrl;
 
 import static org.spine3.base.Identifiers.idFromAny;

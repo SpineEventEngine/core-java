@@ -56,9 +56,9 @@ public class IdentifiersShould {
         assertHasPrivateParameterlessCtor(Identifiers.class);
     }
 
+    @SuppressWarnings("UnnecessaryBoxing")
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_object_of_unsupported_class_passed() {
-        //noinspection UnnecessaryBoxing
         idToString(Character.valueOf('x'));
     }
 

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
@@ -33,7 +33,7 @@ import org.spine3.testdata.Sample;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.entity.storagefield.StorageFieldsDecomposer.toStorageFieldType;
+import static org.spine3.server.entity.storage.StorageFieldsDecomposer.toStorageFieldType;
 
 /**
  * @author Dmytro Dashenkov.

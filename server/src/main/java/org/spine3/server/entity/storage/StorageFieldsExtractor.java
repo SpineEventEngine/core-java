@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.entity.storagefield.StorageFieldsDecomposer.toStorageFieldType;
+import static org.spine3.server.entity.storage.StorageFieldsDecomposer.toStorageFieldType;
 
 /**
  * A utility for extracting the {@link StorageFields} from an {@link Entity}.

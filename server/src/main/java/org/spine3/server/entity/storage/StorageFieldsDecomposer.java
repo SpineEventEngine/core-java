@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -154,7 +154,7 @@ class StorageFieldsDecomposer {
 
     private static IllegalArgumentException unsupportedType(String fieldName, Class cls) {
         throw new IllegalArgumentException(format(
-                "Cannot add field %s : %s to StorageFields.",
+                "Cannot add the field %s : %s to the StorageFields.",
                 fieldName,
                 cls.getName()));
     }

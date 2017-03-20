@@ -86,25 +86,25 @@ message StorageFields {
     // The ID of the entity.
     google.protobuf.Any entity_id = 1;
 
-    // A map of Message filed values.
+    // A map of Message fieled values.
     map<string, google.protobuf.Any> any_field = 2;
 
-    // A map of integer filed values.
+    // A map of integer fieled values.
     map<string, int32> integer_field = 3;
 
-    // A map of long filed values.
+    // A map of long fieled values.
     map<string, int64> long_field = 4;
 
-    // A map of String filed values.
+    // A map of String fieled values.
     map<string, string> string_field = 5;
 
-    // A map of boolean filed values.
+    // A map of boolean fieled values.
     map<string, bool> boolean_field = 6;
 
-    // A map of float filed values.
+    // A map of float fieled values.
     map<string, float> float_field = 7;
 
-    // A map of double filed values.
+    // A map of double fieled values.
     map<string, double> double_field = 8;
 }
 

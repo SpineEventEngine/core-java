@@ -24,6 +24,6 @@
  * @author Dmytro Dashenkov.
  */
 @ParametersAreNonnullByDefault
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import javax.annotation.ParametersAreNonnullByDefault;

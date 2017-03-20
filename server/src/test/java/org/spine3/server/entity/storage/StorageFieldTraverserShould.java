@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import com.google.protobuf.Message;
 import org.junit.Test;
@@ -85,37 +85,37 @@ public class StorageFieldTraverserShould {
 
         @Override
         protected void hitMessage(String fieldName, @Nullable Message value) {
-
+            // NoOp
         }
 
         @Override
         protected void hitInteger(String fieldName, @Nullable Integer value) {
-
+            // NoOp
         }
 
         @Override
         protected void hitLong(String fieldName, @Nullable Long value) {
-
+            // NoOp
         }
 
         @Override
         protected void hitString(String fieldName, @Nullable String value) {
-
+            // NoOp
         }
 
         @Override
         protected void hitBoolean(String fieldName, @Nullable Boolean value) {
-
+            // NoOp
         }
 
         @Override
         protected void hitFloat(String fieldName, @Nullable Float value) {
-
+            // NoOp
         }
 
         @Override
         protected void hitDouble(String fieldName, @Nullable Double value) {
-
+            // NoOp
         }
     }
 }

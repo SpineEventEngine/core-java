@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;

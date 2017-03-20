@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storagefield;
+package org.spine3.server.entity.storage;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -47,7 +47,7 @@ public abstract class StorageFieldTraverser {
     /**
      * Iterates over the given {@link StorageFields}.
      *
-     * <p>The order of iteration is following:
+     * <p>The order of iteration is as follows:
      * <ol>
      *     <li>{@link Message} entries
      *     <li>{@link Integer} entries

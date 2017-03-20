@@ -30,9 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * A representation of a Java-style getter method.
+ * A representation of a JavaBean-style getter method.
  *
- * <p>Aggregates a {@link Method} and some meta information on it.
+ * <p>Aggregates a {@link Method} and its metadata.
  *
  * @author Dmytro Dashenkov.
  */

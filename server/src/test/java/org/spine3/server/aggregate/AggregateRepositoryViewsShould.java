@@ -133,16 +133,6 @@ public class AggregateRepositoryViewsShould {
             }
             getBuilder().setValue(msg);
         }
-
-        @Override
-        public boolean isArchived() {
-            return super.isArchived();
-        }
-
-        @Override
-        public boolean isDeleted() {
-            return super.isDeleted();
-        }
     }
 
     /**

@@ -275,7 +275,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is archived, {@code false} otherwise
      */
     @Override
-    public boolean isArchived() {
+    public final boolean isArchived() {
         return getLifecycleFlags().getArchived();
     }
 
@@ -294,7 +294,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @return {@code true} if the entity is deleted, {@code false} otherwise
      */
     @Override
-    public boolean isDeleted() {
+    public final boolean isDeleted() {
         return getLifecycleFlags().getDeleted();
     }
 
