@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -71,8 +72,10 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
             builder.setVersion(versionable.getVersion())
                    .setLifecycleFlags(versionable.getLifecycleFlags());
         }
-        final StorageFields storageFields = StorageFieldsExtractor.extract(entity);
-        builder.setStorageFields(storageFields);
+        final Optional<StorageFields> storageFields = StorageFieldsExtractor.extract(entity);
+        if (storageFields.isPresent()) {
+            builder.setStorageFields(storageFields.get());
+        }
 
         return builder.build();
     }

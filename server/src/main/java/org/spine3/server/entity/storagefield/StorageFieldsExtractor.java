@@ -20,7 +20,10 @@
 
 package org.spine3.server.entity.storagefield;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 import org.spine3.server.reflect.Getter;
@@ -34,7 +37,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static org.spine3.server.entity.storagefield.StorageFieldsDecomposer.toStorageFieldType;
 
 /**
@@ -73,6 +75,8 @@ public class StorageFieldsExtractor {
     private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
     private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
+    private static final String NON_PUBLIC_CLASS_WARNING = "Passed entity class %s is not public. Storage fields won't be extracted.";
+
     private static final ImmutableSet<String> EXCLUDED_METHODS =
             ImmutableSet.<String>builder()
                         .add("getId")
@@ -90,23 +94,29 @@ public class StorageFieldsExtractor {
     /**
      * Extracts {@link StorageFields} from the given {@link Entity}.
      *
+     * <p>The fields cannot be extracted if the entity type definition is not {@code public}.
+     *
      * @param entity the {@link Entity} to get the field values from
      * @param <E>    the type of the {@link Entity}
-     * @return an object enclosing the storage fields
+     * @return an object enclosing the storage fields or
+     * {@linkplain Optional#absent() Optional.absent()} if the entity class is not {@code public}
      */
     @SuppressWarnings("unchecked") // Reflection - type param conflict
-    public static <E extends Entity<?, ?>> StorageFields extract(E entity) {
+    public static <E extends Entity<?, ?>> Optional<StorageFields> extract(E entity) {
         checkNotNull(entity);
         final Class<? extends E> entityClass = (Class<E>) entity.getClass();
 
         StorageFieldsDecomposer fieldsGenerator = fieldGenerators.get(entityClass);
 
         if (fieldsGenerator == null) {
-            checkClassIsPublic(entityClass);
+            if (!isClassPublic(entityClass)) {
+                log().warn(NON_PUBLIC_CLASS_WARNING);
+                return Optional.absent();
+            }
             fieldsGenerator = newGenerator(entityClass);
         }
         final StorageFields fields = fieldsGenerator.parse(entity);
-        return fields;
+        return Optional.of(fields);
     }
 
     private static StorageFieldsDecomposer newGenerator(
@@ -145,12 +155,19 @@ public class StorageFieldsExtractor {
         return getters;
     }
 
-    private static void checkClassIsPublic(Class<? extends Entity<?, ?>> cls) {
+    private static boolean isClassPublic(Class<? extends Entity<?, ?>> cls) {
         final int modifiers = cls.getModifiers();
         final boolean isPublic = Modifier.isPublic(modifiers);
-        if (!isPublic) {
-            throw new IllegalArgumentException(format("Entity class %s is not public.",
-                                                      cls.getName()));
-        }
+        return isPublic;
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(StorageFieldsExtractor.class);
     }
 }

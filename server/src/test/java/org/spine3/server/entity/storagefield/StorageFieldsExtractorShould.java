@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storagefield;
 
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -37,7 +38,9 @@ import javax.annotation.Nullable;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -67,8 +70,10 @@ public class StorageFieldsExtractorShould {
     @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final StorageFields fields = StorageFieldsExtractor.extract(entity);
-        assertNotNull(fields);
+        final Optional<StorageFields> fieldsOptional = StorageFieldsExtractor.extract(entity);
+        assertTrue(fieldsOptional.isPresent());
+        final StorageFields fields = fieldsOptional.get();
+
         checkId(entity, fields);
         assertEmpty(fields.getAnyFieldMap());
         assertEmpty(fields.getIntegerFieldMap());
@@ -82,7 +87,9 @@ public class StorageFieldsExtractorShould {
     @Test
     public void put_non_null_fields_to_fields_maps() {
         final EntityWithManyGetters entity = spy(new EntityWithManyGetters(STRING_ID));
-        final StorageFields fields = StorageFieldsExtractor.extract(entity);
+        final Optional<StorageFields> fieldsOptional = StorageFieldsExtractor.extract(entity);
+        assertTrue(fieldsOptional.isPresent());
+        final StorageFields fields = fieldsOptional.get();
 
         verify(entity).getId();
         verify(entity).getFloatNull();
@@ -119,9 +126,11 @@ public class StorageFieldsExtractorShould {
         StorageFieldsExtractor.extract(new EntityWithInvalidGetters(STRING_ID));
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_if_entity_class_is_not_public() {
-        StorageFieldsExtractor.extract(new PrivateEntity(STRING_ID));
+    @Test
+    public void hadnle_non_public_entity_class() {
+        final Optional<StorageFields> fields =
+                StorageFieldsExtractor.extract(new PrivateEntity(STRING_ID));
+        assertFalse(fields.isPresent());
     }
 
     private static void checkId(Entity entity, StorageFields fields) {
@@ -133,7 +142,7 @@ public class StorageFieldsExtractorShould {
                      id);
     }
 
-    private static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
+    public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
         protected EntityWithNoStorageFields(String id) {
             super(id);
         }
