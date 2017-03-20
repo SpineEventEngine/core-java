@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
 import org.spine3.base.CommandContext;
-import org.spine3.server.error.MissingEntityIdException;
 
 /**
  * Obtains a command target entity ID based on a command message and context.

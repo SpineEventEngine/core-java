@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.util.JsonFormat;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
-import org.spine3.type.error.UnknownTypeException;
+import org.spine3.type.UnknownTypeException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;

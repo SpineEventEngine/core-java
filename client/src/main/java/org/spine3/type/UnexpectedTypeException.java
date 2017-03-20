@@ -18,11 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+package org.spine3.type;
+
 /**
- * This package provides general exceptions.
+ * Exception thrown when the content of {@link com.google.protobuf.Any Any} does not
+ * match one we expect when unpacking.
+ *
+ * <p>Typically this exception wraps
+ * {@link com.google.protobuf.InvalidProtocolBufferException InvalidProtocolBufferException} thrown
+ * in unsuccessful call of {@link com.google.protobuf.Any#unpack(Class) Any.unpack(Class)}.
+ *
+ * @author Alexander Yevsyukov
  */
+public class UnexpectedTypeException extends RuntimeException {
 
-@ParametersAreNonnullByDefault
-package org.spine3.base.error;
+    private static final long serialVersionUID = 0L;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public UnexpectedTypeException(Throwable cause) {
+        super(cause);
+    }
+}

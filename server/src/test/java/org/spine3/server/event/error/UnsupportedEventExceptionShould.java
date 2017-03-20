@@ -22,6 +22,7 @@ package org.spine3.server.event.error;
 
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.event.UnsupportedEventException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

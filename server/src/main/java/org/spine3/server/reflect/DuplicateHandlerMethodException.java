@@ -17,12 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.server.reflect;
+
+import com.google.protobuf.Message;
 
 /**
- * This package contains exceptions related to working with Protobuf messages.
+ * Indicates that more than one handling method for the same message class are present
+ * in the declaring class.
+ *
+ * @author Mikhail Melnik
+ * @author Alexander Yevsyukov
  */
+public class DuplicateHandlerMethodException extends RuntimeException {
 
-@ParametersAreNonnullByDefault
-package org.spine3.protobuf.error;
+    private static final long serialVersionUID = 0L;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    public DuplicateHandlerMethodException(
+            Class<?> targetClass,
+            Class<? extends Message> messageClass,
+            String firstMethodName,
+            String secondMethodName) {
+
+        super(String.format(
+                "The %s class defines more than one method for handling the message class %s." +
+                        " Methods encountered: %s, %s.",
+                targetClass.getName(), messageClass.getName(),
+                firstMethodName, secondMethodName));
+    }
+}
