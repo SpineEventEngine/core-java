@@ -248,7 +248,7 @@ public abstract class CommandStorageShould
         final Command command = createProject();
         final CommandStatus status = RECEIVED;
 
-        final CommandRecord record = CommandStorage.newRecordBuilder(command, status, null).build();
+        final CommandRecord record = CommandRecords.newRecordBuilder(command, status, null).build();
 
         checkRecord(record, command, status);
     }
