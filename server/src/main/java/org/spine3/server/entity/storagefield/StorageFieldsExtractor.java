@@ -38,8 +38,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>All the values are retrieved from the Entity getters.
  *
- * <p>A getter may have {@link javax.annotation.Nullable} annotation to show that the field may
- * accept {@code null}s. By default all the Storage Fields are non-null.
+ * <p>A getter may have {@link javax.annotation.Nullable {@literal @}javax.annotation.Nullable}
+ * annotation to show that the field may accept {@code null}s.
+ * By default all the Storage Fields are non-null.
  *
  * <p>Supported field types are:
  * <ul>
