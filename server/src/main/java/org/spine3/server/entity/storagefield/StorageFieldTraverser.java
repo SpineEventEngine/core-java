@@ -26,16 +26,40 @@ import org.spine3.annotations.SPI;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.StorageFields;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A helper type for iterating over the {@link StorageFields} objects regarding the type
+ * of the entry.
+ *
+ * <p>This class has a set of methods {@code hitSmth}, where {@code Smth} is the type of the entry.
+ * To handle the types, implement those methods. They take a {@code String} param containing
+ * the name of the storage field and a {@linkplain Nullable nullable} value of the field.
+ *
  * @author Dmytro Dashenkov.
  */
 @SPI
 public abstract class StorageFieldTraverser {
 
+    /**
+     * Iterates over the given {@link StorageFields}.
+     *
+     * <p>The order of iteration is following:
+     * <ol>
+     *     <li>{@link Message} entries
+     *     <li>{@link Integer} entries
+     *     <li>{@link Long} entries
+     *     <li>{@link String} entries
+     *     <li>{@link Boolean} entries
+     *     <li>{@link Float} entries
+     *     <li>{@link Double} entries
+     * </ol>
+     *
+     * @param fields the {@link StorageFields} to traverse
+     */
     public void traverse(StorageFields fields) {
         checkNotNull(fields);
 
@@ -48,19 +72,19 @@ public abstract class StorageFieldTraverser {
         traverseDoubles(fields);
     }
 
-    protected abstract void hitMessage(String fieldName, Message value);
+    protected abstract void hitMessage(String fieldName, @Nullable Message value);
 
-    protected abstract void hitInteger(String fieldName, int value);
+    protected abstract void hitInteger(String fieldName, @Nullable Integer value);
 
-    protected abstract void hitLong(String fieldName, long value);
+    protected abstract void hitLong(String fieldName, @Nullable Long value);
 
-    protected abstract void hitString(String fieldName, String value);
+    protected abstract void hitString(String fieldName, @Nullable String value);
 
-    protected abstract void hitBoolean(String fieldName, boolean value);
+    protected abstract void hitBoolean(String fieldName, @Nullable Boolean value);
 
-    protected abstract void hitFloat(String fieldName, float value);
+    protected abstract void hitFloat(String fieldName, @Nullable Float value);
 
-    protected abstract void hitDouble(String fieldName, double value);
+    protected abstract void hitDouble(String fieldName, @Nullable Double value);
 
     private void traverseMessages(StorageFields fields) {
         for (Map.Entry<String, Any> entry : fields.getAnyFieldMap().entrySet()) {
