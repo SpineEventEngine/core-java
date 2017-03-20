@@ -181,6 +181,36 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         }
     }
 
+    /**
+     * Updates the state of the entity.
+     *
+     * <p>The new state must be {@linkplain #validate(Message) valid}.
+     *
+     * @param state the new state to set
+     * @throws IllegalStateException
+     *                if the passed state is not {@linkplain #validate(S) valid}
+     */
+    protected void updateState(S state) {
+        checkNotNull(state);
+        validate(state);
+        injectState(state);
+    }
+
+    /**
+     * Validates the passed state.
+     *
+     * <p>Does nothing by default. Aggregates may override this method to
+     * specify logic of validating initial or intermediate state.
+     *
+     * @param state a state object to replace the current state
+     * @throws IllegalStateException if the state is not valid
+     */
+    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
+    // Have this no-op method to prevent enforcing implementation in all sub-classes.
+    protected void validate(S state) throws IllegalStateException {
+        // Do nothing by default.
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

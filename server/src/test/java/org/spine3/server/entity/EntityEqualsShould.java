@@ -84,7 +84,7 @@ public class EntityEqualsShould {
     @Test
     public void assure_entities_with_different_states_are_not_equal() {
         final TestEntity another = TestEntity.withStateOf(entity);
-        another.setState(Sample.messageOfType(Project.class), another.getVersion());
+        another.updateState(Sample.messageOfType(Project.class), another.getVersion());
 
         assertNotEquals(entity.getState(), another.getState());
         assertFalse(entity.equals(another));
