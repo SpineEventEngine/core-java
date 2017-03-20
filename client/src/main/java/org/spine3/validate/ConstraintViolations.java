@@ -23,6 +23,7 @@ package org.spine3.validate;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.System.lineSeparator;
 
 /**
  * Utility class for working with {@link ConstraintViolation}s.
@@ -31,10 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class ConstraintViolations {
 
-    @SuppressWarnings("HardcodedLineSeparator") // required for better violation message formatting.
-    private static final String VIOLATION_DELIMITER = "\n  ";
-
     private ConstraintViolations() {
+        //prevent instantiation of this utility class
     }
 
     /**
@@ -68,7 +67,6 @@ public class ConstraintViolations {
      * @return a formatted string
      * @see #toText(ConstraintViolation)
      */
-    @SuppressWarnings("HardcodedLineSeparator")     // required for better formatting.
     public static String toText(Iterable<ConstraintViolation> violations) {
         checkNotNull(violations);
 
@@ -76,7 +74,7 @@ public class ConstraintViolations {
 
         for (ConstraintViolation childViolation : violations) {
             final String childViolationFormatted = toText(childViolation);
-            resultBuilder.append(VIOLATION_DELIMITER)
+            resultBuilder.append(lineSeparator())
                          .append(childViolationFormatted);
         }
         return resultBuilder.toString();
@@ -125,7 +123,7 @@ public class ConstraintViolations {
 
         for (ConstraintViolation childViolation : violations) {
             final String childViolationFormatted = toText(format, childViolation);
-            resultBuilder.append(VIOLATION_DELIMITER)
+            resultBuilder.append(lineSeparator())
                          .append(childViolationFormatted);
         }
         return resultBuilder.toString();
