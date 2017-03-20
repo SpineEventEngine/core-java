@@ -112,7 +112,6 @@ class StorageFieldsDecomposer {
                                  String name,
                                  @Nullable Object value) {
         if (value == null) {
-            // TODO:2017-03-16:dmytro.dashenkov: Check this behavior.
             return;
         }
 
