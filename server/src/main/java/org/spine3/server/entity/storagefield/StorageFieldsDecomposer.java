@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.Entity;
@@ -39,9 +40,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
+ * A parser for an {@link Entity} which decomposes it into the {@link StorageFields}.
+ *
  * @author Dmytro Dashenkov.
  */
-class StorageFieldsParser {
+@Internal
+class StorageFieldsDecomposer {
 
     private static final Map<Class, StorageFieldType> STORAGE_FIELD_TYPES;
 
@@ -59,11 +63,17 @@ class StorageFieldsParser {
 
     private final Collection<Getter> getters;
 
-    StorageFieldsParser(Collection<Getter> getters) {
+    StorageFieldsDecomposer(Collection<Getter> getters) {
         this.getters = checkNotNull(getters);
     }
 
-    public StorageFields parse(Entity<?, ?> entity) {
+    /**
+     * Decomposes the given instance of the {@link Entity} by the passed {@link Getter getters}.
+     *
+     * @param entity the {@link Entity} to decompose
+     * @return new instance of the {@link StorageFields} representing passed {@link Entity}
+     */
+    StorageFields parse(Entity<?, ?> entity) {
         checkNotNull(entity);
         final StorageFields.Builder builder = StorageFields.newBuilder();
         final Object genericId = entity.getId();
