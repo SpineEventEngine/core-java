@@ -22,10 +22,10 @@ package org.spine3.base;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
  * Utility class for working with failures.
@@ -55,7 +55,7 @@ public class Failures {
      */
     public static <M extends Message> M getMessage(Failure failure) {
         checkNotNull(failure);
-        final M result = AnyPacker.unpack(failure.getMessage());
+        final M result = unpack(failure.getMessage());
         return result;
     }
 
