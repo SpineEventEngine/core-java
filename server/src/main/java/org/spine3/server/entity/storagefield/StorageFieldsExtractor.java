@@ -34,6 +34,28 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A utility for extracting the {@link StorageFields} from an {@link Entity}.
+ *
+ * <p>All the values are retrieved from the Entity getters.
+ *
+ * <p>A getter may have {@link javax.annotation.Nullable} annotation to show that the field may
+ * accept {@code null}s. By default all the Storage Fields are non-null.
+ *
+ * <p>Supported field types are:
+ * <ul>
+ *     <li>{@link com.google.protobuf.Message Message}
+ *     <li>{@link Integer}
+ *     <li>{@link Long}
+ *     <li>{@link String}
+ *     <li>{@link Boolean}
+ *     <li>{@link Float}
+ *     <li>{@link Double}
+ * </ul>
+ *
+ * <p>The java primitives are boxed into their wrapper classes.
+ *
+ * <p>To read the resulting {@link StorageFields} object use {@link StorageFieldTraverser}.
+ *
  * @author Dmytro Dashenkov.
  */
 public class StorageFieldsExtractor {
@@ -52,10 +74,17 @@ public class StorageFieldsExtractor {
     private StorageFieldsExtractor() {
     }
 
+    /**
+     * Extracts {@link StorageFields} from the given {@link Entity}.
+     *
+     * @param entity the {@link Entity} to get the field values from
+     * @param <E>    the type of the {@link Entity}
+     * @return an object enclosing the storage fields
+     */
     @SuppressWarnings("unchecked") // Reflection - type param conflict
     public static <E extends Entity<?, ?>> StorageFields extract(E entity) {
         checkNotNull(entity);
-        final Class<E> entityClass = (Class<E>) entity.getClass();
+        final Class<? extends E> entityClass = (Class<E>) entity.getClass();
 
         StorageFieldsParser fieldsGenerator = fieldGenerators.get(entityClass);
 
