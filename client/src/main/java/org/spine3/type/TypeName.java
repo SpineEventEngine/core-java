@@ -25,7 +25,6 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
-import org.spine3.type.error.UnknownTypeException;
 
 import java.util.List;
 

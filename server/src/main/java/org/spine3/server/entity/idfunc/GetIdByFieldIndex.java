@@ -23,7 +23,6 @@ package org.spine3.server.entity.idfunc;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.MessageField;
-import org.spine3.server.error.MissingEntityIdException;
 
 /**
  * Obtains an entity ID based on an event/command message, context and message field index.

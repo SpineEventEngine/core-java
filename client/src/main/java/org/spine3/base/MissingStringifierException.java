@@ -18,10 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains server-side exceptions related to commands.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.server.command.error;
+package org.spine3.base;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * Thrown when a string conversion operation encounters a type for which
+ * there is no registered {@link org.spine3.base.Stringifier Stringifier}.
+ *
+ * @author Alexander Yevsyukov
+ * @see org.spine3.base.StringifierRegistry#register(org.spine3.base.Stringifier,
+ *      java.lang.reflect.Type) StringifierRegistry.register()
+ */
+public class MissingStringifierException extends RuntimeException {
+
+    private static final long serialVersionUID = 1L;
+
+    public MissingStringifierException(String message) {
+        super(message);
+    }
+}

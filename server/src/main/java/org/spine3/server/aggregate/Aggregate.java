@@ -31,7 +31,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
