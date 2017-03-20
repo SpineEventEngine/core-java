@@ -20,6 +20,8 @@
 
 package org.spine3.type;
 
+import com.google.common.base.Objects;
+
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
@@ -61,5 +63,24 @@ public class ParametrizedTypeImpl implements ParameterizedType {
     @Override
     public Type getOwnerType() {
         return ownerType;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ParametrizedTypeImpl that = (ParametrizedTypeImpl) o;
+        return Objects.equal(rawType, that.rawType) &&
+               Objects.equal(typeArguments, that.typeArguments) &&
+               Objects.equal(ownerType, that.ownerType);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(rawType, typeArguments, ownerType);
     }
 }
