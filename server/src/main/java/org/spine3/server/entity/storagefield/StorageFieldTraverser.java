@@ -64,7 +64,7 @@ public abstract class StorageFieldTraverser {
         checkNotNull(fields);
 
         traverseMessages(fields);
-        traverseIntergers(fields);
+        traverseIntegers(fields);
         traverseLongs(fields);
         traverseStrings(fields);
         traverseBooleans(fields);
@@ -93,7 +93,7 @@ public abstract class StorageFieldTraverser {
         }
     }
 
-    private void traverseIntergers(StorageFields fields) {
+    private void traverseIntegers(StorageFields fields) {
         for (Map.Entry<String, Integer> entry : fields.getIntegerFieldMap().entrySet()) {
             hitInteger(entry.getKey(), entry.getValue());
         }
