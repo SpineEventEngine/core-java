@@ -138,9 +138,12 @@ public class StorageFieldsExtractor {
             final boolean returnTypeMatches = toStorageFieldType(returnType).isPresent();
             final boolean argumentsMatch = method.getParameterTypes().length == 0;
             final boolean isNotExclusion = !EXCLUDED_METHODS.contains(methodName);
+            final int modifiers = method.getModifiers();
+            final boolean instanceMethod = !Modifier.isStatic(modifiers);
             if (returnTypeMatches
                 && argumentsMatch
-                && isNotExclusion) {
+                && isNotExclusion
+                && instanceMethod) {
                 // Regex operations are not fast enough to check all the methods.
                 // That's wht we check the Method object fields first
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)

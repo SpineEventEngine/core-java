@@ -40,6 +40,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -133,6 +134,17 @@ public class StorageFieldsExtractorShould {
         assertFalse(fields.isPresent());
     }
 
+    @Test
+    public void ignore_static_members() {
+        final Optional<StorageFields> fieldsOptional =
+                StorageFieldsExtractor.extract(new EntityWithManyGetters(STRING_ID));
+        assertTrue(fieldsOptional.isPresent());
+        final StorageFields fields = fieldsOptional.get();
+        final Map<String, Integer> ints = fields.getIntegerFieldMap();
+        final Integer staticValue = ints.get("StaticMember".toLowerCase());
+        assertNull(staticValue);
+    }
+
     private static void checkId(Entity entity, StorageFields fields) {
         @SuppressWarnings("OverlyStrongTypeCast") // ...OrBuilder
         final String id = ((StringValue) AnyPacker.unpack(fields.getEntityId())).getValue();
@@ -179,6 +191,10 @@ public class StorageFieldsExtractorShould {
 
         public byte[] getSomeUnsupportedType() {
             throw new AssertionError("getSomeUnsupportedType invoked");
+        }
+
+        public static int getStaticMember() {
+            return 1024;
         }
     }
 
