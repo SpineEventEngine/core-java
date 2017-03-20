@@ -94,6 +94,15 @@ public class GetterShould {
         getter.get(new Bean());
     }
 
+    @Test(expected = NullPointerException.class)
+    public void throw_NPE_if_non_null_method_returns_null_value() throws NoSuchMethodException {
+        final Class<Bean> beanClass = Bean.class;
+        final Method getterMethod = beanClass.getDeclaredMethod("getNull");
+        final Getter getter = new Getter(getterMethod);
+
+        getter.get(new Bean());
+    }
+
     public static class Bean {
 
         private final int field = 42;
@@ -112,6 +121,10 @@ public class GetterShould {
         }
 
         private Object getNullPrivate() {
+            return nullRef();
+        }
+
+        public Object getNull() {
             return nullRef();
         }
     }
