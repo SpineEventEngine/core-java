@@ -20,6 +20,7 @@
 
 package org.spine3.type;
 
+import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 
 import java.lang.reflect.ParameterizedType;
@@ -55,5 +56,17 @@ public class ParametrizedTypeImplShould {
         final ParameterizedType type = ParametrizedTypeImpl.make(List.class,
                                                                  typeArguments);
         assertArrayEquals(typeArguments, type.getActualTypeArguments());
+    }
+
+    @Test
+    public void have_smart_equals() {
+        final ParameterizedType firstType = ParametrizedTypeImpl.make(List.class,
+                                                                      new Type[]{Integer.class},
+                                                                      ParametrizedTypeImpl.class);
+        final ParameterizedType secondType = ParametrizedTypeImpl.make(List.class,
+                                                                       new Type[]{Integer.class},
+                                                                       ParametrizedTypeImpl.class);
+        new EqualsTester().addEqualityGroup(firstType, secondType)
+                          .testEquals();
     }
 }
