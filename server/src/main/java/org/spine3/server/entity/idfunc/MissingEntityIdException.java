@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.error;
+package org.spine3.server.entity.idfunc;
 
 import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
 
