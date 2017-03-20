@@ -22,8 +22,18 @@ package org.spine3.server.entity.storagefield;
 
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.entity.StorageFields;
+import org.spine3.test.entity.Project;
+import org.spine3.testdata.Sample;
 
 import javax.annotation.Nullable;
+
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Dmytro Dashenkov.
@@ -32,12 +42,44 @@ public class StorageFieldTraverserShould {
 
     @Test
     public void traverse_over_storage_fields() {
-//        final StorageFields fields = StorageFields.newBuilder()
-//                .putBooleanField("foo", true)
-//                .putStringField("bar", )
+        final String intKey = "Int_value";
+        final String longKey = "Long_value";
+        final String stringKey = "String_value";
+        final String boolKey = "Bool_value";
+        final String floatKey = "Float_value";
+        final String doubleKey = "Double_value";
+        final String message1Key = "Message_value";
+        final String message2Key = "Second_message_value";
+
+        final int intValue = 42;
+        final long longValue = 42L;
+        final String stringValue = "some random string";
+        final boolean boolValue = true;
+        final float floatValue = 4.2f;
+        final double doubleValue = 42.0;
+        final Message messageValue = Sample.messageOfType(Project.class);
+
+        final StorageFields fields =
+                StorageFields.newBuilder()
+                             .putIntegerField(intKey, intValue)
+                             .putLongField(longKey, longValue)
+                             .putBooleanField(boolKey, boolValue)
+                             .putStringField(stringKey, stringValue)
+                             .putFloatField(floatKey, floatValue)
+                             .putDoubleField(doubleKey, doubleValue)
+                             .putAnyField(message1Key, AnyPacker.pack(messageValue))
+                             .putAnyField(message2Key, AnyPacker.pack(messageValue))
+                             .build();
+        final StorageFieldTraverser traverser = spy(new Traverser());
+        traverser.traverse(fields);
+        verify(traverser).hitInteger(eq(intKey), eq(intValue));
+        verify(traverser).hitLong(eq(longKey), eq(longValue));
+        verify(traverser).hitString(eq(stringKey), eq(stringValue));
+        verify(traverser).hitBoolean(eq(boolKey), eq(boolValue));
+        verify(traverser).hitFloat(eq(floatKey), eq(floatValue));
+        verify(traverser).hitDouble(eq(doubleKey), eq(doubleValue));
+        verify(traverser, times(2)).hitMessage(anyString(), eq(messageValue));
     }
-
-
 
     private static class Traverser extends StorageFieldTraverser {
 
