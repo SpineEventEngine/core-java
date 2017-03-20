@@ -23,7 +23,6 @@ package org.spine3.base;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.base.error.MissingStringifierException;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 
 import java.util.Random;

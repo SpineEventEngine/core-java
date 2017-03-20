@@ -62,7 +62,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.util.Logging.closed;
 import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
 
 /**
@@ -157,6 +156,14 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
         log().info(closed(nameForLogging()));
     }
+
+    /**
+     * Returns the passed name with added suffix {@code " closed."}.
+     */
+    private static String closed(String name) {
+        return name + " closed.";
+    }
+
 
     private void shutDownRepositories() throws Exception {
         for (Repository<?, ?> repository : repositories) {

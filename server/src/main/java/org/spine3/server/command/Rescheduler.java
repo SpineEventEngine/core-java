@@ -38,7 +38,7 @@ import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Timestamps2.isLaterThan;
-import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
+import static org.spine3.server.command.CommandExpiredException.commandExpiredError;
 import static org.spine3.time.Intervals.between;
 import static org.spine3.time.Intervals.toDuration;
 

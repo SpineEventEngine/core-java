@@ -29,8 +29,8 @@ import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.client.grpc.CommandServiceGrpc;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.error.CommandException;
-import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.command.CommandException;
+import org.spine3.server.command.UnsupportedCommandException;
 import org.spine3.type.CommandClass;
 
 import java.util.Map;
