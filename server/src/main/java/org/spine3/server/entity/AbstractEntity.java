@@ -21,6 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
@@ -191,24 +192,38 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *                if the passed state is not {@linkplain #validate(S) valid}
      */
     protected void updateState(S state) {
-        checkNotNull(state);
         validate(state);
         injectState(state);
     }
 
     /**
-     * Validates the passed state.
+     * Verifies whether the new state is valid.
      *
-     * <p>Does nothing by default. Aggregates may override this method to
-     * specify logic of validating initial or intermediate state.
+     * <p>Default implementation does nothing always returning {@code true}.
+     * Derived classes may provide custom validation logic overriding this method.
      *
-     * @param state a state object to replace the current state
-     * @throws IllegalStateException if the state is not valid
+     * @param newState a state object to replace the current state
+     * @return {@code true} if the new state object is valid, {@code false} otherwise
      */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
-    // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(S state) throws IllegalStateException {
-        // Do nothing by default.
+    @SuppressWarnings("unused") // OK for this default implementation
+    protected boolean isValid(S newState) {
+        return true;
+    }
+
+    /**
+     * Ensures that the passed new state is valid.
+     *
+     * @param newState a state object to replace the current state
+     * @throws IllegalStateException if the state is not valid
+     * @see #isValid(Message)
+     */
+    protected void validate(S newState) throws IllegalStateException {
+        if (!isValid(newState)) {
+            final String stateStr = Stringifiers.toString(newState);
+            final String errMsg = format("The passed new state (%s) is not valid.",
+                                         stateStr);
+            throw new IllegalStateException(errMsg);
+        }
     }
 
     @Override
