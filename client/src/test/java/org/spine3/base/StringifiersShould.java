@@ -25,7 +25,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.base.error.IllegalConversionArgumentException;
-import org.spine3.base.error.MissingStringifierException;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.types.Task;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
