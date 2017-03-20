@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.base.error.IllegalConversionArgumentException;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.test.types.Task;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
+import org.spine3.type.ParametrizedTypeImpl;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -108,9 +108,8 @@ public class StringifiersShould {
     @Test
     public void convert_string_to_map() throws ParseException {
         final String rawMap = "1\\:1972-01-01T10:00:20.021-05:00";
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{Long.class, Timestamp.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class,
+                                                    new Class[]{Long.class, Timestamp.class});
         final Stringifier<Map<Long, Timestamp>> stringifier =
                 new Stringifiers.MapStringifier<>(Long.class, Timestamp.class);
         StringifierRegistry.getInstance()
@@ -124,9 +123,8 @@ public class StringifiersShould {
     @Test
     public void convert_map_to_string() {
         final Map<String, Integer> mapToConvert = createTestMap();
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{String.class, Integer.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class,
+                                                    new Class[]{String.class, Integer.class});
         final Stringifiers.MapStringifier<String, Integer> stringifier =
                 new Stringifiers.MapStringifier<>(String.class, Integer.class);
         StringifierRegistry.getInstance()
@@ -138,9 +136,8 @@ public class StringifiersShould {
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "first\\:1\\,second\\:2";
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{Integer.class, Integer.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class,
+                                                    new Class[]{Integer.class, Integer.class});
         final Stringifiers.MapStringifier<Integer, Integer> stringifier =
                 new Stringifiers.MapStringifier<>(Integer.class, Integer.class);
         StringifierRegistry.getInstance()
@@ -150,17 +147,14 @@ public class StringifiersShould {
 
     @Test(expected = MissingStringifierException.class)
     public void throw_exception_when_required_stringifier_is_not_found() {
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{Long.class, Task.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class, new Class[]{Long.class, Task.class});
         Stringifiers.fromString("1\\:1", type);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{Task.class, Long.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class,
+                                                    new Class[]{Task.class, Long.class});
         final Stringifiers.MapStringifier<Task, Long> stringifier =
                 new Stringifiers.MapStringifier<>(Task.class, Long.class);
         StringifierRegistry.getInstance()
@@ -170,9 +164,8 @@ public class StringifiersShould {
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_key_value_delimiter_is_wrong() {
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{Long.class, Long.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class,
+                                                    new Class[]{Long.class, Long.class});
         final Stringifiers.MapStringifier<Long, Long> stringifier =
                 new Stringifiers.MapStringifier<>(Long.class, Long.class);
         StringifierRegistry.getInstance()
@@ -183,9 +176,8 @@ public class StringifiersShould {
     @Test
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "first\\:1\\|second\\:2\\|third\\:3";
-        final Type type = ParameterizedTypeImpl.make(Map.class,
-                                                     new Class[]{String.class, Integer.class},
-                                                     null);
+        final Type type = ParametrizedTypeImpl.make(Map.class,
+                                                    new Class[]{String.class, Integer.class});
         final Stringifier<Map<String, Integer>> stringifier =
                 new Stringifiers.MapStringifier<>(String.class, Integer.class, "|");
 
@@ -213,6 +205,7 @@ public class StringifiersShould {
     @SuppressWarnings("EmptyClass") // is the part of the test.
     @Test(expected = MissingStringifierException.class)
     public void raise_exception_on_missing_stringifer() {
-        Stringifiers.toString(new Object() {});
+        Stringifiers.toString(new Object() {
+        });
     }
 }
