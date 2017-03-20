@@ -34,6 +34,7 @@ public class IllegalConversionArgumentException extends RuntimeException {
     private final ConversionException conversionException;
 
     public IllegalConversionArgumentException(ConversionException conversionException) {
+        super();
         this.conversionException = conversionException;
     }
 
