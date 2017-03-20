@@ -42,8 +42,6 @@ import static org.spine3.base.StringifierRegistry.getStringifier;
  */
 public class Stringifiers {
 
-    private static final String CONVERSION_EXCEPTION = "Occurred exception during the conversion";
-
     private Stringifiers() {
         // Disable instantiation of this utility class.
     }
@@ -179,7 +177,7 @@ public class Stringifiers {
                 resultMap.put(convertedKey, convertedValue);
                 return resultMap;
             } catch (Throwable ignored) {
-                throw conversionArgumentException(CONVERSION_EXCEPTION);
+                throw conversionArgumentException("Occurred exception during the conversion");
             }
         }
 
