@@ -118,7 +118,7 @@ public class StorageFieldsExtractor {
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
                                                           .matches();
                 if (nameMatches) {
-                    final Getter getter = new Getter(methodName, method);
+                    final Getter getter = new Getter(method);
                     getters.add(getter);
                 }
             }

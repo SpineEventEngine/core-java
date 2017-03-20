@@ -28,6 +28,11 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * // TODO:2017-03-20:dmytro.dashenkov: Check if we need "(TM)" after "Java".
+ * A representation of a Java getter method.
+ *
+ * <p>Aggregates a Java {@link Method} and
+ *
  * @author Dmytro Dashenkov.
  */
 public class Getter {
@@ -42,38 +47,55 @@ public class Getter {
     private boolean initialized;
     private boolean nullable;
 
-    public Getter(String name, Method method) {
-        this.name = checkNotNull(name);
+    public Getter(Method method) {
         this.method = checkNotNull(method);
+        this.name = checkNotNull(method.getName());
         this.propertyName = GETTER_PREFIX_PATTERN.matcher(name)
                                                  .replaceFirst("")
                                                  .toLowerCase();
     }
 
+    /**
+     * @return the {@linkplain Method#getName() method name}
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * @return the name of the property which is represented by this getter method
+     */
     public String getPropertyName() {
         return propertyName;
     }
 
+    /**
+     * @return the {@linkplain Method#getReturnType() return type} of the getter
+     * (a.k.a. the type of the property)
+     */
     public Class<?> getType() {
         return method.getReturnType();
     }
 
-    public Object get(Object entity) {
+    /**
+     * Invokes the {@link Method} on the given object and returns the result of the invocation.
+     *
+     * @param object the object to invoke method on
+     * @return the result of the invocation
+     */
+    public Object get(Object object) {
+        checkNotNull(object);
         initialize();
         final Object property;
         try {
-            property = method.invoke(entity);
+            property = method.invoke(object);
         } catch (IllegalAccessException | InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
         if (!nullable) {
             checkNotNull(property,
                          "null value of a non-null property %s.",
-                         name);
+                         propertyName);
         }
         return property;
     }
