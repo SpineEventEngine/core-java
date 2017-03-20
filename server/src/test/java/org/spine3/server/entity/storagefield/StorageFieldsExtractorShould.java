@@ -22,6 +22,7 @@ package org.spine3.server.entity.storagefield;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
@@ -94,15 +95,33 @@ public class StorageFieldsExtractorShould {
 
         checkId(entity, fields);
 
+        // Message fields map contains the only custom field
         final Map<String, Any> anyFields = fields.getAnyFieldMap();
         assertSize(1, anyFields);
-        final Any messageField = anyFields.get("someMessage");
+        final Any messageField = anyFields.get("somemessage");
+        assertNotNull(messageField);
         assertEquals(entity.getSomeMessage(), AnyPacker.unpack(messageField));
+
+        // Float field map contains no entries (as field in null)
+        final Map<String, Float> floatFields = fields.getFloatFieldMap();
+        assertEmpty(floatFields);
+
+        // Integer field map containt the only entry
+        final Map<String, Integer> intFields = fields.getIntegerFieldMap();
+        assertSize(1, intFields);
+        final Integer field = intFields.get("IntegerFieldValue".toLowerCase());
+        assertNotNull(field);
+        assertEquals(entity.getIntegerFieldValue(), field.intValue());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_if_non_null_method_returns_null() {
-        StorageFieldsExtractor.extract(new EntityWithInvelidGetters(STRING_ID));
+        StorageFieldsExtractor.extract(new EntityWithInvalidGetters(STRING_ID));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_if_entity_class_is_not_public() {
+        StorageFieldsExtractor.extract(new PrivateEntity(STRING_ID));
     }
 
     private static void checkId(Entity entity, StorageFields fields) {
@@ -122,6 +141,8 @@ public class StorageFieldsExtractorShould {
 
     public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
 
+        private final Message someMessage = Sample.messageOfType(Project.class);
+
         protected EntityWithManyGetters(String id) {
             super(id);
         }
@@ -135,8 +156,8 @@ public class StorageFieldsExtractorShould {
             return null;
         }
 
-        public Project getSomeMessage() {
-            return Sample.messageOfType(Project.class);
+        public Message getSomeMessage() {
+            return someMessage;
         }
 
         int getSomeNonPublicMethod() {
@@ -152,15 +173,22 @@ public class StorageFieldsExtractorShould {
         }
     }
 
-    public static class EntityWithInvelidGetters extends AbstractEntity<String, Any> {
+    public static class EntityWithInvalidGetters extends AbstractEntity<String, Any> {
 
-        protected EntityWithInvelidGetters(String id) {
+        protected EntityWithInvalidGetters(String id) {
             super(id);
         }
 
         @SuppressWarnings("ReturnOfNull") // required for the test
         public Boolean getNonNullBooleanField() {
             return null;
+        }
+    }
+
+    private static class PrivateEntity extends AbstractEntity<String, Any> {
+
+        protected PrivateEntity(String id) {
+            super(id);
         }
     }
 }

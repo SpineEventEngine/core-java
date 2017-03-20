@@ -26,6 +26,7 @@ import org.spine3.server.entity.StorageFields;
 import org.spine3.server.reflect.Getter;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.Map;
@@ -33,6 +34,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.server.entity.storagefield.StorageFieldsDecomposer.toStorageFieldType;
 
 /**
@@ -100,6 +102,7 @@ public class StorageFieldsExtractor {
         StorageFieldsDecomposer fieldsGenerator = fieldGenerators.get(entityClass);
 
         if (fieldsGenerator == null) {
+            checkClassIsPublic(entityClass);
             fieldsGenerator = newGenerator(entityClass);
         }
         final StorageFields fields = fieldsGenerator.parse(entity);
@@ -140,5 +143,14 @@ public class StorageFieldsExtractor {
         }
 
         return getters;
+    }
+
+    private static void checkClassIsPublic(Class<? extends Entity<?, ?>> cls) {
+        final int modifiers = cls.getModifiers();
+        final boolean isPublic = Modifier.isPublic(modifiers);
+        if (!isPublic) {
+            throw new IllegalArgumentException(format("Entity class %s is not public.",
+                                                      cls.getName()));
+        }
     }
 }

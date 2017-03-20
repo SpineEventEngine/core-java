@@ -72,7 +72,8 @@ class StorageFieldsDecomposer {
      * Converts the given class into a corresponding {@link StorageFieldType}.
      */
     static Optional<StorageFieldType> toStorageFieldType(Class cls) {
-        final StorageFieldType type = STORAGE_FIELD_TYPES.get(cls);
+        final Class wrappedClass = Primitives.wrap(cls);
+        final StorageFieldType type = STORAGE_FIELD_TYPES.get(wrappedClass);
         if (type != null) {
             return Optional.of(type);
         }
@@ -112,9 +113,8 @@ class StorageFieldsDecomposer {
             // TODO:2017-03-16:dmytro.dashenkov: Check this behavior.
             return;
         }
-        final Class valueClass = Primitives.wrap(value.getClass());
 
-        final Optional<StorageFieldType> typeOptional = toStorageFieldType(valueClass);
+        final Optional<StorageFieldType> typeOptional = toStorageFieldType(value.getClass());
         if (!typeOptional.isPresent()) {
             return;
         }
