@@ -46,7 +46,7 @@ public class StorageFieldsExtractor {
     private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
     private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
-    private static final Map<Class<? extends Entity<?, ?>>, StorageFieldsWriter>
+    private static final Map<Class<? extends Entity<?, ?>>, StorageFieldsParser>
             fieldGenerators = new ConcurrentHashMap<>();
 
     private StorageFieldsExtractor() {
@@ -57,19 +57,19 @@ public class StorageFieldsExtractor {
         checkNotNull(entity);
         final Class<E> entityClass = (Class<E>) entity.getClass();
 
-        StorageFieldsWriter fieldsGenerator = fieldGenerators.get(entityClass);
+        StorageFieldsParser fieldsGenerator = fieldGenerators.get(entityClass);
 
         if (fieldsGenerator == null) {
             fieldsGenerator = newGenerator(entityClass);
         }
-        final StorageFields fields = fieldsGenerator.generate(entity);
+        final StorageFields fields = fieldsGenerator.parse(entity);
         return fields;
     }
 
-    private static StorageFieldsWriter newGenerator(
+    private static StorageFieldsParser newGenerator(
             Class<? extends Entity<?, ?>> entityClass) {
         final Collection<Getter> getters = collectGetters(entityClass);
-        final StorageFieldsWriter generator = new StorageFieldsWriter(getters);
+        final StorageFieldsParser generator = new StorageFieldsParser(getters);
         fieldGenerators.put(entityClass, generator);
         return generator;
     }

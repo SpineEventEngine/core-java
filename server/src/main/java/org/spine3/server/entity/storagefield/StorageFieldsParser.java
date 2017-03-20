@@ -41,7 +41,7 @@ import static java.lang.String.format;
 /**
  * @author Dmytro Dashenkov.
  */
-class StorageFieldsWriter {
+class StorageFieldsParser {
 
     private static final Map<Class, StorageFieldType> STORAGE_FIELD_TYPES;
 
@@ -59,30 +59,27 @@ class StorageFieldsWriter {
 
     private final Collection<Getter> getters;
 
-    StorageFieldsWriter(Collection<Getter> getters) {
+    StorageFieldsParser(Collection<Getter> getters) {
         this.getters = checkNotNull(getters);
     }
 
-    public StorageFields generate(Entity<?, ?> entity) {
+    public StorageFields parse(Entity<?, ?> entity) {
         checkNotNull(entity);
         final StorageFields.Builder builder = StorageFields.newBuilder();
-        final Any entityId = Identifiers.idToAny(entity.getId());
+        final Object genericId = entity.getId();
+        final Any entityId = Identifiers.idToAny(genericId);
         builder.setEntityId(entityId);
         for (Getter getter : getters) {
             final String name = getter.getPropertyName();
             final Object value = getter.get(entity);
             putValue(builder, name, value);
         }
-        final Object genericId = entity.getId();
-        final Any id = Identifiers.idToAny(genericId);
 
-        final StorageFields fields = StorageFields.newBuilder()
-                                                  .setEntityId(id)
-                                                  .build();
+        final StorageFields fields = builder.build();
         return fields;
     }
 
-    @SuppressWarnings({"OverlyLongMethod", "OverlyComplexMethod"}) // Since switch over 10 positions
+    @SuppressWarnings({"OverlyLongMethod", "OverlyComplexMethod"}) // Since switch over 10 cases
     private static void putValue(StorageFields.Builder builder,
                                  String name,
                                  @Nullable Object value) {
