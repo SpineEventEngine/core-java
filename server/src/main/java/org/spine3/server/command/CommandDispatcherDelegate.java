@@ -26,7 +26,7 @@ import org.spine3.base.CommandEnvelope;
 import java.util.Set;
 
 /**
- * A common interface for the objects which need to dispatch the
+ * A common interface for objects which need to dispatch the
  * {@linkplain org.spine3.base.Command commands}, but are unable to implement
  * the {@link org.spine3.server.command.CommandDispatcher} directly.
  *
