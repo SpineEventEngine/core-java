@@ -23,9 +23,9 @@ package org.spine3.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.Subscribe;
+import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Method;

@@ -19,7 +19,7 @@
  */
 package org.spine3.server.command.error;
 
-import org.spine3.base.CommandClass;
+import org.spine3.type.CommandClass;
 
 /**
  * Exception that is thrown when more than one handler

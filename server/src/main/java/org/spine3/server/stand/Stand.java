@@ -26,14 +26,13 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Queries;
 import org.spine3.base.Responses;
 import org.spine3.base.Version;
+import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -41,14 +40,13 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * A container for storing the latest {@link org.spine3.server.aggregate.Aggregate Aggregate}
@@ -125,12 +123,12 @@ public class Stand implements AutoCloseable {
      * Update the state of an entity inside of the current instance of {@code Stand}.
      *
      * <p>In case the entity update represents the new
-     * {@link org.spine3.server.aggregate.Aggregate} Aggregate state,
+     * {@link org.spine3.server.aggregate.Aggregate Aggregate} state,
      * store the new value for the {@code Aggregate} to each of the configured instances of
      * {@link StandStorage}.
      *
      * <p>Each {@code Aggregate} state value is stored as one-to-one to its
-     * {@link org.spine3.protobuf.TypeUrl TypeUrl} obtained via {@link Any#getTypeUrl()}.
+     * {@link TypeUrl TypeUrl} obtained via {@link Any#getTypeUrl()}.
      *
      * <p>In case {@code Stand} already contains the state for this {@code Aggregate},
      * the value will be replaced.
@@ -149,7 +147,7 @@ public class Stand implements AutoCloseable {
      */
     void update(Object id, Any entityState, Version entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
-        final TypeUrl typeUrl = TypeUrl.of(typeUrlString);
+        final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
 
         final boolean isAggregateUpdate = knownAggregateTypes.contains(typeUrl);
 
@@ -259,7 +257,6 @@ public class Stand implements AutoCloseable {
     public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
 
         final TypeUrl type = Queries.typeOf(query);
-        checkNotNull(type, "Query target type unknown");
         final QueryProcessor queryProcessor = processorFor(type);
 
         final ImmutableCollection<Any> readResult = queryProcessor.process(query);

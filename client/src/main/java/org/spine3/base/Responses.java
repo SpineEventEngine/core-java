@@ -36,18 +36,20 @@ public class Responses {
                                                         .setOk(Empty.getDefaultInstance())
                                                         .build();
 
+    private Responses() {
+        // Prevent instantiation of this utility class.
+    }
+
     /** Returns the instance of OK {@link Response}. */
     public static Response ok() {
         return RESPONSE_OK;
     }
 
-    private Responses() {}
-
     /**
      * Checks if the response is OK.
      *
      * @return {@code true} if the passed response represents `ok` status,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     public static boolean isOk(Response response) {
         final boolean result = response.getStatusCase() == OK;

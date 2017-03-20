@@ -21,7 +21,7 @@
 package org.spine3.server.users;
 
 import com.google.common.base.Optional;
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkArgument;

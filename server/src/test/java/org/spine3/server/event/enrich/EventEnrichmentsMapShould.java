@@ -24,7 +24,6 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.protobuf.TypeName;
 import org.spine3.test.event.EnrichmentByContextFields;
 import org.spine3.test.event.EnrichmentForSeveralEvents;
 import org.spine3.test.event.ProjectCreated;
@@ -51,6 +50,7 @@ import org.spine3.test.event.user.permission.PermissionGrantedEvent;
 import org.spine3.test.event.user.permission.PermissionRevokedEvent;
 import org.spine3.test.event.user.sharing.SharingRequestApproved;
 import org.spine3.test.event.user.sharing.SharingRequestSent;
+import org.spine3.type.TypeName;
 
 import java.util.Collection;
 
@@ -218,10 +218,12 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual =
                 EventEnrichmentsMap.getInstance()
-                                   .get(TypeName.of(enrichmentClass));
+                                   .get(TypeName.of(enrichmentClass)
+                                                .value());
 
         for (Class<? extends Message> expectedClass : FluentIterable.from(eventClassesExpected)) {
-            final String expectedTypeName = TypeName.of(expectedClass);
+            final String expectedTypeName = TypeName.of(expectedClass)
+                                                    .value();
             assertTrue(eventTypesActual.contains(expectedTypeName));
         }
     }
@@ -232,7 +234,8 @@ public class EventEnrichmentsMapShould {
             Class<? extends Message>... eventClassesExpected) {
         final Collection<String> eventTypesActual =
                 EventEnrichmentsMap.getInstance()
-                                   .get(TypeName.of(enrichmentClass));
+                                   .get(TypeName.of(enrichmentClass)
+                                                .value());
         assertEquals(eventClassesExpected.length, eventTypesActual.size());
         assertEventTypeByEnrichmentType(enrichmentClass, eventClassesExpected);
     }

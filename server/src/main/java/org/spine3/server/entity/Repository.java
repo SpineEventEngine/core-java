@@ -22,17 +22,16 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.base.Throwables;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.protobuf.KnownTypes;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
+import org.spine3.type.KnownTypes;
+import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -44,6 +43,7 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Abstract base class for repositories.
@@ -129,8 +129,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         try {
             Identifiers.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
-            final Throwable cause = Throwables.getRootCause(e);
-            throw new IllegalStateException(cause);
+            throw wrappedCause(e);
         }
     }
 

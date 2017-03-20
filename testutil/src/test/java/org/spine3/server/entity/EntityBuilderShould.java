@@ -20,14 +20,13 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Values.newStringValue;
 
 @SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
@@ -95,11 +94,8 @@ public class EntityBuilderShould {
 
     @Test
     public void pass_the_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(EntityBuilder.class)
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .testAllPublicStaticMethods(EntityBuilder.class);
     }
 
     private static class TestEntity extends AbstractVersionableEntity<Long, StringValue> {

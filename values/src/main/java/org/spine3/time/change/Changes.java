@@ -37,6 +37,7 @@ import static org.spine3.change.Preconditions.checkNotEqual;
 public class Changes {
 
     private Changes() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

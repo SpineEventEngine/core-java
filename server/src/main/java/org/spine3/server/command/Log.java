@@ -25,9 +25,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -44,25 +45,34 @@ class Log {
     }
 
     void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
-        final String msg = formatMessageTypeAndId("Exception while handling command `%s` (ID: `%s`)",
-                                                  commandMessage, commandId);
+        final String msg = formatMessageTypeAndId(
+                "Exception while handling command `%s` (ID: `%s`)",
+                commandMessage,
+                commandId);
         log().error(msg, exception);
     }
 
     void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
-        final String msg = formatMessageTypeAndId("Business failure occurred when handling command `%s` (ID: `%s`)",
-                                                  commandMessage, commandId);
+        final String msg = formatMessageTypeAndId(
+                "Business failure occurred when handling command `%s` (ID: `%s`)",
+                commandMessage,
+                commandId);
         log().warn(msg, flr);
     }
 
     void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
-        final String msg = formatMessageTypeAndId("Throwable encountered when handling command `%s` (ID: `%s`)",
-                                                  commandMessage, commandId);
+        final String msg = formatMessageTypeAndId(
+                "Throwable encountered when handling command `%s` (ID: `%s`)",
+                commandMessage,
+                commandId);
         log().error(msg, throwable);
     }
 
     void errorExpiredCommand(Message commandMsg, CommandId id) {
-        final String msg = formatMessageTypeAndId("Expired scheduled command `%s` (ID: `%s`).", commandMsg, id);
+        final String msg = formatMessageTypeAndId(
+                "Expired scheduled command `%s` (ID: `%s`).",
+                commandMsg,
+                id);
         log().error(msg);
     }
 
@@ -76,13 +86,16 @@ class Log {
      * @param commandId the ID of the command
      * @return formatted string
      */
-    private static String formatMessageTypeAndId(String format, Message commandMessage, CommandId commandId) {
+    private static String formatMessageTypeAndId(String format,
+                                                 Message commandMessage,
+                                                 CommandId commandId) {
         checkNotNull(format);
         checkNotEmptyOrBlank(format, "format string");
 
-        final String cmdType = TypeName.of(commandMessage);
+        final String cmdType = TypeName.of(commandMessage)
+                                       .value();
         final String id = idToString(commandId);
-        final String result = String.format(format, cmdType, id);
+        final String result = format(format, cmdType, id);
         return result;
     }
 

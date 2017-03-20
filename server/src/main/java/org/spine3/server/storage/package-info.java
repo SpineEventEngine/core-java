@@ -25,6 +25,6 @@
 @ParametersAreNonnullByDefault
 package org.spine3.server.storage;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 
 import javax.annotation.ParametersAreNonnullByDefault;
