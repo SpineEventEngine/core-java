@@ -38,6 +38,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class StorageFieldsExtractor {
 
+    /**
+     * A regular expression matching strings which correspond to a JavaBean specification for
+     * getters: start with either {@code get} or {@code is} prefix followed by an upper case English
+     * letter and by a number of other "word" symbols.
+     */
     private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
     private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
