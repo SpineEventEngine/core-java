@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  * A common interface for objects which need to dispatch the
  * {@linkplain org.spine3.base.Command commands}, but are unable to implement
- * the {@link org.spine3.server.command.CommandDispatcher} directly.
+ * the {@link org.spine3.server.command.CommandDispatcher CommandDispatcher} directly.
  *
  * @author Alex Tymchenko
  * @see DelegatingCommandDispatcher
