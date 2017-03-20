@@ -53,52 +53,88 @@ public class StorageFieldsDecomposerShould {
         checkClassToTypeMapping(Project.class, StorageFieldType.MESSAGE);
     }
 
-    @SuppressWarnings({"PointlessBooleanExpression", "OverlyLongMethod"})
-        // required for tests; testing all allowed types
     @Test
-    public void put_values_into_storage_fields() {
+    public void put_ints_into_storage_fields() {
         final StorageFields.Builder builder = StorageFields.newBuilder();
-
         final String intKey = "int_value";
-        final String longKey = "long_value";
-        final String stringKey = "string_value";
-        final String boolKey = "bool_value";
-        final String floatKey = "float_value";
-        final String doubleKey = "double_value";
-        final String messageKey = "message_value";
-
         final int intValue = 42;
-        final long longValue = 42L;
-        final String stringValue = "some string";
-        final boolean boolValue = true;
-        final float floatValue = 4.2f;
-        final double doubleValue = 42.0;
-        final Message messageValue = Sample.messageOfType(Project.class);
 
         StorageFieldsDecomposer.putValue(builder, intKey, intValue);
-        StorageFieldsDecomposer.putValue(builder, longKey, longValue);
-        StorageFieldsDecomposer.putValue(builder, stringKey, stringValue);
-        StorageFieldsDecomposer.putValue(builder, boolKey, boolValue);
-        StorageFieldsDecomposer.putValue(builder, floatKey, floatValue);
-        StorageFieldsDecomposer.putValue(builder, doubleKey, doubleValue);
-        StorageFieldsDecomposer.putValue(builder, messageKey, messageValue);
-
         final StorageFields fields = builder.build();
-
         assertEquals(fields.getIntegerFieldOrDefault(intKey, -1), intValue);
+    }
+
+    @Test
+    public void put_longs_into_storage_fields() {
+        final StorageFields.Builder builder = StorageFields.newBuilder();
+        final String longKey = "long_value";
+        final long longValue = 42L;
+
+        StorageFieldsDecomposer.putValue(builder, longKey, longValue);
+        final StorageFields fields = builder.build();
         assertEquals(fields.getLongFieldOrDefault(longKey, -1L), longValue);
+    }
+
+    @Test
+    public void put_strings_into_storage_fields() {
+        final StorageFields.Builder builder = StorageFields.newBuilder();
+        final String stringKey = "string_value";
+        final String stringValue = "some string";
+
+        StorageFieldsDecomposer.putValue(builder, stringKey, stringValue);
+        final StorageFields fields = builder.build();
         assertEquals(fields.getStringFieldOrDefault(stringKey, ""), stringValue);
+    }
+
+    @Test
+    public void put_booleans_into_storage_fields() {
+        final StorageFields.Builder builder = StorageFields.newBuilder();
+        final String boolKey = "bool_value";
+        final boolean boolValue = true;
+
+        StorageFieldsDecomposer.putValue(builder, boolKey, boolValue);
+        final StorageFields fields = builder.build();
         assertEquals(fields.getBooleanFieldOrDefault(boolKey, !boolValue), boolValue);
-        assertEquals(fields.getFloatFieldOrDefault(floatKey, 0.0f), floatValue, 0.0f);
-        assertEquals(fields.getDoubleFieldOrDefault(doubleKey, 0.0), doubleValue, 0.0);
-        final Message messageActual =
-                AnyPacker.unpack(fields.getAnyFieldOrDefault(messageKey, Any.getDefaultInstance()));
-        assertEquals(messageActual, messageValue);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_if_putting_a_field_of_unknown_type() {
         StorageFieldsDecomposer.putValue(StorageFields.newBuilder(), "mock-name", new Object());
+    }
+
+    @Test
+    public void put_floats_intoStorage_fields() {
+        final StorageFields.Builder builder = StorageFields.newBuilder();
+        final String floatKey = "float_value";
+        final float floatValue = 4.2f;
+
+        StorageFieldsDecomposer.putValue(builder, floatKey, floatValue);
+        final StorageFields fields = builder.build();
+        assertEquals(fields.getFloatFieldOrDefault(floatKey, 0.0f), floatValue, 0.0f);
+    }
+
+    @Test
+    public void put_doubles_into_storage_fields() {
+        final StorageFields.Builder builder = StorageFields.newBuilder();
+        final String doubleKey = "double_value";
+        final double doubleValue = 42.0;
+
+        StorageFieldsDecomposer.putValue(builder, doubleKey, doubleValue);
+        final StorageFields fields = builder.build();
+        assertEquals(fields.getDoubleFieldOrDefault(doubleKey, 0.0), doubleValue, 0.0);
+    }
+
+    @Test
+    public void put_messages_into_storage_fields() {
+        final StorageFields.Builder builder = StorageFields.newBuilder();
+        final String messageKey = "message_value";
+        final Message messageValue = Sample.messageOfType(Project.class);
+
+        StorageFieldsDecomposer.putValue(builder, messageKey, messageValue);
+        final StorageFields fields = builder.build();
+        final Message messageActual =
+                AnyPacker.unpack(fields.getAnyFieldOrDefault(messageKey, Any.getDefaultInstance()));
+        assertEquals(messageActual, messageValue);
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // after proper assertion
