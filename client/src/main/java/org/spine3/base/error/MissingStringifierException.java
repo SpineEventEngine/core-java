@@ -18,22 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate;
+package org.spine3.base.error;
 
 /**
- * Signals that an error has been reached unexpectedly while converting from one type to another.
+ * Thrown when a string conversion operation encounters a type for which
+ * there is no registered {@link org.spine3.base.Stringifier Stringifier}.
  *
- * @author Illia Shepilov
+ * @author Alexander Yevsyukov
+ * @see org.spine3.base.StringifierRegistry#register(org.spine3.base.Stringifier,
+ *      java.lang.reflect.Type) StringifierRegistry.register()
  */
-@SuppressWarnings("ExceptionClassNameDoesntEndWithException")
-// It is OK, because it is not {@code Exception} in usual meaning.
-// It is occurred when input value cannot be converted to desirable type
-// and repeated input is required.
-public class ConversionError extends Exception {
+public class MissingStringifierException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    public ConversionError(String message) {
+    public MissingStringifierException(String message) {
         super(message);
     }
 }
