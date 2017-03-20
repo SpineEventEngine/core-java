@@ -28,10 +28,9 @@ import java.util.regex.Pattern;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * // TODO:2017-03-20:dmytro.dashenkov: Check if we need "(TM)" after "Java".
- * A representation of a Java getter method.
+ * A representation of a Java-style getter method.
  *
- * <p>Aggregates a Java {@link Method} and
+ * <p>Aggregates a {@link Method} and some meta information on it.
  *
  * @author Dmytro Dashenkov.
  */
