@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storagefield;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
@@ -68,6 +69,20 @@ class StorageFieldsDecomposer {
     }
 
     /**
+     * Converts the given class into a corresponding {@link StorageFieldType}.
+     */
+    static Optional<StorageFieldType> toStorageFieldType(Class cls) {
+        final StorageFieldType type = STORAGE_FIELD_TYPES.get(cls);
+        if (type != null) {
+            return Optional.of(type);
+        }
+        if (Message.class.isAssignableFrom(cls)) {
+            return Optional.of(StorageFieldType.MESSAGE);
+        }
+        return Optional.absent();
+    }
+
+    /**
      * Decomposes the given instance of the {@link Entity} by the passed {@link Getter getters}.
      *
      * @param entity the {@link Entity} to decompose
@@ -99,10 +114,11 @@ class StorageFieldsDecomposer {
         }
         final Class valueClass = Primitives.wrap(value.getClass());
 
-        final StorageFieldType type = toStorageFieldType(valueClass);
-        if (type == null) {
+        final Optional<StorageFieldType> typeOptional = toStorageFieldType(valueClass);
+        if (!typeOptional.isPresent()) {
             return;
         }
+        final StorageFieldType type = typeOptional.get();
         switch (type) {
             case MESSAGE:
                 final Any any = AnyPacker.pack((Message) value);
@@ -135,17 +151,5 @@ class StorageFieldsDecomposer {
                         type));
 
         }
-    }
-
-    @Nullable
-    private static StorageFieldType toStorageFieldType(Class cls) {
-        final StorageFieldType type = STORAGE_FIELD_TYPES.get(cls);
-        if (type != null) {
-            return type;
-        }
-        if (Message.class.isAssignableFrom(cls)) {
-            return StorageFieldType.MESSAGE;
-        }
-        return null;
     }
 }

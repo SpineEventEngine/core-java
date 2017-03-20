@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storagefield;
 
+import com.google.common.collect.ImmutableSet;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.StorageFields;
 import org.spine3.server.reflect.Getter;
@@ -32,6 +33,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.entity.storagefield.StorageFieldsDecomposer.toStorageFieldType;
 
 /**
  * A utility for extracting the {@link StorageFields} from an {@link Entity}.
@@ -69,6 +71,14 @@ public class StorageFieldsExtractor {
     private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
     private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
+    private static final ImmutableSet<String> EXCLUDED_METHODS =
+            ImmutableSet.<String>builder()
+                        .add("getId")
+                        .add("getState")
+                        .add("getLifecycleFlags")
+                        .add("getDefaultState")
+                        .add("getBuilder")
+                        .build();
     private static final Map<Class<? extends Entity<?, ?>>, StorageFieldsDecomposer>
             fieldGenerators = new ConcurrentHashMap<>();
 
@@ -111,9 +121,13 @@ public class StorageFieldsExtractor {
         final Method[] publicMethods = entityClass.getMethods();
         for (Method method : publicMethods) {
             final String methodName = method.getName();
-            final boolean returnTypeMatches = !void.class.equals(method.getReturnType());
+            final Class returnType = method.getReturnType();
+            final boolean returnTypeMatches = toStorageFieldType(returnType).isPresent();
             final boolean argumentsMatch = method.getParameterTypes().length == 0;
-            if (returnTypeMatches && argumentsMatch) {
+            final boolean isNotExclusion = !EXCLUDED_METHODS.contains(methodName);
+            if (returnTypeMatches
+                && argumentsMatch
+                && isNotExclusion) {
                 // Regex operations are not fast enough to check all the methods.
                 // That's wht we check the Method object fields first
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
