@@ -103,6 +103,7 @@ public class GetterShould {
         getter.get(new Bean());
     }
 
+    @SuppressWarnings("unused") // reflective access
     public static class Bean {
 
         private final int field = 42;
