@@ -24,8 +24,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.Messages.toAny;
 
 /**
  * Utility class for working with failures.
@@ -80,11 +80,5 @@ public class Failures {
                                       .setContext(context)
                                       .build();
         return result;
-    }
-
-    private static Any toAny(Message messageOrAny) {
-        return (messageOrAny instanceof Any)
-                                         ? (Any) messageOrAny
-                                         : pack(messageOrAny);
     }
 }

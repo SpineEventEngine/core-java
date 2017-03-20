@@ -34,6 +34,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
@@ -103,9 +104,7 @@ public class Events {
     public static Event createEvent(Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
-        final Any packed = (messageOrAny instanceof Any)
-                           ? (Any)messageOrAny
-                           : pack(messageOrAny);
+        final Any packed = toAny(messageOrAny);
         final Event result = Event.newBuilder()
                                   .setMessage(packed)
                                   .setContext(context)

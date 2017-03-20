@@ -38,6 +38,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.Descriptor;
 import static com.google.protobuf.Descriptors.GenericDescriptor;
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -104,6 +105,21 @@ public class Messages {
         }
         checkState(result != null);
         return result;
+    }
+
+    /**
+     * Safely packs the given {@link Message} object as {@link Any}.
+     *
+     * <p>If the passed message object is already packed as {@code Any}, just
+     * casts it to {@code Any} and returns the result.
+     *
+     * @param messageOrAny the message object
+     * @return {@code Any}
+     */
+    public static Any toAny(Message messageOrAny) {
+        return (messageOrAny instanceof Any)
+                    ? (Any) messageOrAny
+                    : pack(messageOrAny);
     }
 
     /**
