@@ -80,6 +80,10 @@ message LifecycleFlags {
 //
 // These fields should be searchable in an effiefient way.
 //
+// The field values are stored in maps with their names, each type separately. This is done to
+// avoid unnecassary packing of the values into google.protobuf.Any and guarantee compile time type
+// checks.
+//
 message StorageFields {
     option (SPI_type) = true;
 
