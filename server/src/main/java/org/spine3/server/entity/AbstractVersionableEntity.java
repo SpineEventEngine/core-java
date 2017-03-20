@@ -105,7 +105,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     }
 
     /**
-     * Validates and sets the state.
+     * Updates the state and version of the entity.
+     *
+     * <p>The new state must be {@linkplain #validate(Message) valid}.
+     *
+     * <p>The passed version must have a number not less than the current version of the entity.
      *
      * @param state   the state object to set
      * @param version the entity version to set
@@ -116,25 +120,9 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *                version of the entity
      * @see #validate(S)
      */
-    protected void setState(S state, Version version) {
-        validate(state);
-        injectState(state);
+    protected void updateState(S state, Version version) {
+        updateState(state);
         updateVersion(version);
-    }
-
-    /**
-     * Validates the passed state.
-     *
-     * <p>Does nothing by default. Aggregates may override this method to
-     * specify logic of validating initial or intermediate state.
-     *
-     * @param state a state object to replace the current state
-     * @throws IllegalStateException if the state is not valid
-     */
-    @SuppressWarnings({"NoopMethodInAbstractClass", "UnusedParameters"})
-    // Have this no-op method to prevent enforcing implementation in all sub-classes.
-    protected void validate(S state) throws IllegalStateException {
-        // Do nothing by default.
     }
 
     /**
@@ -221,7 +209,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @param newState a new state to set
      */
     protected void incrementState(S newState) {
-        setState(newState, incrementedVersion());
+        updateState(newState, incrementedVersion());
     }
 
     /**
