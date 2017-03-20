@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storagefield;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
@@ -105,8 +106,9 @@ class StorageFieldsDecomposer {
         return fields;
     }
 
+    @VisibleForTesting // would be private otherwise
     @SuppressWarnings({"OverlyLongMethod", "OverlyComplexMethod"}) // Since switch over 10 cases
-    private static void putValue(StorageFields.Builder builder,
+    static void putValue(StorageFields.Builder builder,
                                  String name,
                                  @Nullable Object value) {
         if (value == null) {
@@ -114,9 +116,10 @@ class StorageFieldsDecomposer {
             return;
         }
 
-        final Optional<StorageFieldType> typeOptional = toStorageFieldType(value.getClass());
+        final Class fieldClass = value.getClass();
+        final Optional<StorageFieldType> typeOptional = toStorageFieldType(fieldClass);
         if (!typeOptional.isPresent()) {
-            return;
+            throw unsupportedType(name, fieldClass);
         }
         final StorageFieldType type = typeOptional.get();
         switch (type) {
@@ -145,11 +148,15 @@ class StorageFieldsDecomposer {
             case SFT_UNKNOWN:
             case UNRECOGNIZED:
             default:
-                throw new IllegalArgumentException(format(
-                        "Cannot add field %s : %s to StorageFields.",
-                        name,
-                        type));
+                throw unsupportedType(name, fieldClass);
 
         }
+    }
+
+    private static IllegalArgumentException unsupportedType(String fieldName, Class cls) {
+        throw new IllegalArgumentException(format(
+                "Cannot add field %s : %s to StorageFields.",
+                fieldName,
+                cls.getName()));
     }
 }
