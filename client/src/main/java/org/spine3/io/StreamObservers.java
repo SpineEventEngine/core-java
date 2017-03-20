@@ -37,19 +37,6 @@ public class StreamObservers {
     }
 
     /**
-     * Creates a {@linkplain StreamObserver<Response> observer} which does nothing upon
-     * the invocation of its callback methods.
-     *
-     * <p>The callees which do not want to follow the responses should use this utility method
-     * to eliminate boilerplate code.
-     *
-     * @return an instance of {@code StreamObserver} which does nothing
-     */
-    public static StreamObserver<Response> emptyObserver() {
-        return emptyObserver;
-    }
-
-    /**
      * The {@code StreamObserver} which does nothing.
      *
      * @see #emptyObserver()
@@ -70,4 +57,17 @@ public class StreamObservers {
             // Do nothing.
         }
     };
+
+    /**
+     * Creates a {@linkplain StreamObserver<Response> observer} which does nothing upon
+     * the invocation of its callback methods.
+     *
+     * <p>The callees which do not want to follow the responses should use this utility method
+     * to eliminate boilerplate code.
+     *
+     * @return an instance of {@code StreamObserver} which does nothing
+     */
+    public static StreamObserver<Response> emptyObserver() {
+        return emptyObserver;
+    }
 }
