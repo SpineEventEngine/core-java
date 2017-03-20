@@ -20,23 +20,18 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Optional;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import com.google.common.reflect.TypeToken;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
+import org.spine3.base.error.ConversionException;
+import org.spine3.base.error.IllegalConversionArgumentException;
 import org.spine3.base.error.MissingStringifierException;
 
-import java.text.ParseException;
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.regex.Pattern;
-import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-import static org.spine3.util.Exceptions.conversionArgumentException;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
@@ -60,7 +55,7 @@ public class Stringifiers {
      * please use {@link #toString(Object, Type)}.
      *
      * @param object the object to convert
-     * @param <T> the type of the object
+     * @param <T>    the type of the object
      * @return the string representation of the passed object
      */
     public static <T> String toString(T object) {
@@ -73,9 +68,9 @@ public class Stringifiers {
      *
      * <p>This method must be used of the passed object is a generic type.
      *
-     * @param <T>       the type of the object to convert
-     * @param object    to object to convert
-     * @param typeOfT   the type of the passed object
+     * @param <T>     the type of the object to convert
+     * @param object  to object to convert
+     * @param typeOfT the type of the passed object
      * @return the string representation of the passed object
      * @throws MissingStringifierException if passed value cannot be converted
      */
@@ -91,9 +86,9 @@ public class Stringifiers {
     /**
      * Parses string to the appropriate value.
      *
-     * @param <T>      the type of the value to return
-     * @param str      the string to convert
-     * @param typeOfT  the type into which to convert the string
+     * @param <T>     the type of the value to return
+     * @param str     the string to convert
+     * @param typeOfT the type into which to convert the string
      * @return the parsed value from string
      * @throws MissingStringifierException if passed value cannot be converted
      */
@@ -154,13 +149,13 @@ public class Stringifiers {
         }
 
         @Override
-        protected String doForward(Map<K, V> map) {
-            final String result = map.toString();
+        protected String toString(Map<K, V> obj) {
+            final String result = obj.toString();
             return result;
         }
 
         @Override
-        protected Map<K, V> doBackward(String s) {
+        protected Map<K, V> fromString(String s) {
             final String[] buckets = s.split(Pattern.quote(delimiter));
             final Map<K, V> resultMap = newHashMap();
 
@@ -205,7 +200,7 @@ public class Stringifiers {
                 return (I) elementToConvert;
             }
 
-            final I convertedValue = parse(elementToConvert, TypeToken.of(elementClass));
+            final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
             return convertedValue;
 
         }
@@ -217,6 +212,10 @@ public class Stringifiers {
                         "separated with single `:` character";
                 throw conversionArgumentException(exMessage);
             }
+        }
+
+        private static IllegalConversionArgumentException conversionArgumentException(String msg) {
+            return new IllegalConversionArgumentException(new ConversionException(msg));
         }
     }
 
