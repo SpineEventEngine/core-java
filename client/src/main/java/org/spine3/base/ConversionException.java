@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.error;
+package org.spine3.base;
 
 /**
  * Signals that an exception has been reached unexpectedly while converting from one type to another.

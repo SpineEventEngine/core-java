@@ -22,8 +22,6 @@ package org.spine3.base;
 
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import org.spine3.base.error.ConversionException;
-import org.spine3.base.error.IllegalConversionArgumentException;
 
 import java.lang.reflect.Type;
 import java.util.Map;

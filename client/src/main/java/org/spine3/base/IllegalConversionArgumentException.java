@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base.error;
+package org.spine3.base;
 
 /**
  * Thrown to indicate that a method has been passed an illegal or
