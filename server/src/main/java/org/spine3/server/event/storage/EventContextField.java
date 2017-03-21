@@ -20,7 +20,7 @@
 
 package org.spine3.server.event.storage;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.server.event.EventStorage;

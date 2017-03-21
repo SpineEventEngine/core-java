@@ -28,15 +28,13 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
 import org.spine3.server.event.enrich.EventEnricher;
-import org.spine3.server.event.error.InvalidEventException;
-import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.validate.MessageValidator;
+import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;

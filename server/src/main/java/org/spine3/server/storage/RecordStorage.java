@@ -25,11 +25,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 
@@ -81,7 +81,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
         final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
         final Any state = builder.getState();
-        final TypeUrl type = TypeUrl.of(state.getTypeUrl());
+        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
 
         final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);

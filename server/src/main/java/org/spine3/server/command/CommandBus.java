@@ -21,12 +21,9 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.base.Throwables;
 import io.grpc.stub.StreamObserver;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
-import org.spine3.base.CommandClass;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
@@ -34,18 +31,19 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
-import org.spine3.server.command.error.CommandException;
-import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.users.CurrentTenant;
+import org.spine3.type.CommandClass;
 import org.spine3.util.Environment;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Throwables.getRootCause;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -280,7 +278,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             dispatcher.dispatch(commandEnvelope);
             setStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
-            final Throwable cause = Throwables.getRootCause(e);
+            final Throwable cause = getRootCause(e);
             updateCommandStatus(commandEnvelope, cause);
         }
     }

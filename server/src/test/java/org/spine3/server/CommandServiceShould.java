@@ -31,7 +31,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.command.UnsupportedCommandException;
 import org.spine3.server.transport.GrpcContainer;
 import org.spine3.testdata.TestCommandBusFactory;
 
@@ -89,8 +89,8 @@ public class CommandServiceShould {
 
     @Test
     public void post_commands_to_appropriate_bounded_context() {
-        verifyPostsCommand(Given.Command.createProject(), projectsContext.getCommandBus());
-        verifyPostsCommand(Given.Command.createCustomer(), customersContext.getCommandBus());
+        verifyPostsCommand(Given.ACommand.createProject(), projectsContext.getCommandBus());
+        verifyPostsCommand(Given.ACommand.createCustomer(), customersContext.getCommandBus());
     }
 
     @Test

@@ -27,4 +27,4 @@
 @Internal
 package org.spine3.client.grpc;
 
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;

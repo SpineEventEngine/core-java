@@ -42,6 +42,7 @@ import static org.spine3.protobuf.Values.newIntValue;
 import static org.spine3.protobuf.Values.newLongValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newUuidValue;
 
 /**
  * @author Alexander Litus
@@ -66,6 +67,12 @@ public class IdentifiersShould {
     public void convert_to_string_number_ids() {
         assertEquals("10", idToString(Integer.valueOf(10)));
         assertEquals("100", idToString(Long.valueOf(100)));
+    }
+
+    @Test
+    public void unpack_passed_Any() {
+        final StringValue id = newUuidValue();
+        assertEquals(id.getValue(), Identifiers.idToString(AnyPacker.pack(id)));
     }
 
     @Test
@@ -94,18 +101,8 @@ public class IdentifiersShould {
     }
 
     @Test
-    public void return_EMPTY_ID_if_convert_blank_string_to_string() {
-        assertEquals(EMPTY_ID, idToString(" "));
-    }
-
-    @Test
     public void return_EMPTY_ID_if_result_of_Message_to_string_conversion_is_empty_string() {
         assertEquals(EMPTY_ID, idToString(CommandId.getDefaultInstance()));
-    }
-
-    @Test
-    public void return_EMPTY_ID_if_result_of_Message_to_string_conversion_is_blank_string() {
-        assertEquals(EMPTY_ID, idToString(newStringValue("  ")));
     }
 
     @Test

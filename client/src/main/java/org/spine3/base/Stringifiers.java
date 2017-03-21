@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import java.lang.reflect.Type;
 import com.google.common.base.Optional;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
@@ -31,9 +32,9 @@ import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.StringifierRegistry.getStringifier;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
@@ -47,10 +48,6 @@ import static org.spine3.util.Exceptions.conversionArgumentException;
  */
 public class Stringifiers {
 
-    private static final String CONVERSION_EXCEPTION = "Occurred exception during conversion";
-    private static final char DEFAULT_ELEMENTS_DELIMITER = ',';
-    private static final String ESCAPE_SEQUENCE = "\\";
-
     private Stringifiers() {
         // Disable instantiation of this utility class.
     }
@@ -58,165 +55,91 @@ public class Stringifiers {
     /**
      * Converts the passed value to the string representation.
      *
-     * @param valueToConvert value to convert
-     * @param typeToken      the type token of the passed value
-     * @param <I>            the type of the value to convert
-     * @return the string representation of the passed value
-     * @throws org.spine3.validate.IllegalConversionArgumentException if passed value cannot be converted
+     * <p>Use this method for converting non-generic objects. For generic objects,
+     * please use {@link #toString(Object, Type)}.
+     *
+     * @param object the object to convert
+     * @param <T>    the type of the object
+     * @return the string representation of the passed object
      */
-    public static <I> String toString(I valueToConvert, TypeToken<I> typeToken) {
-        checkNotNull(valueToConvert);
-        checkNotNull(typeToken);
+    public static <T> String toString(T object) {
+        checkNotNull(object);
+        return toString(object, object.getClass());
+    }
 
-        final Stringifier<I> stringifier = getStringifier(typeToken);
-        final String result = stringifier.convert(valueToConvert);
+    /**
+     * Converts the passed value to the string representation.
+     *
+     * <p>This method must be used of the passed object is a generic type.
+     *
+     * @param <T>     the type of the object to convert
+     * @param object  to object to convert
+     * @param typeOfT the type of the passed object
+     * @return the string representation of the passed object
+     * @throws MissingStringifierException if passed value cannot be converted
+     */
+    public static <T> String toString(T object, Type typeOfT) {
+        checkNotNull(object);
+        checkNotNull(typeOfT);
+
+        final Stringifier<T> stringifier = getStringifier(typeOfT);
+        final String result = stringifier.convert(object);
         return result;
     }
 
     /**
      * Parses string to the appropriate value.
      *
-     * @param valueToParse value to convert
-     * @param typeToken    the type token of the returned value
-     * @param <I>          the type of the value to return
+     * @param <T>     the type of the value to return
+     * @param str     the string to convert
+     * @param typeOfT the type into which to convert the string
      * @return the parsed value from string
-     * @throws org.spine3.validate.IllegalConversionArgumentException if passed string cannot be parsed
+     * @throws MissingStringifierException if passed value cannot be converted
      */
-    public static <I> I parse(String valueToParse, TypeToken<I> typeToken) {
-        checkNotNull(valueToParse);
-        checkNotNull(typeToken);
+    public static <T> T fromString(String str, Type typeOfT) {
+        checkNotNull(str);
+        checkNotNull(typeOfT);
 
-        final Stringifier<I> stringifier = getStringifier(typeToken);
-        final I result = stringifier.reverse()
-                                    .convert(valueToParse);
+        final Stringifier<T> stringifier = getStringifier(typeOfT);
+        final T result = stringifier.reverse()
+                                    .convert(str);
         return result;
     }
 
-    private static <I> Stringifier<I> getStringifier(TypeToken<I> typeToken) {
-        final Optional<Stringifier<I>> stringifierOptional = StringifierRegistry.getInstance()
-                                                                                .get(typeToken);
-
-        if (!stringifierOptional.isPresent()) {
-            final String exMessage =
-                    format("Stringifier for the %s is not provided", typeToken);
-            throw conversionArgumentException(exMessage);
-        }
-        final Stringifier<I> stringifier = stringifierOptional.get();
-        return stringifier;
-    }
-
-    @SuppressWarnings("unchecked") // It is OK because class is verified.
-    private static <I> I convert(Class<I> elementClass, String elementToConvert) {
-
-        if (isInteger(elementClass)) {
-            return (I) Ints.stringConverter()
-                           .convert(elementToConvert);
-        }
-
-        if (isLong(elementClass)) {
-            return (I) Longs.stringConverter()
-                            .convert(elementToConvert);
-        }
-
-        if (isString(elementClass)) {
-            return (I) elementToConvert;
-        }
-
-        final I convertedValue = parse(elementToConvert, TypeToken.of(elementClass));
-        return convertedValue;
-
-    }
-
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static boolean isLong(Class<?> aClass) {
-        return Long.class.equals(aClass);
-    }
-
-    private static boolean isInteger(Class<?> aClass) {
-        return Integer.class.equals(aClass);
-    }
-
-    protected static class TimestampStringifer extends Stringifier<Timestamp> {
-
-        private static final Pattern PATTERN_COLON = Pattern.compile(":");
-        private static final Pattern PATTERN_T = Pattern.compile("T");
-
-        @Override
-        protected String doForward(Timestamp timestamp) {
-            final String result = toString(timestamp);
-            return result;
-        }
-
-        @Override
-        protected Timestamp doBackward(String s) {
-            try {
-                return Timestamps.parse(s);
-            } catch (ParseException ignored) {
-                throw conversionArgumentException(CONVERSION_EXCEPTION);
-            }
-        }
-
-        /**
-         * Converts the passed timestamp to the string.
-         *
-         * @param timestamp the value to convert
-         * @return the string representation of the timestamp
-         */
-        private static String toString(Timestamp timestamp) {
-            String result = Timestamps.toString(timestamp);
-            result = PATTERN_COLON.matcher(result)
-                                  .replaceAll("-");
-            result = PATTERN_T.matcher(result)
-                              .replaceAll("_T");
-            return result;
-        }
-    }
-
-    protected static class EventIdStringifier extends Stringifier<EventId> {
-        @Override
-        protected String doForward(EventId eventId) {
-            final String result = eventId.getUuid();
-            return result;
-        }
-
-        @Override
-        protected EventId doBackward(String s) {
-            final EventId result = EventId.newBuilder()
-                                          .setUuid(s)
-                                          .build();
-            return result;
-        }
-    }
-
-    protected static class CommandIdStringifier extends Stringifier<CommandId> {
-        @Override
-        protected String doForward(CommandId commandId) {
-            final String result = commandId.getUuid();
-            return result;
-        }
-
-        @Override
-        protected CommandId doBackward(String s) {
-            final CommandId result = CommandId.newBuilder()
-                                              .setUuid(s)
-                                              .build();
-            return result;
-        }
+    /**
+     * Obtains {@code Stringifier} for map.
+     *
+     * @param keyClass   the class of keys are maintained by this map
+     * @param valueClass the class  of mapped values
+     * @param <K>        the type of keys are maintained by this map
+     * @param <V>        the type of mapped values
+     * @return the stringifier for the map
+     */
+    public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
+                                                               Class<V> valueClass) {
+        checkNotNull(keyClass);
+        checkNotNull(valueClass);
+        final Stringifier<Map<K, V>> mapStringifier = new MapStringifier<>(keyClass, valueClass);
+        return mapStringifier;
     }
 
     /**
-     * The stringifier for the {@code Map} classes.
-     *
-     * <p> The converter for the type of the elements in the map
-     * should be registered in the {@code StringifierRegistry} class
-     * for the correct usage of the {@code MapStringifier} converter.
-     *
-     * @param <K> the type of the keys in the map
-     * @param <V> the type of the values in the map
+     * @param keyClass   the class of keys are maintained by this map
+     * @param valueClass the class  of mapped values
+     * @param delimiter  the delimiter for the passed map elements via string
+     * @param <K>        the type of keys are maintained by this map
+     * @param <V>        the type of mapped values
+     * @return the stringifier for the map
      */
+    public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
+                                                               Class<V> valueClass,
+                                                               String delimiter) {
+        checkNotNull(keyClass);
+        checkNotNull(valueClass);
+        checkNotNull(delimiter);
+        final Stringifier<Map<K, V>> mapStringifier =
+                new MapStringifier<>(keyClass, valueClass, delimiter);
+        return mapStringifier;
     protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
         private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';

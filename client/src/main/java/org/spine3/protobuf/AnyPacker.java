@@ -20,15 +20,17 @@
 
 package org.spine3.protobuf;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.error.UnexpectedTypeException;
+import org.spine3.type.TypeUrl;
+import org.spine3.type.UnexpectedTypeException;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.Messages.toMessageClass;
 
 /**
  * Utilities for packing messages into {@link Any} and unpacking them.
@@ -44,6 +46,17 @@ import static org.spine3.protobuf.Messages.toMessageClass;
  * @see Any#unpack(Class)
  */
 public class AnyPacker {
+
+    private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
+        @Nullable
+        @Override
+        public Message apply(@Nullable Any input) {
+            if (input == null) {
+                return null;
+            }
+            return unpack(input);
+        }
+    };
 
     private AnyPacker() {
         // Prevent instantiation of this utility class.
@@ -79,7 +92,7 @@ public class AnyPacker {
     public static <T extends Message> T unpack(Any any) {
         checkNotNull(any);
         final TypeUrl typeUrl = TypeUrl.ofEnclosed(any);
-        final Class<T> messageClass = toMessageClass(typeUrl);
+        final Class<T> messageClass = typeUrl.getJavaClass();
         return unpack(any, messageClass);
     }
 
@@ -87,17 +100,17 @@ public class AnyPacker {
      * Unwraps {@code Any} value into an instance of the passed class.
      *
      * <p>If there is no Java class for the type,
-     * {@link org.spine3.protobuf.error.UnexpectedTypeException UnexpectedTypeException}
+     * {@link UnexpectedTypeException UnexpectedTypeException}
      * will be thrown.
      *
      * @param any   instance of {@link Any} that should be unwrapped
-     * @param clazz the class implementing the type of the enclosed object
+     * @param cls the class implementing the type of the enclosed object
      * @param <T>   the type enclosed into {@code Any}
      * @return unwrapped message instance
      */
-    public static <T extends Message> T unpack(Any any, Class<T> clazz) {
+    public static <T extends Message> T unpack(Any any, Class<T> cls) {
         try {
-            final T result = any.unpack(clazz);
+            final T result = any.unpack(cls);
             return result;
         } catch (InvalidProtocolBufferException e) {
             throw new UnexpectedTypeException(e);
@@ -112,5 +125,14 @@ public class AnyPacker {
      */
     public static Iterator<Any> pack(Iterator<Message> iterator) {
         return new PackingIterator(iterator);
+    }
+
+    /**
+     * Provides the function for unpacking messages from {@code Any}.
+     *
+     * <p>The function returns {@code null} for {@code null} input.
+     */
+    public static Function<Any, Message> unpackFunc() {
+        return ANY_UNPACKER;
     }
 }

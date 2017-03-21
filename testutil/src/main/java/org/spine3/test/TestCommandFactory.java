@@ -23,7 +23,7 @@ package org.spine3.test;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.client.CommandFactory;
@@ -57,7 +57,7 @@ public class TestCommandFactory extends CommandFactory {
     }
 
     /** Creates new command with the passed timestamp. */
-    public Command create(Message message, Timestamp timestamp) {
+    public Command createCommand(Message message, Timestamp timestamp) {
         final Command command = createCommand(message);
         return TimeTests.adjustTimestamp(command, timestamp);
 

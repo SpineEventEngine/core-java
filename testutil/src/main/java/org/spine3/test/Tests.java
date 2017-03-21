@@ -33,6 +33,7 @@ import org.spine3.base.Versions;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import javax.annotation.CheckReturnValue;
@@ -176,6 +177,16 @@ public class Tests {
      */
     public static StringValue newUuidValue() {
         return Values.newStringValue(Identifiers.newUuid());
+    }
+
+    /**
+     * Generates a new UUID-based {@code TenantId}.
+     */
+    public static TenantId newTenantUuid() {
+        final TenantId result = TenantId.newBuilder()
+                                        .setValue(Identifiers.newUuid())
+                                        .build();
+        return result;
     }
 
     /**

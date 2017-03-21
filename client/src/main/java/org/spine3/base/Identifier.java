@@ -104,13 +104,11 @@ class Identifier<I> {
                 break;
 
             case STRING:
-                result = value.toString()
-                              .trim();
+                result = value.toString();
                 break;
 
             case MESSAGE:
-                result = Identifiers.idMessageToString((Message) value);
-                result = result.trim();
+                result = Identifiers.idMessageToString((Message)value);
                 break;
             default:
                 throw newIllegalStateException("toString() is not supported for type: %s", type);
@@ -127,8 +125,8 @@ class Identifier<I> {
      * Supported types of identifiers.
      */
     @SuppressWarnings(
-            {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
-             "unchecked" /* We ensure type by matching it first. */})
+       {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
+        "unchecked" /* We ensure type by matching it first. */})
     enum Type {
         STRING {
             @Override
@@ -148,12 +146,12 @@ class Identifier<I> {
 
             @Override
             <I> Message toMessage(I id) {
-                return newStringValue((String) id);
+                return newStringValue((String)id);
             }
 
             @Override
             String fromMessage(Message message) {
-                return ((StringValue) message).getValue();
+                return ((StringValue)message).getValue();
             }
 
             @Override
@@ -187,7 +185,7 @@ class Identifier<I> {
 
             @Override
             Integer fromMessage(Message message) {
-                return ((UInt32Value) message).getValue();
+                return ((UInt32Value)message).getValue();
             }
 
             @Override
@@ -221,7 +219,7 @@ class Identifier<I> {
 
             @Override
             Long fromMessage(Message message) {
-                return ((UInt64Value) message).getValue();
+                return ((UInt64Value)message).getValue();
             }
 
             @Override
@@ -240,13 +238,14 @@ class Identifier<I> {
              * Verifies if the passed message is not an instance of a wrapper for
              * simple types that are used for packing simple Java types into {@code Any}.
              *
-             * @return {@code true} if the message is not {@code StringValue}, or {@code UInt32Value}, or {@code UInt64Value}
+             * @return {@code true} if the message is neither {@code StringValue}, nor
+             *         {@code UInt32Value}, nor {@code UInt64Value}
              */
             @Override
             boolean matchMessage(Message message) {
                 return !(message instanceof StringValue
-                         || message instanceof UInt32Value
-                         || message instanceof UInt64Value);
+                        || message instanceof UInt32Value
+                        || message instanceof UInt64Value);
             }
 
             @Override
@@ -266,7 +265,7 @@ class Identifier<I> {
 
             @Override
             <I> I getDefaultValue(Class<I> idClass) {
-                Class<? extends Message> msgClass = (Class<? extends Message>) idClass;
+                final Class<? extends Message> msgClass = (Class<? extends Message>) idClass;
                 final Message result = Messages.newInstance(msgClass);
                 return (I) result;
             }

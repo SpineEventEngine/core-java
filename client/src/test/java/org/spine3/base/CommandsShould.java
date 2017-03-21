@@ -50,6 +50,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Commands.createContext;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
@@ -59,6 +60,7 @@ import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
@@ -79,10 +81,13 @@ public class CommandsShould {
     }
 
     @Test
-    public void sort() {
-        final Command cmd1 = commandFactory.create(StringValue.getDefaultInstance(), minutesAgo(1));
-        final Command cmd2 = commandFactory.create(Int64Value.getDefaultInstance(), secondsAgo(30));
-        final Command cmd3 = commandFactory.create(BoolValue.getDefaultInstance(), secondsAgo(5));
+    public void sort_commands_by_timestamp() {
+        final Command cmd1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                          minutesAgo(1));
+        final Command cmd2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+                                                          secondsAgo(30));
+        final Command cmd3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                          secondsAgo(5));
         final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
         assertFalse(sortedCommands.equals(commandsToSort));
@@ -90,6 +95,24 @@ public class CommandsShould {
         Commands.sort(commandsToSort);
 
         assertEquals(sortedCommands, commandsToSort);
+    }
+
+    @Test
+    public void create_command_context() {
+        final TenantId tenantId = newTenantUuid();
+        final UserId userId = newUserUuid();
+        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
+        final int targetVersion = 100500;
+
+        final CommandContext commandContext = createContext(tenantId,
+                                                            userId,
+                                                            zoneOffset,
+                                                            targetVersion);
+        
+        assertEquals(tenantId, commandContext.getTenantId());
+        assertEquals(userId, commandContext.getActor());
+        assertEquals(zoneOffset, commandContext.getZoneOffset());
+        assertEquals(targetVersion, commandContext.getTargetVersion());
     }
 
     @Test
@@ -118,8 +141,8 @@ public class CommandsShould {
                 .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class,
-                            commandFactory.create(StringValue.getDefaultInstance(),
-                                                  minutesAgo(1)))
+                            commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                         minutesAgo(1)))
                 .setDefault(CommandContext.class, commandFactory.createContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, Tests.newUserUuid())
@@ -177,16 +200,16 @@ public class CommandsShould {
 
     @Test
     public void create_wereBetween_predicate() {
-        final Command command1 = commandFactory.create(StringValue.getDefaultInstance(),
-                                                       minutesAgo(5));
-        final Command command2 = commandFactory.create(Int64Value.getDefaultInstance(),
-                                                       minutesAgo(2));
-        final Command command3 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(30));
-        final Command command4 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(20));
-        final Command command5 = commandFactory.create(BoolValue.getDefaultInstance(),
-                                                       secondsAgo(5));
+        final Command command1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+                                                              minutesAgo(5));
+        final Command command2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+                                                              minutesAgo(2));
+        final Command command3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(30));
+        final Command command4 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(20));
+        final Command command5 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+                                                              secondsAgo(5));
 
         final ImmutableList<Command> commands = ImmutableList.of(command1, command2, command3,
                                                                  command4, command5);
@@ -263,5 +286,14 @@ public class CommandsShould {
         assertEquals(schedulingTime, cmdUpdated.getContext()
                                                .getSchedule()
                                                .getSchedulingTime());
+    }
+
+    @Test
+    public void provide_stringifier_for_CommandId() {
+        final CommandId id = Commands.generateId();
+
+        final String str = Stringifiers.toString(id);
+        final CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
+        assertEquals(id, convertedBack);
     }
 }

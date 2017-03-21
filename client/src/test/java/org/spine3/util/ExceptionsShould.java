@@ -22,7 +22,6 @@ package org.spine3.util;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.validate.IllegalConversionArgumentException;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -51,11 +50,6 @@ public class ExceptionsShould {
         unsupported(newUuid());
     }
 
-    @Test(expected = IllegalConversionArgumentException.class)
-    public void create_and_throw_illegal_conversion_argument_exception(){
-        Exceptions.conversionArgumentException("Occured exception dueing the conversion");
-    }
-
     @Test
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
@@ -77,5 +71,11 @@ public class ExceptionsShould {
     @Test(expected = IllegalStateException.class)
     public void throw_formatted_ISE() {
         newIllegalStateException("%s check %s", "state", "failed");
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_formatted_ISE_with_cause() {
+        newIllegalStateException(new RuntimeException(getClass().getSimpleName()),
+                                 "%s %s", "taram", "param");
     }
 }
