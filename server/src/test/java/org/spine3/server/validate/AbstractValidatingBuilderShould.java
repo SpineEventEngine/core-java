@@ -20,6 +20,7 @@
 
 package org.spine3.server.validate;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
@@ -32,10 +33,8 @@ import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.types.Task;
 import org.spine3.test.validate.msg.PatternStringFieldValue;
-import org.spine3.type.ParametrizedTypeImpl;
 import org.spine3.validate.ConstraintViolationThrowable;
 
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.List;
 
@@ -58,9 +57,11 @@ public class AbstractValidatingBuilderShould {
     }
 
     @Test
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
+                       // It is OK for test method.
     public void return_converted_value() throws ConversionException {
-        final ParameterizedType type = ParametrizedTypeImpl.from(List.class,
-                                                                 new Type[]{Integer.class});
+        final Type type = new TypeToken<List<Integer>>(){}.getType();
         final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
@@ -78,9 +79,12 @@ public class AbstractValidatingBuilderShould {
     }
 
     @Test(expected = ConversionException.class)
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
+                       // It is OK for test method.
     public void throw_exception_when_string_cannot_be_converted() throws ConversionException {
         final String stringToConvert = "";
-        final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Timestamp.class});
+        final Type type = new TypeToken<List<Timestamp>>(){}.getType();
         final Stringifier<List<Timestamp>> stringifier = listStringifier(Timestamp.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);

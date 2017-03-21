@@ -60,13 +60,14 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
      * @throws ConversionException if passed value cannot be converted
      */
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
-    // It is OK because caught exception is not ignored, it delivers exception to throw.
+    // It is OK because caught exception is not ignored,
+    // it delivers information for exception to throw.
     public <V> V getConvertedValue(Type type, String value) throws ConversionException {
         try {
             final V convertedValue = Stringifiers.fromString(value, type);
             return convertedValue;
         } catch (IllegalConversionArgumentException ex) {
-            throw ex.getConversionException();
+            throw new ConversionException(ex.getMessage());
         }
     }
 
