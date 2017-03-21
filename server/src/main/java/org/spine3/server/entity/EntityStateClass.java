@@ -29,9 +29,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class EntityStateClass extends MessageClass {
+public final class EntityStateClass extends MessageClass {
 
-    protected EntityStateClass(Class<? extends Message> value) {
+    private EntityStateClass(Class<? extends Message> value) {
         super(value);
     }
 
