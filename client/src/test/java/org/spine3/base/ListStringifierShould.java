@@ -20,9 +20,9 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeToken;
 import org.junit.Test;
 import org.spine3.test.types.Task;
-import org.spine3.type.ParametrizedTypeImpl;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -48,7 +48,8 @@ public class ListStringifierShould {
                                                                      .convert(stringToConvert);
         assertNotNull(actualList);
 
-        final List<String> expectedList = Arrays.asList(stringToConvert.split(Pattern.quote("\\,")));
+        final List<String> expectedList = Arrays.asList(
+                stringToConvert.split(Pattern.quote("\\,")));
         assertThat(actualList, is(expectedList));
     }
 
@@ -67,10 +68,13 @@ public class ListStringifierShould {
     }
 
     @Test
+    @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass",
+                       "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
+                       // It is OK for test method.
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1\\|2\\|3\\|4\\|5";
         final String delimiter = "|";
-        final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Integer.class});
+        final Type type = new TypeToken<List<Integer>>(){}.getType();
         final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
