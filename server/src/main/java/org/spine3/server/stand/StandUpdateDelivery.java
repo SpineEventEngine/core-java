@@ -25,6 +25,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.SPI;
+import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.entity.EntityStateEnvelope;
@@ -47,7 +48,7 @@ import java.util.concurrent.Executor;
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope, Stand> {
+public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope<?, ?>, Stand> {
 
     private Stand stand;
 
@@ -65,15 +66,17 @@ public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope, 
 
     @Override
     protected Runnable getDeliveryAction(final Stand consumer,
-                                         final EntityStateEnvelope deliverable) {
+                                         final EntityStateEnvelope<?, ?> deliverable) {
         return new Runnable() {
             @Override
             public void run() {
                 final Message state = deliverable.getMessage();
                 final Any packedState = AnyPacker.pack(state);
+                final Version version = deliverable.getEntityVersion()
+                                                   .or(Version.getDefaultInstance());
                 consumer.update(deliverable.getEntityId(),
                                 packedState,
-                                deliverable.getEntityVersion());
+                                version);
             }
         };
     }

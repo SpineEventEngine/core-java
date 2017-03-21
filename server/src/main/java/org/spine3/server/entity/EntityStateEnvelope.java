@@ -20,6 +20,7 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
@@ -29,32 +30,53 @@ import org.spine3.base.Version;
 import javax.annotation.Nullable;
 
 /**
- * An envelope holder of the {@linkplain VersionableEntity versionable entity} state.
+ * An envelope holder of the {@linkplain Entity entity} state.
  *
  * @author Alex Tymchenko
  */
-public class EntityStateEnvelope<I, S extends Message>
-                                    implements MessageEnvelope<VersionableEntity<I, S>> {
+public final class EntityStateEnvelope<I, S extends Message>
+                                    implements MessageEnvelope<Entity<I, S>> {
 
+    /**
+     * The state of the entity.
+     */
     private final S entityState;
+
+    /**
+     * The ID of the entity, packed as {@code Any}.
+     */
     private final Any entityId;
-    private final Version entityVersion;
+
+    /**
+     * The class of the entity state.
+     */
     private final EntityStateClass entityStateClass;
 
-    protected EntityStateEnvelope(VersionableEntity<I, S> entity) {
+    /**
+     * The optional version of an entity.
+     *
+     * <p>The value is only present If the entity used for the envelope construction
+     * is a {@link VersionableEntity}. Otherwise, this field is {@code null}.
+     */
+    @Nullable
+    private final Version entityVersion;
+
+    private EntityStateEnvelope(Entity<I, S> entity) {
         this.entityState = entity.getState();
         this.entityId = Identifiers.idToAny(entity.getId());
-        this.entityVersion = entity.getVersion();
         this.entityStateClass = EntityStateClass.of(entity);
+        this.entityVersion = entity instanceof VersionableEntity
+                             ? ((VersionableEntity) entity).getVersion()
+                             : null;
     }
 
-    public static  <I, S extends Message> EntityStateEnvelope of(VersionableEntity<I, S> entity) {
+    public static  <I, S extends Message> EntityStateEnvelope of(Entity<I, S> entity) {
         return new EntityStateEnvelope<>(entity);
     }
 
     /**
-     * Always returns {@code null}, as it is impossible to create a {@code VersionableEntity}
-     * instance basing just on its properties.
+     * Always returns {@code null}, as it is impossible to create a {@code Entity} instance basing
+     * just on its properties.
      *
      * <p>To obtain an entity instance, use the corresponding {@code Repository} instance along
      * with {@linkplain #getEntityId() entity ID} instead.
@@ -64,12 +86,12 @@ public class EntityStateEnvelope<I, S extends Message>
     @SuppressWarnings("ReturnOfNull")
     @Override
     @Nullable
-    public VersionableEntity<I, S> getOuterObject() {
+    public Entity<I, S> getOuterObject() {
         return null;
     }
 
     @Override
-    public Message getMessage() {
+    public S getMessage() {
         return entityState;
     }
 
@@ -85,8 +107,8 @@ public class EntityStateEnvelope<I, S extends Message>
         return result;
     }
 
-    public Version getEntityVersion() {
-        return entityVersion;
+    public Optional<Version> getEntityVersion() {
+        return Optional.fromNullable(entityVersion);
     }
 
     @Override
