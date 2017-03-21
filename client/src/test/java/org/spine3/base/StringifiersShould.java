@@ -100,7 +100,6 @@ public class StringifiersShould {
     @SuppressWarnings("EmptyClass") // is the part of the test.
     @Test(expected = MissingStringifierException.class)
     public void raise_exception_on_missing_stringifer() {
-        Stringifiers.toString(new Object() {
-        });
+        Stringifiers.toString(new Object() {});
     }
 }
