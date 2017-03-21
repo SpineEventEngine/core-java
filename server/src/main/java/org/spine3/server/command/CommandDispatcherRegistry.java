@@ -51,7 +51,7 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
      * {@link org.spine3.server.command.CommandDispatcherDelegate delegate} does not handle
      * commands), the repository is not registered.
      *
-     * <p>No exceptions or log messages will be produces in this case.
+     * <p>No exceptions or log messages will be produced in this case.
      *
      * @param dispatcher the dispatcher to register
      */
