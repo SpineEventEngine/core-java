@@ -610,7 +610,7 @@ public class EventBus implements AutoCloseable {
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
                                        .setStreamExecutor(eventStoreStreamExecutor)
-                                       .setStorage(storageFactory.createEventStorage())
+                                       .setStorageFactory(storageFactory)
                                        .setLogger(EventStore.log())
                                        .build();
             }

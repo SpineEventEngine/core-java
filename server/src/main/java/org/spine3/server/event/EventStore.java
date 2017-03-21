@@ -29,6 +29,7 @@ import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.grpc.EventStoreGrpc;
+import org.spine3.server.storage.StorageFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -134,7 +135,7 @@ public abstract class EventStore implements AutoCloseable {
     private abstract static class AbstractBuilder<T> {
 
         private Executor streamExecutor;
-        private EventStorage eventStorage;
+        private StorageFactory storageFactory;
         @Nullable
         private Logger logger;
 
@@ -146,7 +147,7 @@ public abstract class EventStore implements AutoCloseable {
          */
         protected void checkState() {
             checkNotNull(getStreamExecutor(), "streamExecutor must be set");
-            checkNotNull(getEventStorage(), "eventStorage must be set");
+            checkNotNull(getStorageFactory(), "eventStorage must be set");
         }
 
         protected AbstractBuilder setStreamExecutor(Executor executor) {
@@ -158,13 +159,13 @@ public abstract class EventStore implements AutoCloseable {
             return streamExecutor;
         }
 
-        protected AbstractBuilder setStorage(EventStorage eventStorage) {
-            this.eventStorage = checkNotNull(eventStorage);
+        protected AbstractBuilder setStorageFactory(StorageFactory storageFactory) {
+            this.storageFactory = checkNotNull(storageFactory);
             return this;
         }
 
-        public EventStorage getEventStorage() {
-            return eventStorage;
+        public StorageFactory getStorageFactory() {
+            return storageFactory;
         }
 
         protected AbstractBuilder setLogger(@Nullable Logger logger) {
@@ -194,7 +195,9 @@ public abstract class EventStore implements AutoCloseable {
         @Override
         public EventStore build() {
             checkState();
-            final LocalImpl result = new LocalImpl(getStreamExecutor(), getEventStorage(), getLogger());
+            final LocalImpl result = new LocalImpl(getStreamExecutor(),
+                                                   getStorageFactory(),
+                                                   getLogger());
             return result;
         }
 
@@ -205,8 +208,8 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        public Builder setStorage(EventStorage eventStorage) {
-            super.setStorage(eventStorage);
+        public Builder setStorageFactory(StorageFactory storageFactory) {
+            super.setStorageFactory(storageFactory);
             return this;
         }
 
@@ -233,14 +236,19 @@ public abstract class EventStore implements AutoCloseable {
 
         private final EventStorage storage;
 
-        private LocalImpl(Executor catchUpExecutor, EventStorage storage, @Nullable Logger logger) {
+        private LocalImpl(Executor catchUpExecutor,
+                          StorageFactory storageFactory,
+                          @Nullable Logger logger) {
             super(catchUpExecutor, logger);
-            this.storage = storage;
+
+            final EventStorage eventStorage = new EventStorage();
+            eventStorage.initStorage(storageFactory);
+            this.storage = eventStorage;
         }
 
         @Override
-        protected void store(Event record) {
-            storage.write(record.getContext().getEventId(), record);
+        protected void store(Event event) {
+            storage.store(event);
         }
 
         @Override
@@ -270,7 +278,7 @@ public abstract class EventStore implements AutoCloseable {
         public ServerServiceDefinition build() {
             checkState();
             final LocalImpl eventStore = new LocalImpl(getStreamExecutor(),
-                                                       getEventStorage(),
+                                                       getStorageFactory(),
                                                        getLogger());
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
@@ -284,8 +292,8 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        public ServiceBuilder setStorage(EventStorage eventStorage) {
-            super.setStorage(eventStorage);
+        public ServiceBuilder setStorageFactory(StorageFactory storageFactory) {
+            super.setStorageFactory(storageFactory);
             return this;
         }
 

@@ -23,6 +23,7 @@ package org.spine3.server.event;
 import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 
@@ -32,6 +33,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 public class EventStoreServiceBuilderShould {
+
+    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
 
     private EventStore.ServiceBuilder builder;
 
@@ -52,7 +55,7 @@ public class EventStoreServiceBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void throw_NPE_on_non_set_streamExecutor() {
-        builder.setStorage(newEventStorage())
+        builder.setStorageFactory(storageFactory)
                .build();
     }
 
@@ -70,20 +73,15 @@ public class EventStoreServiceBuilderShould {
 
     @Test
     public void return_set_eventStorage() {
-        final EventStorage storage = newEventStorage();
-        assertEquals(storage, builder.setStorage(storage).getEventStorage());
+        assertEquals(storageFactory, builder.setStorageFactory(storageFactory)
+                                            .getStorageFactory());
     }
 
     @Test
     public void build_service_definition() {
         assertNotNull(builder.setStreamExecutor(newExecutor())
-                             .setStorage(newEventStorage())
+                             .setStorageFactory(storageFactory)
                              .build());
-    }
-
-    private static EventStorage newEventStorage() {
-        return InMemoryStorageFactory.getInstance()
-                                     .createEventStorage();
     }
 
     private static Executor newExecutor() {

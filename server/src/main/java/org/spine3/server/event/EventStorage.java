@@ -20,30 +20,73 @@
 
 package org.spine3.server.event;
 
-import org.spine3.annotations.SPI;
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterators;
+import com.google.common.collect.Lists;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.server.storage.AbstractStorage;
+import org.spine3.server.entity.DefaultRecordBasedRepository;
 
+import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.List;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
  *
+ * <p>This class allows to hide implementation details of storing commands.
+ * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
+ * is a {@code Repository}.
+ *
  * @author Alexander Yevsyukov
  */
-@SPI
-public abstract class EventStorage extends AbstractStorage<EventId, Event> {
+class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Event> {
 
-    protected EventStorage(boolean multitenant) {
-        super(multitenant);
+    private static final Function<EventEntity, Event> GET_EVENT =
+            new Function<EventEntity, Event>() {
+                @Nullable
+                @Override
+                public Event apply(@Nullable EventEntity input) {
+                    if (input == null) {
+                        return null;
+                    }
+                    return input.getState();
+                }
+            };
+
+    Iterator<Event> iterator(EventStreamQuery query) {
+        final Iterator<EventEntity> filtered = iterator(new EventEntityMatchesStreamQuery(query));
+        final List<EventEntity> entities = Lists.newArrayList(filtered);
+        Collections.sort(entities, EventEntity.comparator());
+        final Iterator<Event> result = Iterators.transform(entities.iterator(), GET_EVENT);
+        return result;
     }
 
-    /**
-     * Returns iterator through events matching the passed query.
-     *
-     * @param query a filtering query
-     * @return iterator instance
-     */
-    protected abstract Iterator<Event> iterator(EventStreamQuery query);
+    void store(Event event) {
+        final EventEntity entity = new EventEntity(event);
+        store(entity);
+    }
+
+    @VisibleForTesting
+    static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
+
+        private final Predicate<Event> filter;
+
+        EventEntityMatchesStreamQuery(EventStreamQuery query) {
+            this.filter = new MatchesStreamQuery(query);
+        }
+
+        @Override
+        public boolean apply(@Nullable EventEntity input) {
+            if (input == null) {
+                return false;
+            }
+            final Event event = input.getState();
+            final boolean result = filter.apply(event);
+            return result;
+        }
+    }
 }

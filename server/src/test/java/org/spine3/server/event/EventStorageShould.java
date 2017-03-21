@@ -30,13 +30,12 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
-import org.spine3.server.storage.AbstractStorageShould;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.type.TypeName;
@@ -51,15 +50,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.base.Events.generateId;
 import static org.spine3.protobuf.Durations2.nanos;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.Given.AnEventRecord.projectCreated;
 import static org.spine3.server.storage.Given.EventMessage.projectCreated;
 
-public abstract class EventStorageShould
-        extends AbstractStorageShould<EventId, Event, EventStorage> {
+public class EventStorageShould {
 
     /** Small positive delta in seconds or nanoseconds. */
     private static final int POSITIVE_DELTA = 10;
@@ -86,27 +83,13 @@ public abstract class EventStorageShould
 
     @Before
     public void setUpEventStorageTest() {
-        storage = getStorage();
+        storage = new EventStorage();
+        storage.initStorage(InMemoryStorageFactory.getInstance());
     }
 
     @After
-    public void tearDownEventStorageTest() {
-        close(storage);
-    }
-
-    @Override
-    protected Event newStorageRecord() {
-        return Given.AnEvent.projectCreated();
-    }
-
-    @Override
-    protected EventId newId() {
-        return generateId();
-    }
-
-    @Test
-    public void have_index_of_identifiers() {
-        assertNotNull(storage.index());
+    public void tearDownEventStorageTest() throws Exception {
+        storage.close();
     }
 
     @Test
@@ -185,9 +168,7 @@ public abstract class EventStorageShould
                                                  .build();
 
         final Event event = Events.createEvent(projectCreatedAny, context);
-
-        storage.write(event.getContext().getEventId(),
-                      event);
+        storage.store(event);
 
         final Any projectIdPacked = AnyPacker.pack(uid);
         final FieldFilter fieldFilter =
@@ -235,9 +216,7 @@ public abstract class EventStorageShould
                                                  .build();
 
         final Event event = Events.createEvent(eventAny, context);
-
-        storage.write(event.getContext()
-                           .getEventId(), event);
+        storage.store(event);
 
         final FieldFilter contextFieldFilter =
                 FieldFilter.newBuilder()
@@ -544,8 +523,8 @@ public abstract class EventStorageShould
     }
 
     protected void writeAll(Event... events) {
-        for (Event e : events) {
-            storage.write(e.getContext().getEventId(), e);
+        for (Event event : events) {
+            storage.store(event);
         }
     }
 
