@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * To handle the types, implement those methods. They take a {@code String} param containing
  * the name of the storage field and a {@linkplain Nullable nullable} value of the field.
  *
- * @author Dmytro Dashenkov.
+ * @author Dmytro Dashenkov
  */
 @SPI
 public abstract class StorageFieldTraverser {

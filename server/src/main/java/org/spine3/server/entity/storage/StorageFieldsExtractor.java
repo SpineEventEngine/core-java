@@ -37,7 +37,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.entity.storage.StorageFieldsDecomposer.toStorageFieldType;
+import static org.spine3.server.entity.storage.EntityFields.toStorageFieldType;
 
 /**
  * A utility for extracting the {@link StorageFields} from an {@link Entity}.
@@ -63,7 +63,7 @@ import static org.spine3.server.entity.storage.StorageFieldsDecomposer.toStorage
  *
  * <p>To read the resulting {@link StorageFields} object use {@link StorageFieldTraverser}.
  *
- * @author Dmytro Dashenkov.
+ * @author Dmytro Dashenkov
  */
 public class StorageFieldsExtractor {
 
@@ -85,7 +85,7 @@ public class StorageFieldsExtractor {
                         .add("getDefaultState")
                         .add("getBuilder")
                         .build();
-    private static final Map<Class<? extends Entity<?, ?>>, StorageFieldsDecomposer>
+    private static final Map<Class<? extends Entity<?, ?>>, EntityFields>
             fieldGenerators = new ConcurrentHashMap<>();
 
     private StorageFieldsExtractor() {
@@ -106,7 +106,7 @@ public class StorageFieldsExtractor {
         checkNotNull(entity);
         final Class<? extends E> entityClass = (Class<E>) entity.getClass();
 
-        StorageFieldsDecomposer fieldsGenerator = fieldGenerators.get(entityClass);
+        EntityFields fieldsGenerator = fieldGenerators.get(entityClass);
 
         if (fieldsGenerator == null) {
             if (!isClassPublic(entityClass)) {
@@ -115,14 +115,14 @@ public class StorageFieldsExtractor {
             }
             fieldsGenerator = newGenerator(entityClass);
         }
-        final StorageFields fields = fieldsGenerator.parse(entity);
+        final StorageFields fields = fieldsGenerator.toStorageFields(entity);
         return Optional.of(fields);
     }
 
-    private static StorageFieldsDecomposer newGenerator(
+    private static EntityFields newGenerator(
             Class<? extends Entity<?, ?>> entityClass) {
         final Collection<Getter> getters = collectGetters(entityClass);
-        final StorageFieldsDecomposer generator = new StorageFieldsDecomposer(getters);
+        final EntityFields generator = new EntityFields(getters);
         fieldGenerators.put(entityClass, generator);
         return generator;
     }

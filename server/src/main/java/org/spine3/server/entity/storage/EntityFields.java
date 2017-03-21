@@ -44,10 +44,10 @@ import static java.lang.String.format;
 /**
  * A parser for an {@link Entity} which decomposes it into the {@link StorageFields}.
  *
- * @author Dmytro Dashenkov.
+ * @author Dmytro Dashenkov
  */
 @Internal
-class StorageFieldsDecomposer {
+class EntityFields {
 
     private static final Map<Class, StorageFieldType> STORAGE_FIELD_TYPES;
 
@@ -65,7 +65,7 @@ class StorageFieldsDecomposer {
 
     private final Collection<Getter> getters;
 
-    StorageFieldsDecomposer(Collection<Getter> getters) {
+    EntityFields(Collection<Getter> getters) {
         this.getters = checkNotNull(getters);
     }
 
@@ -90,7 +90,7 @@ class StorageFieldsDecomposer {
      * @param entity the {@link Entity} to decompose
      * @return new instance of the {@link StorageFields} representing passed {@link Entity}
      */
-    StorageFields parse(Entity<?, ?> entity) {
+    StorageFields toStorageFields(Entity<?, ?> entity) {
         checkNotNull(entity);
         final StorageFields.Builder builder = StorageFields.newBuilder();
         final Object genericId = entity.getId();
