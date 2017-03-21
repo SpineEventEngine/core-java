@@ -57,7 +57,7 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
      */
     private final CommandContext commandContext;
 
-    protected FailureEnvelope(Failure failure) {
+    private FailureEnvelope(Failure failure) {
         super(failure);
         this.failureMessage = Failures.getMessage(failure);
         this.failureClass = FailureClass.of(failureMessage);
