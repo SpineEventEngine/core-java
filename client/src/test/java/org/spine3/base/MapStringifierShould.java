@@ -20,11 +20,11 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.test.types.Task;
-import org.spine3.type.ParametrizedTypeImpl;
 
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -39,13 +39,15 @@ import static org.spine3.base.Stringifiers.mapStringifier;
 /**
  * @author Illia Shepilov
  */
+@SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass",
+                   "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
+// It is OK for test methods.
 public class MapStringifierShould {
 
     @Test
     public void convert_string_to_map() throws ParseException {
         final String rawMap = "1\\:1972-01-01T10:00:20.021-05:00";
-        final Type type = ParametrizedTypeImpl.from(Map.class,
-                                                    new Class[]{Long.class, Timestamp.class});
+        final Type type = new TypeToken<Map<Long, Timestamp>>(){}.getType();
         final Stringifier<Map<Long, Timestamp>> stringifier =
                 mapStringifier(Long.class, Timestamp.class);
         StringifierRegistry.getInstance()
@@ -59,8 +61,7 @@ public class MapStringifierShould {
     @Test
     public void convert_map_to_string() {
         final Map<String, Integer> mapToConvert = createTestMap();
-        final Type type = ParametrizedTypeImpl.from(Map.class,
-                                                    new Class[]{String.class, Integer.class});
+        final Type type = new TypeToken<Map<String, Integer>>(){}.getType();
         final Stringifier<Map<String, Integer>> stringifier =
                 mapStringifier(String.class, Integer.class);
         StringifierRegistry.getInstance()
@@ -72,8 +73,7 @@ public class MapStringifierShould {
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "first\\:1\\,second\\:2";
-        final Type type = ParametrizedTypeImpl.from(Map.class,
-                                                    new Class[]{Integer.class, Integer.class});
+        final Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
         final Stringifier<Map<Integer, Integer>> stringifier =
                 mapStringifier(Integer.class, Integer.class);
         StringifierRegistry.getInstance()
@@ -83,14 +83,13 @@ public class MapStringifierShould {
 
     @Test(expected = MissingStringifierException.class)
     public void throw_exception_when_required_stringifier_is_not_found() {
-        final Type type = ParametrizedTypeImpl.from(Map.class, new Class[]{Long.class, Task.class});
+        final Type type = new TypeToken<Map<Long, Task>>(){}.getType();
         Stringifiers.fromString("1\\:1", type);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final Type type = ParametrizedTypeImpl.from(Map.class,
-                                                    new Class[]{Task.class, Long.class});
+        final Type type = new TypeToken<Map<Task, Long>>(){}.getType();
         final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
@@ -99,8 +98,7 @@ public class MapStringifierShould {
 
     @Test(expected = IllegalConversionArgumentException.class)
     public void throw_exception_when_key_value_delimiter_is_wrong() {
-        final Type type = ParametrizedTypeImpl.from(Map.class,
-                                                    new Class[]{Long.class, Long.class});
+        final Type type = new TypeToken<Map<Long, Long>>(){}.getType();
         final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
@@ -110,8 +108,7 @@ public class MapStringifierShould {
     @Test
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "first\\:1\\|second\\:2\\|third\\:3";
-        final Type type = ParametrizedTypeImpl.from(Map.class,
-                                                    new Class[]{String.class, Integer.class});
+        final Type type = new TypeToken<Map<Long, Task>>() {}.getType();
         final Stringifier<Map<String, Integer>> stringifier =
                 mapStringifier(String.class, Integer.class, "|");
         StringifierRegistry.getInstance()
