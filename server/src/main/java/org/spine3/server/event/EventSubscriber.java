@@ -22,11 +22,11 @@ package org.spine3.server.event;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventEnvelope;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.reflect.EventSubscriberMethod;
+import org.spine3.type.EventClass;
 
 import javax.annotation.Nullable;
 import java.util.Set;

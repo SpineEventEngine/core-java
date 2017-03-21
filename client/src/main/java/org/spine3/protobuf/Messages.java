@@ -19,6 +19,7 @@
  */
 package org.spine3.protobuf;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 
@@ -26,9 +27,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.protobuf.Descriptors.Descriptor;
-import static com.google.protobuf.Descriptors.GenericDescriptor;
 import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
@@ -57,24 +55,6 @@ public class Messages {
     }
 
     /**
-     * Converts passed message into Json representation.
-     *
-     * @param message the message object
-     * @return Json string
-     */
-    public static String toJson(Message message) {
-        checkNotNull(message);
-        String result;
-        try {
-            result = JsonPrinter.instance().print(message);
-        } catch (InvalidProtocolBufferException e) {
-            throw new UnknownTypeException(e);
-        }
-        checkState(result != null);
-        return result;
-    }
-
-    /**
      * Safely packs the given {@link Message} object as {@link Any}.
      *
      * <p>If the passed message object is already packed as {@code Any}, just
@@ -87,25 +67,6 @@ public class Messages {
         return (messageOrAny instanceof Any)
                     ? (Any) messageOrAny
                     : pack(messageOrAny);
-    }
-
-    /**
-     * Builds and returns the registry of types known in the application.
-     *
-     * @return {@code JsonFormat.TypeRegistry} instance
-     */
-    public static JsonFormat.TypeRegistry forKnownTypes() {
-        final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeUrl typeUrl : KnownTypes.getTypeUrls()) {
-            final Class<? extends Message> clazz = toMessageClass(typeUrl);
-            final GenericDescriptor descriptor = getClassDescriptor(clazz);
-            // Skip outer class descriptors.
-            if (descriptor instanceof Descriptor) {
-                final Descriptor typeDescriptor = (Descriptor) descriptor;
-                builder.add(typeDescriptor);
-            }
-        }
-        return builder.build();
     }
 
     /**

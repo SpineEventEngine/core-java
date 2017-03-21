@@ -27,9 +27,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
+import org.spine3.envelope.FailureEnvelope;
 import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
 import org.spine3.base.Subscribe;
+import org.spine3.type.FailureClass;
 
 import javax.annotation.Nullable;
 import java.util.Set;

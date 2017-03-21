@@ -20,9 +20,9 @@
 
 package org.spine3.server.event;
 
-import org.spine3.base.EventClass;
-import org.spine3.base.EventEnvelope;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.bus.MessageDispatcher;
+import org.spine3.type.EventClass;
 
 /**
  * {@code EventDispatcher} delivers events to subscribers.

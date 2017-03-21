@@ -22,14 +22,14 @@ package org.spine3.server.outbus;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.spine3.Internal;
-import org.spine3.base.MessageClass;
-import org.spine3.base.MessageEnvelope;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
+import org.spine3.envelope.MessageEnvelope;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.delivery.Delivery;
+import org.spine3.type.MessageClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

@@ -78,7 +78,7 @@ class Given {
 
     static class FailureMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = AggregateId.newProjectId();
+        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
         private static final InvalidProjectName INVALID_PROJECT_NAME =
                 invalidProjectName(DUMMY_PROJECT_ID);
 

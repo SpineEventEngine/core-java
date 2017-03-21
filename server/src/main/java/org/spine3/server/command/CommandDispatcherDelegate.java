@@ -19,9 +19,10 @@
  */
 package org.spine3.server.command;
 
-import org.spine3.Internal;
-import org.spine3.base.CommandClass;
-import org.spine3.base.CommandEnvelope;
+
+import org.spine3.annotations.Internal;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.type.CommandClass;
 
 import java.util.Set;
 
@@ -43,7 +44,7 @@ import java.util.Set;
  * returned.
  *
  * <p>The same interference takes place in attempt to implement
- * {@link org.spine3.server.bus.MessageDispatcher#dispatch(org.spine3.base.MessageEnvelope)
+ * {@link org.spine3.server.bus.MessageDispatcher#dispatch(org.spine3.envelope.MessageEnvelope)
  * MessageDispatcher#dispatch(MessageEnvelope)} method with the different types of
  * {@code MessageEnvelope}s dispatches simultaneously.
  *

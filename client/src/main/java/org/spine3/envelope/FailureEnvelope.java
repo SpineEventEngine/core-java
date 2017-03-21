@@ -17,21 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.failure;
+package org.spine3.envelope;
 
 import com.google.protobuf.Message;
-import org.spine3.base.AbstractMessageEnvelope;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
+import org.spine3.type.FailureClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Wraps the business failure into a transferable parcel for
- * transportation along the {@linkplain FailureBus}.
+ * Wraps the business failure into a transferable parcel which provides a convenient access to
+ * its properties.
  *
  * @author Alex Tymchenko
  */

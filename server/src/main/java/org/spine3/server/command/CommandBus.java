@@ -35,8 +35,6 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
-import org.spine3.server.command.error.CommandException;
-import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.type.CommandClass;

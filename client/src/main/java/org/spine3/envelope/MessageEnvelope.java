@@ -21,6 +21,7 @@
 package org.spine3.envelope;
 
 import com.google.protobuf.Message;
+import org.spine3.type.MessageClass;
 
 /**
  * A common interface for obtaining messages from wrapping objects.

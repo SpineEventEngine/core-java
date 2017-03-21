@@ -17,13 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.failure;
+package org.spine3.type;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
-import org.spine3.base.MessageClass;
 
 import java.util.Set;
 

@@ -20,7 +20,7 @@
 package org.spine3.io;
 
 import io.grpc.stub.StreamObserver;
-import org.spine3.Internal;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Response;
 
 /**

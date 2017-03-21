@@ -19,8 +19,10 @@
  */
 package org.spine3.server.failure;
 
-import org.spine3.SPI;
+import org.spine3.annotations.SPI;
+import org.spine3.envelope.FailureEnvelope;
 import org.spine3.server.outbus.CommandOutputDelivery;
+import org.spine3.type.FailureClass;
 
 import java.util.concurrent.Executor;
 
@@ -34,7 +36,7 @@ import java.util.concurrent.Executor;
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<FailureEnvelope,
-                                                                              FailureClass,
+        FailureClass,
                                                                               FailureDispatcher> {
 
     /**

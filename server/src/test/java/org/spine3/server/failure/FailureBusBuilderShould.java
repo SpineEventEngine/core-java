@@ -20,6 +20,7 @@
 package org.spine3.server.failure;
 
 import org.junit.Test;
+import org.spine3.envelope.FailureEnvelope;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;

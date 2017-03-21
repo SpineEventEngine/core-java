@@ -19,7 +19,9 @@
  */
 package org.spine3.server.failure;
 
+import org.spine3.envelope.FailureEnvelope;
 import org.spine3.server.bus.MessageDispatcher;
+import org.spine3.type.FailureClass;
 
 /**
  * Responsible for delivering the business failures to the corresponding subscribers.

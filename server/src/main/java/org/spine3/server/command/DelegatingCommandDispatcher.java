@@ -19,9 +19,10 @@
  */
 package org.spine3.server.command;
 
-import org.spine3.Internal;
-import org.spine3.base.CommandClass;
-import org.spine3.base.CommandEnvelope;
+
+import org.spine3.annotations.Internal;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.type.CommandClass;
 
 import java.util.Set;
 

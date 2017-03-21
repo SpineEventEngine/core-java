@@ -21,12 +21,9 @@ package org.spine3.server.outbus;
 
 import com.google.common.base.Function;
 import org.spine3.annotations.Internal;
-import org.spine3.base.Event;
-import org.spine3.Internal;
-import org.spine3.base.MessageClass;
-import org.spine3.base.MessageEnvelope;
+import org.spine3.envelope.MessageEnvelope;
 import org.spine3.server.delivery.Delivery;
-import org.spine3.type.EventClass;
+import org.spine3.type.MessageClass;
 
 import java.util.Collection;
 import java.util.Set;
@@ -34,7 +31,7 @@ import java.util.concurrent.Executor;
 
 /**
  * Base functionality for the routines delivering the
- * {@linkplain org.spine3.base.MessageEnvelope message envelopes} to the consumers, such as
+ * {@linkplain MessageEnvelope message envelopes} to the consumers, such as
  * {@linkplain org.spine3.server.bus.MessageDispatcher message dispatchers}.
  *
  * @param <E> the type of the envelope

@@ -22,7 +22,9 @@ package org.spine3.server.failure;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
+import org.spine3.envelope.FailureEnvelope;
 import org.spine3.server.reflect.FailureSubscriberMethod;
+import org.spine3.type.FailureClass;
 
 import javax.annotation.Nullable;
 import java.util.Set;

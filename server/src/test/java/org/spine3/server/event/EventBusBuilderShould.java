@@ -22,7 +22,7 @@ package org.spine3.server.event;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.EventEnvelope;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;

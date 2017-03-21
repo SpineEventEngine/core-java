@@ -20,7 +20,7 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.base.MessageClass;
+import org.spine3.type.MessageClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

@@ -20,6 +20,7 @@
 package org.spine3.server.failure;
 
 import org.spine3.server.outbus.OutputDispatcherRegistry;
+import org.spine3.type.FailureClass;
 
 import java.util.Set;
 

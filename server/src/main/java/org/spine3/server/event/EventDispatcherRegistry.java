@@ -20,8 +20,9 @@
 
 package org.spine3.server.event;
 
-import org.spine3.base.EventClass;
+
 import org.spine3.server.outbus.OutputDispatcherRegistry;
+import org.spine3.type.EventClass;
 
 import java.util.Set;
 

@@ -19,10 +19,10 @@
  */
 package org.spine3.server.event;
 
-import org.spine3.SPI;
-import org.spine3.base.EventClass;
-import org.spine3.base.EventEnvelope;
+import org.spine3.annotations.SPI;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.outbus.CommandOutputDelivery;
+import org.spine3.type.EventClass;
 
 import java.util.concurrent.Executor;
 
