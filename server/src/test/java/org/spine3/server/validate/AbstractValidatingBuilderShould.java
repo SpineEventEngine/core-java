@@ -20,18 +20,16 @@
 
 package org.spine3.server.validate;
 
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.Task;
-import org.spine3.test.aggregate.TaskId;
-import org.spine3.test.validate.msg.PatternStringFieldValue;
+import org.spine3.base.ConversionException;
+import org.spine3.type.ParametrizedTypeImpl;
 import org.spine3.validate.ConstraintViolationThrowable;
-import org.spine3.validate.ConversionError;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -52,23 +50,27 @@ public class AbstractValidatingBuilderShould {
     }
 
     @Test
-    public void return_converted_value() throws ConversionError {
+    public void return_converted_value() throws ConversionException {
+        final ParameterizedType type = ParametrizedTypeImpl.from(List.class,
+                                                                 new Type[]{Integer.class});
         final List<Integer> convertedValue =
-                validatingBuilder.getConvertedValue(new TypeToken<List<Integer>>() {}, "1");
+                validatingBuilder.getConvertedValue(type, "1");
         final List<Integer> expectedList = newArrayList(1);
         assertThat(convertedValue, is(expectedList));
     }
 
-    @Test(expected = ConversionError.class)
-    public void throw_exception_when_appropriate_stringifier_is_not_found() throws ConversionError {
+    @Test(expected = ConversionException.class)
+    public void throw_exception_when_appropriate_stringifier_is_not_found() throws
+                                                                            ConversionException {
         final String stringToConvert = "{value:1}";
-        validatingBuilder.getConvertedValue(TypeToken.of(TaskId.class), stringToConvert);
+        validatingBuilder.getConvertedValue(TaskId.class, stringToConvert);
     }
 
-    @Test(expected = ConversionError.class)
-    public void throw_exception_when_string_cannot_be_converted() throws ConversionError {
+    @Test(expected = ConversionException.class)
+    public void throw_exception_when_string_cannot_be_converted() throws ConversionException {
         final String stringToConvert = "";
-        validatingBuilder.getConvertedValue(new TypeToken<List<Timestamp>>() {}, stringToConvert);
+        final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Timestamp.class});
+        validatingBuilder.getConvertedValue(type, stringToConvert);
     }
 
     @Test

@@ -20,22 +20,18 @@
 
 package org.spine3.server.validate;
 
-import com.google.common.base.Optional;
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
-import org.spine3.base.Stringifier;
+import org.spine3.base.IllegalConversionArgumentException;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Stringifiers;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.ConstraintViolationThrowable;
-import org.spine3.validate.ConversionError;
-import org.spine3.validate.IllegalConversionArgumentException;
 
+import java.lang.reflect.Type;
 import java.util.List;
-
-import static java.lang.String.format;
 
 /**
  * Serves as an abstract base for all validating builders.
@@ -56,21 +52,21 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     /**
      * Converts the passed `raw` value and returns it.
      *
-     * @param typeToken the key of the {@code StringifierRegistry} storage
-     *                  to obtain {@code Stringifier}
-     * @param value     the value to convert
-     * @param <V>       the type of the converted value
+     * @param type  the key of the {@code StringifierRegistry} storage
+     *              to obtain {@code Stringifier}
+     * @param value the value to convert
+     * @param <V>   the type of the converted value
      * @return the converted value
-     * @throws ConversionError if passed value cannot be converted
+     * @throws ConversionException if passed value cannot be converted
      */
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
     // It is OK because caught exception is not ignored, it delivers exception to throw.
-    public <V> V getConvertedValue(TypeToken<V> typeToken, String value) throws ConversionError {
+    public <V> V getConvertedValue(Type type, String value) throws ConversionException {
         try {
-            final V convertedValue = Stringifiers.parse(value, typeToken);
+            final V convertedValue = Stringifiers.fromString(value, type);
             return convertedValue;
         } catch (IllegalConversionArgumentException ex) {
-            throw ex.getConversionError();
+            throw ex.getConversionException();
         }
     }
 
