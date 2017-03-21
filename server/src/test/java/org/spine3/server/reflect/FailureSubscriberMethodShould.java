@@ -37,7 +37,7 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings("unused")     // as testing the method declarations, not implementation details.
+@SuppressWarnings("unused")     // some of tests address just the fact of method declaration.
 public class FailureSubscriberMethodShould {
 
     @Test
