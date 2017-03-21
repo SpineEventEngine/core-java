@@ -28,7 +28,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
-import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.base.Identifiers;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
@@ -71,7 +70,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      *
      * @param command a complete command to store
      */
-    protected void store(Command command) {
+    void store(Command command) {
         checkNotClosed();
         store(command, RECEIVED);
     }
@@ -82,7 +81,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      * @param command a command to store
      * @param status  a command status
      */
-    protected void store(Command command, CommandStatus status) {
+    void store(Command command, CommandStatus status) {
         checkNotClosed();
         final CommandEntity commandEntity = CommandEntity.createForStatus(command, status);
         store(commandEntity);
@@ -95,20 +94,10 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      * @param command a command to store
      * @param error   an error occurred
      */
-    protected void store(Command command, Error error) {
+    void store(Command command, Error error) {
         checkNotClosed();
         final CommandEntity commandEntity = CommandEntity.createForError(command, error);
         store(commandEntity);
-    }
-
-    /**
-     * Stores the command with the error status.
-     *
-     * @param command   the command to store
-     * @param exception an exception occurred to convert to {@link org.spine3.base.Error Error}
-     */
-    protected void store(Command command, Exception exception) {
-        store(command, Errors.fromException(exception));
     }
 
     /**
