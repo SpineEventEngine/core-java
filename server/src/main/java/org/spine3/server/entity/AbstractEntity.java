@@ -21,7 +21,6 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifiers;
 import org.spine3.protobuf.Messages;
 
 import javax.annotation.CheckReturnValue;
@@ -219,9 +218,8 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      */
     protected void validate(S newState) throws IllegalStateException {
         if (!isValid(newState)) {
-            final String stateStr = Stringifiers.toString(newState);
             final String errMsg = format("The passed new state (%s) is not valid.",
-                                         stateStr);
+                                         newState);
             throw new IllegalStateException(errMsg);
         }
     }
