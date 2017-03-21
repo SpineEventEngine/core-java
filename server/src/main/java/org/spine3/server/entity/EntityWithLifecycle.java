@@ -38,6 +38,16 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
     LifecycleFlags getLifecycleFlags();
 
     /**
+     * Shows if the {@code Entity} is archived.
+     */
+    boolean isArchived();
+
+    /**
+     * Shows if the {@code Entity} is deleted.
+     */
+    boolean isDeleted();
+
+    /**
      * Tells whether visibility of the entity changed since its initialization.
      */
     boolean lifecycleFlagsChanged();

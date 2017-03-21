@@ -19,16 +19,11 @@
  */
 
 /**
- * This package contains classes and interfaces for storing
- * {@link org.spine3.server.aggregate.Aggregate Aggregate}s.
+ * This package contains classes working with the storage fields retrieval.
  *
- * @see org.spine3.server.aggregate.AggregateStorage AggregateStorage
+ * @author Dmytro Dashenkov.
  */
-
-@SPI
 @ParametersAreNonnullByDefault
-package org.spine3.server.aggregate.storage;
-
-import org.spine3.annotations.SPI;
+package org.spine3.server.entity.storage;
 
 import javax.annotation.ParametersAreNonnullByDefault;

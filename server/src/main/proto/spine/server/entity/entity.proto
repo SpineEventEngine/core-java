@@ -49,6 +49,9 @@ message EntityRecord {
 
     // The lifecycle flags of the entity.
     LifecycleFlags lifecycle_flags = 4;
+
+    // Custom fields of the entity to store in the storage.
+    StorageFields storage_fields = 5;
 }
 
 // The lifecycle flags of an entity.
@@ -71,4 +74,52 @@ message LifecycleFlags {
     // marked with this flag.
     //
     bool deleted = 2;
+}
+
+// Custom fields to store in the storage.
+//
+// These fields should be searchable in an effiefient way.
+//
+// The field values are stored in maps with their names, each type separately. This is done to
+// avoid unnecassary packing of the values into google.protobuf.Any and guarantee compile time type
+// checks.
+//
+message StorageFields {
+    option (SPI_type) = true;
+
+    // The ID of the entity.
+    google.protobuf.Any entity_id = 1;
+
+    // A map of Message fieled values.
+    map<string, google.protobuf.Any> any_field = 2;
+
+    // A map of integer fieled values.
+    map<string, int32> integer_field = 3;
+
+    // A map of long fieled values.
+    map<string, int64> long_field = 4;
+
+    // A map of String fieled values.
+    map<string, string> string_field = 5;
+
+    // A map of boolean fieled values.
+    map<string, bool> boolean_field = 6;
+
+    // A map of float fieled values.
+    map<string, float> float_field = 7;
+
+    // A map of double fieled values.
+    map<string, double> double_field = 8;
+}
+
+enum StorageFieldType {
+
+    SFT_UNKNOWN = 0;
+    MESSAGE = 1;
+    INTEGER = 2;
+    LONG = 3;
+    STRING = 4;
+    BOOLEAN = 5;
+    FLOAT = 6;
+    DOUBLE = 7;
 }

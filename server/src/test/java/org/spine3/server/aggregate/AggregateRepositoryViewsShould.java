@@ -104,7 +104,7 @@ public class AggregateRepositoryViewsShould {
     }
 
     /**
-     * The aggregate that can handle status flags.
+     * The aggregate that can handle lifecycle flags.
      *
      * <p>We use {@code StringValue} for messages to save on code generation
      * in the tests. Real aggregates should use generated messages.
@@ -132,16 +132,6 @@ public class AggregateRepositoryViewsShould {
                 setDeleted(true);
             }
             getBuilder().setValue(msg);
-        }
-
-        @Override
-        protected boolean isArchived() {
-            return super.isArchived();
-        }
-
-        @Override
-        protected boolean isDeleted() {
-            return super.isDeleted();
         }
     }
 

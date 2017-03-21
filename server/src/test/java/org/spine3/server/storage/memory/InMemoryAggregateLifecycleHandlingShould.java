@@ -18,19 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.storage.memory;
+
+import org.spine3.server.aggregate.Aggregate;
+import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.aggregate.AggregateStorageLifecycleHandlingShould;
+import org.spine3.test.aggregate.ProjectId;
 
 /**
- * A marker interface for the {@code enum}s representing the names of the fields
- * used by the framework to store its data.
- *
- * <p>Naming conventions for the {@code enum}s' fields may be changed in favor of
- * the field names to be represented accurately.
- *
- * <p>Owing to that, we may simply call {@link Enum#toString()} or {@link Enum#name()}
- * to get a valid field name.
- *
- * @author Dmytro Dashenkov
+ * @author Dmytro Dashenkov.
  */
-public interface StorageField {
+public class InMemoryAggregateLifecycleHandlingShould extends AggregateStorageLifecycleHandlingShould {
+
+    @Override
+    protected AggregateStorage<ProjectId> getAggregateStorage(
+            Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass) {
+        return InMemoryAggregateStorage.newInstance();
+    }
 }

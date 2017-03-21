@@ -38,7 +38,7 @@ import static org.junit.Assert.assertTrue;
  *
  * @author Dmytro Dashenkov.
  */
-public abstract class AggregateStorageVisibilityHandlingShould {
+public abstract class AggregateStorageLifecycleHandlingShould {
 
     protected abstract AggregateStorage<ProjectId> getAggregateStorage(
             Class<? extends Aggregate<ProjectId, ?, ?>> aggregateClass);
