@@ -35,7 +35,7 @@ import static org.spine3.server.command.CommandRecords.getOrGenerateCommandId;
 import static org.spine3.server.command.CommandRecords.newRecordBuilder;
 
 /**
- * An entity for storing command and its processing status.
+ * An entity for storing a command and its processing status.
  *
  * @author Alexander Yevyukov
  */
