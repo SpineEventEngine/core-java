@@ -28,7 +28,29 @@ import java.util.Set;
 /**
  * A common interface for objects which need to dispatch the
  * {@linkplain org.spine3.base.Command commands}, but are unable to implement
- * the {@link org.spine3.server.command.CommandDispatcher CommandDispatcher} directly.
+ * the {@linkplain org.spine3.server.command.CommandDispatcher CommandDispatcher}.
+ *
+ * <p>A typical example of a {@code CommandDispatcherDelegate} usage is a routine, which
+ * simultaneously dispatches different types of {@linkplain com.google.protobuf.Message messages}
+ * in addition to {@code Command}s.
+ *
+ * <p>In this case such a class would have to implement several
+ * {@linkplain org.spine3.server.bus.MessageDispatcher MessageDispatcher} child interfaces
+ * (such as {@linkplain org.spine3.server.command.CommandDispatcher CommandDispatcher} or
+ * {@linkplain org.spine3.server.event.EventDispatcher EventDispatcher}). However, it is impossible
+ * to implement the same {@link org.spine3.server.bus.MessageDispatcher#getMessageClasses()
+ * getMessageClasses()} method several times with the different types of {@code MessageClass}es
+ * returned.
+ *
+ * <p>The same interference takes place in attempt to implement
+ * {@link org.spine3.server.bus.MessageDispatcher#dispatch(org.spine3.base.MessageEnvelope)
+ * MessageDispatcher#dispatch(MessageEnvelope)} method with the different types of
+ * {@code MessageEnvelope}s dispatches simultaneously.
+ *
+ * <p>That's why unlike {@linkplain org.spine3.server.bus.MessageDispatcher MessageDispatcher},
+ * this interface defines its own contract for declaring the dispatched
+ * {@linkplain CommandClass command classes}, which does not interfere with the
+ * {@code MessageDispatcher} API.
  *
  * @author Alex Tymchenko
  * @see DelegatingCommandDispatcher
