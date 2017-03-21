@@ -56,7 +56,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
 
     /**
      * Invokes the wrapped subscriber method to handle {@code failureMessage},
-     * {@code commandMessage}  with the passed {@code context} of the {@code Command}.
+     * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
      * <p>Unlike the {@linkplain #invoke(Object, Message, Message) overloaded alternative method},
      * this one does return any value, since the failure subscriber methods are {@code void}
@@ -79,9 +79,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         try {
             final int paramCount = getParamCount();
             if (paramCount == 2) {
-
                 getMethod().invoke(target, failureMessage, commandMessage);
-
             } else {
                 getMethod().invoke(target, failureMessage, commandMessage, context);
             }
