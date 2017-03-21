@@ -204,7 +204,6 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @param newState a state object to replace the current state
      * @return {@code true} if the new state object is valid, {@code false} otherwise
      */
-    @SuppressWarnings("unused") // OK for this default implementation
     protected boolean isValid(S newState) {
         return true;
     }
