@@ -57,5 +57,4 @@ class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, Event
     protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
         return super.getDispatchers(eventClass);
     }
-
 }
