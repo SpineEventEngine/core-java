@@ -45,6 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class EventStore implements AutoCloseable {
 
     private final Executor streamExecutor;
+
     @Nullable
     private final Logger logger;
 
@@ -268,7 +269,9 @@ public abstract class EventStore implements AutoCloseable {
         @Override
         public ServerServiceDefinition build() {
             checkState();
-            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(), getEventStorage(), getLogger());
+            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(),
+                                                       getEventStorage(),
+                                                       getLogger());
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
             return result;
@@ -350,7 +353,9 @@ public abstract class EventStore implements AutoCloseable {
 
         if (logger.isInfoEnabled()) {
             final String requestData = TextFormat.shortDebugString(request);
-            logger.info("Creating stream on request: {} for observer: {}", requestData, responseObserver);
+            logger.info("Creating stream on request: {} for observer: {}",
+                        requestData,
+                        responseObserver);
         }
     }
 
