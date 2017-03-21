@@ -153,8 +153,11 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         return boundedContext;
     }
 
-    private static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
-        return timestamp == null ? Timestamp.getDefaultInstance() : timestamp;
+    @VisibleForTesting
+    static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
+        return timestamp == null
+               ? Timestamp.getDefaultInstance()
+               : timestamp;
     }
 
     private static Logger log() {
