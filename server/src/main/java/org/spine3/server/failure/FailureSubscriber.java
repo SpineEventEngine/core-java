@@ -39,7 +39,7 @@ import java.util.Set;
  */
 public class FailureSubscriber implements FailureDispatcher {
     /**
-     * Cached set of the event classes this subscriber is subscribed to.
+     * Cached set of the failure classes this subscriber is subscribed to.
      */
     @Nullable
     private Set<FailureClass> failureClasses;
