@@ -78,7 +78,7 @@ public abstract class Bus<T extends Message,
     public abstract void post(T message, StreamObserver<Response> responseObserver);
 
     /**
-     * Handles the message, for which there is dispatchers registered in the registry.
+     * Handles the message, for which there is no dispatchers registered in the registry.
      *
      * @param message          the message that has no target dispatchers, packed into an envelope
      * @param responseObserver the observer to be potentially notified about the dead message
