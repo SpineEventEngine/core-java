@@ -24,10 +24,12 @@ import org.junit.After;
 import org.junit.Before;
 import org.spine3.base.CommandContext;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.testdata.TestFailureBusFactory;
 
 import static org.mockito.Mockito.spy;
 
@@ -42,6 +44,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected CommandBus commandBus;
     protected CommandStore commandStore;
     protected EventBus eventBus;
+    protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected TestResponseObserver responseObserver;
@@ -51,9 +54,11 @@ public abstract class AbstractCommandBusTestSuite {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
         scheduler = spy(new ExecutorCommandScheduler());
+        failureBus = spy(TestFailureBusFactory.create());
         commandBus = CommandBus.newBuilder()
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
+                               .setFailureBus(failureBus)
                                .setThreadSpawnAllowed(true)
                                .setAutoReschedule(false)
                                .build();
