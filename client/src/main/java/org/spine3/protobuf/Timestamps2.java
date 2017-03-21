@@ -24,6 +24,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.annotations.Internal;
+import org.spine3.base.IllegalConversionArgumentException;
 import org.spine3.base.Stringifier;
 
 import javax.annotation.Nullable;
@@ -33,7 +34,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;
-import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
@@ -274,11 +274,13 @@ public class Timestamps2 {
         }
 
         @Override
+        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+        // It is OK because all necessary information from caught exception is passed.
         protected Timestamp fromString(String str) {
             try {
                 return Timestamps.parse(str);
             } catch (ParseException e) {
-                throw wrappedCause(e);
+                throw new IllegalConversionArgumentException(e.getMessage());
             }
         }
     }
@@ -313,12 +315,14 @@ public class Timestamps2 {
         }
 
         @Override
+        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+        // It is OK because all necessary information from caught exception is passed.
         protected Timestamp fromString(String webSafe) {
             try {
                 final String rfcStr = fromWebSafe(webSafe);
                 return Timestamps.parse(rfcStr);
             } catch (ParseException e) {
-                throw wrappedCause(e);
+                throw new IllegalConversionArgumentException(e.getMessage());
             }
         }
 
