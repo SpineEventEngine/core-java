@@ -136,7 +136,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
                                                             failureClass,
                                                             factory());
         if (method == null) {
-            throw missingEventHandler(cls, failureClass);
+            throw missingFailureHandler(cls, failureClass);
         }
         return method;
     }
@@ -145,11 +145,11 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         return new FailureSubscriberMethod(method);
     }
 
-    private static IllegalStateException missingEventHandler(Class<?> cls,
-                                                             Class<? extends Message> eventClass) {
+    private static IllegalStateException missingFailureHandler(Class<?> cls,
+                                                               Class<? extends Message> failureClass) {
         final String msg = format(
                 "Missing failure handler for failure class %s in the class %s",
-                eventClass, cls
+                failureClass, cls
         );
         return new IllegalStateException(msg);
     }
@@ -163,7 +163,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         return result;
     }
 
-    /** Returns the factory for filtering and creating event subscriber methods. */
+    /** Returns the factory for filtering and creating failure subscriber methods. */
     private static HandlerMethod.Factory<FailureSubscriberMethod> factory() {
         return Factory.instance();
     }
