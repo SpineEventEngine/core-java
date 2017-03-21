@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Response;
 import org.spine3.envelope.MessageEnvelope;
-import org.spine3.server.command.CommandDispatcher;
 import org.spine3.type.MessageClass;
 
 import javax.annotation.Nullable;
