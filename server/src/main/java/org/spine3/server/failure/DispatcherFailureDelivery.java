@@ -72,7 +72,7 @@ public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<Fa
     }
 
     /**
-     * Obtains a pre-defined instance of the {@code DispatcherFailureDelivery}, which does NOT
+     * Obtains a pre-defined instance of the {@code DispatcherFailureDelivery}, which does not
      * postpone any failure dispatching and uses
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
