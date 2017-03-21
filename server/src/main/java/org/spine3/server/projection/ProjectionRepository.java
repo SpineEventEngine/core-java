@@ -70,7 +70,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /** An instance of {@link StandFunnel} to be informed about state updates */
     private final StandFunnel standFunnel;
 
-    /** If {@code true} the projection will {@link #catchUp()} after initialization. */
+    /**
+     * If {@code true} the projection repository will start the {@linkplain #catchUp() catch up}
+     * process after {@linkplain #initStorage(StorageFactory) initialization}.
+     */
     private final boolean catchUpAfterStorageInit;
 
     private final Duration catchUpMaxDuration;
