@@ -20,6 +20,9 @@
 
 package org.spine3.base;
 
+import com.google.common.primitives.Ints;
+import com.google.common.primitives.Longs;
+
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -159,5 +162,40 @@ public class Stringifiers {
         final Stringifier<List<T>> listStringifier =
                 new ListStringifier<T>(elementClass, delimiter);
         return listStringifier;
+    }
+
+    @SuppressWarnings("unchecked") // It is OK because class is verified.
+    static <I> I convert(String elementToConvert, Class<I> elementClass) {
+        checkNotNull(elementToConvert);
+        checkNotNull(elementClass);
+
+        if (isInteger(elementClass)) {
+            return (I) Ints.stringConverter()
+                           .convert(elementToConvert);
+        }
+
+        if (isLong(elementClass)) {
+            return (I) Longs.stringConverter()
+                            .convert(elementToConvert);
+        }
+
+        if (isString(elementClass)) {
+            return (I) elementToConvert;
+        }
+
+        final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
+        return convertedValue;
+    }
+
+    private static boolean isString(Class<?> aClass) {
+        return String.class.equals(aClass);
+    }
+
+    private static boolean isLong(Class<?> aClass) {
+        return Long.class.equals(aClass);
+    }
+
+    private static boolean isInteger(Class<?> aClass) {
+        return Integer.class.equals(aClass);
     }
 }

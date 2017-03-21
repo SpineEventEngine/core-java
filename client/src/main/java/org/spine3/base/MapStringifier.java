@@ -21,7 +21,6 @@
 package org.spine3.base;
 
 import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
 
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -100,35 +99,13 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final String value = keyValue[1];
 
         try {
-            final K convertedKey = convert(keyClass, key);
-            final V convertedValue = convert(valueClass, value);
+            final K convertedKey = Stringifiers.convert(key, keyClass);
+            final V convertedValue = Stringifiers.convert(value, valueClass);
             resultMap.put(convertedKey, convertedValue);
             return resultMap;
         } catch (Throwable ignored) {
             throw conversionArgumentException("Occurred exception during the conversion");
         }
-    }
-
-    @SuppressWarnings("unchecked") // It is OK because class is verified.
-    private static <I> I convert(Class<I> elementClass, String elementToConvert) {
-
-        if (isInteger(elementClass)) {
-            return (I) Ints.stringConverter()
-                           .convert(elementToConvert);
-        }
-
-        if (isLong(elementClass)) {
-            return (I) Longs.stringConverter()
-                            .convert(elementToConvert);
-        }
-
-        if (isString(elementClass)) {
-            return (I) elementToConvert;
-        }
-
-        final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
-        return convertedValue;
-
     }
 
     private static void checkKeyValue(String[] keyValue) {
@@ -142,17 +119,5 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static IllegalConversionArgumentException conversionArgumentException(String msg) {
         return new IllegalConversionArgumentException(new ConversionException(msg));
-    }
-
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static boolean isLong(Class<?> aClass) {
-        return Long.class.equals(aClass);
-    }
-
-    private static boolean isInteger(Class<?> aClass) {
-        return Integer.class.equals(aClass);
     }
 }
