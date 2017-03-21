@@ -20,80 +20,26 @@
 
 package org.spine3.base;
 
-import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.test.identifiers.IdWithPrimitiveFields;
+import org.spine3.test.types.Task;
+import org.spine3.type.ParametrizedTypeImpl;
 
-import java.util.Random;
+import java.lang.reflect.Type;
+import java.text.ParseException;
+import java.util.Map;
 
+import static com.google.common.collect.Maps.newHashMap;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.base.Stringifiers.mapStringifier;
 
-@SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-        "SerializableInnerClassWithNonSerializableOuterClass",
-        "DuplicateStringLiteralInspection"})
-// It is OK for test methods.
-public class StringifiersShould {
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Stringifiers.class);
-    }
-
-    private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
-            new Stringifier<IdWithPrimitiveFields>() {
-                @Override
-                protected String toString(IdWithPrimitiveFields id) {
-                    return id.getName();
-                }
-
-                @Override
-                protected IdWithPrimitiveFields fromString(String str) {
-                    return IdWithPrimitiveFields.newBuilder()
-                                                .setName(str)
-                                                .build();
-                }
-            };
-
-    @Test
-    public void convert_to_string_registered_id_message_type() {
-        StringifierRegistry.getInstance()
-                           .register(ID_TO_STRING_CONVERTER, IdWithPrimitiveFields.class);
-
-        final String testId = "testId 123456";
-        final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
-                                                              .setName(testId)
-                                                              .build();
-        final String result = idToString(id);
-        assertEquals(testId, result);
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-    // OK as these are standard Stringifiers we add ourselves.
-    @Test
-    public void handle_null_in_standard_converters() {
-        final StringifierRegistry registry = StringifierRegistry.getInstance();
-
-        assertNull(registry.get(Timestamp.class)
-                           .get()
-                           .convert(null));
-        assertNull(registry.get(EventId.class)
-                           .get()
-                           .convert(null));
-        assertNull(registry.get(CommandId.class)
-                           .get()
-                           .convert(null));
-    }
-
-    @Test
-    public void return_false_on_attempt_to_find_unregistered_type() {
-        assertFalse(StringifierRegistry.getInstance()
-                                       .hasStringifierFor(Random.class));
-    }
+/**
+ * @author Illia Shepilov
+ */
+public class MapStringifierShould {
 
     @Test
     public void convert_string_to_map() throws ParseException {
@@ -181,65 +127,5 @@ public class StringifiersShould {
         expectedMap.put("second", 2);
         expectedMap.put("third", 3);
         return expectedMap;
-    }
-
-    @Test
-    public void convert_string_to_list_of_strings() {
-        final String stringToConvert = "1,2,3,4,5";
-        final List<String> actualList = listStringifier(String.class).reverse()
-                                                                     .convert(stringToConvert);
-        assertNotNull(actualList);
-
-        final List<String> expectedList = Arrays.asList(stringToConvert.split(","));
-        assertThat(actualList, is(expectedList));
-    }
-
-    @Test
-    public void convert_list_of_strings_to_string() {
-        final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
-        final String actual = listStringifier(String.class).convert(listToConvert);
-        assertEquals(listToConvert.toString(), actual);
-    }
-
-    @Test
-    public void convert_list_of_integers_to_string() {
-        final List<Integer> listToConvert = newArrayList(1, 2, 3, 4, 5);
-        final String actual = listStringifier(Integer.class).convert(listToConvert);
-        assertEquals(listToConvert.toString(), actual);
-    }
-
-    @Test
-    public void convert_string_to_list_of_integers() {
-        final String stringToConvert = "1|2|3|4|5";
-        final String delimiter = "|";
-        final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Integer.class});
-        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
-        final List<Integer> actualList = Stringifiers.fromString(stringToConvert, type);
-        assertNotNull(actualList);
-
-        final List<Integer> expectedList = newArrayList(1, 2, 3, 4, 5);
-        assertThat(actualList, is(expectedList));
-    }
-
-    @Test(expected = IllegalConversionArgumentException.class)
-    public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
-        final String stringToConvert = "{value:123456}";
-        new ListStringifier<>(Task.class).reverse()
-                                         .convert(stringToConvert);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        final NullPointerTester tester = new NullPointerTester();
-        tester.testStaticMethods(Stringifiers.class, NullPointerTester.Visibility.PACKAGE);
-    }
-
-    @SuppressWarnings("EmptyClass") // is the part of the test.
-    @Test(expected = MissingStringifierException.class)
-    public void raise_exception_on_missing_stringifer() {
-        Stringifiers.toString(new Object() {
-        });
     }
 }
