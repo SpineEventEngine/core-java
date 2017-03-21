@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
@@ -48,6 +49,19 @@ import static org.spine3.base.CommandStatus.RECEIVED;
  * @author Alexander Yevsyukov
  */
 class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
+
+    /** The function to obtain a {@code CommandRecord} from {@code CommandEntity}. */
+    private static final Function<CommandEntity, CommandRecord> GET_RECORD =
+            new Function<CommandEntity, CommandRecord>() {
+        @Nullable
+        @Override
+        public CommandRecord apply(@Nullable CommandEntity input) {
+            if (input == null) {
+                return null;
+            }
+            return input.getState();
+        }
+    };
 
     /**
      * Stores a command with the {@link CommandStatus#RECEIVED} status by
@@ -107,18 +121,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
     Iterator<CommandRecord> iterator(CommandStatus status) {
         checkNotClosed();
         final Iterator<CommandEntity> filteredEntities = iterator(new MatchesStatus(status));
-        final Iterator<CommandRecord> transformed =
-                transform(filteredEntities,
-                          new Function<CommandEntity, CommandRecord>() {
-                              @Nullable
-                              @Override
-                              public CommandRecord apply(@Nullable CommandEntity input) {
-                                  if (input == null) {
-                                      return null;
-                                  }
-                                  return input.getState();
-                              }
-                          });
+        final Iterator<CommandRecord> transformed = transform(filteredEntities, getRecordFunc());
         return transformed;
     }
 
@@ -199,5 +202,10 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
 
     boolean isOpen() {
         return storageAssigned();
+    }
+
+    @VisibleForTesting
+    static Function<CommandEntity, CommandRecord> getRecordFunc() {
+        return GET_RECORD;
     }
 }

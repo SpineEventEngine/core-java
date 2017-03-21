@@ -47,6 +47,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.FAILURE;
@@ -323,6 +324,12 @@ public class CommandStorageShould {
                                                                                     Exception {
         storage.close();
         storage.updateStatus(generateId(), newFailure());
+    }
+
+    @Test
+    public void provide_null_accepting_record_retrieval_func() {
+        assertNull(CommandStorage.getRecordFunc()
+                                 .apply(null));
     }
 
     /*
