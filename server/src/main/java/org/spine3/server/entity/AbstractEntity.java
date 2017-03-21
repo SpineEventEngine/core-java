@@ -199,7 +199,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * Verifies whether the new state is valid.
      *
      * <p>Default implementation does nothing always returning {@code true}.
-     * Derived classes may provide custom validation logic overriding this method.
+     * Derived classes may provide custom validation logic by overriding this method.
      *
      * @param newState a state object to replace the current state
      * @return {@code true} if the new state object is valid, {@code false} otherwise
