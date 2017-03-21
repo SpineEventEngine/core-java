@@ -21,24 +21,11 @@
 package org.spine3.base;
 
 import java.lang.reflect.Type;
-import com.google.common.base.Optional;
-import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
-import com.google.common.reflect.TypeToken;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-
-import java.text.ParseException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.StringifierRegistry.getStringifier;
-import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Maps.newHashMap;
-import static java.lang.String.format;
-import static org.spine3.util.Exceptions.conversionArgumentException;
 
 /**
  * Utility class for working with {@code Stringifier}s.
@@ -140,139 +127,35 @@ public class Stringifiers {
         final Stringifier<Map<K, V>> mapStringifier =
                 new MapStringifier<>(keyClass, valueClass, delimiter);
         return mapStringifier;
-    protected static class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
-
-        private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
-
-        /**
-         * The delimiter for the passed elements in the {@code String} representation,
-         * {@code DEFAULT_ELEMENTS_DELIMITER} by default.
-         */
-        private final String delimiter;
-        private final Class<K> keyClass;
-        private final Class<V> valueClass;
-
-        public MapStringifier(Class<K> keyClass, Class<V> valueClass) {
-            super();
-            this.keyClass = keyClass;
-            this.valueClass = valueClass;
-            this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENTS_DELIMITER;
-        }
-
-        /**
-         * That constructor should be used when need to use
-         * a custom delimiter of the elements during conversion.
-         *
-         * @param keyClass   the class of the key elements
-         * @param valueClass the class of the value elements
-         * @param delimiter  the delimiter for the passed elements via string
-         */
-        public MapStringifier(Class<K> keyClass, Class<V> valueClass, String delimiter) {
-            super();
-            this.keyClass = keyClass;
-            this.valueClass = valueClass;
-            this.delimiter = ESCAPE_SEQUENCE + delimiter;
-        }
-
-        @Override
-        protected String doForward(Map<K, V> map) {
-            final String result = map.toString();
-            return result;
-        }
-
-        @Override
-        protected Map<K, V> doBackward(String s) {
-            final String[] buckets = s.split(Pattern.quote(delimiter));
-            final Map<K, V> resultMap = newHashMap();
-
-            for (String bucket : buckets) {
-                saveConvertedBucket(resultMap, bucket);
-            }
-            Ints.stringConverter();
-            return resultMap;
-        }
-
-        private Map<K, V> saveConvertedBucket(Map<K, V> resultMap, String element) {
-            final String[] keyValue = element.split(Pattern.quote(KEY_VALUE_DELIMITER));
-            checkKeyValue(keyValue);
-
-            final String key = keyValue[0];
-            final String value = keyValue[1];
-
-            try {
-                final K convertedKey = Stringifiers.convert(keyClass, key);
-                final V convertedValue = Stringifiers.convert(valueClass, value);
-                resultMap.put(convertedKey, convertedValue);
-                return resultMap;
-            } catch (Throwable ignored) {
-                throw conversionArgumentException(CONVERSION_EXCEPTION);
-            }
-        }
-
-        private static void checkKeyValue(String[] keyValue) {
-            if (keyValue.length != 2) {
-                final String exMessage =
-                        "Illegal key - value format, key value should be " +
-                        "separated with single `:` character";
-                throw conversionArgumentException(exMessage);
-            }
-        }
     }
 
     /**
-     * The stringifier for the {@code List} classes.
+     * Obtains {@code Stringifier} for list.
      *
-     * <p> The converter for the type of the elements in the list
-     * should be registered in the {@code StringifierRegistry} class
-     * for the correct usage of the {@code ListStringifier} converter.
-     *
-     * @param <T> the type of the elements in the list.
+     * @param elementClass the class of the list elements
+     * @param <T>          the type of the elements in the list
+     * @return the stringifier for the list
      */
-    protected static class ListStringifier<T> extends Stringifier<List<T>> {
+    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass) {
+        checkNotNull(elementClass);
+        final Stringifier<List<T>> listStringifier = new ListStringifier<T>(elementClass);
+        return listStringifier;
+    }
 
-        private final Class<T> listGenericClass;
-
-        /**
-         * The delimiter for the passed elements in the {@code String} representation,
-         * {@code DEFAULT_DELIMITER} by default.
-         */
-        private final String delimiter;
-
-        public ListStringifier(Class<T> listGenericClass) {
-            super();
-            this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENTS_DELIMITER;
-            this.listGenericClass = listGenericClass;
-        }
-
-        /**
-         * That constructor should be used when need to use
-         * a custom delimiter during conversion.
-         *
-         * @param listGenericClass the class of the list elements
-         * @param delimiter        the delimiter for the passed elements via string
-         */
-        public ListStringifier(Class<T> listGenericClass, String delimiter) {
-            super();
-            this.listGenericClass = listGenericClass;
-            this.delimiter = ESCAPE_SEQUENCE + delimiter;
-        }
-
-        @Override
-        protected String doForward(List<T> list) {
-            final String result = list.toString();
-            return result;
-        }
-
-        @Override
-        protected List<T> doBackward(String s) {
-            final String[] elements = s.split(delimiter);
-
-            final List<T> result = newArrayList();
-            for (String element : elements) {
-                final T convertedValue = Stringifiers.convert(listGenericClass, element);
-                result.add(convertedValue);
-            }
-            return result;
-        }
+    /**
+     * Obtains {@code Stringifier} for list.
+     *
+     * @param elementClass the class of the list elements
+     * @param delimiter    the delimiter or the list elements passed via string
+     * @param <T>          the type of the elements in the list
+     * @return the stringifier for the list
+     */
+    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
+                                                           String delimiter) {
+        checkNotNull(elementClass);
+        checkNotNull(delimiter);
+        final Stringifier<List<T>> listStringifier =
+                new ListStringifier<T>(elementClass, delimiter);
+        return listStringifier;
     }
 }

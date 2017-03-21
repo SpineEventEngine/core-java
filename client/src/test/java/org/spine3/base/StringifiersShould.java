@@ -44,12 +44,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.listStringifier;
 import static org.spine3.base.Stringifiers.mapStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-                   "SerializableInnerClassWithNonSerializableOuterClass",
-                   "DuplicateStringLiteralInspection"})
+        "SerializableInnerClassWithNonSerializableOuterClass",
+        "DuplicateStringLiteralInspection"})
 // It is OK for test methods.
 public class StringifiersShould {
 
@@ -169,7 +170,7 @@ public class StringifiersShould {
     public void throw_exception_when_key_value_delimiter_is_wrong() {
         final Type type = ParametrizedTypeImpl.from(Map.class,
                                                     new Class[]{Long.class, Long.class});
-        final Stringifier<Map<Long, Long>>stringifier = mapStringifier(Long.class, Long.class);
+        final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         Stringifiers.fromString("1\\-1", type);
@@ -200,9 +201,8 @@ public class StringifiersShould {
     @Test
     public void convert_string_to_list_of_strings() {
         final String stringToConvert = "1,2,3,4,5";
-        final List<String> actualList =
-                new Stringifiers.ListStringifier<>(String.class).reverse()
-                                                                .convert(stringToConvert);
+        final List<String> actualList = listStringifier(String.class).reverse()
+                                                                     .convert(stringToConvert);
         assertNotNull(actualList);
 
         final List<String> expectedList = Arrays.asList(stringToConvert.split(","));
@@ -212,16 +212,14 @@ public class StringifiersShould {
     @Test
     public void convert_list_of_strings_to_string() {
         final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
-        final String actual =
-                new Stringifiers.ListStringifier<>(String.class).convert(listToConvert);
+        final String actual = listStringifier(String.class).convert(listToConvert);
         assertEquals(listToConvert.toString(), actual);
     }
 
     @Test
     public void convert_list_of_integers_to_string() {
         final List<Integer> listToConvert = newArrayList(1, 2, 3, 4, 5);
-        final String actual =
-                new Stringifiers.ListStringifier<>(Integer.class).convert(listToConvert);
+        final String actual = listStringifier(Integer.class).convert(listToConvert);
         assertEquals(listToConvert.toString(), actual);
     }
 
@@ -229,11 +227,11 @@ public class StringifiersShould {
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1|2|3|4|5";
         final String delimiter = "|";
-        final TypeToken<List<Integer>> typeToken = new TypeToken<List<Integer>>(){};
-        final Stringifiers.ListStringifier<Integer> stringifier =
-                new Stringifiers.ListStringifier<>(Integer.class, delimiter);
-        StringifierRegistry.getInstance().register(typeToken, stringifier);
-        final List<Integer> actualList = Stringifiers.parse(stringToConvert, typeToken);
+        final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Integer.class});
+        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
+        StringifierRegistry.getInstance()
+                           .register(stringifier, type);
+        final List<Integer> actualList = Stringifiers.fromString(stringToConvert, type);
         assertNotNull(actualList);
 
         final List<Integer> expectedList = newArrayList(1, 2, 3, 4, 5);
@@ -243,8 +241,8 @@ public class StringifiersShould {
     @Test(expected = IllegalConversionArgumentException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
         final String stringToConvert = "{value:123456}";
-        new Stringifiers.ListStringifier<>(Task.class).reverse()
-                                                      .convert(stringToConvert);
+        new ListStringifier<>(Task.class).reverse()
+                                         .convert(stringToConvert);
     }
 
     @Test
