@@ -120,7 +120,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      *
      * @param commandStore       a store to save commands
      * @param scheduler          a command scheduler
-     * @param failureBus                a failure bus
+     * @param failureBus         a failure bus
      * @param log                a problem logger
      * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
