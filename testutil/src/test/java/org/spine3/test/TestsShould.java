@@ -122,6 +122,16 @@ public class TestsShould {
         Tests.assertTrue(false);
     }
 
+    @Test
+    public void create_archived_visibility() {
+        assertTrue(Tests.archived().getArchived());
+    }
+
+    @Test
+    public void create_deleted_visibility() {
+        assertTrue(Tests.deleted().getDeleted());
+    }
+
     /*
      * Test environment classes
      ***************************/

@@ -33,7 +33,6 @@ import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
-import org.spine3.server.entity.Visibility;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 
@@ -156,16 +155,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     protected Aggregate(I id) {
         super(id);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose the method to the package.
-     */
-    @Override
-    protected Visibility getVisibility() {
-        return super.getVisibility();
     }
 
     /**

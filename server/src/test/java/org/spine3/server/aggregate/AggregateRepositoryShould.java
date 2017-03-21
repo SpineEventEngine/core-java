@@ -200,21 +200,24 @@ public class AggregateRepositoryShould {
 
     @Test
     public void marks_aggregate_archived() {
-        final ProjectId id = createAndStoreAggregate();
+        final ProjectAggregate aggregate = createAndStoreAggregate();
 
-        repository.markArchived(id);
+        // archive the aggregate.
+        aggregate.setArchived(true);
+        repository.store(aggregate);
 
-        assertFalse(repository.load(id)
+        assertFalse(repository.load(aggregate.getId())
                               .isPresent());
     }
 
     @Test
     public void mark_aggregate_deleted() {
-        final ProjectId id = createAndStoreAggregate();
+        final ProjectAggregate aggregate = createAndStoreAggregate();
 
-        repository.markDeleted(id);
+        aggregate.setDeleted(true);
+        repository.store(aggregate);
 
-        assertFalse(repository.load(id)
+        assertFalse(repository.load(aggregate.getId())
                               .isPresent());
     }
 
@@ -251,12 +254,12 @@ public class AggregateRepositoryShould {
         return aggregate;
     }
 
-    private ProjectId createAndStoreAggregate() {
+    private ProjectAggregate createAndStoreAggregate() {
         final ProjectId id = Sample.messageOfType(ProjectId.class);
         final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(id);
 
         repository.store(aggregate);
-        return id;
+        return aggregate;
     }
 
     private AggregateStorage<ProjectId> givenAggregateStorageMock() {
@@ -271,6 +274,7 @@ public class AggregateRepositoryShould {
      * Test environment classes
      ****************************/
 
+    @SuppressWarnings("RedundantMethodOverride")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
@@ -325,6 +329,26 @@ public class AggregateRepositoryShould {
 
         static void clearCommandsHandled() {
             commandsHandled.clear();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overrides to open the method to this test suite.
+         */
+        @Override
+        protected void setArchived(boolean archived) {
+            super.setArchived(archived);
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overrides to open the method to this test suite.
+         */
+        @Override
+        protected void setDeleted(boolean deleted) {
+            super.setDeleted(deleted);
         }
     }
 

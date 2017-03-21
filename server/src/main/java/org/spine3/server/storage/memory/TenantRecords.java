@@ -27,18 +27,16 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.Visibility;
 
 import java.util.Iterator;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
-import static org.spine3.server.entity.Predicates.isRecordVisible;
 
 /**
  * The memory-based storage for {@code EntityStorageRecord} that represents
@@ -67,32 +65,6 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
     public Optional<EntityRecord> get(I id) {
         final EntityRecord record = records.get(id);
         return Optional.fromNullable(record);
-    }
-
-    void markArchived(I id) {
-        final EntityRecord record = records.get(id);
-        checkNotNull(record, "Can't mark a non-existing record archived.");
-        final Visibility status = record.getVisibility()
-                                          .toBuilder()
-                                          .setArchived(true)
-                                          .build();
-        final EntityRecord archivedRecord = record.toBuilder()
-                                                         .setVisibility(status)
-                                                         .build();
-        records.put(id, archivedRecord);
-    }
-
-    void markDeleted(I id) {
-        final EntityRecord record = records.get(id);
-        checkNotNull(record, "Can't mark a non-existing record deleted.");
-        final Visibility status = record.getVisibility()
-                                        .toBuilder()
-                                        .setDeleted(true)
-                                        .build();
-        final EntityRecord archivedRecord = record.toBuilder()
-                                                  .setVisibility(status)
-                                                  .build();
-        records.put(id, archivedRecord);
     }
 
     boolean delete(I id) {

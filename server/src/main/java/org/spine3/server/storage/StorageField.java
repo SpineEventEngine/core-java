@@ -20,8 +20,6 @@
 
 package org.spine3.server.storage;
 
-import org.spine3.SPI;
-
 /**
  * A marker interface for the {@code enum}s representing the names of the fields
  * used by the framework to store its data.
@@ -34,6 +32,5 @@ import org.spine3.SPI;
  *
  * @author Dmytro Dashenkov
  */
-@SPI
 public interface StorageField {
 }

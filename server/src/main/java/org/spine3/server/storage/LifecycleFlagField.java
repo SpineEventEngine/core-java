@@ -18,27 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.change;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+package org.spine3.server.storage;
 
 /**
- * Routines common for all mismatches.
+ * A container for the storage fields used to store the
+ * {@linkplain org.spine3.server.entity.LifecycleFlags LifecycleFlags}.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
+ * @see StorageField
  */
-class Mismatches {
+public enum LifecycleFlagField implements StorageField {
 
-    private static final String ERR_CANNOT_BE_EQUAL = "`expected` and `actual` cannot be equal in ValueMismatch";
+    /**
+     * A {@linkplain boolean} field representing whether
+     * the relevant record is {@code archived} or not.
+     */
+    archived,
 
-    private Mismatches() {
-        // Prevent instantiations.
-    }
-
-    static void checkNotNullOrEqual(Object expected, Object actual) {
-        checkNotNull(expected);
-        checkNotNull(actual);
-        checkArgument(!expected.equals(actual), ERR_CANNOT_BE_EQUAL);
-    }
+    /**
+     * A {@linkplain boolean} field representing whether
+     * the relevant record is {@code deleted} or not.
+     */
+    deleted
 }

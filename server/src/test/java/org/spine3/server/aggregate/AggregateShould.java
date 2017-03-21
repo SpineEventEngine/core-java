@@ -345,7 +345,7 @@ public class AggregateShould {
         anotherAggregate.restore(snapshotNewProject);
         assertEquals(aggregate.getState(), anotherAggregate.getState());
         assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
-        assertEquals(aggregate.getVisibility(), anotherAggregate.getVisibility());
+        assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
     }
 
     @Test
@@ -619,10 +619,6 @@ public class AggregateShould {
     }
 
     private static List<Event> getProjectEvents() {
-
-        //TODO:2017-02-19:alexander.yevsyukov: Use TestCommandFactory instead of
-        // ”re-using” EVENT_CONTEXT.
-        // We need to have increasing version numbers in event contexts.
 
         final List<Event> events = ImmutableList.<Event>builder()
                 .add(projectCreated(ID, EVENT_CONTEXT.toBuilder()

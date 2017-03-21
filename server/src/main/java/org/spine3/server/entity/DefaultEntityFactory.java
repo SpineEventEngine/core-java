@@ -33,14 +33,15 @@ import static org.spine3.server.entity.AbstractEntity.getConstructor;
  * @param <E> the type of entities to create
  * @author Alexander Yevsyukov
  */
-public class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityFactory<I, E> {
+class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>>
+        implements EntityFactory<I, E> {
 
     private final Repository<I, E> repository;
 
     /** The constructor for creating entity instances. */
     private final Constructor<E> entityConstructor;
 
-    public DefaultEntityFactory(Repository<I, E> repository) {
+    DefaultEntityFactory(Repository<I, E> repository) {
         this.repository = repository;
         this.entityConstructor = getEntityConstructor();
         this.entityConstructor.setAccessible(true);
