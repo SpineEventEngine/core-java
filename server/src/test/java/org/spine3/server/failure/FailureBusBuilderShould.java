@@ -36,7 +36,7 @@ public class FailureBusBuilderShould {
                   .setDispatcherFailureDelivery(Tests.<DispatcherFailureDelivery>nullRef());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent")    //It's fine as for the Builder tests
+    @SuppressWarnings("OptionalGetWithoutIsPresent")    //It's fine as for the Builder tests.
     @Test
     public void return_set_DispatcherDelivery() {
         final DispatcherFailureDelivery delivery = deliveryForTests();
@@ -51,7 +51,7 @@ public class FailureBusBuilderShould {
             @Override
             protected boolean shouldPostponeDelivery(FailureEnvelope deliverable,
                                                      FailureDispatcher consumer) {
-                return false;   // does not really matter for tests.
+                return false;   // Does not really matter for tests.
             }
         };
     }
