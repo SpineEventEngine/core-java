@@ -22,7 +22,6 @@ package org.spine3.server.storage;
 
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
@@ -45,11 +44,6 @@ public interface StorageFactory extends AutoCloseable {
      *         {@code false} otherwise
      */
     boolean isMultitenant();
-
-    /**
-     * Creates a new {@link CommandStorage} instance.
-     */
-    CommandStorage createCommandStorage();
 
     /**
      * Creates a new {@link EventStorage} instance.

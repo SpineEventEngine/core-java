@@ -22,7 +22,6 @@ package org.spine3.server.storage.memory;
 
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.command.CommandStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
@@ -46,11 +45,6 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public boolean isMultitenant() {
         return this.multitenant;
-    }
-
-    @Override
-    public CommandStorage createCommandStorage() {
-        return new InMemoryCommandStorage(isMultitenant());
     }
 
     @Override
