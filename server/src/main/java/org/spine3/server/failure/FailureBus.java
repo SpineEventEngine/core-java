@@ -48,7 +48,8 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  * @see org.spine3.base.FailureThrowable
  * @see Subscribe Subscribe @Subscribe
  */
-public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope, FailureClass, FailureDispatcher> {
+public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
+                                                 FailureClass, FailureDispatcher> {
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
