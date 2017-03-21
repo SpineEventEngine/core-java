@@ -32,8 +32,6 @@ import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.enrich.EventEnricher;
-import org.spine3.server.event.error.InvalidEventException;
-import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;

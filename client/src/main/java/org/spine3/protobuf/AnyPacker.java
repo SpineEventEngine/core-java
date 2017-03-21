@@ -25,7 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import org.spine3.type.TypeUrl;
-import org.spine3.type.error.UnexpectedTypeException;
+import org.spine3.type.UnexpectedTypeException;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

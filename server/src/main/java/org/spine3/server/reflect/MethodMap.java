@@ -26,7 +26,6 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.server.error.DuplicateHandlerMethodException;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
