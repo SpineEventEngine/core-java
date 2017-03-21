@@ -27,6 +27,7 @@ import org.spine3.type.ParametrizedTypeImpl;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.core.Is.is;
@@ -42,12 +43,12 @@ public class ListStringifierShould {
 
     @Test
     public void convert_string_to_list_of_strings() {
-        final String stringToConvert = "1,2,3,4,5";
+        final String stringToConvert = "1\\,2\\,3\\,4\\,5";
         final List<String> actualList = listStringifier(String.class).reverse()
                                                                      .convert(stringToConvert);
         assertNotNull(actualList);
 
-        final List<String> expectedList = Arrays.asList(stringToConvert.split(","));
+        final List<String> expectedList = Arrays.asList(stringToConvert.split(Pattern.quote("\\,")));
         assertThat(actualList, is(expectedList));
     }
 
@@ -67,7 +68,7 @@ public class ListStringifierShould {
 
     @Test
     public void convert_string_to_list_of_integers() {
-        final String stringToConvert = "1|2|3|4|5";
+        final String stringToConvert = "1\\|2\\|3\\|4\\|5";
         final String delimiter = "|";
         final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Integer.class});
         final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
@@ -80,7 +81,7 @@ public class ListStringifierShould {
         assertThat(actualList, is(expectedList));
     }
 
-    @Test(expected = IllegalConversionArgumentException.class)
+    @Test(expected = MissingStringifierException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
         final String stringToConvert = "{value:123456}";
         new ListStringifier<>(Task.class).reverse()

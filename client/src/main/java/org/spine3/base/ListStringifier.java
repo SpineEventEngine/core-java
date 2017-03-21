@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import java.util.List;
+import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -73,11 +74,11 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected List<T> fromString(String s) {
-        final String[] elements = s.split(delimiter);
+        final String[] elements = s.split(Pattern.quote(delimiter));
 
         final List<T> result = newArrayList();
         for (String element : elements) {
-            final T convertedValue = Stringifiers.fromString(element, listGenericClass);
+            final T convertedValue = Stringifiers.convert(element, listGenericClass);
             result.add(convertedValue);
         }
         return result;
