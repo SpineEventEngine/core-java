@@ -33,10 +33,6 @@ import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-        "SerializableInnerClassWithNonSerializableOuterClass",
-        "DuplicateStringLiteralInspection"})
-// It is OK for test methods.
 public class StringifiersShould {
 
     @Test
