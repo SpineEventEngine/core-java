@@ -40,6 +40,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.mapStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
@@ -110,7 +111,7 @@ public class StringifiersShould {
         final Type type = ParametrizedTypeImpl.make(Map.class,
                                                     new Class[]{Long.class, Timestamp.class});
         final Stringifier<Map<Long, Timestamp>> stringifier =
-                new Stringifiers.MapStringifier<>(Long.class, Timestamp.class);
+                mapStringifier(Long.class, Timestamp.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         final Map<Long, Timestamp> actualMap = Stringifiers.fromString(rawMap, type);
@@ -124,8 +125,8 @@ public class StringifiersShould {
         final Map<String, Integer> mapToConvert = createTestMap();
         final Type type = ParametrizedTypeImpl.make(Map.class,
                                                     new Class[]{String.class, Integer.class});
-        final Stringifiers.MapStringifier<String, Integer> stringifier =
-                new Stringifiers.MapStringifier<>(String.class, Integer.class);
+        final Stringifier<Map<String, Integer>> stringifier =
+                mapStringifier(String.class, Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         final String convertedMap = Stringifiers.toString(mapToConvert, type);
@@ -137,8 +138,8 @@ public class StringifiersShould {
         final String incorrectRawMap = "first\\:1\\,second\\:2";
         final Type type = ParametrizedTypeImpl.make(Map.class,
                                                     new Class[]{Integer.class, Integer.class});
-        final Stringifiers.MapStringifier<Integer, Integer> stringifier =
-                new Stringifiers.MapStringifier<>(Integer.class, Integer.class);
+        final Stringifier<Map<Integer, Integer>> stringifier =
+                mapStringifier(Integer.class, Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         Stringifiers.fromString(incorrectRawMap, type);
@@ -154,8 +155,7 @@ public class StringifiersShould {
     public void throw_exception_when_occurred_exception_during_conversion() {
         final Type type = ParametrizedTypeImpl.make(Map.class,
                                                     new Class[]{Task.class, Long.class});
-        final Stringifiers.MapStringifier<Task, Long> stringifier =
-                new Stringifiers.MapStringifier<>(Task.class, Long.class);
+        final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         Stringifiers.fromString("first\\:first\\:first", type);
@@ -165,8 +165,7 @@ public class StringifiersShould {
     public void throw_exception_when_key_value_delimiter_is_wrong() {
         final Type type = ParametrizedTypeImpl.make(Map.class,
                                                     new Class[]{Long.class, Long.class});
-        final Stringifiers.MapStringifier<Long, Long> stringifier =
-                new Stringifiers.MapStringifier<>(Long.class, Long.class);
+        final Stringifier<Map<Long, Long>>stringifier = mapStringifier(Long.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         Stringifiers.fromString("1\\-1", type);
@@ -178,8 +177,7 @@ public class StringifiersShould {
         final Type type = ParametrizedTypeImpl.make(Map.class,
                                                     new Class[]{String.class, Integer.class});
         final Stringifier<Map<String, Integer>> stringifier =
-                new Stringifiers.MapStringifier<>(String.class, Integer.class, "|");
-
+                mapStringifier(String.class, Integer.class, "|");
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
 
