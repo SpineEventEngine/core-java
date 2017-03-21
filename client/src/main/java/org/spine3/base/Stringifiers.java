@@ -103,6 +103,8 @@ public class Stringifiers {
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
                                                                Class<V> valueClass) {
+        checkNotNull(keyClass);
+        checkNotNull(valueClass);
         final Stringifier<Map<K, V>> mapStringifier = new MapStringifier<>(keyClass, valueClass);
         return mapStringifier;
     }
@@ -118,6 +120,9 @@ public class Stringifiers {
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
                                                                Class<V> valueClass,
                                                                String delimiter) {
+        checkNotNull(keyClass);
+        checkNotNull(valueClass);
+        checkNotNull(delimiter);
         final Stringifier<Map<K, V>> mapStringifier =
                 new MapStringifier<>(keyClass, valueClass, delimiter);
         return mapStringifier;
