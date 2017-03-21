@@ -110,6 +110,8 @@ public class Stringifiers {
     }
 
     /**
+     * Obtains {@code Stringifier} for map.
+     *
      * @param keyClass   the class of keys are maintained by this map
      * @param valueClass the class  of mapped values
      * @param delimiter  the delimiter for the passed map elements via string
