@@ -118,6 +118,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private static IllegalConversionArgumentException conversionArgumentException(String msg) {
-        return new IllegalConversionArgumentException(new ConversionException(msg));
+        return new IllegalConversionArgumentException(msg);
     }
 }

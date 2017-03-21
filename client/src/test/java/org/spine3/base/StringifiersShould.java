@@ -33,10 +33,6 @@ import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-        "SerializableInnerClassWithNonSerializableOuterClass",
-        "DuplicateStringLiteralInspection"})
-// It is OK for test methods.
 public class StringifiersShould {
 
     @Test
@@ -104,7 +100,6 @@ public class StringifiersShould {
     @SuppressWarnings("EmptyClass") // is the part of the test.
     @Test(expected = MissingStringifierException.class)
     public void raise_exception_on_missing_stringifer() {
-        Stringifiers.toString(new Object() {
-        });
+        Stringifiers.toString(new Object() {});
     }
 }

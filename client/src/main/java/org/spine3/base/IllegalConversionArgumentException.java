@@ -25,20 +25,12 @@ package org.spine3.base;
  * inappropriate argument during the conversion from one type to another.
  *
  * @author Illia Shepilov
- * @see ConversionException
  */
 public class IllegalConversionArgumentException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
-    private final ConversionException conversionException;
-
-    public IllegalConversionArgumentException(ConversionException conversionException) {
-        super();
-        this.conversionException = conversionException;
-    }
-
-    public ConversionException getConversionException() {
-        return conversionException;
+    public IllegalConversionArgumentException(String message) {
+        super(message);
     }
 }
