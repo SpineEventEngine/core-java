@@ -548,5 +548,4 @@ public class ProjectionRepositoryShould
             // NOP
         }
     }
-
 }
