@@ -33,22 +33,55 @@ import org.spine3.testdata.Sample;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.entity.storage.StorageFieldsDecomposer.toStorageFieldType;
+import static org.spine3.server.entity.storage.EntityFields.toStorageFieldType;
 
 /**
- * @author Dmytro Dashenkov.
+ * @author Dmytro Dashenkov
  */
-public class StorageFieldsDecomposerShould {
+public class EntityFieldsShould {
 
     @Test
-    public void map_class_to_storage_field_type() {
+    public void map_integer_to_storage_field_type() {
         checkClassToTypeMapping(int.class, StorageFieldType.INTEGER);
+        checkClassToTypeMapping(Integer.class, StorageFieldType.INTEGER);
+    }
+
+    @Test
+    public void map_long_to_storage_field_type() {
+        checkClassToTypeMapping(long.class, StorageFieldType.LONG);
         checkClassToTypeMapping(Long.class, StorageFieldType.LONG);
+    }
+
+    @Test
+    public void map_string_to_storage_field_type() {
         checkClassToTypeMapping(String.class, StorageFieldType.STRING);
+    }
+
+    @Test
+    public void map_boolean_to_storage_field_type() {
+        checkClassToTypeMapping(boolean.class, StorageFieldType.BOOLEAN);
         checkClassToTypeMapping(Boolean.class, StorageFieldType.BOOLEAN);
+    }
+
+    @Test
+    public void map_float_to_storage_field_type() {
         checkClassToTypeMapping(float.class, StorageFieldType.FLOAT);
+        checkClassToTypeMapping(Float.class, StorageFieldType.FLOAT);
+    }
+
+    @Test
+    public void map_double_to_storage_field_type() {
+        checkClassToTypeMapping(double.class, StorageFieldType.DOUBLE);
         checkClassToTypeMapping(Double.class, StorageFieldType.DOUBLE);
+    }
+
+    @Test
+    public void map_message_to_storage_field_type() {
         checkClassToTypeMapping(Message.class, StorageFieldType.MESSAGE);
+    }
+
+    @Test
+    public void map_custom_message_to_storage_field_type() {
         checkClassToTypeMapping(Any.class, StorageFieldType.MESSAGE);
         checkClassToTypeMapping(Project.class, StorageFieldType.MESSAGE);
     }
@@ -59,7 +92,7 @@ public class StorageFieldsDecomposerShould {
         final String intKey = "int_value";
         final int intValue = 42;
 
-        StorageFieldsDecomposer.putValue(builder, intKey, intValue);
+        EntityFields.putValue(builder, intKey, intValue);
         final StorageFields fields = builder.build();
         assertEquals(fields.getIntegerFieldOrDefault(intKey, -1), intValue);
     }
@@ -70,7 +103,7 @@ public class StorageFieldsDecomposerShould {
         final String longKey = "long_value";
         final long longValue = 42L;
 
-        StorageFieldsDecomposer.putValue(builder, longKey, longValue);
+        EntityFields.putValue(builder, longKey, longValue);
         final StorageFields fields = builder.build();
         assertEquals(fields.getLongFieldOrDefault(longKey, -1L), longValue);
     }
@@ -81,7 +114,7 @@ public class StorageFieldsDecomposerShould {
         final String stringKey = "string_value";
         final String stringValue = "some string";
 
-        StorageFieldsDecomposer.putValue(builder, stringKey, stringValue);
+        EntityFields.putValue(builder, stringKey, stringValue);
         final StorageFields fields = builder.build();
         assertEquals(fields.getStringFieldOrDefault(stringKey, ""), stringValue);
     }
@@ -92,14 +125,14 @@ public class StorageFieldsDecomposerShould {
         final String boolKey = "bool_value";
         final boolean boolValue = true;
 
-        StorageFieldsDecomposer.putValue(builder, boolKey, boolValue);
+        EntityFields.putValue(builder, boolKey, boolValue);
         final StorageFields fields = builder.build();
         assertEquals(fields.getBooleanFieldOrDefault(boolKey, !boolValue), boolValue);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_if_putting_a_field_of_unknown_type() {
-        StorageFieldsDecomposer.putValue(StorageFields.newBuilder(), "mock-name", new Object());
+        EntityFields.putValue(StorageFields.newBuilder(), "mock-name", new Object());
     }
 
     @Test
@@ -108,7 +141,7 @@ public class StorageFieldsDecomposerShould {
         final String floatKey = "float_value";
         final float floatValue = 4.2f;
 
-        StorageFieldsDecomposer.putValue(builder, floatKey, floatValue);
+        EntityFields.putValue(builder, floatKey, floatValue);
         final StorageFields fields = builder.build();
         assertEquals(fields.getFloatFieldOrDefault(floatKey, 0.0f), floatValue, 0.0f);
     }
@@ -119,7 +152,7 @@ public class StorageFieldsDecomposerShould {
         final String doubleKey = "double_value";
         final double doubleValue = 42.0;
 
-        StorageFieldsDecomposer.putValue(builder, doubleKey, doubleValue);
+        EntityFields.putValue(builder, doubleKey, doubleValue);
         final StorageFields fields = builder.build();
         assertEquals(fields.getDoubleFieldOrDefault(doubleKey, 0.0), doubleValue, 0.0);
     }
@@ -130,7 +163,7 @@ public class StorageFieldsDecomposerShould {
         final String messageKey = "message_value";
         final Message messageValue = Sample.messageOfType(Project.class);
 
-        StorageFieldsDecomposer.putValue(builder, messageKey, messageValue);
+        EntityFields.putValue(builder, messageKey, messageValue);
         final StorageFields fields = builder.build();
         final Message messageActual =
                 AnyPacker.unpack(fields.getAnyFieldOrDefault(messageKey, Any.getDefaultInstance()));
