@@ -43,11 +43,11 @@ public class ParametrizedTypeImpl implements ParameterizedType {
         this.ownerType = ownerType;
     }
 
-    public static ParameterizedType make(Class<?> rawType, Type[] typeArguments, Type ownerType) {
+    public static ParameterizedType from(Class<?> rawType, Type[] typeArguments, Type ownerType) {
         return new ParametrizedTypeImpl(rawType, typeArguments, ownerType);
     }
 
-    public static ParameterizedType make(Class<?> rawType, Type[] typeArguments) {
+    public static ParameterizedType from(Class<?> rawType, Type[] typeArguments) {
         return new ParametrizedTypeImpl(rawType, typeArguments, rawType);
     }
 

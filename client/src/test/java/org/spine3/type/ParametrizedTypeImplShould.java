@@ -37,14 +37,14 @@ public class ParametrizedTypeImplShould {
 
     @Test
     public void return_raw_type() {
-        final ParameterizedType type = ParametrizedTypeImpl.make(List.class,
+        final ParameterizedType type = ParametrizedTypeImpl.from(List.class,
                                                                  new Type[]{Integer.class});
         assertEquals(List.class, type.getRawType());
     }
 
     @Test
     public void return_owner_type() {
-        final ParameterizedType type = ParametrizedTypeImpl.make(List.class,
+        final ParameterizedType type = ParametrizedTypeImpl.from(List.class,
                                                                  new Type[]{Integer.class},
                                                                  ParametrizedTypeImpl.class);
         assertEquals(ParametrizedTypeImpl.class, type.getOwnerType());
@@ -53,17 +53,17 @@ public class ParametrizedTypeImplShould {
     @Test
     public void return_type_arguments() {
         final Type[] typeArguments = {Integer.class};
-        final ParameterizedType type = ParametrizedTypeImpl.make(List.class,
+        final ParameterizedType type = ParametrizedTypeImpl.from(List.class,
                                                                  typeArguments);
         assertArrayEquals(typeArguments, type.getActualTypeArguments());
     }
 
     @Test
     public void have_smart_equals() {
-        final ParameterizedType firstType = ParametrizedTypeImpl.make(List.class,
+        final ParameterizedType firstType = ParametrizedTypeImpl.from(List.class,
                                                                       new Type[]{Integer.class},
                                                                       ParametrizedTypeImpl.class);
-        final ParameterizedType secondType = ParametrizedTypeImpl.make(List.class,
+        final ParameterizedType secondType = ParametrizedTypeImpl.from(List.class,
                                                                        new Type[]{Integer.class},
                                                                        ParametrizedTypeImpl.class);
         new EqualsTester().addEqualityGroup(firstType, secondType)
