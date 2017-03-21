@@ -41,7 +41,7 @@ import static org.spine3.base.Stringifiers.mapStringifier;
  */
 @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass",
                    "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
-// It is OK for test methods.
+                   // It is OK for test methods.
 public class MapStringifierShould {
 
     @Test
