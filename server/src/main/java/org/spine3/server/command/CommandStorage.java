@@ -23,7 +23,6 @@ package org.spine3.server.command;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import org.spine3.annotations.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
@@ -40,12 +39,14 @@ import static com.google.common.collect.Iterators.transform;
 import static org.spine3.base.CommandStatus.RECEIVED;
 
 /**
- * This is Repository-based implementation of Command Store, which is going to
- * {@link CommandStore}.
+ * The storage of commands and their processing status.
+ *
+ * <p>This class allows to hide implementation details of storing commands.
+ * {@link CommandStore} serves as a facade, hiding the fact that the {@code CommandStorage}
+ * is a {@code Repository}.
  *
  * @author Alexander Yevsyukov
  */
-@SPI
 class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
 
     /**

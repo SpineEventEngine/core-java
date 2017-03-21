@@ -60,6 +60,7 @@ import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.command.CommandRecords.newRecordBuilder;
 import static org.spine3.server.command.CommandRecords.toCommandIterator;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.validate.Validate.isDefault;
@@ -245,7 +246,7 @@ public class CommandStorageShould {
         final Command command = createProject();
         final CommandStatus status = RECEIVED;
 
-        final CommandRecord record = CommandRecords.newRecordBuilder(command, status, null).build();
+        final CommandRecord record = newRecordBuilder(command, status, null).build();
 
         checkRecord(record, command, status);
     }
