@@ -41,7 +41,6 @@ public class FailuresShould {
         new NullPointerTester()
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .testAllPublicStaticMethods(Failures.class);
-
     }
 
     @Test
