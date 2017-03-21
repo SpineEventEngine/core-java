@@ -25,6 +25,9 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.ConversionException;
+import org.spine3.base.MissingStringifierException;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.types.Task;
@@ -40,6 +43,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Stringifiers.listStringifier;
 
 /**
  * @author Illia Shepilov
@@ -57,13 +61,16 @@ public class AbstractValidatingBuilderShould {
     public void return_converted_value() throws ConversionException {
         final ParameterizedType type = ParametrizedTypeImpl.from(List.class,
                                                                  new Type[]{Integer.class});
+        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class);
+        StringifierRegistry.getInstance()
+                           .register(stringifier, type);
         final List<Integer> convertedValue =
                 validatingBuilder.getConvertedValue(type, "1");
         final List<Integer> expectedList = newArrayList(1);
         assertThat(convertedValue, is(expectedList));
     }
 
-    @Test(expected = ConversionException.class)
+    @Test(expected = MissingStringifierException.class)
     public void throw_exception_when_appropriate_stringifier_is_not_found() throws
                                                                             ConversionException {
         final String stringToConvert = "{value:1}";
@@ -74,6 +81,9 @@ public class AbstractValidatingBuilderShould {
     public void throw_exception_when_string_cannot_be_converted() throws ConversionException {
         final String stringToConvert = "";
         final Type type = ParametrizedTypeImpl.from(List.class, new Type[]{Timestamp.class});
+        final Stringifier<List<Timestamp>> stringifier = listStringifier(Timestamp.class);
+        StringifierRegistry.getInstance()
+                           .register(stringifier, type);
         validatingBuilder.getConvertedValue(type, stringToConvert);
     }
 
