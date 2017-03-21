@@ -22,6 +22,7 @@ package org.spine3.server.event.error;
 
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.server.event.InvalidEventException;
 import org.spine3.validate.ConstraintViolation;
 
 import static java.util.Collections.singletonList;

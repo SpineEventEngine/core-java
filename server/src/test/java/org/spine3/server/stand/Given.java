@@ -30,7 +30,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -44,6 +43,7 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
+import org.spine3.type.TypeUrl;
 
 import java.util.Collections;
 import java.util.List;
@@ -72,7 +72,7 @@ class Given {
                                                                       .setId("12345AD0"))
                                                .build())
                                     .toBuilder()
-                                    .setTypeUrl(TypeUrl.SPINE_TYPE_URL_PREFIX + '/' +
+                                    .setTypeUrl(TypeUrl.Prefix.SPINE.value() + '/' +
                                                 ProjectCreated.getDescriptor()
                                                               .getFullName())
                                     .build())

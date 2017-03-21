@@ -47,7 +47,8 @@ public class InternetDomains {
     }
 
     private static void checkArgumentIsDomainName(CharSequence name) {
-        checkArgument(pattern().matcher(name).matches());
+        checkArgument(pattern().matcher(name)
+                               .matches());
     }
 
     /**

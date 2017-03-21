@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventEnvelope;
 import org.spine3.base.Events;
@@ -42,6 +41,7 @@ import org.spine3.test.Tests;
 import org.spine3.test.Tests.MemoizingObserver;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
+import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;

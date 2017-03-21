@@ -40,6 +40,7 @@ import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.validate.MessageValidator;
+import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;

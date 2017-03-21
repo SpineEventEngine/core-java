@@ -24,25 +24,27 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventEnvelope;
+import org.spine3.base.Events;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcherDelegate;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.event.EventBus;
+import org.spine3.type.CommandClass;
+import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
+
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The abstract base for Process Managers repositories.
@@ -132,7 +134,8 @@ public abstract class ProcessManagerRepository<I,
      * and stored after it handles the passed event.
      *
      * @param event the event to dispatch
-     * @throws IllegalArgumentException if events of this type are not handled by the process manager
+     * @throws IllegalArgumentException if events of this type are not handled by
+     *                                  this process manager
      * @see ProcessManager#dispatchEvent(Message, EventContext)
      */
     @Override
@@ -183,7 +186,7 @@ public abstract class ProcessManagerRepository<I,
         if (!classes.contains(commandClass)) {
             final String eventClassName = commandClass.value()
                                                       .getName();
-            throw new IllegalArgumentException("Unexpected command of class: " + eventClassName);
+            throw newIllegalArgumentException("Unexpected command of class: %s", eventClassName);
         }
     }
 
@@ -194,7 +197,7 @@ public abstract class ProcessManagerRepository<I,
         if (!classes.contains(eventClass)) {
             final String eventClassName = eventClass.value()
                                                     .getName();
-            throw new IllegalArgumentException("Unexpected event of class: " + eventClassName);
+            throw newIllegalArgumentException("Unexpected event of class: %s", eventClassName);
         }
     }
 

@@ -20,13 +20,12 @@
 
 package org.spine3.server;
 
+import com.google.common.testing.NullPointerTester;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.Test;
-import org.spine3.test.NullToleranceTest;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StatusesShould {
@@ -50,11 +49,8 @@ public class StatusesShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
-        final NullToleranceTest nullToleranceTest = NullToleranceTest.newBuilder()
-                                                                     .setClass(Statuses.class)
-                                                                     .addDefaultValue(new RuntimeException("default"))
-                                                                     .build();
-        final boolean passed = nullToleranceTest.check();
-        assertTrue(passed);
+        new NullPointerTester()
+                .setDefault(Exception.class, new RuntimeException("Statuses test"))
+                .testAllPublicStaticMethods(Statuses.class);
     }
 }

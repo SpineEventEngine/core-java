@@ -100,14 +100,14 @@ public class QueryServiceShould {
 
     @Test
     public void execute_queries() {
-        final Query query = Given.Query.readAllProjects();
+        final Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkOkResponse(responseObserver);
     }
 
     @Test
     public void dispatch_queries_to_proper_bounded_context() {
-        final Query query = Given.Query.readAllProjects();
+        final Query query = Given.AQuery.readAllProjects();
         final Stand stand = projectsContext.getStand();
         service.read(query, responseObserver);
 
@@ -137,7 +137,7 @@ public class QueryServiceShould {
     @Test
     public void return_error_if_query_failed_to_execute() {
         when(projectDetailsRepository.loadAll()).thenThrow(RuntimeException.class);
-        final Query query = Given.Query.readAllProjects();
+        final Query query = Given.AQuery.readAllProjects();
         service.read(query, responseObserver);
         checkFailureResponse(responseObserver);
     }

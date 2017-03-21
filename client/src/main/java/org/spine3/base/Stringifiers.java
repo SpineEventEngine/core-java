@@ -20,22 +20,10 @@
 
 package org.spine3.base;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.MessageOrBuilder;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
-import org.spine3.validate.ConversionError;
-import org.spine3.validate.IllegalConversionArgumentException;
-
-import javax.annotation.Nullable;
-import java.text.ParseException;
-import java.util.Collection;
-import java.util.regex.Pattern;
+import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.TextFormat.shortDebugString;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
  * Utility class for working with {@code Stringifier}s.
@@ -45,165 +33,61 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  */
 public class Stringifiers {
 
-    /** A {@code null} ID string representation. */
-    public static final String NULL_ID = "NULL";
-
-    /** An empty ID string representation. */
-    public static final String EMPTY_ID = "EMPTY";
-
-    private static final Pattern PATTERN_COLON = Pattern.compile(":");
-    private static final Pattern PATTERN_T = Pattern.compile("T");
-    private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
-    private static final String EQUAL_SIGN = "=";
-
     private Stringifiers() {
         // Disable instantiation of this utility class.
     }
 
     /**
-     * Converts the passed timestamp to the string, which will serve as ID.
+     * Converts the passed value to the string representation.
      *
-     * @param timestamp the value to convert
-     * @return string representation of timestamp-based ID
+     * <p>Use this method for converting non-generic objects. For generic objects,
+     * please use {@link #toString(Object, Type)}.
+     *
+     * @param object the object to convert
+     * @param <T> the type of the object
+     * @return the string representation of the passed object
      */
-    public static String toIdString(Timestamp timestamp) {
-        checkNotNull(timestamp);
-        String result = Timestamps.toString(timestamp);
-        result = PATTERN_COLON.matcher(result)
-                              .replaceAll("-");
-        result = PATTERN_T.matcher(result)
-                          .replaceAll("_T");
+    public static <T> String toString(T object) {
+        checkNotNull(object);
+        return toString(object, object.getClass());
+    }
 
+    /**
+     * Converts the passed value to the string representation.
+     *
+     * <p>This method must be used of the passed object is a generic type.
+     *
+     * @param <T>       the type of the object to convert
+     * @param object    to object to convert
+     * @param typeOfT   the type of the passed object
+     * @return the string representation of the passed object
+     * @throws MissingStringifierException if passed value cannot be converted
+     */
+    public static <T> String toString(T object, Type typeOfT) {
+        checkNotNull(object);
+        checkNotNull(typeOfT);
+
+        final Stringifier<T> stringifier = getStringifier(typeOfT);
+        final String result = stringifier.convert(object);
         return result;
     }
 
     /**
-     * Converts the passed ID value into the string representation.
+     * Parses string to the appropriate value.
      *
-     * @param id  the value to convert
-     * @param <I> the type of the ID
-     * @return <ul>
-     * <li>for classes implementing {@link Message} &mdash; a Json form;
-     * <li>for {@code String}, {@code Long}, {@code Integer} &mdash; the result of {@link Object#toString()};
-     * <li>for {@code null} ID &mdash; the {@link #NULL_ID};
-     * <li>if the result is empty or blank string &mdash; the {@link #EMPTY_ID}.
-     * </ul>
-     * @throws IllegalArgumentException if the passed type isn't one of the above or
-     *                                  the passed {@link Message} instance has no fields
-     * @see StringifierRegistry
+     * @param <T>      the type of the value to return
+     * @param str      the string to convert
+     * @param typeOfT  the type into which to convert the string
+     * @return the parsed value from string
+     * @throws MissingStringifierException if passed value cannot be converted
      */
-    public static <I> String idToString(@Nullable I id) {
-        if (id == null) {
-            return NULL_ID;
-        }
+    public static <T> T fromString(String str, Type typeOfT) {
+        checkNotNull(str);
+        checkNotNull(typeOfT);
 
-        final Identifier<?> identifier;
-        if (id instanceof Any) {
-            final Message unpacked = unpack((Any) id);
-            identifier = Identifier.fromMessage(unpacked);
-        } else {
-            identifier = Identifier.from(id);
-        }
-
-        final String result = identifier.toString();
+        final Stringifier<T> stringifier = getStringifier(typeOfT);
+        final T result = stringifier.reverse()
+                                    .convert(str);
         return result;
-    }
-
-    @SuppressWarnings("unchecked") // OK to cast to String as output type of Stringifier.
-    static String idMessageToString(Message message) {
-        checkNotNull(message);
-        final String result;
-        final StringifierRegistry registry = StringifierRegistry.getInstance();
-        final Class<? extends Message> msgClass = message.getClass();
-        if (registry.hasStringifierFor(msgClass)) {
-            @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(msgClass)
-                                                  .get();
-            result = (String) converter.convert(message);
-        } else {
-            result = convert(message);
-        }
-        return result;
-    }
-
-    private static String convert(Message message) {
-        final Collection<Object> values = message.getAllFields()
-                                                 .values();
-        final String result;
-        if (values.isEmpty()) {
-            result = EMPTY_ID;
-        } else if (values.size() == 1) {
-            final Object object = values.iterator()
-                                        .next();
-            if (object instanceof Message) {
-                result = idMessageToString((Message) object);
-            } else {
-                result = object.toString();
-            }
-        } else {
-            result = messageWithMultipleFieldsToString(message);
-        }
-        return result;
-    }
-
-    private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
-        String result = shortDebugString(message);
-        result = PATTERN_COLON_SPACE.matcher(result)
-                                    .replaceAll(EQUAL_SIGN);
-        return result;
-    }
-
-    protected static class TimestampIdStringifer extends Stringifier<Timestamp> {
-
-        @Override
-        protected String doForward(Timestamp timestamp) {
-            final String result = toIdString(timestamp);
-            return result;
-        }
-
-        @Override
-        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
-        // It is OK, because all necessary information about exception
-        // is passed to the {@code ConversionError} instance.
-        protected Timestamp doBackward(String s) {
-            try {
-                return Timestamps.parse(s);
-            } catch (ParseException e) {
-                final ConversionError conversionError = new ConversionError(e.getMessage());
-                throw new IllegalConversionArgumentException(conversionError);
-            }
-        }
-    }
-
-    protected static class EventIdStringifier extends Stringifier<EventId> {
-        @Override
-        protected String doForward(EventId eventId) {
-            final String result = eventId.getUuid();
-            return result;
-        }
-
-        @Override
-        protected EventId doBackward(String s) {
-            final EventId result = EventId.newBuilder()
-                                          .setUuid(s)
-                                          .build();
-            return result;
-        }
-    }
-
-    protected static class CommandIdStringifier extends Stringifier<CommandId> {
-        @Override
-        protected String doForward(CommandId commandId) {
-            final String result = commandId.getUuid();
-            return result;
-        }
-
-        @Override
-        protected CommandId doBackward(String s) {
-            final CommandId result = CommandId.newBuilder()
-                                              .setUuid(s)
-                                              .build();
-            return result;
-        }
     }
 }

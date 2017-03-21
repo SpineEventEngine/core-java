@@ -25,18 +25,18 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeUrl;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.stand.AggregateStateId;
+import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A storage keeping messages with identity.
@@ -81,7 +81,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
         final EntityRecord.Builder builder = EntityRecord.newBuilder(rawResult.get());
         final Any state = builder.getState();
-        final TypeUrl type = TypeUrl.of(state.getTypeUrl());
+        final TypeUrl type = TypeUrl.parse(state.getTypeUrl());
         final Message stateAsMessage = AnyPacker.unpack(state);
 
         final Message maskedState = FieldMasks.applyMask(fieldMask, stateAsMessage, type);
@@ -142,11 +142,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
             final String idStr = id instanceof AggregateStateId
                                  ? id.toString()
                                  : idToString(id);
-            final String errMsg = format(
-                    "Unable to load record for entity with ID: %s",
-                    idStr
-            );
-            throw new IllegalStateException(errMsg);
+            throw newIllegalStateException("Unable to load record for entity with ID: %s",
+                                            idStr);
         }
     }
 

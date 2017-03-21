@@ -30,7 +30,6 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventEnvelope;
 import org.spine3.protobuf.TypeName;
@@ -44,6 +43,8 @@ import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.EventClass;
+import org.spine3.type.TypeName;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -362,7 +363,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
-            final String typeName = TypeName.of(eventClass.value());
+            final String typeName = TypeName.of(eventClass.value())
+                                            .value();
             builder.add(EventFilter.newBuilder()
                                    .setEventType(typeName)
                                    .build());
@@ -462,7 +464,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
-     * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing
+     * Implementation of the {@link BulkWriteOperation.FlushCallback FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
     private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>

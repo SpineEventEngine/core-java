@@ -24,10 +24,9 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandEnvelope;
 import org.spine3.base.Event;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.Entity;
@@ -39,6 +38,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -48,7 +48,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.String.format;
-import static org.spine3.base.Stringifiers.idToString;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;

@@ -23,9 +23,9 @@ package org.spine3.server.entity;
 import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import org.spine3.base.EventClass;
 import org.spine3.base.EventContext;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
+import org.spine3.type.EventClass;
 
 import java.util.Map;
 import java.util.Set;

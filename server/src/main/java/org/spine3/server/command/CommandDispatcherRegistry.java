@@ -24,13 +24,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
-import org.spine3.base.CommandClass;
 import org.spine3.server.bus.DispatcherRegistry;
+import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
 
-import static java.lang.String.format;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The registry of objects dispatching command request to where they are processed.
@@ -125,14 +126,11 @@ class CommandDispatcherRegistry extends DispatcherRegistry<CommandClass, Command
     private static void doCheck(Map<CommandClass, CommandDispatcher> alreadyRegistered,
                                 Object registeringObject) {
         if (!alreadyRegistered.isEmpty()) {
-            final String errMsg = format(
+            throw newIllegalArgumentException(
                     "Cannot register dispatcher (%s) because there are " +
                     "already registered dispatchers for the same command classes (%s).",
                     registeringObject,
-                    alreadyRegistered
-            );
-
-            throw new IllegalArgumentException(errMsg);
+                    alreadyRegistered);
         }
     }
 

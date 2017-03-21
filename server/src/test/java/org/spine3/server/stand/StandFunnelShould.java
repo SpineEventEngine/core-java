@@ -30,6 +30,7 @@ import org.spine3.base.CommandEnvelope;
 import org.spine3.base.EventEnvelope;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;

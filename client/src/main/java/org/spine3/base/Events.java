@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.protobuf.TypeName;
+import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import java.util.Collections;
@@ -45,10 +45,6 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  */
 public class Events {
 
-    private Events() {
-        // Prevent instantiation of this utility class.
-    }
-
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = new Comparator<Event>() {
         @Override
@@ -58,6 +54,13 @@ public class Events {
             return Timestamps2.compare(timestamp1, timestamp2);
         }
     };
+
+    /** The stringifier for event IDs. */
+    private static final Stringifier<EventId> idStringifier = new EventIdStringifier();
+
+    private Events() {
+        // Prevent instantiation of this utility class.
+    }
 
     /** Generates a new random UUID-based {@code EventId}. */
     public static EventId generateId() {
@@ -90,7 +93,8 @@ public class Events {
      */
     public static Timestamp getTimestamp(Event event) {
         checkNotNull(event);
-        final Timestamp result = event.getContext().getTimestamp();
+        final Timestamp result = event.getContext()
+                                      .getTimestamp();
         return result;
     }
 
@@ -165,7 +169,7 @@ public class Events {
         checkNotNull(context);
         final Object aggregateId = Identifiers.idFromAny(context.getProducerId());
         @SuppressWarnings("unchecked")
-            // It is the caller's responsibility to know the type of the wrapped ID.
+        // It is the caller's responsibility to know the type of the wrapped ID.
         final I id = (I) aggregateId;
         return id;
 
@@ -213,7 +217,8 @@ public class Events {
         checkNotNull(context);
         if (context.getEnrichment()
                    .getModeCase() == Enrichment.ModeCase.CONTAINER) {
-            return Optional.of(context.getEnrichment().getContainer());
+            return Optional.of(context.getEnrichment()
+                                      .getContainer());
         }
         return Optional.absent();
     }
@@ -235,7 +240,8 @@ public class Events {
             return Optional.absent();
         }
         final Enrichment.Container enrichments = value.get();
-        final String typeName = TypeName.of(enrichmentClass);
+        final String typeName = TypeName.of(enrichmentClass)
+                                        .value();
         final Any any = enrichments.getItemsMap()
                                    .get(typeName);
         if (any == null) {
@@ -243,5 +249,31 @@ public class Events {
         }
         final E result = unpack(any);
         return Optional.fromNullable(result);
+    }
+
+    /**
+     * Obtains the stringifier for event IDs.
+     */
+    public static Stringifier<EventId> idStringifier() {
+        return idStringifier;
+    }
+
+    /**
+     * The stringifier of event IDs.
+     */
+    static class EventIdStringifier extends Stringifier<EventId> {
+        @Override
+        protected String toString(EventId eventId) {
+            final String result = eventId.getUuid();
+            return result;
+        }
+
+        @Override
+        protected EventId fromString(String str) {
+            final EventId result = EventId.newBuilder()
+                                          .setUuid(str)
+                                          .build();
+            return result;
+        }
     }
 }

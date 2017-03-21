@@ -26,7 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandClass;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -35,6 +34,7 @@ import org.spine3.base.Events;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
+import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -45,12 +45,12 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.spine3.base.Events.generateId;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
@@ -96,11 +96,8 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
 
     private static IllegalStateException missingCommandHandler(Class<?> cls,
                         Class<? extends Message> commandClass) {
-        final String errMsg = format(
-                "No handler for the command class %s found in the class %s.",
-                 commandClass.getName(), cls.getName()
-        );
-        throw new IllegalStateException(errMsg);
+        throw newIllegalStateException("No handler for the command class %s found in the class %s.",
+                                        commandClass.getName(), cls.getName());
     }
 
     static MethodPredicate predicate() {
