@@ -26,11 +26,8 @@ import org.spine3.base.CommandEnvelope;
 import java.util.Set;
 
 /**
- * A {@link CommandDispatcher}, that delegates the responsibilities to a wrapped instance of any
- * type.
- *
- * <p>Should be used to declare that execute dutues of a {@code CommandDispatcher}, but aren't able
- * to conform its contract directly.
+ * A {@link CommandDispatcher}, that delegates the responsibilities to an aggregated
+ * {@linkplain CommandDispatcherDelegate delegate instance}.
  *
  * @author Alex Tymchenko
  * @see CommandDispatcherDelegate
