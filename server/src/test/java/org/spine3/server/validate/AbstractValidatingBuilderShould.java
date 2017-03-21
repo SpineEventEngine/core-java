@@ -25,6 +25,10 @@ import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.ConversionException;
+import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.TaskId;
+import org.spine3.test.types.Task;
+import org.spine3.test.validate.msg.PatternStringFieldValue;
 import org.spine3.type.ParametrizedTypeImpl;
 import org.spine3.validate.ConstraintViolationThrowable;
 
