@@ -20,7 +20,6 @@
 
 package org.spine3.server.command;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Command;
@@ -122,7 +121,6 @@ class CommandRecords {
     }
 
     /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
-    @VisibleForTesting
     static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
         return Iterators.transform(records, TO_COMMAND);
     }

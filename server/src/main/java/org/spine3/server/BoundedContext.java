@@ -90,14 +90,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     private final Stand stand;
     private final StandFunnel standFunnel;
 
-    /** All the repositories registered with this bounded context */
+    /** All the repositories registered with this bounded context. */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     /**
      * The map from a type of aggregate state to an aggregate repository instance that
      * manages such aggregates.
      */
-    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories = Maps.newHashMap();
+    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories =
+            Maps.newHashMap();
 
     /**
      * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
@@ -499,7 +500,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         }
 
         private static CommandStore createCommandStore(StorageFactory storageFactory) {
-            final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
+            final CommandStore result = new CommandStore(storageFactory);
             return result;
         }
 

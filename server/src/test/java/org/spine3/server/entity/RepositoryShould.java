@@ -83,7 +83,7 @@ public class RepositoryShould {
          * @param boundedContext the {@link BoundedContext} in which this repository works
          */
         private RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
 
         @Override
@@ -133,7 +133,7 @@ public class RepositoryShould {
                                                               .build();
 
         private TestRepo(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
 
         @Override
@@ -143,11 +143,6 @@ public class RepositoryShould {
             }
             return super.load(id);
         }
-    }
-
-    @Test
-    public void return_its_BoundedContext() {
-        assertEquals(boundedContext, repository.getBoundedContext());
     }
 
     @Test
