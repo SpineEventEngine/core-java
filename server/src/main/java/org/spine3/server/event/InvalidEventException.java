@@ -64,7 +64,7 @@ public class InvalidEventException extends EventException {
     }
 
     /**
-     * Creates an instance of {@code Error} for a event message, which has fields that violate
+     * Creates an instance of {@code Error} for an event message, which has fields that violate
      * validation constraint(s).
      */
     private static Error invalidEventMessageError(Message eventMessage,
