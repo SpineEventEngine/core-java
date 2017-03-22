@@ -59,7 +59,7 @@ import static com.google.common.collect.Lists.newArrayList;
  */
 class ListStringifier<T> extends Stringifier<List<T>> {
 
-    private static final char DEFAULT_ELEMENTS_DELIMITER = ',';
+    private static final char DEFAULT_ELEMENT_DELIMITER = ',';
     private static final String ESCAPE_SEQUENCE = "\\";
 
     private final Class<T> listGenericClass;
@@ -72,7 +72,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     ListStringifier(Class<T> listGenericClass) {
         super();
-        this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENTS_DELIMITER;
+        this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENT_DELIMITER;
         this.listGenericClass = listGenericClass;
     }
 
