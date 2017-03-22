@@ -114,6 +114,13 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
         return transformed;
     }
 
+    ProcessingStatus getStatus(CommandId commandId) {
+        checkNotClosed();
+        final CommandEntity entity = loadEntity(commandId);
+        return entity.getState()
+                     .getStatus();
+    }
+
     /**
      * Sets the status of the command to {@link CommandStatus#OK}
      */

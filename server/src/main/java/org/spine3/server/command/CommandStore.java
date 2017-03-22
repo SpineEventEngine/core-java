@@ -152,6 +152,17 @@ public class CommandStore implements AutoCloseable {
         return commands;
     }
 
+    CommandStatus getStatusCode(CommandId commandId) {
+        final CommandStatus result = getStatus(commandId).getCode();
+        return result;
+    }
+
+    ProcessingStatus getStatus(CommandId commandId) {
+        checkNotClosed();
+        final ProcessingStatus result = storage.getStatus(commandId);
+        return result;
+    }
+
     /**
      * Sets the status of the command to {@link CommandStatus#OK}
      */

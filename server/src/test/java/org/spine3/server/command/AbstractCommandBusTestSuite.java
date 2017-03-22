@@ -42,6 +42,7 @@ import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.spy;
 import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
 import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.test.Tests.newTenantUuid;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
@@ -130,7 +131,9 @@ public abstract class AbstractCommandBusTestSuite {
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        commandFactory = TestCommandFactory.newInstance(getClass());
+        commandFactory = multitenant
+                            ? TestCommandFactory.newInstance(getClass(), newTenantUuid())
+                            : TestCommandFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         responseObserver = new TestResponseObserver();
     }
