@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
 
@@ -106,5 +107,10 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         final Map<I, EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
+    }
+
+    @Override
+    protected void writeRecord(I id, EntityRecordEnvelope record) {
+        writeRecord(id, record.getRecord());
     }
 }
