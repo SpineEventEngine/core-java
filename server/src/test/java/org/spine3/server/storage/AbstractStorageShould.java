@@ -21,13 +21,18 @@
 package org.spine3.server.storage;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.Tests;
+import org.spine3.test.Verify;
 
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -100,13 +105,18 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     protected void writeAndReadRecordTest(I id) {
-        final R expected = newStorageRecord();
-        storage.write(id, expected);
+        final R expected = writeRecord(id);
 
         final Optional<R> actual = storage.read(id);
 
         assertTrue(actual.isPresent());
         assertEquals(expected, actual.get());
+    }
+
+    private R writeRecord(I id) {
+        final R expected = newStorageRecord();
+        storage.write(id, expected);
+        return expected;
     }
 
     @Test
@@ -142,12 +152,6 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     }
 
     @Test
-    public void have_index_on_ID() {
-        final Iterator<I> index = storage.index();
-        assertNotNull(index);
-    }
-
-    @Test
     public void write_and_read_several_records_by_different_ids() {
         writeAndReadRecordTest(newId());
         writeAndReadRecordTest(newId());
@@ -159,6 +163,42 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
         final I id = newId();
         writeAndReadRecordTest(id);
         writeAndReadRecordTest(id);
+    }
+
+    @Test
+    public void have_index_on_ID() {
+        final Iterator<I> index = storage.index();
+        assertNotNull(index);
+    }
+
+    @Test
+    public void index_all_IDs() {
+        final int recordCount = 10;
+        final Set<I> ids = new HashSet<>(recordCount);
+        for (int i = 0; i < recordCount; i++) {
+            final I id = newId();
+            writeRecord(id);
+            ids.add(id);
+        }
+
+        final Iterator<I> index = storage.index();
+        final Collection indexValues = Sets.newHashSet(index);
+
+        assertEquals(ids.size(), indexValues.size());
+        Verify.assertContainsAll(indexValues, ids.toArray());
+    }
+
+    @Test
+    public void have_immutable_index() {
+        writeRecord(newId());
+        final Iterator<I> index = storage.index();
+        assertTrue(index.hasNext());
+        try {
+            index.remove();
+            fail("Storage#index is mutable");
+        } catch (UnsupportedOperationException | IllegalStateException ignored) {
+            // One of valid exceptions was thrown
+        }
     }
 
     @Test(expected = IllegalStateException.class)
