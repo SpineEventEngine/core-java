@@ -28,9 +28,32 @@ import static com.google.common.collect.Lists.newArrayList;
 /**
  * The stringifier for the {@code List} classes.
  *
- * <p> The converter for the type of the elements in the list
+ * <p> The stringifier for the type of the elements in the list
  * should be registered in the {@code StringifierRegistry} class
- * for the correct usage of the {@code ListStringifier} converter.
+ * for the correct usage of the {@code ListStringifier}.
+ *
+ * <h3>Example</h3>
+ * {@code
+ *    // Stringifier creation.
+ *    final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
+ *
+ *    // The registration of the stringifier.
+ *    final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
+ *    final Type type = TypeToken<List<Integer>>(){}.getType();
+ *    StringifierRegistry.getInstance().register(listStringifier, type);
+ *
+ *    // Obtain already registered stringifier.
+ *    final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
+ *                                                                          .getStringifier(type);
+ *
+ *    // Convert to string.
+ *    final List<Integer> listToConvert = ...
+ *    final String convertedString = listStringifer.toString(listToConvert);
+ *
+ *    // Convert from string.
+ *    final String stringToConvert = ...
+ *    final List<Integer> convertedList = listStringifier.fromString(stringToConvert);
+ * }
  *
  * @param <T> the type of the elements in the list.
  */

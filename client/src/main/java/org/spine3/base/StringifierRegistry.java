@@ -36,29 +36,6 @@ import static java.util.Collections.synchronizedMap;
 /**
  * The registry of converters of types to their string representations.
  *
- * <h3>Example</h3>
- * {@code
- *    // Stringifier creation.
- *    final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
- *
- *    // The registration of the stringifier.
- *    final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
- *    final Type type = TypeToken<List<Integer>>(){}.getType();
- *    StringifierRegistry.getInstance().register(listStringifier, type);
- *
- *    // Obtain already registered stringifier.
- *    final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
- *                                                                          .getStringifier(type);
- *
- *    // Convert to string.
- *    final List<Integer> listToConvert = ...
- *    final String convertedString = listStringifer.toString(listToConvert);
- *
- *    // Convert from string.
- *    final String stringToConvert = ...
- *    final List<Integer> convertedList = listStringifier.fromString(stringToConvert);
- * }
- *
  * @author Alexander Yevsyukov
  * @author Illia Shepilov
  */
