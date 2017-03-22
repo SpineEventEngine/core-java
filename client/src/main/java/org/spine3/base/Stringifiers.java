@@ -164,6 +164,14 @@ public class Stringifiers {
         return listStringifier;
     }
 
+    /**
+     * Converts from string to the specified type.
+     *
+     * @param elementToConvert string to convert
+     * @param elementClass     the class of the converted element
+     * @param <I>              the class type of the converted element
+     * @return the converted string
+     */
     @SuppressWarnings("unchecked") // It is OK because class is verified.
     static <I> I convert(String elementToConvert, Class<I> elementClass) {
         checkNotNull(elementToConvert);
@@ -183,7 +191,7 @@ public class Stringifiers {
             return (I) elementToConvert;
         }
 
-        final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
+        final I convertedValue = fromString(elementToConvert, elementClass);
         return convertedValue;
     }
 
