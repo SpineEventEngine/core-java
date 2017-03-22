@@ -27,6 +27,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The stringifier for the {@code Map} classes.
@@ -124,8 +125,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             final V convertedValue = convert(valueClass, value);
             resultMap.put(convertedKey, convertedValue);
             return resultMap;
-        } catch (Throwable ignored) {
-            throw conversionArgumentException("The exception is occurred during the conversion");
+        } catch (Throwable e) {
+            throw newIllegalArgumentException("The exception is occurred during the conversion", e);
         }
     }
 
@@ -156,12 +157,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             final String exMessage =
                     "Illegal key-value format. The value should " +
                     "be separated with a single `:` character.";
-            throw conversionArgumentException(exMessage);
+            throw newIllegalArgumentException(exMessage);
         }
-    }
-
-    private static IllegalConversionArgumentException conversionArgumentException(String msg) {
-        return new IllegalConversionArgumentException(msg);
     }
 
     private static boolean isString(Class<?> aClass) {

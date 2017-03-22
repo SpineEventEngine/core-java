@@ -70,7 +70,7 @@ public class MapStringifierShould {
         assertEquals(mapToConvert.toString(), convertedMap);
     }
 
-    @Test(expected = IllegalConversionArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "first\\:1\\,second\\:2";
         final Type type = new TypeToken<Map<Integer, Integer>>(){}.getType();
@@ -81,7 +81,7 @@ public class MapStringifierShould {
         stringifier.fromString(incorrectRawMap);
     }
 
-    @Test(expected = IllegalConversionArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
         final Type type = new TypeToken<Map<Task, Long>>(){}.getType();
         final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
@@ -90,7 +90,7 @@ public class MapStringifierShould {
         stringifier.fromString("first\\:first\\:first");
     }
 
-    @Test(expected = IllegalConversionArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_key_value_delimiter_is_wrong() {
         final Type type = new TypeToken<Map<Long, Long>>(){}.getType();
         final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
