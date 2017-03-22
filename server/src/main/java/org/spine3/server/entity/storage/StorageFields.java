@@ -20,20 +20,106 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.LinkedListMultimap;
+import com.google.common.collect.Multimap;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.reflect.Property;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.Map;
+import java.util.regex.Pattern;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class StorageFields {
 
+    private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\\\w*";
+    private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
+
+    private static final String NON_PUBLIC_CLASS_WARNING =
+            "Passed entity class %s is not public. Storage fields won't be extracted.";
+
+    private static final ImmutableSet<String> EXCLUDED_METHODS =
+            ImmutableSet.<String>builder()
+                        .add("getId")
+                        .add("getState")
+                        .add("getLifecycleFlags")
+                        .add("getDefaultState")
+                        .add("getBuilder")
+                        .build();
+
+    // TODO:2017-03-22:dmytro.dashenkov: Check if this register should be synchronized.
+    private static final Multimap<Class<? extends Entity>, Property<?>> knownEntityProperties =
+            LinkedListMultimap.create();
+
     private StorageFields() {
     }
 
     public static <E extends Entity<?, ?>> Map<String, Object> from(E entity) {
+        checkNotNull(entity);
+        final Class<? extends Entity> entityType = entity.getClass();
+        final int modifiers = entityType.getModifiers();
+        if (!Modifier.isPublic(modifiers)) {
+            log().warn(NON_PUBLIC_CLASS_WARNING);
+            return Collections.emptyMap();
+        }
+
+        ensureRegistered(entityType);
+
+        final Map<String, Object> fields = getStorageFields();
+        return fields;
+    }
+
+    private static Map<String, Object> getStorageFields() {
         return Collections.emptyMap();
+    }
+
+    private static void ensureRegistered(Class<? extends Entity> entityType) {
+        if (knownEntityProperties.containsKey(entityType)) {
+            return;
+        }
+        addToIndexes(entityType);
+    }
+
+    private static void addToIndexes(Class<? extends Entity> entityType) {
+        final Method[] publicMethods = entityType.getMethods();
+
+        for (Method candidate : publicMethods) {
+            final String methodName = candidate.getName();
+            final boolean argumentsMatch = candidate.getParameterTypes().length == 0;
+            final boolean isNotExclusion = !EXCLUDED_METHODS.contains(methodName);
+            final int modifiers = candidate.getModifiers();
+            final boolean instanceMethod = !Modifier.isStatic(modifiers);
+            if (argumentsMatch
+                && isNotExclusion
+                && instanceMethod) {
+                // Regex operations are not fast enough to check all the methods.
+                // That's wht we check the Method object fields first
+                final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
+                                                          .matches();
+                if (nameMatches) {
+                    final Property<?> storageField = Property.from(candidate);
+                    knownEntityProperties.put(entityType, storageField);
+                }
+            }
+        }
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(StorageFields.class);
     }
 }
