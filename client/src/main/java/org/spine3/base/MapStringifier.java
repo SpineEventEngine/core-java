@@ -46,11 +46,11 @@ import static com.google.common.collect.Maps.newHashMap;
  *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
  *                                                                           .getStringifier(type);
  *
- *  // Convert to string
+ *  // Convert to string.
  *  final Map<String, Long> mapToConvert = ...
- *  final String convertedMap = mapStringifier.toString(mapToConvert);
+ *  final String convertedString = mapStringifier.toString(mapToConvert);
  *
- *  // Convert from string
+ *  // Convert from string.
  *  final String stringToConvert = ...
  *  final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert);
  * }
