@@ -28,12 +28,14 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.client.CommandFactory;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.users.TenantId;
+import org.spine3.testdata.TestFailureBusFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,6 +59,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected CommandStore commandStore;
     protected Log log;
     protected EventBus eventBus;
+    protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
     protected TestResponseObserver responseObserver;
@@ -116,10 +119,12 @@ public abstract class AbstractCommandBusTestSuite {
         commandStore = spy(new CommandStore(storageFactory));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
+        failureBus = spy(TestFailureBusFactory.create());
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
+                               .setFailureBus(failureBus)
                                .setThreadSpawnAllowed(true)
                                .setLog(log)
                                .setAutoReschedule(false)

@@ -41,7 +41,7 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
-import org.spine3.server.event.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -223,7 +223,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository().getEventClasses();
+        final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
                           EventClass.of(ProjectCreated.class),
                           EventClass.of(TaskAdded.class),

@@ -41,7 +41,7 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
@@ -194,7 +194,7 @@ public class ProcessManagerRepositoryShould
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
         final CommandEnvelope cmd = CommandEnvelope.of(createCommand(cmdMsg, CMD_CONTEXT));
-        repository.dispatch(cmd);
+        repository.dispatchCommand(cmd);
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
@@ -219,7 +219,7 @@ public class ProcessManagerRepositoryShould
         final CommandEnvelope request =
                 CommandEnvelope.of(createCommand(unknownCommand,
                                                  CommandContext.getDefaultInstance()));
-        repository.dispatch(request);
+        repository.dispatchCommand(request);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -231,7 +231,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_command_classes() {
-        final Set<CommandClass> commandClasses = repository.getMessageClasses();
+        final Set<CommandClass> commandClasses = repository.getCommandClasses();
         assertTrue(commandClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(commandClasses.contains(CommandClass.of(AddTask.class)));
         assertTrue(commandClasses.contains(CommandClass.of(StartProject.class)));
@@ -239,7 +239,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository.getEventClasses();
+        final Set<EventClass> eventClasses = repository.getMessageClasses();
         assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
         assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));

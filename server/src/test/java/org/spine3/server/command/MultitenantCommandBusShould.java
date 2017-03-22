@@ -30,13 +30,16 @@ import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.type.CommandClass;
+import org.spine3.server.failure.FailureBus;
 
 import java.util.Set;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandValidationError.TENANT_UNKNOWN;
 import static org.spine3.base.CommandValidationError.UNSUPPORTED_COMMAND;
@@ -50,6 +53,19 @@ public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
+    public void allow_to_specify_failure_bus_via_builder() {
+        final FailureBus expectedFailureBus = mock(FailureBus.class);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .setFailureBus(expectedFailureBus)
+                                                .build();
+        assertNotNull(commandBus);
+
+        final FailureBus actualFailureBus = commandBus.failureBus();
+        assertEquals(expectedFailureBus, actualFailureBus);
+    }
+
+    @Test
     public void have_log() {
         assertNotNull(Log.log());
     }
@@ -60,10 +76,25 @@ public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
+    public void have_failure_bus_if_no_custom_set() {
+        final CommandBus bus = CommandBus.newBuilder()
+                                           .setCommandStore(commandStore)
+                                           .build();
+        assertNotNull(bus.failureBus());
+    }
+
+    @Test
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
 
         verify(commandStore).close();
+    }
+
+    @Test
+    public void close_FailureBus_when_closed() throws Exception {
+        commandBus.close();
+
+        verify(failureBus).close();
     }
 
     @Test
