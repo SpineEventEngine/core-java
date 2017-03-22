@@ -197,12 +197,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @Test
     public void rewrite_records_in_bulk() {
-        final int recordsCount = 3;
+        final int recordCount = 3;
         final RecordStorage<I> storage = getStorage();
-        final Map<I, EntityRecord> v1Records = new HashMap<>(recordsCount);
-        final Map<I, EntityRecord> v2Records = new HashMap<>(recordsCount);
+        final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
+        final Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
 
-        for (int i = 0; i < recordsCount; i++) {
+        for (int i = 0; i < recordCount; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
 
