@@ -29,9 +29,9 @@ import org.spine3.base.Responses;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.type.CommandClass;
 import org.spine3.util.Environment;
-import org.spine3.server.failure.FailureBus;
 
 import java.util.Set;
 
