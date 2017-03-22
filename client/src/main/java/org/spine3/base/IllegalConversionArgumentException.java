@@ -21,8 +21,8 @@
 package org.spine3.base;
 
 /**
- * Thrown to indicate that a method has been passed an illegal or
- * inappropriate argument during the conversion from one type to another.
+ * Thrown to indicate that has been passed an illegal or inappropriate
+ * argument during the conversion from one type to another.
  *
  * @author Illia Shepilov
  */
