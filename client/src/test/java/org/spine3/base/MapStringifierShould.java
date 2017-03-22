@@ -52,7 +52,7 @@ public class MapStringifierShould {
                 mapStringifier(Long.class, Timestamp.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        final Map<Long, Timestamp> actualMap = Stringifiers.fromString(rawMap, type);
+        final Map<Long, Timestamp> actualMap = stringifier.fromString(rawMap);
         final Map<Long, Timestamp> expectedMap = newHashMap();
         expectedMap.put(1L, Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
         assertThat(actualMap, is(expectedMap));
@@ -66,7 +66,7 @@ public class MapStringifierShould {
                 mapStringifier(String.class, Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        final String convertedMap = Stringifiers.toString(mapToConvert, type);
+        final String convertedMap = stringifier.toString(mapToConvert);
         assertEquals(mapToConvert.toString(), convertedMap);
     }
 
@@ -78,13 +78,7 @@ public class MapStringifierShould {
                 mapStringifier(Integer.class, Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        Stringifiers.fromString(incorrectRawMap, type);
-    }
-
-    @Test(expected = MissingStringifierException.class)
-    public void throw_exception_when_required_stringifier_is_not_found() {
-        final Type type = new TypeToken<Map<Long, Task>>(){}.getType();
-        Stringifiers.fromString("1\\:1", type);
+        stringifier.fromString(incorrectRawMap);
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
@@ -93,7 +87,7 @@ public class MapStringifierShould {
         final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        Stringifiers.fromString("first\\:first\\:first", type);
+        stringifier.fromString("first\\:first\\:first");
     }
 
     @Test(expected = IllegalConversionArgumentException.class)
@@ -102,7 +96,7 @@ public class MapStringifierShould {
         final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        Stringifiers.fromString("1\\-1", type);
+        stringifier.fromString("1\\-1");
     }
 
     @Test
@@ -114,7 +108,7 @@ public class MapStringifierShould {
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
 
-        final Map<String, Integer> convertedMap = Stringifiers.fromString(rawMap, type);
+        final Map<String, Integer> convertedMap = stringifier.fromString(rawMap);
         assertThat(convertedMap, is(createTestMap()));
     }
 
