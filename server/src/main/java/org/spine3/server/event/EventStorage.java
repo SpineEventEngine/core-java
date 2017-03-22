@@ -58,11 +58,16 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
             };
 
     Iterator<Event> iterator(EventStreamQuery query) {
-        final Iterator<EventEntity> filtered = iterator(new EventEntityMatchesStreamQuery(query));
+        final Iterator<EventEntity> filtered = iterator(createEntityFilter(query));
         final List<EventEntity> entities = Lists.newArrayList(filtered);
         Collections.sort(entities, EventEntity.comparator());
-        final Iterator<Event> result = Iterators.transform(entities.iterator(), GET_EVENT);
+        final Iterator<Event> result = Iterators.transform(entities.iterator(), getEventFunc());
         return result;
+    }
+
+    @VisibleForTesting
+    static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
+        return new EventEntityMatchesStreamQuery(query);
     }
 
     void store(Event event) {
@@ -70,12 +75,15 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         store(entity);
     }
 
-    @VisibleForTesting
-    static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
+    static Function<EventEntity, Event> getEventFunc() {
+        return GET_EVENT;
+    }
+
+    private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
 
         private final Predicate<Event> filter;
 
-        EventEntityMatchesStreamQuery(EventStreamQuery query) {
+        private EventEntityMatchesStreamQuery(EventStreamQuery query) {
             this.filter = new MatchesStreamQuery(query);
         }
 

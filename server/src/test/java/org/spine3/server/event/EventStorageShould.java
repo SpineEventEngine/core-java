@@ -48,6 +48,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.protobuf.Durations2.nanos;
@@ -469,6 +470,24 @@ public class EventStorageShould {
         assertEquals(expected, newArrayList(actual));
     }
 
+    /*
+     * Tests of edge cases
+     ***********************************/
+    @Test
+    public void have_event_extraction_function_that_returns_null_to_null_input() {
+        assertNull(EventStorage.getEventFunc().apply(null));
+    }
+
+    @Test
+    public void have_entity_filter_rejecting_nulls() {
+        assertFalse(EventStorage.createEntityFilter(EventStreamQuery.getDefaultInstance())
+                                .apply(null));
+    }
+
+    /*
+     * Utility functions
+     ***********************************/
+
     private static EventFilter newEventFilterFor(Event event) {
         final Any id = event.getContext()
                             .getProducerId();
@@ -522,19 +541,19 @@ public class EventStorageShould {
         writeAll(event1, event2, event3);
     }
 
-    protected void writeAll(Event... events) {
+    private void writeAll(Event... events) {
         for (Event event : events) {
             storage.store(event);
         }
     }
 
-    protected void assertStorageContainsOnly(List<Event> expectedRecords) {
+    private void assertStorageContainsOnly(List<Event> expectedRecords) {
         final Iterator<Event> iterator = findAll();
         final List<Event> actual = newArrayList(iterator);
         assertEquals(expectedRecords, actual);
     }
 
-    protected Iterator<Event> findAll() {
+    private Iterator<Event> findAll() {
         final Iterator<Event> result = storage.iterator(EventStreamQuery.getDefaultInstance());
         return result;
     }
