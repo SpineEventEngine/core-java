@@ -23,7 +23,6 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.event.EventStorage;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -48,11 +47,6 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public EventStorage createEventStorage() {
-        return new InMemoryEventStorage(isMultitenant());
-    }
-
-    @Override
     public StandStorage createStandStorage() {
         final InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
                                                                 .setMultitenant(isMultitenant())
@@ -62,7 +56,8 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     /** NOTE: the parameter is unused. */
     @Override
-    public <I> AggregateStorage<I> createAggregateStorage(Class<? extends Aggregate<I, ?, ?>> unused) {
+    public <I> AggregateStorage<I> createAggregateStorage(
+            Class<? extends Aggregate<I, ?, ?>> unused) {
         return new InMemoryAggregateStorage<>(isMultitenant());
     }
 
@@ -79,7 +74,8 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> unused) {
         final boolean multitenant = isMultitenant();
-        final InMemoryRecordStorage<I> entityStorage = InMemoryRecordStorage.newInstance(multitenant);
+        final InMemoryRecordStorage<I> entityStorage =
+                InMemoryRecordStorage.newInstance(multitenant);
         return InMemoryProjectionStorage.newInstance(entityStorage);
     }
 
@@ -99,7 +95,10 @@ public class InMemoryStorageFactory implements StorageFactory {
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private enum Singleton {
         INSTANCE;
-        private final InMemoryStorageFactory singleTenantInstance = new InMemoryStorageFactory(false);
-        private final InMemoryStorageFactory multitenantInstance = new InMemoryStorageFactory(true);
+        private final InMemoryStorageFactory singleTenantInstance =
+                new InMemoryStorageFactory(false);
+        
+        private final InMemoryStorageFactory multitenantInstance =
+                new InMemoryStorageFactory(true);
     }
 }
