@@ -56,7 +56,7 @@ public abstract class EventDispatchingRepository<I,
      */
     protected EventDispatchingRepository(BoundedContext boundedContext,
                                          IdSetEventFunction<I, Message> defaultFunction) {
-        super(boundedContext);
+        super();
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
     }
 

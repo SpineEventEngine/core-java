@@ -32,8 +32,6 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.Statuses;
 import org.spine3.server.event.enrich.EventEnricher;
-import org.spine3.server.event.error.InvalidEventException;
-import org.spine3.server.event.error.UnsupportedEventException;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.EventClass;
@@ -612,7 +610,7 @@ public class EventBus implements AutoCloseable {
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
                                        .setStreamExecutor(eventStoreStreamExecutor)
-                                       .setStorage(storageFactory.createEventStorage())
+                                       .setStorageFactory(storageFactory)
                                        .setLogger(EventStore.log())
                                        .build();
             }

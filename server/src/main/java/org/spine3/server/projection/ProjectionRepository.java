@@ -64,42 +64,25 @@ import static com.google.common.base.Preconditions.checkState;
 public abstract class ProjectionRepository<I, P extends Projection<I, S>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
 
-    /** The enumeration of statuses in which a Projection Repository can be during its lifecycle. */
-    protected enum Status {
+    /** The {@code BoundedContext} in which this repository works. */
+    private final BoundedContext boundedContext;
 
-        /**
-         * The repository instance has been created.
-         *
-         * <p>In this status the storage is not yet assigned.
-         */
-        CREATED,
+    /** An instance of {@link StandFunnel} to be informed about state updates */
+    private final StandFunnel standFunnel;
 
-        /** A storage has been assigned to the repository. */
-        STORAGE_ASSIGNED,
+    /**
+     * If {@code true} the projection repository will start the {@linkplain #catchUp() catch up}
+     * process after {@linkplain #initStorage(StorageFactory) initialization}.
+     */
+    private final boolean catchUpAfterStorageInit;
 
-        /** The repository is getting events from EventStore and builds projections. */
-        CATCHING_UP,
-
-        /** The repository completed the catch-up process. */
-        ONLINE,
-
-        /** The repository is closed and no longer accept events. */
-        CLOSED
-    }
+    private final Duration catchUpMaxDuration;
 
     /** The current status of the repository. */
     private Status status = Status.CREATED;
 
     /** An underlying entity storage used to store projections. */
     private RecordStorage<I> recordStorage;
-
-    /** An instance of {@link StandFunnel} to be informed about state updates */
-    private final StandFunnel standFunnel;
-
-    /** If {@code true} the projection will {@link #catchUp()} after initialization. */
-    private final boolean catchUpAfterStorageInit;
-
-    private final Duration catchUpMaxDuration;
 
     @Nullable
     private BulkWriteOperation<I, P> ongoingOperation;
@@ -162,9 +145,26 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                                    boolean catchUpAfterStorageInit,
                                    Duration catchUpMaxDuration) {
         super(boundedContext, EventDispatchingRepository.<I>producerFromContext());
+        this.boundedContext = boundedContext;
         this.standFunnel = boundedContext.getStandFunnel();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;
         this.catchUpMaxDuration = checkNotNull(catchUpMaxDuration);
+    }
+
+    /** Returns the {@link BoundedContext} in which this repository works. */
+    private BoundedContext getBoundedContext() {
+        return boundedContext;
+    }
+
+    @VisibleForTesting
+    static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
+        return timestamp == null
+               ? Timestamp.getDefaultInstance()
+               : timestamp;
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
     protected Status getStatus() {
@@ -181,13 +181,27 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     @Override
     @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
-                       we create a specific type of a storage, not a regular entity storage created in the parent. */)
+                       we create a specific type of a storage, not a regular entity storage created
+                       in the parent. */)
     protected Storage<I, ?> createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage =
                 factory.createProjectionStorage(projectionClass);
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
+    }
+
+    /**
+     * Ensures that the repository has the storage.
+     *
+     * @return storage instance
+     * @throws IllegalStateException if the storage is null
+     */
+    @Override
+    @Nonnull
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+    protected RecordStorage<I> recordStorage() {
+        return checkStorage(recordStorage);
     }
 
     /** {@inheritDoc} */
@@ -215,22 +229,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * @return storage instance
      * @throws IllegalStateException if the storage is null
      */
-    @Override
-    @Nonnull
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-    protected RecordStorage<I> recordStorage() {
-        return checkStorage(recordStorage);
-    }
-
-    /**
-     * Ensures that the repository has the storage.
-     *
-     * @return storage instance
-     * @throws IllegalStateException if the storage is null
-     */
     @Nonnull
     protected ProjectionStorage<I> projectionStorage() {
-        @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
+        @SuppressWarnings("unchecked")
+        // It is safe to cast as we control the creation in createStorage().
         final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
         return checkStorage(storage);
     }
@@ -273,13 +275,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         internalDispatch(event);
     }
 
-    /**
-     * Dispatches the passed event to projections without checking the status.
-     */
-    private void internalDispatch(Event event) {
-        super.dispatch(event);
-    }
-
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = loadOrCreate(id);
@@ -294,6 +289,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         }
 
         standFunnel.post(projection);
+    }
+
+    /**
+     * Dispatches the passed event to projections without checking the status.
+     */
+    private void internalDispatch(Event event) {
+        super.dispatch(event);
     }
 
     private void storeNow(P projection, Timestamp eventTime) {
@@ -345,10 +347,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         eventStore.read(query, new EventStreamObserver(this));
     }
 
-    private static Timestamp nullToDefault(@Nullable Timestamp timestamp) {
-        return timestamp == null ? Timestamp.getDefaultInstance() : timestamp;
-    }
-
     /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
@@ -378,12 +376,60 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     private boolean isBulkWriteInProgress() {
         return ongoingOperation != null
-                && ongoingOperation.isInProgress();
+               && ongoingOperation.isInProgress();
     }
 
     private boolean isBulkWriteRequired() {
         return !catchUpMaxDuration.equals(
                 catchUpMaxDuration.getDefaultInstanceForType());
+    }
+
+    private BulkWriteOperation startBulkWrite(Duration expirationTime) {
+        final BulkWriteOperation<I, P> bulkWriteOperation = new BulkWriteOperation<>(
+                expirationTime,
+                new PendingDataFlushTask<>(this));
+        this.ongoingOperation = bulkWriteOperation;
+        return bulkWriteOperation;
+    }
+
+    /**
+     * The enumeration of statuses in which a Projection Repository can be during its lifecycle.
+     */
+    protected enum Status {
+
+        /**
+         * The repository instance has been created.
+         *
+         * <p>In this status the storage is not yet assigned.
+         */
+        CREATED,
+
+        /**
+         * A storage has been assigned to the repository.
+         */
+        STORAGE_ASSIGNED,
+
+        /**
+         * The repository is getting events from EventStore and builds projections.
+         */
+        CATCHING_UP,
+
+        /**
+         * The repository completed the catch-up process.
+         */
+        ONLINE,
+
+        /**
+         * The repository is closed and no longer accept events.
+         */
+        CLOSED
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
     }
 
     /**
@@ -448,14 +494,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         }
     }
 
-    private BulkWriteOperation startBulkWrite(Duration expirationTime) {
-        final BulkWriteOperation<I, P> bulkWriteOperation = new BulkWriteOperation<>(
-                expirationTime,
-                new PendingDataFlushTask<>(this));
-        this.ongoingOperation = bulkWriteOperation;
-        return bulkWriteOperation;
-    }
-
     /**
      * Implementation of the {@link BulkWriteOperation.FlushCallback FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
@@ -476,16 +514,5 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                                 .writeLastHandledEventTime(lastHandledEventTime);
             projectionRepository.completeCatchUp();
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ProjectionRepository.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

@@ -31,7 +31,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.aggregate.error.MissingEventApplierException;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
@@ -196,7 +195,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             that make sense to the aggregate. */
         final S newState = (S) getBuilder().build();
         final Version version = getVersion();
-        setState(newState, version);
+        updateState(newState, version);
         this.builder = null;
     }
 
@@ -212,12 +211,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     @Internal
     @Override
-    protected final void setState(S state, Version version) {
+    protected final void updateState(S state, Version version) {
         if (builder == null) {
             throw new IllegalStateException(
                     "setState() is called from outside of the aggregate update phase.");
         }
-        super.setState(state, version);
+        super.updateState(state, version);
     }
 
     /**
@@ -420,7 +419,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Sets the passed state and version.
      *
-     * <p>The method circumvents the protection in the {@link #setState(Message, Version)
+     * <p>The method circumvents the protection in the {@link #updateState(Message, Version)
      * setState()} method by creating a fake builder instance, which is cleared
      * after the call.
      *
@@ -434,7 +433,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 // The cast is safe as we checked the type on the construction.
             final B fakeBuilder = (B) getState().newBuilderForType();
             this.builder = fakeBuilder;
-            setState(stateToRestore, versionFromSnapshot);
+            updateState(stateToRestore, versionFromSnapshot);
         } finally {
             this.builder = null;
         }

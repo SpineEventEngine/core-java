@@ -108,7 +108,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param boundedContext the bounded context to which this repository belongs
      */
     protected AggregateRepository(BoundedContext boundedContext) {
-        super(boundedContext);
+        super();
         this.eventBus = boundedContext.getEventBus();
         this.standFunnel = boundedContext.getStandFunnel();
     }

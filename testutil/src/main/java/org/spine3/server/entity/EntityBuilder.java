@@ -125,7 +125,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     }
 
     protected void setState(E result, S state, Version version) {
-        result.setState(state, version);
+        result.updateState(state, version);
     }
 
     /**

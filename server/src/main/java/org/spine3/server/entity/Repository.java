@@ -58,9 +58,6 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
-    /** The {@code BoundedContext} in which this repository works. */
-    private final BoundedContext boundedContext;
-
     /** The data storage for this repository. */
     private Storage<I, ?> storage;
 
@@ -90,15 +87,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Creates the repository in the passed {@link BoundedContext}.
      *
-     * @param boundedContext the {@link BoundedContext} in which this repository works
      */
-    protected Repository(BoundedContext boundedContext) {
-        this.boundedContext = boundedContext;
-    }
-
-    /** Returns the {@link BoundedContext} in which this repository works. */
-    protected BoundedContext getBoundedContext() {
-        return boundedContext;
+    protected Repository() {
     }
 
     /** Returns the class of IDs used by this repository. */

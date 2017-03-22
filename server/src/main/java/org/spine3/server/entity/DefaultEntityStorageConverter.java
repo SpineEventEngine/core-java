@@ -88,7 +88,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         if (entity != null) {
             if (entity instanceof AbstractVersionableEntity) {
                 final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-                versionable.setState(state, entityRecord.getVersion());
+                versionable.updateState(state, entityRecord.getVersion());
                 versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
             } else {
                 entity.injectState(state);

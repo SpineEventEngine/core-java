@@ -24,8 +24,6 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.server.Statuses;
-import org.spine3.server.command.error.CommandException;
-import org.spine3.server.command.error.InvalidCommandException;
 import org.spine3.users.TenantId;
 import org.spine3.validate.ConstraintViolation;
 

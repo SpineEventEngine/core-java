@@ -45,7 +45,8 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class GrpcContainer {
 
-    private static final String SERVER_NOT_STARTED_MSG = "gRPC server was not started or is shut down already.";
+    private static final String SERVER_NOT_STARTED_MSG =
+            "gRPC server was not started or is shut down already.";
 
     private final int port;
     private final ImmutableSet<ServerServiceDefinition> services;
@@ -74,7 +75,8 @@ public class GrpcContainer {
     }
 
     /**
-     * Returns {@code true} if the server is shut down or was not started at all, {@code false} otherwise.
+     * Returns {@code true} if the server is shut down or was not started at all,
+     * {@code false} otherwise.
      *
      * @see GrpcContainer#shutdown()
      */
@@ -83,7 +85,9 @@ public class GrpcContainer {
         return isShutdown;
     }
 
-    /** Initiates an orderly shutdown in which existing calls continue but new calls are rejected. */
+    /**
+     * Initiates an orderly shutdown in which existing calls continue but new calls are rejected.
+     */
     public void shutdown() {
         checkState(grpcServer != null, SERVER_NOT_STARTED_MSG);
         grpcServer.shutdown();
@@ -103,8 +107,11 @@ public class GrpcContainer {
     /**
      * Check if the given gRPC service is scheduled for the deployment in this container.
      *
-     * <p>Note, that the given gRPC service will become available to the clients, once the gRPC container is started.
-     * <p>To find out, whether the service is already available for calls, use {@link #isLive(BindableService)} method.
+     * <p>Note, that the given gRPC service will become available to the clients,
+     * once the gRPC container is started.
+     *
+     * <p>To find out, whether the service is already available for calls,
+     * use {@link #isLive(BindableService)} method.
      *
      * @param service the gRPC service to check
      * @return {@code true}, if the given gRPC service for deployment; {@code false} otherwise
@@ -123,14 +130,16 @@ public class GrpcContainer {
     }
 
     /**
-     * Check if the given gRPC service has actually been deployed and is available for interaction within this container.
+     * Check if the given gRPC service has actually been deployed and is available for interaction
+     * within this container.
      *
      * <p>Returns {@code true} if and only if
      * <p>  a. the service has been previously scheduled for the deployment,
      * <p>  b. the container has been started.
      *
      * @param service the gRPC service
-     * @return {@code true}, if the service is available for interaction within this container; {@code false} otherwise
+     * @return {@code true}, if the service is available for interaction within this container;
+     *         {@code false} otherwise
      */
     public boolean isLive(BindableService service) {
         final boolean inShutdownState = isShutdown();
@@ -170,7 +179,8 @@ public class GrpcContainer {
                                                              .getName();
                 try {
                     if (!isShutdown()) {
-                        System.err.println("Shutting down " + serverClass + " since JVM is shutting down...");
+                        System.err.println("Shutting down " +
+                                           serverClass + " since JVM is shutting down...");
                         shutdown();
                         System.err.println(serverClass + " shut down.");
                     }

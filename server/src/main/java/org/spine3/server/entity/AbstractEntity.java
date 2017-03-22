@@ -181,6 +181,48 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
         }
     }
 
+    /**
+     * Updates the state of the entity.
+     *
+     * <p>The new state must be {@linkplain #validate(Message) valid}.
+     *
+     * @param state the new state to set
+     * @throws IllegalStateException
+     *                if the passed state is not {@linkplain #validate(S) valid}
+     */
+    protected void updateState(S state) {
+        validate(state);
+        injectState(state);
+    }
+
+    /**
+     * Verifies whether the new state is valid.
+     *
+     * <p>Default implementation does nothing always returning {@code true}.
+     * Derived classes may provide custom validation logic by overriding this method.
+     *
+     * @param newState a state object to replace the current state
+     * @return {@code true} if the new state object is valid, {@code false} otherwise
+     */
+    protected boolean isValid(S newState) {
+        return true;
+    }
+
+    /**
+     * Ensures that the passed new state is valid.
+     *
+     * @param newState a state object to replace the current state
+     * @throws IllegalStateException if the state is not valid
+     * @see #isValid(Message)
+     */
+    protected void validate(S newState) throws IllegalStateException {
+        if (!isValid(newState)) {
+            final String errMsg = format("The passed new state (%s) is not valid.",
+                                         newState);
+            throw new IllegalStateException(errMsg);
+        }
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

@@ -20,8 +20,6 @@
 
 package org.spine3.base;
 
-import org.spine3.base.error.MissingStringifierException;
-
 import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;

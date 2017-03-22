@@ -35,7 +35,6 @@ import org.spine3.base.EventContext;
 import org.spine3.test.types.Task;
 import org.spine3.test.types.TaskId;
 import org.spine3.test.types.TaskName;
-import org.spine3.type.error.UnknownTypeException;
 
 import java.util.Arrays;
 import java.util.Collection;

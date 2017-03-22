@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.error.MissingStringifierException;
 import org.spine3.protobuf.Timestamps2;
 
 import java.lang.reflect.Type;

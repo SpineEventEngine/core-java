@@ -114,7 +114,7 @@ public abstract class AbstractCommandBusTestSuite {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
+        commandStore = spy(new CommandStore(storageFactory));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         commandBus = CommandBus.newBuilder()

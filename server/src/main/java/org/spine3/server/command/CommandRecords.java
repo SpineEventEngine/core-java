@@ -20,6 +20,8 @@
 
 package org.spine3.server.command;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Iterators;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
@@ -27,6 +29,7 @@ import org.spine3.base.CommandStatus;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
@@ -40,6 +43,18 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  * @author Alexander Yevsyukov
  */
 class CommandRecords {
+
+    private static final Function<CommandRecord, Command> TO_COMMAND =
+            new Function<CommandRecord, Command>() {
+                @Override
+                public Command apply(@Nullable CommandRecord record) {
+                    if (record == null) {
+                        return Command.getDefaultInstance();
+                    }
+                    final Command cmd = record.getCommand();
+                    return cmd;
+                }
+            };
 
     private CommandRecords() {
         // Prevent instantiation of this utility class.
@@ -57,8 +72,8 @@ class CommandRecords {
      * @param status
      *            a command status to set in the record
      * @param generatedCommandId
-     *            a command ID to used because the passed command does not have own ID.
-     *            If the command has own ID this parameter is {@code null}.
+     *            a command ID to be used because the passed command does not have own ID.
+     *            If the command has own ID, this parameter is {@code null}.
      * @return a storage record
      */
     static CommandRecord.Builder newRecordBuilder(Command command,
@@ -95,7 +110,7 @@ class CommandRecords {
      * But this ID does not belong to the command.
      *
      * <p>Therefore, commands without ID can be found by records
-     * where `command.context.command_id` field is empty.
+     * where {@code command.context.command_id} field is empty.
      */
     static CommandId getOrGenerateCommandId(Command command) {
         CommandId id = getId(command);
@@ -103,5 +118,10 @@ class CommandRecords {
             id = generateId();
         }
         return id;
+    }
+
+    /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
+    static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
+        return Iterators.transform(records, TO_COMMAND);
     }
 }

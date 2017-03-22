@@ -21,11 +21,10 @@
 package org.spine3.server.event.storage;
 
 import org.spine3.annotations.SPI;
-import org.spine3.server.event.EventStorage;
 import org.spine3.server.storage.StorageField;
 
 /**
- * A container for the storage fields specific for the {@link EventStorage} and its implementations.
+ * A container for the storage fields required for storing events.
  *
  * @author Dmytro Dashenkov
  * @see StorageField

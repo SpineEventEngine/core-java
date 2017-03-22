@@ -21,7 +21,6 @@
 package org.spine3.base;
 
 import org.junit.Test;
-import org.spine3.base.error.MissingStringifierException;
 
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 

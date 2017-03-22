@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command.error;
+package org.spine3.server.command;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Command;

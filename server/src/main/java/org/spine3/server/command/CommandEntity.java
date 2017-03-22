@@ -35,7 +35,7 @@ import static org.spine3.server.command.CommandRecords.getOrGenerateCommandId;
 import static org.spine3.server.command.CommandRecords.newRecordBuilder;
 
 /**
- * An entity for storing command and its processing status.
+ * An entity for storing a command and its processing status.
  *
  * @author Alexander Yevyukov
  */
@@ -44,7 +44,7 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
     /**
      * {@inheritDoc}
      */
-    protected CommandEntity(CommandId id) {
+    private CommandEntity(CommandId id) {
         super(id);
     }
 
@@ -78,7 +78,7 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
         final CommandRecord record = newRecordBuilder(command,
                                                       status,
                                                       null).build();
-        injectState(record);
+        updateState(record);
     }
 
     private void setError(CommandId id, Command command, Error error) {
@@ -86,7 +86,7 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
         builder.getStatusBuilder()
                .setError(error);
         final CommandRecord record = builder.build();
-        injectState(record);
+        updateState(record);
     }
 
     void setOkStatus() {
@@ -94,7 +94,7 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
         builder.getStatusBuilder()
                .setCode(OK);
         final CommandRecord record = builder.build();
-        injectState(record);
+        updateState(record);
     }
 
     void setToError(Error error) {
@@ -103,7 +103,7 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
                .setCode(ERROR)
                .setError(error);
         final CommandRecord record = builder.build();
-        injectState(record);
+        updateState(record);
     }
 
     void setToFailure(Failure failure) {
@@ -112,6 +112,6 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
                .setCode(FAILURE)
                .setFailure(failure);
         final CommandRecord record = builder.build();
-        injectState(record);
+        updateState(record);
     }
 }

@@ -27,14 +27,16 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.command.error.CommandException;
+import org.spine3.server.command.CommandException;
 import org.spine3.server.storage.TenantDataOperation;
 
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.command.CommandRecords.toCommandIterator;
 
 /**
  * Manages commands received by the system.
@@ -48,11 +50,12 @@ public class CommandStore implements AutoCloseable {
 
     /**
      * Creates a new instance.
-     *
-     * @param storage an underlying storage
      */
-    public CommandStore(CommandStorage storage) {
+    public CommandStore(StorageFactory storageFactory) {
+        final CommandStorage storage = new CommandStorage();
+        storage.initStorage(storageFactory);
         this.storage = storage;
+
     }
 
     /**
@@ -146,7 +149,7 @@ public class CommandStore implements AutoCloseable {
      */
     public Iterator<Command> iterator(CommandStatus status) {
         checkNotClosed();
-        final Iterator<Command> commands = storage.iterator(status);
+        final Iterator<Command> commands = toCommandIterator(storage.iterator(status));
         return commands;
     }
 

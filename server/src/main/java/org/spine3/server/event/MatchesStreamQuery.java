@@ -33,8 +33,7 @@ import static org.spine3.base.EventPredicates.isBefore;
 import static org.spine3.base.EventPredicates.isBetween;
 
 /**
- * The predicate for filtering {@code Event} instances by
- * {@link EventStreamQuery}.
+ * The predicate for filtering {@code Event} instances by {@link EventStreamQuery}.
  *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov

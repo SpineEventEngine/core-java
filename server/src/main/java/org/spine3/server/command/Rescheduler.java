@@ -36,8 +36,8 @@ import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Timestamps2.isLaterThan;
+import static org.spine3.server.command.CommandExpiredException.commandExpiredError;
 import static org.spine3.server.command.CommandScheduler.setSchedule;
-import static org.spine3.server.command.error.CommandExpiredException.commandExpiredError;
 import static org.spine3.time.Intervals.between;
 import static org.spine3.time.Intervals.toDuration;
 
