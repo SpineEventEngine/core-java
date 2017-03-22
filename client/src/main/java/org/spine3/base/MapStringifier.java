@@ -30,22 +30,42 @@ import static com.google.common.collect.Maps.newHashMap;
 /**
  * The stringifier for the {@code Map} classes.
  *
- * <p> The converter for the type of the elements in the map
+ * <p>The stringifier for the type of the elements in the map
  * should be registered in the {@code StringifierRegistry} class
- * for the correct usage of the {@code MapStringifier} converter.
+ * for the correct usage of {@code MapStringifier}.
+ *
+ * <h3>Example</h3>
+ *
+ * {@code
+ *  // The registration of the stringifier.
+ *  final Type type = new TypeToken<Map<String, Long>>(){}.getType();
+ *  StringifierRegistry.getInstance().register(stringifier, type);
+ *
+ *  // Obtain already registered `MapStringifier`.
+ *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
+ *                                                                           .getStringifier(type);
+ *
+ *  // Convert to string
+ *  final Map<String, Long> mapToConvert = ...
+ *  final String convertedMap = mapStringifier.toString(mapToConvert);
+ *
+ *  // Convert from string
+ *  final String stringToConvert = ...
+ *  final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert);
+ * }
  *
  * @param <K> the type of the keys in the map
  * @param <V> the type of the values in the map
  */
 class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
-    private static final char DEFAULT_ELEMENTS_DELIMITER = ',';
+    private static final char DEFAULT_ELEMENT_DELIMITER = ',';
     private static final String ESCAPE_SEQUENCE = "\\";
     private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
 
     /**
      * The delimiter for the passed elements in the {@code String} representation,
-     * {@code DEFAULT_ELEMENTS_DELIMITER} by default.
+     * {@code DEFAULT_ELEMENT_DELIMITER} by default.
      */
     private final String delimiter;
     private final Class<K> keyClass;
@@ -55,7 +75,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         super();
         this.keyClass = keyClass;
         this.valueClass = valueClass;
-        this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENTS_DELIMITER;
+        this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENT_DELIMITER;
     }
 
     /**
@@ -104,15 +124,15 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             resultMap.put(convertedKey, convertedValue);
             return resultMap;
         } catch (Throwable ignored) {
-            throw conversionArgumentException("Occurred exception during the conversion");
+            throw conversionArgumentException("The exception is occurred during the conversion");
         }
     }
 
     private static void checkKeyValue(String[] keyValue) {
         if (keyValue.length != 2) {
             final String exMessage =
-                    "Illegal key - value format, key value should be " +
-                    "separated with single `:` character";
+                    "Illegal key-value format. The value should " +
+                    "be separated with a single `:` character.";
             throw conversionArgumentException(exMessage);
         }
     }

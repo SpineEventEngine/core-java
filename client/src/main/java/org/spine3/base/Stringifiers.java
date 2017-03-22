@@ -97,7 +97,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for map.
+     * Obtains {@code Stringifier} for map with default delimiter for the passed map elements.
      *
      * @param keyClass   the class of keys are maintained by this map
      * @param valueClass the class  of mapped values
@@ -114,7 +114,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for map.
+     * Obtains {@code Stringifier} for map with custom delimiter for the passed map elements.
      *
      * @param keyClass   the class of keys are maintained by this map
      * @param valueClass the class  of mapped values
