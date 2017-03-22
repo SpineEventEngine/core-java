@@ -135,7 +135,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for list.
+     * Obtains {@code Stringifier} for list with default delimiter for the passed list elements.
      *
      * @param elementClass the class of the list elements
      * @param <T>          the type of the elements in the list
@@ -148,7 +148,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for list.
+     * Obtains {@code Stringifier} for list with custom delimiter for the passed list elements.
      *
      * @param elementClass the class of the list elements
      * @param delimiter    the delimiter or the list elements passed via string
