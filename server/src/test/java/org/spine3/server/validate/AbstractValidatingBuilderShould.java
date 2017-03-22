@@ -71,7 +71,7 @@ public class AbstractValidatingBuilderShould {
         assertThat(convertedValue, is(expectedList));
     }
 
-    @Test(expected = MissingStringifierException.class)
+    @Test(expected = ConversionException.class)
     public void throw_exception_when_appropriate_stringifier_is_not_found() throws
                                                                             ConversionException {
         final String stringToConvert = "{value:1}";

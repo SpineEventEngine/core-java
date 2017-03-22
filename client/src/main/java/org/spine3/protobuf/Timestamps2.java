@@ -24,7 +24,6 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.annotations.Internal;
-import org.spine3.base.IllegalConversionArgumentException;
 import org.spine3.base.Stringifier;
 
 import javax.annotation.Nullable;
@@ -34,6 +33,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utilities class for working with {@link Timestamp}s in addition to those available from
@@ -280,7 +280,7 @@ public class Timestamps2 {
             try {
                 return Timestamps.parse(str);
             } catch (ParseException e) {
-                throw new IllegalConversionArgumentException(e.getMessage());
+                throw newIllegalArgumentException(e.getMessage(), e);
             }
         }
     }
@@ -322,7 +322,7 @@ public class Timestamps2 {
                 final String rfcStr = fromWebSafe(webSafe);
                 return Timestamps.parse(rfcStr);
             } catch (ParseException e) {
-                throw new IllegalConversionArgumentException(e.getMessage());
+                throw newIllegalArgumentException(e.getMessage(), e);
             }
         }
 

@@ -24,7 +24,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.base.IllegalConversionArgumentException;
 import org.spine3.base.Stringifier;
 import org.spine3.base.Stringifiers;
 import org.spine3.test.TimeTests;
@@ -313,7 +312,7 @@ public class Timestamps2Should {
         assertEquals(timestamp, convertedBack);
     }
 
-    @Test(expected = IllegalConversionArgumentException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         // This uses TextFormat printing, for the output won't be parsable.
         final String time = Timestamps2.getCurrentTime()

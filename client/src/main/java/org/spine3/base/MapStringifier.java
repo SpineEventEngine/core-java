@@ -129,28 +129,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         }
     }
 
-    @SuppressWarnings("unchecked") // It is OK because class is verified.
-    private static <I> I convert(Class<I> elementClass, String elementToConvert) {
-
-        if (isInteger(elementClass)) {
-            return (I) Ints.stringConverter()
-                           .convert(elementToConvert);
-        }
-
-        if (isLong(elementClass)) {
-            return (I) Longs.stringConverter()
-                            .convert(elementToConvert);
-        }
-
-        if (isString(elementClass)) {
-            return (I) elementToConvert;
-        }
-
-        final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
-        return convertedValue;
-
-    }
-
     private static void checkKeyValue(String[] keyValue) {
         if (keyValue.length != 2) {
             final String exMessage =
@@ -158,17 +136,5 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                     "be separated with a single `:` character.";
             throw newIllegalArgumentException(exMessage);
         }
-    }
-
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static boolean isLong(Class<?> aClass) {
-        return Long.class.equals(aClass);
-    }
-
-    private static boolean isInteger(Class<?> aClass) {
-        return Integer.class.equals(aClass);
     }
 }

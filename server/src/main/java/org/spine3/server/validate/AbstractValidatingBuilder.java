@@ -24,7 +24,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
-import org.spine3.base.IllegalConversionArgumentException;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Stringifiers;
 import org.spine3.validate.ConstraintViolation;
@@ -66,8 +65,8 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
         try {
             final V convertedValue = Stringifiers.fromString(value, type);
             return convertedValue;
-        } catch (IllegalConversionArgumentException ex) {
-            throw new ConversionException(ex.getMessage());
+        } catch (RuntimeException ex) {
+            throw new ConversionException(ex.getMessage(), ex);
         }
     }
 
