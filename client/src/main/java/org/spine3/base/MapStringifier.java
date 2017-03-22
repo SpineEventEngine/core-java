@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The stringifier for the {@code Map} classes.
@@ -45,11 +46,11 @@ import static com.google.common.collect.Maps.newHashMap;
  *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
  *                                                                           .getStringifier(type);
  *
- *  // Convert to string
+ *  // Convert to string.
  *  final Map<String, Long> mapToConvert = ...
- *  final String convertedMap = mapStringifier.toString(mapToConvert);
+ *  final String convertedString = mapStringifier.toString(mapToConvert);
  *
- *  // Convert from string
+ *  // Convert from string.
  *  final String stringToConvert = ...
  *  final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert);
  * }
@@ -123,9 +124,31 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             final V convertedValue = Stringifiers.convert(value, valueClass);
             resultMap.put(convertedKey, convertedValue);
             return resultMap;
-        } catch (Throwable ignored) {
-            throw conversionArgumentException("The exception is occurred during the conversion");
+        } catch (Throwable e) {
+            throw newIllegalArgumentException("The exception is occurred during the conversion", e);
         }
+    }
+
+    @SuppressWarnings("unchecked") // It is OK because class is verified.
+    private static <I> I convert(Class<I> elementClass, String elementToConvert) {
+
+        if (isInteger(elementClass)) {
+            return (I) Ints.stringConverter()
+                           .convert(elementToConvert);
+        }
+
+        if (isLong(elementClass)) {
+            return (I) Longs.stringConverter()
+                            .convert(elementToConvert);
+        }
+
+        if (isString(elementClass)) {
+            return (I) elementToConvert;
+        }
+
+        final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
+        return convertedValue;
+
     }
 
     private static void checkKeyValue(String[] keyValue) {
@@ -133,11 +156,19 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             final String exMessage =
                     "Illegal key-value format. The value should " +
                     "be separated with a single `:` character.";
-            throw conversionArgumentException(exMessage);
+            throw newIllegalArgumentException(exMessage);
         }
     }
 
-    private static IllegalConversionArgumentException conversionArgumentException(String msg) {
-        return new IllegalConversionArgumentException(msg);
+    private static boolean isString(Class<?> aClass) {
+        return String.class.equals(aClass);
+    }
+
+    private static boolean isLong(Class<?> aClass) {
+        return Long.class.equals(aClass);
+    }
+
+    private static boolean isInteger(Class<?> aClass) {
+        return Integer.class.equals(aClass);
     }
 }
