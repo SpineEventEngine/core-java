@@ -91,6 +91,11 @@ ext {
 
 subprojects {
 
+    configurations {
+        runtime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+        testRuntime.exclude group: "com.google.protobuf", module: "protobuf-lite"
+    }
+
     project.ext {
         sourcesRootDir = "$projectDir/src"
         generatedRootDir = "$projectDir/generated"
