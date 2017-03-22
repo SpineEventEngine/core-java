@@ -48,9 +48,6 @@ class EventEntity extends AbstractEntity<EventId, Event> {
         }
     };
 
-    /**
-     * {@inheritDoc}
-     */
     EventEntity(EventId id) {
         super(id);
     }
