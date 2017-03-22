@@ -197,27 +197,22 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
     @Test
     public void rewrite_records_in_bulk() {
+        final int recordsCount = 3;
         final RecordStorage<I> storage = getStorage();
-        final I id1 = newId();
-        final I id2 = newId();
-        final I id3 = newId();
+        final Map<I, EntityRecord> v1Records = new HashMap<>(recordsCount);
+        final Map<I, EntityRecord> v2Records = new HashMap<>(recordsCount);
 
-        final EntityRecord record1 = newStorageRecord(id1);
-        final EntityRecord record2 = newStorageRecord(id2);
-        final EntityRecord record3 = newStorageRecord(id3);
+        for (int i = 0; i < recordsCount; i++) {
+            final I id = newId();
+            final EntityRecord record = newStorageRecord(id);
 
-        final EntityRecord record1Modified = newStorageRecord(id1);
-        final EntityRecord record3Modified = newStorageRecord(id3);
-
-        final Map<I, EntityRecord> v1Records = new HashMap<>(3);
-        v1Records.put(id1, record1);
-        v1Records.put(id2, record2);
-        v1Records.put(id3, record3);
-
-        final Map<I, EntityRecord> v2Records = new HashMap<>(3);
-        v2Records.put(id1, record1Modified);
-        v2Records.put(id2, record2);
-        v2Records.put(id3, record3Modified);
+            // Some records are changed and some are not
+            final EntityRecord alternateRecord = (i % 2 == 0)
+                                                 ? record
+                                                 : newStorageRecord(id);
+            v1Records.put(id, record);
+            v2Records.put(id, alternateRecord);
+        }
 
         storage.write(v1Records);
         final Map<I, EntityRecord> firstRevision = storage.readAll();
