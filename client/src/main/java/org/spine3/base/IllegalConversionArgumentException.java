@@ -21,10 +21,13 @@
 package org.spine3.base;
 
 /**
- * Thrown to indicate that a method has been passed an illegal or
- * inappropriate argument during the conversion from one type to another.
+ * This exception is thrown in the {@code Stringifier#toString(Object)}
+ * and {@code Stringifier#fromString(String)} methods to indicate that
+ * the method has been passed an illegal or inappropriate argument.
  *
  * @author Illia Shepilov
+ * @see Stringifier#toString(Object)
+ * @see Stringifier#fromString(String)
  */
 public class IllegalConversionArgumentException extends IllegalArgumentException {
 
