@@ -106,11 +106,6 @@ public abstract class EventStorageShould
     }
 
     @Test
-    public void have_index_of_identifiers() {
-        assertNotNull(storage.index());
-    }
-
-    @Test
     public void return_iterator_over_empty_collection_if_read_events_from_empty_storage() {
         final Iterator<Event> iterator = findAll();
 

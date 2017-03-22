@@ -27,8 +27,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.Tests;
 
+import java.util.Iterator;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
@@ -136,6 +139,12 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     @Test
     public void write_and_read_record() {
         writeAndReadRecordTest(newId());
+    }
+
+    @Test
+    public void have_index_on_ID() {
+        final Iterator<I> index = storage.index();
+        assertNotNull(index);
     }
 
     @Test
