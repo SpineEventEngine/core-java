@@ -70,15 +70,16 @@ public class ListStringifierShould {
     @Test
     @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass",
                        "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
-                       // It is OK for test method.
+                        // It is OK for test method.
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1\\|2\\|3\\|4\\|5";
         final String delimiter = "|";
-        final Type type = new TypeToken<List<Integer>>(){}.getType();
+        final Type type = new TypeToken<List<Integer>>() {
+        }.getType();
         final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        final List<Integer> actualList = Stringifiers.fromString(stringToConvert, type);
+        final List<Integer> actualList = stringifier.fromString(stringToConvert);
         assertNotNull(actualList);
 
         final List<Integer> expectedList = newArrayList(1, 2, 3, 4, 5);
