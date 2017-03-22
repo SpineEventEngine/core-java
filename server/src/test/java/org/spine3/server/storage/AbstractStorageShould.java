@@ -196,6 +196,9 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
         try {
             index.remove();
             fail("Storage#index is mutable");
+
+            // One of collections used in in-memory implementation throws IllegalStateException
+            // but default behavior is UnsupportedOperationException
         } catch (UnsupportedOperationException | IllegalStateException ignored) {
             // One of valid exceptions was thrown
         }
