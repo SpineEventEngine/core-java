@@ -19,6 +19,7 @@
  */
 package org.spine3.protobuf;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
 
@@ -26,6 +27,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -50,6 +52,21 @@ public class Messages {
         checkNotNull(message);
         final String result = TextFormat.printToString(message);
         return result;
+    }
+
+    /**
+     * Safely packs the given {@link Message} object as {@link Any}.
+     *
+     * <p>If the passed message object is already packed as {@code Any}, just
+     * casts it to {@code Any} and returns the result.
+     *
+     * @param messageOrAny the message object
+     * @return {@code Any}
+     */
+    public static Any toAny(Message messageOrAny) {
+        return (messageOrAny instanceof Any)
+                    ? (Any) messageOrAny
+                    : pack(messageOrAny);
     }
 
     /**
