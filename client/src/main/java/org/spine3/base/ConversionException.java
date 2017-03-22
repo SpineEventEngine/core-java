@@ -21,7 +21,7 @@
 package org.spine3.base;
 
 /**
- * Signals that an exception has been reached unexpectedly while converting from one type to another.
+ * This exception is thrown when one type cannot be converted to another.
  *
  * @author Illia Shepilov
  */

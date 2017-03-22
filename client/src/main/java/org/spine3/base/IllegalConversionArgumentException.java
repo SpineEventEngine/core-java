@@ -26,7 +26,7 @@ package org.spine3.base;
  *
  * @author Illia Shepilov
  */
-public class IllegalConversionArgumentException extends RuntimeException {
+public class IllegalConversionArgumentException extends IllegalArgumentException {
 
     private static final long serialVersionUID = 1L;
 
