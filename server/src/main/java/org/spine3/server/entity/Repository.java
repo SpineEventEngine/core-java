@@ -262,7 +262,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * <p>If not throws {@code IllegalStateException}
      */
     protected void checkNotClosed() {
-        checkState(isOpen(), "The repository is closed.");
+        checkState(isOpen(), "The repository (%s) is closed.", getClass().getName());
     }
 
     /**

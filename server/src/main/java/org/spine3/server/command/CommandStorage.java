@@ -114,12 +114,6 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
         return transformed;
     }
 
-    private void checkNotClosed() throws IllegalStateException {
-        if (!isOpen()) {
-            throw new IllegalStateException("Command storage is closed.");
-        }
-    }
-
     /**
      * Sets the status of the command to {@link CommandStatus#OK}
      */

@@ -41,7 +41,7 @@ public class CommandBusBuilderShould {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandStore = new CommandStore(storageFactory.createCommandStorage());
+        commandStore = new CommandStore(storageFactory);
     }
 
     @Test(expected = NullPointerException.class)

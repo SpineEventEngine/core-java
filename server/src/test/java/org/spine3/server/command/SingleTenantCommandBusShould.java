@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.server.command.error.InvalidCommandException;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

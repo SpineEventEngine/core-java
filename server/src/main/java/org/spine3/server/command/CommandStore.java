@@ -27,10 +27,9 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Errors;
 import org.spine3.base.Failure;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.command.CommandException;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.TenantDataOperation;
 
 import java.util.Iterator;

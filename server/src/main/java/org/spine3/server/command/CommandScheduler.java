@@ -123,7 +123,8 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Sets a new scheduling time to {@link CommandContext.Schedule}.
+     * Sets a new scheduling time in the {@linkplain CommandContext.Schedule context}
+     * of the passed command.
      *
      * @param command        a command to update
      * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
@@ -141,7 +142,7 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Updates {@link CommandContext.Schedule}.
+     * Updates {@linkplain CommandContext.Schedule command schedule}.
      *
      * @param command        a command to update
      * @param delay          a {@linkplain CommandContext.Schedule#getDelay() delay} to set

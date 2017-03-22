@@ -154,7 +154,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     /**
-     * Obtains the instance of the {@link CommandStore.StatusService} associated with this command bus.
+     * Obtains the instance of the {@link CommandStore.StatusService CommandStore.StatusService}
+     * associated with this command bus.
      */
     CommandStore.StatusService getCommandStatusService() {
         return commandStatusService;

@@ -26,8 +26,6 @@ import org.spine3.base.Command;
 import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.command.error.InvalidCommandException;
-import org.spine3.server.command.error.UnsupportedCommandException;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;

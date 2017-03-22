@@ -27,7 +27,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.client.CommandFactory;
-import org.spine3.server.command.error.CommandException;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestCommandFactory;
