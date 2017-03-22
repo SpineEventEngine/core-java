@@ -62,6 +62,9 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
+    /** The {@code BoundedContext} in which this repository works. */
+    private final BoundedContext boundedContext;
+
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage =
             GetTargetIdFromCommand.newInstance();
 
@@ -74,6 +77,12 @@ public abstract class ProcessManagerRepository<I,
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
         super(boundedContext, EventDispatchingRepository.<I>producerFromFirstMessageField());
+        this.boundedContext = boundedContext;
+    }
+
+    /** Returns the {@link BoundedContext} in which this repository works. */
+    private BoundedContext getBoundedContext() {
+        return boundedContext;
     }
 
     @Override

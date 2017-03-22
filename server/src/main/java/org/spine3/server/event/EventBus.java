@@ -469,7 +469,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
                                        .setStreamExecutor(eventStoreStreamExecutor)
-                                       .setStorage(storageFactory.createEventStorage())
+                                       .setStorageFactory(storageFactory)
                                        .setLogger(EventStore.log())
                                        .build();
             }
