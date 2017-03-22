@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.type.TypeUrl;
@@ -141,8 +142,13 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected void writeRecords(Map<AggregateStateId, EntityRecord> records) {
-        for (Map.Entry<AggregateStateId, EntityRecord> record : records.entrySet()) {
+    protected void writeRecord(AggregateStateId id, EntityRecordEnvelope record) {
+        writeRecord(id, record.getRecord());
+    }
+
+    @Override
+    protected void writeRecords(Map<AggregateStateId, EntityRecordEnvelope> records) {
+        for (Map.Entry<AggregateStateId, EntityRecordEnvelope> record : records.entrySet()) {
             writeRecord(record.getKey(), record.getValue());
         }
     }

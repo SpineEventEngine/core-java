@@ -33,6 +33,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
+import org.spine3.server.entity.storage.EntityRecordEnvelope;
+import org.spine3.server.entity.storage.StorageFields;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -111,7 +113,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public void store(E entity) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityRecord record = toRecord(entity);
+        final EntityRecordEnvelope record = toRecord(entity);
         storage.write(entity.getId(), record);
     }
 
@@ -286,9 +288,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Converts the passed entity into the record.
      */
-    protected EntityRecord toRecord(E entity) {
+    protected EntityRecordEnvelope toRecord(E entity) {
         final EntityRecord entityRecord = entityConverter().convert(entity);
-        return entityRecord;
+        final Map<String, Object> storageFields = StorageFields.from(entity);
+        final EntityRecordEnvelope envelope = new EntityRecordEnvelope(entityRecord, storageFields);
+        return envelope;
     }
 
     private E toEntity(EntityRecord record) {

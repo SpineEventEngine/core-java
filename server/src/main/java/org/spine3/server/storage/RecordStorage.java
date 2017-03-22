@@ -28,15 +28,13 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.stand.AggregateStateId;
+import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A storage keeping messages with identity.
@@ -94,10 +92,19 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public void write(I id, EntityRecord record) {
         checkNotNull(id);
         checkArgument(record.hasState(), "Record does not have state field.");
+        checkNotClosed();
+
+        writeRecord(id, record);
+    }
+
+    public void write(I id, EntityRecordEnvelope record) {
+        checkNotNull(id);
+        checkArgument(record.getRecord().hasState(), "Record does not have state field.");
         checkNotClosed();
 
         writeRecord(id, record);
@@ -111,7 +118,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param records an ID to record map with the entries to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void write(Map<I, EntityRecord> records) {
+    public void write(Map<I, EntityRecordEnvelope> records) {
         checkNotNull(records);
         checkNotClosed();
 
@@ -128,23 +135,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return Optional.absent();
     }
 
+    @Deprecated
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        final Optional<EntityRecord> optional = read(id);
-        if (optional.isPresent()) {
-            final EntityRecord record = optional.get();
-            final EntityRecord updated = record.toBuilder()
-                                               .setLifecycleFlags(flags)
-                                               .build();
-            write(id, updated);
-        } else {
-            // The AggregateStateId is a special case, which is not handled by the Identifier class.
-            final String idStr = id instanceof AggregateStateId
-                                 ? id.toString()
-                                 : idToString(id);
-            throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                            idStr);
-        }
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -235,7 +229,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param id     an ID of the record
      * @param record a record to store
      */
+    @Deprecated
     protected abstract void writeRecord(I id, EntityRecord record);
+
+    protected abstract void writeRecord(I id, EntityRecordEnvelope record);
 
     /**
      * Writes a bulk of records into the storage.
@@ -244,5 +241,5 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      *
      * @param records an ID to record map with the entries to store
      */
-    protected abstract void writeRecords(Map<I, EntityRecord> records);
+    protected abstract void writeRecords(Map<I, EntityRecordEnvelope> records);
 }

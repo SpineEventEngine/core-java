@@ -30,9 +30,11 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -175,12 +177,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         final int bulkSize = 5;
 
-        final Map<I, EntityRecord> expected = new HashMap<>(bulkSize);
+        final Map<I, EntityRecordEnvelope> expected = new HashMap<>(bulkSize);
 
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            expected.put(id, record);
+            final Map<String, Object> storageFields = Collections.emptyMap();
+            expected.put(id, new EntityRecordEnvelope(record, storageFields));
         }
         storage.write(expected);
 
