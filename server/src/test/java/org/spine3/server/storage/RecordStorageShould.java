@@ -20,7 +20,9 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -33,6 +35,7 @@ import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.test.Tests;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -202,6 +205,18 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void rewrite_records_in_bulk() {
         final int recordCount = 3;
         final RecordStorage<I> storage = getStorage();
+
+        final Function<EntityRecord, EntityRecordEnvelope> envelopPacker =
+                new Function<EntityRecord, EntityRecordEnvelope>() {
+                    @Nullable
+                    @Override
+                    public EntityRecordEnvelope apply(@Nullable EntityRecord record) {
+                        if (record == null) {
+                            return null;
+                        }
+                        return new EntityRecordEnvelope(record, Collections.<String, Object>emptyMap());
+                    }
+                };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
         final Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
 
@@ -217,11 +232,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             v2Records.put(id, alternateRecord);
         }
 
-        storage.write(v1Records);
+        storage.write(Maps.transformValues(v1Records, envelopPacker));
         final Map<I, EntityRecord> firstRevision = storage.readAll();
         assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
 
-        storage.write(v2Records);
+        storage.write(Maps.transformValues(v2Records, envelopPacker));
         final Map<I, EntityRecord> secondRevision = storage.readAll();
         assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
     }
