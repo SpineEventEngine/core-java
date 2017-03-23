@@ -58,9 +58,9 @@ import static org.spine3.server.command.Given.CommandMessage.createProjectMessag
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
-public class CommandBusShouldHandleCommandStatus extends AbstractCommandBusTestSuite {
+public class CommandBusStatusHandlingShould extends AbstractCommandBusTestSuite {
 
-    public CommandBusShouldHandleCommandStatus() {
+    public CommandBusStatusHandlingShould() {
         super(true);
     }
 
