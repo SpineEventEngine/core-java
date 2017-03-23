@@ -38,6 +38,15 @@ public class Types {
         // Disable instantiation of this utility class.
     }
 
+    /**
+     * Creates the {@code ParameterizedTypeImpl} type of the map.
+     *
+     * @param keyClass   the class of keys are maintained by this map
+     * @param valueClass the class  of mapped values
+     * @param <K>        the type of keys are maintained by this map
+     * @param <V>        the type of the values stored in this map
+     * @return the type of the map
+     */
     public static <K, V> Type createMapType(K keyClass, V valueClass) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
