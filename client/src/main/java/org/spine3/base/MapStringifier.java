@@ -133,7 +133,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             final K convertedKey = convert(keyClass, key);
             final V convertedValue = convert(valueClass, value);
             final Map.Entry<K, V> convertedBucket =
-                    new AbstractMap.SimpleEntry<K, V>(convertedKey, convertedValue);
+                    new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
             return convertedBucket;
         } catch (Throwable e) {
             throw newIllegalArgumentException("The exception is occurred during the conversion", e);
