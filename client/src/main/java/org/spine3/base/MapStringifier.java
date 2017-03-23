@@ -69,8 +69,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static final String ESCAPE_SEQUENCE = "\\";
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
-    private static final char KEY_VALUE_DELIMITER = ':';
-    private static final String ESCAPED_KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
+    private static final char COLON = ':';
+    private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
 
     /**
      * The delimiter for the passed elements in the {@code String} representation,
@@ -118,7 +118,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final StringBuilder stringBuilder = new StringBuilder(0);
         for (Map.Entry<K, V> entry : obj.entrySet()) {
             stringBuilder.append(entry.getKey())
-                         .append(ESCAPED_KEY_VALUE_DELIMITER)
+                         .append(KEY_VALUE_DELIMITER)
                          .append(entry.getValue())
                          .append(delimiter);
         }
@@ -140,7 +140,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private Map.Entry<K, V> convert(String bucketToConvert) {
-        final String[] keyValue = bucketToConvert.split(Pattern.quote(ESCAPED_KEY_VALUE_DELIMITER));
+        final String[] keyValue = bucketToConvert.split(Pattern.quote(KEY_VALUE_DELIMITER));
         checkKeyValue(keyValue);
 
         final String key = keyValue[0];
@@ -183,7 +183,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         if (keyValue.length != 2) {
             final String exMessage =
                     "Illegal key-value format. The value should " +
-                    "be separated with the escaped `" + KEY_VALUE_DELIMITER + "` character.";
+                    "be separated with the escaped `" + COLON + "` character.";
             throw newIllegalArgumentException(exMessage);
         }
     }
