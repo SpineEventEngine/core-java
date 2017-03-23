@@ -121,7 +121,7 @@ public class StorageFields {
                 && isNotExclusion
                 && instanceMethod) {
                 // Regex operations are not fast enough to check all the methods.
-                // That's wht we check the Method object fields first
+                // That's why we check the Method object fields first
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
                                                           .matches();
                 if (nameMatches) {
