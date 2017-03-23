@@ -51,7 +51,7 @@ public class TypesShould {
     @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
                        "SerializableInnerClassWithNonSerializableOuterClass"})
                         // It is OK for test method.
-    public void create_map_type_token() {
+    public void create_map_type() {
         final Type type = createMapType(String.class, Integer.class);
         final Type expectedType = new TypeToken<Map<String, Integer>>(){}.getType();
         assertEquals(expectedType, type);
