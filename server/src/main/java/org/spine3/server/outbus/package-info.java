@@ -18,34 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
-
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Marks a method as an event subscriber.
- *
- * <p>An event subscriber method:
- * <ul>
- *     <li>is annotated with {@link Subscribe};
- *     <li>is {@code public};
- *     <li>returns {@code void};
- *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
- *          as the first parameter;
- *     <li>(optional) accepts an {@link org.spine3.base.EventContext EventContext}
- *          as the second parameter.
- * </ul>
- *
- * If the annotation is applied to a method which doesn't satisfy any of these requirements,
- * this method is not considered as an event subscriber and is not registered for event delivery
- * from {@link EventBus}.
- *
- * @author Alexander Yevsyukov
+ * This package provides classes for working with the
+ * {@linkplain org.spine3.server.command.CommandBus bus} output.
  */
-@Retention(RetentionPolicy.RUNTIME)
-@Target(ElementType.METHOD)
-public @interface Subscribe {
-}
+
+@ParametersAreNonnullByDefault
+package org.spine3.server.outbus;
+
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -23,7 +23,7 @@ package org.spine3.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.base.EventContext;
-import org.spine3.server.event.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.test.reflect.event.ProjectCreated;
 
 import java.lang.reflect.InvocationTargetException;
@@ -43,6 +43,7 @@ public class EventSubscriberMethodShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(EventContext.class, EventContext.getDefaultInstance())
                 .testAllPublicStaticMethods(EventSubscriberMethod.class);
     }
     

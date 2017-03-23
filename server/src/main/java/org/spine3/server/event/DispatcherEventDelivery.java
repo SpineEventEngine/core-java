@@ -20,47 +20,53 @@
 package org.spine3.server.event;
 
 import org.spine3.annotations.SPI;
-import org.spine3.base.Event;
+import org.spine3.envelope.EventEnvelope;
+import org.spine3.server.outbus.CommandOutputDelivery;
+import org.spine3.type.EventClass;
 
 import java.util.concurrent.Executor;
 
 /**
- * A base class for the strategies on delivering the {@code Event}s from the {@link EventBus}
- * to the {@link EventDispatcher}s.
+ * A base class for the strategies on delivering the {@link org.spine3.base.Event events}
+ * from the {@linkplain EventBus event bus} to the corresponding
+ * {@linkplain EventDispatcher event dispatchers}.
  *
  * @author Alex Tymchenko
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatcher> {
+public abstract class DispatcherEventDelivery extends CommandOutputDelivery<EventEnvelope,
+                                                                            EventClass,
+                                                                            EventDispatcher> {
 
     /**
      * Create a dispatcher event delivery with an {@link Executor} used for the operation.
      *
      * @param delegate the instance of {@code Executor} used to dispatch events.
-     * @see EventDelivery#EventDelivery(Executor)
+     * @see CommandOutputDelivery#CommandOutputDelivery(Executor)
      */
     protected DispatcherEventDelivery(Executor delegate) {
         super(delegate);
     }
 
     /**
-     * Creates an instance of event executor with a
-     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+     * Creates an instance of event delivery with a
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * used for event dispatching.
      *
-     * @see EventDelivery#EventDelivery()
+     * @see CommandOutputDelivery#CommandOutputDelivery()
      */
     protected DispatcherEventDelivery() {
         super();
     }
 
     @Override
-    protected Runnable getDeliveryAction(final EventDispatcher consumer, final Event event) {
+    protected Runnable getDeliveryAction(final EventDispatcher consumer,
+                                         final EventEnvelope envelope) {
         return new Runnable() {
             @Override
             public void run() {
-                consumer.dispatch(event);
+                consumer.dispatch(envelope);
             }
         };
     }
@@ -68,7 +74,7 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
     /**
      * Obtains a pre-defined instance of the {@code DispatcherEventDelivery}, which does NOT
      * postpone any event dispatching and uses
-     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *
      * @return the pre-configured default executor.
@@ -83,14 +89,16 @@ public abstract class DispatcherEventDelivery extends EventDelivery<EventDispatc
         /**
          * A pre-defined instance of the {@code DispatcherEventDelivery},
          * which does not postpone any event dispatching and uses
-         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
+         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
          * for operation.
          */
-        private static final DispatcherEventDelivery DIRECT_DELIVERY = new DispatcherEventDelivery() {
-            @Override
-            public boolean shouldPostponeDelivery(Event event, EventDispatcher dispatcher) {
-                return false;
-            }
-        };
+        private static final DispatcherEventDelivery DIRECT_DELIVERY =
+                new DispatcherEventDelivery() {
+                    @Override
+                    public boolean shouldPostponeDelivery(EventEnvelope envelope,
+                                                          EventDispatcher dispatcher) {
+                        return false;
+                    }
+                };
     }
 }

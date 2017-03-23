@@ -160,7 +160,7 @@ public class EntityShould {
     public void have_state() {
         final Version ver = Versions.newVersion(3, getCurrentTime());
 
-        entityNew.setState(state, ver);
+        entityNew.updateState(state, ver);
 
         assertEquals(state, entityNew.getState());
         assertEquals(ver, entityNew.getVersion());
@@ -169,13 +169,13 @@ public class EntityShould {
     @Test
     public void validate_state_when_set_it() {
         final TestEntity spyEntityNew = spy(entityNew);
-        spyEntityNew.setState(state, Versions.create());
+        spyEntityNew.updateState(state, Versions.create());
         verify(spyEntityNew).validate(eq(state));
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        entityNew.setState(Tests.<Project>nullRef(), Versions.create());
+        entityNew.updateState(Tests.<Project>nullRef(), Versions.create());
     }
 
     private static class BareBonesEntity extends AbstractVersionableEntity<Long, StringValue> {

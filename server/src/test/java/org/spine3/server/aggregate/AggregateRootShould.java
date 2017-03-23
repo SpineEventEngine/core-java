@@ -50,7 +50,7 @@ import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.test.Tests.emptyObserver;
+import static org.spine3.io.StreamObservers.emptyObserver;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class AggregateRootShould {

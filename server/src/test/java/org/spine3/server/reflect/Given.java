@@ -21,6 +21,7 @@
 package org.spine3.server.reflect;
 
 import org.spine3.test.reflect.ProjectId;
+import org.spine3.test.reflect.ReflectFailures.InvalidProjectName;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.command.StartProject;
 import org.spine3.test.reflect.event.ProjectCreated;
@@ -72,6 +73,28 @@ class Given {
             return StartProject.newBuilder()
                                .setProjectId(newProjectId())
                                .build();
+        }
+    }
+
+    static class FailureMessage {
+
+        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
+        private static final InvalidProjectName INVALID_PROJECT_NAME =
+                invalidProjectName(DUMMY_PROJECT_ID);
+
+        private FailureMessage() {
+        }
+
+        public static InvalidProjectName invalidProjectName() {
+            return INVALID_PROJECT_NAME;
+        }
+
+        public static InvalidProjectName  invalidProjectName(ProjectId id) {
+            final InvalidProjectName invalidProjectName =
+                    InvalidProjectName.newBuilder()
+                                                      .setProjectId(id)
+                                                      .build();
+            return invalidProjectName;
         }
     }
 }

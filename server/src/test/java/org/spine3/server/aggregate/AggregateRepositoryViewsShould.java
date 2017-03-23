@@ -36,8 +36,8 @@ import org.spine3.test.TestCommandFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.io.StreamObservers.emptyObserver;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.test.Tests.emptyObserver;
 
 /**
  * @author Alexander Yevsyukov

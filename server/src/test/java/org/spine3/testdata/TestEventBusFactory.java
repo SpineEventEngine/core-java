@@ -22,7 +22,6 @@ package org.spine3.testdata;
 
 import com.google.common.util.concurrent.MoreExecutors;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.event.EventStorage;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -32,7 +31,6 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  *
  * @author Andrey Lavrov
  */
-
 @SuppressWarnings("UtilityClass")
 public class TestEventBusFactory {
 
@@ -40,11 +38,9 @@ public class TestEventBusFactory {
     }
 
     public static EventBus create() {
-        final EventStorage storage = InMemoryStorageFactory.getInstance()
-                                                           .createEventStorage();
         final EventStore store = EventStore.newBuilder()
                                            .setStreamExecutor(MoreExecutors.directExecutor())
-                                           .setStorage(storage)
+                                           .setStorageFactory(InMemoryStorageFactory.getInstance())
                                            .build();
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(store)
@@ -56,7 +52,7 @@ public class TestEventBusFactory {
     public static EventBus create(StorageFactory storageFactory) {
         final EventStore store = EventStore.newBuilder()
                                            .setStreamExecutor(MoreExecutors.directExecutor())
-                                           .setStorage(storageFactory.createEventStorage())
+                                           .setStorageFactory(storageFactory)
                                            .build();
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(store)
