@@ -23,7 +23,6 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.server.storage.RecordStorage;
 
@@ -123,10 +122,5 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         for (Map.Entry<I, EntityRecordEnvelope> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue().getRecord());
         }
-    }
-
-    @Override
-    public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-
     }
 }

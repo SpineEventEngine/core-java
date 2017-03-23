@@ -48,6 +48,5 @@ public interface StorageWithLifecycleFlags<I, R extends Message> extends Storage
      * @param id         the ID of the entity for which to update the status
      * @param flags the status to write
      */
-    @Deprecated
     void writeLifecycleFlags(I id, LifecycleFlags flags);
 }

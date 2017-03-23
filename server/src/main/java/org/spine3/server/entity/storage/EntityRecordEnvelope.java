@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.reflect.Property;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 /**
@@ -32,6 +33,8 @@ import java.util.Map;
 public class EntityRecordEnvelope {
 
     private final EntityRecord record;
+
+    @Nullable
     private final ImmutableMap<String, Property.MemoizedValue<?>> storageFields;
 
     public EntityRecordEnvelope(EntityRecord record,
@@ -43,7 +46,8 @@ public class EntityRecordEnvelope {
     @SuppressWarnings("ConstantConditions")
         // null value for the storage fields map
     public EntityRecordEnvelope(EntityRecord record) {
-        this(record, null);
+        this.record = record;
+        this.storageFields = null;
     }
 
     public EntityRecord getRecord() {

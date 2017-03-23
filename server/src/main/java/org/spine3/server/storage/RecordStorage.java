@@ -138,7 +138,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return Optional.absent();
     }
 
-    @Deprecated
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
         final Optional<EntityRecord> optional = read(id);
