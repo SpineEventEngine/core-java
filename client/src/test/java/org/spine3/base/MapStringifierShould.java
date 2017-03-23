@@ -25,7 +25,6 @@ import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.test.types.Task;
 
-import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.Map;
 
@@ -34,7 +33,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Stringifiers.mapStringifier;
-import static org.spine3.base.Types.createMapType;
 
 /**
  * @author Illia Shepilov
@@ -44,11 +42,8 @@ public class MapStringifierShould {
     @Test
     public void convert_string_to_map() throws ParseException {
         final String rawMap = "1\\:1972-01-01T10:00:20.021-05:00";
-        final Type type = createMapType(Long.class, Timestamp.class);
         final Stringifier<Map<Long, Timestamp>> stringifier =
                 mapStringifier(Long.class, Timestamp.class);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
         final Map<Long, Timestamp> actualMap = stringifier.fromString(rawMap);
         final Map<Long, Timestamp> expectedMap = newHashMap();
         expectedMap.put(1L, Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
@@ -58,55 +53,49 @@ public class MapStringifierShould {
     @Test
     public void convert_map_to_string() {
         final Map<String, Integer> mapToConvert = createTestMap();
-        final Type type = createMapType(String.class, Integer.class);
         final Stringifier<Map<String, Integer>> stringifier =
                 mapStringifier(String.class, Integer.class);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
         final String convertedMap = stringifier.toString(mapToConvert);
-        assertEquals(mapToConvert.toString(), convertedMap);
+        assertEquals("third\\:3\\,first\\:1\\,second\\:2", convertedMap);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "first\\:1\\,second\\:2";
-        final Type type = createMapType(Integer.class, Integer.class);
         final Stringifier<Map<Integer, Integer>> stringifier =
                 mapStringifier(Integer.class, Integer.class);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
         stringifier.fromString(incorrectRawMap);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final Type type = createMapType(Task.class, Long.class);
         final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
         stringifier.fromString("first\\:first\\:first");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_key_value_delimiter_is_wrong() {
-        final Type type = createMapType(Long.class, Long.class);
         final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
         stringifier.fromString("1\\-1");
     }
 
     @Test
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "first\\:1\\|second\\:2\\|third\\:3";
-        final Type type = createMapType(String.class, Integer.class);
         final Stringifier<Map<String, Integer>> stringifier =
                 mapStringifier(String.class, Integer.class, "|");
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
-
         final Map<String, Integer> convertedMap = stringifier.fromString(rawMap);
         assertThat(convertedMap, is(createTestMap()));
+    }
+
+    @Test
+    public void convert_from_map_to_string_and_backward() {
+        final Map<String, Integer> mapToConvert = createTestMap();
+        final Stringifier<Map<String, Integer>> stringifier =
+                mapStringifier(String.class, Integer.class);
+        final String convertedString = stringifier.toString(mapToConvert);
+        final Map<String, Integer> actualMap = stringifier.fromString(convertedString);
+        assertEquals(mapToConvert, actualMap);
     }
 
     private static Map<String, Integer> createTestMap() {
