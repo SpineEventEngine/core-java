@@ -22,6 +22,7 @@ package org.spine3.base;
 
 import com.google.common.primitives.Ints;
 
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -72,6 +73,14 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     private final Class<K> keyClass;
     private final Class<V> valueClass;
 
+    /**
+     * That constructor should be used when a custom delimiter is not needed.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} will be used.
+     *
+     * @param keyClass   the class of the key elements
+     * @param valueClass the class of the value elements
+     */
     MapStringifier(Class<K> keyClass, Class<V> valueClass) {
         super();
         this.keyClass = keyClass;
@@ -80,8 +89,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     /**
-     * That constructor should be used when need to use
-     * a custom delimiter of the elements during conversion.
+     * That constructor should be used for providing a custom
+     * delimiter of the elements during conversion.
      *
      * @param keyClass   the class of the key elements
      * @param valueClass the class of the value elements
@@ -106,24 +115,25 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final Map<K, V> resultMap = newHashMap();
 
         for (String bucket : buckets) {
-            saveConvertedBucket(resultMap, bucket);
+            final Map.Entry<K, V> convertedBucket = convert(bucket);
+            resultMap.put(convertedBucket.getKey(), convertedBucket.getValue());
         }
-        Ints.stringConverter();
         return resultMap;
     }
 
-    private Map<K, V> saveConvertedBucket(Map<K, V> resultMap, String element) {
-        final String[] keyValue = element.split(Pattern.quote(KEY_VALUE_DELIMITER));
+    private Map.Entry<K, V> convert(String bucketToConvert) {
+        final String[] keyValue = bucketToConvert.split(Pattern.quote(KEY_VALUE_DELIMITER));
         checkKeyValue(keyValue);
 
         final String key = keyValue[0];
         final String value = keyValue[1];
 
         try {
-            final K convertedKey = Stringifiers.convert(key, keyClass);
-            final V convertedValue = Stringifiers.convert(value, valueClass);
-            resultMap.put(convertedKey, convertedValue);
-            return resultMap;
+            final K convertedKey = convert(key, keyClass);
+            final V convertedValue = convert(value, valueClass);
+            final Map.Entry<K, V> convertedBucket =
+                    new AbstractMap.SimpleEntry<K, V>(convertedKey, convertedValue);
+            return convertedBucket;
         } catch (Throwable e) {
             throw newIllegalArgumentException("The exception is occurred during the conversion", e);
         }
