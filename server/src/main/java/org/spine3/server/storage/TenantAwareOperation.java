@@ -23,11 +23,7 @@ package org.spine3.server.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import org.spine3.annotations.Internal;
-import org.spine3.base.Command;
-import org.spine3.base.CommandId;
 import org.spine3.users.TenantId;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.validate.Validate.isDefault;
@@ -43,30 +39,6 @@ public abstract class TenantAwareOperation implements Runnable {
     private final TenantId tenantId;
 
     /**
-     * Contains the ID of the currently being handled command,
-     * or {@code null} if the operation is performed not because of a command.
-     */
-    @Nullable
-    private final CommandId commandId;
-
-    /**
-     * Creates a new instance.
-     *
-     * <p>If default value of tenant ID is passed, {@link CurrentTenant#singleTenant()}
-     * will be substituted.
-     *
-     * @param tenantId tenant ID or default value
-     * @param commandId a command ID or {@code null}
-     */
-    private TenantAwareOperation(TenantId tenantId, @Nullable CommandId commandId) {
-        checkNotNull(tenantId);
-        this.tenantId = isDefault(tenantId)
-                        ? CurrentTenant.singleTenant()
-                        : tenantId;
-        this.commandId = commandId;
-    }
-
-    /**
      * Creates an instance of the operation, which uses the {@code TenantId}
      * set in the current non-command handling execution context.
      *
@@ -74,7 +46,7 @@ public abstract class TenantAwareOperation implements Runnable {
      * @see CurrentTenant#ensure()
      */
     protected TenantAwareOperation() throws IllegalStateException {
-        this(CurrentTenant.ensure(), null);
+        this(CurrentTenant.ensure());
     }
 
     /**
@@ -90,36 +62,15 @@ public abstract class TenantAwareOperation implements Runnable {
      * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}
      */
     protected TenantAwareOperation(TenantId tenantId) {
-        this(tenantId, null);
-    }
-
-    /**
-     * Creates and instance for the operation on the tenant data in
-     * response to the passed command.
-     *
-     * @param command the command from which context to obtain the tenant ID
-     */
-    protected TenantAwareOperation(Command command) {
-        this(command.getContext().getTenantId(),
-             command.getContext().getCommandId());
+        checkNotNull(tenantId);
+        this.tenantId = isDefault(tenantId)
+                        ? CurrentTenant.singleTenant()
+                        : tenantId;
     }
 
     @VisibleForTesting
     TenantId tenantId() {
         return tenantId;
-    }
-
-    /**
-     * Obtains ID of the currently handled command.
-     *
-     * @throws IllegalStateException of the method is called from non-command handling context
-     */
-    protected CommandId commandId() {
-        if (commandId == null) {
-            throw new IllegalStateException(
-                    "Unable to get CommandId from non-command handling execution context.");
-        }
-        return commandId;
     }
 
     /**

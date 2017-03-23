@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
@@ -29,6 +30,7 @@ import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.storage.CommandOperation;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.TenantAwareOperation;
 
@@ -38,7 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.command.CommandRecords.toCommandIterator;
 
 /**
- * Manages commands received by the system.
+ * Manages storage of commands received by a Bounded Context.
  *
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
@@ -57,6 +59,21 @@ public class CommandStore implements AutoCloseable {
 
     }
 
+    private void checkNotClosed() {
+        checkState(isOpen(), "The CommandStore is closed.");
+    }
+
+    @Override
+    public void close() throws Exception {
+        storage.close();
+    }
+
+    /** Returns {@code true} if the store is open, {@code false} otherwise */
+    boolean isOpen() {
+        final boolean isOpened = storage.isOpen();
+        return isOpened;
+    }
+
     /**
      * Stores the command.
      *
@@ -66,15 +83,12 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void store(final Command command) {
-        checkNotClosed();
-
-        final TenantAwareOperation op = new TenantAwareOperation(command) {
+        final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 storage.store(command);
             }
         };
-
         op.execute();
     }
 
@@ -85,15 +99,12 @@ public class CommandStore implements AutoCloseable {
      * @param error an error occurred
      */
     public void store(final Command command, final Error error) {
-        checkNotClosed();
-
-        final TenantAwareOperation op = new TenantAwareOperation(command) {
+        final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 storage.store(command, error);
             }
         };
-
         op.execute();
     }
 
@@ -126,15 +137,62 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status
      */
     public void store(final Command command, final CommandStatus status) {
-        checkNotClosed();
-
-        final TenantAwareOperation op = new TenantAwareOperation(command) {
+        final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
                 storage.store(command, status);
             }
         };
+        op.execute();
+    }
 
+    /**
+     * Sets the status of the command to {@link CommandStatus#OK}
+     */
+    private void setCommandStatusOk(CommandEnvelope commandEnvelope) {
+        final TenantAwareOperation op = new Operation(this, commandEnvelope) {
+            @Override
+            public void run() {
+                storage.setOkStatus(getCommandId());
+            }
+        };
+        op.execute();
+    }
+
+    /**
+     * Updates the status of the command with the passed error.
+     *  @param commandEnvelope the ID of the command
+     * @param error the error, which occurred during command processing
+     */
+    private void updateStatus(CommandEnvelope commandEnvelope, final Error error) {
+        final TenantAwareOperation op = new CommandOperation(commandEnvelope.getCommand()) {
+            @Override
+            public void run() {
+                storage.updateStatus(getCommandId(), error);
+            }
+        };
+        op.execute();
+    }
+
+    /**
+     * Updates the status of the command processing with the exception.
+     */
+    private void updateStatus(CommandEnvelope commandEnvelope, Exception exception) {
+        updateStatus(commandEnvelope, Errors.fromException(exception));
+    }
+
+    /**
+     * Updates the status of the command with the business failure.
+     *  @param commandEnvelope the command to update
+     * @param failure the business failure occurred during command processing
+     */
+    private void updateStatus(CommandEnvelope commandEnvelope, final Failure failure) {
+        final TenantAwareOperation op = new Operation(this, commandEnvelope) {
+            @Override
+            public void run() {
+                storage.updateStatus(getCommandId(), failure);
+            }
+        };
         op.execute();
     }
 
@@ -152,67 +210,17 @@ public class CommandStore implements AutoCloseable {
         return commands;
     }
 
+    @VisibleForTesting
     CommandStatus getStatusCode(CommandId commandId) {
         final CommandStatus result = getStatus(commandId).getCode();
         return result;
     }
 
+    @VisibleForTesting
     ProcessingStatus getStatus(CommandId commandId) {
         checkNotClosed();
         final ProcessingStatus result = storage.getStatus(commandId);
         return result;
-    }
-
-    /**
-     * Sets the status of the command to {@link CommandStatus#OK}
-     */
-    private void setCommandStatusOk(CommandId commandId) {
-        checkNotClosed();
-        storage.setOkStatus(commandId);
-    }
-
-    /**
-     * Updates the status of the command processing with the exception.
-     */
-    private void updateStatus(CommandId commandId, Exception exception) {
-        updateStatus(commandId, Errors.fromException(exception));
-    }
-
-    /**
-     * Updates the status of the command with the passed error.
-     *
-     * @param commandId the ID of the command
-     * @param error the error, which occurred during command processing
-     */
-    private void updateStatus(CommandId commandId, Error error) {
-        checkNotClosed();
-        storage.updateStatus(commandId, error);
-    }
-
-    /**
-     * Updates the status of the command with the business failure.
-     *
-     * @param commandId the command to update
-     * @param failure the business failure occurred during command processing
-     */
-    private void updateStatus(CommandId commandId, Failure failure) {
-        checkNotClosed();
-        storage.updateStatus(commandId, failure);
-    }
-
-    @Override
-    public void close() throws Exception {
-        storage.close();
-    }
-
-    /** Returns {@code true} if the store is open, {@code false} otherwise */
-    boolean isOpen() {
-        final boolean isOpened = storage.isOpen();
-        return isOpened;
-    }
-
-    private void checkNotClosed() {
-        checkState(isOpen(), "The CommandStore is closed.");
     }
 
     /**
@@ -229,50 +237,53 @@ public class CommandStore implements AutoCloseable {
         }
 
         void setOk(final CommandEnvelope commandEnvelope) {
-            final TenantAwareOperation op = new TenantAwareOperation(commandEnvelope.getCommand()) {
-                @Override
-                public void run() {
-                    commandStore.setCommandStatusOk(commandEnvelope.getCommandId());
-                }
-            };
-            op.execute();
+            commandStore.setCommandStatusOk(commandEnvelope);
         }
 
-        void setToError(CommandEnvelope commandEnvelope, final Error error) {
-            final Command command = commandEnvelope.getCommand();
-            final TenantAwareOperation op = new TenantAwareOperation(command) {
-                @Override
-                public void run() {
-                    commandStore.updateStatus(commandId(), error);
-                }
-            };
-            op.execute();
+        void setToError(final CommandEnvelope commandEnvelope, final Error error) {
+            commandStore.updateStatus(commandEnvelope, error);
         }
 
-        void updateCommandStatus(final CommandEnvelope commandEnvelope, final Throwable cause) {
-            final TenantAwareOperation op = new TenantAwareOperation(commandEnvelope.getCommand()) {
-                @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
-                @Override
-                public void run() {
-                    final Message commandMessage = commandEnvelope.getMessage();
-                    final CommandId commandId = commandEnvelope.getCommandId();
+        @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
+        void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause) {
+            final Message commandMessage = commandEnvelope.getMessage();
+            final CommandId commandId = commandEnvelope.getCommandId();
+            if (cause instanceof FailureThrowable) {
+                final FailureThrowable failure = (FailureThrowable) cause;
+                log.failureHandling(failure, commandMessage, commandId);
+                commandStore.updateStatus(commandEnvelope, failure.toFailure());
+            } else if (cause instanceof Exception) {
+                final Exception exception = (Exception) cause;
+                log.errorHandling(exception, commandMessage, commandId);
+                commandStore.updateStatus(commandEnvelope, exception);
+            } else {
+                log.errorHandlingUnknown(cause, commandMessage, commandId);
+                final Error error = Errors.fromThrowable(cause);
+                commandStore.updateStatus(commandEnvelope, error);
+            }
+        }
+    }
 
-                    if (cause instanceof FailureThrowable) {
-                        final FailureThrowable failure = (FailureThrowable) cause;
-                        log.failureHandling(failure, commandMessage, commandId);
-                        commandStore.updateStatus(commandId, failure.toFailure());
-                    } else if (cause instanceof Exception) {
-                        final Exception exception = (Exception) cause;
-                        log.errorHandling(exception, commandMessage, commandId);
-                        commandStore.updateStatus(commandId, exception);
-                    } else {
-                        log.errorHandlingUnknown(cause, commandMessage, commandId);
-                        final Error error = Errors.fromThrowable(cause);
-                        commandStore.updateStatus(commandId, error);
-                    }
-                }
-            };
-            op.execute();
+    /**
+     * An abstract Command Store operation, which checks whether the store is open.
+     */
+    private abstract static class Operation extends CommandOperation {
+        private final CommandStore store;
+
+        private Operation(CommandStore store, Command command) {
+            super(command);
+            this.store = store;
+        }
+
+        private Operation(CommandStore store, CommandEnvelope commandEnvelope) {
+            super(commandEnvelope.getCommand());
+            this.store = store;
+        }
+
+        @Override
+        public void execute() {
+            store.checkNotClosed();
+            super.execute();
         }
     }
 }
