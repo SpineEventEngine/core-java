@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
@@ -56,7 +58,7 @@ public class MapStringifierShould {
         final Stringifier<Map<String, Integer>> stringifier =
                 mapStringifier(String.class, Integer.class);
         final String convertedMap = stringifier.toString(mapToConvert);
-        assertEquals("third\\:3\\,first\\:1\\,second\\:2", convertedMap);
+        assertEquals(convertMapToString(mapToConvert), convertedMap);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -96,6 +98,17 @@ public class MapStringifierShould {
         final String convertedString = stringifier.toString(mapToConvert);
         final Map<String, Integer> actualMap = stringifier.fromString(convertedString);
         assertEquals(mapToConvert, actualMap);
+    }
+
+    private static String convertMapToString(Map<String, Integer> mapToConvert) {
+        final Escaper escaper = Escapers.builder()
+                                        .addEscape(' ', "")
+                                        .addEscape('{', "")
+                                        .addEscape('}', "")
+                                        .addEscape('=', "\\:")
+                                        .addEscape(',', "\\,")
+                                        .build();
+        return escaper.escape(mapToConvert.toString());
     }
 
     private static Map<String, Integer> createTestMap() {
