@@ -33,6 +33,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * for the correct usage of the {@code ListStringifier}.
  *
  * <h3>Example</h3>
+ *
  * {@code
  *    // Stringifier creation.
  *    final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
@@ -66,10 +67,17 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     /**
      * The delimiter for the passed elements in the {@code String} representation,
-     * {@code DEFAULT_DELIMITER} by default.
+     * {@code DEFAULT_ELEMENT_DELIMITER} by default.
      */
     private final String delimiter;
 
+    /**
+     * That constructor should be used when a custom delimiter is not needed.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} will be used.
+     *
+     * @param listGenericClass the class of the list elements
+     */
     ListStringifier(Class<T> listGenericClass) {
         super();
         this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENT_DELIMITER;
@@ -77,8 +85,8 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     }
 
     /**
-     * That constructor should be used when need to use
-     * a custom delimiter during conversion.
+     * That constructor should be used for providing a custom
+     * delimiter of the elements during conversion.
      *
      * @param listGenericClass the class of the list elements
      * @param delimiter        the delimiter for the passed elements via string
