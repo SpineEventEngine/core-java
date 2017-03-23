@@ -56,6 +56,7 @@ public class StorageFields {
                         .add("getLifecycleFlags")
                         .add("getDefaultState")
                         .add("getBuilder")
+                        .add("getClass")
                         .build();
 
     // TODO:2017-03-22:dmytro.dashenkov: Check if this register should be synchronized.
