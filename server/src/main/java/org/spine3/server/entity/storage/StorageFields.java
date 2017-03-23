@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class StorageFields {
 
-    private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\\\w*";
+    private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
     private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
     private static final String NON_PUBLIC_CLASS_WARNING =
