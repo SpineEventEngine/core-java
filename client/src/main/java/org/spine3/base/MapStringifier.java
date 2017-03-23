@@ -48,9 +48,14 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
  *                                                                           .getStringifier(type);
  *
- *  // Convert to string. The converted string is result of the {@code Map#toString()} method.
- *  final Map<String, Long> mapToConvert = ...
+ *  // Convert to string.
+ *  final Map<String, Long> mapToConvert = newHashMap();
+ *  mapToConvert.put("first", 1);
+ *  mapToConvert.put("second", 2);
+ *
+ *  // The result is: "first\:1\,second\:2"
  *  final String convertedString = mapStringifier.toString(mapToConvert);
+ *
  *
  *  // Convert from string.
  *  final String stringToConvert = ...
@@ -109,7 +114,15 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final String result = obj.toString();
+        final StringBuilder stringBuilder = new StringBuilder(0);
+        for (Map.Entry<K, V> entry : obj.entrySet()) {
+            stringBuilder.append(entry.getKey())
+                         .append(KEY_VALUE_DELIMITER)
+                         .append(entry.getValue())
+                         .append(delimiter);
+        }
+        final int length = stringBuilder.length();
+        final String result = stringBuilder.substring(0, length - 2);
         return result;
     }
 
