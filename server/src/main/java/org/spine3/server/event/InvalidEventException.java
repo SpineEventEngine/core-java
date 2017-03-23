@@ -24,9 +24,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
-import org.spine3.server.validate.InvalidMessages.ConstraintViolationHelper;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolations.ExceptionBuilder;
 
 import java.util.Map;
 
@@ -59,7 +59,7 @@ public class InvalidEventException extends EventException {
     public static InvalidEventException onConstraintViolations(
             Message eventMsg, Iterable<ConstraintViolation> violations) {
 
-        final EventConstraintViolationsHelper helper = new EventConstraintViolationsHelper(
+        final ConstraintViolationExceptionBuilder helper = new ConstraintViolationExceptionBuilder(
                 eventMsg, violations);
         return helper.buildException();
     }
@@ -68,16 +68,16 @@ public class InvalidEventException extends EventException {
      * A helper utility aimed to create an {@code InvalidEventException} to report the
      * event which field values violate validation constraint(s).
      */
-    private static class EventConstraintViolationsHelper
-                                extends ConstraintViolationHelper<InvalidEventException,
-                                                                  Message,
-                                                                  EventClass,
-                                                                  EventValidationError> {
+    private static class ConstraintViolationExceptionBuilder
+                                        extends ExceptionBuilder<InvalidEventException,
+                                                                 Message,
+                                                                 EventClass,
+                                                                 EventValidationError> {
 
         private final EventClass eventClass;
 
-        private EventConstraintViolationsHelper(Message eventMsg,
-                                                Iterable<ConstraintViolation> violations) {
+        private ConstraintViolationExceptionBuilder(Message eventMsg,
+                                                    Iterable<ConstraintViolation> violations) {
             super(eventMsg, violations);
             this.eventClass = EventClass.of(eventMsg);
         }

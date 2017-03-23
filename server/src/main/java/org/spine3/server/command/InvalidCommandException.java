@@ -27,10 +27,10 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
-import org.spine3.server.validate.InvalidMessages.ConstraintViolationHelper;
 import org.spine3.type.CommandClass;
 import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolations.ExceptionBuilder;
 
 import java.util.Map;
 
@@ -66,7 +66,7 @@ public class InvalidCommandException extends CommandException {
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        final CommandConstraintViolationsHelper helper = new CommandConstraintViolationsHelper(
+        final ConstraintViolationExceptionBuilder helper = new ConstraintViolationExceptionBuilder(
                 command, violations);
         return helper.buildException();
     }
@@ -91,8 +91,8 @@ public class InvalidCommandException extends CommandException {
     }
 
     /**
-     * Creates an error for a command with missing {@code tenant_id} attribute  attribute in the {@code CommandContext},
-     * which is required in a multitenant application.
+     * Creates an error for a command with missing {@code tenant_id}
+     * attribute in the {@code CommandContext}, which is required in a multitenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()
@@ -107,15 +107,15 @@ public class InvalidCommandException extends CommandException {
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).
      */
-    private static class CommandConstraintViolationsHelper
-                                        extends ConstraintViolationHelper<InvalidCommandException,
-                                                                          Command,
-                                                                          CommandClass,
-                                                                          CommandValidationError> {
+    private static class ConstraintViolationExceptionBuilder
+                                        extends ExceptionBuilder<InvalidCommandException,
+                                                                 Command,
+                                                                 CommandClass,
+                                                                 CommandValidationError> {
         private final CommandClass commandClass;
 
-        protected CommandConstraintViolationsHelper(Command command,
-                                                    Iterable<ConstraintViolation> violations) {
+        protected ConstraintViolationExceptionBuilder(Command command,
+                                                      Iterable<ConstraintViolation> violations) {
             super(command, violations);
             this.commandClass = CommandClass.of(command);
         }
