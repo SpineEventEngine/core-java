@@ -40,7 +40,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *
  *    // The registration of the stringifier.
  *    final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
- *    final Type type = TypeToken<List<Integer>>(){}.getType();
+ *    final Type type = Types.listTypeOf(Integer.class);
  *    StringifierRegistry.getInstance().register(listStringifier, type);
  *
  *    // Obtain already registered stringifier.
