@@ -48,7 +48,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
  *                                                                           .getStringifier(type);
  *
- *  // Convert to string.
+ *  // Convert to string. The converted string is result of the {@code Map#toString()} method.
  *  final Map<String, Long> mapToConvert = ...
  *  final String convertedString = mapStringifier.toString(mapToConvert);
  *
@@ -75,9 +75,10 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     private final Class<V> valueClass;
 
     /**
-     * That constructor should be used when a custom delimiter is not needed.
+     * Creates a {@code MapStringifier}.
      *
-     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} will be used.
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for key-value
+     * separation in {@code String} representation of the {@code Map}.
      *
      * @param keyClass   the class of the key elements
      * @param valueClass the class of the value elements
@@ -90,8 +91,10 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     /**
-     * That constructor should be used for providing a custom
-     * delimiter of the elements during conversion.
+     * Creates a {@code MapStringifier}.
+     *
+     * <p>The specified delimiter is used for key-value separation
+     * in {@code String} representation of the {@code Map}.
      *
      * @param keyClass   the class of the key elements
      * @param valueClass the class of the value elements
