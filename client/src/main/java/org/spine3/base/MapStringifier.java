@@ -20,8 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.primitives.Ints;
-
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -129,10 +127,10 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final String value = keyValue[1];
 
         try {
-            final K convertedKey = convert(key, keyClass);
-            final V convertedValue = convert(value, valueClass);
+            final K convertedKey = Stringifiers.convert(key, keyClass);
+            final V convertedValue = Stringifiers.convert(value, valueClass);
             final Map.Entry<K, V> convertedBucket =
-                    new AbstractMap.SimpleEntry<K, V>(convertedKey, convertedValue);
+                    new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
             return convertedBucket;
         } catch (Throwable e) {
             throw newIllegalArgumentException("The exception is occurred during the conversion", e);
