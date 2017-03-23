@@ -25,7 +25,6 @@ import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.test.types.Task;
 
-import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.util.Map;
 
@@ -34,7 +33,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Stringifiers.mapStringifier;
-import static org.spine3.base.Types.createMapType;
 
 /**
  * @author Illia Shepilov
@@ -91,9 +89,10 @@ public class MapStringifierShould {
     }
 
     @Test
-    public void convert_from_map_to_string_and_backward(){
+    public void convert_from_map_to_string_and_backward() {
         final Map<String, Integer> mapToConvert = createTestMap();
-        final Stringifier<Map<String, Integer>> stringifier = mapStringifier(String.class, Integer.class);
+        final Stringifier<Map<String, Integer>> stringifier =
+                mapStringifier(String.class, Integer.class);
         final String convertedString = stringifier.toString(mapToConvert);
         final Map<String, Integer> actualMap = stringifier.fromString(convertedString);
         assertEquals(mapToConvert, actualMap);
