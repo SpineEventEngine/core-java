@@ -22,11 +22,9 @@ package org.spine3.base;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
-import com.google.common.reflect.TypeToken;
 import org.junit.Test;
 import org.spine3.test.types.Task;
 
-import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -70,17 +68,10 @@ public class ListStringifierShould {
     }
 
     @Test
-    @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass",
-            "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
-    // It is OK for test method.
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1\\|2\\|3\\|4\\|5";
         final String delimiter = "|";
-        final Type type = new TypeToken<List<Integer>>() {
-        }.getType();
         final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
-        StringifierRegistry.getInstance()
-                           .register(stringifier, type);
         final List<Integer> actualList = stringifier.fromString(stringToConvert);
         assertNotNull(actualList);
 
