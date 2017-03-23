@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
@@ -99,12 +101,14 @@ public class MapStringifierShould {
     }
 
     private static String convertMapToString(Map<String, Integer> mapToConvert) {
-        return mapToConvert.toString()
-                           .replaceAll(" ", "")
-                           .replaceAll("\\{", "")
-                           .replaceAll("\\}", "")
-                           .replaceAll("=", "\\\\:")
-                           .replaceAll(",", "\\\\,");
+        final Escaper escaper = Escapers.builder()
+                                        .addEscape(' ', "")
+                                        .addEscape('{', "")
+                                        .addEscape('}', "")
+                                        .addEscape('=', "\\:")
+                                        .addEscape(',', "\\,")
+                                        .build();
+        return escaper.escape(mapToConvert.toString());
     }
 
     private static Map<String, Integer> createTestMap() {
