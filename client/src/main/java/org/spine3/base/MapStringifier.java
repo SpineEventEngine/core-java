@@ -64,8 +64,9 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  */
 class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
-    private static final char DEFAULT_ELEMENT_DELIMITER = ',';
     private static final String ESCAPE_SEQUENCE = "\\";
+    private static final char DEFAULT_ELEMENT_DELIMITER = ',';
+    private static final char COLON = ':';
     private static final String KEY_VALUE_DELIMITER = ESCAPE_SEQUENCE + ':';
 
     /**
@@ -157,7 +158,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         if (keyValue.length != 2) {
             final String exMessage =
                     "Illegal key-value format. The value should " +
-                    "be separated with a single `:` character.";
+                    "be separated with the escaped `" + COLON + "` character.";
             throw newIllegalArgumentException(exMessage);
         }
     }
