@@ -22,40 +22,45 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
-import com.google.common.collect.Iterators;
-import org.spine3.annotations.SPI;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.server.storage.AbstractStorage;
-import org.spine3.type.TypeName;
+import org.spine3.base.Identifiers;
+import org.spine3.server.entity.DefaultRecordBasedRepository;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
-import static org.spine3.base.CommandStatus.ERROR;
+import static com.google.common.collect.Iterators.transform;
 import static org.spine3.base.CommandStatus.RECEIVED;
-import static org.spine3.base.Commands.generateId;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.validate.Validate.checkNotDefault;
 
 /**
- * A storage used by {@link CommandStore} for keeping command data.
+ * The storage of commands and their processing status.
+ *
+ * <p>This class allows to hide implementation details of storing commands.
+ * {@link CommandStore} serves as a facade, hiding the fact that the {@code CommandStorage}
+ * is a {@code Repository}.
  *
  * @author Alexander Yevsyukov
  */
-@SPI
-public abstract class CommandStorage extends AbstractStorage<CommandId, CommandRecord> {
+class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
 
-    protected CommandStorage(boolean multitenant) {
-        super(multitenant);
-    }
+    /** The function to obtain a {@code CommandRecord} from {@code CommandEntity}. */
+    private static final Function<CommandEntity, CommandRecord> GET_RECORD =
+            new Function<CommandEntity, CommandRecord>() {
+        @Nullable
+        @Override
+        public CommandRecord apply(@Nullable CommandEntity input) {
+            if (input == null) {
+                return null;
+            }
+            return input.getState();
+        }
+    };
 
     /**
      * Stores a command with the {@link CommandStatus#RECEIVED} status by
@@ -64,25 +69,22 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
      * <p>Rewrites it if a command with such command ID already exists in the storage.
      *
      * @param command a complete command to store
-     * @throws IllegalStateException if the storage is closed
      */
-    protected void store(Command command) {
+    void store(Command command) {
+        checkNotClosed();
         store(command, RECEIVED);
     }
 
     /**
-     * Stores a command with the given status by a command ID from a command context.
+     * Stores a command with the given status.
      *
-     * @param command a complete command to store
+     * @param command a command to store
      * @param status  a command status
-     * @throws IllegalStateException if the storage is closed
      */
-    protected void store(Command command, CommandStatus status) {
+    void store(Command command, CommandStatus status) {
         checkNotClosed();
-
-        final CommandRecord record = newRecordBuilder(command, status, null).build();
-        final CommandId commandId = getId(command);
-        write(commandId, record);
+        final CommandEntity commandEntity = CommandEntity.createForStatus(command, status);
+        store(commandEntity);
     }
 
     /**
@@ -91,41 +93,11 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
      *
      * @param command a command to store
      * @param error   an error occurred
-     * @throws IllegalStateException if the storage is closed
      */
-    protected void store(Command command, Error error) {
+    void store(Command command, Error error) {
         checkNotClosed();
-        checkNotDefault(error);
-
-        final CommandId id = getOrGenerateCommandId(command);
-
-        final CommandRecord.Builder builder = newRecordBuilder(command, ERROR, id);
-        builder.getStatusBuilder()
-               .setError(error);
-        final CommandRecord record = builder.build();
-
-        write(id, record);
-    }
-
-    /**
-     * Obtains or generates a {@code CommandId} from the passed command.
-     *
-     * <p>We don't have a command ID in the passed command.
-     * But need an ID to store the error in the record associated
-     * with this command. So, the ID will be generated.
-     *
-     * <p>We pass this ID to the record, so that it has an identity.
-     * But this ID does not belong to the command.
-     *
-     * <p>Therefore, commands without ID can be found by records
-     * where `command.context.command_id` field is empty.
-     */
-    private static CommandId getOrGenerateCommandId(Command command) {
-        CommandId id = getId(command);
-        if (idToString(id).equals(EMPTY_ID)) {
-            id = generateId();
-        }
-        return id;
+        final CommandEntity commandEntity = CommandEntity.createForError(command, error);
+        store(commandEntity);
     }
 
     /**
@@ -135,84 +107,94 @@ public abstract class CommandStorage extends AbstractStorage<CommandId, CommandR
      * @return commands with the given status
      * @throws IllegalStateException if the storage is closed
      */
-    protected Iterator<Command> iterator(CommandStatus status) {
+    Iterator<CommandRecord> iterator(CommandStatus status) {
         checkNotClosed();
-        final Iterator<CommandRecord> recordIterator = read(status);
-        final Iterator<Command> commandIterator = toCommandIterator(recordIterator);
-        return commandIterator;
+        final Iterator<CommandEntity> filteredEntities = iterator(new MatchesStatus(status));
+        final Iterator<CommandRecord> transformed = transform(filteredEntities, getRecordFunc());
+        return transformed;
     }
 
-    /**
-     * Reads all command records with the given status.
-     *
-     * @param status a command status to search by
-     * @return records with the given status
-     */
-    protected abstract Iterator<CommandRecord> read(CommandStatus status);
-
-    /** Updates the status of the command to {@link CommandStatus#OK}. */
-    protected abstract void setOkStatus(CommandId commandId);
-
-    /** Updates the status of the command with the error. */
-    protected abstract void updateStatus(CommandId commandId, Error error);
-
-    /** Updates the status of the command with the business failure. */
-    protected abstract void updateStatus(CommandId commandId, Failure failure);
-
-    /**
-     * Creates a command storage record builder passed on the passed parameters.
-     *
-     * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
-     * the command is not for an entity.
-     *
-     * @param command
-     *            a command to convert to a record. This includes instances of faulty commands.
-     *            An example of such a fault is missing command ID.
-     * @param status
-     *            a command status to set in the record
-     * @param generatedCommandId
-     *            a command ID to used because the passed command does not have own ID.
-     *            If the command has own ID this parameter is {@code null}.
-     * @return a storage record
-     */
-    @VisibleForTesting
-    static CommandRecord.Builder newRecordBuilder(Command command,
-                                                  CommandStatus status,
-                                                  @Nullable CommandId generatedCommandId) {
-        final CommandContext context = command.getContext();
-
-        final CommandId commandId = generatedCommandId != null
-                                    ? generatedCommandId
-                                    : context.getCommandId();
-
-        final String commandType = TypeName.ofCommand(command)
-                                           .getSimpleName();
-
-        final CommandRecord.Builder builder =
-                CommandRecord.newBuilder()
-                             .setCommandId(commandId)
-                             .setCommandType(commandType)
-                             .setCommand(command)
-                             .setTimestamp(getCurrentTime())
-                             .setStatus(ProcessingStatus.newBuilder()
-                                                        .setCode(status));
-        return builder;
-    }
-
-    /** Converts {@code CommandStorageRecord}s to {@code Command}s. */
-    @VisibleForTesting
-    static Iterator<Command> toCommandIterator(Iterator<CommandRecord> records) {
-        return Iterators.transform(records, TO_COMMAND);
-    }
-
-    private static final Function<CommandRecord, Command> TO_COMMAND = new Function<CommandRecord, Command>() {
-        @Override
-        public Command apply(@Nullable CommandRecord record) {
-            if (record == null) {
-                return Command.getDefaultInstance();
-            }
-            final Command cmd = record.getCommand();
-            return cmd;
+    private void checkNotClosed() throws IllegalStateException {
+        if (!isOpen()) {
+            throw new IllegalStateException("Command storage is closed.");
         }
-    };
+    }
+
+    /**
+     * Sets the status of the command to {@link CommandStatus#OK}
+     */
+    void setOkStatus(CommandId commandId) {
+        checkNotClosed();
+        final CommandEntity entity = loadEntity(commandId);
+        entity.setOkStatus();
+        store(entity);
+    }
+
+    /**
+     * Updates the status of the command with the passed error.
+     *
+     * @param commandId the ID of the command
+     * @param error     the error, which occurred during command processing
+     */
+    void updateStatus(CommandId commandId, Error error) {
+        checkNotClosed();
+        final CommandEntity entity = loadEntity(commandId);
+        entity.setToError(error);
+        store(entity);
+    }
+
+    /**
+     * Updates the status of the command with the business failure.
+     *
+     * @param commandId the command to update
+     * @param failure   the business failure occurred during command processing
+     */
+    void updateStatus(CommandId commandId, Failure failure) {
+        checkNotClosed();
+        final CommandEntity entity = loadEntity(commandId);
+        entity.setToFailure(failure);
+        store(entity);
+    }
+
+    private CommandEntity loadEntity(CommandId commandId) {
+        final Optional<CommandEntity> loaded = load(commandId);
+        if (!loaded.isPresent()) {
+            final String idStr = Identifiers.idToString(commandId);
+            throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
+        }
+
+        return loaded.get();
+    }
+
+    /**
+     * The predicate that filters entities by their processing status code.
+     */
+    private static class MatchesStatus implements Predicate<CommandEntity> {
+
+        private final CommandStatus commandStatus;
+
+        private MatchesStatus(CommandStatus commandStatus) {
+            this.commandStatus = commandStatus;
+        }
+
+        @Override
+        public boolean apply(@Nullable CommandEntity input) {
+            if (input == null) {
+                return false;
+            }
+            final boolean result = input.getState()
+                                        .getStatus()
+                                        .getCode() == commandStatus;
+            return result;
+        }
+    }
+
+    boolean isOpen() {
+        return storageAssigned();
+    }
+
+    @VisibleForTesting
+    static Function<CommandEntity, CommandRecord> getRecordFunc() {
+        return GET_RECORD;
+    }
 }

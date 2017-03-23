@@ -77,7 +77,7 @@ public class CommandBusShouldHandleCommandStatus {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        commandStore = spy(new CommandStore(storageFactory.createCommandStorage()));
+        commandStore = spy(new CommandStore(storageFactory));
         final ExecutorCommandScheduler scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         commandBus = CommandBus.newBuilder()
@@ -254,7 +254,6 @@ public class CommandBusShouldHandleCommandStatus {
 
         private final List<Response> responses = newLinkedList();
         private Throwable throwable;
-        private boolean completed;
 
         @Override
         public void onNext(Response response) {
@@ -268,15 +267,10 @@ public class CommandBusShouldHandleCommandStatus {
 
         @Override
         public void onCompleted() {
-            this.completed = true;
         }
 
         Throwable getThrowable() {
             return throwable;
-        }
-
-        boolean isCompleted() {
-            return this.completed;
         }
     }
 }

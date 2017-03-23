@@ -17,24 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.testdata;
 
-package org.spine3.server.storage.memory;
-
-import org.spine3.server.event.EventStorage;
-import org.spine3.server.event.EventStorageShould;
+import org.spine3.server.failure.FailureBus;
 
 /**
- * In-memory implementation of {@link EventStorage} tests.
- *
- * @author Alexander Litus
+ * @author Alex Tymchenko
  */
-public class InMemoryEventStorageShould extends EventStorageShould {
+public class TestFailureBusFactory {
 
-    private final InMemoryStorageFactory factory = InMemoryStorageFactory.getInstance();
+    private TestFailureBusFactory() {
+        // Prevent instantiation of this utility factory.
+    }
 
-    @Override
-    protected EventStorage getStorage() {
-        final InMemoryEventStorage storage = (InMemoryEventStorage) factory.createEventStorage();
-        return storage;
+    public static FailureBus create() {
+        return FailureBus.newBuilder()
+                         .build();
     }
 }

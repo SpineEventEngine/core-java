@@ -30,13 +30,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
-import org.spine3.server.storage.AbstractStorageShould;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.type.TypeName;
@@ -49,22 +49,21 @@ import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.base.Events.generateId;
-import static org.spine3.protobuf.Durations2.nanos;
+import static org.spine3.protobuf.Durations2.milliseconds;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.Given.AnEventRecord.projectCreated;
 import static org.spine3.server.storage.Given.EventMessage.projectCreated;
 
-public abstract class EventStorageShould
-        extends AbstractStorageShould<EventId, Event, EventStorage> {
+public abstract class EventStorageShould {
 
-    /** Small positive delta in seconds or nanoseconds. */
+    /** Small positive delta in seconds or milliseconds. */
     private static final int POSITIVE_DELTA = 10;
 
-    /** Small negative delta in seconds or nanoseconds. */
+    /** Small negative delta in seconds or milliseconds. */
     private static final int NEGATIVE_DELTA = -POSITIVE_DELTA;
 
     private static final int ZERO = 0;
@@ -86,27 +85,13 @@ public abstract class EventStorageShould
 
     @Before
     public void setUpEventStorageTest() {
-        storage = getStorage();
+        storage = new EventStorage();
+        storage.initStorage(InMemoryStorageFactory.getInstance());
     }
 
     @After
-    public void tearDownEventStorageTest() {
-        close(storage);
-    }
-
-    @Override
-    protected Event newStorageRecord() {
-        return Given.AnEvent.projectCreated();
-    }
-
-    @Override
-    protected EventId newId() {
-        return generateId();
-    }
-
-    @Test
-    public void have_index_of_identifiers() {
-        assertNotNull(storage.index());
+    public void tearDownEventStorageTest() throws Exception {
+        storage.close();
     }
 
     @Test
@@ -185,9 +170,7 @@ public abstract class EventStorageShould
                                                  .build();
 
         final Event event = Events.createEvent(projectCreatedAny, context);
-
-        storage.write(event.getContext().getEventId(),
-                      event);
+        storage.store(event);
 
         final Any projectIdPacked = AnyPacker.pack(uid);
         final FieldFilter fieldFilter =
@@ -235,9 +218,7 @@ public abstract class EventStorageShould
                                                  .build();
 
         final Event event = Events.createEvent(eventAny, context);
-
-        storage.write(event.getContext()
-                           .getEventId(), event);
+        storage.store(event);
 
         final FieldFilter contextFieldFilter =
                 FieldFilter.newBuilder()
@@ -291,55 +272,55 @@ public abstract class EventStorageShould
      *************************************************************/
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_BIGGER() {
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_millis_BIGGER() {
         givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
         assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_EQUAL() {
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_millis_EQUAL() {
         givenSequentialRecords(POSITIVE_DELTA, ZERO);
         assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_nanos_LESS() {
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_BIGGER_and_millis_LESS() {
         givenSequentialRecords(POSITIVE_DELTA, NEGATIVE_DELTA);
         assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void find_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_nanos_BIGGER() {
+    public void find_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_millis_BIGGER() {
         givenSequentialRecords(0, POSITIVE_DELTA);
         assertThereAreEventsAfterTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_nanos_LESS() {
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_millis_LESS() {
         givenSequentialRecords(NEGATIVE_DELTA, NEGATIVE_DELTA);
         assertNoEventsAfterTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_nanos_BIGGER() {
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_millis_BIGGER() {
         givenSequentialRecords(NEGATIVE_DELTA, POSITIVE_DELTA);
         assertNoEventsAfterTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_nanos_LESS() {
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_millis_LESS() {
         givenSequentialRecords(ZERO, NEGATIVE_DELTA);
         assertNoEventsAfterTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_nanos_EQUAL() {
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_EQUAL_and_millis_EQUAL() {
         givenSequentialRecords(ZERO, ZERO);
         assertNoEventsAfterTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_nanos_EQUAL() {
+    public void NOT_find_any_events_which_happened_after_a_point_in_time_CASE_secs_LESS_and_millis_EQUAL() {
         givenSequentialRecords(NEGATIVE_DELTA, ZERO);
         assertNoEventsAfterTime();
     }
@@ -369,55 +350,55 @@ public abstract class EventStorageShould
      ***********************************************************/
 
     @Test
-    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_LESS() {
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_millis_LESS() {
         givenSequentialRecords(NEGATIVE_DELTA, NEGATIVE_DELTA);
         assertThereAreEventsBeforeTime();
     }
 
     @Test
-    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_EQUAL() {
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_millis_EQUAL() {
         givenSequentialRecords(NEGATIVE_DELTA, ZERO);
         assertThereAreEventsBeforeTime();
     }
 
     @Test
-    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_nanos_BIGGER() {
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_LESS_and_millis_BIGGER() {
         givenSequentialRecords(NEGATIVE_DELTA, POSITIVE_DELTA);
         assertThereAreEventsBeforeTime();
     }
 
     @Test
-    public void find_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_nanos_LESS() {
+    public void find_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_millis_LESS() {
         givenSequentialRecords(ZERO, NEGATIVE_DELTA);
         assertThereAreEventsBeforeTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_nanos_BIGGER() {
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_millis_BIGGER() {
         givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
         assertNoEventsBeforeTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_nanos_LESS() {
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_millis_LESS() {
         givenSequentialRecords(POSITIVE_DELTA, NEGATIVE_DELTA);
         assertNoEventsBeforeTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_nanos_BIGGER() {
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_millis_BIGGER() {
         givenSequentialRecords(ZERO, POSITIVE_DELTA);
         assertNoEventsBeforeTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_nanos_EQUAL() {
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_EQUAL_and_millis_EQUAL() {
         givenSequentialRecords(ZERO, ZERO);
         assertNoEventsBeforeTime();
     }
 
     @Test
-    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_nanos_EQUAL() {
+    public void NOT_find_any_events_which_happened_before_a_point_in_time_CASE_secs_BIGGER_and_millis_EQUAL() {
         givenSequentialRecords(POSITIVE_DELTA, ZERO);
         assertNoEventsBeforeTime();
     }
@@ -490,6 +471,24 @@ public abstract class EventStorageShould
         assertEquals(expected, newArrayList(actual));
     }
 
+    /*
+     * Tests of edge cases
+     ***********************************/
+    @Test
+    public void have_event_extraction_function_that_returns_null_to_null_input() {
+        assertNull(EventStorage.getEventFunc().apply(null));
+    }
+
+    @Test
+    public void have_entity_filter_rejecting_nulls() {
+        assertFalse(EventStorage.createEntityFilter(EventStreamQuery.getDefaultInstance())
+                                .apply(null));
+    }
+
+    /*
+     * Utility functions
+     ***********************************/
+
     private static EventFilter newEventFilterFor(Event event) {
         final Any id = event.getContext()
                             .getProducerId();
@@ -502,37 +501,39 @@ public abstract class EventStorageShould
         givenSequentialRecords(POSITIVE_DELTA, POSITIVE_DELTA);
     }
 
-    private static Duration createDelta(long deltaSeconds, int deltaNanos) {
-        if (deltaNanos == 0) {
+    private static Duration createDelta(long deltaSeconds, int deltaMillis) {
+        if (deltaMillis == 0) {
             return seconds(deltaSeconds);
         }
 
         if (deltaSeconds == 0) {
-            return nanos(deltaNanos);
+            return milliseconds(deltaMillis);
         }
 
-        // If deltaNanos is negative, subtract its value from seconds.
-        if (deltaSeconds > 0 && deltaNanos < 0) {
+        // If deltaMillis is negative, subtract its value from seconds.
+        if (deltaSeconds > 0 && deltaMillis < 0) {
             return com.google.protobuf.util.Durations.subtract(seconds(deltaSeconds),
-                                                               nanos(deltaNanos));
+                                                               milliseconds(deltaMillis));
         }
 
-        // If deltaSeconds is negative and nanos are positive, add nanos.
-        if (deltaSeconds < 0 && deltaNanos > 0) {
-            return Durations2.add(seconds(deltaSeconds), nanos(deltaNanos));
+        // If deltaSeconds is negative and millis are positive, add millis.
+        if (deltaSeconds < 0 && deltaMillis > 0) {
+            return Durations2.add(seconds(deltaSeconds), milliseconds(deltaMillis));
         }
 
         // The params have the same sign, just create a Duration instance using them.
         return Duration.newBuilder()
                        .setSeconds(deltaSeconds)
-                       .setNanos(deltaNanos)
+                       .setNanos((int) Timestamps2.NANOS_PER_MICROSECOND * deltaMillis)
                        .build();
     }
 
-    private void givenSequentialRecords(long deltaSeconds, int deltaNanos) {
-        final Duration delta = createDelta(deltaSeconds, deltaNanos);
+    private void givenSequentialRecords(long deltaSeconds, int deltaMillis) {
+        final Duration delta = createDelta(deltaSeconds, deltaMillis);
+
         time1 = getCurrentTime().toBuilder()
-                                .setNanos(POSITIVE_DELTA * 10)
+                                .setNanos(POSITIVE_DELTA * 10
+                                          * (int) Timestamps2.NANOS_PER_MICROSECOND)
                                 .build(); // to be sure that nanos are bigger than delta
         event1 = projectCreated(time1);
         time2 = add(time1, delta);
@@ -543,19 +544,19 @@ public abstract class EventStorageShould
         writeAll(event1, event2, event3);
     }
 
-    protected void writeAll(Event... events) {
-        for (Event e : events) {
-            storage.write(e.getContext().getEventId(), e);
+    private void writeAll(Event... events) {
+        for (Event event : events) {
+            storage.store(event);
         }
     }
 
-    protected void assertStorageContainsOnly(List<Event> expectedRecords) {
+    private void assertStorageContainsOnly(List<Event> expectedRecords) {
         final Iterator<Event> iterator = findAll();
         final List<Event> actual = newArrayList(iterator);
         assertEquals(expectedRecords, actual);
     }
 
-    protected Iterator<Event> findAll() {
+    private Iterator<Event> findAll() {
         final Iterator<Event> result = storage.iterator(EventStreamQuery.getDefaultInstance());
         return result;
     }
