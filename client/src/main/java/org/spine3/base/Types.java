@@ -48,8 +48,7 @@ public class Types {
      * @param <V>        the type of the values stored in this map
      * @return the type of the map
      */
-    public static <K, V> Type createMapType(Class<K> keyClass,
-                                            Class<V> valueClass) {
+    public static <K, V> Type mapTypeOf(Class<K> keyClass, Class<V> valueClass) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
 

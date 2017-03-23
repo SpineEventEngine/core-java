@@ -28,7 +28,7 @@ import java.lang.reflect.Type;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Types.createMapType;
+import static org.spine3.base.Types.mapTypeOf;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -52,7 +52,7 @@ public class TypesShould {
                        "SerializableInnerClassWithNonSerializableOuterClass"})
                         // It is OK for test method.
     public void create_map_type() {
-        final Type type = createMapType(String.class, Integer.class);
+        final Type type = mapTypeOf(String.class, Integer.class);
         final Type expectedType = new TypeToken<Map<String, Integer>>(){}.getType();
         assertEquals(expectedType, type);
     }
