@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
