@@ -30,7 +30,9 @@ import org.spine3.server.reflect.Property;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -63,7 +65,11 @@ public class StorageFields {
     private StorageFields() {
     }
 
-    public static <E extends Entity<?, ?>> Map<String, Object> from(E entity) {
+    public static Map<String, Property.MemoizedValue<?>> empty() {
+        return Collections.emptyMap();
+    }
+
+    public static <E extends Entity<?, ?>> Map<String, Property.MemoizedValue<?>> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
@@ -74,12 +80,23 @@ public class StorageFields {
 
         ensureRegistered(entityType);
 
-        final Map<String, Object> fields = getStorageFields();
+        final Map<String, Property.MemoizedValue<?>> fields = getStorageFields(entityType, entity);
         return fields;
     }
 
-    private static Map<String, Object> getStorageFields() {
-        return Collections.emptyMap();
+    private static Map<String, Property.MemoizedValue<?>> getStorageFields(Class<? extends Entity> entityType,
+                                                                        Entity entity) {
+        final Collection<Property<?>> storageFieldProperties =
+                knownEntityProperties.get(entityType);
+        final Map<String, Property.MemoizedValue<?>> values =
+                new HashMap<>(storageFieldProperties.size());
+
+        for (Property<?> property : storageFieldProperties) {
+            final String name = property.getName();
+            final Property.MemoizedValue<?> value = property.memoizeFor(entity);
+            values.put(name, value);
+        }
+        return values;
     }
 
     private static void ensureRegistered(Class<? extends Entity> entityType) {

@@ -22,7 +22,9 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.reflect.Property;
 
+import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -31,11 +33,16 @@ import java.util.Map;
 public class EntityRecordEnvelope {
 
     private final EntityRecord record;
-    private final ImmutableMap<String, Object> storageFields;
+    private final ImmutableMap<String, Property.MemoizedValue<?>> storageFields;
 
-    public EntityRecordEnvelope(EntityRecord record, Map<String, Object> storageFields) {
+    public EntityRecordEnvelope(EntityRecord record,
+                                Map<String, Property.MemoizedValue<?>> storageFields) {
         this.record = record;
         this.storageFields = ImmutableMap.copyOf(storageFields);
+    }
+
+    public EntityRecordEnvelope(EntityRecord record) {
+        this(record, Collections.<String, Property.MemoizedValue<?>>emptyMap());
     }
 
     public EntityRecord getRecord() {
@@ -43,7 +50,7 @@ public class EntityRecordEnvelope {
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableMap<String, Object> getStorageFields() {
+    public ImmutableMap<String, Property.MemoizedValue<?>> getStorageFields() {
         return storageFields;
     }
 
