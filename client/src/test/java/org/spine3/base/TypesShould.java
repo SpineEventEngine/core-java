@@ -23,9 +23,9 @@ package org.spine3.base;
 import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Type;
+import java.util.Map;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -50,9 +50,13 @@ public class TypesShould {
     }
 
     @Test
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
+                        // It is OK for test method.
     public void create_map_type() {
         final Type type = createMapType(String.class, Integer.class);
-        assertEquals(ParameterizedTypeImpl.class, type.getClass());
+        final Type expectedType = new TypeToken<Map<String, Integer>>(){}.getType();
+        assertEquals(expectedType, type);
     }
 
     @Test

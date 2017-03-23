@@ -49,11 +49,15 @@ public class Types {
      * @param <V>        the type of the values stored in this map
      * @return the type of the map
      */
-    public static <K, V> Type createMapType(K keyClass, V valueClass) {
+    public static <K, V> Type createMapType(Class<K> keyClass,
+                                            Class<V> valueClass) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
 
-        return new TypeToken<Map<K, V>>() {}.getType();
+        final Type type =  new TypeToken<Map<K, V>>() {}.where(new TypeParameter<K>() {}, keyClass)
+                                                        .where(new TypeParameter<V>() {}, valueClass)
+                                                        .getType();
+        return type;
     }
 
     /**
