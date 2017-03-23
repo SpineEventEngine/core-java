@@ -51,7 +51,7 @@ public interface StorageFactory extends AutoCloseable {
      *
      * @return immutable registry of type convection strategies
      */
-    ColumnTypeRegistry<?, ?> getTypeRegistry();
+    ColumnTypeRegistry getTypeRegistry();
 
     /**
      * Creates a new {@link StandStorage} instance.

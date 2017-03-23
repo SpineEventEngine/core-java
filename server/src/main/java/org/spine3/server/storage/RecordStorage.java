@@ -102,7 +102,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         checkArgument(record.hasState(), "Record does not have state field.");
         checkNotClosed();
 
-        writeRecord(id, record);
+        writeRecord(id, new EntityRecordEnvelope(record));
     }
 
     public void write(I id, EntityRecordEnvelope record) {
@@ -236,17 +236,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
-
-    /**
-     * Writes a record into the storage.
-     *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
-     *
-     * @param id     an ID of the record
-     * @param record a record to store
-     */
-    @Deprecated
-    protected abstract void writeRecord(I id, EntityRecord record);
 
     protected abstract void writeRecord(I id, EntityRecordEnvelope record);
 

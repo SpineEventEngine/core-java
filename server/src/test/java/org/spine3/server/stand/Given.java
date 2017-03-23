@@ -30,11 +30,14 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Version;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.Subscribe;
 import org.spine3.server.projection.Projection;
@@ -112,6 +115,15 @@ class Given {
         return boundedContextBuilder(stand)
                 .setStandUpdateDelivery(standUpdateDelivery)
                 .build();
+    }
+
+    @SuppressWarnings("unchecked")
+    static VersionableEntity entityFrom(Object id, Message state, Version version) {
+        return org.spine3.test.Given.entityOfClass(AbstractVersionableEntity.class)
+                                    .withId(id)
+                                    .withState(state)
+                                    .withVersion(version.getNumber())
+                                    .build();
     }
 
     private static BoundedContext.Builder boundedContextBuilder(Stand stand) {

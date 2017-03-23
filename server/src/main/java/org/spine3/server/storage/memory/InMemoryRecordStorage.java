@@ -107,13 +107,8 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, EntityRecord record) {
-        getStorage().put(id, record);
-    }
-
-    @Override
     protected void writeRecord(I id, EntityRecordEnvelope record) {
-        writeRecord(id, record.getRecord());
+        getStorage().put(id, record.getRecord());
     }
 
     @Override

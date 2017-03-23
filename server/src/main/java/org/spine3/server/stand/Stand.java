@@ -33,6 +33,7 @@ import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -141,11 +142,37 @@ public class Stand implements AutoCloseable {
      * by the entity {@code TypeUrl}.
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
-     *  @param id            the entity identifier
-     * @param entityState   the entity state
-     * @param entityVersion the version of the entity
+     *
+     *  @param entity the {@link Entity} to update
      */
-    void update(Object id, Any entityState, Version entityVersion) {
+    void update(VersionableEntity entity) {
+        final Message state = entity.getState();
+        final Any entityState = AnyPacker.pack(state);
+        final String typeUrlString = entityState.getTypeUrl();
+        final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
+
+        final boolean isAggregateUpdate = knownAggregateTypes.contains(typeUrl);
+
+        final Object genericId = entity.getId();
+        if (isAggregateUpdate) {
+            final Version version = entity.getVersion();
+            final AggregateStateId aggregateStateId = AggregateStateId.of(genericId, typeUrl);
+            final EntityRecord record =
+                    EntityRecord.newBuilder()
+                                .setState(entityState)
+                                .setVersion(version)
+                                .build();
+            storage.write(aggregateStateId, record);
+        }
+
+        notifyMatchingSubscriptions(genericId, entityState, typeUrl);
+    }
+
+    /**
+     * @deprecated use {@link #update(VersionableEntity)} instead
+     */
+    @Deprecated
+    void up1date(Object id, Any entityState, Version entityVersion) {
         final String typeUrlString = entityState.getTypeUrl();
         final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
 
@@ -300,7 +327,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      *
-     * @see #update(Object, Any, Version)
+     * @see #update(VersionableEntity)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends VersionableEntity<I, ?>>

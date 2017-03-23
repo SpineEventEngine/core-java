@@ -111,6 +111,6 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     protected void writeRecord(I id, EntityRecordEnvelope record) {
-        writeRecord(id, record.getRecord());
+        recordStorage.writeRecord(id, record);
     }
 }

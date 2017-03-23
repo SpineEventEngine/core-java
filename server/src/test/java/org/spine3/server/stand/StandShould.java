@@ -92,6 +92,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.server.stand.Given.StandTestProjection;
+import static org.spine3.server.stand.Given.entityFrom;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
@@ -180,7 +181,7 @@ public class StandShould {
         final Any someUpdate = AnyPacker.pack(Project.getDefaultInstance());
         final Object someId = new Object();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(someId, someUpdate, stateVersion);
+        stand.update(entityFrom(someId, someUpdate, stateVersion));
 
         verify(executor, times(1)).execute(any(Runnable.class));
     }
@@ -207,7 +208,7 @@ public class StandShould {
 
         verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecord.class));
 
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(entityFrom(customerId, packedState, stateVersion));
 
         final AggregateStateId expectedAggregateStateId = AggregateStateId.of(customerId, customerType);
         final EntityRecord expectedRecord = EntityRecord.newBuilder()
@@ -310,7 +311,7 @@ public class StandShould {
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(entityFrom(customerId, packedState, stateVersion));
 
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
@@ -333,7 +334,7 @@ public class StandShould {
         final Project project = sampleData.getValue();
         final Any packedState = AnyPacker.pack(project);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(projectId, packedState, stateVersion);
+        stand.update(entityFrom(projectId, packedState, stateVersion));
 
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
@@ -357,7 +358,7 @@ public class StandShould {
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(entityFrom(customerId, packedState, stateVersion));
 
         assertNull(memoizeCallback.newEntityState);
     }
@@ -394,7 +395,7 @@ public class StandShould {
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(entityFrom(customerId, packedState, stateVersion));
 
         for (MemoizeEntityUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
@@ -415,7 +416,7 @@ public class StandShould {
         final Customer customer = sampleData.getValue();
         final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(entityFrom(customerId, packedState, stateVersion));
 
         verify(callback, never()).onStateChanged(any(Any.class));
     }
@@ -444,7 +445,7 @@ public class StandShould {
             final Customer customer = sampleEntry.getValue();
             final Any packedState = AnyPacker.pack(customer);
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(customerId, packedState, stateVersion);
+            stand.update(entityFrom(customerId, packedState, stateVersion));
         }
 
         assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
@@ -476,7 +477,9 @@ public class StandShould {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(entityFrom(sampleCustomer.getId(),
+                                AnyPacker.pack(sampleCustomer),
+                                stateVersion));
 
         final Query customerQuery = Queries.readAll(Customer.class);
 
@@ -590,7 +593,7 @@ public class StandShould {
             final Customer customer = getSampleCustomer();
             customers.add(customer);
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
+            stand.update(entityFrom(customer.getId(), AnyPacker.pack(customer), stateVersion));
         }
 
         final Set<CustomerId> ids = Collections.singleton(customers.get(0)
@@ -617,7 +620,9 @@ public class StandShould {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(entityFrom(sampleCustomer.getId(),
+                                AnyPacker.pack(sampleCustomer),
+                                stateVersion));
 
         // FieldMask with invalid type URLs.
         final String[] paths = {"invalid_type_url_example", Project.getDescriptor()
@@ -700,7 +705,9 @@ public class StandShould {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(entityFrom(sampleCustomer.getId(),
+                                AnyPacker.pack(sampleCustomer),
+                                stateVersion));
 
         final String[] paths = new String[fieldIndexes.length];
 
@@ -772,7 +779,7 @@ public class StandShould {
                                                                           .setNumber(i))
                                                          .build();
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
+            stand.update(entityFrom(customer.getId(), AnyPacker.pack(customer), stateVersion));
 
             ids.add(customer.getId());
         }
@@ -977,7 +984,7 @@ public class StandShould {
             final Customer sampleCustomer = sampleCustomers.get(id);
             final Any customerState = AnyPacker.pack(sampleCustomer);
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(id, customerState, stateVersion);
+            stand.update(entityFrom(id, customerState, stateVersion));
         }
     }
 

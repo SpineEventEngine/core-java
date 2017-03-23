@@ -130,8 +130,9 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected void writeRecord(AggregateStateId id, EntityRecord record) {
-        final TypeUrl recordType = TypeUrl.parse(record.getState()
+    protected void writeRecord(AggregateStateId id, EntityRecordEnvelope record) {
+        final TypeUrl recordType = TypeUrl.parse(record.getRecord()
+                                                       .getState()
                                                        .getTypeUrl());
         final TypeUrl recordTypeFromId = id.getStateType();
         checkState(recordTypeFromId.equals(recordType),
@@ -139,11 +140,6 @@ class InMemoryStandStorage extends StandStorage {
                    recordType,
                    recordTypeFromId);
         recordStorage.write(id, record);
-    }
-
-    @Override
-    protected void writeRecord(AggregateStateId id, EntityRecordEnvelope record) {
-        writeRecord(id, record.getRecord());
     }
 
     @Override
