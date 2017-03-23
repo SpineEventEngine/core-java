@@ -22,6 +22,7 @@ package org.spine3.server.storage;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
@@ -180,21 +181,30 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         final int bulkSize = 5;
 
-        final Map<I, EntityRecordEnvelope> expected = new HashMap<>(bulkSize);
+        final Map<I, EntityRecordEnvelope> initial = new HashMap<>(bulkSize);
 
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            expected.put(id, new EntityRecordEnvelope(record));
+            initial.put(id, new EntityRecordEnvelope(record));
         }
-        storage.write(expected);
+        storage.write(initial);
 
         final Collection<EntityRecord> actual = newLinkedList(
-                storage.readMultiple(expected.keySet())
+                storage.readMultiple(initial.keySet())
         );
+        final Collection<EntityRecord> expected =
+                Collections2.transform(initial.values(),
+                                       new Function<EntityRecordEnvelope, EntityRecord>() {
+                                           @Override
+                                           public EntityRecord apply(@Nullable EntityRecordEnvelope envelope) {
+                                               assertNotNull(envelope);
+                                               return envelope.getRecord();
+                                           }
+                                       });
 
         assertEquals(expected.size(), actual.size());
-        assertTrue(actual.containsAll(expected.values()));
+        assertTrue(actual.containsAll(expected));
 
         close(storage);
     }
