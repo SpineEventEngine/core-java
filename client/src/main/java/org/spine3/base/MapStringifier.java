@@ -156,7 +156,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         }
     }
 
-    @SuppressWarnings("unchecked") // It is OK because class is verified.
+    @SuppressWarnings("unchecked") // It is safe because the type is checked before the cast.
     private static <I> I convert(Class<I> elementClass, String elementToConvert) {
 
         if (isInteger(elementClass)) {
@@ -182,7 +182,9 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         if (keyValue.length != 2) {
             final String exMessage =
                     "Illegal key-value format. The value should " +
-                    "be separated with a single `:` character.";
+                    "be separated with a single `" +
+                    KEY_VALUE_DELIMITER +
+                    "` character.";
             throw newIllegalArgumentException(exMessage);
         }
     }
