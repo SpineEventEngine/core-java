@@ -29,12 +29,15 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordEnvelope;
+import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A storage keeping messages with identity.
@@ -138,7 +141,21 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     @Deprecated
     @Override
     public void writeLifecycleFlags(I id, LifecycleFlags flags) {
-        throw new UnsupportedOperationException();
+        final Optional<EntityRecord> optional = read(id);
+        if (optional.isPresent()) {
+            final EntityRecord record = optional.get();
+            final EntityRecord updated = record.toBuilder()
+                                               .setLifecycleFlags(flags)
+                                               .build();
+            write(id, new EntityRecordEnvelope(updated));
+        } else {
+            // The AggregateStateId is a special case, which is not handled by the Identifier class.
+            final String idStr = id instanceof AggregateStateId
+                                 ? id.toString()
+                                 : idToString(id);
+            throw newIllegalStateException("Unable to load record for entity with ID: %s",
+                                           idStr);
+        }
     }
 
     /**
