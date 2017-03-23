@@ -21,6 +21,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.spine3.base.Command;
@@ -119,7 +120,7 @@ class Given {
 
     @SuppressWarnings("unchecked")
     static VersionableEntity entityFrom(Object id, Message state, Version version) {
-        return org.spine3.test.Given.entityOfClass(AbstractVersionableEntity.class)
+        return org.spine3.test.Given.entityOfClass(TestEntity.class)
                                     .withId(id)
                                     .withState(state)
                                     .withVersion(version.getNumber())
@@ -195,6 +196,17 @@ class Given {
         @Subscribe
         public void handle(ProjectCreated event, EventContext context) {
             // Do nothing
+        }
+    }
+
+    private static class TestEntity extends AbstractVersionableEntity<Object, Message> {
+        protected TestEntity(Object id) {
+            super(id);
+        }
+
+        @Override
+        public Message getDefaultState() {
+            return Any.getDefaultInstance();
         }
     }
 }
