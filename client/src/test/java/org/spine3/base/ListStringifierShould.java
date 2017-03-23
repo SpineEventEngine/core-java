@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.common.reflect.TypeToken;
 import org.junit.Test;
 import org.spine3.test.types.Task;
@@ -57,20 +59,20 @@ public class ListStringifierShould {
     public void convert_list_of_strings_to_string() {
         final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
         final String actual = listStringifier(String.class).convert(listToConvert);
-        assertEquals(listToConvert.toString(), actual);
+        assertEquals(convertListToString(listToConvert), actual);
     }
 
     @Test
     public void convert_list_of_integers_to_string() {
         final List<Integer> listToConvert = newArrayList(1, 2, 3, 4, 5);
         final String actual = listStringifier(Integer.class).convert(listToConvert);
-        assertEquals(listToConvert.toString(), actual);
+        assertEquals(convertListToString(listToConvert), actual);
     }
 
     @Test
     @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass",
-                       "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
-                        // It is OK for test method.
+            "SerializableNonStaticInnerClassWithoutSerialVersionUID"})
+    // It is OK for test method.
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "1\\|2\\|3\\|4\\|5";
         final String delimiter = "|";
@@ -91,5 +93,15 @@ public class ListStringifierShould {
         final String stringToConvert = "{value:123456}";
         new ListStringifier<>(Task.class).reverse()
                                          .convert(stringToConvert);
+    }
+
+    private static String convertListToString(List<?> listToConvert) {
+        final Escaper escaper = Escapers.builder()
+                                        .addEscape(' ', "")
+                                        .addEscape('[', "")
+                                        .addEscape(']', "")
+                                        .addEscape(',', "\\,")
+                                        .build();
+        return escaper.escape(listToConvert.toString());
     }
 }

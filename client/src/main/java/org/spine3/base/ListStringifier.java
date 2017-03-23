@@ -101,7 +101,13 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final String result = list.toString();
+        final StringBuilder stringBuilder = new StringBuilder(0);
+        for (T element : list) {
+            stringBuilder.append(element)
+                         .append(delimiter);
+        }
+        final int length = stringBuilder.length();
+        final String result = stringBuilder.substring(0, length-2);
         return result;
     }
 
