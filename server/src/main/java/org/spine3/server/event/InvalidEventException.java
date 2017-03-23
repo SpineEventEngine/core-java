@@ -21,12 +21,14 @@
 package org.spine3.server.event;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Value;
 import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
-import org.spine3.base.ValidationError;
+import org.spine3.server.validate.InvalidMessages.ConstraintViolationHelper;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolations;
+
+import java.util.Map;
 
 /**
  * The exception for reporting invalid events.
@@ -41,7 +43,7 @@ public class InvalidEventException extends EventException {
     private static final long serialVersionUID = 0L;
 
     private static final String MSG_VALIDATION_ERROR = "Event message does match " +
-                                                       "the validation constraints. ";
+                                                       "the validation constraints.";
 
     private InvalidEventException(String messageText, Message eventMsg, Error error) {
         super(messageText, eventMsg, error);
@@ -56,31 +58,54 @@ public class InvalidEventException extends EventException {
      */
     public static InvalidEventException onConstraintViolations(
             Message eventMsg, Iterable<ConstraintViolation> violations) {
-        final String errorDetails = MSG_VALIDATION_ERROR + ConstraintViolations.toText(violations);
-        final Error error = invalidEventMessageError(eventMsg, violations, errorDetails);
-        final String text = MSG_VALIDATION_ERROR + " Message class: " + EventClass.of(eventMsg) +
-                            " See Error.getValidationError() for details.";
-        return new InvalidEventException(text, eventMsg, error);
+
+        final EventConstraintViolationsHelper helper = new EventConstraintViolationsHelper(
+                eventMsg, violations);
+        return helper.buildException();
     }
 
     /**
-     * Creates an instance of {@code Error} for an event message, which has fields that violate
-     * validation constraint(s).
+     * A helper utility aimed to create an {@code InvalidEventException} to report the
+     * event which field values violate validation constraint(s).
      */
-    private static Error invalidEventMessageError(Message eventMessage,
-                                                  Iterable<ConstraintViolation> violations,
-                                                  String errorText) {
-        final ValidationError validationError =
-                ValidationError.newBuilder()
-                               .addAllConstraintViolation(violations)
-                               .build();
-        final Error.Builder error = Error.newBuilder()
-                                         .setType(EventValidationError.getDescriptor()
-                                                                      .getFullName())
-                                         .setCode(EventValidationError.INVALID_EVENT.getNumber())
-                                         .setValidationError(validationError)
-                                         .setMessage(errorText)
-                                         .putAllAttributes(eventTypeAttribute(eventMessage));
-        return error.build();
+    private static class EventConstraintViolationsHelper
+                                extends ConstraintViolationHelper<InvalidEventException,
+                                                                  Message,
+                                                                  EventClass,
+                                                                  EventValidationError> {
+
+        private final EventClass eventClass;
+
+        private EventConstraintViolationsHelper(Message eventMsg,
+                                                Iterable<ConstraintViolation> violations) {
+            super(eventMsg, violations);
+            this.eventClass = EventClass.of(eventMsg);
+        }
+
+        @Override
+        protected EventClass getMessageClass() {
+            return eventClass;
+        }
+
+        @Override
+        protected EventValidationError getErrorCode() {
+            return EventValidationError.INVALID_EVENT;
+        }
+
+        @Override
+        protected String getErrorText() {
+            return MSG_VALIDATION_ERROR;
+        }
+
+        @Override
+        protected Map<String, Value> getMessageTypeAttribute(Message message) {
+            return eventTypeAttribute(message);
+        }
+
+        @Override
+        protected InvalidEventException createException(String exceptionMsg, Message message,
+                                                        Error error) {
+            return new InvalidEventException(exceptionMsg, message, error);
+        }
     }
 }
