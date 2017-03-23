@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * @author Dmytro Dashenkov
  */
-public class ColumnTypeRegistry<R, C> {
+public class ColumnTypeRegistry {
 
     private final Map<Class, ColumnType> propertyColumnType;
 
@@ -66,8 +66,8 @@ public class ColumnTypeRegistry<R, C> {
             return this;
         }
 
-        public ColumnTypeRegistry<R, C> build() {
-            return new ColumnTypeRegistry<>(ImmutableMap.copyOf(propertyColumnType));
+        public ColumnTypeRegistry build() {
+            return new ColumnTypeRegistry(ImmutableMap.copyOf(propertyColumnType));
         }
     }
 }
