@@ -52,11 +52,14 @@ public class MapStringifierShould {
 
     @Test
     public void convert_map_to_string() {
-        final Map<String, Integer> mapToConvert = createTestMap();
-        final Stringifier<Map<String, Integer>> stringifier =
-                mapStringifier(String.class, Integer.class);
+        final Map<Character, Integer> mapToConvert = newHashMap();
+        mapToConvert.put('1', 1);
+        mapToConvert.put('2', 2);
+
+        final Stringifier<Map<Character, Integer>> stringifier =
+                mapStringifier(Character.class, Integer.class);
         final String convertedMap = stringifier.toString(mapToConvert);
-        assertEquals("third\\:3\\,first\\:1\\,second\\:2", convertedMap);
+        assertEquals("1\\:1\\,2\\:2", convertedMap);
     }
 
     @Test(expected = IllegalArgumentException.class)
