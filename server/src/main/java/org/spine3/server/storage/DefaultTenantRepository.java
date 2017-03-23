@@ -18,14 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.storage;
+
+import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.users.TenantId;
 
 /**
+ * Default implementation of {code TenantRepository} that stores timestamps
+ * of tenant ID registration.
+ *
  * @author Alexander Yevsyukov
  */
-public class SingleTenantStatusServiceShould extends StatusServiceShould {
+public class DefaultTenantRepository extends TenantRepository<Timestamp,
+                                                              DefaultTenantRepository.Entity> {
 
-    public SingleTenantStatusServiceShould() {
-        super(false);
+    public static class Entity extends TenantRepository.Entity<Timestamp> {
+        protected Entity(TenantId id) {
+            super(id);
+        }
+
+        @Override
+        public Timestamp getDefaultState() {
+            return Timestamps2.getCurrentTime();
+        }
     }
 }

@@ -62,6 +62,11 @@ public class CommandStore implements AutoCloseable {
 
     }
 
+    StatusService createStatusService(Log log) {
+        final StatusService result = new StatusService(this, log);
+        return result;
+    }
+
     private void checkNotClosed() {
         checkState(isOpen(), "The CommandStore is closed.");
     }
@@ -219,12 +224,6 @@ public class CommandStore implements AutoCloseable {
     }
 
     @VisibleForTesting
-    CommandStatus getStatusCode(CommandId commandId) {
-        final CommandStatus result = getStatus(commandId).getCode();
-        return result;
-    }
-
-    @VisibleForTesting
     ProcessingStatus getStatus(CommandId commandId) {
         final Func<CommandId, ProcessingStatus> func = new Func<CommandId, ProcessingStatus>(this) {
             @Override
@@ -245,7 +244,7 @@ public class CommandStore implements AutoCloseable {
         private final CommandStore commandStore;
         private final Log log;
 
-        StatusService(CommandStore commandStore, Log log) {
+        private StatusService(CommandStore commandStore, Log log) {
             this.commandStore = commandStore;
             this.log = log;
         }

@@ -191,7 +191,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @CheckReturnValue
     @Nullable
-    protected AutoCloseable getStorage() {
+    protected Storage<I, ?> getStorage() {
         return this.storage;
     }
 

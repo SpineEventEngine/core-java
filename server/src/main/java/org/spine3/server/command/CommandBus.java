@@ -92,7 +92,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         super();
         this.multitenant = builder.multitenant;
         this.commandStore = builder.commandStore;
-        this.commandStatusService = new CommandStore.StatusService(commandStore, builder.log);
+        this.commandStatusService = commandStore.createStatusService(builder.log);
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
