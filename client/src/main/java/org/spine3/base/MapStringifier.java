@@ -41,7 +41,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  *
  * {@code
  *  // The registration of the stringifier.
- *  final Type type = new TypeToken<Map<String, Long>>(){}.getType();
+ *  final Type type = Types.mapTypeOf(String.class, Long.class);
  *  StringifierRegistry.getInstance().register(stringifier, type);
  *
  *  // Obtain already registered `MapStringifier`.
