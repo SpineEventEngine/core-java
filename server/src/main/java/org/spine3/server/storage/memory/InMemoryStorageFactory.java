@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -47,6 +48,12 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
+    public ColumnTypeRegistry getTypeRegistry() {
+        return ColumnTypeRegistry.newBuilder()
+                                 .build();
+    }
+
+    @Override
     public StandStorage createStandStorage() {
         final InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
                                                                 .setMultitenant(isMultitenant())
@@ -67,12 +74,12 @@ public class InMemoryStorageFactory implements StorageFactory {
      * NOTE: the parameter is unused.
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> unused) {
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {
         return InMemoryRecordStorage.newInstance(isMultitenant());
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> unused) {
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(multitenant);
@@ -97,7 +104,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         INSTANCE;
         private final InMemoryStorageFactory singleTenantInstance =
                 new InMemoryStorageFactory(false);
-        
+
         private final InMemoryStorageFactory multitenantInstance =
                 new InMemoryStorageFactory(true);
     }

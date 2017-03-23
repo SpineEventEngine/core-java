@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * @author Dmytro Dashenkov
  */
-public class ColumnTypeRegistry {
+public class ColumnTypeRegistry<R, C> {
 
     private final Map<Class, ColumnType> propertyColumnType;
 
@@ -50,24 +50,24 @@ public class ColumnTypeRegistry {
         return type;
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
+    public static <R, C> Builder<R, C> newBuilder() {
+        return new Builder<>();
     }
 
-    public static class Builder {
+    public static class Builder<R, C> {
 
         private final Map<Class, ColumnType> propertyColumnType = new HashMap<>();
 
         private Builder() {
         }
 
-        public <J, S> Builder put(Class<J> javaType, ColumnType<J, S> columnType) {
+        public <J, S> Builder put(Class<J> javaType, ColumnType<J, S, R, C> columnType) {
             propertyColumnType.put(javaType, columnType);
             return this;
         }
 
-        public ColumnTypeRegistry build() {
-            return new ColumnTypeRegistry(ImmutableMap.copyOf(propertyColumnType));
+        public ColumnTypeRegistry<R, C> build() {
+            return new ColumnTypeRegistry<>(ImmutableMap.copyOf(propertyColumnType));
         }
     }
 }

@@ -23,6 +23,7 @@ package org.spine3.server.storage;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 
@@ -43,6 +44,14 @@ public interface StorageFactory extends AutoCloseable {
      *         {@code false} otherwise
      */
     boolean isMultitenant();
+
+    /**
+     * Retrieves the {@link ColumnTypeRegistry type registry} which declares how to store
+     * the columns of a certain Java type.
+     *
+     * @return immutable registry of type convection strategies
+     */
+    ColumnTypeRegistry<?, ?> getTypeRegistry();
 
     /**
      * Creates a new {@link StandStorage} instance.

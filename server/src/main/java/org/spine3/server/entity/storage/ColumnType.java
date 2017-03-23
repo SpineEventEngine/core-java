@@ -23,7 +23,9 @@ package org.spine3.server.entity.storage;
 /**
  * @author Dmytro Dashenkov
  */
-public interface ColumnType<J, S> {
+public interface ColumnType<J, S, R, C> {
 
     S convert(J fieldValue);
+
+    void set(R storageRecord, S value, C columnIdentifier);
 }
