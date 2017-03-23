@@ -66,7 +66,7 @@ public class Types {
      * @param <T>          the type of the elements in this list
      * @return the type of the list
      */
-    public static <T> Type createListType(Class<T> elementClass) {
+    public static <T> Type listTypeOf(Class<T> elementClass) {
         checkNotNull(elementClass);
 
         final Type type =  new TypeToken<List<T>>() {}.where(new TypeParameter<T>() {}, elementClass)

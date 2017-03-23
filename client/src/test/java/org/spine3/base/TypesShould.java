@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Types.createListType;
+import static org.spine3.base.Types.listTypeOf;
 import static org.spine3.base.Types.mapTypeOf;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -64,7 +64,7 @@ public class TypesShould {
                        "SerializableInnerClassWithNonSerializableOuterClass"})
                         // It is OK for test method.
     public void create_list_type() {
-        final Type type = createListType(String.class);
+        final Type type = listTypeOf(String.class);
         final Type expectedType = new TypeToken<List<String>>(){}.getType();
         assertEquals(expectedType, type);
     }
