@@ -39,7 +39,7 @@ public class Types {
     }
 
     /**
-     * Creates the {@code ParameterizedTypeImpl} type of the map.
+     * Creates the parametrized {@code Type} of the map.
      *
      * @param keyClass   the class of keys are maintained by this map
      * @param valueClass the class  of mapped values
