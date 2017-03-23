@@ -23,6 +23,7 @@ package org.spine3.base;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
+import java.util.AbstractMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -115,13 +116,14 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final Map<K, V> resultMap = newHashMap();
 
         for (String bucket : buckets) {
-            saveConvertedBucket(resultMap, bucket);
+            final Map.Entry<K, V> convertedBucket = convert(bucket);
+            resultMap.put(convertedBucket.getKey(), convertedBucket.getValue());
         }
         return resultMap;
     }
 
-    private Map<K, V> saveConvertedBucket(Map<K, V> resultMap, String element) {
-        final String[] keyValue = element.split(Pattern.quote(KEY_VALUE_DELIMITER));
+    private Map.Entry<K, V> convert(String bucketToConvert) {
+        final String[] keyValue = bucketToConvert.split(Pattern.quote(KEY_VALUE_DELIMITER));
         checkKeyValue(keyValue);
 
         final String key = keyValue[0];
@@ -130,8 +132,9 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         try {
             final K convertedKey = convert(keyClass, key);
             final V convertedValue = convert(valueClass, value);
-            resultMap.put(convertedKey, convertedValue);
-            return resultMap;
+            final Map.Entry<K, V> convertedBucket =
+                    new AbstractMap.SimpleEntry<K, V>(convertedKey, convertedValue);
+            return convertedBucket;
         } catch (Throwable e) {
             throw newIllegalArgumentException("The exception is occurred during the conversion", e);
         }
