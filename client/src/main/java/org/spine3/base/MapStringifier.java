@@ -53,7 +53,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  *  mapToConvert.put("first", 1);
  *  mapToConvert.put("second", 2);
  *
- *  // The result is: "first\:1\,second\:2"
+ *  // The result is: "first\:1\,second\:2".
  *  final String convertedString = mapStringifier.toString(mapToConvert);
  *
  *
