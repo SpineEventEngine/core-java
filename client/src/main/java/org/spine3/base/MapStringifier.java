@@ -73,6 +73,14 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     private final Class<K> keyClass;
     private final Class<V> valueClass;
 
+    /**
+     * That constructor should be used when a custom delimiter is not needed.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} will be used.
+     *
+     * @param keyClass   the class of the key elements
+     * @param valueClass the class of the value elements
+     */
     MapStringifier(Class<K> keyClass, Class<V> valueClass) {
         super();
         this.keyClass = keyClass;
@@ -81,8 +89,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     /**
-     * That constructor should be used when need to use
-     * a custom delimiter of the elements during conversion.
+     * That constructor should be used for providing a custom
+     * delimiter of the elements during conversion.
      *
      * @param keyClass   the class of the key elements
      * @param valueClass the class of the value elements
@@ -109,7 +117,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         for (String bucket : buckets) {
             saveConvertedBucket(resultMap, bucket);
         }
-        Ints.stringConverter();
         return resultMap;
     }
 

@@ -58,9 +58,9 @@ public class Stringifiers {
      *
      * <p>This method must be used of the passed object is a generic type.
      *
-     * @param <T>     the type of the object to convert
      * @param object  to object to convert
      * @param typeOfT the type of the passed object
+     * @param <T>     the type of the object to convert
      * @return the string representation of the passed object
      * @throws MissingStringifierException if passed value cannot be converted
      */
@@ -74,11 +74,11 @@ public class Stringifiers {
     }
 
     /**
-     * Parses string to the appropriate value.
+     * Converts string value to the specified type.
      *
-     * @param <T>     the type of the value to return
      * @param str     the string to convert
      * @param typeOfT the type into which to convert the string
+     * @param <T>     the type of the value to return
      * @return the parsed value from string
      * @throws MissingStringifierException if passed value cannot be converted
      */
@@ -93,12 +93,12 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for map with default delimiter for the passed map elements.
+     * Obtains {@code Stringifier} for the map with default delimiter for the passed map elements.
      *
      * @param keyClass   the class of keys are maintained by this map
      * @param valueClass the class  of mapped values
      * @param <K>        the type of keys are maintained by this map
-     * @param <V>        the type of mapped values
+     * @param <V>        the type of the values stored in this map
      * @return the stringifier for the map
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
@@ -110,7 +110,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for map with custom delimiter for the passed map elements.
+     * Obtains {@code Stringifier} for the map with custom delimiter for the passed map elements.
      *
      * @param keyClass   the class of keys are maintained by this map
      * @param valueClass the class  of mapped values
