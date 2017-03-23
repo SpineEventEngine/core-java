@@ -20,9 +20,11 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,5 +54,20 @@ public class Types {
         checkNotNull(valueClass);
 
         return new TypeToken<Map<K, V>>() {}.getType();
+    }
+
+    /**
+     * Create the parametrized {@code Type} of the list.
+     *
+     * @param elementClass the class of the list elements
+     * @param <T>          the type of the elements in the list
+     * @return the type of the list
+     */
+    public static <T> Type createListType(Class<T> elementClass) {
+        checkNotNull(elementClass);
+
+        final Type type =  new TypeToken<List<T>>() {}.where(new TypeParameter<T>() {}, elementClass)
+                                                      .getType();
+        return type;
     }
 }

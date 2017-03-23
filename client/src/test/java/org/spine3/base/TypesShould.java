@@ -20,13 +20,16 @@
 
 package org.spine3.base;
 
+import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Type;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.base.Types.createListType;
 import static org.spine3.base.Types.createMapType;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -50,5 +53,15 @@ public class TypesShould {
     public void create_map_type() {
         final Type type = createMapType(String.class, Integer.class);
         assertEquals(ParameterizedTypeImpl.class, type.getClass());
+    }
+
+    @Test
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
+                        // It is OK for test method.
+    public void create_list_type() {
+        final Type type = createListType(String.class);
+        final Type expectedType = new TypeToken<List<String>>(){}.getType();
+        assertEquals(expectedType, type);
     }
 }
