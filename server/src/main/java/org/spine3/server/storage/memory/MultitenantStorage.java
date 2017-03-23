@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.TenantAwareOperation;
+import org.spine3.server.storage.TenantAware;
 import org.spine3.users.TenantId;
 
 import java.util.Map;
@@ -64,7 +64,7 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
     }
 
     private TenantId currentTenant() {
-        final TenantId result = TenantAwareOperation.getCurrentTenant(isMultitenant());
+        final TenantId result = TenantAware.getCurrentTenant(isMultitenant());
         return result;
     }
 

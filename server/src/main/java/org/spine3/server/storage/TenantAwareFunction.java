@@ -20,57 +20,46 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import org.spine3.users.TenantId;
 
 /**
- * An abstract base for operations on a tenant data.
+ * A function, which is calculated in a tenant context.
  *
- * @author Alexander Yevsyukov
- * @see #execute()
+ * @param <F> the type of the input
+ * @param <T> the type of the output
+ * @author Alexander Yevsykov
  */
-public abstract class TenantAwareOperation extends TenantAware implements Runnable {
+public abstract class TenantAwareFunction<F, T> extends TenantAware implements Function<F, T> {
 
-    /**
-     * Creates an instance of an operation, which uses the {@code TenantId}
-     * set in the current non-command handling execution context.
-     *
-     * @throws IllegalStateException if there is no current {@code TenantId}
-     * @see CurrentTenant#ensure()
-     */
-    protected TenantAwareOperation() throws IllegalStateException {
+    protected TenantAwareFunction() throws IllegalStateException {
         super();
     }
 
-    /**
-     * Creates an instance of an operation for the tenant specified by the passed ID.
-     *
-     * <p>If a default instance of {@link TenantId} is passed (because the application works in
-     * a single-tenant mode, {@linkplain CurrentTenant#singleTenant() singleTenant()} value will be
-     * substituted.
-     *
-     * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}
-     */
-    protected TenantAwareOperation(TenantId tenantId) {
+    protected TenantAwareFunction(TenantId tenantId) {
         super(tenantId);
     }
 
     /**
-     * Executes the operation.
+     * Returns the result of {@linkplain #apply(Object) applying} the function to the passed
+     * {@code input}.
      *
      * <p>The execution goes through the following steps:
      * <ol>
      *     <li>The current tenant ID is obtained and remembered.
      *     <li>The tenant ID passed to the constructor is set as current.
-     *     <li>The {@link #run()} method is called.
+     *     <li>The {@link #apply(Object)} method is called.
      *     <li>The previous tenant ID is set as current.
      * </ol>
      */
-    public void execute() {
+    public T execute(F input) {
+        final T result;
         final Optional<TenantId> remembered = CurrentTenant.get();
         try {
             CurrentTenant.set(tenantId());
-            run();
+            result = apply(input);
+            return result;
         } finally {
             if (remembered.isPresent()) {
                 CurrentTenant.set(remembered.get());

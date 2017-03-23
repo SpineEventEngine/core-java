@@ -32,10 +32,13 @@ import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.storage.CommandOperation;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.TenantAwareFunction;
 import org.spine3.server.storage.TenantAwareOperation;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.command.CommandRecords.toCommandIterator;
 
@@ -153,7 +156,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
-                storage.setOkStatus(getCommandId());
+                storage.setOkStatus(commandId());
             }
         };
         op.execute();
@@ -168,7 +171,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new CommandOperation(commandEnvelope.getCommand()) {
             @Override
             public void run() {
-                storage.updateStatus(getCommandId(), error);
+                storage.updateStatus(commandId(), error);
             }
         };
         op.execute();
@@ -190,13 +193,11 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
-                storage.updateStatus(getCommandId(), failure);
+                storage.updateStatus(commandId(), failure);
             }
         };
         op.execute();
     }
-
-    //TODO:2017-02-14:alexander.yevsyukov: Have reads as tenant-data ops.
 
     /**
      * Returns an iterator over all commands with the given status.
@@ -204,10 +205,17 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status to search by
      * @return commands with the given status
      */
-    public Iterator<Command> iterator(CommandStatus status) {
-        checkNotClosed();
-        final Iterator<Command> commands = toCommandIterator(storage.iterator(status));
-        return commands;
+    public Iterator<Command> iterator(final CommandStatus status) {
+        final Func<CommandStatus, Iterator<Command>> func =
+                new Func<CommandStatus, Iterator<Command>>(this) {
+            @Override
+            public Iterator<Command> apply(@Nullable final CommandStatus input) {
+                checkNotNull(input);
+                final Iterator<Command> commands = toCommandIterator(storage.iterator(status));
+                return commands;
+            }
+        };
+        return func.execute(status);
     }
 
     @VisibleForTesting
@@ -218,9 +226,15 @@ public class CommandStore implements AutoCloseable {
 
     @VisibleForTesting
     ProcessingStatus getStatus(CommandId commandId) {
-        checkNotClosed();
-        final ProcessingStatus result = storage.getStatus(commandId);
-        return result;
+        final Func<CommandId, ProcessingStatus> func = new Func<CommandId, ProcessingStatus>(this) {
+            @Override
+            public ProcessingStatus apply(@Nullable CommandId input) {
+                checkNotNull(input);
+                final ProcessingStatus status = storage.getStatus(input);
+                return status;
+            }
+        };
+        return func.execute(commandId);
     }
 
     /**
@@ -265,7 +279,7 @@ public class CommandStore implements AutoCloseable {
     }
 
     /**
-     * An abstract Command Store operation, which checks whether the store is open.
+     * An abstract Command Store operation, which ensures that the store is open.
      */
     private abstract static class Operation extends CommandOperation {
         private final CommandStore store;
@@ -284,6 +298,23 @@ public class CommandStore implements AutoCloseable {
         public void execute() {
             store.checkNotClosed();
             super.execute();
+        }
+    }
+
+    /**
+     * An abstract Command Store function which ensures that the store is open.
+     */
+    private abstract static class Func<F, T> extends TenantAwareFunction<F, T> {
+        private final CommandStore store;
+
+        private Func(CommandStore store) {
+            this.store = store;
+        }
+
+        @Override
+        public T execute(F input) {
+            store.checkNotClosed();
+            return super.execute(input);
         }
     }
 }

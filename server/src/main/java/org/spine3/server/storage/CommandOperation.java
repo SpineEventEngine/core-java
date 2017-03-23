@@ -51,8 +51,15 @@ public abstract class CommandOperation extends TenantAwareOperation {
      *
      * @throws IllegalStateException of the method is called from non-command handling context
      */
-    protected CommandId getCommandId() {
+    protected CommandId commandId() {
         return command.getContext()
                       .getCommandId();
+    }
+
+    /**
+     * Obtains the command related to this operation.
+     */
+    protected Command command() {
+        return command;
     }
 }
