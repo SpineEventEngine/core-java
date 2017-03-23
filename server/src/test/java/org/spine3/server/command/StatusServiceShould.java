@@ -62,10 +62,10 @@ import static org.spine3.server.command.Given.Command.startProject;
 import static org.spine3.server.command.Given.CommandMessage.createProjectMessage;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
-public class CommandBusStatusHandlingShould extends AbstractCommandBusTestSuite {
+public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
 
-    public CommandBusStatusHandlingShould() {
-        super(false);
+    protected StatusServiceShould(boolean multitenant) {
+        super(multitenant);
     }
 
     @Test

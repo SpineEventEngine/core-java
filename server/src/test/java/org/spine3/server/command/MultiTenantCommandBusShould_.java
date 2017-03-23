@@ -46,9 +46,9 @@ import static org.spine3.base.CommandValidationError.UNSUPPORTED_COMMAND;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 
-public class MultitenantCommandBusShould extends AbstractCommandBusTestSuite {
+public class MultiTenantCommandBusShould_ extends AbstractCommandBusTestSuite {
 
-    public MultitenantCommandBusShould() {
+    public MultiTenantCommandBusShould_() {
         super(true);
     }
 
