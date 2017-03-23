@@ -33,7 +33,6 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordEnvelope;
-import org.spine3.server.entity.storage.StorageFields;
 import org.spine3.test.Tests;
 
 import javax.annotation.Nullable;
@@ -275,7 +274,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, record);
+        storage.write(id, new EntityRecordEnvelope(record));
 
         storage.writeLifecycleFlags(id, archived());
 

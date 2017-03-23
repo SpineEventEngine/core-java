@@ -85,8 +85,9 @@ public class StorageFields {
         return fields;
     }
 
-    private static Map<String, Property.MemoizedValue<?>> getStorageFields(Class<? extends Entity> entityType,
-                                                                        Entity entity) {
+    private static Map<String, Property.MemoizedValue<?>> getStorageFields(
+            Class<? extends Entity> entityType,
+            Entity entity) {
         final Collection<Property<?>> storageFieldProperties =
                 knownEntityProperties.get(entityType);
         final Map<String, Property.MemoizedValue<?>> values =

@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.reflect.Property;
 
-import java.util.Collections;
 import java.util.Map;
 
 /**
@@ -41,8 +40,10 @@ public class EntityRecordEnvelope {
         this.storageFields = ImmutableMap.copyOf(storageFields);
     }
 
+    @SuppressWarnings("ConstantConditions")
+        // null value for the storage fields map
     public EntityRecordEnvelope(EntityRecord record) {
-        this(record, Collections.<String, Property.MemoizedValue<?>>emptyMap());
+        this(record, null);
     }
 
     public EntityRecord getRecord() {
@@ -50,8 +51,14 @@ public class EntityRecordEnvelope {
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableMap<String, Property.MemoizedValue<?>> getStorageFields() {
-        return storageFields;
+    public Map<String, Property.MemoizedValue<?>> getStorageFields() {
+        return storageFields == null
+                ? StorageFields.empty()
+                : storageFields;
+    }
+
+    public boolean hasStorageFiedls() {
+        return storageFields != null;
     }
 
     @Override
