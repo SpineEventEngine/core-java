@@ -47,7 +47,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *    final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
  *                                                                          .getStringifier(type);
  *
- *    // Convert to string. The converted string is result of the {@code List#toString()} method.
+ *    // Convert to string.
  *    final List<Integer> listToConvert = newArrayList(1, 2, 3);
  *
  *    // The result is: "1\,2\,3".
