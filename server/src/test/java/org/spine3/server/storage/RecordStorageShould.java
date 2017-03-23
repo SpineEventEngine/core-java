@@ -47,6 +47,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
+import static org.spine3.test.Verify.assertMapsEqual;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.validate.Validate.isDefault;
 
@@ -192,6 +193,34 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertTrue(actual.containsAll(expected.values()));
 
         close(storage);
+    }
+
+    @Test
+    public void rewrite_records_in_bulk() {
+        final int recordCount = 3;
+        final RecordStorage<I> storage = getStorage();
+        final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
+        final Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
+
+        for (int i = 0; i < recordCount; i++) {
+            final I id = newId();
+            final EntityRecord record = newStorageRecord(id);
+
+            // Some records are changed and some are not
+            final EntityRecord alternateRecord = (i % 2 == 0)
+                                                 ? record
+                                                 : newStorageRecord(id);
+            v1Records.put(id, record);
+            v2Records.put(id, alternateRecord);
+        }
+
+        storage.write(v1Records);
+        final Map<I, EntityRecord> firstRevision = storage.readAll();
+        assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
+
+        storage.write(v2Records);
+        final Map<I, EntityRecord> secondRevision = storage.readAll();
+        assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
     }
 
     @Test(expected = IllegalStateException.class)

@@ -38,6 +38,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.command.DelegatingCommandDispatcher;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
@@ -46,6 +47,7 @@ import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
+import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
@@ -90,14 +92,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     private final Stand stand;
     private final StandFunnel standFunnel;
 
-    /** All the repositories registered with this bounded context */
+    /** All the repositories registered with this bounded context. */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
     /**
      * The map from a type of aggregate state to an aggregate repository instance that
      * manages such aggregates.
      */
-    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories = Maps.newHashMap();
+    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories =
+            Maps.newHashMap();
 
     /**
      * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
@@ -216,6 +219,10 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             commandBus.register((CommandDispatcher) repository);
         }
 
+        if (repository instanceof ProcessManagerRepository) {
+            final ProcessManagerRepository procmanRepo = (ProcessManagerRepository) repository;
+            commandBus.register(DelegatingCommandDispatcher.of(procmanRepo));
+        }
         if (repository instanceof EventDispatcher) {
             eventBus.register((EventDispatcher) repository);
         }
@@ -474,7 +481,6 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             if (eventBus == null) {
                 eventBus = createEventBus(storageFactory);
             }
-
             if (stand == null) {
                 stand = createStand(storageFactory);
             }
@@ -499,7 +505,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         }
 
         private static CommandStore createCommandStore(StorageFactory storageFactory) {
-            final CommandStore result = new CommandStore(storageFactory.createCommandStorage());
+            final CommandStore result = new CommandStore(storageFactory);
             return result;
         }
 

@@ -26,6 +26,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
@@ -40,7 +41,7 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
-import org.spine3.server.event.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -222,7 +223,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository().getEventClasses();
+        final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertContainsAll(eventClasses,
                           EventClass.of(ProjectCreated.class),
                           EventClass.of(TaskAdded.class),
@@ -399,7 +400,8 @@ public class ProjectionRepositoryShould
         }
         // Set up repository
         final Duration duration = Durations2.nanos(1L);
-        final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
+        final ProjectionRepository repository =
+                spy(new ManualCatchupProjectionRepository(boundedContext, duration));
         repository.initStorage(InMemoryStorageFactory.getInstance());
         repository.catchUp();
 
@@ -412,13 +414,22 @@ public class ProjectionRepositoryShould
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
         repository().removeIdSetFunction(ProjectCreated.class);
-        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out = repository().getIdSetFunction(ProjectCreated.class);
+        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out =
+                repository().getIdSetFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());
     }
 
+    @Test
+    public void convert_null_timestamp_to_default() {
+        final Timestamp timestamp = Timestamps2.getCurrentTime();
+        assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
+        assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
+    }
+
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
-        final ManualCatchupProjectionRepository repo = new ManualCatchupProjectionRepository(boundedContext);
+        final ManualCatchupProjectionRepository repo =
+                new ManualCatchupProjectionRepository(boundedContext);
         repo.initStorage(InMemoryStorageFactory.getInstance());
         return repo;
     }
@@ -427,7 +438,8 @@ public class ProjectionRepositoryShould
     static class TestProjection extends Projection<ProjectId, Project> {
 
         /** The event message history we store for inspecting in delivery tests. */
-        private static final Multimap<ProjectId, Message> eventMessagesDelivered = HashMultimap.create();
+        private static final Multimap<ProjectId, Message> eventMessagesDelivered =
+                HashMultimap.create();
 
         public TestProjection(ProjectId id) {
             super(id);
@@ -467,9 +479,17 @@ public class ProjectionRepositoryShould
             incrementState(newState);
         }
 
-        /* EventContext parameter left to show that a projection subscriber can have two parameters. */
+
+        /**
+         * Handles the {@link ProjectStarted} event.
+         *
+         * @param event   the event message
+         * @param ignored this parameter is left to show that a projection subscriber
+         *                can have two parameters
+         */
         @Subscribe
-        public void on(ProjectStarted event, @SuppressWarnings("UnusedParameters") EventContext ignored) {
+        public void on(ProjectStarted event,
+                       @SuppressWarnings("UnusedParameters") EventContext ignored) {
             keep(event);
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)
@@ -528,5 +548,4 @@ public class ProjectionRepositoryShould
             // NOP
         }
     }
-
 }

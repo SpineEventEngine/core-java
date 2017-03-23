@@ -21,7 +21,6 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.server.BoundedContext;
 
 /**
  * Implementation of {@link RecordBasedRepository} that manages entities
@@ -43,11 +42,10 @@ public abstract class DefaultRecordBasedRepository<I,
     /**
      * {@inheritDoc}
      *
-     * @param boundedContext
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
-    protected DefaultRecordBasedRepository(BoundedContext boundedContext) {
-        super(boundedContext);
+    protected DefaultRecordBasedRepository() {
+        super();
         this.entityFactory = new DefaultEntityFactory<>(this);
         this.storageConverter = DefaultEntityStorageConverter.forAllFields(this);
     }
