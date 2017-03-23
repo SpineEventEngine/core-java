@@ -26,7 +26,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.storage.TenantDataOperation;
+import org.spine3.server.storage.TenantAwareOperation;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +41,7 @@ import javax.annotation.Nullable;
  * @author Alexander Yevsyukov
  */
 class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
-        extends TenantDataOperation {
+        extends TenantAwareOperation {
 
     private final AggregateRepository<I, A> repository;
     private final CommandEnvelope command;

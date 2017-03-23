@@ -30,7 +30,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.TenantDataOperation;
+import org.spine3.server.storage.TenantAwareOperation;
 
 import java.util.Iterator;
 
@@ -68,7 +68,7 @@ public class CommandStore implements AutoCloseable {
     public void store(final Command command) {
         checkNotClosed();
 
-        final TenantDataOperation op = new TenantDataOperation(command) {
+        final TenantAwareOperation op = new TenantAwareOperation(command) {
             @Override
             public void run() {
                 storage.store(command);
@@ -87,7 +87,7 @@ public class CommandStore implements AutoCloseable {
     public void store(final Command command, final Error error) {
         checkNotClosed();
 
-        final TenantDataOperation op = new TenantDataOperation(command) {
+        final TenantAwareOperation op = new TenantAwareOperation(command) {
             @Override
             public void run() {
                 storage.store(command, error);
@@ -128,7 +128,7 @@ public class CommandStore implements AutoCloseable {
     public void store(final Command command, final CommandStatus status) {
         checkNotClosed();
 
-        final TenantDataOperation op = new TenantDataOperation(command) {
+        final TenantAwareOperation op = new TenantAwareOperation(command) {
             @Override
             public void run() {
                 storage.store(command, status);
@@ -229,7 +229,7 @@ public class CommandStore implements AutoCloseable {
         }
 
         void setOk(final CommandEnvelope commandEnvelope) {
-            final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
+            final TenantAwareOperation op = new TenantAwareOperation(commandEnvelope.getCommand()) {
                 @Override
                 public void run() {
                     commandStore.setCommandStatusOk(commandEnvelope.getCommandId());
@@ -240,7 +240,7 @@ public class CommandStore implements AutoCloseable {
 
         void setToError(CommandEnvelope commandEnvelope, final Error error) {
             final Command command = commandEnvelope.getCommand();
-            final TenantDataOperation op = new TenantDataOperation(command) {
+            final TenantAwareOperation op = new TenantAwareOperation(command) {
                 @Override
                 public void run() {
                     commandStore.updateStatus(commandId(), error);
@@ -250,7 +250,7 @@ public class CommandStore implements AutoCloseable {
         }
 
         void updateCommandStatus(final CommandEnvelope commandEnvelope, final Throwable cause) {
-            final TenantDataOperation op = new TenantDataOperation(commandEnvelope.getCommand()) {
+            final TenantAwareOperation op = new TenantAwareOperation(commandEnvelope.getCommand()) {
                 @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
                 @Override
                 public void run() {

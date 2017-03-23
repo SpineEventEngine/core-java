@@ -32,7 +32,7 @@ import static org.spine3.test.Tests.newTenantUuid;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OptionalGetWithoutIsPresent") // OK for the tests. We set right before we get().
-public class TenantDataOperationShould {
+public class TenantAwareOperationShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_tenant() {
@@ -41,7 +41,7 @@ public class TenantDataOperationShould {
 
     @Test
     public void substitute_single_tenant_for_default_value() {
-        final TenantDataOperation op = createOperation(TenantId.getDefaultInstance());
+        final TenantAwareOperation op = createOperation(TenantId.getDefaultInstance());
         assertEquals(CurrentTenant.singleTenant(), op.tenantId());
     }
 
@@ -51,7 +51,7 @@ public class TenantDataOperationShould {
         CurrentTenant.set(previousTenant);
 
         final TenantId newTenant = newTenantUuid();
-        final TenantDataOperation op = createOperation(newTenant);
+        final TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction of the operation does not change the current tenant.
         assertEquals(previousTenant, CurrentTenant.get().get());
@@ -72,7 +72,7 @@ public class TenantDataOperationShould {
 
         // Create new operation.
         final TenantId newTenant = newTenantUuid();
-        final TenantDataOperation op = createOperation(newTenant);
+        final TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction did not set the tenant.
         assertFalse(CurrentTenant.get().isPresent());
@@ -91,7 +91,7 @@ public class TenantDataOperationShould {
         final TenantId tenant = newTenantUuid();
         CurrentTenant.set(tenant);
 
-        final TenantDataOperation op = createOperation();
+        final TenantAwareOperation op = createOperation();
 
         assertEquals(tenant, op.tenantId());
 
@@ -120,14 +120,14 @@ public class TenantDataOperationShould {
         return new TestOp();
     }
 
-    private static TenantId getTenantFromRun(TenantDataOperation op) {
+    private static TenantId getTenantFromRun(TenantAwareOperation op) {
         return ((TestOp)op).tenantInRun;
     }
 
     /**
      * The tenant data operation which remembers the current tenant in {@link #run()}.
      */
-    private static class TestOp extends TenantDataOperation {
+    private static class TestOp extends TenantAwareOperation {
 
         private TenantId tenantInRun;
 

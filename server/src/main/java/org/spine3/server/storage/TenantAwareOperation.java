@@ -38,7 +38,7 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Alexander Yevsyukov
  * @see #execute()
  */
-public abstract class TenantDataOperation implements Runnable {
+public abstract class TenantAwareOperation implements Runnable {
 
     private final TenantId tenantId;
 
@@ -58,7 +58,7 @@ public abstract class TenantDataOperation implements Runnable {
      * @param tenantId tenant ID or default value
      * @param commandId a command ID or {@code null}
      */
-    private TenantDataOperation(TenantId tenantId, @Nullable CommandId commandId) {
+    private TenantAwareOperation(TenantId tenantId, @Nullable CommandId commandId) {
         checkNotNull(tenantId);
         this.tenantId = isDefault(tenantId)
                         ? CurrentTenant.singleTenant()
@@ -73,7 +73,7 @@ public abstract class TenantDataOperation implements Runnable {
      * @throws IllegalStateException if there is no current {@code TenantId}
      * @see CurrentTenant#ensure()
      */
-    protected TenantDataOperation() throws IllegalStateException {
+    protected TenantAwareOperation() throws IllegalStateException {
         this(CurrentTenant.ensure(), null);
     }
 
@@ -89,7 +89,7 @@ public abstract class TenantDataOperation implements Runnable {
      *
      * @param tenantId the tenant ID or {@linkplain TenantId#getDefaultInstance() default value}
      */
-    protected TenantDataOperation(TenantId tenantId) {
+    protected TenantAwareOperation(TenantId tenantId) {
         this(tenantId, null);
     }
 
@@ -99,7 +99,7 @@ public abstract class TenantDataOperation implements Runnable {
      *
      * @param command the command from which context to obtain the tenant ID
      */
-    protected TenantDataOperation(Command command) {
+    protected TenantAwareOperation(Command command) {
         this(command.getContext().getTenantId(),
              command.getContext().getCommandId());
     }
