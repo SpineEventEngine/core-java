@@ -138,12 +138,12 @@ public class Stringifiers {
      * Obtains {@code Stringifier} for list with default delimiter for the passed list elements.
      *
      * @param elementClass the class of the list elements
-     * @param <T>          the type of the elements in the list
+     * @param <T>          the type of the elements in this list
      * @return the stringifier for the list
      */
     public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass) {
         checkNotNull(elementClass);
-        final Stringifier<List<T>> listStringifier = new ListStringifier<T>(elementClass);
+        final Stringifier<List<T>> listStringifier = new ListStringifier<>(elementClass);
         return listStringifier;
     }
 
@@ -152,7 +152,7 @@ public class Stringifiers {
      *
      * @param elementClass the class of the list elements
      * @param delimiter    the delimiter or the list elements passed via string
-     * @param <T>          the type of the elements in the list
+     * @param <T>          the type of the elements in this list
      * @return the stringifier for the list
      */
     public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
@@ -160,7 +160,7 @@ public class Stringifiers {
         checkNotNull(elementClass);
         checkNotNull(delimiter);
         final Stringifier<List<T>> listStringifier =
-                new ListStringifier<T>(elementClass, delimiter);
+                new ListStringifier<>(elementClass, delimiter);
         return listStringifier;
     }
 
