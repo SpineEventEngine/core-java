@@ -21,6 +21,7 @@
 package org.spine3.server.reflect;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -87,8 +88,77 @@ public class Property<T> {
         return nullable;
     }
 
+    public T getFor(Object source) {
+        try {
+            @SuppressWarnings("unchecked")
+            final T result = (T) getter.invoke(source);
+            return result;
+        } catch (IllegalAccessException | InvocationTargetException e) {
+            throw new IllegalArgumentException(e);
+        }
+    }
+
+    public MemoizedValue<T> memoizeFor(Object source) {
+        final T value = getFor(source);
+        final MemoizedValue<T> result = new MemoizedValue<>(this, source, value);
+        return result;
+    }
+
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
         return (Class<T>) getter.getReturnType();
+    }
+
+    public static class MemoizedValue<T> {
+
+        private final Property sourceProperty;
+        private final Object sourceObject;
+
+        @Nullable
+        private final T value;
+
+        private MemoizedValue(Property sourceProperty, Object sourceObject, @Nullable T value) {
+            this.sourceProperty = sourceProperty;
+            this.sourceObject = sourceObject;
+            this.value = value;
+        }
+
+        @Nullable
+        public T getValue() {
+            return value;
+        }
+
+        public Property getSourceProperty() {
+            return sourceProperty;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+
+            MemoizedValue<?> that = (MemoizedValue<?>) o;
+
+            if (!getSourceProperty().equals(that.getSourceProperty())) {
+                return false;
+            }
+            if (!sourceObject.equals(that.sourceObject)) {
+                return false;
+            }
+            return getValue() != null ? getValue().equals(that.getValue()) : that.getValue() ==
+                                                                             null;
+        }
+
+        @Override
+        public int hashCode() {
+            int result = getSourceProperty().hashCode();
+            result = 31 * result + sourceObject.hashCode();
+            result = 31 * result + (getValue() != null ? getValue().hashCode() : 0);
+            return result;
+        }
     }
 }
