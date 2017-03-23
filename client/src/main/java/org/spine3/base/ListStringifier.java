@@ -48,7 +48,9 @@ import static com.google.common.collect.Lists.newArrayList;
  *                                                                          .getStringifier(type);
  *
  *    // Convert to string. The converted string is result of the {@code List#toString()} method.
- *    final List<Integer> listToConvert = ...
+ *    final List<Integer> listToConvert = newArrayList(1, 2, 3);
+ *
+ *    // The result is: "1\,2\,3".
  *    final String convertedString = listStringifer.toString(listToConvert);
  *
  *    // Convert from string.
