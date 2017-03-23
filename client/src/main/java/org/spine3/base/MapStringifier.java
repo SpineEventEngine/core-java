@@ -182,9 +182,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         if (keyValue.length != 2) {
             final String exMessage =
                     "Illegal key-value format. The value should " +
-                    "be separated with a single `" +
-                    KEY_VALUE_DELIMITER +
-                    "` character.";
+                    "be separated with a single `" + KEY_VALUE_DELIMITER + "` character.";
             throw newIllegalArgumentException(exMessage);
         }
     }
