@@ -52,8 +52,10 @@ import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
+import org.spine3.server.storage.DefaultTenantRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.server.storage.TenantRepository;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -108,6 +110,9 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
      */
     private final Supplier<StorageFactory> storageFactory;
 
+    @Nullable
+    private final TenantRepository<?, ?> tenantRepository;
+
     private BoundedContext(Builder builder) {
         super();
         this.name = builder.name;
@@ -117,6 +122,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
         this.standFunnel = builder.standFunnel;
+        this.tenantRepository = builder.tenantRepository;
     }
 
     /**
@@ -174,6 +180,10 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             repository.close();
         }
         repositories.clear();
+
+        if (tenantRepository != null) {
+            tenantRepository.close();
+        }
     }
 
     private String nameForLogging() {
@@ -362,6 +372,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         private Stand stand;
         private StandUpdateDelivery standUpdateDelivery;
         private StandFunnel standFunnel;
+        private TenantRepository<?, ?> tenantRepository;
 
         /**
          * Sets the name for a new bounded context.
@@ -429,6 +440,9 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return Optional.fromNullable(commandBus);
         }
 
+        public Optional<? extends TenantRepository<?, ?>> tenantRepository() {
+            return Optional.fromNullable(tenantRepository);
+        }
 
         public Builder setEventBus(EventBus eventBus) {
             this.eventBus = checkNotNull(eventBus);
@@ -457,6 +471,15 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
+        public Builder setTenantRepository(TenantRepository<?, ?> tenantRepository) {
+            if (this.multitenant) {
+                checkNotNull(tenantRepository,
+                             "TenantRepository cannot be null in multi-tenant BoundedContext.");
+            }
+            this.tenantRepository = tenantRepository;
+            return this;
+        }
+
         public BoundedContext build() {
             if (storageFactorySupplier == null) {
                 storageFactorySupplier = StorageFactorySwitch.getInstance();
@@ -470,6 +493,11 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                         storageFactorySupplier
                 );
                 throw new IllegalStateException(errMsg);
+            }
+
+            if (multitenant && tenantRepository == null) {
+                tenantRepository = new DefaultTenantRepository();
+                tenantRepository.initStorage(storageFactory);
             }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
@@ -521,11 +549,14 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             if (commandStore == null) {
                 this.commandStore = createCommandStore(storageFactory);
             }
-            final CommandBus commandBus = CommandBus.newBuilder()
+            final CommandBus.Builder builder = CommandBus.newBuilder()
                                                     .setMultitenant(this.multitenant)
-                                                    .setCommandStore(commandStore)
-                                                    .build();
-            return commandBus;
+                                                    .setCommandStore(commandStore);
+            if (this.multitenant) {
+                builder.setTenantIndex(this.tenantRepository);
+            }
+
+            return builder.build();
         }
 
         private static EventBus createEventBus(StorageFactory storageFactory) {

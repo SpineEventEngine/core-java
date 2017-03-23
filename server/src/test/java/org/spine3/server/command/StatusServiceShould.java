@@ -23,7 +23,6 @@ package org.spine3.server.command;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
@@ -49,13 +48,11 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.Durations2.fromMinutes;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.CommandExpiredException.commandExpiredError;
-import static org.spine3.server.command.CommandScheduler.setSchedule;
 import static org.spine3.server.command.Given.Command.addTask;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.server.command.Given.Command.startProject;
@@ -163,6 +160,13 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
      */
     private void assertHasErrorStatusWithMessage(CommandEnvelope commandEnvelope,
                                                  String errorMessage) {
+        final ProcessingStatus status = getProcessingStatus(commandEnvelope);
+        assertEquals(CommandStatus.ERROR, status.getCode());
+        assertEquals(errorMessage, status.getError()
+                                         .getMessage());
+    }
+
+    private ProcessingStatus getProcessingStatus(CommandEnvelope commandEnvelope) {
         final TenantId tenantId = commandEnvelope.getCommandContext()
                                                  .getTenantId();
         final TenantAwareFunction<CommandId, ProcessingStatus> func =
@@ -173,11 +177,7 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
                         return commandStore.getStatus(checkNotNull(input));
                     }
                 };
-        final ProcessingStatus status = func.execute(commandEnvelope.getCommandId());
-
-        assertEquals(CommandStatus.ERROR, status.getCode());
-        assertEquals(errorMessage, status.getError()
-                                         .getMessage());
+        return func.execute(commandEnvelope.getCommandId());
     }
 
     @Test
@@ -198,9 +198,6 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
         assertHasErrorStatusWithMessage(envelope, throwable.getMessage());
     }
 
-    //TODO:2017-03-23:alexander.yevsyukov: Enable this test back when command rescheduling is done
-    // for all known tenants.
-    @Ignore
     @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
         final List<Command> commands = newArrayList(createProject(),
@@ -214,24 +211,17 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
                   .doRescheduleCommands();
 
         for (Command cmd : commands) {
-            final Message msg = getMessage(cmd);
-            final CommandId id = getId(cmd);
+            final CommandEnvelope envelope = CommandEnvelope.of(cmd);
+            final Message msg = envelope.getMessage();
+            final CommandId id = envelope.getCommandId();
 
             // Check the expired status error was set.
-            final ProcessingStatus status = commandStore.getStatus(id);
-            assertEquals(status.getError(), commandExpiredError(msg));
+            final ProcessingStatus status = getProcessingStatus(envelope);
+
+            assertEquals(commandExpiredError(msg), status.getError());
 
             // Check that the logging was called.
             verify(log).errorExpiredCommand(msg, id);
-        }
-    }
-
-    private void storeAsScheduled(Iterable<Command> commands,
-                                  Duration delay,
-                                  Timestamp schedulingTime) {
-        for (Command cmd : commands) {
-            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            commandStore.store(cmdWithSchedule, SCHEDULED);
         }
     }
 

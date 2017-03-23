@@ -22,6 +22,7 @@ package org.spine3.testdata;
 
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
+import org.spine3.server.storage.DefaultTenantRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
@@ -30,11 +31,10 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  *
  * @author Andrey Lavrov
  */
-
-@SuppressWarnings("UtilityClass")
 public class TestCommandBusFactory {
 
     private TestCommandBusFactory() {
+        // Prevent instantiation of this utility class.
     }
 
     /** Creates a new command bus with the {@link InMemoryStorageFactory}. */
@@ -45,8 +45,11 @@ public class TestCommandBusFactory {
     /** Creates a new command bus with the given storage factory. */
     public static CommandBus create(StorageFactory storageFactory) {
         final CommandStore store = new CommandStore(storageFactory);
+        final DefaultTenantRepository tenantRepository = new DefaultTenantRepository();
+        tenantRepository.initStorage(storageFactory);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
+                                                .setTenantIndex(tenantRepository)
                                                 .setCommandStore(store)
                                                 .build();
         return commandBus;

@@ -28,7 +28,6 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
@@ -37,6 +36,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.DefaultTenantRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -51,10 +51,8 @@ import org.spine3.testdata.Sample;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -80,10 +78,9 @@ public class AggregateCommandEndpointShould {
     public void setUp() {
         eventBus = mock(EventBus.class);
         final CommandStore commandStore = mock(CommandStore.class);
-        doReturn(emptyIterator()).when(commandStore)
-                                 .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
+                                                .setTenantIndex(new DefaultTenantRepository())
                                                 .setCommandStore(commandStore)
                                                 .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);

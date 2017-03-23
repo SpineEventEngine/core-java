@@ -40,7 +40,6 @@ import static org.spine3.time.ZoneOffsets.UTC;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class TestCommandContextFactory {
 
     private TestCommandContextFactory() {}
@@ -54,9 +53,14 @@ public class TestCommandContextFactory {
     }
 
     /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
+    public static CommandContext createCommandContext(UserId userId,
+                                                      CommandId commandId,
+                                                      Timestamp when) {
+
+        //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestCommandFactory
+
         final TenantId.Builder generatedTenantId = TenantId.newBuilder()
-                                                         .setValue(newUuid());
+                                                           .setValue(newUuid());
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setCommandId(commandId)
                                                              .setActor(userId)

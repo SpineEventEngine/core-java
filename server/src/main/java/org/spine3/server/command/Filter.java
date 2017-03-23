@@ -67,8 +67,10 @@ class Filter {
         final List<ConstraintViolation> violations = CommandValidator.getInstance()
                                                                      .validate(command);
         if (!violations.isEmpty()) {
-            final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
-            commandBus.commandStore().storeWithError(command, invalidCommand);
+            final CommandException invalidCommand =
+                    InvalidCommandException.onConstraintViolations(command, violations);
+            commandBus.commandStore()
+                      .storeWithError(command, invalidCommand);
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
             return false;
         }
@@ -76,15 +78,20 @@ class Filter {
         return true;
     }
 
-    private void reportMissingTenantId(Command command, StreamObserver<Response> responseObserver) {
-        final CommandException noTenantDefined = InvalidCommandException.onMissingTenantId(command);
+    private void reportMissingTenantId(Command command,
+                                       StreamObserver<Response> responseObserver) {
+        final CommandException noTenantDefined =
+                InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
         responseObserver.onError(Statuses.invalidArgumentWithCause(noTenantDefined));
     }
 
-    private void reportTenantIdInapplicable(Command command, StreamObserver<Response> responseObserver) {
-        final CommandException tenantIdInapplicable = InvalidCommandException.onInapplicableTenantId(command);
-        commandBus.commandStore().storeWithError(command, tenantIdInapplicable);
+    private void reportTenantIdInapplicable(Command command,
+                                            StreamObserver<Response> responseObserver) {
+        final CommandException tenantIdInapplicable =
+                InvalidCommandException.onInapplicableTenantId(command);
+        commandBus.commandStore()
+                  .storeWithError(command, tenantIdInapplicable);
         responseObserver.onError(Statuses.invalidArgumentWithCause(tenantIdInapplicable));
     }
 }

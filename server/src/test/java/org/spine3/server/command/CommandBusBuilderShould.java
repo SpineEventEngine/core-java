@@ -22,6 +22,7 @@ package org.spine3.server.command;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
 
@@ -34,6 +35,7 @@ import static org.mockito.Mockito.mock;
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ConstantConditions")
 public class CommandBusBuilderShould {
 
     private CommandStore commandStore;
@@ -72,13 +74,25 @@ public class CommandBusBuilderShould {
                                                      .setCommandStore(commandStore)
                                                      .setCommandScheduler(expectedScheduler);
 
-        assertEquals(expectedScheduler, builder.getCommandScheduler());
+        assertEquals(expectedScheduler, builder.commandScheduler()
+                                               .get());
 
         final CommandBus commandBus = builder.build();
         assertNotNull(commandBus);
 
         final CommandScheduler actualScheduler = commandBus.scheduler();
         assertEquals(expectedScheduler, actualScheduler);
+    }
+
+    @Test
+    public void allow_to_specify_failure_bus() {
+        final FailureBus expectedFailureBus = mock(FailureBus.class);
+
+        final CommandBus.Builder builder = CommandBus.newBuilder()
+                                                     .setCommandStore(commandStore)
+                                                     .setFailureBus(expectedFailureBus);
+        assertEquals(expectedFailureBus, builder.failureBus()
+                                                .get());
     }
 
     @Test

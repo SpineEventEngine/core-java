@@ -134,7 +134,7 @@ public class CommandStore implements AutoCloseable {
      * @param exception the exception occurred, which encloses {@link org.spine3.base.Error Error}
      *                  to store
      */
-    public void storeWithError(Command command, CommandException exception) {
+    void storeWithError(Command command, CommandException exception) {
         store(command, exception.getError());
     }
 
@@ -210,7 +210,7 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status to search by
      * @return commands with the given status
      */
-    public Iterator<Command> iterator(final CommandStatus status) {
+    Iterator<Command> iterator(final CommandStatus status) {
         final Func<CommandStatus, Iterator<Command>> func =
                 new Func<CommandStatus, Iterator<Command>>(this) {
             @Override
@@ -249,11 +249,11 @@ public class CommandStore implements AutoCloseable {
             this.log = log;
         }
 
-        void setOk(final CommandEnvelope commandEnvelope) {
+        void setOk(CommandEnvelope commandEnvelope) {
             commandStore.setCommandStatusOk(commandEnvelope);
         }
 
-        void setToError(final CommandEnvelope commandEnvelope, final Error error) {
+        void setToError(CommandEnvelope commandEnvelope, Error error) {
             commandStore.updateStatus(commandEnvelope, error);
         }
 

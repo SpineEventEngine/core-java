@@ -22,15 +22,20 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.storage.TenantAwareFunction;
 import org.spine3.time.Interval;
+import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
+import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
@@ -72,7 +77,25 @@ class Rescheduler {
 
     @VisibleForTesting
     void doRescheduleCommands() {
-        final Iterator<Command> commands = commandBus.commandStore().iterator(SCHEDULED);
+        final Set<TenantId> tenants = commandBus.getAllTenants();
+
+        for (TenantId tenantId : tenants) {
+            rescheduleForTenant(tenantId);
+        }
+    }
+
+    private void rescheduleForTenant(final TenantId tenantId) {
+        final TenantAwareFunction<Empty, Iterator<Command>> func =
+                new TenantAwareFunction<Empty, Iterator<Command>>(tenantId) {
+                    @Nullable
+                    @Override
+                    public Iterator<Command> apply(@Nullable Empty input) {
+                        return commandBus.commandStore()
+                                         .iterator(SCHEDULED);
+                    }
+                };
+
+        final Iterator<Command> commands = func.execute(Empty.getDefaultInstance());
         while (commands.hasNext()) {
             final Command command = commands.next();
             reschedule(command);
@@ -88,7 +111,8 @@ class Rescheduler {
             final Interval interval = between(now, timeToPost);
             final Duration newDelay = toDuration(interval);
             final Command commandUpdated = setSchedule(command, newDelay, now);
-            commandBus.scheduler().schedule(commandUpdated);
+            commandBus.scheduler()
+                      .schedule(commandUpdated);
         }
     }
 
@@ -99,9 +123,16 @@ class Rescheduler {
         return timeToPost;
     }
 
+    /**
+     * Sets the status of the expired command to error.
+     *
+     * <p>We cannot post such a command because there is no handler or dispatcher registered yet.
+     * Or, posting such a command may be undesirable from the business logic point of view.
+     *
+     * @param command the expired command
+     * @see CommandExpiredException
+     */
     private void onScheduledCommandExpired(Command command) {
-        // We cannot post this command because there is no handler/dispatcher registered yet.
-        // Also, posting it can be undesirable.
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         final Message msg = commandEnvelope.getMessage();
         final CommandId id = commandEnvelope.getCommandId();

@@ -98,17 +98,21 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         responseObserver.assertResponseOkAndCompleted();
     }
 
-    //TODO:2017-03-23:alexander.yevsyukov: Enable back when rescheduling uses TenantRepository
-    @Ignore
+    @Ignore //TODO:2017-03-23:alexander.yevsyukov: Enable back when commands are generated using TestCommandFactory.
+            // Currently TenantIds are generated for each command. Because of this we have three kept tenant.
+            // This causes Rescheduler to be called for each tenant.
     @Test
     public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
         final Duration delayPrimary = Durations2.fromMinutes(5);
         final Duration newDelayExpected = Durations2.fromMinutes(2); // = 5 - 3
-        final List<Command> commandsPrimary = newArrayList(createProject(), addTask(), startProject());
+        final List<Command> commandsPrimary = newArrayList(createProject(),
+                                                           addTask(),
+                                                           startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        commandBus.rescheduler().doRescheduleCommands();
+        commandBus.rescheduler()
+                  .doRescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());
@@ -119,8 +123,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         }
     }
 
-    //TODO:2017-03-23:alexander.yevsyukov: Enable back when the hanging bug is fixed.
-    @Ignore
     @Test
     public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
@@ -155,8 +157,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         assertNotEquals(mainThreadName, actualThreadName);
     }
 
-    //TODO:2017-03-23:alexander.yevsyukov: Enable back when rescheduling uses TenantRepository
-    @Ignore
     @Test
     public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
@@ -264,15 +264,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
                 latch.countDown();
             }
         });
-    }
-
-    private void storeAsScheduled(Iterable<Command> commands,
-                                  Duration delay,
-                                  Timestamp schedulingTime) {
-        for (Command cmd : commands) {
-            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            commandStore.store(cmdWithSchedule, SCHEDULED);
-        }
     }
 
     private static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {

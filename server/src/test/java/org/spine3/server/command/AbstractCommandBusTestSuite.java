@@ -20,6 +20,8 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
 import org.spine3.base.Command;
@@ -27,8 +29,10 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.client.CommandFactory;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureBus;
+import org.spine3.server.storage.DefaultTenantRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.CreateProject;
@@ -40,7 +44,9 @@ import org.spine3.users.TenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.spy;
+import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
+import static org.spine3.server.command.CommandScheduler.setSchedule;
 import static org.spine3.server.command.Given.Command.createProject;
 import static org.spine3.test.Tests.newTenantUuid;
 
@@ -70,11 +76,11 @@ public abstract class AbstractCommandBusTestSuite {
      *
      * @param multitenant the multi-tenancy status of the {@code CommandBus} under tests
      */
-    public AbstractCommandBusTestSuite(boolean multitenant) {
+    AbstractCommandBusTestSuite(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
-    protected static Command newCommandWithoutContext() {
+    static Command newCommandWithoutContext() {
         final Command cmd = createProject();
         final Command invalidCmd = cmd.toBuilder()
                                       .setContext(CommandContext.getDefaultInstance())
@@ -82,10 +88,11 @@ public abstract class AbstractCommandBusTestSuite {
         return invalidCmd;
     }
 
-    protected static <E extends CommandException> void checkCommandError(Throwable throwable,
-                                                                         CommandValidationError validationError,
-                                                                         Class<E> exceptionClass,
-                                                                         Command cmd) {
+    static <E extends CommandException>
+    void checkCommandError(Throwable throwable,
+                           CommandValidationError validationError,
+                           Class<E> exceptionClass,
+                           Command cmd) {
         final Throwable cause = throwable.getCause();
         assertEquals(exceptionClass, cause.getClass());
         @SuppressWarnings("unchecked")
@@ -121,6 +128,13 @@ public abstract class AbstractCommandBusTestSuite {
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         failureBus = spy(TestFailureBusFactory.create());
+        final DefaultTenantRepository tenantRepository =
+                this.multitenant
+                ? new DefaultTenantRepository()
+                : null;
+        if (tenantRepository != null) {
+            tenantRepository.initStorage(storageFactory);
+        }
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(multitenant)
                                .setCommandStore(commandStore)
@@ -129,6 +143,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .setThreadSpawnAllowed(true)
                                .setLog(log)
                                .setAutoReschedule(false)
+                               .setTenantIndex(tenantRepository)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = multitenant
@@ -144,6 +159,17 @@ public abstract class AbstractCommandBusTestSuite {
             commandBus.close();
         }
         eventBus.close();
+    }
+
+    void storeAsScheduled(Iterable<Command> commands,
+                          Duration delay,
+                          Timestamp schedulingTime) {
+        for (Command cmd : commands) {
+            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
+            // Simulate storing a tenant ID which happens in CommandBus.post().
+            commandBus.keepTenantId(CommandEnvelope.of(cmd));
+            commandStore.store(cmdWithSchedule, SCHEDULED);
+        }
     }
 
     /**

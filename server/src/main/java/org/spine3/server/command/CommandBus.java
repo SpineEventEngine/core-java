@@ -21,6 +21,7 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
@@ -30,15 +31,20 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.failure.FailureBus;
+import org.spine3.server.storage.TenantAware;
+import org.spine3.server.storage.TenantIndex;
 import org.spine3.type.CommandClass;
+import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
 
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static java.lang.String.format;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -85,12 +91,23 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     private final boolean isThreadSpawnAllowed;
 
     /**
+     * The repository for storing tenant IDs of incoming commands.
+     *
+     * <p>This field is {@code null} if the command bus is single-tenant.
+     */
+    @Nullable
+    private final TenantIndex tenandIndex;
+
+    /**
      * Creates new instance according to the passed {@link Builder}.
      */
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
         super();
         this.multitenant = builder.multitenant;
+        this.tenandIndex = this.multitenant
+                                ? builder.tenantIndex
+                                : null;
         this.commandStore = builder.commandStore;
         this.commandStatusService = commandStore.createStatusService(builder.log);
         this.scheduler = builder.commandScheduler;
@@ -98,7 +115,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.filter = new Filter(this);
         this.rescheduler = new Rescheduler(this);
-        this.failureBus = builder.getFailureBus();
+        this.failureBus = builder.failureBus;
     }
 
     /**
@@ -208,6 +225,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return;
         }
 
+        keepTenantId(commandEnvelope);
+
         if (isScheduled(command)) {
             scheduleAndStore(command, responseObserver);
             return;
@@ -244,8 +263,10 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
         final String idStr = Identifiers.idToString(commandEnvelope.getCommandId());
-        final String msg = String.format("No dispatcher found for the command (class: %s id: %s).",
-                                         commandEnvelope.getMessageClass(), idStr);
+        final String msg = format("No dispatcher found for the command (class: %s id: %s).",
+                                  commandEnvelope.getMessageClass()
+                                                 .getClassName(),
+                                  idStr);
         throw new IllegalStateException(msg);
     }
 
@@ -266,6 +287,27 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStatusService.updateCommandStatus(commandEnvelope, cause);
+        }
+    }
+
+    /**
+     * Ensures the {@code CommandBus} has a {@code TenantRepository} in multi-tenant context.
+     *
+     * @throws IllegalStateException if the repository is not set
+     */
+    TenantIndex tenantIndex() {
+        checkState(tenandIndex != null,
+                   "TenantIndex is not initialized in multi-tenant context.");
+        return tenandIndex;
+    }
+
+    @VisibleForTesting
+    void keepTenantId(CommandEnvelope commandEnvelope) {
+        if (isMultitenant()) {
+            // We expect a valid value here because the command passed the Filter.
+            final TenantId tenantId = commandEnvelope.getCommandContext()
+                                                     .getTenantId();
+            tenantIndex().keep(tenantId);
         }
     }
 
@@ -299,6 +341,14 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return (CommandDispatcherRegistry) super.registry();
     }
 
+    Set<TenantId> getAllTenants() {
+        if (isMultitenant()) {
+            final Set<TenantId> tenants = tenantIndex().getAll();
+            return tenants;
+        }
+        return ImmutableSet.of(TenantAware.getCurrentTenant(false));
+    }
+
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
@@ -317,27 +367,15 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
          */
         private CommandScheduler commandScheduler;
 
-        /**
-         * If set to {@code true}, the {@code CommandBus} will be creating instances of
-         * {@link Thread} for operation.
-         *
-         * <p>However, some runtime environments, such as Google AppEngine Standard,
-         * do not allow manual thread
-         * spawning. In this case, this flag should be set to {@code false}.
-         *
-         * <p>The default value of this flag is set upon the best guess,
-         * based on current {@link Environment}.
-         */
+        /** @see #setThreadSpawnAllowed(boolean) */
         private boolean threadSpawnAllowed = detectThreadsAllowed();
 
-        /**
-         * If set the builder will not call {@link CommandBus#rescheduleCommands()}.
-         *
-         * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
-         */
+        /** @see #setAutoReschedule(boolean) */
         private boolean autoReschedule;
 
         private FailureBus failureBus;
+
+        private TenantIndex tenantIndex;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -353,16 +391,24 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return multitenant;
         }
 
+        public boolean isThreadSpawnAllowed() {
+            return threadSpawnAllowed;
+        }
+
         public CommandStore getCommandStore() {
             return commandStore;
         }
 
-        public CommandScheduler getCommandScheduler() {
-            return commandScheduler;
+        public Optional<CommandScheduler> commandScheduler() {
+            return Optional.fromNullable(commandScheduler);
         }
 
-        public FailureBus getFailureBus() {
-            return failureBus;
+        public Optional<FailureBus> failureBus() {
+            return Optional.fromNullable(failureBus);
+        }
+
+        public Optional<TenantIndex> tenantIndex() {
+            return Optional.fromNullable(tenantIndex);
         }
 
         public Builder setMultitenant(boolean multitenant) {
@@ -388,21 +434,53 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return this;
         }
 
-        public boolean isThreadSpawnAllowed() {
-            return threadSpawnAllowed;
+        /**
+         * Sets the tenant index for the bus to build.
+         *
+         * @param tenantIndex the tenant index or
+         *                    {@code null} if the {@code CommandBus} to build is single-tenant
+         */
+        public Builder setTenantIndex(@Nullable TenantIndex tenantIndex) {
+            if (this.multitenant) {
+                checkNotNull(tenantIndex,
+                             "TenantIndex cannot be null in multi-tenant CommandBus");
+            }
+            this.tenantIndex = tenantIndex;
+            return this;
         }
 
+        /**
+         * Enables or disables creating threads for {@code CommandBus} operations.
+         *
+         * <p>If set to {@code true}, the {@code CommandBus} will be creating instances of
+         * {@link Thread} for potentially time consuming operation.
+         *
+         * <p>However, some runtime environments, such as Google AppEngine Standard,
+         * do not allow manual thread spawning. In this case, this flag should be set
+         * to {@code false}.
+         *
+         * <p>If not set explicitly, the default value of this flag is set upon the best guess,
+         * based on current {@link Environment}.
+         */
         public Builder setThreadSpawnAllowed(boolean threadSpawnAllowed) {
             this.threadSpawnAllowed = threadSpawnAllowed;
             return this;
         }
 
+        /**
+         * Sets the log for logging errors.
+         */
         @VisibleForTesting
         Builder setLog(Log log) {
             this.log = log;
             return this;
         }
 
+        /**
+         * If set the builder will not call {@link CommandBus#rescheduleCommands()}.
+         *
+         * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
+         */
         @VisibleForTesting
         Builder setAutoReschedule(boolean autoReschedule) {
             this.autoReschedule = autoReschedule;
@@ -432,6 +510,11 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             if (failureBus == null) {
                 failureBus = FailureBus.newBuilder()
                                        .build();
+            }
+
+            if (multitenant) {
+                checkState(tenantIndex != null,
+                           "TenantRepository must be set for multi-tenant CommandBus.");
             }
 
             final CommandBus commandBus = new CommandBus(this);
