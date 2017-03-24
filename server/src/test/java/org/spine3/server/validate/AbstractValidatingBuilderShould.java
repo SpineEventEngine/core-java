@@ -20,13 +20,11 @@
 
 package org.spine3.server.validate;
 
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.ConversionException;
-import org.spine3.base.MissingStringifierException;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.test.aggregate.ProjectId;
@@ -43,6 +41,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.listStringifier;
+import static org.spine3.base.Types.listTypeOf;
 
 /**
  * @author Illia Shepilov
@@ -57,16 +56,13 @@ public class AbstractValidatingBuilderShould {
     }
 
     @Test
-    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-                       "SerializableInnerClassWithNonSerializableOuterClass"})
-                       // It is OK for test method.
     public void return_converted_value() throws ConversionException {
-        final Type type = new TypeToken<List<Integer>>(){}.getType();
+        final Type type = listTypeOf(Integer.class);
         final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         final List<Integer> convertedValue =
-                validatingBuilder.getConvertedValue(type, "1");
+                validatingBuilder.getConvertedValue(type, "\"1\"");
         final List<Integer> expectedList = newArrayList(1);
         assertThat(convertedValue, is(expectedList));
     }
@@ -79,12 +75,9 @@ public class AbstractValidatingBuilderShould {
     }
 
     @Test(expected = ConversionException.class)
-    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
-                       "SerializableInnerClassWithNonSerializableOuterClass"})
-                       // It is OK for test method.
     public void throw_exception_when_string_cannot_be_converted() throws ConversionException {
         final String stringToConvert = "";
-        final Type type = new TypeToken<List<Timestamp>>(){}.getType();
+        final Type type = listTypeOf(Timestamp.class);
         final Stringifier<List<Timestamp>> stringifier = listStringifier(Timestamp.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
