@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.tenant;
 
 import org.junit.Test;
 import org.spine3.test.Tests;
@@ -31,7 +31,8 @@ import static org.spine3.test.Tests.newTenantUuid;
 /**
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("OptionalGetWithoutIsPresent") // OK for the tests. We set right before we get().
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+// OK for the tests. We set right before we get().
 public class TenantAwareOperationShould {
 
     @Test(expected = NullPointerException.class)
@@ -54,7 +55,8 @@ public class TenantAwareOperationShould {
         final TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction of the operation does not change the current tenant.
-        assertEquals(previousTenant, CurrentTenant.get().get());
+        assertEquals(previousTenant, CurrentTenant.get()
+                                                  .get());
 
         op.execute();
 
@@ -62,7 +64,8 @@ public class TenantAwareOperationShould {
         assertEquals(newTenant, getTenantFromRun(op));
 
         // Check that the current tenant is restored.
-        assertEquals(previousTenant, CurrentTenant.get().get());
+        assertEquals(previousTenant, CurrentTenant.get()
+                                                  .get());
     }
 
     @Test
@@ -75,7 +78,8 @@ public class TenantAwareOperationShould {
         final TenantAwareOperation op = createOperation(newTenant);
 
         // Check that the construction did not set the tenant.
-        assertFalse(CurrentTenant.get().isPresent());
+        assertFalse(CurrentTenant.get()
+                                 .isPresent());
 
         op.execute();
 
@@ -83,7 +87,8 @@ public class TenantAwareOperationShould {
         assertEquals(newTenant, getTenantFromRun(op));
 
         // Check that the execution cleared the current tenant.
-        assertFalse(CurrentTenant.get().isPresent());
+        assertFalse(CurrentTenant.get()
+                                 .isPresent());
     }
 
     @Test

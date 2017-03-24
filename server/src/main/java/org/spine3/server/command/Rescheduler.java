@@ -29,8 +29,8 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.storage.TenantAwareFunction;
-import org.spine3.server.storage.TenantAwareOperation;
+import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
 

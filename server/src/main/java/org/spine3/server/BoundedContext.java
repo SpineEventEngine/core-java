@@ -52,10 +52,10 @@ import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
-import org.spine3.server.storage.DefaultTenantRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
-import org.spine3.server.storage.TenantRepository;
+import org.spine3.server.tenant.DefaultTenantRepository;
+import org.spine3.server.tenant.TenantRepository;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

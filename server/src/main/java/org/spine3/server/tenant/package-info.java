@@ -18,29 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
-
-import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
-import org.spine3.users.TenantId;
-
 /**
- * Default implementation of {code TenantRepository} that stores timestamps
- * of tenant ID registration.
- *
- * @author Alexander Yevsyukov
+ * This package contains classes and interfaces for supporting multi-tenancy.
  */
-public final class DefaultTenantRepository extends TenantRepository<Timestamp,
-                                                              DefaultTenantRepository.Entity> {
 
-    public static class Entity extends TenantRepository.Entity<Timestamp> {
-        protected Entity(TenantId id) {
-            super(id);
-        }
+@ParametersAreNonnullByDefault
+package org.spine3.server.tenant;
 
-        @Override
-        public Timestamp getDefaultState() {
-            return Timestamps2.getCurrentTime();
-        }
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

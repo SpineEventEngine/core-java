@@ -18,13 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package org.spine3.server.tenant;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
+import org.spine3.server.storage.Storage;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
 
 import java.util.Iterator;

@@ -22,9 +22,9 @@ package org.spine3.testdata;
 
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.storage.DefaultTenantRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.DefaultTenantRepository;
 
 /**
  * Creates {@link org.spine3.server.command.CommandBus CommandBus}s for tests.

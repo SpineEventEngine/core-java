@@ -37,9 +37,9 @@ import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
-import org.spine3.server.storage.CommandOperation;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.tenant.CommandOperation;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;

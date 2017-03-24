@@ -30,10 +30,10 @@ import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.storage.CommandOperation;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.TenantAwareFunction;
-import org.spine3.server.storage.TenantAwareOperation;
+import org.spine3.server.tenant.CommandOperation;
+import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.server.tenant.TenantAwareOperation;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

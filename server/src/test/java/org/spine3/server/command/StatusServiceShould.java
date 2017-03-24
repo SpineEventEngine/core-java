@@ -30,7 +30,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.storage.TenantAwareFunction;
+import org.spine3.server.tenant.TenantAwareFunction;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;

@@ -26,7 +26,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.storage.TenantAwareOperation;
+import org.spine3.server.tenant.TenantAwareOperation;
 
 import javax.annotation.Nullable;
 

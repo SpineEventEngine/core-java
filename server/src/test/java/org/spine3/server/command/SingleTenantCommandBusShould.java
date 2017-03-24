@@ -28,7 +28,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.CommandValidationError.INVALID_COMMAND;
 import static org.spine3.base.CommandValidationError.TENANT_INAPPLICABLE;
 import static org.spine3.server.command.Given.Command.createProject;
-import static org.spine3.server.storage.TenantAwareOperation.isTenantSet;
+import static org.spine3.server.tenant.TenantAwareOperation.isTenantSet;
 
 /**
  * @author Alexander Yevsyukov

@@ -20,7 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.storage.TenantAware;
+import org.spine3.server.tenant.TenantAware;
 import org.spine3.users.TenantId;
 
 import java.util.Map;
