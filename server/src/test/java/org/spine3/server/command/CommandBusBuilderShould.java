@@ -42,7 +42,7 @@ public class CommandBusBuilderShould {
 
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
         commandStore = new CommandStore(storageFactory);
     }
 

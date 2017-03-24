@@ -146,7 +146,7 @@ public class ProjectionRepositoryShould
     @Before
     public void setUp() {
         initRepository();
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -364,8 +364,9 @@ public class ProjectionRepositoryShould
                       .append(event);
         // Set up repository
         final Duration duration = Durations2.seconds(10L);
-        final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        final ProjectionRepository repository = spy(
+                new ManualCatchupProjectionRepository(boundedContext, duration));
+        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         repository.catchUp();
 
         // Check bulk write
@@ -402,7 +403,7 @@ public class ProjectionRepositoryShould
         final Duration duration = Durations2.nanos(1L);
         final ProjectionRepository repository =
                 spy(new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         repository.catchUp();
 
         // Check bulk write
@@ -430,7 +431,7 @@ public class ProjectionRepositoryShould
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
-        repo.initStorage(InMemoryStorageFactory.getInstance());
+        repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         return repo;
     }
 

@@ -35,7 +35,7 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 @SuppressWarnings("UtilityClass")
 public class TestBoundedContextFactory {
 
-    private static final InMemoryStorageFactory FACTORY = InMemoryStorageFactory.getInstance();
+    private static final InMemoryStorageFactory FACTORY = InMemoryStorageFactory.getInstance(true);
 
     private TestBoundedContextFactory() {
     }

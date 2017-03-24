@@ -39,7 +39,7 @@ public class TestCommandBusFactory {
 
     /** Creates a new command bus with the {@link InMemoryStorageFactory}. */
     public static CommandBus create() {
-        return create(InMemoryStorageFactory.getInstance());
+        return create(InMemoryStorageFactory.getInstance(true));
     }
 
     /** Creates a new command bus with the given storage factory. */

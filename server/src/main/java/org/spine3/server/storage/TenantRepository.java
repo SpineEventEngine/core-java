@@ -51,6 +51,11 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         return TenantId.class;
     }
 
+    @Override
+    public void initStorage(StorageFactory factory) {
+        super.initStorage(factory.toSingleTenant());
+    }
+
     /**
      * {@inheritDoc}
      *

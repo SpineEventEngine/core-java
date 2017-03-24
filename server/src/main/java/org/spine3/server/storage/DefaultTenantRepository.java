@@ -30,7 +30,7 @@ import org.spine3.users.TenantId;
  *
  * @author Alexander Yevsyukov
  */
-public class DefaultTenantRepository extends TenantRepository<Timestamp,
+public final class DefaultTenantRepository extends TenantRepository<Timestamp,
                                                               DefaultTenantRepository.Entity> {
 
     public static class Entity extends TenantRepository.Entity<Timestamp> {

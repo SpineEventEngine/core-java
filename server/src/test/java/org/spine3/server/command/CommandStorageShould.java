@@ -71,6 +71,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ConstantConditions")
 public class CommandStorageShould {
 
     private static final Error defaultError = Error.getDefaultInstance();
@@ -83,7 +84,7 @@ public class CommandStorageShould {
     @Before
     public void setUpCommandStorageTest() {
         storage = new CommandStorage();
-        storage.initStorage(InMemoryStorageFactory.getInstance());
+        storage.initStorage(InMemoryStorageFactory.getInstance(true));
     }
 
     @After

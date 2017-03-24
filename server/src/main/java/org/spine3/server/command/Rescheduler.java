@@ -30,6 +30,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.storage.TenantAwareFunction;
+import org.spine3.server.storage.TenantAwareOperation;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
 
@@ -96,10 +97,16 @@ class Rescheduler {
                 };
 
         final Iterator<Command> commands = func.execute(Empty.getDefaultInstance());
-        while (commands.hasNext()) {
-            final Command command = commands.next();
-            reschedule(command);
-        }
+
+        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                while (commands.hasNext()) {
+                    final Command command = commands.next();
+                    reschedule(command);
+                }
+            }
+        };
     }
 
     private void reschedule(Command command) {
@@ -110,9 +117,9 @@ class Rescheduler {
         } else {
             final Interval interval = between(now, timeToPost);
             final Duration newDelay = toDuration(interval);
-            final Command commandUpdated = setSchedule(command, newDelay, now);
+            final Command updatedCommand = setSchedule(command, newDelay, now);
             commandBus.scheduler()
-                      .schedule(commandUpdated);
+                      .schedule(updatedCommand);
         }
     }
 

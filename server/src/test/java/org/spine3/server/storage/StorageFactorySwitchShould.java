@@ -64,16 +64,19 @@ public class StorageFactorySwitchShould {
 
     private StorageFactorySwitch storageFactorySwitch;
 
+    //TODO:2017-03-24:alexander.yevsyukov: Have single-tenant and multi-tenant tests
+    private final boolean multitenant = true;
+
     private final Supplier<StorageFactory> inMemorySupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.getInstance();
+            return InMemoryStorageFactory.getInstance(multitenant);
         }
     };
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.getInstance();
+        storageFactorySwitch = StorageFactorySwitch.getInstance(multitenant);
     }
 
     @After
@@ -113,7 +116,7 @@ public class StorageFactorySwitchShould {
 
         final StorageFactory custom = mock(StorageFactory.class);
 
-        init(inMemorySupplier, new Supplier<StorageFactory>() {
+        init(multitenant, inMemorySupplier, new Supplier<StorageFactory>() {
             @Override
             public StorageFactory get() {
                 return custom;
@@ -147,7 +150,7 @@ public class StorageFactorySwitchShould {
     public void cache_instance_of_StorageFactory_in_testing() {
         final Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
 
-        init(inMemorySupplier, testingSupplier);
+        init(multitenant, testingSupplier, inMemorySupplier);
 
         Environment.getInstance().setToTests();
 
@@ -161,7 +164,7 @@ public class StorageFactorySwitchShould {
     public void cache_instance_of_StorageFactory_in_production() {
         final Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
 
-        init(productionSupplier, inMemorySupplier);
+        init(multitenant, inMemorySupplier, productionSupplier);
 
         Environment.getInstance().setToProduction();
 
@@ -173,7 +176,7 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void return_itself_on_init() {
-        final StorageFactorySwitch result = init(inMemorySupplier, inMemorySupplier);
+        final StorageFactorySwitch result = init(multitenant, inMemorySupplier, inMemorySupplier);
         assertSame(storageFactorySwitch, result);
     }
 }

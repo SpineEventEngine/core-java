@@ -24,6 +24,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -80,11 +81,17 @@ public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+    private StorageFactory storageFactory;
 
-    private final BoundedContext boundedContext = newBoundedContext();
+    private BoundedContext boundedContext;
 
     private boolean handlersRegistered = false;
+
+    @Before
+    public void setUp() {
+        boundedContext = newBoundedContext();
+        storageFactory = InMemoryStorageFactory.getInstance(boundedContext.isMultitenant());
+    }
 
     @After
     public void tearDown() throws Exception {
@@ -97,7 +104,7 @@ public class BoundedContextShould {
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(storageFactory);
         boundedContext.register(repository);
         boundedContext.getEventBus().register(subscriber);
         handlersRegistered = true;

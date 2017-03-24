@@ -123,7 +123,8 @@ public abstract class AbstractCommandBusTestSuite {
 
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+        final InMemoryStorageFactory storageFactory =
+                InMemoryStorageFactory.getInstance(this.multitenant);
         commandStore = spy(new CommandStore(storageFactory));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());

@@ -54,7 +54,7 @@ public class RepositoryShould {
     public void setUp() {
         boundedContext = newBoundedContext();
         repository = new TestRepo(boundedContext);
-        storageFactory = InMemoryStorageFactory.getInstance();
+        storageFactory = InMemoryStorageFactory.getInstance(boundedContext.isMultitenant());
     }
 
     //

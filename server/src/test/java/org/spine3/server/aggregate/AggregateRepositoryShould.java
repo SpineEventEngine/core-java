@@ -63,7 +63,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "ConstantConditions"})
 public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
@@ -355,7 +355,7 @@ public class AggregateRepositoryShould {
     private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(InMemoryStorageFactory.getInstance());
+            initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         }
     }
 }

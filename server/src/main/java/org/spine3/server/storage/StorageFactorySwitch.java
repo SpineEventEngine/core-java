@@ -37,18 +37,18 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * <h2>Test mode</h2>
  * <p>Under tests  this class returns {@link InMemoryStorageFactory} if
- * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
+ * a {@code Supplier} for tests was not set via {@link #init(boolean, Supplier, Supplier)}.
  *
  * <h2>Production mode</h2>
  * <p>In production mode this class obtains the instance provided by
- * the {@code Supplier} passed via {@link #init(Supplier, Supplier)}.
+ * the {@code Supplier} passed via {@link #init(boolean, Supplier, Supplier)}.
  * If the production {@code Supplier} was not initialized,
  * {@code IllegalStateException} will be thrown.
  *
  * <h2>Remembering {@code StorageFactory} obtained from suppliers</h2>
  * In both modes the reference to the {@code StorageFactory} obtained from a {@code Supplier}
  * will be stored. This means that a call to {@link Supplier#get()} method of
- * the suppliers passed via {@link #init(Supplier, Supplier)} will be made only once.
+ * the suppliers passed via {@link #init(boolean, Supplier, Supplier)} will be made only once.
  *
  * @author Alexander Yevsyukov
  * @see Environment#isTests()
@@ -64,28 +64,35 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     @Nullable
     private Supplier<StorageFactory> testsSupplier;
 
-    private StorageFactorySwitch() {
-        // Prevent construction of this singleton from outside code.
+    private final boolean multitenant;
+
+    private StorageFactorySwitch(boolean multitenant) {
+        this.multitenant = multitenant;
     }
 
     /**
      * Obtains the singleton instance.
      */
-    public static StorageFactorySwitch getInstance() {
-        return Singleton.INSTANCE.value;
+    public static StorageFactorySwitch getInstance(boolean multitenant) {
+        return multitenant
+               ? Singleton.INSTANCE.multiTenant
+               : Singleton.INSTANCE.singleTenant;
     }
 
     /**
      * Initializes the current singleton instance with the suppliers.
      *
+     *
+     * @param multitenant   the kind of switch instance to initialize
      * @param productionSupplier the supplier for the production mode
      * @param testsSupplier the supplier for the tests mode.
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
      * @return the current singleton instance
      */
-    public static StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
+    public static StorageFactorySwitch init(boolean multitenant,
+                                            Supplier<StorageFactory> productionSupplier,
                                             @Nullable Supplier<StorageFactory> testsSupplier) {
-        final StorageFactorySwitch instance = getInstance();
+        final StorageFactorySwitch instance = getInstance(multitenant);
         instance.productionSupplier = checkNotNull(productionSupplier);
         instance.testsSupplier = testsSupplier;
         return instance;
@@ -121,7 +128,8 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * Obtains {@code StorageFactory} for the current execution mode.
      *
      * @return {@code StorageFactory} instance
-     * @throws IllegalStateException if production {@code Supplier} was not set via {@link #init(Supplier, Supplier)}
+     * @throws IllegalStateException if production {@code Supplier} was not set via
+     *                               {@link #init(boolean, Supplier, Supplier)}
      */
     @Override
     public StorageFactory get() {
@@ -132,7 +140,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
         if (Environment.getInstance().isTests()) {
             storageFactory = testsSupplier != null
                              ? testsSupplier.get()
-                             : InMemoryStorageFactory.getInstance();
+                             : InMemoryStorageFactory.getInstance(multitenant);
         } else {
             if (productionSupplier == null) {
                 throw newIllegalStateException(
@@ -146,10 +154,10 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
         return storageFactory;
     }
 
+    @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private enum Singleton {
         INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final StorageFactorySwitch value = new StorageFactorySwitch();
+        private final StorageFactorySwitch singleTenant = new StorageFactorySwitch(false);
+        private final StorageFactorySwitch multiTenant = new StorageFactorySwitch(true);
     }
 }

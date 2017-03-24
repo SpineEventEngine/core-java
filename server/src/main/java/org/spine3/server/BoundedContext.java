@@ -482,7 +482,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
 
         public BoundedContext build() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.getInstance();
+                storageFactorySupplier = StorageFactorySwitch.getInstance(multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();
@@ -566,9 +566,10 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return result;
         }
 
-        private static Stand createStand(StorageFactory storageFactory) {
+        private Stand createStand(StorageFactory storageFactory) {
             final StandStorage standStorage = storageFactory.createStandStorage();
             final Stand result = Stand.newBuilder()
+                                      .setMultitenant(multitenant)
                                       .setStorage(standStorage)
                                       .build();
             return result;

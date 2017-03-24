@@ -68,7 +68,9 @@ public class AggregateCommandEndpointShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
+    /**
+     * The spy to be used when it is required to avoid problems, make tests faster and easier.
+     */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
     private EventBus eventBus;
 
@@ -125,18 +127,25 @@ public class AggregateCommandEndpointShould {
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
-        doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
-        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance())).when(storage).read(projectId);
-        doReturn(storage).when(repositorySpy).aggregateStorage();
-        doReturn(Optional.absent()).when(storage).readLifecycleFlags(projectId);
+        doReturn(0, 1)
+                .when(storage).readEventCountAfterLastSnapshot(projectId);
+        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance()))
+                .when(storage).read(projectId);
+        doReturn(storage)
+                .when(repositorySpy).aggregateStorage();
+        doReturn(Optional.absent())
+                .when(storage).readLifecycleFlags(projectId);
 
         repositorySpy.dispatch(cmd);
 
         // Load should be executed twice due to repeated dispatching.
-        verify(repositorySpy, times(2)).loadOrCreate(projectId);
+        verify(repositorySpy, times(2))
+                .loadOrCreate(projectId);
 
-        // Reading event count is executed 2 times per dispatch (so 2 * 2) plus once upon storing the state.
-        verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
+        // Reading event count is executed 2 times per dispatch (so 2 * 2)
+        // plus once upon storing the state.
+        verify(storage, times(2 * 2 + 1))
+                .readEventCountAfterLastSnapshot(projectId);
     }
 
     @Test
@@ -163,7 +172,8 @@ public class AggregateCommandEndpointShould {
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
             AggregateCommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
+        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor =
+                ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
     }
@@ -249,7 +259,7 @@ public class AggregateCommandEndpointShould {
             extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(InMemoryStorageFactory.getInstance());
+            initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         }
     }
 }

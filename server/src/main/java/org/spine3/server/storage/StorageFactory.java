@@ -75,4 +75,15 @@ public interface StorageFactory extends AutoCloseable {
      */
     <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Entity<I, ?>> projectionClass);
+
+    /**
+     * Creates a single-tenant version of the factory.
+     *
+     * <p>This method is needed for creating single-tenant storages using
+     * a multi-tenant instance of a {@code StorageFactory}.
+     *
+     * @return a single-tenant version of the factory, or {@code this}
+     *         if the factory is single-tenant
+     */
+    StorageFactory toSingleTenant();
 }

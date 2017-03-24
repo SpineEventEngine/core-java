@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
@@ -36,6 +37,7 @@ import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.storage.CommandOperation;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.CommandClass;
@@ -200,22 +202,30 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The repository loads the aggregate by this ID, or creates a new aggregate
      * if there is no aggregate with such ID.
      *
-     * @param command the command to dispatch
+     * @param envelope the envelope of the command to dispatch
      */
     @Override
-    public void dispatch(CommandEnvelope command) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this, command);
-        commandEndpoint.execute();
+    public void dispatch(final CommandEnvelope envelope) {
+        final Command command = envelope.getCommand();
+        final CommandOperation op = new CommandOperation(command) {
+            @Override
+            public void run() {
+                final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(
+                        AggregateRepository.this, envelope);
+                commandEndpoint.execute();
 
-        final Optional<A> processedAggregate = commandEndpoint.getAggregate();
-        if (!processedAggregate.isPresent()) {
-            throw new IllegalStateException("No aggregate loaded for command: " + command);
-        }
+                final Optional<A> processedAggregate = commandEndpoint.getAggregate();
+                if (!processedAggregate.isPresent()) {
+                    throw new IllegalStateException("No aggregate loaded for command: " + command);
+                }
 
-        final A aggregate = processedAggregate.get();
-        final List<Event> events = aggregate.getUncommittedEvents();
-        storeAndPostToStand(aggregate);
-        postEvents(events);
+                final A aggregate = processedAggregate.get();
+                final List<Event> events = aggregate.getUncommittedEvents();
+                storeAndPostToStand(aggregate);
+                postEvents(events);
+            }
+        };
+        op.execute();
     }
 
     private void storeAndPostToStand(A aggregate) {

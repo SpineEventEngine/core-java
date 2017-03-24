@@ -41,7 +41,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent" /* OK as we set right before get(). */)
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class BoundedContextBuilderShould {
 
     private StorageFactory storageFactory;
@@ -49,8 +49,10 @@ public class BoundedContextBuilderShould {
 
     @Before
     public void setUp() {
-        storageFactory = InMemoryStorageFactory.getInstance();
-        builder = BoundedContext.newBuilder();
+        final boolean multitenant = true;
+        storageFactory = InMemoryStorageFactory.getInstance(multitenant);
+        builder = BoundedContext.newBuilder()
+                                .setMultitenant(multitenant);
     }
 
     @After
@@ -93,14 +95,16 @@ public class BoundedContextBuilderShould {
         final CommandBus expected = TestCommandBusFactory.create(storageFactory);
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
-        assertEquals(expected, builder.commandBus().get());
+        assertEquals(expected, builder.commandBus()
+                                      .get());
     }
 
     @Test
     public void return_EventBus() {
         final EventBus expected = TestEventBusFactory.create(storageFactory);
         builder.setEventBus(expected);
-        assertEquals(expected, builder.eventBus().get());
+        assertEquals(expected, builder.eventBus()
+                                      .get());
     }
 
     @Test

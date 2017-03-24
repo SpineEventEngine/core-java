@@ -337,6 +337,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * Updates projections from the event stream obtained from {@code EventStore}.
      */
     public void catchUp() {
+        setStatus(Status.CATCHING_UP);
+
+        //TODO:2017-03-24:alexander.yevsyukov: Perform this for all tenants.
+        
         // Get the timestamp of the last event. This also ensures we have the storage.
         final Timestamp timestamp = nullToDefault(projectionStorage().readLastHandledEventTime());
         final EventStore eventStore = getBoundedContext().getEventBus()
@@ -349,7 +353,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                                                        .addAllFilter(eventFilters)
                                                        .build();
 
-        setStatus(Status.CATCHING_UP);
         eventStore.read(query, new EventStreamObserver(this));
     }
 

@@ -101,9 +101,9 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
-                TestBoundedContextFactory.newBoundedContext());
-        repo.initStorage(InMemoryStorageFactory.getInstance());
+        final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext();
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
+        repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         return repo;
     }
 
@@ -150,7 +150,7 @@ public class ProcessManagerRepositoryShould
                       });
 
         repository = new TestProcessManagerRepository(boundedContext);
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
