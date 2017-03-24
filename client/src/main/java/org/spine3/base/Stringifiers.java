@@ -125,13 +125,61 @@ public class Stringifiers {
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
                                                                Class<V> valueClass,
-                                                               String delimiter) {
+                                                               char delimiter) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
         checkNotNull(delimiter);
         final Stringifier<Map<K, V>> mapStringifier =
                 new MapStringifier<>(keyClass, valueClass, delimiter);
         return mapStringifier;
+    }
+
+    /**
+     * Obtains {@code Stringifier} for the integers values.
+     * @return the stringifier for the integer values
+     */
+    public static Stringifier<Integer> integerStringifier(){
+        final Stringifier<Integer> integerStringifier = new IntegerStringifier();
+        return integerStringifier;
+    }
+
+    /**
+     * Obtains {@code Stringifier} for the long values
+     * @return the stringifier for the long values
+     */
+    public static Stringifier<Long> longStringifier(){
+        final Stringifier<Long> integerStringifier = new LongStringifier();
+        return integerStringifier;
+    }
+
+    /**
+     * The {@code Stringifier} for the long values.
+     */
+    static class LongStringifier extends Stringifier<Long>{
+        @Override
+        protected String toString(Long obj) {
+            return Longs.stringConverter().reverse().convert(obj);
+        }
+
+        @Override
+        protected Long fromString(String s) {
+            return Longs.stringConverter().convert(s);
+        }
+    }
+
+    /**
+     * The {@code Stringifier} for the integer values.
+     */
+    static class IntegerStringifier extends Stringifier<Integer>{
+        @Override
+        protected String toString(Integer obj) {
+            return Ints.stringConverter().reverse().convert(obj);
+        }
+
+        @Override
+        protected Integer fromString(String s) {
+            return Ints.stringConverter().convert(s);
+        }
     }
 
     /**

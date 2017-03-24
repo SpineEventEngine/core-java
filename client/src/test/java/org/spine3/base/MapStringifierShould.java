@@ -43,12 +43,16 @@ public class MapStringifierShould {
 
     @Test
     public void convert_string_to_map() throws ParseException {
-        final String rawMap = "1\\:1972-01-01T10:00:20.021-05:00";
+        final String rawMap = "\"1\":\"1972-01-01T10\\:00\\:20.021-05\\:00\"," +
+                              "\"2\":\"1972-01-01T10\\:00\\:20.021-05\\:00\"";
         final Stringifier<Map<Long, Timestamp>> stringifier =
                 mapStringifier(Long.class, Timestamp.class);
         final Map<Long, Timestamp> actualMap = stringifier.fromString(rawMap);
         final Map<Long, Timestamp> expectedMap = newHashMap();
-        expectedMap.put(1L, Timestamps.parse("1972-01-01T10:00:20.021-05:00"));
+
+        final String timeToParse = "1972-01-01T10:00:20.021-05:00";
+        expectedMap.put(1L, Timestamps.parse(timeToParse));
+        expectedMap.put(2L, Timestamps.parse(timeToParse));
         assertThat(actualMap, is(expectedMap));
     }
 
@@ -63,7 +67,7 @@ public class MapStringifierShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
-        final String incorrectRawMap = "first\\:1\\,second\\:2";
+        final String incorrectRawMap = "\"first\":\"1\",\"second\":\"2\"";
         final Stringifier<Map<Integer, Integer>> stringifier =
                 mapStringifier(Integer.class, Integer.class);
         stringifier.fromString(incorrectRawMap);
@@ -72,7 +76,7 @@ public class MapStringifierShould {
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
         final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
-        stringifier.fromString("first\\:first\\:first");
+        stringifier.fromString("first\":\"first\":\"first\"");
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -83,9 +87,9 @@ public class MapStringifierShould {
 
     @Test
     public void convert_map_with_custom_delimiter() {
-        final String rawMap = "first\\:1\\|second\\:2\\|third\\:3";
+        final String rawMap = "\"first\":\"1\"|\"second\":\"2\"|\"third\":\"3\"";
         final Stringifier<Map<String, Integer>> stringifier =
-                mapStringifier(String.class, Integer.class, "|");
+                mapStringifier(String.class, Integer.class, '|');
         final Map<String, Integer> convertedMap = stringifier.fromString(rawMap);
         assertThat(convertedMap, is(createTestMap()));
     }
@@ -100,13 +104,32 @@ public class MapStringifierShould {
         assertEquals(mapToConvert, actualMap);
     }
 
+    @Test
+    public void convert_string_which_contains_delimiter_in_content_to_map(){
+        final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\",\"2\\:\":\"two\"";
+        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                             String.class);
+        final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
+
+        assertEquals(actualMap.get("1\"\""), "one,");
+        assertEquals(actualMap.get("2:"), "two");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_key_value_are_incorrect(){
+        final String stringToConvert = "1:2";
+        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                             String.class);
+        stringifier.fromString(stringToConvert);
+    }
+
     private static String convertMapToString(Map<String, Integer> mapToConvert) {
         final Escaper escaper = Escapers.builder()
                                         .addEscape(' ', "")
-                                        .addEscape('{', "")
-                                        .addEscape('}', "")
-                                        .addEscape('=', "\\:")
-                                        .addEscape(',', "\\,")
+                                        .addEscape('{', "\"")
+                                        .addEscape('}', "\"")
+                                        .addEscape('=', "\":\"")
+                                        .addEscape(',', "\",\"")
                                         .build();
         return escaper.escape(mapToConvert.toString());
     }
