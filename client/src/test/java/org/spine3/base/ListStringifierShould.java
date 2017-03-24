@@ -43,13 +43,12 @@ public class ListStringifierShould {
 
     @Test
     public void convert_string_to_list_of_strings() {
-        final String stringToConvert = "1\\,2\\,3\\,4\\,5";
+        final String stringToConvert = "\"1\",\"2\",\"3\",\"4\",\"5\"";
         final List<String> actualList = listStringifier(String.class).reverse()
                                                                      .convert(stringToConvert);
         assertNotNull(actualList);
 
-        final List<String> expectedList = Arrays.asList(
-                stringToConvert.split(Pattern.quote("\\,")));
+        final List<String> expectedList = Arrays.asList(unquote(stringToConvert).split((",")));
         assertThat(actualList, is(expectedList));
     }
 
@@ -57,21 +56,20 @@ public class ListStringifierShould {
     public void convert_list_of_strings_to_string() {
         final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
         final String actual = listStringifier(String.class).convert(listToConvert);
-        assertEquals(convertListToString(listToConvert), actual);
+        assertEquals(escapeString(listToConvert.toString()), actual);
     }
 
     @Test
     public void convert_list_of_integers_to_string() {
         final List<Integer> listToConvert = newArrayList(1, 2, 3, 4, 5);
         final String actual = listStringifier(Integer.class).convert(listToConvert);
-        assertEquals(convertListToString(listToConvert), actual);
+        assertEquals(escapeString(listToConvert.toString()), actual);
     }
 
     @Test
     public void convert_string_to_list_of_integers() {
-        final String stringToConvert = "1\\|2\\|3\\|4\\|5";
-        final String delimiter = "|";
-        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, delimiter);
+        final String stringToConvert = "\"1\"|\"2\"|\"3\"|\"4\"|\"5\"";
+        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, '|');
         final List<Integer> actualList = stringifier.fromString(stringToConvert);
         assertNotNull(actualList);
 
@@ -86,13 +84,19 @@ public class ListStringifierShould {
                                          .convert(stringToConvert);
     }
 
-    private static String convertListToString(List<?> listToConvert) {
+    private static String unquote(CharSequence stringToUnescape) {
+        return Pattern.compile("\"")
+                      .matcher(stringToUnescape)
+                      .replaceAll("");
+    }
+
+    private static String escapeString(String stringToEscape) {
         final Escaper escaper = Escapers.builder()
                                         .addEscape(' ', "")
-                                        .addEscape('[', "")
-                                        .addEscape(']', "")
-                                        .addEscape(',', "\\,")
+                                        .addEscape('[', "\"")
+                                        .addEscape(']', "\"")
+                                        .addEscape(',', "\",\"")
                                         .build();
-        return escaper.escape(listToConvert.toString());
+        return escaper.escape(stringToEscape);
     }
 }

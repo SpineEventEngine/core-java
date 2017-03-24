@@ -26,6 +26,7 @@ import com.google.common.primitives.Longs;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.StringifierRegistry.getStringifier;
@@ -153,6 +154,47 @@ public class Stringifiers {
     }
 
     /**
+     * Obtains {@code Stringifier} for list with default delimiter for the passed list elements.
+     *
+     * @param elementClass the class of the list elements
+     * @param <T>          the type of the elements in this list
+     * @return the stringifier for the list
+     */
+    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass) {
+        checkNotNull(elementClass);
+        final Stringifier<List<T>> listStringifier = new ListStringifier<>(elementClass);
+        return listStringifier;
+    }
+
+    /**
+     * Obtains {@code Stringifier} for list with custom delimiter for the passed list elements.
+     *
+     * @param elementClass the class of the list elements
+     * @param delimiter    the delimiter or the list elements passed via string
+     * @param <T>          the type of the elements in this list
+     * @return the stringifier for the list
+     */
+    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
+                                                           char delimiter) {
+        checkNotNull(elementClass);
+        checkNotNull(delimiter);
+        final Stringifier<List<T>> listStringifier =
+                new ListStringifier<>(elementClass, delimiter);
+        return listStringifier;
+    }
+
+    static String unquote(String value) {
+        final String unquotedValue = Pattern.compile("\\\\")
+                                            .matcher(value.substring(2, value.length() - 2))
+                                            .replaceAll("");
+        return unquotedValue;
+    }
+
+    static boolean isQuote(char character) {
+        return character == '"';
+    }
+
+    /**
      * The {@code Stringifier} for the long values.
      */
     static class LongStringifier extends Stringifier<Long>{
@@ -183,36 +225,6 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for list with default delimiter for the passed list elements.
-     *
-     * @param elementClass the class of the list elements
-     * @param <T>          the type of the elements in this list
-     * @return the stringifier for the list
-     */
-    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass) {
-        checkNotNull(elementClass);
-        final Stringifier<List<T>> listStringifier = new ListStringifier<>(elementClass);
-        return listStringifier;
-    }
-
-    /**
-     * Obtains {@code Stringifier} for list with custom delimiter for the passed list elements.
-     *
-     * @param elementClass the class of the list elements
-     * @param delimiter    the delimiter or the list elements passed via string
-     * @param <T>          the type of the elements in this list
-     * @return the stringifier for the list
-     */
-    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
-                                                           String delimiter) {
-        checkNotNull(elementClass);
-        checkNotNull(delimiter);
-        final Stringifier<List<T>> listStringifier =
-                new ListStringifier<>(elementClass, delimiter);
-        return listStringifier;
-    }
-
-    /**
      * Converts from string to the specified type.
      *
      * @param elementToConvert string to convert
@@ -225,16 +237,6 @@ public class Stringifiers {
         checkNotNull(elementToConvert);
         checkNotNull(elementClass);
 
-        if (isInteger(elementClass)) {
-            return (I) Ints.stringConverter()
-                           .convert(elementToConvert);
-        }
-
-        if (isLong(elementClass)) {
-            return (I) Longs.stringConverter()
-                            .convert(elementToConvert);
-        }
-
         if (isString(elementClass)) {
             return (I) elementToConvert;
         }
@@ -245,13 +247,5 @@ public class Stringifiers {
 
     private static boolean isString(Class<?> aClass) {
         return String.class.equals(aClass);
-    }
-
-    private static boolean isLong(Class<?> aClass) {
-        return Long.class.equals(aClass);
-    }
-
-    private static boolean isInteger(Class<?> aClass) {
-        return Integer.class.equals(aClass);
     }
 }

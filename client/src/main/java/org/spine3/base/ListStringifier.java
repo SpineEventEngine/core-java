@@ -20,10 +20,14 @@
 
 package org.spine3.base;
 
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
+
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.base.Stringifiers.unquote;
 
 /**
  * The stringifier for the {@code List} classes.
@@ -50,7 +54,7 @@ import static com.google.common.collect.Lists.newArrayList;
  *    // Convert to string.
  *    final List<Integer> listToConvert = newArrayList(1, 2, 3);
  *
- *    // The result is: "1\,2\,3".
+ *    // The result is: \"1\",\"2\",\"3\".
  *    final String convertedString = listStringifer.toString(listToConvert);
  *
  *    // Convert from string.
@@ -63,15 +67,15 @@ import static com.google.common.collect.Lists.newArrayList;
 class ListStringifier<T> extends Stringifier<List<T>> {
 
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
-    private static final String ESCAPE_SEQUENCE = "\\";
-
-    private final Class<T> listGenericClass;
 
     /**
      * The delimiter for the passed elements in the {@code String} representation,
      * {@code DEFAULT_ELEMENT_DELIMITER} by default.
      */
-    private final String delimiter;
+    private final char delimiter;
+    private final Class<T> listGenericClass;
+    private final String elementDelimiterPattern;
+    private final Escaper escaper;
 
     /**
      * That constructor should be used when a custom delimiter is not needed.
@@ -82,8 +86,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      */
     ListStringifier(Class<T> listGenericClass) {
         super();
-        this.delimiter = ESCAPE_SEQUENCE + DEFAULT_ELEMENT_DELIMITER;
         this.listGenericClass = listGenericClass;
+        this.delimiter = DEFAULT_ELEMENT_DELIMITER;
+        escaper = createEscaper(delimiter);
+        elementDelimiterPattern = createElementDelimiterPattern(delimiter);
     }
 
     /**
@@ -93,33 +99,54 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      * @param listGenericClass the class of the list elements
      * @param delimiter        the delimiter for the passed elements via string
      */
-    ListStringifier(Class<T> listGenericClass, String delimiter) {
+    ListStringifier(Class<T> listGenericClass, char delimiter) {
         super();
         this.listGenericClass = listGenericClass;
-        this.delimiter = ESCAPE_SEQUENCE + delimiter;
+        this.delimiter = delimiter;
+        escaper = createEscaper(delimiter);
+        elementDelimiterPattern = createElementDelimiterPattern(delimiter);
+    }
+
+    private static String createElementDelimiterPattern(char delimiter) {
+        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
+                      .pattern();
     }
 
     @Override
     protected String toString(List<T> list) {
         final StringBuilder stringBuilder = new StringBuilder(0);
         for (T element : list) {
-            stringBuilder.append(element)
+            final char quote = '"';
+            stringBuilder.append(quote)
+                         .append(element)
+                         .append(quote)
                          .append(delimiter);
         }
         final int length = stringBuilder.length();
-        final String result = stringBuilder.substring(0, length-2);
+        final String result = stringBuilder.substring(0, length-1);
         return result;
     }
 
     @Override
     protected List<T> fromString(String s) {
-        final String[] elements = s.split(Pattern.quote(delimiter));
+        final String escapedString = escaper.escape(s);
+        final String[] elements = escapedString.split(elementDelimiterPattern);
 
         final List<T> result = newArrayList();
         for (String element : elements) {
-            final T convertedValue = Stringifiers.convert(element, listGenericClass);
+            final T convertedValue = Stringifiers.convert(unquote(element), listGenericClass);
             result.add(convertedValue);
         }
+        return result;
+    }
+
+    private static Escaper createEscaper(char charToEscape) {
+        final String escapedChar = "\\" + charToEscape;
+        final Escaper result = Escapers.builder()
+                                       .addEscape('\"', "\\\"")
+                                       .addEscape(':', "\\:")
+                                       .addEscape(charToEscape, escapedChar)
+                                       .build();
         return result;
     }
 }

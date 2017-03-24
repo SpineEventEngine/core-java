@@ -166,8 +166,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final String[] keyValue = bucketToConvert.split(keyValuePattern);
         checkKeyValue(keyValue);
 
-        final String key = unquote(keyValue[0]);
-        final String value = unquote(keyValue[1]);
+        final String key = Stringifiers.unquote(keyValue[0]);
+        final String value = Stringifiers.unquote(keyValue[1]);
 
         try {
             final K convertedKey = Stringifiers.convert(key, keyClass);
@@ -189,17 +189,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         }
     }
 
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static String unquote(String value) {
-        final String unquotedValue = Pattern.compile("\\\\")
-                                            .matcher(value.substring(2, value.length() - 2))
-                                            .replaceAll("");
-        return unquotedValue;
-    }
-
     private static boolean isQuotedKeyValue(String[] keyValue) {
         final String key = keyValue[0];
         final String value = keyValue[1];
@@ -211,13 +200,9 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             return false;
         }
 
-        final boolean result = isQuote(key.charAt(1)) && isQuote(key.charAt(keyLength - 1)) &&
-                               isQuote(value.charAt(1)) && isQuote(value.charAt(valueLength - 1));
+        final boolean result = Stringifiers.isQuote(key.charAt(1)) && Stringifiers.isQuote(key.charAt(keyLength - 1)) &&
+                               Stringifiers.isQuote(value.charAt(1)) && Stringifiers.isQuote(value.charAt(valueLength - 1));
         return result;
-    }
-
-    private static boolean isQuote(char character) {
-        return character == QUOTE;
     }
 
     private static Escaper createEscaper(char charToEscape) {
