@@ -54,7 +54,7 @@ import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
-import org.spine3.server.tenant.DefaultTenantRepository;
+import org.spine3.server.tenant.TenantIndex;
 import org.spine3.server.tenant.TenantRepository;
 
 import javax.annotation.CheckReturnValue;
@@ -75,7 +75,8 @@ import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
  * @author Alexander Yevsyukov
  * @author Mikhail Melnik
  */
-public final class BoundedContext extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
+public final class BoundedContext
+        extends IntegrationEventSubscriberGrpc.IntegrationEventSubscriberImplBase
         implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
@@ -111,7 +112,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
     private final Supplier<StorageFactory> storageFactory;
 
     @Nullable
-    private final TenantRepository<?, ?> tenantRepository;
+    private final TenantIndex tenantIndex;
 
     private BoundedContext(Builder builder) {
         super();
@@ -122,7 +123,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
         this.standFunnel = builder.standFunnel;
-        this.tenantRepository = builder.tenantRepository;
+        this.tenantIndex = builder.tenantIndex;
     }
 
     /**
@@ -181,8 +182,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         }
         repositories.clear();
 
-        if (tenantRepository != null) {
-            tenantRepository.close();
+        if (tenantIndex != null) {
+            tenantIndex.close();
         }
     }
 
@@ -372,7 +373,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
         private Stand stand;
         private StandUpdateDelivery standUpdateDelivery;
         private StandFunnel standFunnel;
-        private TenantRepository<?, ?> tenantRepository;
+        private TenantIndex tenantIndex;
 
         /**
          * Sets the name for a new bounded context.
@@ -440,8 +441,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return Optional.fromNullable(commandBus);
         }
 
-        public Optional<? extends TenantRepository<?, ?>> tenantRepository() {
-            return Optional.fromNullable(tenantRepository);
+        public Optional<? extends TenantIndex> tenantIndex() {
+            return Optional.fromNullable(tenantIndex);
         }
 
         public Builder setEventBus(EventBus eventBus) {
@@ -471,12 +472,12 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
             return this;
         }
 
-        public Builder setTenantRepository(TenantRepository<?, ?> tenantRepository) {
+        public Builder setTenantIndex(TenantRepository<?, ?> tenantIndex) {
             if (this.multitenant) {
-                checkNotNull(tenantRepository,
+                checkNotNull(tenantIndex,
                              "TenantRepository cannot be null in multi-tenant BoundedContext.");
             }
-            this.tenantRepository = tenantRepository;
+            this.tenantIndex = tenantIndex;
             return this;
         }
 
@@ -495,9 +496,8 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                 throw new IllegalStateException(errMsg);
             }
 
-            if (multitenant && tenantRepository == null) {
-                tenantRepository = new DefaultTenantRepository();
-                tenantRepository.initStorage(storageFactory);
+            if (multitenant && tenantIndex == null) {
+                tenantIndex = TenantIndex.Factory.createDefault(storageFactory);
             }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
@@ -553,7 +553,7 @@ public final class BoundedContext extends IntegrationEventSubscriberGrpc.Integra
                                                     .setMultitenant(this.multitenant)
                                                     .setCommandStore(commandStore);
             if (this.multitenant) {
-                builder.setTenantIndex(this.tenantRepository);
+                builder.setTenantIndex(this.tenantIndex);
             }
 
             return builder.build();

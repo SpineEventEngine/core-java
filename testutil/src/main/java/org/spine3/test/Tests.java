@@ -41,6 +41,7 @@ import java.lang.reflect.Modifier;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.abs;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -242,6 +243,11 @@ public class Tests {
      */
     public static MemoizingObserver memoizingObserver() {
         return new MemoizingObserver();
+    }
+
+    public static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {
+        final long diffSec = abs(expectedSec - actualSec);
+        assertTrue(diffSec <= maxDiffSec);
     }
 
     /**

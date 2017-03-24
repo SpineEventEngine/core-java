@@ -20,6 +20,7 @@
 
 package org.spine3.server.tenant;
 
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
 
 import java.util.Set;
@@ -29,7 +30,7 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
-public interface TenantIndex {
+public interface TenantIndex extends AutoCloseable {
 
     /**
      * Stores the passed tenant ID in the index.
@@ -40,4 +41,19 @@ public interface TenantIndex {
      * Obtains the set of all stored tenant IDs.
      */
     Set<TenantId> getAll();
+
+    class Factory {
+        private Factory() {
+            // Prevent instantiation of this utility class.
+        }
+
+        /**
+         * Creates default implementation of {@code TenantIndex}.
+         */
+        public static TenantIndex createDefault(StorageFactory storageFactory) {
+            final DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
+            tenantRepo.initStorage(storageFactory);
+            return tenantRepo;
+        }
+    }
 }

@@ -39,7 +39,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.server.storage.StorageFactorySwitch.init;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -90,11 +89,6 @@ public class StorageFactorySwitchShould {
      */
     private void clearSwitch() throws NoSuchFieldException, IllegalAccessException {
         storageFactorySwitch.reset();
-    }
-
-    @Test
-    public void have_private_parameterless_constructor() {
-        assertHasPrivateParameterlessCtor(StorageFactorySwitch.class);
     }
 
     @Test
@@ -166,7 +160,8 @@ public class StorageFactorySwitchShould {
 
         init(multitenant, inMemorySupplier, productionSupplier);
 
-        Environment.getInstance().setToProduction();
+        Environment.getInstance()
+                   .setToProduction();
 
         storageFactorySwitch.get();
         storageFactorySwitch.get();

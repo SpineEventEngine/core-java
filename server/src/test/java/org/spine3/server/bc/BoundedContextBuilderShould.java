@@ -114,8 +114,9 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void be_not_multitenant_by_default() {
-        assertFalse(builder.isMultitenant());
+    public void be_single_tenant_by_default() {
+        assertFalse(BoundedContext.newBuilder()
+                                  .isMultitenant());
     }
 
     @Test(expected = NullPointerException.class)

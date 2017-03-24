@@ -24,7 +24,7 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.tenant.DefaultTenantRepository;
+import org.spine3.server.tenant.TenantIndex;
 
 /**
  * Creates {@link org.spine3.server.command.CommandBus CommandBus}s for tests.
@@ -45,11 +45,10 @@ public class TestCommandBusFactory {
     /** Creates a new command bus with the given storage factory. */
     public static CommandBus create(StorageFactory storageFactory) {
         final CommandStore store = new CommandStore(storageFactory);
-        final DefaultTenantRepository tenantRepository = new DefaultTenantRepository();
-        tenantRepository.initStorage(storageFactory);
+        final TenantIndex tenantIndex = TenantIndex.Factory.createDefault(storageFactory);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
-                                                .setTenantIndex(tenantRepository)
+                                                .setTenantIndex(tenantIndex)
                                                 .setCommandStore(store)
                                                 .build();
         return commandBus;

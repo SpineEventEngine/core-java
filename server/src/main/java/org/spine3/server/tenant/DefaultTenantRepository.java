@@ -30,8 +30,8 @@ import org.spine3.users.TenantId;
  *
  * @author Alexander Yevsyukov
  */
-public final class DefaultTenantRepository extends TenantRepository<Timestamp,
-                                                              DefaultTenantRepository.Entity> {
+final class DefaultTenantRepository
+      extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
 
     public static class Entity extends TenantRepository.Entity<Timestamp> {
         protected Entity(TenantId id) {

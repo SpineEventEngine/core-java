@@ -33,7 +33,7 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.tenant.DefaultTenantRepository;
+import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
@@ -129,13 +129,10 @@ public abstract class AbstractCommandBusTestSuite {
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         failureBus = spy(TestFailureBusFactory.create());
-        final DefaultTenantRepository tenantRepository =
+        final TenantIndex tenantIndex =
                 this.multitenant
-                ? new DefaultTenantRepository()
+                ? TenantIndex.Factory.createDefault(storageFactory)
                 : null;
-        if (tenantRepository != null) {
-            tenantRepository.initStorage(storageFactory);
-        }
         commandBus = CommandBus.newBuilder()
                                .setMultitenant(multitenant)
                                .setCommandStore(commandStore)
@@ -144,7 +141,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .setThreadSpawnAllowed(true)
                                .setLog(log)
                                .setAutoReschedule(false)
-                               .setTenantIndex(tenantRepository)
+                               .setTenantIndex(tenantIndex)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = multitenant
