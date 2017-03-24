@@ -204,14 +204,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         return String.class.equals(aClass);
     }
 
-    private static boolean isLong(Class<?> aClass) {
-        return Long.class.equals(aClass);
-    }
-
-    private static boolean isInteger(Class<?> aClass) {
-        return Integer.class.equals(aClass);
-    }
-
     private static String unquote(String value) {
         final String unquotedValue = Pattern.compile("\\\\")
                                             .matcher(value.substring(2, value.length() - 2))
