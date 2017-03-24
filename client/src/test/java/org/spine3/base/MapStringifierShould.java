@@ -107,11 +107,20 @@ public class MapStringifierShould {
     @Test
     public void convert_string_which_contains_delimiter_in_content_to_map(){
         final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\",\"2\\:\":\"two\"";
-        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class, String.class);
+        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                             String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
 
         assertEquals(actualMap.get("1\"\""), "one,");
         assertEquals(actualMap.get("2:"), "two");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_key_value_are_incorrect(){
+        final String stringToConvert = "1:2";
+        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                             String.class);
+        stringifier.fromString(stringToConvert);
     }
 
     private static String convertMapToString(Map<String, Integer> mapToConvert) {
