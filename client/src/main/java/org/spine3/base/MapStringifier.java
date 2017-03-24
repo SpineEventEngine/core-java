@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.base.Stringifiers.isQuote;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -200,8 +201,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             return false;
         }
 
-        final boolean result = Stringifiers.isQuote(key.charAt(1)) && Stringifiers.isQuote(key.charAt(keyLength - 1)) &&
-                               Stringifiers.isQuote(value.charAt(1)) && Stringifiers.isQuote(value.charAt(valueLength - 1));
+        final boolean result = isQuote(key.charAt(1)) && isQuote(key.charAt(keyLength - 1)) &&
+                               isQuote(value.charAt(1)) && isQuote(value.charAt(valueLength - 1));
         return result;
     }
 

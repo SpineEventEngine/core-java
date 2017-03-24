@@ -79,7 +79,7 @@ public class ListStringifierShould {
 
     @Test(expected = MissingStringifierException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
-        final String stringToConvert = "{value:123456}";
+        final String stringToConvert = "\"{value:123456}\"";
         new ListStringifier<>(Task.class).reverse()
                                          .convert(stringToConvert);
     }
