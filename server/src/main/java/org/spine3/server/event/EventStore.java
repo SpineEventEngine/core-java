@@ -30,6 +30,8 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.grpc.EventStoreGrpc;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.tenant.EventOperation;
+import org.spine3.server.tenant.TenantAwareOperation;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -84,8 +86,15 @@ public abstract class EventStore implements AutoCloseable {
      *
      * @param event the record to append
      */
-    public void append(Event event) {
-        store(event);
+    public void append(final Event event) {
+        final TenantAwareOperation op = new EventOperation(event) {
+            @Override
+            public void run() {
+                store(event);
+            }
+        };
+        op.execute();
+
         logStored(event);
     }
 

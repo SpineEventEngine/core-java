@@ -20,44 +20,37 @@
 
 package org.spine3.server.tenant;
 
-import org.spine3.base.Command;
-import org.spine3.base.CommandId;
+import org.spine3.base.Event;
+import org.spine3.base.EventId;
 
 /**
- * A tenant-aware operation performed in response to a command or in relation to a command.
+ * A tenant-aware operation performed in relation to an event.
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandOperation extends TenantAwareOperation {
+public abstract class EventOperation extends TenantAwareOperation {
 
     /**
-     * The command because of which the operation is performed.
+     * The event because of which the operation is performed.
      */
-    private final Command command;
+    private final Event event;
 
     /**
-     * Creates and instance for the operation on the tenant data in
-     * response to the passed command.
+     * Creates an instance of the operation on the tenant related to the event.
      *
-     * @param command the command from which context to obtain the tenant ID
+     * @param event the event from which to obtain the tenant ID
      */
-    protected CommandOperation(Command command) {
-        super(command.getContext().getTenantId());
-        this.command = command;
+    protected EventOperation(Event event) {
+        super(event.getContext()
+                   .getCommandContext()
+                   .getTenantId());
+        this.event = event;
     }
 
     /**
-     * Obtains the ID of the command.
+     * Obtains the ID of the event.
      */
-    protected CommandId commandId() {
-        return command.getContext()
-                      .getCommandId();
-    }
-
-    /**
-     * Obtains the command related to this operation.
-     */
-    protected Command command() {
-        return command;
+    protected EventId eventId() {
+        return event.getContext().getEventId();
     }
 }
