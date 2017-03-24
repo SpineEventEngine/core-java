@@ -47,6 +47,8 @@ public class StringifierRegistry {
                             .put(Timestamp.class, Timestamps2.stringifier())
                             .put(EventId.class, Events.idStringifier())
                             .put(CommandId.class, Commands.idStringifier())
+                            .put(Integer.class, Stringifiers.integerStringifier())
+                            .put(Long.class, Stringifiers.longStringifier())
                             .build()
             )
     );
