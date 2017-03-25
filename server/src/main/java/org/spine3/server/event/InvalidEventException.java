@@ -26,7 +26,7 @@ import org.spine3.base.Error;
 import org.spine3.base.EventValidationError;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolations.ExceptionBuilder;
+import org.spine3.validate.ConstraintViolations.ExceptionFactory;
 
 import java.util.Map;
 
@@ -59,24 +59,24 @@ public class InvalidEventException extends EventException {
     public static InvalidEventException onConstraintViolations(
             Message eventMsg, Iterable<ConstraintViolation> violations) {
 
-        final ConstraintViolationExceptionBuilder helper = new ConstraintViolationExceptionBuilder(
+        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
                 eventMsg, violations);
-        return helper.buildException();
+        return helper.newException();
     }
 
     /**
      * A helper utility aimed to create an {@code InvalidEventException} to report the
      * event which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionBuilder
-                                        extends ExceptionBuilder<InvalidEventException,
-                                                                 Message,
-                                                                 EventClass,
-                                                                 EventValidationError> {
+    private static class ConstraintViolationExceptionFactory
+                                extends ExceptionFactory<InvalidEventException,
+                                                         Message,
+                                                         EventClass,
+                                                         EventValidationError> {
 
         private final EventClass eventClass;
 
-        private ConstraintViolationExceptionBuilder(Message eventMsg,
+        private ConstraintViolationExceptionFactory(Message eventMsg,
                                                     Iterable<ConstraintViolation> violations) {
             super(eventMsg, violations);
             this.eventClass = EventClass.of(eventMsg);

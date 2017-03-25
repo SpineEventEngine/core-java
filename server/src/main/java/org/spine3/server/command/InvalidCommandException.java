@@ -30,7 +30,7 @@ import org.spine3.base.Error;
 import org.spine3.type.CommandClass;
 import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolations.ExceptionBuilder;
+import org.spine3.validate.ConstraintViolations.ExceptionFactory;
 
 import java.util.Map;
 
@@ -66,9 +66,9 @@ public class InvalidCommandException extends CommandException {
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        final ConstraintViolationExceptionBuilder helper = new ConstraintViolationExceptionBuilder(
+        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
                 command, violations);
-        return helper.buildException();
+        return helper.newException();
     }
 
     /**
@@ -107,14 +107,14 @@ public class InvalidCommandException extends CommandException {
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionBuilder
-                                        extends ExceptionBuilder<InvalidCommandException,
-                                                                 Command,
-                                                                 CommandClass,
-                                                                 CommandValidationError> {
+    private static class ConstraintViolationExceptionFactory
+                                 extends ExceptionFactory<InvalidCommandException,
+                                                          Command,
+                                                          CommandClass,
+                                                          CommandValidationError> {
         private final CommandClass commandClass;
 
-        protected ConstraintViolationExceptionBuilder(Command command,
+        protected ConstraintViolationExceptionFactory(Command command,
                                                       Iterable<ConstraintViolation> violations) {
             super(command, violations);
             this.commandClass = CommandClass.of(command);

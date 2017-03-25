@@ -148,7 +148,7 @@ public class ConstraintViolations {
      * @param <R> type of an error code to use for error reporting; must be a Protobuf enum value
      */
     @Internal
-    public abstract static class ExceptionBuilder<E extends Exception,
+    public abstract static class ExceptionFactory<E extends Exception,
                                                   M extends Message,
                                                   C extends MessageClass,
                                                   R extends ProtocolMessageEnum> {
@@ -157,13 +157,13 @@ public class ConstraintViolations {
         private final M message;
 
         /**
-         * Creates an {@code ExceptionBuilder} instance for a given message and
-         * constraint violations,
+         * Creates an {@code ExceptionFactory} instance for a given message and
+         * constraint violations.
          *
          * @param message              an invalid event message
          * @param constraintViolations constraint violations for the event message
          */
-        protected ExceptionBuilder(M message,
+        protected ExceptionFactory(M message,
                                    Iterable<ConstraintViolation> constraintViolations) {
             this.constraintViolations = constraintViolations;
             this.message = message;
@@ -218,7 +218,7 @@ public class ConstraintViolations {
          * Creates an exception instance for an invalid message, which has fields that
          * violate validation constraint(s).
          */
-        public E buildException() {
+        public E newException() {
             return createException(formatExceptionMessage(), message, createError());
         }
     }
