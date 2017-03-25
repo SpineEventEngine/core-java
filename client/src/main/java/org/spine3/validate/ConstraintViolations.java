@@ -144,7 +144,7 @@ public class ConstraintViolations {
      *
      * @param <E> type of {@code Exception} to build
      * @param <M> type of the {@code Message}
-     * @param <C> type of the {@linkplain MessageClass MessageClass} of {@code |M|}.
+     * @param <C> type of the {@linkplain MessageClass} of {@code |M|}.
      * @param <R> type of an error code to use for error reporting; must be a Protobuf enum value
      */
     @Internal
