@@ -127,7 +127,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private static String createKeyValuePattern() {
-        return Pattern.compile("(?<!\\\\)\\\\" + KEY_VALUE_DELIMITER)
+        return Pattern.compile("(?<!\\\\)" + KEY_VALUE_DELIMITER)
                       .pattern();
     }
 
@@ -235,7 +235,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final String escapedChar = "\\" + charToEscape;
         final Escaper result = Escapers.builder()
                                        .addEscape('\"', "\\\"")
-                                       .addEscape(':', "\\:")
                                        .addEscape(charToEscape, escapedChar)
                                        .build();
         return result;
