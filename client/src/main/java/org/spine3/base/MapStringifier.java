@@ -223,7 +223,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             return false;
         }
 
-        boolean result = isQuote(stringToCheck.charAt(0)) &&
+        boolean result = isQuote(stringToCheck.charAt(1)) &&
                          isQuote(stringToCheck.charAt(stringLength - 1));
         return result;
     }
