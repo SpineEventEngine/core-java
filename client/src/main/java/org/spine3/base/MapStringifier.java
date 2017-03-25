@@ -192,7 +192,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private static void checkKeyValue(String[] keyValue) {
-        if (keyValue.length != 2 || !isQuotedKeyValue(keyValue)) {
+        if (keyValue.length != 2 || !isQuotedKeyValue(keyValue[0], keyValue[1])) {
             final String exMessage =
                     "Illegal key-value format. The key-value should be quoted " +
                     "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
@@ -211,23 +211,24 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         return unquotedValue;
     }
 
-    private static boolean isQuotedKeyValue(String[] keyValue) {
-        final String key = keyValue[0];
-        final String value = keyValue[1];
-
-        final int keyLength = key.length();
-        final int valueLength = value.length();
-
-        if (keyLength < 2 || valueLength < 2) {
-            return false;
-        }
-
-        final boolean result = isQuote(key.charAt(1)) && isQuote(key.charAt(keyLength - 1)) &&
-                               isQuote(value.charAt(1)) && isQuote(value.charAt(valueLength - 1));
+    private static boolean isQuotedKeyValue(CharSequence key, CharSequence value) {
+        final boolean result = isQuotedString(key) && isQuotedString(value);
         return result;
     }
 
-    private static boolean isQuote(char character) {
+    private static boolean isQuotedString(CharSequence stringToCheck) {
+        final int stringLength = stringToCheck.length();
+
+        if(stringLength<2){
+            return false;
+        }
+
+        boolean result = isQuote(stringToCheck.charAt(0)) &&
+                         isQuote(stringToCheck.charAt(stringLength - 1));
+        return result;
+    }
+
+    private static boolean isQuote(char character){
         return character == QUOTE;
     }
 
