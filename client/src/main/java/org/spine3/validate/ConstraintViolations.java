@@ -179,11 +179,22 @@ public class ConstraintViolations {
          */
         protected abstract R getErrorCode();
 
+        /**
+         * Obtains an error text to use for error reporting.
+         *
+         * <p>This text will also be used as a base for an exception message to generate.
+         */
         protected abstract String getErrorText();
 
-
+        /**
+         * Obtains the {@code Message}-specific type attributes for error reporting.
+         */
         protected abstract Map<String, Value> getMessageTypeAttribute(Message message);
 
+        /**
+         * Defines the way to create an instance of exception, basing on the source {@code Message},
+         * exception text and a generated {@code Error}.
+         */
         protected abstract E createException(String exceptionMsg, M message, Error error);
 
         private String formatExceptionMessage() {
