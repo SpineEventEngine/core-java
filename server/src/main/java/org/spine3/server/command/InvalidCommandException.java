@@ -49,7 +49,7 @@ public class InvalidCommandException extends CommandException {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MSG_VALIDATION_ERROR = "Command message does match " +
+    private static final String MSG_VALIDATION_ERROR = "Command message does not match " +
                                                        "validation constrains.";
 
     private InvalidCommandException(String messageText, Command command, Error error) {

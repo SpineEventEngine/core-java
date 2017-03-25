@@ -42,7 +42,7 @@ public class InvalidEventException extends EventException {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MSG_VALIDATION_ERROR = "Event message does match " +
+    private static final String MSG_VALIDATION_ERROR = "Event message does not match " +
                                                        "the validation constraints.";
 
     private InvalidEventException(String messageText, Message eventMsg, Error error) {
