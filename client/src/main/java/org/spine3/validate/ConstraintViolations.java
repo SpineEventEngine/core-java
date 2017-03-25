@@ -200,7 +200,7 @@ public class ConstraintViolations {
         private String formatExceptionMessage() {
             return String.format("%s. Message class: %s. " +
                                  "See Error.getValidationError() for details.",
-                          getErrorText(), getMessageClass());
+                                 getErrorText(), getMessageClass());
         }
 
         private Error createError() {

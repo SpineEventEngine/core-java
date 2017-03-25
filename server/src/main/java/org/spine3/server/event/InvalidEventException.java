@@ -103,9 +103,10 @@ public class InvalidEventException extends EventException {
         }
 
         @Override
-        protected InvalidEventException createException(String exceptionMsg, Message message,
+        protected InvalidEventException createException(String exceptionMsg,
+                                                        Message event,
                                                         Error error) {
-            return new InvalidEventException(exceptionMsg, message, error);
+            return new InvalidEventException(exceptionMsg, event, error);
         }
     }
 }

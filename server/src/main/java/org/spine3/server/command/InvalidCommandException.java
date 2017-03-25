@@ -141,9 +141,10 @@ public class InvalidCommandException extends CommandException {
         }
 
         @Override
-        protected InvalidCommandException createException(String exceptionMsg, Command message,
+        protected InvalidCommandException createException(String exceptionMsg,
+                                                          Command command,
                                                           Error error) {
-            return new InvalidCommandException(exceptionMsg, message, error);
+            return new InvalidCommandException(exceptionMsg, command, error);
         }
     }
 }
