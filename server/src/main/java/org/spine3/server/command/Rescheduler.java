@@ -107,6 +107,7 @@ class Rescheduler {
                 }
             }
         };
+        op.execute();
     }
 
     private void reschedule(Command command) {

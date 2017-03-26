@@ -61,7 +61,7 @@ import static org.spine3.test.TimeTests.Past.minutesAgo;
 
 public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
 
-    protected StatusServiceShould(boolean multitenant) {
+    StatusServiceShould(boolean multitenant) {
         super(multitenant);
     }
 
@@ -170,8 +170,7 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
         final TenantId tenantId = commandEnvelope.getCommandContext()
                                                  .getTenantId();
         final TenantAwareFunction<CommandId, ProcessingStatus> func =
-                new TenantAwareFunction<CommandId, ProcessingStatus>(
-                        tenantId) {
+                new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
                     @Override
                     public ProcessingStatus apply(@Nullable CommandId input) {
                         return commandStore.getStatus(checkNotNull(input));
@@ -218,10 +217,10 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
             // Check the expired status error was set.
             final ProcessingStatus status = getProcessingStatus(envelope);
 
-            assertEquals(commandExpiredError(msg), status.getError());
-
             // Check that the logging was called.
             verify(log).errorExpiredCommand(msg, id);
+
+            assertEquals(commandExpiredError(msg), status.getError());
         }
     }
 
