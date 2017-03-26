@@ -118,7 +118,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     @CheckReturnValue
-    public Optional<E> load(I id) {
+    public Optional<E> find(I id) {
         final RecordStorage<I> storage = recordStorage();
         final Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
@@ -136,8 +136,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      */
     @CheckReturnValue
-    protected E loadOrCreate(I id) {
-        final Optional<E> loaded = load(id);
+    protected E findOrCreate(I id) {
+        final Optional<E> loaded = find(id);
 
         if (!loaded.isPresent()) {
             final E result = create(id);
@@ -153,7 +153,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * contained within the passed {@code ids} values.
      *
      * <p>Provides a convenience wrapper around multiple invocations of
-     * {@link #load(Object)}. Descendants may optimize the execution of this
+     * {@link #find(Object)}. Descendants may optimize the execution of this
      * method, choosing the most suitable way for the particular storage engine used.
      *
      * <p>The result only contains those entities which IDs are contained inside

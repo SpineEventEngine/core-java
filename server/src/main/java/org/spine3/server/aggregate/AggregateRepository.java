@@ -335,7 +335,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @see AggregateStateRecord
      */
     @Override
-    public Optional<A> load(I id) throws IllegalStateException {
+    public Optional<A> find(I id) throws IllegalStateException {
         final Optional<LifecycleFlags> loadedFlags = aggregateStorage().readLifecycleFlags(id);
         if (loadedFlags.isPresent()) {
             final boolean isVisible = isEntityVisible().apply(loadedFlags.get());

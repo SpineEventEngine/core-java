@@ -20,10 +20,15 @@
 
 package org.spine3.server.tenant;
 
+import com.google.common.collect.ImmutableSet;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
 
 import java.util.Set;
+
+import static java.lang.String.format;
+import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.util.Exceptions.unsupported;
 
 /**
  * The index of tenant IDs in a multi-tenant application.
@@ -43,6 +48,28 @@ public interface TenantIndex extends AutoCloseable {
     Set<TenantId> getAll();
 
     class Factory {
+
+        private static final TenantIndex SINGLE_TENANT_INDEX = new TenantIndex() {
+            @Override
+            public void keep(TenantId id) {
+                final String tenantIdStr = idToString(id);
+                final String errMsg = format(
+                        "Request to keep TenantId (%s) in a single-tenant context",
+                        tenantIdStr);
+                throw unsupported(errMsg);
+            }
+
+            @Override
+            public Set<TenantId> getAll() {
+                return ImmutableSet.of(CurrentTenant.singleTenant());
+            }
+
+            @Override
+            public void close() throws Exception {
+                // Do nothing;
+            }
+        };
+
         private Factory() {
             // Prevent instantiation of this utility class.
         }
@@ -54,6 +81,13 @@ public interface TenantIndex extends AutoCloseable {
             final DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
             tenantRepo.initStorage(storageFactory);
             return tenantRepo;
+        }
+
+        /**
+         * Creates an {@code TenantIndex} to be used in single-tenant context.
+         */
+        public static TenantIndex singleTenant() {
+            return SINGLE_TENANT_INDEX;
         }
     }
 }

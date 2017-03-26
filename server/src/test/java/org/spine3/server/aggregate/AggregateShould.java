@@ -47,6 +47,7 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -65,6 +66,7 @@ import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -78,8 +80,9 @@ public class AggregateShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
+    private static final TenantId TENANT_ID = newTenantUuid();
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
-    private static final EventContext EVENT_CONTEXT = createEventContext(ID);
+    private static final EventContext EVENT_CONTEXT = createEventContext(ID, TENANT_ID);
 
     private final CreateProject createProject = Given.CommandMessage.createProject(ID);
     private final AddTask addTask = Given.CommandMessage.addTask(ID);

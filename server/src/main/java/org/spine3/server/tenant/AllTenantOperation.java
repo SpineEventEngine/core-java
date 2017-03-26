@@ -20,33 +20,41 @@
 
 package org.spine3.server.tenant;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.users.TenantId;
 
 /**
- * Default implementation of {code TenantRepository} that stores timestamps
- * of tenant ID registration.
+ * An operation which runs for all tenants registered in the passed {@link TenantIndex}.
  *
  * @author Alexander Yevsyukov
  */
-final class DefaultTenantRepository
-      extends TenantRepository<Timestamp, DefaultTenantRepository.Entity> {
+public abstract class AllTenantOperation implements Runnable {
 
-    @Override
-    protected Class<? extends Message> getEntityStateClass() {
-        return Timestamp.class;
+    private final TenantIndex tenantIndex;
+
+    /**
+     * Creates a new instance of an operation that will be {@linkplain #execute()} executed}
+     * for all tenants in the passed index.
+     */
+    protected AllTenantOperation(TenantIndex tenantIndex) {
+        this.tenantIndex = tenantIndex;
     }
 
-    public static class Entity extends TenantRepository.Entity<Timestamp> {
-        protected Entity(TenantId id) {
-            super(id);
+    /**
+     * Executes {@linkplain #run() an operation} for all tenants.
+     */
+    public void execute() {
+        for (TenantId tenantId : tenantIndex.getAll()) {
+            executeForTenant(tenantId);
         }
+    }
 
-        @Override
-        public Timestamp getDefaultState() {
-            return Timestamps2.getCurrentTime();
-        }
+    private void executeForTenant(TenantId tenantId) {
+        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                AllTenantOperation.this.run();
+            }
+        };
+        op.execute();
     }
 }

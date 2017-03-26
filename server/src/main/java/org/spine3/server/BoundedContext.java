@@ -29,6 +29,7 @@ import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
@@ -209,6 +210,20 @@ public final class BoundedContext
     @CheckReturnValue
     public boolean isMultitenant() {
         return multitenant;
+    }
+
+    /**
+     * Obtains a tenant index of this Bounded Context.
+     *
+     * <p>If the Bounded Context is single-tenant returns
+     * {@linkplain TenantIndex.Factory#singleTenant() null-object} implementation.
+     */
+    @Internal
+    public TenantIndex getTenantIndex() {
+        if (!isMultitenant()) {
+            return TenantIndex.Factory.singleTenant();
+        }
+        return tenantIndex;
     }
 
     /**

@@ -42,6 +42,7 @@ import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.tenant.AllTenantOperation;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
 
@@ -283,7 +284,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
-        final P projection = loadOrCreate(id);
+        final P projection = findOrCreate(id);
         projection.handle(eventMessage, context);
 
         final Timestamp eventTime = context.getTimestamp();
@@ -339,21 +340,40 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     public void catchUp() {
         setStatus(Status.CATCHING_UP);
 
-        //TODO:2017-03-24:alexander.yevsyukov: Perform this for all tenants.
-        
-        // Get the timestamp of the last event. This also ensures we have the storage.
-        final Timestamp timestamp = nullToDefault(projectionStorage().readLastHandledEventTime());
-        final EventStore eventStore = getBoundedContext().getEventBus()
-                                                         .getEventStore();
+        final AllTenantOperation op = new AllTenantOperation(boundedContext.getTenantIndex()) {
 
-        final Set<EventFilter> eventFilters = getEventFilters();
+            private final EventStore eventStore = getBoundedContext().getEventBus()
+                                                                     .getEventStore();
+            private final Set<EventFilter> eventFilters = getEventFilters();
 
-        final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                       .setAfter(timestamp)
-                                                       .addAllFilter(eventFilters)
-                                                       .build();
+            @Override
+            public void run() {
+                // Get the timestamp of the last event. This also ensures we have the storage.
+                final Timestamp timestamp = nullToDefault(
+                        projectionStorage().readLastHandledEventTime());
+                final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                               .setAfter(timestamp)
+                                                               .addAllFilter(eventFilters)
+                                                               .build();
 
-        eventStore.read(query, new EventStreamObserver(this));
+                eventStore.read(query, new EventStreamObserver(ProjectionRepository.this));
+            }
+        };
+        op.execute();
+
+        completeCatchUp();
+        logCatchUpComplete();
+    }
+
+    private void completeCatchUp() {
+        setOnline();
+    }
+
+    private void logCatchUpComplete() {
+        if (log().isInfoEnabled()) {
+            final Class<? extends ProjectionRepository> repositoryClass = getClass();
+            log().info("{} catch-up complete", repositoryClass.getName());
+        }
     }
 
     /**
@@ -377,10 +397,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      */
     public void setOnline() {
         setStatus(Status.ONLINE);
-    }
-
-    private void completeCatchUp() {
-        setOnline();
     }
 
     private boolean isBulkWriteInProgress() {
@@ -489,16 +505,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         public void onCompleted() {
             if (projectionRepository.isBulkWriteInProgress()) {
                 operation.complete();
-            }
-            projectionRepository.completeCatchUp();
-            logCatchUpComplete();
-        }
-
-        private void logCatchUpComplete() {
-            if (log().isInfoEnabled()) {
-                final Class<? extends ProjectionRepository> repositoryClass =
-                        projectionRepository.getClass();
-                log().info("{} catch-up complete", repositoryClass.getName());
             }
         }
     }

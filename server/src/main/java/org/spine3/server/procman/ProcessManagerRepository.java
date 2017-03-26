@@ -120,7 +120,7 @@ public abstract class ProcessManagerRepository<I,
         final CommandClass commandClass = envelope.getMessageClass();
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
-        final P manager = loadOrCreate(id);
+        final P manager = findOrCreate(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
         postEvents(events);
@@ -161,7 +161,7 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
-        final P manager = loadOrCreate(id);
+        final P manager = findOrCreate(id);
         try {
             manager.dispatchEvent(eventMessage, context);
             store(manager);
@@ -183,8 +183,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     @CheckReturnValue
-    protected P loadOrCreate(I id) {
-        final P result = super.loadOrCreate(id);
+    protected P findOrCreate(I id) {
+        final P result = super.findOrCreate(id);
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;

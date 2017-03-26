@@ -130,8 +130,10 @@ public class ProcessManagerRepositoryShould
         return procmans;
     }
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         eventBus = spy(TestEventBusFactory.create());
         boundedContext = TestBoundedContextFactory.newBoundedContext(eventBus);
 
@@ -154,9 +156,11 @@ public class ProcessManagerRepositoryShould
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         boundedContext.close();
+        super.tearDown();
     }
 
     // Tests

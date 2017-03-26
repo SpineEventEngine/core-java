@@ -37,6 +37,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.TenantId;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,15 +61,17 @@ public class Sample {
     private Sample() {
     }
 
-    public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
-        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
+    public static Event eventBy(Message producerId, Class<? extends Message> eventClass,
+                                TenantId tenantId) {
+        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId, tenantId);
         final Message eventMessage = messageOfType(eventClass);
         final Event event = Events.createEvent(eventMessage, eventContext);
         return event;
     }
 
-    public static Event eventBy(Message producerId, Message eventMessage) {
-        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
+    public static Event eventBy(Message producerId, Message eventMessage,
+                                TenantId tenantId) {
+        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId, tenantId);
         final Event event = Events.createEvent(eventMessage, eventContext);
         return event;
     }

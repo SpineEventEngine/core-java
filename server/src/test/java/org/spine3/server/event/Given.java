@@ -44,6 +44,7 @@ import org.spine3.test.event.user.permission.PermissionGrantedEvent;
 import org.spine3.test.event.user.permission.PermissionRevokedEvent;
 import org.spine3.test.event.user.sharing.SharingRequestApproved;
 import org.spine3.time.ZoneOffset;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
@@ -51,6 +52,7 @@ import javax.annotation.Nullable;
 import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.EventTests.newEvent;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 /**
@@ -148,6 +150,7 @@ public class Given {
     public static class AnEvent {
 
         private static final ProjectId PROJECT_ID = newProjectId();
+        private static final TenantId TENANT_ID = newTenantUuid();
 
         private AnEvent() {}
 
@@ -157,12 +160,12 @@ public class Given {
 
         public static Event projectStarted() {
             final ProjectStarted msg = EventMessage.projectStarted();
-            final Event event = createEvent(msg, createEventContext(msg.getProjectId()));
+            final Event event = createEvent(msg, createEventContext(msg.getProjectId(), TENANT_ID));
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            return projectCreated(projectId, createEventContext(projectId));
+            return projectCreated(projectId, createEventContext(projectId, TENANT_ID));
         }
 
         public static Event projectCreated(ProjectId projectId, EventContext eventContext) {

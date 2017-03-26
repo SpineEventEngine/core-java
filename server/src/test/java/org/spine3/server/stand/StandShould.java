@@ -936,7 +936,7 @@ public class StandShould {
                 toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.load(eq(projectId)))
+            when(projectionRepository.find(eq(projectId)))
                     .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 

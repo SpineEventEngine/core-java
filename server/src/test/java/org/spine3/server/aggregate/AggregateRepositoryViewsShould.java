@@ -77,7 +77,7 @@ public class AggregateRepositoryViewsShould {
 
     @Test
     public void load_aggregate_if_no_status_flags_set() {
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
         final SHAggregate agg = aggregate.get();
@@ -89,7 +89,7 @@ public class AggregateRepositoryViewsShould {
     public void not_load_aggregates_with_archived_status() {
         postCommand("archive");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertFalse(aggregate.isPresent());
     }
@@ -98,7 +98,7 @@ public class AggregateRepositoryViewsShould {
     public void not_load_aggregates_with_deleted_status() {
         postCommand("delete");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertFalse(aggregate.isPresent());
     }

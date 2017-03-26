@@ -68,7 +68,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
      */
     @Override
     public void keep(TenantId id) {
-        final Optional<E> optional = load(id);
+        final Optional<E> optional = find(id);
         if (!optional.isPresent()) {
             final E newEntity = create(id);
             store(newEntity);

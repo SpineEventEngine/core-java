@@ -100,7 +100,7 @@ public class RepositoryShould {
         }
 
         @Override
-        public Optional<EntityWithUnsupportedId> load(Exception id) {
+        public Optional<EntityWithUnsupportedId> find(Exception id) {
             return null;
         }
 
@@ -146,11 +146,11 @@ public class RepositoryShould {
                                                               .build();
 
         @Override
-        public Optional<ProjectEntity> load(ProjectId id) {
+        public Optional<ProjectEntity> find(ProjectId id) {
             if (id.equals(troublesome)) {
                 return Optional.absent();
             }
-            return super.load(id);
+            return super.find(id);
         }
     }
 

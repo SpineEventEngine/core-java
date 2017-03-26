@@ -137,14 +137,23 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
+     * Obtains the class of the entity state.
+     *
+     * <p>The default implementation uses generic type parameter from the entity class declaration.
+     */
+    protected Class<? extends Message> getEntityStateClass() {
+        final Class<E> entityClass = getEntityClass();
+        return Entity.TypeInfo.getStateClass(entityClass);
+    }
+
+    /**
      * Returns the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository
      */
     @CheckReturnValue
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
-            final Class<E> entityClass = getEntityClass();
-            final Class<Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
+            final Class<? extends Message> stateClass = getEntityStateClass();
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -175,7 +184,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>The returned iterator does not support removal.
      *
-     * <p>Iteration through entities is performed by {@linkplain #load(Object) loading}
+     * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
      * them one by one.
      */
     @Override
@@ -323,7 +332,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         @Override
         public E next() {
             final I id = index.next();
-            final Optional<E> loaded = repository.load(id);
+            final Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
                 final String idStr = idToString(id);
                 throw newIllegalStateException("Unable to load entity with ID: %s", idStr);

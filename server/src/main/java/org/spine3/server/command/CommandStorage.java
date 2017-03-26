@@ -158,7 +158,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
     }
 
     private CommandEntity loadEntity(CommandId commandId) {
-        final Optional<CommandEntity> loaded = load(commandId);
+        final Optional<CommandEntity> loaded = find(commandId);
         if (!loaded.isPresent()) {
             final String idStr = Identifiers.idToString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);

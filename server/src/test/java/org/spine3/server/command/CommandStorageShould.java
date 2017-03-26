@@ -113,7 +113,7 @@ public class CommandStorageShould {
      ****************************/
 
     private Optional<CommandRecord> read(CommandId commandId) {
-        final Optional<CommandEntity> entity = storage.load(commandId);
+        final Optional<CommandEntity> entity = storage.find(commandId);
         if (entity.isPresent()) {
             return Optional.of(entity.get()
                                      .getState());
