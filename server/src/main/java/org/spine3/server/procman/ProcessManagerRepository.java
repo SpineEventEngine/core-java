@@ -76,7 +76,7 @@ public abstract class ProcessManagerRepository<I,
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
-        super(boundedContext, EventDispatchingRepository.<I>producerFromFirstMessageField());
+        super(EventDispatchingRepository.<I>producerFromFirstMessageField());
         this.boundedContext = boundedContext;
     }
 

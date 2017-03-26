@@ -37,6 +37,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.FailureContext;
 import org.spine3.base.Failures;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
 import org.spine3.type.TypeName;
@@ -64,6 +65,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.CommandRecords.newRecordBuilder;
 import static org.spine3.server.command.CommandRecords.toCommandIterator;
 import static org.spine3.server.command.Given.Command.createProject;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -72,7 +74,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ConstantConditions")
-public class CommandStorageShould {
+public class CommandStorageShould extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
@@ -83,6 +85,7 @@ public class CommandStorageShould {
 
     @Before
     public void setUpCommandStorageTest() {
+        setCurrentTenant(newTenantUuid());
         storage = new CommandStorage();
         storage.initStorage(InMemoryStorageFactory.getInstance(true));
     }
@@ -90,6 +93,7 @@ public class CommandStorageShould {
     @After
     public void tearDownCommandStorageTest() throws Exception {
         storage.close();
+        clearCurrentTenant();
     }
 
     private static CommandRecord newStorageRecord() {

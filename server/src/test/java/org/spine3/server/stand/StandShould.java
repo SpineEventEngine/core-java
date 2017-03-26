@@ -31,6 +31,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
@@ -52,6 +53,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
@@ -100,18 +102,30 @@ import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
  * @author Dmytro Dashenkov
  */
 //It's OK for a test.
-@SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public class StandShould {
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+public class StandShould extends TenantAwareTest {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
-    //TODO:2017-03-24:alexander.yevsyukov: Have multitenant and single-tenant tests.
-    private final boolean multitenant = true;
+    private boolean multitenant;
+
+    protected void setMultitenant(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    protected boolean isMultitenant() {
+        return multitenant;
+    }
+
+    @Before
+    public void setUp() {
+        setMultitenant(false);
+    }
 
     @Test
     public void initialize_with_empty_builder() {
         final Stand.Builder builder = Stand.newBuilder()
-                                           .setMultitenant(multitenant);
+                                           .setMultitenant(isMultitenant());
         final Stand stand = builder.build();
 
         assertNotNull(stand);
@@ -126,7 +140,7 @@ public class StandShould {
     @Test
     public void register_projection_repositories() {
         final Stand stand = Stand.newBuilder()
-                                 .setMultitenant(multitenant)
+                                 .setMultitenant(isMultitenant())
                                  .build();
         final BoundedContext boundedContext = newBoundedContext(stand);
 
@@ -198,6 +212,7 @@ public class StandShould {
         verify(executor, times(1)).execute(any(Runnable.class));
     }
 
+    @SuppressWarnings("OverlyCoupledMethod")
     @Test
     public void operate_with_storage_provided_through_builder() {
         final StandStorage standStorageMock = mock(StandStorage.class);

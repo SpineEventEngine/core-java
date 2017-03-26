@@ -146,7 +146,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     protected ProjectionRepository(BoundedContext boundedContext,
                                    boolean catchUpAfterStorageInit,
                                    Duration catchUpMaxDuration) {
-        super(boundedContext, EventDispatchingRepository.<I>producerFromContext());
+        super(EventDispatchingRepository.<I>producerFromContext());
         this.boundedContext = boundedContext;
         this.standFunnel = boundedContext.getStandFunnel();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;

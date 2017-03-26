@@ -24,7 +24,6 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.entity.idfunc.Producers;
 import org.spine3.server.tenant.EventOperation;
@@ -51,11 +50,9 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Creates new repository instance.
      *
-     * @param boundedContext the {@code BoundedContext} in which the repository works
      * @param defaultFunction the default function for getting an target entity IDs
      */
-    protected EventDispatchingRepository(BoundedContext boundedContext,
-                                         IdSetEventFunction<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(IdSetEventFunction<I, Message> defaultFunction) {
         super();
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
     }
