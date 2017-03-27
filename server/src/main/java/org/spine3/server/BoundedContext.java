@@ -84,8 +84,8 @@ public final class BoundedContext
     public static final String DEFAULT_NAME = "Main";
 
     /**
-     * The name of the bounded context, which is used to distinguish the context in an application with
-     * several bounded contexts.
+     * The name of the bounded context, which is used to distinguish the context in an application
+     * with several bounded contexts.
      */
     private final String name;
 
@@ -196,7 +196,8 @@ public final class BoundedContext
      * Obtains a name of the bounded context.
      *
      * <p>The name allows to identify a bounded context if a multi-context application.
-     * If the name was not defined, during the building process, the context would get {@link #DEFAULT_NAME}.
+     * If the name was not defined, during the building process, the context would get
+     * {@link #DEFAULT_NAME}.
      *
      * @return the name of this {@code BoundedContext}
      */
