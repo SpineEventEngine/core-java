@@ -20,16 +20,22 @@
 package org.spine3.server.stand;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.envelope.EventEnvelope;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -99,16 +105,19 @@ public class StandFunnelShould {
                                             .setId("PRJ-001")
                                             .build();
         final Given.StandTestAggregate entity = repository.create(entityId);
+        final StringValue state = entity.getState();
+        final Any packedState = AnyPacker.pack(state);
+        final Version version = entity.getVersion();
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
-                   .update(entity);
+                   .update(entityId, packedState, version);
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
                                               .build();
         funnel.post(entity);
-        verify(stand).update(eq(entity));
+        verify(stand).update(entityId, packedState, version);
     }
 
     @SuppressWarnings("MagicNumber")
@@ -117,7 +126,8 @@ public class StandFunnelShould {
         final Stand stand = TestStandFactory.create();
         final StandUpdateDelivery delivery = spy(new StandUpdateDelivery() {
             @Override
-            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
+                                                     Stand consumer) {
                 return false;
             }
         });
@@ -128,7 +138,7 @@ public class StandFunnelShould {
         final StandFunnel standFunnel = builder.build();
         Assert.assertNotNull(standFunnel);
 
-        final Object id = new Object();
+        final Object id = Identifiers.newUuid();
         final StringValue state = StringValue.getDefaultInstance();
 
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
@@ -138,7 +148,8 @@ public class StandFunnelShould {
 
         standFunnel.post(entity);
 
-        verify(delivery).deliverNow(eq(entity), eq(Stand.class));
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity);
+        verify(delivery).deliverNow(eq(envelope), eq(Stand.class));
     }
 
     // **** Negative scenarios (unit) ****
@@ -208,7 +219,7 @@ public class StandFunnelShould {
         }
 
         // Was called as many times as there are dispatch actions.
-        verify(delivery, times(dispatchActions.length)).deliver(any(AbstractVersionableEntity.class));
+        verify(delivery, times(dispatchActions.length)).deliver(any(EntityStateEnvelope.class));
 
         if (isConcurrent) {
             try {
@@ -218,7 +229,7 @@ public class StandFunnelShould {
         }
 
         verify(stand, times(dispatchActions.length))
-                .update(any(VersionableEntity.class));
+                .update(ArgumentMatchers.any(), any(Any.class), any(Version.class));
     }
 
     private static BoundedContextAction aggregateRepositoryDispatch() {
@@ -262,7 +273,7 @@ public class StandFunnelShould {
                 repository.initStorage(InMemoryStorageFactory.getInstance());
 
                 // Dispatch an update from projection repo
-                repository.dispatch(Given.validEvent());
+                repository.dispatch(EventEnvelope.of(Given.validEvent()));
             }
         };
     }
@@ -278,7 +289,7 @@ public class StandFunnelShould {
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
-                   .update(any(VersionableEntity.class));
+                   .update(ArgumentMatchers.any(), any(Any.class), any(Version.class));
 
         final StandFunnel standFunnel = StandFunnel.newBuilder()
                                                    .setStand(stand)
@@ -328,7 +339,7 @@ public class StandFunnelShould {
         }
 
         @Override
-        protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
+        protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable, Stand consumer) {
             return false;
         }
     }

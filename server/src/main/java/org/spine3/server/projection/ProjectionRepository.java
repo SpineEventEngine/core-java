@@ -31,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.storage.EntityRecordEnvelope;
@@ -239,7 +240,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     /** {@inheritDoc} */
     @Override
-    public Set<EventClass> getEventClasses() {
+    public Set<EventClass> getMessageClasses() {
         final Class<? extends Projection> projectionClass = getEntityClass();
         final Set<EventClass> result = Projection.TypeInfo.getEventClasses(projectionClass);
         return result;
@@ -258,21 +259,26 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * <p>If there is no stored projection with the ID from the event, a new projection is created
      * and stored after it handles the passed event.
      *
-     * @param event the event to dispatch
+     * @param eventEnvelope the event to dispatch packed into an envelope
      * @see #catchUp()
      * @see Projection#handle(Message, EventContext)
      */
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `internalDispatch()`.
     @Override
-    public void dispatch(Event event) {
+    public void dispatch(EventEnvelope eventEnvelope) {
         if (!isOnline()) {
             log().trace("Ignoring event {} while repository is not in {} status",
-                        event,
+                        eventEnvelope.getOuterObject(),
                         Status.ONLINE);
             return;
         }
 
-        internalDispatch(event);
+        internalDispatch(eventEnvelope);
+    }
+
+    @VisibleForTesting
+    void dispatch(Event event) {
+        dispatch(EventEnvelope.of(event));
     }
 
     @Override
@@ -294,8 +300,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /**
      * Dispatches the passed event to projections without checking the status.
      */
-    private void internalDispatch(Event event) {
-        super.dispatch(event);
+    private void internalDispatch(EventEnvelope envelope) {
+        super.dispatch(envelope);
     }
 
     private void storeNow(P projection, Timestamp eventTime) {
@@ -353,7 +359,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      */
     private Set<EventFilter> getEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        final Set<EventClass> eventClasses = getEventClasses();
+        final Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
             final String typeName = TypeName.of(eventClass.value())
                                             .value();
@@ -442,7 +448,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         private final ProjectionRepository projectionRepository;
         private BulkWriteOperation operation;
 
-        EventStreamObserver(ProjectionRepository projectionRepository) {
+        private EventStreamObserver(ProjectionRepository projectionRepository) {
             this.projectionRepository = projectionRepository;
         }
 
@@ -469,7 +475,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 }
             }
 
-            projectionRepository.internalDispatch(event);
+            projectionRepository.internalDispatch(EventEnvelope.of(event));
         }
 
         @Override
@@ -499,12 +505,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * Implementation of the {@link BulkWriteOperation.FlushCallback FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
-    private static class PendingDataFlushTask<P extends Projection<?, ?>>
+    private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>
             implements BulkWriteOperation.FlushCallback<P> {
 
-        private final ProjectionRepository<?, P, ?> projectionRepository;
+        private final ProjectionRepository<I, P, S> projectionRepository;
 
-        private PendingDataFlushTask(ProjectionRepository<?, P, ?> projectionRepository) {
+        private PendingDataFlushTask(ProjectionRepository<I, P, S> projectionRepository) {
             this.projectionRepository = projectionRepository;
         }
 

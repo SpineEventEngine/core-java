@@ -22,7 +22,11 @@ package org.spine3.envelope;
 
 import com.google.protobuf.Message;
 import org.spine3.base.Event;
+import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.type.EventClass;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The holder of an {@code Event} which provides convenient access to its properties.
@@ -33,16 +37,21 @@ import org.spine3.base.Events;
 public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
 
     private final Message eventMessage;
+    private final EventClass eventClass;
+    private final EventContext eventContext;
 
-    private EventEnvelope(Event object) {
-        super(object);
-        this.eventMessage = Events.getMessage(object);
+    private EventEnvelope(Event event) {
+        super(event);
+        this.eventMessage = Events.getMessage(event);
+        this.eventClass = EventClass.of(this.eventMessage);
+        this.eventContext = event.getContext();
     }
 
     /**
      * Creates instance for the passed event.
      */
     public static EventEnvelope of(Event event) {
+        checkNotNull(event);
         return new EventEnvelope(event);
     }
 
@@ -52,5 +61,20 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
     @Override
     public Message getMessage() {
         return this.eventMessage;
+    }
+
+    /**
+     * Obtains the class of the event.
+     */
+    @Override
+    public EventClass getMessageClass() {
+        return this.eventClass;
+    }
+
+    /**
+     * Obtains the context of the event.
+     */
+    public EventContext getEventContext() {
+        return this.eventContext;
     }
 }

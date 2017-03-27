@@ -20,6 +20,13 @@
 
 package org.spine3.base;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.Messages.toAny;
+
 /**
  * Utility class for working with failures.
  *
@@ -37,5 +44,41 @@ public class Failures {
         return FailureId.newBuilder()
                         .setUuid(value)
                         .build();
+    }
+
+    /**
+     * Extracts the message from the passed {@code Failure} instance.
+     *
+     * @param failure a failure to extract a message from
+     * @param <M>     a type of the failure message
+     * @return an unpacked message
+     */
+    public static <M extends Message> M getMessage(Failure failure) {
+        checkNotNull(failure);
+        final M result = unpack(failure.getMessage());
+        return result;
+    }
+
+    /**
+     * Creates a new {@code Failure} instance.
+     *
+     * @param messageOrAny the failure message or {@code Any} containing the message
+     * @param command      the {@code Command}, which triggered the failure.
+     * @return created failure instance
+     */
+    public static Failure createFailure(Message messageOrAny,
+                                        Command command) {
+        checkNotNull(messageOrAny);
+        checkNotNull(command);
+
+        final Any packedFailureMessage = toAny(messageOrAny);
+        final FailureContext context = FailureContext.newBuilder()
+                                                     .setCommand(command)
+                                                     .build();
+        final Failure result = Failure.newBuilder()
+                                      .setMessage(packedFailureMessage)
+                                      .setContext(context)
+                                      .build();
+        return result;
     }
 }
