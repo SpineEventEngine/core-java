@@ -25,6 +25,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.annotations.Internal;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.reflect.Column;
 
@@ -43,13 +44,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 
 /**
+ * A utility for generating the Storage fields {@linkplain Map}.
+ *
+ * <p>All the methods of the passed {@link Entity} that fit
+ * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean getter spec</a>
+ * are considered as Storage Fields and indexed respectively.
+ *
+ * <p>When passing an instance of already known {@link Entity} type, the methods are retrieved form
+ * a cache and are not updated.
+ *
+ * <p>There are several excluded methods, which are never indexed and are <b>NOT</b> considered as
+ * Storage Fields:
+ * <ul>
+ *     <li>{@link Object#getClass()}
+ *     <li>{@link Entity#getId()}
+ *     <li>{@link Entity#getState()}
+ *     <li>{@link Entity#getDefaultState()}
+ *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags() EntityWithLifecycle#getLifecycleFlags()}
+ *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate#getBuilder()}
+ * </ul>
+ *
+ * <p>Note: if creating a getter method with a name which intersects with one of these methods'
+ * names, your getter method will also <b>NOT</b> be considered as a Storage Field.
+ *
  * @author Dmytro Dashenkov
+ * @see Column
  */
 public class StorageFields {
 
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
 
+    /**
+     * An immutable {@link java.util.Set set} of excluded methods which fit the getter pattern but
+     * are not Storage Fields.
+     */
     private static final ImmutableSet<String> EXCLUDED_METHODS =
             ImmutableSet.<String>builder()
                         .add("getId")
@@ -72,10 +101,28 @@ public class StorageFields {
     private StorageFields() {
     }
 
+    /**
+     * @return an {@link Collections#emptyMap()} with the type of the storage fields map
+     */
+    @Internal
     public static Map<String, Column.MemoizedValue<?>> empty() {
         return Collections.emptyMap();
     }
 
+    /**
+     * Generates the Storage Fields for the given {@linkplain Entity}.
+     *
+     * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
+     * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
+     * a call to this method will create an index of the passed {@linkplain Entity entity's} getters
+     * and use it in all the successive calls.
+     *
+     * @param entity an {@link Entity} to get the Storage Fields from
+     * @param <E> the type of the {@link Entity}
+     * @return a {@link Map} of the Storage Field names to their
+     * {@linkplain Column.MemoizedValue memoized values}.
+     * @see Column.MemoizedValue
+     */
     public static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue<?>> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
@@ -91,6 +138,14 @@ public class StorageFields {
         return fields;
     }
 
+    /**
+     * Generates the Storage Filed values considering the passed {@linkplain Entity entity type}
+     * indexed.
+     *
+     * @param entityType indexed type of the {@link Entity}
+     * @param entity the object which to take the values from
+     * @return a {@link Map} of the Storage Fields
+     */
     private static Map<String, Column.MemoizedValue<?>> getStorageFields(
             Class<? extends Entity> entityType,
             Entity entity) {
@@ -114,6 +169,9 @@ public class StorageFields {
         addToIndexes(entityType);
     }
 
+    /**
+     * Indexes the {@linkplain Entity entity type} for further Storage Fields retrieving.
+     */
     private static void addToIndexes(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
         try {
