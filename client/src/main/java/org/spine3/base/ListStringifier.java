@@ -146,7 +146,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     private static void checkElement(CharSequence element) {
         final boolean isQuoted = isQuotedString(element);
-        if(!isQuoted){
+        if (!isQuoted) {
             throw newIllegalArgumentException("Illegal format of the element");
         }
     }
