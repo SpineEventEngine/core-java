@@ -40,6 +40,8 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareTest;
+import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Given;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.procman.ProjectId;
@@ -86,8 +88,9 @@ public class ProcessManagerShould {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
+        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
         final CommandStore commandStore = spy(
-                new CommandStore(storageFactory)
+                new CommandStore(storageFactory, tenantIndex)
         );
 
         commandBus = spy(CommandBus.newBuilder()

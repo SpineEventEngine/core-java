@@ -44,8 +44,8 @@ public class TestCommandBusFactory {
 
     /** Creates a new command bus with the given storage factory. */
     public static CommandBus create(StorageFactory storageFactory) {
-        final CommandStore store = new CommandStore(storageFactory);
         final TenantIndex tenantIndex = TenantIndex.Factory.createDefault(storageFactory);
+        final CommandStore store = new CommandStore(storageFactory, tenantIndex);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
                                                 .setTenantIndex(tenantIndex)

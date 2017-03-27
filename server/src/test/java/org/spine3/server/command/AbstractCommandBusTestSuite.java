@@ -29,10 +29,10 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
 import org.spine3.client.CommandFactory;
-import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.CreateProject;
@@ -125,16 +125,13 @@ public abstract class AbstractCommandBusTestSuite {
     public void setUp() {
         final InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.getInstance(this.multitenant);
-        commandStore = spy(new CommandStore(storageFactory));
+        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant, storageFactory);
+        commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());
         failureBus = spy(TestFailureBusFactory.create());
-        final TenantIndex tenantIndex =
-                this.multitenant
-                ? TenantIndex.Factory.createDefault(storageFactory)
-                : null;
         commandBus = CommandBus.newBuilder()
-                               .setMultitenant(multitenant)
+                               .setMultitenant(this.multitenant)
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setFailureBus(failureBus)
@@ -144,7 +141,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .setTenantIndex(tenantIndex)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        commandFactory = multitenant
+        commandFactory = this.multitenant
                             ? TestCommandFactory.newInstance(getClass(), newTenantUuid())
                             : TestCommandFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
@@ -164,8 +161,6 @@ public abstract class AbstractCommandBusTestSuite {
                           Timestamp schedulingTime) {
         for (Command cmd : commands) {
             final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
-            // Simulate storing a tenant ID which happens in CommandBus.post().
-            commandBus.keepTenantId(CommandEnvelope.of(cmd));
             commandStore.store(cmdWithSchedule, SCHEDULED);
         }
     }

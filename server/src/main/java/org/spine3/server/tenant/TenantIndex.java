@@ -26,10 +26,6 @@ import org.spine3.users.TenantId;
 
 import java.util.Set;
 
-import static java.lang.String.format;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.util.Exceptions.unsupported;
-
 /**
  * The index of tenant IDs in a multi-tenant application.
  *
@@ -52,11 +48,7 @@ public interface TenantIndex extends AutoCloseable {
         private static final TenantIndex SINGLE_TENANT_INDEX = new TenantIndex() {
             @Override
             public void keep(TenantId id) {
-                final String tenantIdStr = idToString(id);
-                final String errMsg = format(
-                        "Request to keep TenantId (%s) in a single-tenant context",
-                        tenantIdStr);
-                throw unsupported(errMsg);
+                // Do nothing.
             }
 
             @Override

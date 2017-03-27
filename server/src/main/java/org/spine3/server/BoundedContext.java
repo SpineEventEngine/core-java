@@ -511,17 +511,19 @@ public final class BoundedContext
                 throw new IllegalStateException(errMsg);
             }
 
-            if (multitenant && tenantIndex == null) {
-                tenantIndex = TenantIndex.Factory.createDefault(storageFactory);
+            if (tenantIndex == null) {
+                tenantIndex = multitenant
+                              ? TenantIndex.Factory.createDefault(storageFactory)
+                              : TenantIndex.Factory.singleTenant();
             }
 
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
-                commandStore = createCommandStore(storageFactory);
+                commandStore = createCommandStore(storageFactory, tenantIndex);
             }
 
             if (commandBus == null) {
-                commandBus = createCommandBus(storageFactory);
+                commandBus = createCommandBus(storageFactory, tenantIndex);
             } else {
                 // Check that both either multi-tenant or single-tenant.
                 checkState(multitenant == commandBus.isMultitenant(),
@@ -555,14 +557,16 @@ public final class BoundedContext
             return builder.build();
         }
 
-        private static CommandStore createCommandStore(StorageFactory storageFactory) {
-            final CommandStore result = new CommandStore(storageFactory);
+        private static CommandStore createCommandStore(StorageFactory storageFactory,
+                                                       TenantIndex tenantIndex) {
+            final CommandStore result = new CommandStore(storageFactory, tenantIndex);
             return result;
         }
 
-        private CommandBus createCommandBus(StorageFactory storageFactory) {
+        private CommandBus createCommandBus(StorageFactory storageFactory,
+                                            TenantIndex tenantIndex) {
             if (commandStore == null) {
-                this.commandStore = createCommandStore(storageFactory);
+                this.commandStore = createCommandStore(storageFactory, tenantIndex);
             }
             final CommandBus.Builder builder = CommandBus.newBuilder()
                                                     .setMultitenant(this.multitenant)

@@ -21,7 +21,6 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableSet;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
@@ -31,7 +30,6 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.failure.FailureBus;
-import org.spine3.server.tenant.TenantAware;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.type.CommandClass;
 import org.spine3.users.TenantId;
@@ -96,7 +94,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      * <p>This field is {@code null} if the command bus is single-tenant.
      */
     @Nullable
-    private final TenantIndex tenandIndex;
+    private final TenantIndex tenantIndex;
 
     /**
      * Creates new instance according to the passed {@link Builder}.
@@ -105,7 +103,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     private CommandBus(Builder builder) {
         super();
         this.multitenant = builder.multitenant;
-        this.tenandIndex = this.multitenant
+        this.tenantIndex = this.multitenant
                                 ? builder.tenantIndex
                                 : null;
         this.commandStore = builder.commandStore;
@@ -225,8 +223,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return;
         }
 
-        keepTenantId(commandEnvelope);
-
         if (isScheduled(command)) {
             scheduleAndStore(command, responseObserver);
             return;
@@ -295,20 +291,10 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      *
      * @throws IllegalStateException if the repository is not set
      */
-    TenantIndex tenantIndex() {
-        checkState(tenandIndex != null,
+    private TenantIndex tenantIndex() {
+        checkState(tenantIndex != null,
                    "TenantIndex is not initialized in multi-tenant context.");
-        return tenandIndex;
-    }
-
-    @VisibleForTesting
-    void keepTenantId(CommandEnvelope commandEnvelope) {
-        if (isMultitenant()) {
-            // We expect a valid value here because the command passed the Filter.
-            final TenantId tenantId = commandEnvelope.getCommandContext()
-                                                     .getTenantId();
-            tenantIndex().keep(tenantId);
-        }
+        return tenantIndex;
     }
 
     /**
@@ -342,11 +328,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     Set<TenantId> getAllTenants() {
-        if (isMultitenant()) {
-            final Set<TenantId> tenants = tenantIndex().getAll();
-            return tenants;
-        }
-        return ImmutableSet.of(TenantAware.getCurrentTenant(false));
+        final Set<TenantId> result = tenantIndex().getAll();
+        return result;
     }
 
     /**
@@ -515,6 +498,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             if (multitenant) {
                 checkState(tenantIndex != null,
                            "TenantRepository must be set for multi-tenant CommandBus.");
+            } else {
+                tenantIndex = TenantIndex.Factory.singleTenant();
             }
 
             final CommandBus commandBus = new CommandBus(this);

@@ -24,6 +24,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareTest;
+import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
@@ -42,8 +44,12 @@ public class CommandBusBuilderShould {
 
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
-        commandStore = new CommandStore(storageFactory);
+        final boolean multitenant = true;
+        final InMemoryStorageFactory storageFactory =
+                InMemoryStorageFactory.getInstance(multitenant);
+        final TenantIndex tenantIndex =
+                TenantAwareTest.createTenantIndex(multitenant, storageFactory);
+        commandStore = new CommandStore(storageFactory, tenantIndex);
     }
 
     @Test(expected = NullPointerException.class)

@@ -34,6 +34,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.CommandOperation;
 import org.spine3.server.tenant.TenantAwareFunction;
 import org.spine3.server.tenant.TenantAwareOperation;
+import org.spine3.server.tenant.TenantIndex;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -51,11 +52,15 @@ import static org.spine3.server.command.CommandRecords.toCommandIterator;
 public class CommandStore implements AutoCloseable {
 
     private final CommandStorage storage;
+    private final TenantIndex tenantIndex;
 
     /**
      * Creates a new instance.
      */
-    public CommandStore(StorageFactory storageFactory) {
+    public CommandStore(StorageFactory storageFactory,
+                        TenantIndex tenantIndex) {
+        checkNotNull(storageFactory);
+        this.tenantIndex = checkNotNull(tenantIndex);
         final CommandStorage storage = new CommandStorage();
         storage.initStorage(storageFactory);
         this.storage = storage;
@@ -91,6 +96,7 @@ public class CommandStore implements AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     public void store(final Command command) {
+        keepTenantId(command);
         final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
@@ -100,6 +106,11 @@ public class CommandStore implements AutoCloseable {
         op.execute();
     }
 
+    private void keepTenantId(Command command) {
+        tenantIndex.keep(command.getContext()
+                                .getTenantId());
+    }
+
     /**
      * Stores a command with the error status.
      *
@@ -107,6 +118,7 @@ public class CommandStore implements AutoCloseable {
      * @param error an error occurred
      */
     public void store(final Command command, final Error error) {
+        keepTenantId(command);
         final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
@@ -124,6 +136,7 @@ public class CommandStore implements AutoCloseable {
      */
     public void store(Command command, Exception exception) {
         checkNotClosed();
+        keepTenantId(command);
         storage.store(command, Errors.fromException(exception));
     }
 
@@ -145,6 +158,7 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status
      */
     public void store(final Command command, final CommandStatus status) {
+        keepTenantId(command);
         final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
@@ -158,6 +172,7 @@ public class CommandStore implements AutoCloseable {
      * Sets the status of the command to {@link CommandStatus#OK}
      */
     private void setCommandStatusOk(CommandEnvelope commandEnvelope) {
+        keepTenantId(commandEnvelope.getCommand());
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
@@ -173,6 +188,7 @@ public class CommandStore implements AutoCloseable {
      * @param error the error, which occurred during command processing
      */
     private void updateStatus(CommandEnvelope commandEnvelope, final Error error) {
+        keepTenantId(commandEnvelope.getCommand());
         final TenantAwareOperation op = new CommandOperation(commandEnvelope.getCommand()) {
             @Override
             public void run() {
@@ -195,6 +211,7 @@ public class CommandStore implements AutoCloseable {
      * @param failure the business failure occurred during command processing
      */
     private void updateStatus(CommandEnvelope commandEnvelope, final Failure failure) {
+        keepTenantId(commandEnvelope.getCommand());
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
