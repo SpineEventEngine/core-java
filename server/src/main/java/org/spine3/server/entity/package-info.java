@@ -19,7 +19,7 @@
  */
 
 /**
- * This package contains server-side exceptions related to commands.
+ * This package contains classes and interfaces defining entity-oriented API and base functionality.
  */
 @ParametersAreNonnullByDefault
 package org.spine3.server.entity;
