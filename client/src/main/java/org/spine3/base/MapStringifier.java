@@ -21,13 +21,13 @@
 package org.spine3.base;
 
 import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
 
 import java.util.AbstractMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.base.Stringifiers.createEscaper;
 import static org.spine3.base.Stringifiers.isQuotedString;
 import static org.spine3.base.Stringifiers.unquote;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
@@ -193,15 +193,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static boolean isQuotedKeyValue(CharSequence key, CharSequence value) {
         final boolean result = isQuotedString(key) && isQuotedString(value);
-        return result;
-    }
-
-    private static Escaper createEscaper(char charToEscape) {
-        final String escapedChar = "\\" + charToEscape;
-        final Escaper result = Escapers.builder()
-                                       .addEscape('\"', "\\\"")
-                                       .addEscape(charToEscape, escapedChar)
-                                       .build();
         return result;
     }
 }

@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
@@ -185,6 +187,12 @@ public class Stringifiers {
         return listStringifier;
     }
 
+    /**
+     * Removes prior and further escaped quotes.
+     *
+     * @param value the value to unquote
+     * @return unquoted value
+     */
     static String unquote(String value) {
         final String unquotedValue = Pattern.compile("\\\\")
                                             .matcher(value.substring(2, value.length() - 2))
@@ -196,15 +204,37 @@ public class Stringifiers {
         return character == '"';
     }
 
+    /**
+     * Checks that the {@code CharSequence} contains escaped quotes.
+     *
+     * @param stringToCheck the sequence of chars to check
+     * @return {@code true} if sequence contains further
+     * and prior escaped quotes, {@code false} otherwise
+     */
     static boolean isQuotedString(CharSequence stringToCheck) {
         final int stringLength = stringToCheck.length();
 
-        if(stringLength<2){
+        if (stringLength < 2) {
             return false;
         }
 
         boolean result = isQuote(stringToCheck.charAt(1)) &&
                          isQuote(stringToCheck.charAt(stringLength - 1));
+        return result;
+    }
+
+    /**
+     * Create the {@code Escaper} which contains will escape '\' and passed character.
+     *
+     * @param charToEscape the char to escape
+     * @return the constructed escaper
+     */
+    static Escaper createEscaper(char charToEscape) {
+        final String escapedChar = "\\" + charToEscape;
+        final Escaper result = Escapers.builder()
+                                       .addEscape('\"', "\\\"")
+                                       .addEscape(charToEscape, escapedChar)
+                                       .build();
         return result;
     }
 

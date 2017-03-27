@@ -21,12 +21,12 @@
 package org.spine3.base;
 
 import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
 
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.base.Stringifiers.createEscaper;
 import static org.spine3.base.Stringifiers.isQuotedString;
 import static org.spine3.base.Stringifiers.unquote;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
@@ -151,12 +151,4 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         }
     }
 
-    private static Escaper createEscaper(char charToEscape) {
-        final String escapedChar = "\\" + charToEscape;
-        final Escaper result = Escapers.builder()
-                                       .addEscape('\"', "\\\"")
-                                       .addEscape(charToEscape, escapedChar)
-                                       .build();
-        return result;
-    }
 }
