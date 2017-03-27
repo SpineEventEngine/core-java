@@ -105,10 +105,10 @@ public class MapStringifierShould {
     }
 
     @Test
-    public void convert_string_which_contains_delimiter_in_content_to_map(){
+    public void convert_string_which_contains_delimiter_in_content_to_map() {
         final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\",\"2\\:\":\"two\"";
-        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
-                                                                             String.class);
+        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                            String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
 
         assertEquals(actualMap.get("1\"\""), "one,");
@@ -116,38 +116,38 @@ public class MapStringifierShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_value_has_not_prior_quote(){
+    public void throw_exception_when_value_has_not_prior_quote() {
         final String stringToConvert = "\"1\":2\"";
         tryToConvert(stringToConvert);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_key_has_not_prior_quote(){
+    public void throw_exception_when_key_has_not_prior_quote() {
         final String stringToConvert = "1\":\"2\"";
         tryToConvert(stringToConvert);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_value_has_not_further_quote(){
+    public void throw_exception_when_value_has_not_further_quote() {
         final String stringToConvert = "\"1\":\"2";
         tryToConvert(stringToConvert);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_key_has_not_further_quote(){
+    public void throw_exception_when_key_has_not_further_quote() {
         final String stringToConvert = "\"1:\"2\"";
         tryToConvert(stringToConvert);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_key_value_are_unquoted(){
+    public void throw_exception_when_key_value_are_unquoted() {
         final String stringToConvert = "1:2";
         tryToConvert(stringToConvert);
     }
 
-    private static void tryToConvert(String stringToConvert){
-        final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
-                                                                             String.class);
+    private static void tryToConvert(String stringToConvert) {
+        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                            String.class);
         stringifier.fromString(stringToConvert);
     }
 

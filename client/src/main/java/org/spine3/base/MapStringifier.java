@@ -219,7 +219,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     private static boolean isQuotedString(CharSequence stringToCheck) {
         final int stringLength = stringToCheck.length();
 
-        if(stringLength<2){
+        if (stringLength < 2) {
             return false;
         }
 
@@ -228,7 +228,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         return result;
     }
 
-    private static boolean isQuote(char character){
+    private static boolean isQuote(char character) {
         return character == QUOTE;
     }
 
