@@ -47,7 +47,8 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  */
 public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         implements StorageWithLifecycleFlags<I, EntityRecord>,
-                   BulkStorageOperationsMixin<I, EntityRecord> {
+                   BulkStorageOperationsMixin<I, EntityRecord>,
+                   WritableStorage<I, EntityRecordEnvelope> {
 
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -96,7 +97,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * {@inheritDoc}
      */
     @Deprecated
-    @Override
     public void write(I id, EntityRecord record) {
         checkNotNull(id);
         checkArgument(record.hasState(), "Record does not have state field.");
@@ -105,6 +105,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         writeRecord(id, new EntityRecordEnvelope(record));
     }
 
+    @Override
     public void write(I id, EntityRecordEnvelope record) {
         checkNotNull(id);
         checkArgument(record.getRecord().hasState(), "Record does not have state field.");

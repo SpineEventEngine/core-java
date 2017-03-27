@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Converter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
@@ -60,13 +61,13 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Dmytro Dashenkov
  */
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-       extends AbstractStorageShould<I, EntityRecord, S> {
+       extends AbstractStorageShould<I, EntityRecord, EntityRecordEnvelope, S> {
 
     protected abstract Message newState(I id);
 
     @Override
-    protected EntityRecord newStorageRecord() {
-        return newStorageRecord(newState(newId()));
+    protected EntityRecordEnvelope newStorageRecord() {
+        return new EntityRecordEnvelope(newStorageRecord(newState(newId())));
     }
 
     private EntityRecord newStorageRecord(I id) {
@@ -80,6 +81,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();
         return record;
+    }
+
+    @Override
+    protected Converter<EntityRecordEnvelope, EntityRecord> getRecordConverter() {
+        return new RecordConverter();
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
@@ -291,5 +297,17 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());
         assertTrue(optional.get().getArchived());
+    }
+
+    private static class RecordConverter extends Converter<EntityRecordEnvelope, EntityRecord> {
+        @Override
+        protected EntityRecord doForward(EntityRecordEnvelope entityRecordEnvelope) {
+            return entityRecordEnvelope.getRecord();
+        }
+
+        @Override
+        protected EntityRecordEnvelope doBackward(EntityRecord entityRecord) {
+            return new EntityRecordEnvelope(entityRecord);
+        }
     }
 }

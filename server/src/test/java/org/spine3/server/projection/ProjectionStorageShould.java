@@ -29,6 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
@@ -83,8 +84,8 @@ public abstract class ProjectionStorageShould<I>
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     @Override
-    protected EntityRecord newStorageRecord() {
-        return newEntityStorageRecord();
+    protected EntityRecordEnvelope newStorageRecord() {
+        return new EntityRecordEnvelope(newEntityStorageRecord());
     }
 
     @Test

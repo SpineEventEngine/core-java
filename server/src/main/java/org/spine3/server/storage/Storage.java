@@ -60,15 +60,4 @@ public interface Storage<I, R extends Message> extends AutoCloseable {
      * @throws IllegalStateException if the storage was closed before
      */
     Optional<R> read(I id);
-
-    /**
-     * Writes a record into the storage.
-     *
-     * <p>Rewrites it if a record with this ID already exists in the storage.
-     *
-     * @param id     the ID for the record
-     * @param record a record to store
-     * @throws IllegalStateException if the storage is closed
-     */
-    void write(I id, R record);
 }

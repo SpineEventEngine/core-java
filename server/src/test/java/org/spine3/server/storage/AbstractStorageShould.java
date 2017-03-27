@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Converter;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -45,12 +46,17 @@ import static org.junit.Assert.fail;
  *
  * @param <I> the type of IDs of storage records
  * @param <R> the type of records kept in the storage
+ * @param <W> the type of the records which are written into the storage
  * @author Alexander Litus
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class AbstractStorageShould<I, R extends Message, S extends AbstractStorage<I, R>> {
+public abstract class AbstractStorageShould<I,
+                                            R extends Message,
+                                            W,
+                                            S extends AbstractStorage<I, R>
+                                                    & WritableStorage<I, W>> {
 
-    private AbstractStorage<I, R> storage;
+    private S storage;
 
     @Before
     public void setUpAbstractStorageTest() {
@@ -73,10 +79,14 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     protected abstract S getStorage();
 
     /** Creates a new storage record. */
-    protected abstract R newStorageRecord();
+    protected abstract W newStorageRecord();
 
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
+
+    protected Converter<W, R> getRecordConverter() {
+        return new DefaultRecordConverter<>();
+    }
 
     /**
      * Closes the storage and propagates an exception if any occurs.
@@ -105,16 +115,16 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     protected void writeAndReadRecordTest(I id) {
-        final R expected = writeRecord(id);
+        final W expected = writeRecord(id);
 
         final Optional<R> actual = storage.read(id);
 
         assertTrue(actual.isPresent());
-        assertEquals(expected, actual.get());
+        assertEquals(getRecordConverter().convert(expected), actual.get());
     }
 
-    private R writeRecord(I id) {
-        final R expected = newStorageRecord();
+    private W writeRecord(I id) {
+        final W expected = newStorageRecord();
         storage.write(id, expected);
         return expected;
     }
@@ -143,7 +153,7 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        storage.write(newId(), Tests.<R>nullRef());
+        storage.write(newId(), Tests.<W>nullRef());
     }
 
     @Test
@@ -258,5 +268,19 @@ public abstract class AbstractStorageShould<I, R extends Message, S extends Abst
     public void throw_exception_if_close_twice() throws Exception {
         storage.close();
         storage.close();
+    }
+
+    @SuppressWarnings("unchecked") // Converts the records by cast
+    private static class DefaultRecordConverter<W, R extends Message> extends Converter<W, R> {
+
+        @Override
+        protected R doForward(W w) {
+            return (R) w;
+        }
+
+        @Override
+        protected W doBackward(R r) {
+            return (W) r;
+        }
     }
 }
