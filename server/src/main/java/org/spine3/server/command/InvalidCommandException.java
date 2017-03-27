@@ -21,15 +21,18 @@
 package org.spine3.server.command;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Value;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
-import org.spine3.base.ValidationError;
 import org.spine3.type.CommandClass;
 import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolations.ExceptionFactory;
+
+import java.util.Map;
 
 import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToString;
@@ -46,44 +49,26 @@ public class InvalidCommandException extends CommandException {
 
     private static final long serialVersionUID = 0L;
 
-    private static final String MSG_VALIDATION_ERROR = "Command message does match validation constrains.";
+    private static final String MSG_VALIDATION_ERROR = "Command message does not match " +
+                                                       "validation constrains.";
 
     private InvalidCommandException(String messageText, Command command, Error error) {
         super(messageText, command, error);
     }
 
     /**
-     * Creates an exception instance for a command message, which has fields that violate validation constraint(s).
+     * Creates an exception instance for a command message,
+     * which has fields that violate validation constraint(s).
      *
-     * @param command an invalid command
+     * @param command    an invalid command
      * @param violations constraint violations for the command message
      */
-    public static InvalidCommandException onConstraintViolations(Command command,
-                                                                 Iterable<ConstraintViolation> violations) {
-        final Error error = invalidCommandMessageError(Commands.getMessage(command), violations, MSG_VALIDATION_ERROR);
-        final String text = format("%s Message class: %s. See Error.getValidationError() for details.",
-                                   MSG_VALIDATION_ERROR, CommandClass.of(command));
-        //TODO:2016-06-09:alexander.yevsyukov: Add more diagnostics on the validation problems discovered.
-        return new InvalidCommandException(text, command, error);
-    }
+    public static InvalidCommandException onConstraintViolations(
+            Command command, Iterable<ConstraintViolation> violations) {
 
-    /**
-     * Creates an instance of {@code Error} for a command message, which has fields that violate
-     * validation constraint(s).
-     */
-    private static Error invalidCommandMessageError(Message commandMessage,
-                                                    Iterable<ConstraintViolation> violations,
-                                                    String errorText) {
-        final ValidationError validationError = ValidationError.newBuilder()
-                .addAllConstraintViolation(violations)
-                .build();
-        final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
-                .setCode(CommandValidationError.INVALID_COMMAND.getNumber())
-                .setValidationError(validationError)
-                .setMessage(errorText)
-                .putAllAttributes(commandTypeAttribute(commandMessage));
-        return error.build();
+        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
+                command, violations);
+        return helper.newException();
     }
 
     /**
@@ -106,8 +91,8 @@ public class InvalidCommandException extends CommandException {
     }
 
     /**
-     * Creates an error for a command with missing {@code tenant_id} attribute  attribute in the {@code CommandContext},
-     * which is required in a multitenant application.
+     * Creates an error for a command with missing {@code tenant_id}
+     * attribute in the {@code CommandContext}, which is required in a multitenant application.
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()
@@ -116,5 +101,50 @@ public class InvalidCommandException extends CommandException {
                 .setMessage(errorText)
                 .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
+    }
+
+    /**
+     * A helper utility aimed to create an {@code InvalidCommandException} to report the
+     * command which field values violate validation constraint(s).
+     */
+    private static class ConstraintViolationExceptionFactory
+                                 extends ExceptionFactory<InvalidCommandException,
+                                                          Command,
+                                                          CommandClass,
+                                                          CommandValidationError> {
+        private final CommandClass commandClass;
+
+        protected ConstraintViolationExceptionFactory(Command command,
+                                                      Iterable<ConstraintViolation> violations) {
+            super(command, violations);
+            this.commandClass = CommandClass.of(command);
+        }
+
+        @Override
+        protected CommandClass getMessageClass() {
+            return commandClass;
+        }
+
+        @Override
+        protected CommandValidationError getErrorCode() {
+            return CommandValidationError.INVALID_COMMAND;
+        }
+
+        @Override
+        protected String getErrorText() {
+            return MSG_VALIDATION_ERROR;
+        }
+
+        @Override
+        protected Map<String, Value> getMessageTypeAttribute(Message commandMessage) {
+            return commandTypeAttribute(commandMessage);
+        }
+
+        @Override
+        protected InvalidCommandException createException(String exceptionMsg,
+                                                          Command command,
+                                                          Error error) {
+            return new InvalidCommandException(exceptionMsg, command, error);
+        }
     }
 }
