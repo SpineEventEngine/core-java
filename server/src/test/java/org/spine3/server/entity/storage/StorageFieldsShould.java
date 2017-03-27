@@ -77,20 +77,9 @@ public class StorageFieldsShould {
 
     @Test
     public void put_non_null_fields_to_fields_maps() {
-        final EntityWithManyGetters entity = // spy(
-                new EntityWithManyGetters(STRING_ID)
-        //)
-        ;
+        final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
         final Map<String, Column.MemoizedValue<?>> fields = StorageFields.from(entity);
         assertNotNull(fields);
-
-//        verify(entity).getFloatNull();
-//        verify(entity).getIntegerFieldValue();
-//        verify(entity).getSomeMessage();
-//
-//        verify(entity, never()).getId();
-//        verify(entity, never()).getSomeNonPublicMethod();
-//        verify(entity, never()).getSomeVoid();
 
         assertSize(3, fields);
 

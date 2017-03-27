@@ -28,23 +28,24 @@ import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.reflect.Column;
 
+import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
+import java.beans.Introspector;
+import java.beans.PropertyDescriptor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class StorageFields {
-
-    private static final String GETTER_REGEX = "((get)|(is))[A-Z]\\w*";
-    private static final Pattern GETTER_PATTERN = Pattern.compile(GETTER_REGEX);
 
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
@@ -59,9 +60,14 @@ public class StorageFields {
                         .add("getClass")
                         .build();
 
-    // TODO:2017-03-22:dmytro.dashenkov: Check if this register should be synchronized.
+    /**
+     * A one to many container of the {@link Class} to {@link Column} relations.
+     *
+     * <p>This container is mutable and thread safe.
+     */
     private static final Multimap<Class<? extends Entity>, Column<?>> knownEntityProperties =
-            LinkedListMultimap.create();
+            synchronizedListMultimap(
+                    LinkedListMultimap.<Class<? extends Entity>, Column<?>>create());
 
     private StorageFields() {
     }
@@ -109,30 +115,18 @@ public class StorageFields {
     }
 
     private static void addToIndexes(Class<? extends Entity> entityType) {
-        final Method[] publicMethods = entityType.getMethods();
+        final BeanInfo entityDescriptor;
+        try {
+            entityDescriptor = Introspector.getBeanInfo(entityType);
+        } catch (IntrospectionException e) {
+            throw new IllegalStateException(e);
+        }
 
-        for (Method candidate : publicMethods) {
-            final String methodName = candidate.getName();
-            final boolean argumentsMatch = candidate.getParameterTypes().length == 0;
-            final boolean isNotExclusion = !EXCLUDED_METHODS.contains(methodName);
-            final int modifiers = candidate.getModifiers();
-            final boolean instanceMethod = !Modifier.isStatic(modifiers);
-            final boolean isNotVoid = !candidate.getReturnType()
-                                                .equals(Void.TYPE)
-                                      && !candidate.getReturnType()
-                                                   .equals(Void.class);
-            if (argumentsMatch
-                && isNotExclusion
-                && instanceMethod
-                && isNotVoid) {
-                // Regex operations are not fast enough to check all the methods.
-                // That's why we check the Method object fields first
-                final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
-                                                          .matches();
-                if (nameMatches) {
-                    final Column<?> storageField = Column.from(candidate);
-                    knownEntityProperties.put(entityType, storageField);
-                }
+        for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
+            final Method getter = property.getReadMethod();
+            if (!EXCLUDED_METHODS.contains(getter.getName())) {
+                final Column<?> storageField = Column.from(getter);
+                knownEntityProperties.put(entityType, storageField);
             }
         }
     }
