@@ -116,8 +116,36 @@ public class MapStringifierShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_key_value_are_incorrect(){
+    public void throw_exception_when_value_has_not_prior_quote(){
+        final String stringToConvert = "\"1\":2\"";
+        tryToConvert(stringToConvert);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_key_has_not_prior_quote(){
+        final String stringToConvert = "1\":\"2\"";
+        tryToConvert(stringToConvert);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_value_has_not_further_quote(){
+        final String stringToConvert = "\"1\":\"2";
+        tryToConvert(stringToConvert);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_key_has_not_further_quote(){
+        final String stringToConvert = "\"1:\"2\"";
+        tryToConvert(stringToConvert);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_key_value_are_unquoted(){
         final String stringToConvert = "1:2";
+        tryToConvert(stringToConvert);
+    }
+
+    private static void tryToConvert(String stringToConvert){
         final  Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
                                                                              String.class);
         stringifier.fromString(stringToConvert);

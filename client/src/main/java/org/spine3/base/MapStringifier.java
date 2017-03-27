@@ -128,7 +128,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private static String createKeyValuePattern() {
-        return Pattern.compile("(?<!\\\\)\\\\" + KEY_VALUE_DELIMITER)
+        return Pattern.compile("(?<!\\\\)" + KEY_VALUE_DELIMITER)
                       .pattern();
     }
 
@@ -177,12 +177,12 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                     new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
             return convertedBucket;
         } catch (Throwable e) {
-            throw newIllegalArgumentException("The exception is occurred during the conversion", e);
+            throw newIllegalArgumentException("The exception occurred during the conversion", e);
         }
     }
 
     private static void checkKeyValue(String[] keyValue) {
-        if (keyValue.length != 2 || !isQuotedKeyValue(keyValue)) {
+        if (keyValue.length != 2 || !isQuotedKeyValue(keyValue[0], keyValue[1])) {
             final String exMessage =
                     "Illegal key-value format. The key-value should be quoted " +
                     "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
@@ -190,27 +190,42 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         }
     }
 
-    private static boolean isQuotedKeyValue(String[] keyValue) {
-        final String key = keyValue[0];
-        final String value = keyValue[1];
+    private static boolean isString(Class<?> aClass) {
+        return String.class.equals(aClass);
+    }
 
-        final int keyLength = key.length();
-        final int valueLength = value.length();
+    private static String unquote(String value) {
+        final String unquotedValue = Pattern.compile("\\\\")
+                                            .matcher(value.substring(2, value.length() - 2))
+                                            .replaceAll("");
+        return unquotedValue;
+    }
 
-        if (keyLength < 2 || valueLength < 2) {
+    private static boolean isQuotedKeyValue(CharSequence key, CharSequence value) {
+        final boolean result = isQuotedString(key) && isQuotedString(value);
+        return result;
+    }
+
+    private static boolean isQuotedString(CharSequence stringToCheck) {
+        final int stringLength = stringToCheck.length();
+
+        if(stringLength<2){
             return false;
         }
 
-        final boolean result = isQuote(key.charAt(1)) && isQuote(key.charAt(keyLength - 1)) &&
-                               isQuote(value.charAt(1)) && isQuote(value.charAt(valueLength - 1));
+        boolean result = isQuote(stringToCheck.charAt(1)) &&
+                         isQuote(stringToCheck.charAt(stringLength - 1));
         return result;
+    }
+
+    private static boolean isQuote(char character){
+        return character == QUOTE;
     }
 
     private static Escaper createEscaper(char charToEscape) {
         final String escapedChar = "\\" + charToEscape;
         final Escaper result = Escapers.builder()
                                        .addEscape('\"', "\\\"")
-                                       .addEscape(':', "\\:")
                                        .addEscape(charToEscape, escapedChar)
                                        .build();
         return result;
