@@ -77,7 +77,6 @@ public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope<?
                 consumer.update(deliverable.getEntityId(),
                                 packedState,
                                 version);
-                //consumer.update(deliverable);
             }
         };
     }
