@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.base.Stringifiers.isQuote;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -190,36 +189,9 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         }
     }
 
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static String unquote(String value) {
-        final String unquotedValue = Pattern.compile("\\\\")
-                                            .matcher(value.substring(2, value.length() - 2))
-                                            .replaceAll("");
-        return unquotedValue;
-    }
-
     private static boolean isQuotedKeyValue(CharSequence key, CharSequence value) {
-        final boolean result = isQuotedString(key) && isQuotedString(value);
+        final boolean result = Stringifiers.isQuotedString(key) && Stringifiers.isQuotedString(value);
         return result;
-    }
-
-    private static boolean isQuotedString(CharSequence stringToCheck) {
-        final int stringLength = stringToCheck.length();
-
-        if(stringLength<2){
-            return false;
-        }
-
-        boolean result = isQuote(stringToCheck.charAt(1)) &&
-                         isQuote(stringToCheck.charAt(stringLength - 1));
-        return result;
-    }
-
-    private static boolean isQuote(char character){
-        return character == QUOTE;
     }
 
     private static Escaper createEscaper(char charToEscape) {

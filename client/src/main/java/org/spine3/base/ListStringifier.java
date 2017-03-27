@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.Stringifiers.isQuote;
+import static org.spine3.base.Stringifiers.isQuotedString;
 import static org.spine3.base.Stringifiers.unquote;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
@@ -145,11 +145,9 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     }
 
     private static void checkElement(CharSequence element) {
-        final int elementLength = element.length();
-        final boolean isQuoted = isQuote(element.charAt(1)) &&
-                                 isQuote(element.charAt(elementLength - 1));
+        final boolean isQuoted = isQuotedString(element);
         if(!isQuoted){
-            throw newIllegalArgumentException("Illegal element format");
+            throw newIllegalArgumentException("Illegal format of the element");
         }
     }
 
@@ -157,7 +155,6 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         final String escapedChar = "\\" + charToEscape;
         final Escaper result = Escapers.builder()
                                        .addEscape('\"', "\\\"")
-                                       .addEscape(':', "\\:")
                                        .addEscape(charToEscape, escapedChar)
                                        .build();
         return result;

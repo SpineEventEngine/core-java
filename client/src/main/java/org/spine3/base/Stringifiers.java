@@ -192,8 +192,20 @@ public class Stringifiers {
         return unquotedValue;
     }
 
-    static boolean isQuote(char character) {
+    private static boolean isQuote(char character) {
         return character == '"';
+    }
+
+    static boolean isQuotedString(CharSequence stringToCheck) {
+        final int stringLength = stringToCheck.length();
+
+        if(stringLength<2){
+            return false;
+        }
+
+        boolean result = isQuote(stringToCheck.charAt(1)) &&
+                         isQuote(stringToCheck.charAt(stringLength - 1));
+        return result;
     }
 
     /**
