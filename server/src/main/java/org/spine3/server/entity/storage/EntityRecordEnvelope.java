@@ -27,6 +27,8 @@ import org.spine3.server.reflect.Property;
 import javax.annotation.Nullable;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -39,14 +41,14 @@ public class EntityRecordEnvelope {
 
     public EntityRecordEnvelope(EntityRecord record,
                                 Map<String, Property.MemoizedValue<?>> storageFields) {
-        this.record = record;
+        this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
     }
 
     @SuppressWarnings("ConstantConditions")
         // null value for the storage fields map
     public EntityRecordEnvelope(EntityRecord record) {
-        this.record = record;
+        this.record = checkNotNull(record);
         this.storageFields = null;
     }
 
