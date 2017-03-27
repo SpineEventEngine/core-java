@@ -23,6 +23,7 @@ package org.spine3.server.command;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.Statuses;
 import org.spine3.users.TenantId;
 import org.spine3.validate.ConstraintViolation;
@@ -36,22 +37,24 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-class Filter {
+class CommandValidationFilter implements CommandBusFilter {
 
     private final CommandBus commandBus;
 
-    Filter(CommandBus commandBus) {
+    CommandValidationFilter(CommandBus commandBus) {
         this.commandBus = commandBus;
     }
 
     /**
      * Returns {@code true} if a command is valid, {@code false} otherwise.
      */
-    boolean handleValidation(Command command, StreamObserver<Response> responseObserver) {
-        final TenantId tenantId = command.getContext()
-                                         .getTenantId();
+    @Override
+    public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+        final TenantId tenantId = envelope.getCommandContext()
+                                          .getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
 
+        final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 reportMissingTenantId(command, responseObserver);
@@ -76,6 +79,11 @@ class Filter {
         }
 
         return true;
+    }
+
+    @Override
+    public void onClose(CommandBus commandBus) {
+        // Do nothing.
     }
 
     private void reportMissingTenantId(Command command,

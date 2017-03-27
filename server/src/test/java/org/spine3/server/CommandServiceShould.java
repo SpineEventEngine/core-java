@@ -62,13 +62,15 @@ public class CommandServiceShould {
     public void setUp() {
         // Create Projects Bounded Context with one repository.
         projectsContext = newBoundedContext(spy(TestCommandBusFactory.create()));
-        final Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository(projectsContext);
+        final Given.ProjectAggregateRepository projectRepo =
+                new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
         customersContext = newBoundedContext(spy(TestCommandBusFactory.create()));
-        final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
+        final Given.CustomerAggregateRepository customerRepo =
+                new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
@@ -118,7 +120,8 @@ public class CommandServiceShould {
 
     @Test
     public void return_error_if_command_is_unsupported() {
-        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(), createCommandContext());
+        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(),
+                                                              createCommandContext());
 
         service.post(unsupportedCmd, responseObserver);
 

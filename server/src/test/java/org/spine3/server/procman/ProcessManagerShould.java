@@ -55,7 +55,6 @@ import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -104,34 +103,34 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void have_default_state_initially() throws InvocationTargetException {
+    public void have_default_state_initially() {
         assertEquals(processManager.getDefaultState(), processManager.getState());
     }
 
     @Test
-    public void dispatch_event() throws InvocationTargetException {
+    public void dispatch_event() {
         testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
     }
 
     @Test
-    public void dispatch_several_events() throws InvocationTargetException {
+    public void dispatch_several_events() {
         testDispatchEvent(Sample.messageOfType(ProjectCreated.class));
         testDispatchEvent(Sample.messageOfType(TaskAdded.class));
         testDispatchEvent(Sample.messageOfType(ProjectStarted.class));
     }
 
-    private void testDispatchEvent(Message event) throws InvocationTargetException {
+    private void testDispatchEvent(Message event) {
         processManager.dispatchEvent(event, EVENT_CONTEXT);
         assertEquals(AnyPacker.pack(event), processManager.getState());
     }
 
     @Test
-    public void dispatch_command() throws InvocationTargetException {
+    public void dispatch_command() {
         testDispatchCommand(addTask());
     }
 
     @Test
-    public void dispatch_several_commands() throws InvocationTargetException {
+    public void dispatch_several_commands() {
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
 
@@ -140,7 +139,7 @@ public class ProcessManagerShould {
         testDispatchCommand(startProject());
     }
 
-    private List<Event> testDispatchCommand(Message command) throws InvocationTargetException {
+    private List<Event> testDispatchCommand(Message command) {
         final List<Event> events = processManager.dispatchCommand(command,
                                                                   commandFactory.createContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
@@ -148,7 +147,7 @@ public class ProcessManagerShould {
     }
 
     @Test
-    public void dispatch_command_and_return_events() throws InvocationTargetException {
+    public void dispatch_command_and_return_events() {
         final List<Event> events = testDispatchCommand(createProject());
 
         assertEquals(1, events.size());
@@ -164,7 +163,7 @@ public class ProcessManagerShould {
      * @see TestProcessManager#handle(StartProject, CommandContext)
      */
     @Test
-    public void route_commands() throws InvocationTargetException {
+    public void route_commands() {
         // Add dispatcher for the routed command. Otherwise the command would reject the command.
         commandBus.register(new AddTaskDispatcher());
         processManager.setCommandBus(commandBus);
@@ -201,13 +200,13 @@ public class ProcessManagerShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
+    public void throw_exception_if_dispatch_unknown_command() {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
         processManager.dispatchCommand(unknownCommand, commandFactory.createContext());
     }
 
     @Test(expected = IllegalStateException.class)
-    public void throw_exception_if_dispatch_unknown_event() throws InvocationTargetException {
+    public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
         processManager.dispatchEvent(unknownEvent, EVENT_CONTEXT);
     }

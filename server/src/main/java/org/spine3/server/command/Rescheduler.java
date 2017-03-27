@@ -76,6 +76,14 @@ class Rescheduler {
         }
     }
 
+    private CommandStore commandStore() {
+        return commandBus.commandStore();
+    }
+
+    private CommandScheduler scheduler() {
+        return commandBus.scheduler();
+    }
+
     @VisibleForTesting
     void doRescheduleCommands() {
         final Set<TenantId> tenants = commandBus.getAllTenants();
@@ -91,8 +99,7 @@ class Rescheduler {
                     @Nullable
                     @Override
                     public Iterator<Command> apply(@Nullable Empty input) {
-                        return commandBus.commandStore()
-                                         .iterator(SCHEDULED);
+                        return commandStore().iterator(SCHEDULED);
                     }
                 };
 
@@ -119,8 +126,7 @@ class Rescheduler {
             final Interval interval = between(now, timeToPost);
             final Duration newDelay = toDuration(interval);
             final Command updatedCommand = setSchedule(command, newDelay, now);
-            commandBus.scheduler()
-                      .schedule(updatedCommand);
+            scheduler().schedule(updatedCommand);
         }
     }
 

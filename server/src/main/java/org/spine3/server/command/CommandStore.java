@@ -64,7 +64,6 @@ public class CommandStore implements AutoCloseable {
         final CommandStorage storage = new CommandStorage();
         storage.initStorage(storageFactory);
         this.storage = storage;
-
     }
 
     StatusService createStatusService(Log log) {

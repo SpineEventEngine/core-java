@@ -22,19 +22,24 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Response;
+import org.spine3.base.Responses;
+import org.spine3.envelope.CommandEnvelope;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
+import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
+import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 /**
@@ -42,13 +47,43 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  *
  * @author Alexander Litus
  */
-public abstract class CommandScheduler {
+public abstract class CommandScheduler implements CommandBusFilter {
 
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
     private boolean isActive = true;
 
     private CommandBus commandBus;
+
+    protected CommandScheduler() {
+    }
+
+    public void setCommandBus(CommandBus commandBus) {
+        this.commandBus = commandBus;
+    }
+
+    @Override
+    public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+        final Command command = envelope.getCommand();
+        if (isScheduled(command)) {
+            scheduleAndStore(command, responseObserver);
+            return false;
+        }
+        return true;
+    }
+
+    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
+        schedule(command);
+        commandBus().commandStore()
+                    .store(command, SCHEDULED);
+        responseObserver.onNext(Responses.ok());
+        responseObserver.onCompleted();
+    }
+
+    @Override
+    public void onClose(CommandBus commandBus) {
+        shutdown();
+    }
 
     /**
      * Schedules a command and delivers it to the target according to the scheduling options.
@@ -69,12 +104,14 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Obtains {@code CommandBus} associated with this scheduler or {@code null}
-     * if the scheduler is not linked to a {@code CommandBus}.
+     * Obtains {@code CommandBus} associated with this scheduler.
+     *
+     * @throws IllegalStateException if {@code CommandBus} was not
+     * {@linkplain #setCommandBus(CommandBus) set} prior to calling this method
      */
-    @Nullable
     @CheckReturnValue
-    protected CommandBus getCommandBus() {
+    protected CommandBus commandBus() {
+        checkState(commandBus != null, "CommandBus is not set");
         return commandBus;
     }
 
@@ -93,7 +130,7 @@ public abstract class CommandScheduler {
      * @param command a command to deliver
      */
     protected void post(Command command) {
-        commandBus.postPreviouslyScheduled(command);
+        commandBus().postPreviouslyScheduled(command);
     }
 
     private static boolean isScheduledAlready(Command command) {
@@ -115,11 +152,6 @@ public abstract class CommandScheduler {
      */
     public void shutdown() {
         isActive = false;
-    }
-
-    /** Sets a command bus used to post scheduled commands. */
-    void setCommandBus(CommandBus commandBus) {
-        this.commandBus = commandBus;
     }
 
     /**

@@ -43,8 +43,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
 import static java.lang.String.format;
-import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -56,8 +54,6 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alex Tymchenko
  */
 public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, CommandDispatcher> {
-
-    private final Filter filter;
 
     private final CommandStore commandStore;
 
@@ -96,6 +92,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @Nullable
     private final TenantIndex tenantIndex;
 
+    private CommandBusFilter filterChain;
+
     /**
      * Creates new instance according to the passed {@link Builder}.
      */
@@ -111,7 +109,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
-        this.filter = new Filter(this);
         this.rescheduler = new Rescheduler(this);
         this.failureBus = builder.failureBus;
     }
@@ -159,6 +156,10 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @VisibleForTesting
     FailureBus failureBus() {
         return this.failureBus;
+    }
+
+    private void setFilterChain(CommandBusFilter filterChain) {
+        this.filterChain = filterChain;
     }
 
     @Override
@@ -209,28 +210,13 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         checkArgument(isNotDefault(command));
 
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        final CommandClass commandClass = commandEnvelope.getMessageClass();
-
-        final Optional<CommandDispatcher> dispatcher = getDispatcher(commandClass);
-
-        // If the command is not supported, return as error.
-        if (!dispatcher.isPresent()) {
-            handleDeadMessage(commandEnvelope, responseObserver);
+        if (!filterChain.accept(commandEnvelope, responseObserver)) {
             return;
         }
-
-        if (!filter.handleValidation(command, responseObserver)) {
-            return;
-        }
-
-        if (isScheduled(command)) {
-            scheduleAndStore(command, responseObserver);
-            return;
-        }
-
-        commandStore.store(command);
+        commandStore().store(command);
         responseObserver.onNext(Responses.ok());
-        doPost(commandEnvelope, dispatcher.get());
+
+        doPost(commandEnvelope);
         responseObserver.onCompleted();
     }
 
@@ -254,7 +240,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         if (!dispatcher.isPresent()) {
             throw noDispatcherFound(commandEnvelope);
         }
-        doPost(commandEnvelope, dispatcher.get());
+        doPost(commandEnvelope);
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
@@ -266,19 +252,17 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         throw new IllegalStateException(msg);
     }
 
-    private void scheduleAndStore(Command command, StreamObserver<Response> responseObserver) {
-        scheduler.schedule(command);
-        commandStore.store(command, SCHEDULED);
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-    }
-
     /**
      * Directs a command to be dispatched.
      */
-    void doPost(CommandEnvelope commandEnvelope, CommandDispatcher dispatcher) {
+    @SuppressWarnings("ConstantConditions")
+        // OK to get without checking because the command was validated before this call.
+    void doPost(CommandEnvelope commandEnvelope) {
+        final Optional<CommandDispatcher> dispatcher = getDispatcher(
+                commandEnvelope.getMessageClass());
         try {
-            dispatcher.dispatch(commandEnvelope);
+            dispatcher.get()
+                      .dispatch(commandEnvelope);
             commandStatusService.setOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
@@ -312,8 +296,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @Override
     public void close() throws Exception {
         registry().unregisterAll();
+        filterChain.onClose(this);
         commandStore.close();
-        scheduler.shutdown();
         failureBus.close();
     }
 
@@ -503,16 +487,23 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             }
 
             final CommandBus commandBus = new CommandBus(this);
-
-            if (commandScheduler.getCommandBus() == null) {
-                commandScheduler.setCommandBus(commandBus);
-            }
+            setFilter(commandBus);
+            
+            commandScheduler.setCommandBus(commandBus);
 
             if (autoReschedule) {
                 commandBus.rescheduleCommands();
             }
 
             return commandBus;
+        }
+
+        private void setFilter(CommandBus commandBus) {
+            final CommandBusFilter filterChain = FilterChain.newBuilder()
+                                                            .setCommandBus(commandBus)
+                                                            .setCommandScheduler(commandScheduler)
+                                                            .build();
+            commandBus.setFilterChain(filterChain);
         }
     }
 }
