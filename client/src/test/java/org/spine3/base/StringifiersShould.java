@@ -31,6 +31,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Stringifiers.integerStringifier;
+import static org.spine3.base.Stringifiers.longStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StringifiersShould {
@@ -95,6 +97,18 @@ public class StringifiersShould {
     public void pass_the_null_tolerance_check() {
         final NullPointerTester tester = new NullPointerTester();
         tester.testStaticMethods(Stringifiers.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @Test
+    public void convert_long_to_string() {
+        final String convertedLong = longStringifier().toString(1L);
+        assertEquals("1", convertedLong);
+    }
+
+    @Test
+    public void convert_int_to_string() {
+        final String convertedInt = integerStringifier().toString(2);
+        assertEquals("2", convertedInt);
     }
 
     @SuppressWarnings("EmptyClass") // is the part of the test.
