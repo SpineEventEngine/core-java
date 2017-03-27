@@ -57,8 +57,7 @@ public class CommandStore implements AutoCloseable {
     /**
      * Creates a new instance.
      */
-    public CommandStore(StorageFactory storageFactory,
-                        TenantIndex tenantIndex) {
+    public CommandStore(StorageFactory storageFactory, TenantIndex tenantIndex) {
         checkNotNull(storageFactory);
         this.tenantIndex = checkNotNull(tenantIndex);
         final CommandStorage storage = new CommandStorage();
