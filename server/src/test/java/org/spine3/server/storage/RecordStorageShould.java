@@ -171,6 +171,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
+    @SuppressWarnings("ConstantConditions") // converter nullability issues
     @Test
     public void delete_record() {
         final RecordStorage<I> storage = getStorage();
@@ -178,7 +179,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = newStorageRecord(id);
 
         // Write the record.
-        storage.write(id, getRecordConverter().reverse().convert(record));
+        storage.write(id, getRecordConverter().reverse()
+                                              .convert(record));
 
         // Delete the record.
         assertTrue(storage.delete(id));
@@ -276,12 +278,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertFalse(optional.isPresent());
     }
 
-    @SuppressWarnings({
-            "OptionalGetWithoutIsPresent",
-                // We verify in assertion
-            "ConstantConditions"
-                // Converter nullability issues
-    })
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     @Test
     public void return_default_visibility_for_new_record() {
         final I id = newId();
@@ -308,6 +305,20 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());
         assertTrue(optional.get().getArchived());
+    }
+
+    @Test
+    public void accept_record_envelopes_with_empty_storage_fields() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final EntityRecordEnvelope recordEnvelope = new EntityRecordEnvelope(record);
+        assertFalse(recordEnvelope.hasStorageFiedls());
+        final RecordStorage<I> storage = getStorage();
+
+        storage.write(id, recordEnvelope);
+        final Optional<EntityRecord> actualRecord = storage.read(id);
+        assertTrue(actualRecord.isPresent());
+        assertEquals(record, actualRecord.get());
     }
 
     private static class RecordConverter extends Converter<EntityRecordEnvelope, EntityRecord> {
