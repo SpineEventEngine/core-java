@@ -98,9 +98,7 @@ public class AbstractValidatingBuilderShould {
         final FieldDescriptor descriptor = PatternStringFieldValue.getDescriptor()
                                                                   .getFields()
                                                                   .get(0);
-        validatingBuilder.validate(descriptor,
-                                   "incorrectEmail",
-                                   "email");
+        validatingBuilder.validate(descriptor, "incorrectEmail", "email");
     }
 
     private static class ConcreteValidatingBuilder extends AbstractValidatingBuilder<Task> {
