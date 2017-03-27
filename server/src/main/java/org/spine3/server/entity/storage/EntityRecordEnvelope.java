@@ -61,7 +61,7 @@ public class EntityRecordEnvelope {
                 : storageFields;
     }
 
-    public boolean hasStorageFiedls() {
+    public boolean hasStorageFields() {
         return storageFields != null;
     }
 

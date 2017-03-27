@@ -49,8 +49,7 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
-        return ColumnTypeRegistry.newBuilder()
-                                 .build();
+        return ColumnTypeRegistry.empty();
     }
 
     @Override

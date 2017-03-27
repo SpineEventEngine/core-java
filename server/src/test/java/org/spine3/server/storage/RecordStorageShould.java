@@ -312,7 +312,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final EntityRecordEnvelope recordEnvelope = new EntityRecordEnvelope(record);
-        assertFalse(recordEnvelope.hasStorageFiedls());
+        assertFalse(recordEnvelope.hasStorageFields());
         final RecordStorage<I> storage = getStorage();
 
         storage.write(id, recordEnvelope);

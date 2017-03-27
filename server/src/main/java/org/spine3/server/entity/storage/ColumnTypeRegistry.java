@@ -20,9 +20,11 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.spine3.server.reflect.Property;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,20 +36,31 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class ColumnTypeRegistry {
 
-    private final Map<Class, ColumnType> propertyColumnType;
+    private static final ColumnTypeRegistry EMPTY_INSTANCE = newBuilder().build();
 
-    private ColumnTypeRegistry(Map<Class, ColumnType> propertyColumnType) {
-        this.propertyColumnType = propertyColumnType;
+    private final Map<Class, ColumnType> columnTypeMap;
+
+    private ColumnTypeRegistry(Map<Class, ColumnType> columnTypeMap) {
+        this.columnTypeMap = columnTypeMap;
+    }
+
+    public static ColumnTypeRegistry empty() {
+        return EMPTY_INSTANCE;
     }
 
     public ColumnType get(Property<?> field) {
         checkNotNull(field);
         final Class javaType = field.getType();
-        final ColumnType type = propertyColumnType.get(javaType);
+        final ColumnType type = columnTypeMap.get(javaType);
         checkState(type != null,
                    "Could not find storage type for %s.",
                    javaType.getName());
         return type;
+    }
+
+    @VisibleForTesting
+    Map<Class, ColumnType> getColumnTypeMap() {
+        return Collections.unmodifiableMap(columnTypeMap);
     }
 
     public static <R, C> Builder<R, C> newBuilder() {
@@ -56,18 +69,18 @@ public class ColumnTypeRegistry {
 
     public static class Builder<R, C> {
 
-        private final Map<Class, ColumnType> propertyColumnType = new HashMap<>();
+        private final Map<Class, ColumnType> columnTypeMap = new HashMap<>();
 
         private Builder() {
         }
 
         public <J, S> Builder put(Class<J> javaType, ColumnType<J, S, R, C> columnType) {
-            propertyColumnType.put(javaType, columnType);
+            columnTypeMap.put(javaType, columnType);
             return this;
         }
 
         public ColumnTypeRegistry build() {
-            return new ColumnTypeRegistry(ImmutableMap.copyOf(propertyColumnType));
+            return new ColumnTypeRegistry(ImmutableMap.copyOf(columnTypeMap));
         }
     }
 }
