@@ -119,7 +119,7 @@ subprojects {
     apply plugin: 'java'
 
     apply plugin: 'org.spine3.tools.javadoc-checker'
-    // Javadoc checker plugin allow to find FQN links with wrong format.
+    // Javadoc checker plugin allows finding FQN links with the wrong format.
     //"threshold" - is a number of wrong links that should be found to trigger a response.
     //"responseType" - can be either "error" or "warn"
     //      "warn" type allows to see all errors in build result records without failing it.
