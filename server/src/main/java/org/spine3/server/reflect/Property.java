@@ -94,7 +94,11 @@ public class Property<T> {
             final T result = (T) getter.invoke(source);
             return result;
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException(e);
+            throw new IllegalArgumentException(
+                    format("Could not invoke getter of property %s from object %s",
+                           getName(),
+                           source),
+                    e);
         }
     }
 
@@ -126,6 +130,10 @@ public class Property<T> {
         @Nullable
         public T getValue() {
             return value;
+        }
+
+        public boolean isNull() {
+            return value == null;
         }
 
         public Property getSourceProperty() {

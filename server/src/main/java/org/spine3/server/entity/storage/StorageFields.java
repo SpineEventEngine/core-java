@@ -53,8 +53,8 @@ public class StorageFields {
             ImmutableSet.<String>builder()
                         .add("getId")
                         .add("getState")
-                        .add("getLifecycleFlags")
                         .add("getDefaultState")
+                        .add("getLifecycleFlags")
                         .add("getBuilder")
                         .add("getClass")
                         .build();
@@ -117,9 +117,14 @@ public class StorageFields {
             final boolean isNotExclusion = !EXCLUDED_METHODS.contains(methodName);
             final int modifiers = candidate.getModifiers();
             final boolean instanceMethod = !Modifier.isStatic(modifiers);
+            final boolean isNotVoid = !candidate.getReturnType()
+                                                .equals(Void.TYPE)
+                                      && !candidate.getReturnType()
+                                                   .equals(Void.class);
             if (argumentsMatch
                 && isNotExclusion
-                && instanceMethod) {
+                && instanceMethod
+                && isNotVoid) {
                 // Regex operations are not fast enough to check all the methods.
                 // That's why we check the Method object fields first
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
