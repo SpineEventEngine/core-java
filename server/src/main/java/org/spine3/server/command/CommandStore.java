@@ -66,11 +66,6 @@ public class CommandStore implements AutoCloseable {
         this.storage = storage;
     }
 
-    StatusService createStatusService(Log log) {
-        final StatusService result = new StatusService(this, log);
-        return result;
-    }
-
     private void checkNotClosed() {
         checkState(isOpen(), "The CommandStore is closed.");
     }
@@ -174,7 +169,7 @@ public class CommandStore implements AutoCloseable {
     /**
      * Sets the status of the command to {@link CommandStatus#OK}
      */
-    private void setCommandStatusOk(CommandEnvelope commandEnvelope) {
+    void setCommandStatusOk(CommandEnvelope commandEnvelope) {
         keepTenantId(commandEnvelope.getCommand());
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
@@ -256,45 +251,27 @@ public class CommandStore implements AutoCloseable {
         return func.execute(commandId);
     }
 
-    /**
-     * The service for updating a status of a command.
-     */
-    static class StatusService {
-
-        private final CommandStore commandStore;
-        private final Log log;
-
-        private StatusService(CommandStore commandStore, Log log) {
-            this.commandStore = commandStore;
-            this.log = log;
+    @SuppressWarnings("ChainOfInstanceofChecks") // OK for this consolidated error handling.
+    void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
+        final Message commandMessage = commandEnvelope.getMessage();
+        final CommandId commandId = commandEnvelope.getCommandId();
+        if (cause instanceof FailureThrowable) {
+            final FailureThrowable failure = (FailureThrowable) cause;
+            log.failureHandling(failure, commandMessage, commandId);
+            updateStatus(commandEnvelope, failure.toFailure());
+        } else if (cause instanceof Exception) {
+            final Exception exception = (Exception) cause;
+            log.errorHandling(exception, commandMessage, commandId);
+            updateStatus(commandEnvelope, exception);
+        } else {
+            log.errorHandlingUnknown(cause, commandMessage, commandId);
+            final Error error = Errors.fromThrowable(cause);
+            updateStatus(commandEnvelope, error);
         }
+    }
 
-        void setOk(CommandEnvelope commandEnvelope) {
-            commandStore.setCommandStatusOk(commandEnvelope);
-        }
-
-        void setToError(CommandEnvelope commandEnvelope, Error error) {
-            commandStore.updateStatus(commandEnvelope, error);
-        }
-
-        @SuppressWarnings("ChainOfInstanceofChecks") // OK for this rare case
-        void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause) {
-            final Message commandMessage = commandEnvelope.getMessage();
-            final CommandId commandId = commandEnvelope.getCommandId();
-            if (cause instanceof FailureThrowable) {
-                final FailureThrowable failure = (FailureThrowable) cause;
-                log.failureHandling(failure, commandMessage, commandId);
-                commandStore.updateStatus(commandEnvelope, failure.toFailure());
-            } else if (cause instanceof Exception) {
-                final Exception exception = (Exception) cause;
-                log.errorHandling(exception, commandMessage, commandId);
-                commandStore.updateStatus(commandEnvelope, exception);
-            } else {
-                log.errorHandlingUnknown(cause, commandMessage, commandId);
-                final Error error = Errors.fromThrowable(cause);
-                commandStore.updateStatus(commandEnvelope, error);
-            }
-        }
+    void setToError(CommandEnvelope commandEnvelope, Error error) {
+        updateStatus(commandEnvelope, error);
     }
 
     /**

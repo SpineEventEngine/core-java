@@ -53,7 +53,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
     private final CommandStore commandStore;
 
-    private final CommandStore.StatusService commandStatusService;
+    private CommandBusFilter filterChain;
 
     private final CommandScheduler scheduler;
 
@@ -78,8 +78,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     private final boolean isThreadSpawnAllowed;
 
-    private CommandBusFilter filterChain;
-
     /**
      * Creates new instance according to the passed {@link Builder}.
      */
@@ -88,7 +86,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         super();
         this.multitenant = builder.multitenant;
         this.commandStore = builder.commandStore;
-        this.commandStatusService = commandStore.createStatusService(builder.log);
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
@@ -154,14 +151,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     public Set<CommandClass> getRegisteredCommandClasses() {
         return registry().getRegisteredMessageClasses();
-    }
-
-    /**
-     * Obtains the instance of the {@link CommandStore.StatusService CommandStore.StatusService}
-     * associated with this command bus.
-     */
-    CommandStore.StatusService getCommandStatusService() {
-        return commandStatusService;
     }
 
     private Optional<CommandDispatcher> getDispatcher(CommandClass commandClass) {
@@ -230,10 +219,10 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         final CommandDispatcher dispatcher = getDispatcher(commandEnvelope);
         try {
             dispatcher.dispatch(commandEnvelope);
-            commandStatusService.setOk(commandEnvelope);
+            commandStore.setCommandStatusOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
-            commandStatusService.updateCommandStatus(commandEnvelope, cause);
+            commandStore.updateCommandStatus(commandEnvelope, cause, log);
         }
     }
 

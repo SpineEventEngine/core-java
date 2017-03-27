@@ -71,11 +71,6 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
-    public void have_command_status_service() {
-        assertNotNull(commandBus.getCommandStatusService());
-    }
-
-    @Test
     public void have_failure_bus_if_no_custom_set() {
         final CommandBus bus = CommandBus.newBuilder()
                                            .setCommandStore(commandStore)
