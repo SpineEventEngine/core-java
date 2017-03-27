@@ -80,9 +80,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     private final Escaper escaper;
 
     /**
-     * That constructor should be used when a custom delimiter is not needed.
+     * Creates a {@code ListStringifier}.
      *
-     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} will be used.
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for element
+     * separation in {@code String} representation of the {@code List}.
      *
      * @param listGenericClass the class of the list elements
      */
@@ -95,8 +96,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     }
 
     /**
-     * That constructor should be used for providing a custom
-     * delimiter of the elements during conversion.
+     * Creates a {@code ListStringifier}.
+     *
+     * <p>The specified delimiter is used for element separation
+     * in {@code String} representation of the {@code List}.
      *
      * @param listGenericClass the class of the list elements
      * @param delimiter        the delimiter for the passed elements via string
