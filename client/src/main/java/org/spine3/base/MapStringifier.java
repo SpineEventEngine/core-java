@@ -29,6 +29,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.base.Stringifiers.isQuotedString;
+import static org.spine3.base.Stringifiers.unquote;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -167,8 +168,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final String[] keyValue = bucketToConvert.split(keyValuePattern);
         checkKeyValue(keyValue);
 
-        final String key = Stringifiers.unquote(keyValue[0]);
-        final String value = Stringifiers.unquote(keyValue[1]);
+        final String key = unquote(keyValue[0]);
+        final String value = unquote(keyValue[1]);
 
         try {
             final K convertedKey = Stringifiers.convert(key, keyClass);
