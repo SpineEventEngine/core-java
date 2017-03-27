@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.reflect.Property;
+import org.spine3.server.entity.storage.reflect.Column;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 
@@ -62,7 +62,7 @@ public class StorageFieldsShould {
 
     @Test
     public void return_empty_map() {
-        final Map<String, Property.MemoizedValue<?>> emptyFields = StorageFields.empty();
+        final Map<String, Column.MemoizedValue<?>> emptyFields = StorageFields.empty();
         assertNotNull(emptyFields);
         assertEmpty(emptyFields);
     }
@@ -70,7 +70,7 @@ public class StorageFieldsShould {
     @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final Map<String, Property.MemoizedValue<?>> fields = StorageFields.from(entity);
+        final Map<String, Column.MemoizedValue<?>> fields = StorageFields.from(entity);
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -81,7 +81,7 @@ public class StorageFieldsShould {
                 new EntityWithManyGetters(STRING_ID)
         //)
         ;
-        final Map<String, Property.MemoizedValue<?>> fields = StorageFields.from(entity);
+        final Map<String, Column.MemoizedValue<?>> fields = StorageFields.from(entity);
         assertNotNull(fields);
 
 //        verify(entity).getFloatNull();
@@ -95,8 +95,8 @@ public class StorageFieldsShould {
         assertSize(3, fields);
 
         final String floatNullKey = "floatNull";
-        @SuppressWarnings("unchecked") final Property.MemoizedValue<Float> floatMemoizedNull =
-                (Property.MemoizedValue<Float>) fields.get(floatNullKey);
+        @SuppressWarnings("unchecked") final Column.MemoizedValue<Float> floatMemoizedNull =
+                (Column.MemoizedValue<Float>) fields.get(floatNullKey);
         assertNotNull(floatMemoizedNull);
         assertNull(floatMemoizedNull.getValue());
 
@@ -113,9 +113,9 @@ public class StorageFieldsShould {
 
     @Test
     public void ignore_static_members() {
-        final Map<String, Property.MemoizedValue<?>> fields =
+        final Map<String, Column.MemoizedValue<?>> fields =
                 StorageFields.from(new EntityWithManyGetters(STRING_ID));
-        final Property.MemoizedValue<?> staticValue = fields.get("staticMember");
+        final Column.MemoizedValue<?> staticValue = fields.get("staticMember");
         assertNull(staticValue);
     }
 

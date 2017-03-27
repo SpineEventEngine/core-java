@@ -22,7 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.reflect.Property;
+import org.spine3.server.entity.storage.reflect.Column;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -37,10 +37,10 @@ public class EntityRecordEnvelope {
     private final EntityRecord record;
 
     @Nullable
-    private final ImmutableMap<String, Property.MemoizedValue<?>> storageFields;
+    private final ImmutableMap<String, Column.MemoizedValue<?>> storageFields;
 
     public EntityRecordEnvelope(EntityRecord record,
-                                Map<String, Property.MemoizedValue<?>> storageFields) {
+                                Map<String, Column.MemoizedValue<?>> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
     }
@@ -57,7 +57,7 @@ public class EntityRecordEnvelope {
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<String, Property.MemoizedValue<?>> getStorageFields() {
+    public Map<String, Column.MemoizedValue<?>> getStorageFields() {
         return storageFields == null
                 ? StorageFields.empty()
                 : storageFields;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package org.spine3.server.entity.storage.reflect;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -30,17 +30,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * @author Dmytro Dashenkov
+ * @author
+ * Dmytro Dashenkov
  */
-public class Property<T> {
+public class Column<T> {
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
 
     private final Method getter;
-
-    @Nullable
-    private final Method setter;
 
     private final String name;
 
@@ -49,20 +47,19 @@ public class Property<T> {
     @Nullable
     private final T defaultValue = null; // TODO:2017-03-22:dmytro.dashenkov: Add default value handling.
 
-    private Property(Method getter, @Nullable Method setter, String name, boolean nullable) {
+    private Column(Method getter, String name, boolean nullable) {
             //, @Nullable T defaultValue) {
         this.getter = getter;
-        this.setter = setter;
         this.name = name;
         this.nullable = nullable;
         //this.defaultValue = defaultValue;
     }
 
-    public static <T> Property<T> from(Method getter) {
+    public static <T> Column<T> from(Method getter) {
         checkNotNull(getter);
         final String name = nameFromGetterName(getter.getName());
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final Property<T> result = new Property<>(getter, null, name, nullable);
+        final Column<T> result = new Column<>(getter, name, nullable);
 
         return result;
     }
@@ -115,14 +112,14 @@ public class Property<T> {
 
     public static class MemoizedValue<T> {
 
-        private final Property sourceProperty;
+        private final Column sourceColumn;
         private final Object sourceObject;
 
         @Nullable
         private final T value;
 
-        private MemoizedValue(Property sourceProperty, Object sourceObject, @Nullable T value) {
-            this.sourceProperty = sourceProperty;
+        private MemoizedValue(Column sourceColumn, Object sourceObject, @Nullable T value) {
+            this.sourceColumn = sourceColumn;
             this.sourceObject = sourceObject;
             this.value = value;
         }
@@ -136,8 +133,8 @@ public class Property<T> {
             return value == null;
         }
 
-        public Property getSourceProperty() {
-            return sourceProperty;
+        public Column getSourceColumn() {
+            return sourceColumn;
         }
 
         @Override
@@ -151,7 +148,7 @@ public class Property<T> {
 
             MemoizedValue<?> that = (MemoizedValue<?>) o;
 
-            if (!getSourceProperty().equals(that.getSourceProperty())) {
+            if (!getSourceColumn().equals(that.getSourceColumn())) {
                 return false;
             }
             if (!sourceObject.equals(that.sourceObject)) {
@@ -163,7 +160,7 @@ public class Property<T> {
 
         @Override
         public int hashCode() {
-            int result = getSourceProperty().hashCode();
+            int result = getSourceColumn().hashCode();
             result = 31 * result + sourceObject.hashCode();
             result = 31 * result + (getValue() != null ? getValue().hashCode() : 0);
             return result;

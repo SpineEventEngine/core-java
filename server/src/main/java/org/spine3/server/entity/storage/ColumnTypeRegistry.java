@@ -22,7 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import org.spine3.server.reflect.Property;
+import org.spine3.server.entity.storage.reflect.Column;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -48,7 +48,7 @@ public class ColumnTypeRegistry {
         return EMPTY_INSTANCE;
     }
 
-    public ColumnType get(Property<?> field) {
+    public ColumnType get(Column<?> field) {
         checkNotNull(field);
         final Class javaType = field.getType();
         final ColumnType type = columnTypeMap.get(javaType);

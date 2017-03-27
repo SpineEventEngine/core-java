@@ -26,7 +26,7 @@ import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.reflect.Property;
+import org.spine3.server.entity.storage.reflect.Column;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -60,17 +60,17 @@ public class StorageFields {
                         .build();
 
     // TODO:2017-03-22:dmytro.dashenkov: Check if this register should be synchronized.
-    private static final Multimap<Class<? extends Entity>, Property<?>> knownEntityProperties =
+    private static final Multimap<Class<? extends Entity>, Column<?>> knownEntityProperties =
             LinkedListMultimap.create();
 
     private StorageFields() {
     }
 
-    public static Map<String, Property.MemoizedValue<?>> empty() {
+    public static Map<String, Column.MemoizedValue<?>> empty() {
         return Collections.emptyMap();
     }
 
-    public static <E extends Entity<?, ?>> Map<String, Property.MemoizedValue<?>> from(E entity) {
+    public static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue<?>> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
@@ -81,21 +81,21 @@ public class StorageFields {
 
         ensureRegistered(entityType);
 
-        final Map<String, Property.MemoizedValue<?>> fields = getStorageFields(entityType, entity);
+        final Map<String, Column.MemoizedValue<?>> fields = getStorageFields(entityType, entity);
         return fields;
     }
 
-    private static Map<String, Property.MemoizedValue<?>> getStorageFields(
+    private static Map<String, Column.MemoizedValue<?>> getStorageFields(
             Class<? extends Entity> entityType,
             Entity entity) {
-        final Collection<Property<?>> storageFieldProperties =
+        final Collection<Column<?>> storageFieldProperties =
                 knownEntityProperties.get(entityType);
-        final Map<String, Property.MemoizedValue<?>> values =
+        final Map<String, Column.MemoizedValue<?>> values =
                 new HashMap<>(storageFieldProperties.size());
 
-        for (Property<?> property : storageFieldProperties) {
-            final String name = property.getName();
-            final Property.MemoizedValue<?> value = property.memoizeFor(entity);
+        for (Column<?> column : storageFieldProperties) {
+            final String name = column.getName();
+            final Column.MemoizedValue<?> value = column.memoizeFor(entity);
             values.put(name, value);
         }
         return values;
@@ -130,7 +130,7 @@ public class StorageFields {
                 final boolean nameMatches = GETTER_PATTERN.matcher(methodName)
                                                           .matches();
                 if (nameMatches) {
-                    final Property<?> storageField = Property.from(candidate);
+                    final Column<?> storageField = Column.from(candidate);
                     knownEntityProperties.put(entityType, storageField);
                 }
             }

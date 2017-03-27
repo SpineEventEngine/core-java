@@ -21,7 +21,7 @@
 package org.spine3.server.entity.storage;
 
 import org.junit.Test;
-import org.spine3.server.reflect.Property;
+import org.spine3.server.entity.storage.reflect.Column;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,11 +77,11 @@ public class ColumnTypeRegistryShould {
         }
     }
 
-    private static <T> Property<T> mockProperty(Class<T> cls) {
+    private static <T> Column<T> mockProperty(Class<T> cls) {
         @SuppressWarnings("unchecked")
-        final Property<T> property = (Property<T>) mock(Property.class);
-        when(property.getType()).thenReturn(cls);
-        return property;
+        final Column<T> column = (Column<T>) mock(Column.class);
+        when(column.getType()).thenReturn(cls);
+        return column;
     }
 
     private static class AnyType implements ColumnType {

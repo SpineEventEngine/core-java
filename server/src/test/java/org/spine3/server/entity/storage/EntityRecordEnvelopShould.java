@@ -24,7 +24,7 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.reflect.Property;
+import org.spine3.server.entity.storage.reflect.Column;
 import org.spine3.testdata.Sample;
 
 import java.util.Collections;
@@ -46,7 +46,7 @@ public class EntityRecordEnvelopShould {
     public void initialize_with_record_and_storage_fields() {
         final EntityRecordEnvelope envelope =
                 new EntityRecordEnvelope(EntityRecord.getDefaultInstance(),
-                                         Collections.<String, Property.MemoizedValue<?>>emptyMap());
+                                         Collections.<String, Column.MemoizedValue<?>>emptyMap());
         assertNotNull(envelope);
     }
 
@@ -73,16 +73,16 @@ public class EntityRecordEnvelopShould {
 
     @Test
     public void store_storage_fields() {
-        final Property.MemoizedValue<?> mockValue = mock(Property.MemoizedValue.class);
-        final Map<String, Property.MemoizedValue<?>> storageFieldsExpected =
-                Collections.<String, Property.MemoizedValue<?>>singletonMap("some-key", mockValue);
+        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
+        final Map<String, Column.MemoizedValue<?>> storageFieldsExpected =
+                Collections.<String, Column.MemoizedValue<?>>singletonMap("some-key", mockValue);
 
         final EntityRecordEnvelope envelope =
                 new EntityRecordEnvelope(Sample.messageOfType(EntityRecord.class),
                                          storageFieldsExpected);
         assertTrue(envelope.hasStorageFields());
 
-        final Map<String, Property.MemoizedValue<?>> storageFieldActual =
+        final Map<String, Column.MemoizedValue<?>> storageFieldActual =
                 envelope.getStorageFields();
         assertMapsEqual(storageFieldsExpected, storageFieldActual, "storage fields");
     }
@@ -92,23 +92,23 @@ public class EntityRecordEnvelopShould {
         final EntityRecordEnvelope envelope = new EntityRecordEnvelope(
                 EntityRecord.getDefaultInstance());
         assertFalse(envelope.hasStorageFields());
-        final Map<String, Property.MemoizedValue<?>> fields = envelope.getStorageFields();
+        final Map<String, Column.MemoizedValue<?>> fields = envelope.getStorageFields();
         assertEmpty(fields);
     }
 
     @Test
     public void have_equals() {
-        final Property.MemoizedValue<?> mockValue = mock(Property.MemoizedValue.class);
+        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
         final EntityRecordEnvelope noFieldsEnvelope = new EntityRecordEnvelope(
                 EntityRecord.getDefaultInstance()
         );
         final EntityRecordEnvelope emptyFieldsEnvelope = new EntityRecordEnvelope(
                 EntityRecord.getDefaultInstance(),
-                Collections.<String, Property.MemoizedValue<?>>emptyMap()
+                Collections.<String, Column.MemoizedValue<?>>emptyMap()
         );
         final EntityRecordEnvelope notEmptyFieldsEnvelope = new EntityRecordEnvelope(
                 EntityRecord.getDefaultInstance(),
-                Collections.<String, Property.MemoizedValue<?>>singletonMap("key", mockValue)
+                Collections.<String, Column.MemoizedValue<?>>singletonMap("key", mockValue)
         );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
@@ -121,6 +121,6 @@ public class EntityRecordEnvelopShould {
 
     private static EntityRecordEnvelope newEnvelope() {
         return new EntityRecordEnvelope(Sample.messageOfType(EntityRecord.class),
-                                        Collections.<String, Property.MemoizedValue<?>>emptyMap());
+                                        Collections.<String, Column.MemoizedValue<?>>emptyMap());
     }
 }
