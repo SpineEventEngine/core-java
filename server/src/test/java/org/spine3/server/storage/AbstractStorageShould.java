@@ -84,6 +84,10 @@ public abstract class AbstractStorageShould<I,
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
 
+    /**
+     * @return a {@link Converter} from the {@code W} - write type to the {@code R} - read type;
+     * by default returns a casting converter
+     */
     protected Converter<W, R> getRecordConverter() {
         return new DefaultRecordConverter<>();
     }

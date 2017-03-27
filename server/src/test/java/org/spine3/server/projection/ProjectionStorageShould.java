@@ -200,6 +200,7 @@ public abstract class ProjectionStorageShould<I>
         writeAndReadLastEventTimeTest(time2);
     }
 
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     private List<I> fillStorage(int count) {
         final List<I> ids = new LinkedList<>();
 
@@ -212,7 +213,7 @@ public abstract class ProjectionStorageShould<I>
                                                     .setState(packedState)
                                                     .setVersion(Tests.newVersionWithNumber(1))
                                                     .build();
-            storage.write(id, record);
+            storage.write(id, getRecordConverter().reverse().convert(record));
             ids.add(id);
         }
 

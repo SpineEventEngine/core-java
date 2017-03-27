@@ -206,7 +206,7 @@ public class StandShould {
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = Tests.newVersionWithNumber(1);
 
-        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecord.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordEnvelope.class));
 
         stand.update(customerId, packedState, stateVersion);
 

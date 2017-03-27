@@ -88,13 +88,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         return new RecordConverter();
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
+    @SuppressWarnings("ConstantConditions")
+        // Converter nullability issues and Optional getting
     @Test
     public void write_and_read_record_by_Message_id() {
         final RecordStorage<I> storage = getStorage();
         final I id = newId();
         final EntityRecord expected = newStorageRecord(id);
-        storage.write(id, expected);
+        storage.write(id, getRecordConverter().reverse()
+                                              .convert(expected));
 
         final EntityRecord actual = storage.read(id).get();
 
@@ -114,13 +116,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEmpty(empty);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We check in assertion.
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     @Test
     public void read_single_record_with_mask() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, record);
+        storage.write(id, getRecordConverter().reverse()
+                                              .convert(record));
 
         final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
         final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
@@ -133,7 +136,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertFalse(isDefault(unpacked));
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
+    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"})
+        // Converter nullability issues
     @Test
     public void read_multiple_records_with_field_mask() {
         final RecordStorage<I> storage = getStorage();
@@ -145,7 +149,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             final I id = newId();
             final Message state = newState(id);
             final EntityRecord record = newStorageRecord(state);
-            storage.write(id, record);
+            storage.write(id, getRecordConverter().reverse()
+                                                  .convert(record));
             ids.add(id);
 
             if (typeDescriptor == null) {
@@ -173,7 +178,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = newStorageRecord(id);
 
         // Write the record.
-        storage.write(id, record);
+        storage.write(id, getRecordConverter().reverse().convert(record));
 
         // Delete the record.
         assertTrue(storage.delete(id));
@@ -271,13 +276,19 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertFalse(optional.isPresent());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
+    @SuppressWarnings({
+            "OptionalGetWithoutIsPresent",
+                // We verify in assertion
+            "ConstantConditions"
+                // Converter nullability issues
+    })
     @Test
     public void return_default_visibility_for_new_record() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, record);
+        storage.write(id, getRecordConverter().reverse()
+                                              .convert(record));
 
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());

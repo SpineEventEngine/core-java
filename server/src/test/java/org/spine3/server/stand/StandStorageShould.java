@@ -115,7 +115,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         checkByTypeRead(mask);
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // OK for this test.
+    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
     private void checkByTypeRead(FieldMask fieldMask) {
         final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
         final StandStorage storage = getStorage();
@@ -136,7 +136,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
                                   .setDescription("With description")
                                   .build();
             final EntityRecord record = newRecord(task);
-            storage.write(id, record);
+            storage.write(id, getRecordConverter().reverse()
+                                                  .convert(record));
         }
 
         final ImmutableCollection<EntityRecord> readRecords
@@ -163,6 +164,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return DEFAULT_ID_SUPPLIER.get();
     }
 
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     protected List<AggregateStateId> fill(StandStorage storage,
                                           int count,
                                           Supplier<AggregateStateId<ProjectId>> idSupplier) {
@@ -172,7 +174,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             final AggregateStateId genericId = idSupplier.get();
             final Message state = newState(genericId);
             final EntityRecord record = newRecord(state);
-            storage.write(genericId, record);
+            storage.write(genericId, getRecordConverter().reverse()
+                                                         .convert(record));
             ids.add(genericId);
         }
 

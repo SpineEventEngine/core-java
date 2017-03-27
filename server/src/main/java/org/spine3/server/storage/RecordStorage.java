@@ -96,15 +96,6 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * {@inheritDoc}
      */
-    @Deprecated
-    public void write(I id, EntityRecord record) {
-        checkNotNull(id);
-        checkArgument(record.hasState(), "Record does not have state field.");
-        checkNotClosed();
-
-        writeRecord(id, new EntityRecordEnvelope(record));
-    }
-
     @Override
     public void write(I id, EntityRecordEnvelope record) {
         checkNotNull(id);
