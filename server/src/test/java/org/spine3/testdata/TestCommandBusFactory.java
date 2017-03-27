@@ -48,7 +48,6 @@ public class TestCommandBusFactory {
         final CommandStore store = new CommandStore(storageFactory, tenantIndex);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
-                                                .setTenantIndex(tenantIndex)
                                                 .setCommandStore(store)
                                                 .build();
         return commandBus;

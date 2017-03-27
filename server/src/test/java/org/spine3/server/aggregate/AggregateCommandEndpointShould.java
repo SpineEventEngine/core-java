@@ -38,7 +38,6 @@ import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -82,10 +81,8 @@ public class AggregateCommandEndpointShould {
         final StorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
         eventBus = mock(EventBus.class);
         final CommandStore commandStore = mock(CommandStore.class);
-        final TenantIndex tenantIndex = TenantIndex.Factory.createDefault(storageFactory);
         final CommandBus commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
-                                                .setTenantIndex(tenantIndex)
                                                 .setCommandStore(commandStore)
                                                 .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);

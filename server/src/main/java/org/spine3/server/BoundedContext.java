@@ -571,10 +571,6 @@ public final class BoundedContext
             final CommandBus.Builder builder = CommandBus.newBuilder()
                                                     .setMultitenant(this.multitenant)
                                                     .setCommandStore(commandStore);
-            if (this.multitenant) {
-                builder.setTenantIndex(this.tenantIndex);
-            }
-
             return builder.build();
         }
 

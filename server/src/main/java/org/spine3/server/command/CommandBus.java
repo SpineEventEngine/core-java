@@ -27,15 +27,11 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.Statuses;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.failure.FailureBus;
-import org.spine3.server.tenant.TenantIndex;
 import org.spine3.type.CommandClass;
-import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
 
-import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -61,8 +57,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
     private final CommandScheduler scheduler;
 
-    private final Rescheduler rescheduler;
-
     private final FailureBus failureBus;
 
     private final Log log;
@@ -84,14 +78,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     private final boolean isThreadSpawnAllowed;
 
-    /**
-     * The repository for storing tenant IDs of incoming commands.
-     *
-     * <p>This field is {@code null} if the command bus is single-tenant.
-     */
-    @Nullable
-    private final TenantIndex tenantIndex;
-
     private CommandBusFilter filterChain;
 
     /**
@@ -101,23 +87,20 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     private CommandBus(Builder builder) {
         super();
         this.multitenant = builder.multitenant;
-        this.tenantIndex = this.multitenant
-                                ? builder.tenantIndex
-                                : null;
         this.commandStore = builder.commandStore;
         this.commandStatusService = commandStore.createStatusService(builder.log);
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
-        this.rescheduler = new Rescheduler(this);
         this.failureBus = builder.failureBus;
     }
 
     /**
      * Initializes the instance by rescheduling commands.
      */
-    private void rescheduleCommands() {
-        rescheduler.rescheduleCommands();
+    @VisibleForTesting
+    void rescheduleCommands() {
+        scheduler.rescheduleCommands();
     }
 
     /**
@@ -141,11 +124,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
     Log problemLog() {
         return log;
-    }
-
-    @VisibleForTesting
-    Rescheduler rescheduler() {
-        return rescheduler;
     }
 
     @VisibleForTesting
@@ -223,10 +201,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @Override
     public void handleDeadMessage(CommandEnvelope message,
                                   StreamObserver<Response> responseObserver) {
-        Command command = message.getCommand();
-        final CommandException unsupported = new UnsupportedCommandException(command);
-        commandStore.storeWithError(command, unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+        // Do nothing because this is the responsibility of DeadCommandFilter.
     }
 
     /**
@@ -234,12 +209,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        final Optional<CommandDispatcher> dispatcher = getDispatcher(
-                commandEnvelope.getMessageClass()
-        );
-        if (!dispatcher.isPresent()) {
-            throw noDispatcherFound(commandEnvelope);
-        }
         doPost(commandEnvelope);
     }
 
@@ -258,11 +227,9 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @SuppressWarnings("ConstantConditions")
         // OK to get without checking because the command was validated before this call.
     void doPost(CommandEnvelope commandEnvelope) {
-        final Optional<CommandDispatcher> dispatcher = getDispatcher(
-                commandEnvelope.getMessageClass());
+        final CommandDispatcher dispatcher = getDispatcher(commandEnvelope);
         try {
-            dispatcher.get()
-                      .dispatch(commandEnvelope);
+            dispatcher.dispatch(commandEnvelope);
             commandStatusService.setOk(commandEnvelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
@@ -270,15 +237,14 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         }
     }
 
-    /**
-     * Ensures the {@code CommandBus} has a {@code TenantRepository} in multi-tenant context.
-     *
-     * @throws IllegalStateException if the repository is not set
-     */
-    private TenantIndex tenantIndex() {
-        checkState(tenantIndex != null,
-                   "TenantIndex is not initialized in multi-tenant context.");
-        return tenantIndex;
+    private CommandDispatcher getDispatcher(CommandEnvelope commandEnvelope) {
+        final Optional<CommandDispatcher> dispatcher = getDispatcher(
+                commandEnvelope.getMessageClass()
+        );
+        if (!dispatcher.isPresent()) {
+            throw noDispatcherFound(commandEnvelope);
+        }
+        return dispatcher.get();
     }
 
     /**
@@ -311,11 +277,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return (CommandDispatcherRegistry) super.registry();
     }
 
-    Set<TenantId> getAllTenants() {
-        final Set<TenantId> result = tenantIndex().getAll();
-        return result;
-    }
-
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
@@ -341,8 +302,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         private boolean autoReschedule;
 
         private FailureBus failureBus;
-
-        private TenantIndex tenantIndex;
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -374,10 +333,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return Optional.fromNullable(failureBus);
         }
 
-        public Optional<TenantIndex> tenantIndex() {
-            return Optional.fromNullable(tenantIndex);
-        }
-
         public Builder setMultitenant(boolean multitenant) {
             this.multitenant = multitenant;
             return this;
@@ -398,21 +353,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         public Builder setFailureBus(FailureBus failureBus) {
             checkNotNull(failureBus);
             this.failureBus = failureBus;
-            return this;
-        }
-
-        /**
-         * Sets the tenant index for the bus to build.
-         *
-         * @param tenantIndex the tenant index or
-         *                    {@code null} if the {@code CommandBus} to build is single-tenant
-         */
-        public Builder setTenantIndex(@Nullable TenantIndex tenantIndex) {
-            if (this.multitenant) {
-                checkNotNull(tenantIndex,
-                             "TenantIndex cannot be null in multi-tenant CommandBus");
-            }
-            this.tenantIndex = tenantIndex;
             return this;
         }
 
@@ -444,7 +384,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         }
 
         /**
-         * If set the builder will not call {@link CommandBus#rescheduleCommands()}.
+         * If not set the builder will not call {@link CommandBus#rescheduleCommands()}.
          *
          * <p>One of the applications of this flag is to disable rescheduling of commands in tests.
          */
@@ -479,15 +419,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
                                        .build();
             }
 
-            if (multitenant) {
-                checkState(tenantIndex != null,
-                           "TenantRepository must be set for multi-tenant CommandBus.");
-            } else {
-                tenantIndex = TenantIndex.Factory.singleTenant();
-            }
-
             final CommandBus commandBus = new CommandBus(this);
-            setFilter(commandBus);
+            setFilterChain(commandBus);
             
             commandScheduler.setCommandBus(commandBus);
 
@@ -498,7 +431,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return commandBus;
         }
 
-        private void setFilter(CommandBus commandBus) {
+        private void setFilterChain(CommandBus commandBus) {
             final CommandBusFilter filterChain = FilterChain.newBuilder()
                                                             .setCommandBus(commandBus)
                                                             .setCommandScheduler(commandScheduler)

@@ -109,8 +109,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
                                                            startProject());
         storeAsScheduled(commandsPrimary, delayPrimary, schedulingTime);
 
-        commandBus.rescheduler()
-                  .doRescheduleCommands();
+        commandBus.rescheduleCommands();
 
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
         verify(scheduler, times(commandsPrimary.size())).schedule(commandCaptor.capture());

@@ -138,7 +138,6 @@ public abstract class AbstractCommandBusTestSuite {
                                .setThreadSpawnAllowed(true)
                                .setLog(log)
                                .setAutoReschedule(false)
-                               .setTenantIndex(tenantIndex)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
         commandFactory = this.multitenant

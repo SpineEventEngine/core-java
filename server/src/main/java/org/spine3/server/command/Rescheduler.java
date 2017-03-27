@@ -85,9 +85,9 @@ class Rescheduler {
     }
 
     @VisibleForTesting
-    void doRescheduleCommands() {
-        final Set<TenantId> tenants = commandBus.getAllTenants();
-
+    private void doRescheduleCommands() {
+        final Set<TenantId> tenants = commandStore().tenantIndex()
+                                                    .getAll();
         for (TenantId tenantId : tenants) {
             rescheduleForTenant(tenantId);
         }

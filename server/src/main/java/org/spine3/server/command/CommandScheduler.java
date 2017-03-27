@@ -31,6 +31,7 @@ import org.spine3.base.Responses;
 import org.spine3.envelope.CommandEnvelope;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,6 +47,7 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  * Schedules commands delivering them to the target according to the scheduling options.
  *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public abstract class CommandScheduler implements CommandBusFilter {
 
@@ -53,13 +55,23 @@ public abstract class CommandScheduler implements CommandBusFilter {
 
     private boolean isActive = true;
 
+    @Nullable
     private CommandBus commandBus;
+
+    @Nullable
+    private Rescheduler rescheduler;
 
     protected CommandScheduler() {
     }
 
     public void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
+        this.rescheduler = new Rescheduler(commandBus);
+    }
+
+    Rescheduler rescheduler() {
+        checkState(rescheduler != null, "Rescheduler is not initialized");
+        return rescheduler;
     }
 
     @Override
@@ -123,6 +135,10 @@ public abstract class CommandScheduler implements CommandBusFilter {
      * @see #post(Command)
      */
     protected abstract void doSchedule(Command command);
+
+    void rescheduleCommands() {
+        rescheduler().rescheduleCommands();
+    }
 
     /**
      * Delivers a scheduled command to a target.

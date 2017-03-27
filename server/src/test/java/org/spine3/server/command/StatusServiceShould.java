@@ -208,8 +208,7 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
         final Timestamp schedulingTime = minutesAgo(10); // time to post passed
         storeAsScheduled(commands, delay, schedulingTime);
 
-        commandBus.rescheduler()
-                  .doRescheduleCommands();
+        commandBus.rescheduleCommands();
 
         for (Command cmd : commands) {
             final CommandEnvelope envelope = CommandEnvelope.of(cmd);
