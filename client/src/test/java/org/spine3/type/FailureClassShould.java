@@ -17,19 +17,31 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.type;
 
-package org.spine3.server.storage.memory;
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.BoolValue;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
 
-import org.spine3.server.command.CommandStorage;
-import org.spine3.server.command.CommandStorageShould;
+import static org.junit.Assert.assertEquals;
 
-public class InMemoryCommandStorageShould extends CommandStorageShould {
+/**
+ * @author Alex Tymchenko
+ */
+public class FailureClassShould {
 
-    private final InMemoryStorageFactory factory = InMemoryStorageFactory.getInstance();
+    @Test
+    public void create_set_on_varargs() {
+        assertEquals(3,
+                     FailureClass.setOf(BoolValue.class, Int32Value.class, StringValue.class)
+                                 .size());
+    }
 
-    @Override
-    protected CommandStorage getStorage() {
-        final CommandStorage storage = factory.createCommandStorage();
-        return storage;
+    @Test
+    public void pass_null_tolerance_check() throws Exception {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(FailureClass.class);
     }
 }
