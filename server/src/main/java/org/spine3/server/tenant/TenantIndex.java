@@ -43,6 +43,9 @@ public interface TenantIndex extends AutoCloseable {
      */
     Set<TenantId> getAll();
 
+    /**
+     * Provides default implementations of {@code TenantIndex}.
+     */
     class Factory {
 
         private static final TenantIndex SINGLE_TENANT_INDEX = new TenantIndex() {
@@ -67,7 +70,7 @@ public interface TenantIndex extends AutoCloseable {
         }
 
         /**
-         * Creates default implementation of {@code TenantIndex}.
+         * Creates default implementation of {@code TenantIndex} for multi-tenant context.
          */
         public static TenantIndex createDefault(StorageFactory storageFactory) {
             final DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
