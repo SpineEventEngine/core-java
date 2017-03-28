@@ -47,8 +47,7 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  */
 public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         implements StorageWithLifecycleFlags<I, EntityRecord>,
-                   BulkStorageOperationsMixin<I, EntityRecord>,
-                   WritableStorage<I, EntityRecordEnvelope> {
+                   BulkStorageOperationsMixin<I, EntityRecord> {
 
     protected RecordStorage(boolean multitenant) {
         super(multitenant);
@@ -94,15 +93,31 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     }
 
     /**
-     * {@inheritDoc}
+     * Writes a record and its
+     * {@linkplain org.spine3.server.entity.storage.StorageFields storage fields} into the storage.
+     *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
+     * @param id     the ID for the record
+     * @param record a record to store
+     * @throws IllegalStateException if the storage is closed
+     * @see #write(Object, EntityRecord)
      */
-    @Override
     public void write(I id, EntityRecordEnvelope record) {
         checkNotNull(id);
         checkArgument(record.getRecord().hasState(), "Record does not have state field.");
         checkNotClosed();
 
         writeRecord(id, record);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void write(I id, EntityRecord record) {
+        final EntityRecordEnvelope envelope = new EntityRecordEnvelope(record);
+        write(id, envelope);
     }
 
     /**
