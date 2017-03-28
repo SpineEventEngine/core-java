@@ -29,11 +29,11 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Responses;
+import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
-import org.spine3.base.Subscribe;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
 import org.spine3.test.Tests.MemoizingObserver;
@@ -80,7 +80,8 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        this.storageFactory = InMemoryStorageFactory.getInstance();
+        this.storageFactory = StorageFactorySwitch.getInstance()
+                                                  .get();
         /**
          * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
          * because it's impossible to spy on {@code final} classes.

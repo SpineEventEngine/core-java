@@ -23,6 +23,7 @@ package org.spine3.testdata;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandStore;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 
 /**
@@ -39,7 +40,7 @@ public class TestCommandBusFactory {
 
     /** Creates a new command bus with the {@link InMemoryStorageFactory}. */
     public static CommandBus create() {
-        return create(InMemoryStorageFactory.getInstance());
+        return create(StorageFactorySwitch.getInstance().get());
     }
 
     /** Creates a new command bus with the given storage factory. */

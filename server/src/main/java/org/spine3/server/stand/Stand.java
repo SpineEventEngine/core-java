@@ -39,6 +39,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.type.TypeUrl;
 
@@ -425,8 +426,9 @@ public class Stand implements AutoCloseable {
          */
         public Stand build() {
             if (storage == null) {
-                storage = InMemoryStorageFactory.getInstance()
-                                                .createStandStorage();
+                storage = StorageFactorySwitch.getInstance()
+                                              .get()
+                                              .createStandStorage();
             }
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();

@@ -32,14 +32,15 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.base.Subscribe;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Given;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.procman.ProjectId;
@@ -85,11 +86,9 @@ public class ProcessManagerShould {
 
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-        final CommandStore commandStore = spy(
-                new CommandStore(storageFactory)
-        );
-
+        final StorageFactory storageFactory = StorageFactorySwitch.getInstance()
+                                                                  .get();
+        final CommandStore commandStore = spy(new CommandStore(storageFactory));
         commandBus = spy(CommandBus.newBuilder()
                                    .setCommandStore(commandStore)
                                    .build());

@@ -51,7 +51,7 @@ import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Tests;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
@@ -650,7 +650,9 @@ public class StandShould {
     }
 
     private static StandStorage createStandStorage() {
-        return InMemoryStorageFactory.getInstance().createStandStorage();
+        return StorageFactorySwitch.getInstance()
+                                   .get()
+                                   .createStandStorage();
     }
 
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {

@@ -30,7 +30,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 
@@ -54,7 +54,8 @@ public class RepositoryShould {
     public void setUp() {
         boundedContext = newBoundedContext();
         repository = new TestRepo(boundedContext);
-        storageFactory = InMemoryStorageFactory.getInstance();
+        storageFactory = StorageFactorySwitch.getInstance()
+                                             .get();
     }
 
     //

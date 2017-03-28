@@ -36,7 +36,7 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureContext;
 import org.spine3.base.Failures;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
 import org.spine3.type.TypeName;
@@ -83,7 +83,8 @@ public class CommandStorageShould {
     @Before
     public void setUpCommandStorageTest() {
         storage = new CommandStorage();
-        storage.initStorage(InMemoryStorageFactory.getInstance());
+        storage.initStorage(StorageFactorySwitch.getInstance()
+                                                .get());
     }
 
     @After

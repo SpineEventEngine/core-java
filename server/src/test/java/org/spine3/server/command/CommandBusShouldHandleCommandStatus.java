@@ -37,7 +37,8 @@ import org.spine3.client.CommandFactory;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.Durations2;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -76,7 +77,8 @@ public class CommandBusShouldHandleCommandStatus {
 
     @Before
     public void setUp() {
-        final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+        final StorageFactory storageFactory = StorageFactorySwitch.getInstance()
+                                                                  .get();
         commandStore = spy(new CommandStore(storageFactory));
         final ExecutorCommandScheduler scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());

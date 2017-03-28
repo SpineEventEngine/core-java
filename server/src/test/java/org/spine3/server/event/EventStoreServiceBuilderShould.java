@@ -24,7 +24,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Tests;
 
 import java.util.concurrent.Executor;
@@ -34,8 +34,8 @@ import static org.junit.Assert.assertNotNull;
 
 public class EventStoreServiceBuilderShould {
 
-    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
-
+    private final StorageFactory storageFactory = StorageFactorySwitch.getInstance()
+                                                                      .get();
     private EventStore.ServiceBuilder builder;
 
     @Before

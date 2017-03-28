@@ -30,7 +30,7 @@ import org.spine3.server.command.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Tests;
 import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
@@ -49,7 +49,8 @@ public class BoundedContextBuilderShould {
 
     @Before
     public void setUp() {
-        storageFactory = InMemoryStorageFactory.getInstance();
+        storageFactory = StorageFactorySwitch.getInstance()
+                                             .get();
         builder = BoundedContext.newBuilder();
     }
 

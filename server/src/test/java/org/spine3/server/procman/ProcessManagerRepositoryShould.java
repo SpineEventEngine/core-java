@@ -34,6 +34,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
@@ -41,8 +42,8 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
-import org.spine3.base.Subscribe;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
@@ -92,6 +93,10 @@ public class ProcessManagerRepositoryShould
     // Configuration of the test suite
     //---------------------------------
 
+    private static StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance().get();
+    }
+
     @Override
     protected ProjectId createId(int value) {
         return ProjectId.newBuilder()
@@ -103,7 +108,7 @@ public class ProcessManagerRepositoryShould
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(
                 TestBoundedContextFactory.newBoundedContext());
-        repo.initStorage(InMemoryStorageFactory.getInstance());
+        repo.initStorage(storageFactory());
         return repo;
     }
 
@@ -150,7 +155,7 @@ public class ProcessManagerRepositoryShould
                       });
 
         repository = new TestProcessManagerRepository(boundedContext);
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(storageFactory());
         TestProcessManager.clearMessageDeliveryHistory();
     }
 

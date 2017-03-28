@@ -38,7 +38,8 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
 
@@ -239,7 +240,7 @@ public class StandFunnelShould {
                 // Init repository
                 final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
 
-                repository.initStorage(InMemoryStorageFactory.getInstance());
+                repository.initStorage(storageFactory());
 
                 try {
                     // Mock aggregate and mock stand are not able to handle events
@@ -270,12 +271,16 @@ public class StandFunnelShould {
             public void perform(BoundedContext context) {
                 // Init repository
                 final ProjectionRepository repository = Given.projectionRepo(context);
-                repository.initStorage(InMemoryStorageFactory.getInstance());
+                repository.initStorage(storageFactory());
 
                 // Dispatch an update from projection repo
                 repository.dispatch(EventEnvelope.of(Given.validEvent()));
             }
         };
+    }
+
+    private static StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance().get();
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")

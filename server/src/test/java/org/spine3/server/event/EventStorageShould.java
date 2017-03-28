@@ -36,7 +36,7 @@ import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.type.TypeName;
@@ -58,7 +58,7 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.event.Given.AnEventRecord.projectCreated;
 import static org.spine3.server.storage.Given.EventMessage.projectCreated;
 
-public abstract class EventStorageShould {
+public class EventStorageShould {
 
     /** Small positive delta in seconds or milliseconds. */
     private static final int POSITIVE_DELTA = 10;
@@ -86,7 +86,8 @@ public abstract class EventStorageShould {
     @Before
     public void setUpEventStorageTest() {
         storage = new EventStorage();
-        storage.initStorage(InMemoryStorageFactory.getInstance());
+        storage.initStorage(StorageFactorySwitch.getInstance()
+                                                .get());
     }
 
     @After

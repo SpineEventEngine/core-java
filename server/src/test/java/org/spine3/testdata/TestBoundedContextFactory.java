@@ -25,7 +25,8 @@ import org.spine3.server.command.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.stand.Stand;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
@@ -35,7 +36,7 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 @SuppressWarnings("UtilityClass")
 public class TestBoundedContextFactory {
 
-    private static final InMemoryStorageFactory FACTORY = InMemoryStorageFactory.getInstance();
+    private static final StorageFactory FACTORY = StorageFactorySwitch.getInstance().get();
 
     private TestBoundedContextFactory() {
     }

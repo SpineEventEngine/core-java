@@ -29,6 +29,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
+import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -37,7 +38,6 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
-import org.spine3.base.Subscribe;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
 import org.spine3.server.procman.ProcessManager;
@@ -46,7 +46,7 @@ import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.command.AddTask;
@@ -80,7 +80,7 @@ public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+    private final StorageFactory storageFactory = StorageFactorySwitch.getInstance().get();
 
     private final BoundedContext boundedContext = newBoundedContext();
 
@@ -97,7 +97,7 @@ public class BoundedContextShould {
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(storageFactory);
         boundedContext.register(repository);
         boundedContext.getEventBus().register(subscriber);
         handlersRegistered = true;

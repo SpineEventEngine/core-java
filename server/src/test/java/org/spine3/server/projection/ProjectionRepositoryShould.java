@@ -33,6 +33,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.base.Subscribe;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
@@ -41,11 +42,10 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
-import org.spine3.base.Subscribe;
 import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Given;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
@@ -146,7 +146,7 @@ public class ProjectionRepositoryShould
     @Before
     public void setUp() {
         initRepository();
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(storageFactory());
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -365,7 +365,7 @@ public class ProjectionRepositoryShould
         // Set up repository
         final Duration duration = Durations2.seconds(10L);
         final ProjectionRepository repository = spy(new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(storageFactory());
         repository.catchUp();
 
         // Check bulk write
@@ -402,7 +402,7 @@ public class ProjectionRepositoryShould
         final Duration duration = Durations2.nanos(1L);
         final ProjectionRepository repository =
                 spy(new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(storageFactory());
         repository.catchUp();
 
         // Check bulk write
@@ -430,8 +430,12 @@ public class ProjectionRepositoryShould
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
-        repo.initStorage(InMemoryStorageFactory.getInstance());
+        repo.initStorage(storageFactory());
         return repo;
+    }
+
+    private static StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance().get();
     }
 
     /** The projection stub used in tests. */

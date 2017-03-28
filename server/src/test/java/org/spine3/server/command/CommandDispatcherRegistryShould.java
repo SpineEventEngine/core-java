@@ -30,7 +30,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.procman.ProcessManagerRepositoryShould;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.StartProject;
@@ -67,8 +67,8 @@ public class CommandDispatcherRegistryShould {
 
     @Before
     public void setUp() {
-        eventBus = TestEventBusFactory.create(InMemoryStorageFactory.getInstance());
-
+        eventBus = TestEventBusFactory.create(StorageFactorySwitch.getInstance()
+                                                                  .get());
         registry = new CommandDispatcherRegistry();
     }
 
