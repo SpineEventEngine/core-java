@@ -29,12 +29,15 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.test.Tests;
+import org.spine3.test.storage.Project;
+import org.spine3.testdata.Sample;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -48,6 +51,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
@@ -180,6 +187,20 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
+    public void write_none_storage_fields_is_none_passed() {
+        final RecordStorage<I> storage = spy(getStorage());
+        final I id = newId();
+        final Any state = AnyPacker.pack(
+                Sample.messageOfType(Project.class));
+        final EntityRecord record =
+                Sample.<EntityRecord, EntityRecord.Builder>builderForType(EntityRecord.class)
+                      .setState(state)
+                      .build();
+        storage.write(id, record);
+        verify(storage).write(eq(id), withRecordAndNoFields(record));
+    }
+
+    @Test
     public void write_record_bulk() {
         final RecordStorage<I> storage = getStorage();
         final int bulkSize = 5;
@@ -308,5 +329,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Optional<EntityRecord> actualRecord = storage.read(id);
         assertTrue(actualRecord.isPresent());
         assertEquals(record, actualRecord.get());
+    }
+
+    private static EntityRecordWithStorageFields withRecordAndNoFields(final EntityRecord record) {
+        return argThat(new ArgumentMatcher<EntityRecordWithStorageFields>() {
+            @Override
+            public boolean matches(EntityRecordWithStorageFields argument) {
+                return argument.getRecord().equals(record)
+                        && !argument.hasStorageFields();
+            }
+        });
     }
 }

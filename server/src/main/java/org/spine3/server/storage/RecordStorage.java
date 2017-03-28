@@ -116,8 +116,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      */
     @Override
     public void write(I id, EntityRecord record) {
-        final EntityRecordWithStorageFields envelope = new EntityRecordWithStorageFields(record);
-        write(id, envelope);
+        final EntityRecordWithStorageFields recordWithStorageFields = new EntityRecordWithStorageFields(record);
+        write(id, recordWithStorageFields);
     }
 
     /**
