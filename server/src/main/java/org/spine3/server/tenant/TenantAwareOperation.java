@@ -33,10 +33,9 @@ public abstract class TenantAwareOperation extends TenantAware implements Runnab
 
     /**
      * Creates an instance of an operation, which uses the {@code TenantId}
-     * set in the current non-command handling execution context.
+     * set in the execution context.
      *
-     * @throws IllegalStateException if there is no current {@code TenantId}
-     * @see CurrentTenant#ensure()
+     * @throws IllegalStateException if there is no current {@code TenantId} set
      */
     protected TenantAwareOperation() throws IllegalStateException {
         super();

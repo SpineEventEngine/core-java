@@ -45,8 +45,9 @@ class CurrentTenant {
                                                          .setValue("SINGLE_TENANT")
                                                          .build();
 
-    /** Have only static methods for this class. */
-    private CurrentTenant() {}
+    private CurrentTenant() {
+        // Prevent instantiation of this utility class.
+    }
 
     /**
      * Returns a constant for single-tenant applications.

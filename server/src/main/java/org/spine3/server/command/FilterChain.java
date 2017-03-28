@@ -45,7 +45,6 @@ class FilterChain implements CommandBusFilter {
         this.filters = filters;
     }
 
-
     static Builder newBuilder() {
         return new Builder();
     }
