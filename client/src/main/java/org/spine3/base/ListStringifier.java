@@ -32,7 +32,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The stringifier for the {@code List} classes.
@@ -122,17 +121,24 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final Function<T, QuotedListItem<T>> function = new Function<T, QuotedListItem<T>>() {
+        final Function<T, String> convertFunction = new Function<T, String>() {
             @Nullable
             @Override
-            public QuotedListItem<T> apply(@Nullable T input) {
-                if(input == null){
-                    throw newIllegalArgumentException("The list element cannot be null.");
-                }
-                return QuotedListItem.of(input);
+            public String apply(@Nullable T input) {
+                checkNotNull(input);
+                return Stringifiers.toString(input, listGenericClass);
             }
         };
-        final List<QuotedListItem<T>> quotedItems = Lists.transform(list, function);
+        final List<String> convertedList = Lists.transform(list, convertFunction);
+        final Function<String, String> function = new Function<String, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable String input) {
+                checkNotNull(input);
+                return QuotedItem.quote(input);
+            }
+        };
+        final List<String> quotedItems = Lists.transform(convertedList, function);
         final String result = Joiner.on(delimiter)
                                     .join(quotedItems);
         return result;
@@ -142,54 +148,25 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
         final List<String> elements = newArrayList(splitter.split(escapedString));
-        final Function<String, T> function = new Function<String, T>() {
+        final Function<String, String> unquoteFunction = new Function<String, String>() {
+            @Nullable
+            @Override
+            public String apply(@Nullable String input) {
+                checkNotNull(input);
+                return QuotedItem.unquote(input);
+            }
+        };
+        final Function<String, T> convertFunction = new Function<String, T>() {
             @Nullable
             @Override
             public T apply(@Nullable String input) {
                 checkNotNull(input);
-                return QuotedListItem.parse(input, listGenericClass);
+                return Stringifiers.convert(input, listGenericClass);
             }
         };
-        final List<T> result = newArrayList(Lists.transform(elements, function));
+        final List<String> unquotedList = newArrayList(Lists.transform(elements, unquoteFunction));
+        final List<T> result = newArrayList(Lists.transform(unquotedList, convertFunction));
         return result;
     }
 
-    /**
-     * Encloses and discloses each element of the list into and from quotes
-     *
-     * @param <T> the type of the elements in the list
-     */
-    private static class QuotedListItem<T> extends Stringifiers.QuotedItem {
-
-        private final T object;
-        private final Class<T> genericClass;
-
-        @SuppressWarnings("unchecked")
-        // It is OK because the class is same.
-        private QuotedListItem(T object) {
-            this.object = object;
-            this.genericClass = (Class<T>) object.getClass();
-        }
-
-        static <T> QuotedListItem<T> of(T object) {
-            return new QuotedListItem<>(object);
-        }
-
-        static <T> T parse(String elementToParse, Class<T> genericClass) {
-            checkElement(elementToParse);
-            return Stringifiers.convert(unquote(elementToParse), genericClass);
-        }
-
-        private static void checkElement(CharSequence element) {
-            final boolean isQuoted = isQuotedString(element);
-            if (!isQuoted) {
-                throw newIllegalArgumentException("Illegal format of the element: " + element);
-            }
-        }
-
-        @Override
-        public String toString() {
-            return quote(Stringifiers.toString(object, genericClass));
-        }
-    }
 }

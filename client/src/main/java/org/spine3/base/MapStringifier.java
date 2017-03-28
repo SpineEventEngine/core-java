@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Maps;
@@ -27,9 +28,11 @@ import com.google.common.escape.Escaper;
 
 import javax.annotation.Nullable;
 import java.util.AbstractMap;
+import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
@@ -120,6 +123,14 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
     }
 
+    private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
+                                                       String keyValuePattern) {
+        final Splitter.MapSplitter result =
+                Splitter.onPattern(bucketPattern)
+                        .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
+        return result;
+    }
+
     private static String createBucketPattern(char delimiter) {
         return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
                       .pattern();
@@ -132,11 +143,24 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Maps.EntryTransformer<K, V, QuotedMapItem<K, V>> transformer =
-                getFromMapEntryTransformer();
-        final Map<K, QuotedMapItem<K, V>> escapedMap = Maps.transformEntries(obj, transformer);
+        final Maps.EntryTransformer<K, V, Map.Entry<String, String>> transformer =
+                entryTransformer();
+        final Collection<Map.Entry<String, String>> convertedEntries =
+                Maps.transformEntries(obj, transformer)
+                    .values();
+
+       final Function<Map.Entry<String, String>, Map.Entry<String, String>> function =
+               quotedTransformer();
+        final Map<String, String> resultMap = newHashMap();
+        for (Map.Entry<String, String> entry : convertedEntries) {
+            Map.Entry<String, String> quotedEntry = function.apply(entry);
+            checkNotNull(quotedEntry);
+            resultMap.put(quotedEntry.getKey(), quotedEntry.getValue());
+        }
+
         final String result = Joiner.on(delimiter)
-                                    .join(escapedMap.values());
+                                    .withKeyValueSeparator(KEY_VALUE_DELIMITER)
+                                    .join(resultMap);
         return result;
     }
 
@@ -146,120 +170,94 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final Map<K, V> resultMap = newHashMap();
 
         final Map<String, String> buckets = splitter.split(escapedString);
-        final Maps.EntryTransformer<String, String, Map.Entry<K, V>> transformer =
-                getToMapEntryTransformer();
-        final Map<String, Map.Entry<K, V>> transformedMap =
-                Maps.transformEntries(buckets, transformer);
+        final Maps.EntryTransformer<String, String, Map.Entry<String, String>> unquoteTransformer =
+                unquotedTransformer();
+        final Map<String, Map.Entry<String, String>> transformedMap =
+                Maps.transformEntries(buckets, unquoteTransformer);
 
-        for (Map.Entry<K, V> bucket : transformedMap.values()) {
-            resultMap.put(bucket.getKey(), bucket.getValue());
+        for (Map.Entry<String, String> entry : transformedMap.values()) {
+            final Map.Entry<K, V> convertedEntry = convert(entry.getKey(), entry.getValue());
+            resultMap.put(convertedEntry.getKey(), convertedEntry.getValue());
         }
+
         return resultMap;
     }
 
-    private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
-                                                       String keyValuePattern) {
-        final Splitter.MapSplitter result =
-                Splitter.onPattern(bucketPattern)
-                        .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
-        return result;
+    private Map.Entry<K, V> convert(String keyToConvert, String value) {
+        try {
+            final K convertedKey = Stringifiers.convert(keyToConvert, keyClass);
+            final V convertedValue = Stringifiers.convert(value, valueClass);
+            final Map.Entry<K, V> convertedBucket =
+                    new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
+            return convertedBucket;
+        } catch (Throwable e) {
+            throw newIllegalArgumentException("The exception occurred during the conversion", e);
+        }
     }
 
-    private Maps.EntryTransformer<K, V, QuotedMapItem<K, V>> getFromMapEntryTransformer() {
-        return new Maps.EntryTransformer<K, V, QuotedMapItem<K, V>>() {
+    private Maps.EntryTransformer<K, V, Map.Entry<String, String>> entryTransformer() {
+        return new Maps.EntryTransformer<K, V, Map.Entry<String, String>>() {
             @Override
-            public QuotedMapItem<K, V> transformEntry(@Nullable K key, @Nullable V value) {
-                if (key == null || value == null) {
-                    throw newIllegalArgumentException("The key and value cannot be null.");
-                }
-                return QuotedMapItem.of(key, value);
+            public Map.Entry<String, String> transformEntry(@Nullable K key, @Nullable V value) {
+                checkNotNull(key);
+                checkNotNull(value);
+
+                final String convertedKey = Stringifiers.toString(key, keyClass);
+                final String convertedValue = Stringifiers.toString(value, valueClass);
+                final AbstractMap.SimpleEntry<String, String> entry =
+                        new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
+                return entry;
             }
         };
     }
 
-    private Maps.EntryTransformer<String, String, Map.Entry<K, V>> getToMapEntryTransformer() {
-        return new Maps.EntryTransformer<String, String, Map.Entry<K, V>>() {
+    private static Function<Map.Entry<String, String>,
+                            Map.Entry<String, String>> quotedTransformer() {
+        final Function<Map.Entry<String, String>, Map.Entry<String, String>> function =
+                new Function<Map.Entry<String, String>, Map.Entry<String, String>>() {
+                    @Nullable
+                    @Override
+                    public Map.Entry<String, String> apply(
+                            @Nullable Map.Entry<String, String> input) {
+                        checkNotNull(input);
+                        final String key = input.getKey();
+                        final String value = input.getValue();
+                        checkNotNull(key);
+                        checkNotNull(value);
+
+                        final String quotedKey = QuotedItem.quote(key);
+                        final String quotedValue = QuotedItem.quote(value);
+                        final Map.Entry<String, String> result =
+                                new AbstractMap.SimpleEntry<>(quotedKey, quotedValue);
+                        return result;
+                    }
+                };
+        return function;
+    }
+
+    private static Maps.EntryTransformer<String,
+                                         String,
+                                         Map.Entry<String, String>> unquotedTransformer() {
+        return new Maps.EntryTransformer<String, String, Map.Entry<String, String>>() {
             @Override
-            public Map.Entry<K, V> transformEntry(@Nullable String key,
-                                                  @Nullable String value) {
-                final Map.Entry<K, V> result =
-                        QuotedMapItem.parse(new AbstractMap.SimpleEntry<>(key, value),
-                                            new AbstractMap.SimpleEntry<>(keyClass, valueClass));
+            public Map.Entry<String, String> transformEntry(@Nullable String key,
+                                                            @Nullable String value) {
+                checkNotNull(key);
+                checkNotNull(value);
+
+                if (!QuotedItem.isQuotedString(key) || !QuotedItem.isQuotedString(value)) {
+                    final String exMessage =
+                            "Illegal key-value format. The key-value should be quoted " +
+                            "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
+                    throw newIllegalArgumentException(exMessage);
+                }
+
+                final String unquotedKey = QuotedItem.unquote(key);
+                final String unquotedValue = QuotedItem.unquote(value);
+                final Map.Entry<String, String> result =
+                        new AbstractMap.SimpleEntry<>(unquotedKey, unquotedValue);
                 return result;
             }
         };
-    }
-
-    /**
-     * Encloses and discloses each key value from the {@code Map} into and from quotes.
-     *
-     * @param <K> the type of the keys in the map
-     * @param <V> the type of the values in the map
-     */
-    private static class QuotedMapItem<K, V> extends Stringifiers.QuotedItem {
-        private final K key;
-        private final V value;
-        private final Class<K> keyClass;
-        private final Class<V> valueClass;
-
-        @SuppressWarnings("unchecked")
-        // It is OK because the classes are same.
-        private QuotedMapItem(K key, V value) {
-            this.key = key;
-            this.value = value;
-            this.keyClass = (Class<K>) key.getClass();
-            this.valueClass = (Class<V>) value.getClass();
-        }
-
-       private static <K, V> QuotedMapItem<K, V> of(K key, V value) {
-            return new QuotedMapItem<>(key, value);
-        }
-
-        static <K, V> Map.Entry<K, V> parse(Map.Entry<String, String> entryToParse,
-                                            Map.Entry<Class<K>, Class<V>> classEntry) {
-            checkKeyValue(entryToParse);
-            return convert(entryToParse, classEntry);
-        }
-
-        private static <K, V> Map.Entry<K, V> convert(Map.Entry<String, String> entryToParse,
-                                                      Map.Entry<Class<K>, Class<V>> classEntry) {
-            final String key = Stringifiers.QuotedItem.unquote(entryToParse.getKey());
-            final String value = Stringifiers.QuotedItem.unquote(entryToParse.getValue());
-
-            try {
-                final K convertedKey = Stringifiers.convert(key, classEntry.getKey());
-                final V convertedValue = Stringifiers.convert(value,
-                                                              classEntry.getValue());
-                final Map.Entry<K, V> convertedBucket =
-                        new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
-                return convertedBucket;
-            } catch (Throwable e) {
-                throw newIllegalArgumentException("The exception occurred during the conversion",
-                                                  e);
-            }
-        }
-
-        private static void checkKeyValue(Map.Entry<String, String> entryToCheck) {
-            if (!isQuotedKeyValue(entryToCheck.getKey(), entryToCheck.getValue())) {
-                final String exMessage =
-                        "Illegal key-value format. The key-value should be quoted " +
-                        "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
-                throw newIllegalArgumentException(exMessage);
-            }
-        }
-
-        private static boolean isQuotedKeyValue(CharSequence key, CharSequence value) {
-            final boolean result = Stringifiers.QuotedItem.isQuotedString(key) &&
-                                   Stringifiers.QuotedItem.isQuotedString(value);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            final String keyToQuote = Stringifiers.toString(key, keyClass);
-            final String valueToQuote =  Stringifiers.toString(value, valueClass);
-            final String result = quote(keyToQuote) + KEY_VALUE_DELIMITER + quote(valueToQuote);
-            return result;
-        }
     }
 }

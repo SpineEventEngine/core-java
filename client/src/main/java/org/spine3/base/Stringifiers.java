@@ -28,7 +28,6 @@ import com.google.common.primitives.Longs;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.StringifierRegistry.getStringifier;
@@ -76,7 +75,7 @@ public class Stringifiers {
         checkNotNull(object);
         checkNotNull(typeOfT);
 
-        if(isString(typeOfT)){
+        if (isString(typeOfT)) {
             return (String) object;
         }
 
@@ -266,56 +265,6 @@ public class Stringifiers {
         protected Integer fromString(String s) {
             return Ints.stringConverter()
                        .convert(s);
-        }
-    }
-
-    /**
-     * Serves as enclosure and disclosure for the elements into and from quotes.
-     */
-    abstract static class QuotedItem{
-
-        private static final char QUOTE_SYMBOL = '\"';
-
-        /**
-         * Removes prior and further escaped quotes.
-         *
-         * @param value the value to unquote
-         * @return unquoted value
-         */
-        static String unquote(String value) {
-            checkNotNull(value);
-
-            final String unquotedValue = Pattern.compile("\\\\")
-                                                .matcher(value.substring(2, value.length() - 2))
-                                                .replaceAll("");
-            return unquotedValue;
-        }
-
-        static String quote(String stringToQuote) {
-            return QUOTE_SYMBOL + stringToQuote + QUOTE_SYMBOL;
-        }
-
-        /**
-         * Checks that the {@code CharSequence} contains escaped quotes.
-         *
-         * @param stringToCheck the sequence of chars to check
-         * @return {@code true} if sequence contains further
-         * and prior escaped quotes, {@code false} otherwise
-         */
-        static boolean isQuotedString(CharSequence stringToCheck) {
-            final int stringLength = stringToCheck.length();
-
-            if (stringLength < 2) {
-                return false;
-            }
-
-            boolean result = isQuote(stringToCheck.charAt(1)) &&
-                             isQuote(stringToCheck.charAt(stringLength - 1));
-            return result;
-        }
-
-        private static boolean isQuote(char character) {
-            return character == QUOTE_SYMBOL;
         }
     }
 }
