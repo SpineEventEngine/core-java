@@ -130,4 +130,25 @@ public class CommandBusBuilderShould {
                                              .setCommandStore(commandStore)
                                              .getCommandStore());
     }
+
+    @Test
+    public void allow_adding_filter() {
+        final CommandBusFilter filter = mock(CommandBusFilter.class);
+
+        assertTrue(CommandBus.newBuilder()
+                             .add(filter)
+                             .getFilters()
+                             .contains(filter));
+    }
+
+    @Test
+    public void allow_removing_filter() {
+        final CommandBusFilter filter = mock(CommandBusFilter.class);
+
+        assertFalse(CommandBus.newBuilder()
+                              .add(filter)
+                              .remove(filter)
+                              .getFilters()
+                              .contains(filter));
+    }
 }

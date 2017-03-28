@@ -190,10 +190,15 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         responseObserver.onCompleted();
     }
 
+    /**
+     * Does nothing because commands for which are no registered dispatchers
+     * are rejected by a built-in {@link CommandBusFilter} invoked when such a command is
+     * {@linkplain #post(Command, StreamObserver) posted} to the bus.
+     */
     @Override
     public void handleDeadMessage(CommandEnvelope message,
                                   StreamObserver<Response> responseObserver) {
-        // Do nothing because this is the responsibility of DeadCommandFilter.
+        // Do nothing because this is the responsibility of `DeadCommandFilter`.
     }
 
     /**
@@ -351,11 +356,13 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         }
 
         public Builder add(CommandBusFilter filter) {
+            checkNotNull(filter);
             filters.add(filter);
             return this;
         }
 
         public Builder remove(CommandBusFilter filter) {
+            checkNotNull(filter);
             filters.remove(filter);
             return this;
         }

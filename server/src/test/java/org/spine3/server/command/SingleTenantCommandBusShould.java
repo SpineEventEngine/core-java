@@ -20,8 +20,12 @@
 
 package org.spine3.server.command;
 
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.Response;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -78,5 +82,11 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
                           InvalidCommandException.class,
                           cmd);
         assertTrue(responseObserver.getResponses().isEmpty());
+    }
+
+    @Test
+    public void do_nothing_in_handleDeadMessage() {
+        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef(),
+                                     Tests.<StreamObserver<Response>>nullRef());
     }
 }
