@@ -84,13 +84,8 @@ class FilterChain implements CommandBusFilter {
             return this;
         }
 
-        Builder add(CommandBusFilter filter) {
-            filters.add(filter);
-            return this;
-        }
-
-        Builder remove(CommandBusFilter filter) {
-            filters.remove(filter);
+        Builder addFilters(List<CommandBusFilter> filters) {
+            this.filters.addAll(filters);
             return this;
         }
 

@@ -21,6 +21,8 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
@@ -32,6 +34,7 @@ import org.spine3.server.failure.FailureBus;
 import org.spine3.type.CommandClass;
 import org.spine3.util.Environment;
 
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -292,6 +295,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
         private FailureBus failureBus;
 
+        private final List<CommandBusFilter> filters = Lists.newArrayList();
+
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
          * the current runtime environment.
@@ -345,6 +350,23 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return this;
         }
 
+        public Builder add(CommandBusFilter filter) {
+            filters.add(filter);
+            return this;
+        }
+
+        public Builder remove(CommandBusFilter filter) {
+            filters.remove(filter);
+            return this;
+        }
+
+        /**
+         * Obtains immutable list of added filters.
+         */
+        public List<CommandBusFilter> getFilters() {
+            return ImmutableList.copyOf(filters);
+        }
+
         /**
          * Enables or disables creating threads for {@code CommandBus} operations.
          *
@@ -391,8 +413,9 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
          * Builds an instance of {@link CommandBus}.
          */
         public CommandBus build() {
-            checkState(commandStore != null,
-                       "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
+            checkState(
+                    commandStore != null,
+                    "CommandStore must be set. Please call CommandBus.Builder.setCommandStore()."
             );
 
             if (commandScheduler == null) {
@@ -408,10 +431,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
                                        .build();
             }
 
-            final CommandBus commandBus = new CommandBus(this);
-            // Enforce creating the registry to make spying in tests work.
-            commandBus.registry();
-            setFilterChain(commandBus);
+            final CommandBus commandBus = createCommandBus();
             
             commandScheduler.setCommandBus(commandBus);
 
@@ -422,9 +442,20 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return commandBus;
         }
 
+        private CommandBus createCommandBus() {
+            final CommandBus commandBus = new CommandBus(this);
+
+            // Enforce creating the registry to make spying for CommandBus-es in tests work.
+            commandBus.registry();
+
+            setFilterChain(commandBus);
+            return commandBus;
+        }
+
         private void setFilterChain(CommandBus commandBus) {
             final CommandBusFilter filterChain = FilterChain.newBuilder()
                                                             .setCommandBus(commandBus)
+                                                            .addFilters(getFilters())
                                                             .setCommandScheduler(commandScheduler)
                                                             .build();
             commandBus.setFilterChain(filterChain);
