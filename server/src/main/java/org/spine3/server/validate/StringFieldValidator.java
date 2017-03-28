@@ -48,8 +48,8 @@ class StringFieldValidator extends FieldValidator<String> {
      * @param descriptor    a descriptor of the field to validate
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
-     * @param strict        if {@code true} the validator would assume that the field is required even
-     *                      if the corresponding option is not set
+     * @param strict        if {@code true} the validator would assume that the field is required
+     *                      even if the corresponding option is not set
      */
     StringFieldValidator(FieldDescriptor descriptor,
                          ImmutableList<String> fieldValues,
