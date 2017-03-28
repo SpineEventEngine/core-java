@@ -124,7 +124,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      * @param log                a problem logger
      * @param threadSpawnAllowed whether the current runtime environment allows manual thread spawn
      */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances only store the reference.
+    @SuppressWarnings("ThisEscapedInObjectConstruction") // is OK because helper instances
+                                                         // only store the reference.
     private CommandBus(CommandStore commandStore,
                              CommandScheduler scheduler,
                              FailureBus failureBus,
