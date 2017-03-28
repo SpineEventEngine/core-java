@@ -501,7 +501,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
-     * Implementation of the {@link BulkWriteOperation.FlushCallback FlushCallback} for storing
+     * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
     private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>

@@ -38,7 +38,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.6-SNAPSHOT'
+        spineToolsVersion = '0.8.7-SNAPSHOT'
     }
 
     dependencies {
@@ -117,7 +117,18 @@ subprojects {
 
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
+
     apply plugin: 'org.spine3.tools.javadoc-checker'
+    // Javadoc checker plugin allows finding FQN links with the wrong format.
+    // "threshold" - is a number of bearable wrong links that triggers a response.
+    // "responseType" - can be either "error" or "warn"
+    //      "warn" type allows to see all errors in build result records without failing it.
+    //      "error" type will fail the build process.
+    //      For more details please see org.spine3.tools.javadoc-checker.Response
+    checkJavadoc {
+        threshold = 0
+        responseType = "warn"
+    }
 
     sourceCompatibility = 1.7
     targetCompatibility = 1.7
