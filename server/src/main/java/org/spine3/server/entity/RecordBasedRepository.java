@@ -35,7 +35,7 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.entity.storage.StorageFields;
-import org.spine3.server.entity.storage.reflect.Column;
+import org.spine3.server.entity.storage.Column;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -292,7 +292,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     protected EntityRecordWithStorageFields toRecord(E entity) {
         final EntityRecord entityRecord = entityConverter().convert(entity);
         final Map<String, Column.MemoizedValue<?>> storageFields = StorageFields.from(entity);
-        final EntityRecordWithStorageFields envelope = new EntityRecordWithStorageFields(entityRecord, storageFields);
+        final EntityRecordWithStorageFields envelope =
+                EntityRecordWithStorageFields.newInstance(entityRecord, storageFields);
         return envelope;
     }
 

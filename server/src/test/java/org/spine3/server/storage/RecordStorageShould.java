@@ -69,6 +69,16 @@ import static org.spine3.validate.Validate.isDefault;
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
        extends AbstractStorageShould<I, EntityRecord, S> {
 
+    private static final Function<EntityRecordWithStorageFields, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
+            new Function<EntityRecordWithStorageFields, EntityRecord>() {
+                @Override
+                public EntityRecord apply(
+                        @Nullable EntityRecordWithStorageFields entityRecord) {
+                    assertNotNull(entityRecord);
+                    return entityRecord.getRecord();
+                }
+            };
+
     protected abstract Message newState(I id);
 
     @Override
@@ -210,7 +220,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            initial.put(id, new EntityRecordWithStorageFields(record));
+            initial.put(id, EntityRecordWithStorageFields.newInstance(record));
         }
         storage.write(initial);
 
@@ -219,13 +229,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         );
         final Collection<EntityRecord> expected =
                 Collections2.transform(initial.values(),
-                                       new Function<EntityRecordWithStorageFields, EntityRecord>() {
-                                           @Override
-                                           public EntityRecord apply(@Nullable EntityRecordWithStorageFields record) {
-                                               assertNotNull(record);
-                                               return record.getRecord();
-                                           }
-                                       });
+                                       RECORD_EXTRACTOR_FUNCTION);
 
         assertEquals(expected.size(), actual.size());
         assertTrue(actual.containsAll(expected));
@@ -246,7 +250,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                         if (record == null) {
                             return null;
                         }
-                        return new EntityRecordWithStorageFields(record);
+                        return EntityRecordWithStorageFields.newInstance(record);
                     }
                 };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
@@ -308,7 +312,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, new EntityRecordWithStorageFields(record));
+        storage.write(id, EntityRecordWithStorageFields.newInstance(record));
 
         storage.writeLifecycleFlags(id, archived());
 
@@ -321,7 +325,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void accept_records_with_empty_storage_fields() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final EntityRecordWithStorageFields recordWithStorageFields = new EntityRecordWithStorageFields(record);
+        final EntityRecordWithStorageFields recordWithStorageFields =
+                EntityRecordWithStorageFields.newInstance(record);
         assertFalse(recordWithStorageFields.hasStorageFields());
         final RecordStorage<I> storage = getStorage();
 

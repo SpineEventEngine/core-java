@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import org.junit.Test;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.storage.Column;
 import org.spine3.test.Given;
 
 import javax.annotation.Nullable;

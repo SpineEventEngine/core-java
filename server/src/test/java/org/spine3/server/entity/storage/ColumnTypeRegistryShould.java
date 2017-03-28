@@ -21,7 +21,6 @@
 package org.spine3.server.entity.storage;
 
 import org.junit.Test;
-import org.spine3.server.entity.storage.reflect.Column;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -87,12 +86,12 @@ public class ColumnTypeRegistryShould {
     private static class AnyType implements ColumnType {
 
         @Override
-        public Object convert(Object fieldValue) {
+        public Object convertColumnValue(Object fieldValue) {
             return fieldValue;
         }
 
         @Override
-        public void set(Object storageRecord, Object value, Object columnIdentifier) {
+        public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
             // NOP
         }
     }

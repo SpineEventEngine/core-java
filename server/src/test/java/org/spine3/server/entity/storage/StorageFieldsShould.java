@@ -27,7 +27,6 @@ import org.junit.Test;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.reflect.Column;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 

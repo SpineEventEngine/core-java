@@ -27,7 +27,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.annotations.Internal;
 import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.storage.reflect.Column;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -42,19 +41,20 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
+import static java.lang.String.format;
 
 /**
  * A utility for generating the Storage fields {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
- * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean getter spec</a>
- * are considered as Storage Fields and indexed respectively.
+ * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean</a>
+ *  getter spec are considered Storage Fields and indexed respectively.
  *
- * <p>When passing an instance of already known {@link Entity} type, the methods are retrieved form
+ * <p>When passing an instance of already known {@link Entity} type, the methods are retrieved from
  * a cache and are not updated.
  *
- * <p>There are several excluded methods, which are never indexed and are <b>NOT</b> considered as
- * Storage Fields:
+ * <p>There are several excluded methods, which are never taken into account and are
+ * <b>not</b> considered Storage Fields:
  * <ul>
  *     <li>{@link Object#getClass()}
  *     <li>{@link Entity#getId()}
@@ -64,8 +64,8 @@ import static com.google.common.collect.Multimaps.synchronizedListMultimap;
  *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate#getBuilder()}
  * </ul>
  *
- * <p>Note: if creating a getter method with a name which intersects with one of these methods'
- * names, your getter method will also <b>NOT</b> be considered as a Storage Field.
+ * <p>Note: if creating a getter method with a name which intersects with one of these method
+ * names, your getter method will also <b>not</b> be considered a Storage Field.
  *
  * @author Dmytro Dashenkov
  * @see Column
@@ -99,10 +99,11 @@ public class StorageFields {
                     LinkedListMultimap.<Class<? extends Entity>, Column<?>>create());
 
     private StorageFields() {
+        // Prevent initialization of a utility class
     }
 
     /**
-     * @return an {@link Collections#emptyMap()} with the type of the storage fields map
+     * @return an {@link Collections#emptyMap()} with the type of the Storage Fields map
      */
     @Internal
     public static Map<String, Column.MemoizedValue<?>> empty() {
@@ -128,7 +129,9 @@ public class StorageFields {
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            log().warn(NON_PUBLIC_CLASS_WARNING);
+            log().warn(
+                    format(NON_PUBLIC_CLASS_WARNING,
+                           entityType.getCanonicalName()));
             return Collections.emptyMap();
         }
 

@@ -22,7 +22,6 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
-import org.spine3.server.entity.storage.reflect.Column;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,10 +39,10 @@ public class ColumnTypeRegistry {
 
     private static final ColumnTypeRegistry EMPTY_INSTANCE = newBuilder().build();
 
-    private final Map<Class, ColumnType> columnTypeMap;
+    private final ImmutableMap<Class, ColumnType> columnTypeMap;
 
-    private ColumnTypeRegistry(Map<Class, ColumnType> columnTypeMap) {
-        this.columnTypeMap = columnTypeMap;
+    private ColumnTypeRegistry(Builder builder) {
+        this.columnTypeMap = ImmutableMap.copyOf(builder.columnTypeMap);
     }
 
     /**
@@ -104,7 +103,7 @@ public class ColumnTypeRegistry {
         }
 
         public ColumnTypeRegistry build() {
-            return new ColumnTypeRegistry(ImmutableMap.copyOf(columnTypeMap));
+            return new ColumnTypeRegistry(this);
         }
     }
 }

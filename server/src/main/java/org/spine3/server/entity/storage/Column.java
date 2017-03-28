@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage.reflect;
+package org.spine3.server.entity.storage;
 
 import org.spine3.server.entity.Entity;
 
@@ -33,6 +33,8 @@ import static java.lang.String.format;
 
 /**
  * A reflective representation of a Storage Field.
+ *
+ * <p>This class manages the access to the Storage Field value and the reference to its declaration.
  *
  * @author Dmytro Dashenkov
  */
@@ -172,7 +174,9 @@ public class Column<T> {
     }
 
     /**
-     * A memoized in a point in time value of the Storage Field.
+     * A value of a Storage Field saved at some point in time.
+     *
+     * <p>The class associates the Storage Field value with its metadata - {@linkplain Column}.
      *
      * @param <T> the type of the Storage Field
      */

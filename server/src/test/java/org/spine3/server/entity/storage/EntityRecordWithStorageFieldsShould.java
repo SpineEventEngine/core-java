@@ -24,7 +24,6 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.reflect.Column;
 import org.spine3.testdata.Sample;
 
 import java.util.Collections;
@@ -45,15 +44,15 @@ public class EntityRecordWithStorageFieldsShould {
     @Test
     public void initialize_with_record_and_storage_fields() {
         final EntityRecordWithStorageFields envelope =
-                new EntityRecordWithStorageFields(EntityRecord.getDefaultInstance(),
-                                                  Collections.<String, Column.MemoizedValue<?>>emptyMap());
+                EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance(),
+                                                          Collections.<String, Column.MemoizedValue<?>>emptyMap());
         assertNotNull(envelope);
     }
 
     @Test
     public void initialize_with_record_only() {
         final EntityRecordWithStorageFields envelope =
-                new EntityRecordWithStorageFields(EntityRecord.getDefaultInstance());
+                EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance());
         assertNotNull(envelope);
     }
 
@@ -78,8 +77,8 @@ public class EntityRecordWithStorageFieldsShould {
                 Collections.<String, Column.MemoizedValue<?>>singletonMap("some-key", mockValue);
 
         final EntityRecordWithStorageFields envelope =
-                new EntityRecordWithStorageFields(Sample.messageOfType(EntityRecord.class),
-                                                  storageFieldsExpected);
+                EntityRecordWithStorageFields.newInstance(Sample.messageOfType(EntityRecord.class),
+                                                          storageFieldsExpected);
         assertTrue(envelope.hasStorageFields());
 
         final Map<String, Column.MemoizedValue<?>> storageFieldActual =
@@ -89,8 +88,8 @@ public class EntityRecordWithStorageFieldsShould {
 
     @Test
     public void return_empty_map_if_no_storage_fields() {
-        final EntityRecordWithStorageFields envelope = new EntityRecordWithStorageFields(
-                EntityRecord.getDefaultInstance());
+        final EntityRecordWithStorageFields envelope =
+                EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance());
         assertFalse(envelope.hasStorageFields());
         final Map<String, Column.MemoizedValue<?>> fields = envelope.getStorageFields();
         assertEmpty(fields);
@@ -99,17 +98,19 @@ public class EntityRecordWithStorageFieldsShould {
     @Test
     public void have_equals() {
         final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
-        final EntityRecordWithStorageFields noFieldsEnvelope = new EntityRecordWithStorageFields(
-                EntityRecord.getDefaultInstance()
-        );
-        final EntityRecordWithStorageFields emptyFieldsEnvelope = new EntityRecordWithStorageFields(
-                EntityRecord.getDefaultInstance(),
-                Collections.<String, Column.MemoizedValue<?>>emptyMap()
-        );
-        final EntityRecordWithStorageFields notEmptyFieldsEnvelope = new EntityRecordWithStorageFields(
-                EntityRecord.getDefaultInstance(),
-                Collections.<String, Column.MemoizedValue<?>>singletonMap("key", mockValue)
-        );
+        final EntityRecordWithStorageFields noFieldsEnvelope =
+                EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance()
+                );
+        final EntityRecordWithStorageFields emptyFieldsEnvelope =
+                EntityRecordWithStorageFields.newInstance(
+                        EntityRecord.getDefaultInstance(),
+                        Collections.<String, Column.MemoizedValue<?>>emptyMap()
+                );
+        final EntityRecordWithStorageFields notEmptyFieldsEnvelope =
+                EntityRecordWithStorageFields.newInstance(
+                        EntityRecord.getDefaultInstance(),
+                        Collections.<String, Column.MemoizedValue<?>>singletonMap("key", mockValue)
+                );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
                 .addEqualityGroup(newEnvelope())
@@ -117,10 +118,8 @@ public class EntityRecordWithStorageFieldsShould {
                 .testEquals();
     }
 
-
-
     private static EntityRecordWithStorageFields newEnvelope() {
-        return new EntityRecordWithStorageFields(Sample.messageOfType(EntityRecord.class),
-                                                 Collections.<String, Column.MemoizedValue<?>>emptyMap());
+        return EntityRecordWithStorageFields.newInstance(Sample.messageOfType(EntityRecord.class),
+                                                         Collections.<String, Column.MemoizedValue<?>>emptyMap());
     }
 }

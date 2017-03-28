@@ -22,7 +22,6 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.reflect.Column;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -30,11 +29,12 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A packed value of an {@link EntityRecord} with its {@linkplain StorageFields storage fields}.
+ * An associated with its {@linkplain StorageFields Storage Fields} value of
+ * an {@link EntityRecord}.
  *
  * @author Dmytro Dashenkov
  */
-public class EntityRecordWithStorageFields {
+public final class EntityRecordWithStorageFields {
 
     private final EntityRecord record;
 
@@ -45,17 +45,17 @@ public class EntityRecordWithStorageFields {
      * Creates a new instance of the {@code EntityRecordWithStorageFields}.
      *
      * @param record        {@link EntityRecord} to pack
-     * @param storageFields {@linkplain StorageFields storage fields map} to pack
+     * @param storageFields {@linkplain StorageFields Storage Fields map} to pack
      */
-    public EntityRecordWithStorageFields(EntityRecord record,
-                                         Map<String, Column.MemoizedValue<?>> storageFields) {
+    private EntityRecordWithStorageFields(EntityRecord record,
+                                          Map<String, Column.MemoizedValue<?>> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
     }
 
     /**
      * Creates an instance of the {@link EntityRecordWithStorageFields} with no
-     * {@linkplain StorageFields storage fields}.
+     * {@linkplain StorageFields Storage Fields}.
      *
      * <p>An object created with this constructor will always return {@code false} on
      * {@link #hasStorageFields()}.
@@ -63,10 +63,19 @@ public class EntityRecordWithStorageFields {
      * @param record {@link EntityRecord} to pack
      * @see #hasStorageFields()
      */
-    @SuppressWarnings("ConstantConditions") // null value for the storage fields map
-    public EntityRecordWithStorageFields(EntityRecord record) {
+    @SuppressWarnings("ConstantConditions") // null value for the Storage Fields map
+    private EntityRecordWithStorageFields(EntityRecord record) {
         this.record = checkNotNull(record);
         this.storageFields = null;
+    }
+
+    public static EntityRecordWithStorageFields newInstance(EntityRecord record,
+                                                     Map<String, Column.MemoizedValue<?>> storageFields) {
+        return new EntityRecordWithStorageFields(record, storageFields);
+    }
+
+    public static EntityRecordWithStorageFields newInstance(EntityRecord record) {
+        return new EntityRecordWithStorageFields(record);
     }
 
     public EntityRecord getRecord() {
@@ -81,10 +90,10 @@ public class EntityRecordWithStorageFields {
     }
 
     /**
-     * Shows whether there were any storage fields passed in the object initialization or not.
+     * Determines whether there are any Storage Fields for this record.
      *
-     * <p>If returns {@code false}, the {@linkplain StorageFields storage field} are not considered
-     * in the storage and
+     * <p>If returns {@code false}, the {@linkplain StorageFields Storage Fields} are not considered
+     * by the storage.
      *
      * @return {@code true} if current object was constructed with
      * {@linkplain #EntityRecordWithStorageFields(EntityRecord, Map)} and {@code false} if it was
