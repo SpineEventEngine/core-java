@@ -39,7 +39,8 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 
 /**
- * The default mechanism for enriching messages based on {@code FieldOptions} of Protobuf message definitions.
+ * The default mechanism for enriching messages based on {@code FieldOptions}
+ * of Protobuf message definitions.
  *
  * @param <S> a type of the source event message to enrich
  * @param <T> a type of the target enrichment message
@@ -85,7 +86,8 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
         final ReferenceValidator referenceValidator = new ReferenceValidator(enricher,
                                                                              getEventClass(),
                                                                              getEnrichmentClass());
-        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction> map = ImmutableMultimap.builder();
+        final ImmutableMultimap.Builder<Class<?>, EnrichmentFunction> map =
+                                                                      ImmutableMultimap.builder();
         final ReferenceValidator.ValidationResult validationResult = referenceValidator.validate();
         final List<EnrichmentFunction<?, ?>> fieldFunctions = validationResult.getFunctions();
         for (EnrichmentFunction<?, ?> fieldFunction : fieldFunctions) {
@@ -133,7 +135,8 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
         checkState(!fieldFunctions.isEmpty(), "fieldFunctions is empty");
     }
 
-    @SuppressWarnings({"ConstantConditions", "MethodWithMultipleLoops"}) // it is assured that collections are not null
+    @SuppressWarnings({"ConstantConditions", "MethodWithMultipleLoops"}) // it is assured that
+                                                                         // collections are not null
     private void setFields(Message.Builder builder, S eventMsg) {
         for (FieldDescriptor srcField : fieldMap.keySet()) {
             final Object srcFieldValue = getSrcFieldValue(srcField, eventMsg);

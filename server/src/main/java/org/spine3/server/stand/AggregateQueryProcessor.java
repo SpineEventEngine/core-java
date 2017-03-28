@@ -142,7 +142,8 @@ class AggregateQueryProcessor implements QueryProcessor {
         final boolean applyFieldMask = !fieldMask.getPathsList()
                                                  .isEmpty();
         final Iterable<EntityRecord> bulkReadResults = applyFieldMask
-                                                              ? standStorage.readMultiple(stateIds, fieldMask)
+                                                              ? standStorage.readMultiple(stateIds,
+                                                                                          fieldMask)
                                                               : standStorage.readMultiple(stateIds);
         final ImmutableCollection<EntityRecord> result
                 = FluentIterable.from(bulkReadResults)

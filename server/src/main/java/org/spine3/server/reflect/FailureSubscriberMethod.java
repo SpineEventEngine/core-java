@@ -172,7 +172,8 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         return PREDICATE;
     }
 
-    /** The factory for filtering methods that match {@code FailureSubscriberMethod} specification. */
+    /** The factory for filtering methods that match
+     * {@code FailureSubscriberMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<FailureSubscriberMethod> {
 
         @Override

@@ -70,7 +70,9 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     private final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
 
-    AbstractCommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
+    AbstractCommandRouter(CommandBus commandBus,
+                          Message commandMessage,
+                          CommandContext commandContext) {
         this.commandBus = checkNotNull(commandBus);
         checkNotNull(commandMessage);
         checkNotNull(commandContext);

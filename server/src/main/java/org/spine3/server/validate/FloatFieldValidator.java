@@ -43,7 +43,9 @@ class FloatFieldValidator extends FloatFieldValidatorBase<Float> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    FloatFieldValidator(FieldDescriptor descriptor, ImmutableList<Float> fieldValues, FieldPath rootFieldPath) {
+    FloatFieldValidator(FieldDescriptor descriptor,
+                        ImmutableList<Float> fieldValues,
+                        FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 

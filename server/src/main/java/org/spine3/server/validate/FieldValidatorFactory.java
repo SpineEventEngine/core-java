@@ -110,7 +110,8 @@ class FieldValidatorFactory {
     }
 
     private static IllegalArgumentException fieldTypeIsNotSupported(FieldDescriptor descriptor) {
-        final String msg = format("The field type is not supported for validation: %s", descriptor.getType());
+        final String msg = format(
+                "The field type is not supported for validation: %s", descriptor.getType());
         throw new IllegalArgumentException(msg);
     }
 }

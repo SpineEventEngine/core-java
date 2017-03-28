@@ -29,6 +29,7 @@ import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
+import static org.spine3.server.command.InvalidCommandException.*;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -51,7 +52,7 @@ class Filter {
         final TenantId tenantId = command.getContext()
                                          .getTenantId();
         if (commandBus.isMultitenant() && isDefault(tenantId)) {
-            final CommandException noTenantDefined = InvalidCommandException.onMissingTenantId(command);
+            final CommandException noTenantDefined = onMissingTenantId(command);
             commandBus.commandStore().storeWithError(command, noTenantDefined);
             responseObserver.onError(Statuses.invalidArgumentWithCause(noTenantDefined));
             return false; // and nothing else matters
@@ -59,7 +60,7 @@ class Filter {
         final List<ConstraintViolation> violations = CommandValidator.getInstance()
                                                                      .validate(command);
         if (!violations.isEmpty()) {
-            final CommandException invalidCommand = InvalidCommandException.onConstraintViolations(command, violations);
+            final CommandException invalidCommand = onConstraintViolations(command, violations);
             commandBus.commandStore().storeWithError(command, invalidCommand);
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
             return false;

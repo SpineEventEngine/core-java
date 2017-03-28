@@ -338,7 +338,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         /**
          * Optional enricher for events.
          *
-         * <p>If not set, the enrichments will NOT be supported in the {@code EventBus} instance built.
+         * <p>If not set, the enrichments will NOT be supported
+         * in the {@code EventBus} instance built.
          */
         @Nullable
         private EventEnricher enricher;
@@ -398,8 +399,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
          * new {@code EventStore} instance when building {@code EventBus}, <em>if</em>
          * {@code EventStore} was not explicitly set in the builder.
          *
-         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
-         * will be used.
+         * <p>If an {@code Executor} is not set in the builder,
+         * {@link MoreExecutors#directExecutor()} will be used.
          *
          * @see #setEventStore(EventStore)
          */
@@ -459,8 +460,9 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         }
 
         public EventBus build() {
-            checkState(storageFactory != null || eventStore != null,
-                       "Either storageFactory or eventStore must be set to build the EventBus instance");
+            final String message =
+                    "Either storageFactory or eventStore must be set to build the EventBus instance";
+            checkState(storageFactory != null || eventStore != null, message);
 
             if (eventStoreStreamExecutor == null) {
                 this.eventStoreStreamExecutor = MoreExecutors.directExecutor();

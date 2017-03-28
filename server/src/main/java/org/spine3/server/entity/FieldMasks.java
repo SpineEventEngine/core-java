@@ -197,7 +197,8 @@ public class FieldMasks {
                 builder.setField(field, wholeMessage.getField(field));
             }
         }
-        @SuppressWarnings("unchecked")       // It's fine as the constructor is of {@code MessageCls.Builder} type.
+        @SuppressWarnings("unchecked") // It's fine as the constructor
+                                       // is of {@code MessageCls.Builder} type.
         final M result = (M) builder.build();
         return result;
     }

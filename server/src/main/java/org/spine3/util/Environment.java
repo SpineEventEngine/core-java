@@ -51,7 +51,8 @@ public final class Environment {
 
     /** If set, contains the version of AppEngine obtained from the system property. */
     @Nullable
-    private static final String appEngineRuntimeVersion = System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
+    private static final String appEngineRuntimeVersion =
+                                System.getProperty(ENV_KEY_APP_ENGINE_RUNTIME_VERSION);
 
     private static final String VAL_TRUE = "true";
     private static final String VAL_FALSE = "false";
