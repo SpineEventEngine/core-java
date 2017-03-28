@@ -22,7 +22,6 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
@@ -96,9 +95,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         responseObserver.assertResponseOkAndCompleted();
     }
 
-    @Ignore //TODO:2017-03-23:alexander.yevsyukov: Enable back when commands are generated using TestCommandFactory.
-            // Currently TenantIds are generated for each command. Because of this we have three kept tenant.
-            // This causes Rescheduler to be called for each tenant.
     @Test
     public void reschedule_commands_from_storage() {
         final Timestamp schedulingTime = minutesAgo(3);
@@ -120,7 +116,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         }
     }
 
-    @Ignore //TODO:2017-03-24:alexander.yevsyukov: Enable back when multi-tenantcy is fixed
     @Test
     public void reschedule_commands_from_storage_in_parallel_on_build_if_thread_spawning_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
@@ -155,7 +150,6 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         assertNotEquals(mainThreadName, actualThreadName);
     }
 
-    @Ignore //TODO:2017-03-27:alexander.yevsyukov: Enable back when multi-tenantcy is fixed.
     @Test
     public void reschedule_commands_from_storage_synchronously_on_build_if_thread_spawning_NOT_allowed() {
         final String mainThreadName = Thread.currentThread().getName();
