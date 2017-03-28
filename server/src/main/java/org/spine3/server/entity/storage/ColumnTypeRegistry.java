@@ -32,6 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
+ * A registry of type conversion strategies for the Storage Fields.
+ *
  * @author Dmytro Dashenkov
  */
 public class ColumnTypeRegistry {
@@ -44,10 +46,23 @@ public class ColumnTypeRegistry {
         this.columnTypeMap = columnTypeMap;
     }
 
+    /**
+     * @return an empty registry, used for
+     * {@linkplain org.spine3.server.storage.memory.InMemoryStorageFactory in-memory storages} etc.
+     */
     public static ColumnTypeRegistry empty() {
         return EMPTY_INSTANCE;
     }
 
+    /**
+     * Retrieves the {@link ColumnType} for specified {@link Column}.
+     *
+     * <p>By default, this method returns the {@link ColumnType} for the
+     * {@linkplain Column column's} {@linkplain Column#getType() type}.
+     *
+     * @param field the {@link Column} to get type conversion strategy for
+     * @return the {@link ColumnType} for the given {@link Column}
+     */
     public ColumnType get(Column<?> field) {
         checkNotNull(field);
         final Class javaType = field.getType();
@@ -63,18 +78,27 @@ public class ColumnTypeRegistry {
         return Collections.unmodifiableMap(columnTypeMap);
     }
 
-    public static <R, C> Builder<R, C> newBuilder() {
-        return new Builder<>();
+    public static Builder newBuilder() {
+        return new Builder();
     }
 
-    public static class Builder<R, C> {
+    public static class Builder {
 
         private final Map<Class, ColumnType> columnTypeMap = new HashMap<>();
 
         private Builder() {
         }
 
-        public <J, S> Builder put(Class<J> javaType, ColumnType<J, S, R, C> columnType) {
+        /**
+         * Create the mapping between the Java class and the database
+         * {@linkplain ColumnType column type}.
+         *
+         * @param javaType   the Java class to map the value from
+         * @param columnType the the database {@linkplain ColumnType column type} to map value to
+         * @param <J>        the Java type
+         * @return self for call chaining
+         */
+        public <J> Builder put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
             columnTypeMap.put(javaType, columnType);
             return this;
         }
