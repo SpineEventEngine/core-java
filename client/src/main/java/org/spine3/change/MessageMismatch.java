@@ -78,7 +78,9 @@ public class MessageMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch expectedNotDefault(Message expected, Message newValue, int version) {
+    public static ValueMismatch expectedNotDefault(Message expected,
+                                                   Message newValue,
+                                                   int version) {
         checkNotNull(expected);
         checkNotNull(newValue);
         final Message defaultValue = expected.getDefaultInstanceForType();
