@@ -44,15 +44,10 @@ public class Column<T> {
 
     private final boolean nullable;
 
-    @Nullable
-    private final T defaultValue = null; // TODO:2017-03-22:dmytro.dashenkov: Add default value handling.
-
     private Column(Method getter, String name, boolean nullable) {
-            //, @Nullable T defaultValue) {
         this.getter = getter;
         this.name = name;
         this.nullable = nullable;
-        //this.defaultValue = defaultValue;
     }
 
     public static <T> Column<T> from(Method getter) {
@@ -104,7 +99,7 @@ public class Column<T> {
 
     public MemoizedValue<T> memoizeFor(Object source) {
         final T value = getFor(source);
-        final MemoizedValue<T> result = new MemoizedValue<>(this, source, value);
+        final MemoizedValue<T> result = new MemoizedValue<>(this, value);
         return result;
     }
 
@@ -135,14 +130,12 @@ public class Column<T> {
     public static class MemoizedValue<T> {
 
         private final Column sourceColumn;
-        private final Object sourceObject;
 
         @Nullable
         private final T value;
 
-        private MemoizedValue(Column sourceColumn, Object sourceObject, @Nullable T value) {
+        private MemoizedValue(Column sourceColumn, @Nullable T value) {
             this.sourceColumn = sourceColumn;
-            this.sourceObject = sourceObject;
             this.value = value;
         }
 
