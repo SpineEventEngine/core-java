@@ -83,6 +83,12 @@ public class ListStringifierShould {
         stringifier.fromString(stringToConvert);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_element_is_null(){
+        final List<String> listToConvert = newArrayList("1", "2", null, "4");
+        listStringifier(String.class).toString(listToConvert);
+    }
+
     private static String escapeString(String stringToEscape) {
         final Escaper escaper = Escapers.builder()
                                         .addEscape(' ', "")
