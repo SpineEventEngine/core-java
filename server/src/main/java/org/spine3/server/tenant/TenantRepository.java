@@ -22,6 +22,7 @@ package org.spine3.server.tenant;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
@@ -42,6 +43,8 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         extends DefaultRecordBasedRepository<TenantId, E, T>
         implements TenantIndex {
 
+    private final Set<TenantId> cache = Sets.newConcurrentHashSet();
+
     /**
      * {@inheritDoc}
      *
@@ -61,18 +64,47 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
     /**
      * {@inheritDoc}
      *
-     * <p>If there is an entity with the passed ID, the method quites. Otherwise,
+     * <p>If there is an entity with the passed ID, the method quits. Otherwise,
      * a new entity with the default state will be created and stored.
      *
      * @param id the tenant ID to store
      */
     @Override
     public void keep(TenantId id) {
+        if (cache.contains(id)) {
+            return;
+        }
+
         final Optional<E> optional = find(id);
         if (!optional.isPresent()) {
             final E newEntity = create(id);
             store(newEntity);
         }
+        cache(id);
+    }
+
+    private void cache(TenantId id) {
+        cache.add(id);
+    }
+
+    /**
+     * Removes the passed value from the in-memory cache of known tenant IDs.
+     *
+     * <p>Implementations should call this method for removing the cached value
+     * for a tenant, which record was removed from the repository.
+     * @param id the ID to remove from the cache
+     * @return {@code true} if the value was cached before and removed, {@code false} otherwise
+     */
+    protected boolean unCache(TenantId id) {
+        final boolean result = cache.remove(id);
+        return result;
+    }
+
+    /**
+     * Clears the cache of known tenant IDs.
+     */
+    protected void clearCache() {
+        cache.clear();
     }
 
     @Override
@@ -84,6 +116,7 @@ public abstract class TenantRepository<T extends Message, E extends TenantReposi
         final Set<TenantId> result = index != null
                                      ? ImmutableSet.copyOf(index)
                                      : ImmutableSet.<TenantId>of();
+        cache.addAll(result);
         return result;
     }
 

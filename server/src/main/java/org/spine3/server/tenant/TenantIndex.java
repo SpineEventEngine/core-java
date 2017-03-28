@@ -26,6 +26,8 @@ import org.spine3.users.TenantId;
 
 import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The index of tenant IDs in a multi-tenant application.
  *
@@ -44,11 +46,22 @@ public interface TenantIndex extends AutoCloseable {
     Set<TenantId> getAll();
 
     /**
+     * Closes the index for further read or write operations.
+     *
+     * <p>Implementations may throw specific exceptions.
+     */
+    @Override
+    void close();
+
+    /**
      * Provides default implementations of {@code TenantIndex}.
      */
     class Factory {
 
-        private static final TenantIndex SINGLE_TENANT_INDEX = new TenantIndex() {
+        private static final ImmutableSet<TenantId> singleTenantIndexSet =
+                ImmutableSet.of(CurrentTenant.singleTenant());
+
+        private static final TenantIndex singleTenantIndex = new TenantIndex() {
             @Override
             public void keep(TenantId id) {
                 // Do nothing.
@@ -56,12 +69,12 @@ public interface TenantIndex extends AutoCloseable {
 
             @Override
             public Set<TenantId> getAll() {
-                return ImmutableSet.of(CurrentTenant.singleTenant());
+                return singleTenantIndexSet;
             }
 
             @Override
-            public void close() throws Exception {
-                // Do nothing;
+            public void close() {
+                // Do nothing.
             }
         };
 
@@ -71,8 +84,15 @@ public interface TenantIndex extends AutoCloseable {
 
         /**
          * Creates default implementation of {@code TenantIndex} for multi-tenant context.
+         *
+         * <p>Storage of {@code TenantIndex} data is performed in single-tenant context, and a
+         * {@linkplain StorageFactory#toSingleTenant() single-tenant} version of the passed storage
+         * factory. Therefore, it is safe to pass both single-tenant and multi-tenant storage
+         * factories to this method as long as the passed factory implements
+         * {@link StorageFactory#toSingleTenant()}.
          */
         public static TenantIndex createDefault(StorageFactory storageFactory) {
+            checkNotNull(storageFactory);
             final DefaultTenantRepository tenantRepo = new DefaultTenantRepository();
             tenantRepo.initStorage(storageFactory);
             return tenantRepo;
@@ -82,7 +102,7 @@ public interface TenantIndex extends AutoCloseable {
          * Creates an {@code TenantIndex} to be used in single-tenant context.
          */
         public static TenantIndex singleTenant() {
-            return SINGLE_TENANT_INDEX;
+            return singleTenantIndex;
         }
     }
 }
