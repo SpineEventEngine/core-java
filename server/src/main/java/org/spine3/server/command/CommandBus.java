@@ -409,6 +409,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             }
 
             final CommandBus commandBus = new CommandBus(this);
+            // Enforce creating the registry to make spying in tests work.
+            commandBus.registry();
             setFilterChain(commandBus);
             
             commandScheduler.setCommandBus(commandBus);
