@@ -66,7 +66,8 @@ public class DoubleMismatch {
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value
+     * different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected string
@@ -74,13 +75,15 @@ public class DoubleMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(double expected, double actual, double newValue, int version) {
+    public static ValueMismatch unexpectedValue(double expected, double actual,
+                                                double newValue, int version) {
         checkNotNullOrEqual(expected, actual);
         return of(expected, actual, newValue, version);
     }
 
     /**
-     * Creates a new instance of {@code ValueMismatch} with the passed values for a double attribute.
+     * Creates a new instance of {@code ValueMismatch} with the passed values
+     * for a double attribute.
      */
     public static ValueMismatch of(double expected, double actual, double newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()

@@ -20,6 +20,8 @@
 
 package org.spine3.util;
 
+import static java.lang.String.*;
+
 /**
  * Math utilities.
  *
@@ -60,7 +62,7 @@ public class Math {
     }
 
     private static long throwOverflow(long a, int b) {
-        throw new ArithmeticException(String.format("Multiplication overflows a long: %d * %d", a, b));
+        throw new ArithmeticException(format("Multiplication overflows a long: %d * %d", a, b));
     }
 
     /**

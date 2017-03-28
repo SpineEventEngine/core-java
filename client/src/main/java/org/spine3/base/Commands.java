@@ -109,7 +109,8 @@ public class Commands {
      * Creates a new command context with the current time.
      *
      * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#createCommand(Message)},
+     * Commands in client applications should be created by
+     * {@link org.spine3.client.CommandFactory#createCommand(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
@@ -269,7 +270,8 @@ public class Commands {
      * Checks if the file is for commands.
      *
      * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX}, {@code false} otherwise
+     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX},
+     *                      {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
         checkNotNull(file);
@@ -286,7 +288,8 @@ public class Commands {
      * Checks if the command is scheduled to be delivered later.
      *
      * @param command a command to check
-     * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
+     * @return {@code true} if the command context has a scheduling option set,
+     *                      {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
         checkNotNull(command);

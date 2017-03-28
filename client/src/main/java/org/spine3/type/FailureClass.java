@@ -52,8 +52,8 @@ public class FailureClass extends MessageClass {
     /**
      * Creates a new instance of the failure class by passed failure instance.
      *
-     * <p>If an instance of {@link Failure} (which implements {@code Message}) is passed to this method,
-     * enclosing failure message will be un-wrapped to determine the class of the failure.
+     * <p>If an instance of {@link Failure} (which implements {@code Message}) is passed to this
+     * method, enclosing failure message will be un-wrapped to determine the class of the failure.
      *
      * @param failure a failure instance
      * @return new instance

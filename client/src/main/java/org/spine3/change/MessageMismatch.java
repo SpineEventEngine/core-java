@@ -86,7 +86,8 @@ public class MessageMismatch {
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value
+     * different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected value
@@ -94,7 +95,8 @@ public class MessageMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(Message expected, Message actual, Message newValue, int version) {
+    public static ValueMismatch unexpectedValue(Message expected, Message actual,
+                                                Message newValue, int version) {
         checkNotNull(expected);
         checkNotNull(actual);
         checkNotNull(newValue);
@@ -106,7 +108,8 @@ public class MessageMismatch {
     /**
      * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
-    private static ValueMismatch of(Message expected, Message actual, Message newValue, int version) {
+    private static ValueMismatch of(Message expected, Message actual,
+                                    Message newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))
                                                            .setActual(pack(actual))
@@ -118,7 +121,8 @@ public class MessageMismatch {
     /**
      * Obtains expected value as a {@code Message} from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
+     * @throws RuntimeException if the passed instance represent a mismatch of
+     *                          non-{@code Message} values
      */
     public static Message unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
@@ -130,7 +134,8 @@ public class MessageMismatch {
     /**
      * Obtains actual value as a {@code Message} from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
+     * @throws RuntimeException if the passed instance represent a mismatch of
+     *                          non-{@code Message} values
      */
     public static Message unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
@@ -142,7 +147,8 @@ public class MessageMismatch {
     /**
      * Obtains new value as a {@code Message} from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-{@code Message} values
+     * @throws RuntimeException if the passed instance represent a mismatch of
+     *                          non-{@code Message} values
      */
     public static Message unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);

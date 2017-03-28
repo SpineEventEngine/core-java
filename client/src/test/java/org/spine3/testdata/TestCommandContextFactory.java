@@ -60,7 +60,8 @@ public class TestCommandContextFactory {
                                                              .setActor(userId)
                                                              .setTimestamp(when)
                                                              .setZoneOffset(UTC)
-                                                             .setTenantId(TenantId.newBuilder().setValue(newUuid()));
+                                                             .setTenantId(TenantId.newBuilder()
+                                                                                  .setValue(newUuid()));
         return builder.build();
     }
 
