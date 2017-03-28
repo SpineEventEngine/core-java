@@ -31,8 +31,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.base.MapStringifier.QuotedMapItem.of;
-import static org.spine3.base.MapStringifier.QuotedMapItem.parse;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -82,9 +80,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     private final char delimiter;
     private final Class<K> keyClass;
     private final Class<V> valueClass;
-    private final String bucketPattern;
-    private final String keyValuePattern;
     private final Escaper escaper;
+    private final Splitter.MapSplitter splitter;
 
     /**
      * Creates a {@code MapStringifier}.
@@ -100,9 +97,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         this.keyClass = keyClass;
         this.valueClass = valueClass;
         this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        this.escaper = Stringifiers.QuotedItem.createEscaper(delimiter);
-        this.bucketPattern = createBucketPattern(delimiter);
-        this.keyValuePattern = createKeyValuePattern();
+        this.escaper = Stringifiers.createEscaper(delimiter);
+        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
     }
 
     /**
@@ -120,9 +116,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         this.keyClass = keyClass;
         this.valueClass = valueClass;
         this.delimiter = delimiter;
-        this.escaper = Stringifiers.QuotedItem.createEscaper(delimiter);
-        this.bucketPattern = createBucketPattern(delimiter);
-        this.keyValuePattern = createKeyValuePattern();
+        this.escaper = Stringifiers.createEscaper(delimiter);
+        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
     }
 
     private static String createBucketPattern(char delimiter) {
@@ -150,7 +145,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final String escapedString = escaper.escape(s);
         final Map<K, V> resultMap = newHashMap();
 
-        final Splitter.MapSplitter splitter = getMapSplitter();
         final Map<String, String> buckets = splitter.split(escapedString);
         final Maps.EntryTransformer<String, String, Map.Entry<K, V>> transformer =
                 getToMapEntryTransformer();
@@ -163,7 +157,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         return resultMap;
     }
 
-    private Splitter.MapSplitter getMapSplitter() {
+    private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
+                                                       String keyValuePattern) {
         final Splitter.MapSplitter result =
                 Splitter.onPattern(bucketPattern)
                         .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
@@ -177,7 +172,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                 if (key == null || value == null) {
                     throw newIllegalArgumentException("The key and value cannot be null.");
                 }
-                return of(key, value);
+                return QuotedMapItem.of(key, value);
             }
         };
     }
@@ -188,8 +183,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             public Map.Entry<K, V> transformEntry(@Nullable String key,
                                                   @Nullable String value) {
                 final Map.Entry<K, V> result =
-                        parse(new AbstractMap.SimpleEntry<>(key, value),
-                              new AbstractMap.SimpleEntry<>(keyClass, valueClass));
+                        QuotedMapItem.parse(new AbstractMap.SimpleEntry<>(key, value),
+                                            new AbstractMap.SimpleEntry<>(keyClass, valueClass));
                 return result;
             }
         };
@@ -201,7 +196,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      * @param <K> the type of the keys in the map
      * @param <V> the type of the values in the map
      */
-    static class QuotedMapItem<K, V> extends Stringifiers.QuotedItem {
+    private static class QuotedMapItem<K, V> extends Stringifiers.QuotedItem {
         private final K key;
         private final V value;
         private final Class<K> keyClass;
@@ -216,7 +211,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             this.valueClass = (Class<V>) value.getClass();
         }
 
-        static <K, V> QuotedMapItem<K, V> of(K key, V value) {
+       private static <K, V> QuotedMapItem<K, V> of(K key, V value) {
             return new QuotedMapItem<>(key, value);
         }
 
@@ -232,9 +227,9 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             final String value = Stringifiers.QuotedItem.unquote(entryToParse.getValue());
 
             try {
-                final K convertedKey = Stringifiers.QuotedItem.convert(key, classEntry.getKey());
-                final V convertedValue = Stringifiers.QuotedItem.convert(value,
-                                                                         classEntry.getValue());
+                final K convertedKey = Stringifiers.convert(key, classEntry.getKey());
+                final V convertedValue = Stringifiers.convert(value,
+                                                              classEntry.getValue());
                 final Map.Entry<K, V> convertedBucket =
                         new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
                 return convertedBucket;
@@ -261,11 +256,9 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
         @Override
         public String toString() {
-            final String keuToQuote = isString(keyClass) ?
-                                      (String) key : Stringifiers.toString(key, keyClass);
-            final String valueToQuote = isString(valueClass) ?
-                                        (String) value : Stringifiers.toString(value);
-            final String result = quote(keuToQuote) + KEY_VALUE_DELIMITER + quote(valueToQuote);
+            final String keyToQuote = Stringifiers.toString(key, keyClass);
+            final String valueToQuote =  Stringifiers.toString(value, valueClass);
+            final String result = quote(keyToQuote) + KEY_VALUE_DELIMITER + quote(valueToQuote);
             return result;
         }
     }

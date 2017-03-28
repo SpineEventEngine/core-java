@@ -30,9 +30,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.regex.Pattern;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.ListStringifier.QuotedListItem.of;
-import static org.spine3.base.ListStringifier.QuotedListItem.parse;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -80,8 +79,8 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      */
     private final char delimiter;
     private final Class<T> listGenericClass;
-    private final String elementDelimiterPattern;
     private final Escaper escaper;
+    private final Splitter splitter;
 
     /**
      * Creates a {@code ListStringifier}.
@@ -95,8 +94,8 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         super();
         this.listGenericClass = listGenericClass;
         this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        escaper = Stringifiers.QuotedItem.createEscaper(delimiter);
-        elementDelimiterPattern = createElementDelimiterPattern(delimiter);
+        escaper = Stringifiers.createEscaper(delimiter);
+        splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
     }
 
     /**
@@ -112,8 +111,8 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         super();
         this.listGenericClass = listGenericClass;
         this.delimiter = delimiter;
-        escaper = Stringifiers.QuotedItem.createEscaper(delimiter);
-        elementDelimiterPattern = createElementDelimiterPattern(delimiter);
+        escaper = Stringifiers.createEscaper(delimiter);
+        splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
     }
 
     private static String createElementDelimiterPattern(char delimiter) {
@@ -130,7 +129,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
                 if(input == null){
                     throw newIllegalArgumentException("The list element cannot be null.");
                 }
-                return of(input);
+                return QuotedListItem.of(input);
             }
         };
         final List<QuotedListItem<T>> quotedItems = Lists.transform(list, function);
@@ -142,15 +141,13 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     @Override
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
-        final Splitter splitter = Splitter.onPattern(elementDelimiterPattern);
         final List<String> elements = newArrayList(splitter.split(escapedString));
         final Function<String, T> function = new Function<String, T>() {
-            @SuppressWarnings("ConstantConditions")
-            // It should be processed by the stringifier.
             @Nullable
             @Override
             public T apply(@Nullable String input) {
-                return parse(input, listGenericClass);
+                checkNotNull(input);
+                return QuotedListItem.parse(input, listGenericClass);
             }
         };
         final List<T> result = newArrayList(Lists.transform(elements, function));
@@ -162,7 +159,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      *
      * @param <T> the type of the elements in the list
      */
-    static class QuotedListItem<T> extends Stringifiers.QuotedItem {
+    private static class QuotedListItem<T> extends Stringifiers.QuotedItem {
 
         private final T object;
         private final Class<T> genericClass;
@@ -180,7 +177,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
         static <T> T parse(String elementToParse, Class<T> genericClass) {
             checkElement(elementToParse);
-            return convert(unquote(elementToParse), genericClass);
+            return Stringifiers.convert(unquote(elementToParse), genericClass);
         }
 
         private static void checkElement(CharSequence element) {
@@ -192,9 +189,6 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
         @Override
         public String toString() {
-            if (isString(genericClass)) {
-                return quote((String) object);
-            }
             return quote(Stringifiers.toString(object, genericClass));
         }
     }
