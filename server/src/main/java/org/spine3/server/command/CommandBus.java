@@ -355,13 +355,13 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return this;
         }
 
-        public Builder add(CommandBusFilter filter) {
+        public Builder addFilter(CommandBusFilter filter) {
             checkNotNull(filter);
             filters.add(filter);
             return this;
         }
 
-        public Builder remove(CommandBusFilter filter) {
+        public Builder removeFilter(CommandBusFilter filter) {
             checkNotNull(filter);
             filters.remove(filter);
             return this;
