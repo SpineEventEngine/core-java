@@ -41,7 +41,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * If the annotation is applied to a method which doesn't satisfy any of these requirements,
- * this method is not considered as a command handler and is not registered for command dispatching.
+ * this method is not considered a command handler and is not registered for command dispatching.
  *
  * <p><b>IMPORTANT:</b> an application must have one and only one handler per command class.
  * Declaring two methods that handle the same command class will result in run-time error.
