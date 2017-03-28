@@ -27,6 +27,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Commands;
 import org.spine3.base.Error;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.type.CommandClass;
 import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
@@ -66,8 +67,8 @@ public class InvalidCommandException extends CommandException {
     public static InvalidCommandException onConstraintViolations(
             Command command, Iterable<ConstraintViolation> violations) {
 
-        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
-                command, violations);
+        final ConstraintViolationExceptionFactory helper =
+                new ConstraintViolationExceptionFactory(command, violations);
         return helper.newException();
     }
 
@@ -103,6 +104,31 @@ public class InvalidCommandException extends CommandException {
         return error.build();
     }
 
+    public static InvalidCommandException onInapplicableTenantId(Command command) {
+        final CommandEnvelope cmd = CommandEnvelope.of(command);
+        final TypeName typeName = TypeName.of(cmd.getMessage());
+        final String errMsg = format(
+                "The command (class: %s, type: %s, id: %s) was posted to single-tenant " +
+                "CommandBus, but has tenant_id: %s attribute set in the command context.",
+                cmd.getMessageClass(),
+                typeName,
+                cmd.getCommandId(),
+                command.getContext()
+                       .getTenantId());
+        final Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
+        return new InvalidCommandException(errMsg, command, error);
+    }
+
+    private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
+        final Error.Builder error =
+                Error.newBuilder()
+                     .setType(CommandValidationError.getDescriptor()
+                                                    .getFullName())
+                     .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
+                     .setMessage(errMsg)
+                     .putAllAttributes(commandTypeAttribute(commandMessage));
+        return error.build();
+    }
     /**
      * A helper utility aimed to create an {@code InvalidCommandException} to report the
      * command which field values violate validation constraint(s).
