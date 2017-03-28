@@ -158,34 +158,5 @@ public class Column<T> {
         public Column getSourceColumn() {
             return sourceColumn;
         }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            MemoizedValue<?> that = (MemoizedValue<?>) o;
-
-            if (!getSourceColumn().equals(that.getSourceColumn())) {
-                return false;
-            }
-            if (!sourceObject.equals(that.sourceObject)) {
-                return false;
-            }
-            return getValue() != null ? getValue().equals(that.getValue()) : that.getValue() ==
-                                                                             null;
-        }
-
-        @Override
-        public int hashCode() {
-            int result = getSourceColumn().hashCode();
-            result = 31 * result + sourceObject.hashCode();
-            result = 31 * result + (getValue() != null ? getValue().hashCode() : 0);
-            return result;
-        }
     }
 }

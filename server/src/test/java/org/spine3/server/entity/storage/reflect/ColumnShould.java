@@ -22,7 +22,6 @@ package org.spine3.server.entity.storage.reflect;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
@@ -34,6 +33,7 @@ import java.lang.reflect.Method;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -85,28 +85,6 @@ public class ColumnShould {
         assertEquals(changedState, extractedState);
     }
 
-    @Ignore // TODO:2017-03-28:dmytro.dashenkov: Check out this equals issue.
-    @Test
-    public void have_memoized_values_comparable() {
-        final String stringId = "some-random-sequence";
-        final Entity<String, ?> firstEntity = new TestEntity(stringId);
-        final Entity<String, ?> secondEntity = new TestEntity(stringId);
-        final Entity<String, ?> differentEntity = new TestEntity("different-id");
-        final Column.MemoizedValue<String> firstIdMemoized = memoized("getId",
-                                                                      Entity.class,
-                                                                      firstEntity);
-        final Column.MemoizedValue<String> secondIdMemoized = memoized("getId",
-                                                                      Entity.class,
-                                                                      secondEntity);
-        final Column.MemoizedValue<String> differentIdMemoized = memoized("getId",
-                                                                      Entity.class,
-                                                                      differentEntity);
-        new EqualsTester()
-                .addEqualityGroup(firstIdMemoized, secondIdMemoized)
-                .addEqualityGroup(differentIdMemoized)
-                .testEquals();
-    }
-
     @Test(expected = IllegalStateException.class)
     public void fail_to_get_value_from_private_method() {
         final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
@@ -147,6 +125,28 @@ public class ColumnShould {
         assertTrue(nullableColumn.isNullable());
     }
 
+    @Test
+    public void contain_property_type() {
+        final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
+        assertEquals(Long.TYPE, column.getType());
+    }
+
+    @Test
+    public void memoize_value_regarding_nulls() {
+        final Column<?> nullableColumn = forMethod("getNull", TestEntity.class);
+        final Column.MemoizedValue<?> memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
+        assertTrue(memoizedNull.isNull());
+        assertNull(memoizedNull.getValue());
+    }
+
+    @Test
+    public void memoize_value_which_has_reference_on_Column_itself() {
+        final Column<Long> column = forMethod("getMutableState", TestEntity.class);
+        final TestEntity entity = new TestEntity("");
+        final Column.MemoizedValue<Long> memoizedValue = column.memoizeFor(entity);
+        assertSame(column, memoizedValue.getSourceColumn());
+    }
+
     private static <T> Column<T> forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
@@ -160,7 +160,7 @@ public class ColumnShould {
                                                            Class<E> enclosingClass,
                                                            E dataSource) {
         final Column<T> column = forMethod(name, enclosingClass);
-        final Column.MemoizedValue<T> value =  column.memoizeFor(dataSource);
+        final Column.MemoizedValue<T> value = column.memoizeFor(dataSource);
         return value;
     }
 
