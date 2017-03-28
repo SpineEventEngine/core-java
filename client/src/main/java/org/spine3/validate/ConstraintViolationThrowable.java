@@ -25,7 +25,7 @@ import java.util.List;
 import static java.util.Collections.unmodifiableList;
 
 /**
- * Signals that the validated value contains the constraint violations.
+ * Signals that the validated value violates the constraints set for it.
  *
  * @author Illia Shepilov
  */
