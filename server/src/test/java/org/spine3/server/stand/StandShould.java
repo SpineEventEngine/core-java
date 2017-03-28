@@ -1070,12 +1070,12 @@ public class StandShould {
         return stand;
     }
 
-    private static EntityRecordWithStorageFields recordStateMatcher(final EntityRecord expectedRecord) {
-        return argThat(new ArgumentMatcher<EntityRecordWithStorageFields>() {
+    private static EntityRecord recordStateMatcher(final EntityRecord expectedRecord) {
+        return argThat(new ArgumentMatcher<EntityRecord>() {
             @Override
-            public boolean matches(EntityRecordWithStorageFields argument) {
+            public boolean matches(EntityRecord argument) {
                 final boolean matchResult = Objects.equals(expectedRecord.getState(),
-                                                           argument.getRecord().getState());
+                                                           argument.getState());
                 return matchResult;
             }
         });

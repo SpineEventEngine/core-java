@@ -89,9 +89,12 @@ public class Column<T> {
         try {
             @SuppressWarnings("unchecked")
             final T result = (T) getter.invoke(source);
+            if (!nullable) {
+                checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
+            }
             return result;
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw new IllegalArgumentException(
+            throw new IllegalStateException(
                     format("Could not invoke getter of property %s from object %s",
                            getName(),
                            source),

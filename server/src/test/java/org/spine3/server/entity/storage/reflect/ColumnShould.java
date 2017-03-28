@@ -28,13 +28,18 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.test.Given;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("DuplicateStringLiteralInspection") // Many string literals for method names
 public class ColumnShould {
 
     @Test(expected = IllegalArgumentException.class)
@@ -71,11 +76,11 @@ public class ColumnShould {
         final int initialState = 1;
         final int changedState = 42;
         entity.setMutableState(initialState);
-        final Column.MemoizedValue<Integer> memiozedState = mutableColumn.memoizeFor(entity);
+        final Column.MemoizedValue<Integer> memoizedState = mutableColumn.memoizeFor(entity);
         entity.setMutableState(changedState);
         final int extractedState = mutableColumn.getFor(entity);
 
-        assertEquals(initialState, memiozedState.getValue()
+        assertEquals(initialState, memoizedState.getValue()
                                                 .intValue());
         assertEquals(changedState, extractedState);
     }
@@ -102,6 +107,46 @@ public class ColumnShould {
                 .testEquals();
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_get_value_from_private_method() {
+        final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
+        column.getFor(new TestEntity(""));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_memoize_value_from_private_method() {
+        final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
+        column.memoizeFor(new TestEntity(""));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_get_value_from_wrong_object() {
+        final Column<Long> column = forMethod("getMutableState", TestEntity.class);
+        column.getFor(new Object());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void check_value_if_getter_is_not_null() {
+        final Column<?> column = forMethod("getNotNull", TestEntity.class);
+        column.getFor(new TestEntity(""));
+    }
+
+    @Test
+    public void allow_nulls_if_getter_is_nullable() {
+        final Column<?> column = forMethod("getNull", TestEntity.class);
+        final Object value = column.getFor(new TestEntity(""));
+        assertNull(value);
+    }
+
+    @Test
+    public void tell_if_property_is_nullable() {
+        final Column<?> notNullColumn = forMethod("getNotNull", TestEntity.class);
+        final Column<?> nullableColumn = forMethod("getNull", TestEntity.class);
+
+        assertFalse(notNullColumn.isNullable());
+        assertTrue(nullableColumn.isNullable());
+    }
+
     private static <T> Column<T> forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
@@ -119,6 +164,7 @@ public class ColumnShould {
         return value;
     }
 
+    @SuppressWarnings("unused") // Reflective access
     public static class TestEntity extends AbstractVersionableEntity<String, Any> {
 
         private int mutableState = 0;
@@ -133,6 +179,19 @@ public class ColumnShould {
 
         public void setMutableState(int mutableState) {
             this.mutableState = mutableState;
+        }
+
+        private long getFortyTwoLong() {
+            return 42L;
+        }
+
+        public Object getNotNull() {
+            return null;
+        }
+
+        @Nullable
+        public Object getNull() {
+            return null;
         }
     }
 }
