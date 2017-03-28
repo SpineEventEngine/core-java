@@ -145,6 +145,16 @@ public class MapStringifierShould {
         tryToConvert(stringToConvert);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_key_is_null(){
+        final Stringifier<Map<String, String>> stringifier =
+                mapStringifier(String.class, String.class);
+        final Map<String, String> mapWithNulls = newHashMap();
+        mapWithNulls.put("1", "2");
+        mapWithNulls.put(null, "2");
+        stringifier.toString(mapWithNulls);
+    }
+
     private static void tryToConvert(String stringToConvert) {
         final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
                                                                             String.class);
