@@ -32,23 +32,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
- * The {@code Supplier} of {@code StorageFactory} that takes into account
- * if the code runs under tests.
+ * The {@code Supplier} of {@code StorageFactory} that takes into account if the code runs under
+ * tests on in the production mode.
  *
  * <h2>Test mode</h2>
  * <p>Under tests  this class returns {@link InMemoryStorageFactory} if
- * a {@code Supplier} for tests was not set via {@link #init(boolean, Supplier, Supplier)}.
+ * a {@code Supplier} for tests was not set via {@link #init(Supplier, Supplier)}.
  *
  * <h2>Production mode</h2>
- * <p>In production mode this class obtains the instance provided by
- * the {@code Supplier} passed via {@link #init(boolean, Supplier, Supplier)}.
- * If the production {@code Supplier} was not initialized,
+ * <p>In the production mode this class obtains the instance provided by the {@code Supplier} passed
+ * via {@link #init(Supplier, Supplier)}. If the production {@code Supplier} was not initialized,
  * {@code IllegalStateException} will be thrown.
  *
  * <h2>Remembering {@code StorageFactory} obtained from suppliers</h2>
  * In both modes the reference to the {@code StorageFactory} obtained from a {@code Supplier}
  * will be stored. This means that a call to {@link Supplier#get()} method of
- * the suppliers passed via {@link #init(boolean, Supplier, Supplier)} will be made only once.
+ * the suppliers passed via {@link #init(Supplier, Supplier)} will be made only once.
  *
  * @author Alexander Yevsyukov
  * @see Environment#isTests()
@@ -71,7 +70,10 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     }
 
     /**
-     * Obtains the singleton instance.
+     * Obtains the instance of the switch that corresponds to multi-tenancy mode.
+     *
+     * @param multitenant if {@code true} the switch is requested for the multi-tenant execution
+     *                    context, {@code false} for the single-tenant context
      */
     public static StorageFactorySwitch getInstance(boolean multitenant) {
         return multitenant
@@ -83,19 +85,16 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * Initializes the current singleton instance with the suppliers.
      *
      *
-     * @param multitenant   the kind of switch instance to initialize
      * @param productionSupplier the supplier for the production mode
      * @param testsSupplier the supplier for the tests mode.
      *                      If {@code null} is passed {@link InMemoryStorageFactory} will be used
-     * @return the current singleton instance
+     * @return this
      */
-    public static StorageFactorySwitch init(boolean multitenant,
-                                            Supplier<StorageFactory> productionSupplier,
-                                            @Nullable Supplier<StorageFactory> testsSupplier) {
-        final StorageFactorySwitch instance = getInstance(multitenant);
-        instance.productionSupplier = checkNotNull(productionSupplier);
-        instance.testsSupplier = testsSupplier;
-        return instance;
+    public StorageFactorySwitch init(Supplier<StorageFactory> productionSupplier,
+                                     @Nullable Supplier<StorageFactory> testsSupplier) {
+        this.productionSupplier = checkNotNull(productionSupplier);
+        this.testsSupplier = testsSupplier;
+        return this;
     }
 
     /**
@@ -129,7 +128,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      *
      * @return {@code StorageFactory} instance
      * @throws IllegalStateException if production {@code Supplier} was not set via
-     *                               {@link #init(boolean, Supplier, Supplier)}
+     *                               {@link #init(Supplier, Supplier)}
      */
     @Override
     public StorageFactory get() {
@@ -137,7 +136,8 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
             return storageFactory;
         }
 
-        if (Environment.getInstance().isTests()) {
+        if (Environment.getInstance()
+                       .isTests()) {
             storageFactory = testsSupplier != null
                              ? testsSupplier.get()
                              : InMemoryStorageFactory.getInstance(multitenant);
