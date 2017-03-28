@@ -120,8 +120,8 @@ subprojects {
 
     apply plugin: 'org.spine3.tools.javadoc-checker'
     // Javadoc checker plugin allows finding FQN links with the wrong format.
-    //"threshold" - is a number of wrong links that should be found to trigger a response.
-    //"responseType" - can be either "error" or "warn"
+    // "threshold" - is a number of bearable wrong links that triggers a response.
+    // "responseType" - can be either "error" or "warn"
     //      "warn" type allows to see all errors in build result records without failing it.
     //      "error" type will fail the build process.
     //      For more details please see org.spine3.tools.javadoc-checker.Response
@@ -280,5 +280,3 @@ idea.project.ipr {
 apply from: "${rootDir}/scripts/jacoco.gradle"
 
 apply from: publishPlugin
-
-
