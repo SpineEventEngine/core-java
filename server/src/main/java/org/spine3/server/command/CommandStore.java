@@ -303,6 +303,7 @@ public class CommandStore implements AutoCloseable {
         private final CommandStore store;
 
         private Func(CommandStore store) {
+            super();
             this.store = store;
         }
 
