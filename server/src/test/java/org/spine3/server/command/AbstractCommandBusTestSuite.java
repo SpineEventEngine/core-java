@@ -135,7 +135,7 @@ public abstract class AbstractCommandBusTestSuite {
                                .setCommandStore(commandStore)
                                .setCommandScheduler(scheduler)
                                .setFailureBus(failureBus)
-                               .setThreadSpawnAllowed(true)
+                               .setThreadSpawnAllowed(false)
                                .setLog(log)
                                .setAutoReschedule(false)
                                .build();

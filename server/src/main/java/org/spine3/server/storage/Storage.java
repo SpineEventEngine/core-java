@@ -66,4 +66,19 @@ public interface Storage<I, R extends Message> extends AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     void write(I id, R record);
+
+    /**
+     * Closes the storage.
+     *
+     * <p>Implementations may throw specific exceptions.
+     */
+    @Override
+    void close();
+
+    /**
+     * Verifies whether the storage is open.
+     *
+     * @return {@code true} if the storage is open, {@code false} otherwise
+     */
+    boolean isOpen();
 }

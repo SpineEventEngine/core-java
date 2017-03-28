@@ -52,6 +52,16 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  */
 public class Tests {
 
+    /**
+     * The prefix for generated tenant identifiers.
+     */
+    private static final String TENANT_PREFIX = "tenant-";
+
+    /**
+     * The prefix for generated user identifiers.
+     */
+    private static final String USER_PREFIX = "user-";
+
     private Tests() {
         // Prevent instantiation of this utility class.
     }
@@ -169,14 +179,14 @@ public class Tests {
      * Generates a new UUID-based {@code UserId}.
      */
     public static UserId newUserUuid() {
-        return newUserId(newUuid());
+        return newUserId(USER_PREFIX + newUuid());
     }
 
     /**
      * Generates a new UUID-based {@code TenantId}.
      */
     public static TenantId newTenantUuid() {
-        return newTenantId(newUuid());
+        return newTenantId(TENANT_PREFIX + newUuid());
     }
 
     /**

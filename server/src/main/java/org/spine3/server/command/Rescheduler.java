@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.tenant.TenantAwareFunction;
 import org.spine3.server.tenant.TenantAwareOperation;
@@ -82,6 +83,10 @@ class Rescheduler {
 
     private CommandScheduler scheduler() {
         return commandBus.scheduler();
+    }
+
+    private Log log() {
+        return commandBus.problemLog();
     }
 
     @VisibleForTesting
@@ -151,7 +156,8 @@ class Rescheduler {
         final Message msg = commandEnvelope.getMessage();
         final CommandId id = commandEnvelope.getCommandId();
 
-        commandBus.problemLog().errorExpiredCommand(msg, id);
-        commandStore().setToError(commandEnvelope, commandExpiredError(msg));
+        final Error error = commandExpiredError(msg);
+        commandStore().setToError(commandEnvelope, error);
+        log().errorExpiredCommand(msg, id);
     }
 }

@@ -66,7 +66,7 @@ public class CommandStore implements AutoCloseable {
     }
 
     private void checkNotClosed() {
-        checkState(isOpen(), "The CommandStore is closed.");
+        checkState(isOpen(), "Read/write operation on the closed CommandStore (%s)", this);
     }
 
     @Override

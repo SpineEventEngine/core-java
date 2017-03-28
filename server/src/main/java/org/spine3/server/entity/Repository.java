@@ -25,7 +25,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -58,7 +57,13 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
-    /** The data storage for this repository. */
+    /**
+     * The data storage for this repository.
+     *
+     * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
+     * initialized} or the repository was {@linkplain #close() closed}.
+     */
+    @Nullable
     private Storage<I, ?> storage;
 
     /**
@@ -85,8 +90,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     private volatile Class<I> idClass;
 
     /**
-     * Creates the repository in the passed {@link BoundedContext}.
-     *
+     * Creates the repository.
      */
     protected Repository() {
     }
@@ -250,11 +254,9 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Closes the repository by closing the underlying storage.
      *
      * <p>The reference to the storage becomes null after this call.
-     *
-     * @throws Exception which occurred during closing of the storage
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (this.storage != null) {
             this.storage.close();
             this.storage = null;
@@ -263,6 +265,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     private boolean isOpen() {
         return storage != null;
+    }
+
+    private Storage<I, ?> ensureStorage() {
+        checkState(storage != null, "No storage assigned in repository %s", this);
+        return storage;
     }
 
     /**
@@ -312,15 +319,15 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>This iterator does not allow removal.
      */
-    private static class EntityIterator<I, E extends Entity<I, ?>>
-            implements Iterator<E> {
+    private static class EntityIterator<I, E extends Entity<I, ?>> implements Iterator<E> {
 
         private final Repository<I, E> repository;
         private final Iterator<I> index;
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.storage.index();
+            this.index = repository.ensureStorage()
+                                   .index();
         }
 
         @Override

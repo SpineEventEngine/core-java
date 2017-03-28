@@ -23,9 +23,9 @@ package org.spine3.server.command;
 /**
  * @author Alexander Yevsyukov
  */
-public class SingleTenantStatusServiceShould extends StatusServiceShould {
+public class SingleTenantCommandStoreShould extends CommandStoreShould {
 
-    public SingleTenantStatusServiceShould() {
+    public SingleTenantCommandStoreShould() {
         super(false);
     }
 }

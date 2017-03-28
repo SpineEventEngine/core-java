@@ -220,7 +220,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     /** {@inheritDoc} */
     @Override
-    public void close() throws Exception {
+    public void close() {
         super.close();
         setStatus(Status.CLOSED);
     }

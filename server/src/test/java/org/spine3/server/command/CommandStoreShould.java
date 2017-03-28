@@ -23,12 +23,12 @@ package org.spine3.server.command;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.base.Error;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.tenant.TenantAwareFunction;
@@ -60,9 +60,9 @@ import static org.spine3.server.command.Given.Command.startProject;
 import static org.spine3.server.command.Given.CommandMessage.createProjectMessage;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 
-public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
+public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
-    StatusServiceShould(boolean multitenant) {
+    CommandStoreShould(boolean multitenant) {
         super(multitenant);
     }
 
@@ -177,7 +177,8 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
                         return commandStore.getStatus(checkNotNull(input));
                     }
                 };
-        return func.execute(commandEnvelope.getCommandId());
+        final ProcessingStatus result = func.execute(commandEnvelope.getCommandId());
+        return result;
     }
 
     @Test
@@ -198,7 +199,6 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
         assertHasErrorStatusWithMessage(envelope, throwable.getMessage());
     }
 
-    @Ignore //TODO:2017-03-27:alexander.yevsyukov: Enable back when multi-tenantcy is fixed.
     @Test
     public void set_expired_scheduled_command_status_to_error_if_time_to_post_them_passed() {
         final List<Command> commands = newArrayList(createProject(),
@@ -221,7 +221,8 @@ public abstract class StatusServiceShould extends AbstractCommandBusTestSuite {
             // Check that the logging was called.
             verify(log).errorExpiredCommand(msg, id);
 
-            assertEquals(commandExpiredError(msg), status.getError());
+            final Error expected = commandExpiredError(msg);
+            assertEquals(expected, status.getError());
         }
     }
 
