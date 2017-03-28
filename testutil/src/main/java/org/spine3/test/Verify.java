@@ -683,7 +683,9 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}. */
+    /** Assert that the given {@code stringToFind} is contained
+     * within the {@code stringToSearch}.
+     */
     public static void assertContains(String stringName,
                                       CharSequence stringToFind,
                                       String stringToSearch) {
