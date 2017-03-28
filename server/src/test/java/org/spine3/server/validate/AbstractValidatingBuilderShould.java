@@ -52,7 +52,7 @@ public class AbstractValidatingBuilderShould {
 
     @Before
     public void setUp() {
-        validatingBuilder = new ConcreteValidatingBuilder();
+        validatingBuilder = new TestValidatingBuilder();
     }
 
     @Test
@@ -101,7 +101,7 @@ public class AbstractValidatingBuilderShould {
         validatingBuilder.validate(descriptor, "incorrectEmail", "email");
     }
 
-    private static class ConcreteValidatingBuilder extends AbstractValidatingBuilder<Task> {
+    private static class TestValidatingBuilder extends AbstractValidatingBuilder<Task> {
         @Override
         public Task build() {
             return Task.getDefaultInstance();
