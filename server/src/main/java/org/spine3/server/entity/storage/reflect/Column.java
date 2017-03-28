@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity.storage.reflect;
 
+import org.spine3.server.entity.Entity;
+
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -30,8 +32,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * @author
- * Dmytro Dashenkov
+ * A reflective representation of a Storage Field.
+ *
+ * @author Dmytro Dashenkov
  */
 public class Column<T> {
 
@@ -50,6 +53,13 @@ public class Column<T> {
         this.nullable = nullable;
     }
 
+    /**
+     * Creates new instance of the {@code Column} from the given getter method.
+     *
+     * @param getter the getter of the Storage Field
+     * @param <T> the type of the Storage Field
+     * @return new instance of the {@code Column} reflecting the given property
+     */
     public static <T> Column<T> from(Method getter) {
         checkNotNull(getter);
         final String name = nameFromGetterName(getter.getName());
@@ -72,15 +82,35 @@ public class Column<T> {
         return resullt;
     }
 
+    /**
+     * Retrieves the name of the property which represents the Storage Field.
+     *
+     * <p>For example, if the getter method has name "isArchivedOrDeleted", the returned value is
+     * "archivedOrDeleted".
+     *
+     * @return the name of the property reflected by this object
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Shows if the Storage Field may return {@code null}s.
+     *
+     * @return {@code true} if the getter method was annotated as {@link Nullable},
+     * {@code false} otherwise
+     */
     public boolean isNullable() {
         return nullable;
     }
 
-    public T getFor(Object source) {
+    /**
+     * Retrieves the Storage Field value from the given {@link Entity}.
+     *
+     * @param source the {@link Entity} to get the Fields from
+     * @return the value of the Storage Field represented y this instance of {@code Column}
+     */
+    public T getFor(Entity<?, ?> source) {
         try {
             @SuppressWarnings("unchecked")
             final T result = (T) getter.invoke(source);
@@ -97,12 +127,26 @@ public class Column<T> {
         }
     }
 
-    public MemoizedValue<T> memoizeFor(Object source) {
+    /**
+     * Retrieves the Storage Field value from the given {@link Entity}.
+     *
+     * <p>The value is wrapped into a special container, which bears information about the Field's
+     * metadata
+     *
+     * @param source the {@link Entity} to get the Fields from
+     * @return the value of the Storage Field represented y this instance of {@code Column} wrapped
+     * into {@link MemoizedValue}
+     * @see MemoizedValue
+     */
+    public MemoizedValue<T> memoizeFor(Entity<?, ?> source) {
         final T value = getFor(source);
         final MemoizedValue<T> result = new MemoizedValue<>(this, value);
         return result;
     }
 
+    /**
+     * @return the type of the Storage Field
+     */
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
         return (Class<T>) getter.getReturnType();
@@ -127,6 +171,11 @@ public class Column<T> {
         return getter.hashCode();
     }
 
+    /**
+     * A memoized in a point in time value of the Storage Field.
+     *
+     * @param <T> the type of the Storage Field
+     */
     public static class MemoizedValue<T> {
 
         private final Column sourceColumn;
@@ -148,6 +197,9 @@ public class Column<T> {
             return value == null;
         }
 
+        /**
+         * @return the {@link Column} representing this Storage Field
+         */
         public Column getSourceColumn() {
             return sourceColumn;
         }

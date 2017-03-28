@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.base.Converter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Collections2;
@@ -201,9 +200,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                 Collections2.transform(initial.values(),
                                        new Function<EntityRecordWithStorageFields, EntityRecord>() {
                                            @Override
-                                           public EntityRecord apply(@Nullable EntityRecordWithStorageFields envelope) {
-                                               assertNotNull(envelope);
-                                               return envelope.getRecord();
+                                           public EntityRecord apply(@Nullable EntityRecordWithStorageFields record) {
+                                               assertNotNull(record);
+                                               return record.getRecord();
                                            }
                                        });
 
@@ -218,7 +217,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final int recordCount = 3;
         final RecordStorage<I> storage = getStorage();
 
-        final Function<EntityRecord, EntityRecordWithStorageFields> envelopPacker =
+        final Function<EntityRecord, EntityRecordWithStorageFields> recordPacker =
                 new Function<EntityRecord, EntityRecordWithStorageFields>() {
                     @Nullable
                     @Override
@@ -244,11 +243,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             v2Records.put(id, alternateRecord);
         }
 
-        storage.write(Maps.transformValues(v1Records, envelopPacker));
+        storage.write(Maps.transformValues(v1Records, recordPacker));
         final Map<I, EntityRecord> firstRevision = storage.readAll();
         assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
 
-        storage.write(Maps.transformValues(v2Records, envelopPacker));
+        storage.write(Maps.transformValues(v2Records, recordPacker));
         final Map<I, EntityRecord> secondRevision = storage.readAll();
         assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
     }
@@ -298,28 +297,16 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @Test
-    public void accept_record_envelopes_with_empty_storage_fields() {
+    public void accept_records_with_empty_storage_fields() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final EntityRecordWithStorageFields recordEnvelope = new EntityRecordWithStorageFields(record);
-        assertFalse(recordEnvelope.hasStorageFields());
+        final EntityRecordWithStorageFields recordWithStorageFields = new EntityRecordWithStorageFields(record);
+        assertFalse(recordWithStorageFields.hasStorageFields());
         final RecordStorage<I> storage = getStorage();
 
-        storage.write(id, recordEnvelope);
+        storage.write(id, recordWithStorageFields);
         final Optional<EntityRecord> actualRecord = storage.read(id);
         assertTrue(actualRecord.isPresent());
         assertEquals(record, actualRecord.get());
-    }
-
-    private static class RecordConverter extends Converter<EntityRecordWithStorageFields, EntityRecord> {
-        @Override
-        protected EntityRecord doForward(EntityRecordWithStorageFields entityRecordWithStorageFields) {
-            return entityRecordWithStorageFields.getRecord();
-        }
-
-        @Override
-        protected EntityRecordWithStorageFields doBackward(EntityRecord entityRecord) {
-            return new EntityRecordWithStorageFields(entityRecord);
-        }
     }
 }

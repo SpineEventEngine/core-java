@@ -63,8 +63,7 @@ public class EntityRecordWithStorageFields {
      * @param record {@link EntityRecord} to pack
      * @see #hasStorageFields()
      */
-    @SuppressWarnings("ConstantConditions")
-    // null value for the storage fields map
+    @SuppressWarnings("ConstantConditions") // null value for the storage fields map
     public EntityRecordWithStorageFields(EntityRecord record) {
         this.record = checkNotNull(record);
         this.storageFields = null;

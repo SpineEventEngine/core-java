@@ -62,7 +62,7 @@ public class ColumnTypeRegistryShould {
         final Collection<Class> classes = Arrays.<Class>asList(String.class,
                                                                Integer.class,
                                                                Date.class);
-        final ColumnTypeRegistry.Builder<?, ?> registryBuilder =
+        final ColumnTypeRegistry.Builder registryBuilder =
                 ColumnTypeRegistry.<Object, Object>newBuilder();
         for (Class<?> cls : classes) {
             final ColumnType type = new AnyType();

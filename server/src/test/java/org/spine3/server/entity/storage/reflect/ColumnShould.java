@@ -100,7 +100,7 @@ public class ColumnShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_get_value_from_wrong_object() {
         final Column<Long> column = forMethod("getMutableState", TestEntity.class);
-        column.getFor(new Object());
+        column.getFor(new DifferentTestEntity(""));
     }
 
     @Test(expected = NullPointerException.class)
@@ -156,14 +156,6 @@ public class ColumnShould {
         }
     }
 
-    private static <T, E> Column.MemoizedValue<T> memoized(String name,
-                                                           Class<E> enclosingClass,
-                                                           E dataSource) {
-        final Column<T> column = forMethod(name, enclosingClass);
-        final Column.MemoizedValue<T> value = column.memoizeFor(dataSource);
-        return value;
-    }
-
     @SuppressWarnings("unused") // Reflective access
     public static class TestEntity extends AbstractVersionableEntity<String, Any> {
 
@@ -192,6 +184,12 @@ public class ColumnShould {
         @Nullable
         public Object getNull() {
             return null;
+        }
+    }
+
+    private static class DifferentTestEntity extends AbstractVersionableEntity<String, Any> {
+        protected DifferentTestEntity(String id) {
+            super(id);
         }
     }
 }

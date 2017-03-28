@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.base.Converter;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
@@ -261,19 +260,5 @@ public abstract class AbstractStorageShould<I,
     public void throw_exception_if_close_twice() throws Exception {
         storage.close();
         storage.close();
-    }
-
-    @SuppressWarnings("unchecked") // Converts the records by cast
-    private static class DefaultRecordConverter<W, R extends Message> extends Converter<W, R> {
-
-        @Override
-        protected R doForward(W w) {
-            return (R) w;
-        }
-
-        @Override
-        protected W doBackward(R r) {
-            return (W) r;
-        }
     }
 }
