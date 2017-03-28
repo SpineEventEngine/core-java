@@ -71,13 +71,23 @@ public class Stringifiers {
      * @return the string representation of the passed object
      * @throws MissingStringifierException if passed value cannot be converted
      */
+    @SuppressWarnings("unchecked") // It is OK because the type is checked before cast.
     public static <T> String toString(T object, Type typeOfT) {
         checkNotNull(object);
         checkNotNull(typeOfT);
 
+        if(isString(typeOfT)){
+            return (String) object;
+        }
+
         final Stringifier<T> stringifier = getStringifier(typeOfT);
         final String result = stringifier.convert(object);
         return result;
+    }
+
+    private static boolean isString(Type aType) {
+        checkNotNull(aType);
+        return String.class.equals(aType);
     }
 
     /**
@@ -188,6 +198,42 @@ public class Stringifiers {
     }
 
     /**
+     * Converts from string to the specified type.
+     *
+     * @param elementToConvert string to convert
+     * @param elementClass     the class of the converted element
+     * @param <I>              the class type of the converted element
+     * @return the converted string
+     */
+    @SuppressWarnings("unchecked") // It is OK because class is verified.
+    static <I> I convert(String elementToConvert, Class<I> elementClass) {
+        checkNotNull(elementToConvert);
+        checkNotNull(elementClass);
+
+        if (isString(elementClass)) {
+            return (I) elementToConvert;
+        }
+
+        final I convertedValue = fromString(elementToConvert, elementClass);
+        return convertedValue;
+    }
+
+    /**
+     * Create the {@code Escaper} which contains will escape '\' and passed character.
+     *
+     * @param charToEscape the char to escape
+     * @return the constructed escaper
+     */
+    static Escaper createEscaper(char charToEscape) {
+        final String escapedChar = "\\" + charToEscape;
+        final Escaper result = Escapers.builder()
+                                       .addEscape('\"', "\\\"")
+                                       .addEscape(charToEscape, escapedChar)
+                                       .build();
+        return result;
+    }
+
+    /**
      * The {@code Stringifier} for the long values.
      */
     static class LongStringifier extends Stringifier<Long> {
@@ -223,50 +269,12 @@ public class Stringifiers {
         }
     }
 
+    /**
+     * Serves as enclosure and disclosure for the elements into and from quotes.
+     */
     abstract static class QuotedItem{
 
         private static final char QUOTE_SYMBOL = '\"';
-
-        static boolean isString(Class<?> aClass) {
-            checkNotNull(aClass);
-            return String.class.equals(aClass);
-        }
-
-        /**
-         * Converts from string to the specified type.
-         *
-         * @param elementToConvert string to convert
-         * @param elementClass     the class of the converted element
-         * @param <I>              the class type of the converted element
-         * @return the converted string
-         */
-        @SuppressWarnings("unchecked") // It is OK because class is verified.
-        static <I> I convert(String elementToConvert, Class<I> elementClass) {
-            checkNotNull(elementToConvert);
-            checkNotNull(elementClass);
-
-            if (isString(elementClass)) {
-                return (I) elementToConvert;
-            }
-
-            final I convertedValue = fromString(elementToConvert, elementClass);
-            return convertedValue;
-        }
-
-        /**
-         * Create the {@code Escaper} which contains will escape '\' and passed character.
-         *
-         * @param charToEscape the char to escape
-         * @return the constructed escaper
-         */
-        static Escaper createEscaper(char charToEscape) {
-            final String escapedChar = "\\" + charToEscape;
-            final Escaper result = Escapers.builder()
-                                           .addEscape('\"', "\\\"")
-                                           .addEscape(charToEscape, escapedChar)
-                                           .build();
-            return result;
-        }
 
         /**
          * Removes prior and further escaped quotes.
