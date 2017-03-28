@@ -188,57 +188,6 @@ public class Stringifiers {
     }
 
     /**
-     * Removes prior and further escaped quotes.
-     *
-     * @param value the value to unquote
-     * @return unquoted value
-     */
-    static String unquote(String value) {
-        final String unquotedValue = Pattern.compile("\\\\")
-                                            .matcher(value.substring(2, value.length() - 2))
-                                            .replaceAll("");
-        return unquotedValue;
-    }
-
-    private static boolean isQuote(char character) {
-        return character == '"';
-    }
-
-    /**
-     * Checks that the {@code CharSequence} contains escaped quotes.
-     *
-     * @param stringToCheck the sequence of chars to check
-     * @return {@code true} if sequence contains further
-     * and prior escaped quotes, {@code false} otherwise
-     */
-    static boolean isQuotedString(CharSequence stringToCheck) {
-        final int stringLength = stringToCheck.length();
-
-        if (stringLength < 2) {
-            return false;
-        }
-
-        boolean result = isQuote(stringToCheck.charAt(1)) &&
-                         isQuote(stringToCheck.charAt(stringLength - 1));
-        return result;
-    }
-
-    /**
-     * Create the {@code Escaper} which contains will escape '\' and passed character.
-     *
-     * @param charToEscape the char to escape
-     * @return the constructed escaper
-     */
-    static Escaper createEscaper(char charToEscape) {
-        final String escapedChar = "\\" + charToEscape;
-        final Escaper result = Escapers.builder()
-                                       .addEscape('\"', "\\\"")
-                                       .addEscape(charToEscape, escapedChar)
-                                       .build();
-        return result;
-    }
-
-    /**
      * The {@code Stringifier} for the long values.
      */
     static class LongStringifier extends Stringifier<Long> {
@@ -274,28 +223,91 @@ public class Stringifiers {
         }
     }
 
-    /**
-     * Converts from string to the specified type.
-     *
-     * @param elementToConvert string to convert
-     * @param elementClass     the class of the converted element
-     * @param <I>              the class type of the converted element
-     * @return the converted string
-     */
-    @SuppressWarnings("unchecked") // It is OK because class is verified.
-    static <I> I convert(String elementToConvert, Class<I> elementClass) {
-        checkNotNull(elementToConvert);
-        checkNotNull(elementClass);
+    abstract static class QuotedItem{
 
-        if (isString(elementClass)) {
-            return (I) elementToConvert;
+        private static final char QUOTE_SYMBOL = '\"';
+
+        static boolean isString(Class<?> aClass) {
+            checkNotNull(aClass);
+            return String.class.equals(aClass);
         }
 
-        final I convertedValue = fromString(elementToConvert, elementClass);
-        return convertedValue;
-    }
+        /**
+         * Converts from string to the specified type.
+         *
+         * @param elementToConvert string to convert
+         * @param elementClass     the class of the converted element
+         * @param <I>              the class type of the converted element
+         * @return the converted string
+         */
+        @SuppressWarnings("unchecked") // It is OK because class is verified.
+        static <I> I convert(String elementToConvert, Class<I> elementClass) {
+            checkNotNull(elementToConvert);
+            checkNotNull(elementClass);
 
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
+            if (isString(elementClass)) {
+                return (I) elementToConvert;
+            }
+
+            final I convertedValue = fromString(elementToConvert, elementClass);
+            return convertedValue;
+        }
+
+        /**
+         * Create the {@code Escaper} which contains will escape '\' and passed character.
+         *
+         * @param charToEscape the char to escape
+         * @return the constructed escaper
+         */
+        static Escaper createEscaper(char charToEscape) {
+            final String escapedChar = "\\" + charToEscape;
+            final Escaper result = Escapers.builder()
+                                           .addEscape('\"', "\\\"")
+                                           .addEscape(charToEscape, escapedChar)
+                                           .build();
+            return result;
+        }
+
+        /**
+         * Removes prior and further escaped quotes.
+         *
+         * @param value the value to unquote
+         * @return unquoted value
+         */
+        static String unquote(String value) {
+            checkNotNull(value);
+
+            final String unquotedValue = Pattern.compile("\\\\")
+                                                .matcher(value.substring(2, value.length() - 2))
+                                                .replaceAll("");
+            return unquotedValue;
+        }
+
+        static String quote(String stringToQuote) {
+            return QUOTE_SYMBOL + stringToQuote + QUOTE_SYMBOL;
+        }
+
+        /**
+         * Checks that the {@code CharSequence} contains escaped quotes.
+         *
+         * @param stringToCheck the sequence of chars to check
+         * @return {@code true} if sequence contains further
+         * and prior escaped quotes, {@code false} otherwise
+         */
+        static boolean isQuotedString(CharSequence stringToCheck) {
+            final int stringLength = stringToCheck.length();
+
+            if (stringLength < 2) {
+                return false;
+            }
+
+            boolean result = isQuote(stringToCheck.charAt(1)) &&
+                             isQuote(stringToCheck.charAt(stringLength - 1));
+            return result;
+        }
+
+        private static boolean isQuote(char character) {
+            return character == QUOTE_SYMBOL;
+        }
     }
 }

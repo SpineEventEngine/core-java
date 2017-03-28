@@ -25,9 +25,7 @@ import com.google.common.escape.Escapers;
 import org.junit.Test;
 import org.spine3.test.types.Task;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.core.Is.is;
@@ -43,12 +41,12 @@ public class ListStringifierShould {
 
     @Test
     public void convert_string_to_list_of_strings() {
-        final String stringToConvert = "\"1\",\"2\",\"3\",\"4\",\"5\"";
+        final String stringToConvert = "\"1\\\"\",\"2\",\"3\\\"\",\"4\",\"5\"";
         final List<String> actualList = listStringifier(String.class).reverse()
                                                                      .convert(stringToConvert);
         assertNotNull(actualList);
 
-        final List<String> expectedList = Arrays.asList(unquote(stringToConvert).split((",")));
+        final List<String> expectedList = newArrayList("1\"", "2", "3\"", "4", "5");
         assertThat(actualList, is(expectedList));
     }
 
@@ -56,6 +54,7 @@ public class ListStringifierShould {
     public void convert_list_of_strings_to_string() {
         final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
         final String actual = listStringifier(String.class).convert(listToConvert);
+
         assertEquals(escapeString(listToConvert.toString()), actual);
     }
 
@@ -80,14 +79,8 @@ public class ListStringifierShould {
     @Test(expected = MissingStringifierException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
         final String stringToConvert = "\"{value:123456}\"";
-        new ListStringifier<>(Task.class).reverse()
-                                         .convert(stringToConvert);
-    }
-
-    private static String unquote(CharSequence stringToUnescape) {
-        return Pattern.compile("\"")
-                      .matcher(stringToUnescape)
-                      .replaceAll("");
+        final Stringifier<List<Task>> stringifier = listStringifier(Task.class);
+        stringifier.fromString(stringToConvert);
     }
 
     private static String escapeString(String stringToEscape) {

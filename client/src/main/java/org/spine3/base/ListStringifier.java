@@ -20,15 +20,19 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Function;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
+import com.google.common.collect.Lists;
 import com.google.common.escape.Escaper;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.Stringifiers.createEscaper;
-import static org.spine3.base.Stringifiers.isQuotedString;
-import static org.spine3.base.Stringifiers.unquote;
+import static org.spine3.base.ListStringifier.QuotedListItem.of;
+import static org.spine3.base.ListStringifier.QuotedListItem.parse;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -68,6 +72,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  */
 class ListStringifier<T> extends Stringifier<List<T>> {
 
+    private static final String ELEMENT_IS_NULL_EX_MSG = "The list element cannot be null.";
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
 
     /**
@@ -91,7 +96,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         super();
         this.listGenericClass = listGenericClass;
         this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        escaper = createEscaper(delimiter);
+        escaper = Stringifiers.QuotedItem.createEscaper(delimiter);
         elementDelimiterPattern = createElementDelimiterPattern(delimiter);
     }
 
@@ -108,7 +113,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         super();
         this.listGenericClass = listGenericClass;
         this.delimiter = delimiter;
-        escaper = createEscaper(delimiter);
+        escaper = Stringifiers.QuotedItem.createEscaper(delimiter);
         elementDelimiterPattern = createElementDelimiterPattern(delimiter);
     }
 
@@ -119,39 +124,80 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final StringBuilder stringBuilder = new StringBuilder(0);
-        for (T element : list) {
-            final char quote = '"';
-            stringBuilder.append(quote)
-                         .append(element)
-                         .append(quote)
-                         .append(delimiter);
-        }
-        final int length = stringBuilder.length();
-        final String result = stringBuilder.substring(0, length - 1);
+        final Function<T, QuotedListItem<T>> function = new Function<T, QuotedListItem<T>>() {
+            @Nullable
+            @Override
+            public QuotedListItem<T> apply(@Nullable T input) {
+                if (input == null) {
+                    throw newIllegalArgumentException(ELEMENT_IS_NULL_EX_MSG);
+                }
+                return of(input);
+            }
+        };
+        final List<QuotedListItem<T>> quotedItems = Lists.transform(list, function);
+        final String result = Joiner.on(delimiter)
+                                    .join(quotedItems);
         return result;
     }
 
     @Override
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
-        final String[] elements = escapedString.split(elementDelimiterPattern);
-
-        final List<T> result = newArrayList();
-        for (String element : elements) {
-            checkElement(element);
-
-            final T convertedValue = Stringifiers.convert(unquote(element), listGenericClass);
-            result.add(convertedValue);
-        }
+        final Splitter splitter = Splitter.onPattern(elementDelimiterPattern);
+        final List<String> elements = newArrayList(splitter.split(escapedString));
+        final Function<String, T> function = new Function<String, T>() {
+            @Nullable
+            @Override
+            public T apply(@Nullable String input) {
+                if (input == null) {
+                    throw newIllegalArgumentException(ELEMENT_IS_NULL_EX_MSG);
+                }
+                return parse(input, listGenericClass);
+            }
+        };
+        final List<T> result = newArrayList(Lists.transform(elements, function));
         return result;
     }
 
-    private static void checkElement(CharSequence element) {
-        final boolean isQuoted = isQuotedString(element);
-        if (!isQuoted) {
-            throw newIllegalArgumentException("Illegal format of the element");
+    /**
+     * Encloses and discloses each element of the list into and from quotes
+     *
+     * @param <T> the type of the elements in the list
+     */
+    static class QuotedListItem<T> extends Stringifiers.QuotedItem {
+
+        private final T object;
+        private final Class<T> genericClass;
+
+        @SuppressWarnings("unchecked")
+        // It is OK because the class is same.
+        private QuotedListItem(T object) {
+            this.object = object;
+            this.genericClass = (Class<T>) object.getClass();
+        }
+
+        static <T> QuotedListItem<T> of(T object) {
+            return new QuotedListItem<>(object);
+        }
+
+        static <T> T parse(String elementToParse, Class<T> genericClass) {
+            checkElement(elementToParse);
+            return convert(unquote(elementToParse), genericClass);
+        }
+
+        private static void checkElement(CharSequence element) {
+            final boolean isQuoted = isQuotedString(element);
+            if (!isQuoted) {
+                throw newIllegalArgumentException("Illegal format of the element: " + element);
+            }
+        }
+
+        @Override
+        public String toString() {
+            if (isString(genericClass)) {
+                return quote((String) object);
+            }
+            return quote(Stringifiers.toString(object, genericClass));
         }
     }
-
 }

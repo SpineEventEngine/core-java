@@ -111,8 +111,8 @@ public class MapStringifierShould {
                                                                             String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
 
-        assertEquals(actualMap.get("1\"\""), "one,");
-        assertEquals(actualMap.get("2:"), "two");
+        assertEquals("one,", actualMap.get("1\"\""));
+        assertEquals("two", actualMap.get("2:"));
     }
 
     @Test(expected = IllegalArgumentException.class)
