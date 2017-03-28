@@ -46,15 +46,12 @@ import static org.junit.Assert.fail;
  *
  * @param <I> the type of IDs of storage records
  * @param <R> the type of records kept in the storage
- * @param <W> the type of the records which are written into the storage
  * @author Alexander Litus
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public abstract class AbstractStorageShould<I,
                                             R extends Message,
-                                            W,
-                                            S extends AbstractStorage<I, R>
-                                                    & WritableStorage<I, W>> {
+                                            S extends AbstractStorage<I, R>> {
 
     private S storage;
 
@@ -79,18 +76,10 @@ public abstract class AbstractStorageShould<I,
     protected abstract S getStorage();
 
     /** Creates a new storage record. */
-    protected abstract W newStorageRecord();
+    protected abstract R newStorageRecord();
 
     /** Creates a new unique storage record ID. */
     protected abstract I newId();
-
-    /**
-     * @return a {@link Converter} from the {@code W} - write type to the {@code R} - read type;
-     * by default returns a casting converter
-     */
-    protected Converter<W, R> getRecordConverter() {
-        return new DefaultRecordConverter<>();
-    }
 
     /**
      * Closes the storage and propagates an exception if any occurs.
@@ -119,16 +108,16 @@ public abstract class AbstractStorageShould<I,
     /** Writes a record, reads it and asserts it is the same as the expected one. */
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We do check.
     protected void writeAndReadRecordTest(I id) {
-        final W expected = writeRecord(id);
+        final R expected = writeRecord(id);
 
         final Optional<R> actual = storage.read(id);
 
         assertTrue(actual.isPresent());
-        assertEquals(getRecordConverter().convert(expected), actual.get());
+        assertEquals(expected, actual.get());
     }
 
-    private W writeRecord(I id) {
-        final W expected = newStorageRecord();
+    private R writeRecord(I id) {
+        final R expected = newStorageRecord();
         storage.write(id, expected);
         return expected;
     }
@@ -157,7 +146,7 @@ public abstract class AbstractStorageShould<I,
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_write_null_record() {
-        storage.write(newId(), Tests.<W>nullRef());
+        storage.write(newId(), Tests.<R>nullRef());
     }
 
     @Test

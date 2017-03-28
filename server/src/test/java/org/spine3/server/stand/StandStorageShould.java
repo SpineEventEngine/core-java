@@ -136,8 +136,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
                                   .setDescription("With description")
                                   .build();
             final EntityRecord record = newRecord(task);
-            storage.write(id, getRecordConverter().reverse()
-                                                  .convert(record));
+            storage.write(id, record);
         }
 
         final ImmutableCollection<EntityRecord> readRecords
@@ -174,8 +173,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             final AggregateStateId genericId = idSupplier.get();
             final Message state = newState(genericId);
             final EntityRecord record = newRecord(state);
-            storage.write(genericId, getRecordConverter().reverse()
-                                                         .convert(record));
+            storage.write(genericId, record);
             ids.add(genericId);
         }
 

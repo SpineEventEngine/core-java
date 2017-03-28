@@ -61,13 +61,13 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Dmytro Dashenkov
  */
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-       extends AbstractStorageShould<I, EntityRecord, EntityRecordEnvelope, S> {
+       extends AbstractStorageShould<I, EntityRecord, S> {
 
     protected abstract Message newState(I id);
 
     @Override
-    protected EntityRecordEnvelope newStorageRecord() {
-        return new EntityRecordEnvelope(newStorageRecord(newState(newId())));
+    protected EntityRecord newStorageRecord() {
+        return newStorageRecord(newState(newId()));
     }
 
     private EntityRecord newStorageRecord(I id) {
@@ -83,11 +83,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         return record;
     }
 
-    @Override
-    protected Converter<EntityRecordEnvelope, EntityRecord> getRecordConverter() {
-        return new RecordConverter();
-    }
-
     @SuppressWarnings("ConstantConditions")
         // Converter nullability issues and Optional getting
     @Test
@@ -95,8 +90,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         final I id = newId();
         final EntityRecord expected = newStorageRecord(id);
-        storage.write(id, getRecordConverter().reverse()
-                                              .convert(expected));
+        storage.write(id, expected);
 
         final EntityRecord actual = storage.read(id).get();
 
@@ -122,8 +116,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, getRecordConverter().reverse()
-                                              .convert(record));
+        storage.write(id, record);
 
         final Descriptors.Descriptor descriptor = newState(id).getDescriptorForType();
         final FieldMask idMask = FieldMasks.maskOf(descriptor, 1);
@@ -149,8 +142,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             final I id = newId();
             final Message state = newState(id);
             final EntityRecord record = newStorageRecord(state);
-            storage.write(id, getRecordConverter().reverse()
-                                                  .convert(record));
+            storage.write(id, record);
             ids.add(id);
 
             if (typeDescriptor == null) {
@@ -179,8 +171,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = newStorageRecord(id);
 
         // Write the record.
-        storage.write(id, getRecordConverter().reverse()
-                                              .convert(record));
+        storage.write(id, record);
 
         // Delete the record.
         assertTrue(storage.delete(id));
@@ -284,8 +275,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, getRecordConverter().reverse()
-                                              .convert(record));
+        storage.write(id, record);
 
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());

@@ -58,7 +58,6 @@ import static org.spine3.server.storage.Given.AnEvent.projectCreated;
 public abstract class AggregateStorageShould
         extends AbstractStorageShould<ProjectId,
                                       AggregateStateRecord,
-                                      AggregateStateRecord,
                                       AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
