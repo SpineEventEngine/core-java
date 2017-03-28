@@ -18,10 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains classes and interfaces defining entity-oriented API and base functionality.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.server.entity;
+package org.spine3.base;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * This exception is thrown when one type cannot be converted to another.
+ *
+ * @author Illia Shepilov
+ */
+public class ConversionException extends Exception {
+
+    private static final long serialVersionUID = 1L;
+
+    public ConversionException(String message, Throwable cause) {
+        super(message, cause);
+    }
+}

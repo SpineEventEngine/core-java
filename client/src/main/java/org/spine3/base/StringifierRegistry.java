@@ -22,7 +22,6 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
 
@@ -48,6 +47,8 @@ public class StringifierRegistry {
                             .put(Timestamp.class, Timestamps2.stringifier())
                             .put(EventId.class, Events.idStringifier())
                             .put(CommandId.class, Commands.idStringifier())
+                            .put(Integer.class, Stringifiers.integerStringifier())
+                            .put(Long.class, Stringifiers.longStringifier())
                             .build()
             )
     );
@@ -73,10 +74,10 @@ public class StringifierRegistry {
      * Registers the passed stringifier in the registry.
      *
      * @param stringifier the stringifier to register
-     * @param typeOfT the value of the type of objects handled by the stringifier
-     * @param <T> the type of the objects handled by the stringifier
+     * @param typeOfT     the value of the type of objects handled by the stringifier
+     * @param <T>         the type of the objects handled by the stringifier
      */
-    public <T extends Message> void register(Stringifier<T> stringifier, Type typeOfT) {
+    public <T> void register(Stringifier<T> stringifier, Type typeOfT) {
         checkNotNull(typeOfT);
         checkNotNull(stringifier);
         stringifiers.put(typeOfT, stringifier);
@@ -85,8 +86,8 @@ public class StringifierRegistry {
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
-     * @param <T> the type of the values to convert
      * @param typeOfT the type to stringify
+     * @param <T>     the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
     public <T> Optional<Stringifier<T>> get(Type typeOfT) {
