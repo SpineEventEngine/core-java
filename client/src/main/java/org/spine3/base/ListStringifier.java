@@ -72,7 +72,6 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  */
 class ListStringifier<T> extends Stringifier<List<T>> {
 
-    private static final String ELEMENT_IS_NULL_EX_MSG = "The list element cannot be null.";
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
 
     /**
@@ -128,8 +127,8 @@ class ListStringifier<T> extends Stringifier<List<T>> {
             @Nullable
             @Override
             public QuotedListItem<T> apply(@Nullable T input) {
-                if (input == null) {
-                    throw newIllegalArgumentException(ELEMENT_IS_NULL_EX_MSG);
+                if(input == null){
+                    throw newIllegalArgumentException("The list element cannot be null.");
                 }
                 return of(input);
             }
@@ -146,12 +145,11 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         final Splitter splitter = Splitter.onPattern(elementDelimiterPattern);
         final List<String> elements = newArrayList(splitter.split(escapedString));
         final Function<String, T> function = new Function<String, T>() {
+            @SuppressWarnings("ConstantConditions")
+            // It should be processed by the stringifier.
             @Nullable
             @Override
             public T apply(@Nullable String input) {
-                if (input == null) {
-                    throw newIllegalArgumentException(ELEMENT_IS_NULL_EX_MSG);
-                }
                 return parse(input, listGenericClass);
             }
         };

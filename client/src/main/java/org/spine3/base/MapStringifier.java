@@ -74,7 +74,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
     private static final char KEY_VALUE_DELIMITER = ':';
-    public static final String KEY_VALUE_ARE_NULL_EX_MSG = "The key and value cannot be null.";
 
     /**
      * The delimiter for the passed elements in the {@code String} representation,
@@ -176,7 +175,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             @Override
             public QuotedMapItem<K, V> transformEntry(@Nullable K key, @Nullable V value) {
                 if (key == null || value == null) {
-                    throw newIllegalArgumentException(KEY_VALUE_ARE_NULL_EX_MSG);
+                    throw newIllegalArgumentException("The key and value cannot be null.");
                 }
                 return of(key, value);
             }
