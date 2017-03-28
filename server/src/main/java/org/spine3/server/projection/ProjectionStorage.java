@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import org.spine3.annotations.SPI;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordEnvelope;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
@@ -54,7 +54,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityRecordEnvelope> records) {
+    protected void writeRecords(Map<I, EntityRecordWithStorageFields> records) {
         final RecordStorage<I> storage = recordStorage();
         storage.write(records);
     }

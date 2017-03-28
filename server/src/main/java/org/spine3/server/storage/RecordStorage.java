@@ -28,7 +28,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.EntityRecordEnvelope;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
 
@@ -103,7 +103,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @throws IllegalStateException if the storage is closed
      * @see #write(Object, EntityRecord)
      */
-    public void write(I id, EntityRecordEnvelope record) {
+    public void write(I id, EntityRecordWithStorageFields record) {
         checkNotNull(id);
         checkArgument(record.getRecord().hasState(), "Record does not have state field.");
         checkNotClosed();
@@ -116,7 +116,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      */
     @Override
     public void write(I id, EntityRecord record) {
-        final EntityRecordEnvelope envelope = new EntityRecordEnvelope(record);
+        final EntityRecordWithStorageFields envelope = new EntityRecordWithStorageFields(record);
         write(id, envelope);
     }
 
@@ -128,7 +128,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param records an ID to record map with the entries to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void write(Map<I, EntityRecordEnvelope> records) {
+    public void write(Map<I, EntityRecordWithStorageFields> records) {
         checkNotNull(records);
         checkNotClosed();
 
@@ -153,7 +153,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
             final EntityRecord updated = record.toBuilder()
                                                .setLifecycleFlags(flags)
                                                .build();
-            write(id, new EntityRecordEnvelope(updated));
+            write(id, updated);
         } else {
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
             final String idStr = id instanceof AggregateStateId
@@ -244,7 +244,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
 
-    protected abstract void writeRecord(I id, EntityRecordEnvelope record);
+    protected abstract void writeRecord(I id, EntityRecordWithStorageFields record);
 
     /**
      * Writes a bulk of records into the storage.
@@ -253,5 +253,5 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      *
      * @param records an ID to record map with the entries to store
      */
-    protected abstract void writeRecords(Map<I, EntityRecordEnvelope> records);
+    protected abstract void writeRecords(Map<I, EntityRecordWithStorageFields> records);
 }

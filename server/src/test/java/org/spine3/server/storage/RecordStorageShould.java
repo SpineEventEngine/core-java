@@ -34,7 +34,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.EntityRecordEnvelope;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.test.Tests;
 
 import javax.annotation.Nullable;
@@ -185,12 +185,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         final int bulkSize = 5;
 
-        final Map<I, EntityRecordEnvelope> initial = new HashMap<>(bulkSize);
+        final Map<I, EntityRecordWithStorageFields> initial = new HashMap<>(bulkSize);
 
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            initial.put(id, new EntityRecordEnvelope(record));
+            initial.put(id, new EntityRecordWithStorageFields(record));
         }
         storage.write(initial);
 
@@ -199,9 +199,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         );
         final Collection<EntityRecord> expected =
                 Collections2.transform(initial.values(),
-                                       new Function<EntityRecordEnvelope, EntityRecord>() {
+                                       new Function<EntityRecordWithStorageFields, EntityRecord>() {
                                            @Override
-                                           public EntityRecord apply(@Nullable EntityRecordEnvelope envelope) {
+                                           public EntityRecord apply(@Nullable EntityRecordWithStorageFields envelope) {
                                                assertNotNull(envelope);
                                                return envelope.getRecord();
                                            }
@@ -218,15 +218,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final int recordCount = 3;
         final RecordStorage<I> storage = getStorage();
 
-        final Function<EntityRecord, EntityRecordEnvelope> envelopPacker =
-                new Function<EntityRecord, EntityRecordEnvelope>() {
+        final Function<EntityRecord, EntityRecordWithStorageFields> envelopPacker =
+                new Function<EntityRecord, EntityRecordWithStorageFields>() {
                     @Nullable
                     @Override
-                    public EntityRecordEnvelope apply(@Nullable EntityRecord record) {
+                    public EntityRecordWithStorageFields apply(@Nullable EntityRecord record) {
                         if (record == null) {
                             return null;
                         }
-                        return new EntityRecordEnvelope(record);
+                        return new EntityRecordWithStorageFields(record);
                     }
                 };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
@@ -288,7 +288,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, new EntityRecordEnvelope(record));
+        storage.write(id, new EntityRecordWithStorageFields(record));
 
         storage.writeLifecycleFlags(id, archived());
 
@@ -301,7 +301,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void accept_record_envelopes_with_empty_storage_fields() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final EntityRecordEnvelope recordEnvelope = new EntityRecordEnvelope(record);
+        final EntityRecordWithStorageFields recordEnvelope = new EntityRecordWithStorageFields(record);
         assertFalse(recordEnvelope.hasStorageFields());
         final RecordStorage<I> storage = getStorage();
 
@@ -311,15 +311,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEquals(record, actualRecord.get());
     }
 
-    private static class RecordConverter extends Converter<EntityRecordEnvelope, EntityRecord> {
+    private static class RecordConverter extends Converter<EntityRecordWithStorageFields, EntityRecord> {
         @Override
-        protected EntityRecord doForward(EntityRecordEnvelope entityRecordEnvelope) {
-            return entityRecordEnvelope.getRecord();
+        protected EntityRecord doForward(EntityRecordWithStorageFields entityRecordWithStorageFields) {
+            return entityRecordWithStorageFields.getRecord();
         }
 
         @Override
-        protected EntityRecordEnvelope doBackward(EntityRecord entityRecord) {
-            return new EntityRecordEnvelope(entityRecord);
+        protected EntityRecordWithStorageFields doBackward(EntityRecord entityRecord) {
+            return new EntityRecordWithStorageFields(entityRecord);
         }
     }
 }

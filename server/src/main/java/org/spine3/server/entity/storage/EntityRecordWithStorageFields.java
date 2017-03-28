@@ -30,24 +30,42 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A packed value of an {@link EntityRecord} with its {@linkplain StorageFields storage fields}.
+ *
  * @author Dmytro Dashenkov
  */
-public class EntityRecordEnvelope {
+public class EntityRecordWithStorageFields {
 
     private final EntityRecord record;
 
     @Nullable
     private final ImmutableMap<String, Column.MemoizedValue<?>> storageFields;
 
-    public EntityRecordEnvelope(EntityRecord record,
-                                Map<String, Column.MemoizedValue<?>> storageFields) {
+    /**
+     * Creates a new instance of the {@code EntityRecordWithStorageFields}.
+     *
+     * @param record        {@link EntityRecord} to pack
+     * @param storageFields {@linkplain StorageFields storage fields map} to pack
+     */
+    public EntityRecordWithStorageFields(EntityRecord record,
+                                         Map<String, Column.MemoizedValue<?>> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
     }
 
+    /**
+     * Creates an instance of the {@link EntityRecordWithStorageFields} with no
+     * {@linkplain StorageFields storage fields}.
+     *
+     * <p>An object created with this constructor will always return {@code false} on
+     * {@link #hasStorageFields()}.
+     *
+     * @param record {@link EntityRecord} to pack
+     * @see #hasStorageFields()
+     */
     @SuppressWarnings("ConstantConditions")
-        // null value for the storage fields map
-    public EntityRecordEnvelope(EntityRecord record) {
+    // null value for the storage fields map
+    public EntityRecordWithStorageFields(EntityRecord record) {
         this.record = checkNotNull(record);
         this.storageFields = null;
     }
@@ -59,10 +77,20 @@ public class EntityRecordEnvelope {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public Map<String, Column.MemoizedValue<?>> getStorageFields() {
         return storageFields == null
-                ? StorageFields.empty()
-                : storageFields;
+               ? StorageFields.empty()
+               : storageFields;
     }
 
+    /**
+     * Shows whether there were any storage fields passed in the object initialization or not.
+     *
+     * <p>If returns {@code false}, the {@linkplain StorageFields storage field} are not considered
+     * in the storage and
+     *
+     * @return {@code true} if current object was constructed with
+     * {@linkplain #EntityRecordWithStorageFields(EntityRecord, Map)} and {@code false} if it was
+     * constructed with {@linkplain #EntityRecordWithStorageFields(EntityRecord)}
+     */
     public boolean hasStorageFields() {
         return storageFields != null;
     }
@@ -76,7 +104,7 @@ public class EntityRecordEnvelope {
             return false;
         }
 
-        EntityRecordEnvelope envelope = (EntityRecordEnvelope) o;
+        EntityRecordWithStorageFields envelope = (EntityRecordWithStorageFields) o;
 
         return getRecord().equals(envelope.getRecord());
     }

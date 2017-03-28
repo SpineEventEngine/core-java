@@ -39,7 +39,6 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
-import org.spine3.server.entity.storage.EntityRecordEnvelope;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.type.TypeUrl;
 
@@ -161,8 +160,7 @@ public class Stand implements AutoCloseable {
                                 .setState(entityState)
                                 .setVersion(entityVersion)
                                 .build();
-            final EntityRecordEnvelope recordEnvelope = new EntityRecordEnvelope(record);
-            storage.write(aggregateStateId, recordEnvelope);
+            storage.write(aggregateStateId, record);
         }
 
         notifyMatchingSubscriptions(id, entityState, typeUrl);

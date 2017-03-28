@@ -49,7 +49,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordEnvelope;
+import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -206,7 +206,7 @@ public class StandShould {
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = Tests.newVersionWithNumber(1);
 
-        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordEnvelope.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordWithStorageFields.class));
 
         stand.update(customerId, packedState, stateVersion);
 
@@ -1070,10 +1070,10 @@ public class StandShould {
         return stand;
     }
 
-    private static EntityRecordEnvelope recordStateMatcher(final EntityRecord expectedRecord) {
-        return argThat(new ArgumentMatcher<EntityRecordEnvelope>() {
+    private static EntityRecordWithStorageFields recordStateMatcher(final EntityRecord expectedRecord) {
+        return argThat(new ArgumentMatcher<EntityRecordWithStorageFields>() {
             @Override
-            public boolean matches(EntityRecordEnvelope argument) {
+            public boolean matches(EntityRecordWithStorageFields argument) {
                 final boolean matchResult = Objects.equals(expectedRecord.getState(),
                                                            argument.getRecord().getState());
                 return matchResult;
