@@ -107,7 +107,8 @@ abstract class HandlerMethod<C extends Message> {
         try {
             final int paramCount = getParamCount();
             if (paramCount == 1) {
-                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                @SuppressWarnings("unchecked") // it is assumed that the method returns
+                                               // the result of this type
                 final R result = (R) method.invoke(target, message);
                 return result;
             } else {

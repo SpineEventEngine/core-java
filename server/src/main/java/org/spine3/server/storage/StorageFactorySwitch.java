@@ -121,7 +121,8 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
      * Obtains {@code StorageFactory} for the current execution mode.
      *
      * @return {@code StorageFactory} instance
-     * @throws IllegalStateException if production {@code Supplier} was not set via {@link #init(Supplier, Supplier)}
+     * @throws IllegalStateException if production {@code Supplier} was not set
+     *                               via {@link #init(Supplier, Supplier)}
      */
     @Override
     public StorageFactory get() {

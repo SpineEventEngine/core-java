@@ -60,8 +60,8 @@ class MessageFieldValidator extends FieldValidator<Message> {
      * @param descriptor    a descriptor of the field to validate
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
-     * @param strict        if {@code true} the validator would assume that the field is required even
-     *                      if the corresponding field option is not present
+     * @param strict        if {@code true} the validator would assume that the field is required
+     *                      even if the corresponding field option is not present
      */
     MessageFieldValidator(FieldDescriptor descriptor,
                           ImmutableList<Message> fieldValues,
@@ -144,7 +144,8 @@ class MessageFieldValidator extends FieldValidator<Message> {
      * @param timeToCheck  a timestamp to check
      * @param whenExpected the time when the checked timestamp should be
      * @param now          the current moment
-     * @return {@code true} if the time is valid according to {@code whenExpected} parameter, {@code false} otherwise
+     * @return {@code true} if the time is valid according to {@code whenExpected} parameter,
+     *         {@code false} otherwise
      */
     private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
         final boolean isValid = (whenExpected == FUTURE)
@@ -168,7 +169,8 @@ class MessageFieldValidator extends FieldValidator<Message> {
         return violation;
     }
 
-    private ConstraintViolation newValidViolation(Message fieldValue, Iterable<ConstraintViolation> violations) {
+    private ConstraintViolation newValidViolation(Message fieldValue,
+                                                  Iterable<ConstraintViolation> violations) {
         final String msg = getErrorMsgFormat(ifInvalidOption, ifInvalidOption.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
                                                                  .setMsgFormat(msg)
