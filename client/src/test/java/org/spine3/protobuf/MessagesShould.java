@@ -19,20 +19,10 @@
  */
 package org.spine3.protobuf;
 
-import com.google.common.collect.Lists;
-import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import com.google.protobuf.util.JsonFormat;
 import org.junit.Test;
 import org.spine3.test.Tests;
-import org.spine3.type.KnownTypes;
-import org.spine3.type.TypeUrl;
 
-import java.util.List;
-
-import static org.junit.Assert.assertFalse;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {
@@ -45,32 +35,5 @@ public class MessagesShould {
     @Test(expected = NullPointerException.class)
     public void toText_fail_on_null() {
         Messages.toText(Tests.<Message>nullRef());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void toJson_fail_on_null() {
-        Messages.toJson(Tests.<Message>nullRef());
-    }
-
-    @Test
-    public void print_to_json() {
-        final StringValue value = newStringValue("print_to_json");
-        assertFalse(Messages.toJson(value)
-                            .isEmpty());
-    }
-
-    @Test
-    public void build_JsonFormat_registry_for_known_types() {
-        final JsonFormat.TypeRegistry typeRegistry = Messages.forKnownTypes();
-
-        final List<Descriptor> found = Lists.newLinkedList();
-        for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Descriptor descriptor = typeRegistry.find(typeUrl.getTypeName());
-            if (descriptor != null) {
-                found.add(descriptor);
-            }
-        }
-
-        assertFalse(found.isEmpty());
     }
 }

@@ -27,6 +27,7 @@ import com.google.protobuf.MessageOrBuilder;
 import org.spine3.annotations.Internal;
 
 import javax.annotation.Nullable;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.UUID;
 import java.util.regex.Pattern;
@@ -192,9 +193,10 @@ public class Identifiers {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         final Class<? extends Message> msgClass = message.getClass();
         final TypeToken<? extends Message> msgToken = TypeToken.of(msgClass);
-        if (registry.hasStringifierFor(msgToken)) {
+        final Type msgType = msgToken.getType();
+        if (registry.hasStringifierFor(msgType)) {
             @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(msgToken)
+            final Stringifier converter = registry.get(msgType)
                                                   .get();
             result = (String) converter.convert(message);
         } else {

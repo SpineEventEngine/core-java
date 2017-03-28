@@ -25,9 +25,10 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.annotations.SPI;
+import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.delivery.Delivery;
-import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.projection.ProjectionRepository;
 
 import java.util.Collection;
@@ -47,7 +48,7 @@ import java.util.concurrent.Executor;
  */
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
-public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, Stand> {
+public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope<?, ?>, Stand> {
 
     private Stand stand;
 
@@ -65,19 +66,23 @@ public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, St
 
     @Override
     protected Runnable getDeliveryAction(final Stand consumer,
-                                         final VersionableEntity deliverable) {
+                                         final EntityStateEnvelope<?, ?> deliverable) {
         return new Runnable() {
             @Override
             public void run() {
-                final Message state = deliverable.getState();
+                final Message state = deliverable.getMessage();
                 final Any packedState = AnyPacker.pack(state);
-                consumer.update(deliverable.getId(), packedState, deliverable.getVersion());
+                final Version version = deliverable.getEntityVersion()
+                                                   .or(Version.getDefaultInstance());
+                consumer.update(deliverable.getEntityId(),
+                                packedState,
+                                version);
             }
         };
     }
 
     @Override
-    protected Collection<Stand> consumersFor(VersionableEntity deliverable) {
+    protected Collection<Stand> consumersFor(EntityStateEnvelope deliverable) {
         return Lists.newArrayList(stand);
     }
 
@@ -91,7 +96,8 @@ public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, St
     public static StandUpdateDelivery immediateDeliveryWithExecutor(Executor executor) {
         final StandUpdateDelivery immediateDelivery = new StandUpdateDelivery(executor) {
             @Override
-            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
+                                                     Stand consumer) {
                 return false;
             }
         };
@@ -112,7 +118,8 @@ public abstract class StandUpdateDelivery extends Delivery<VersionableEntity, St
         private static final StandUpdateDelivery DIRECT_DELIVERY = new StandUpdateDelivery() {
 
             @Override
-            protected boolean shouldPostponeDelivery(VersionableEntity deliverable, Stand consumer) {
+            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
+                                                     Stand consumer) {
                 return false;
             }
         };

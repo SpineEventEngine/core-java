@@ -19,21 +19,15 @@
  */
 package org.spine3.protobuf;
 
-import com.google.protobuf.Descriptors;
-import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.TextFormat;
-import com.google.protobuf.util.JsonFormat;
-import org.spine3.type.KnownTypes;
-import org.spine3.type.TypeUrl;
-import org.spine3.type.error.UnknownTypeException;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.protobuf.Descriptors.Descriptor;
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
  * Utility class for working with {@link Message} objects.
@@ -61,38 +55,18 @@ public class Messages {
     }
 
     /**
-     * Converts passed message into Json representation.
+     * Safely packs the given {@link Message} object as {@link Any}.
      *
-     * @param message the message object
-     * @return Json string
-     */
-    public static String toJson(Message message) {
-        checkNotNull(message);
-        String result;
-        try {
-            result = JsonPrinter.instance().print(message);
-        } catch (InvalidProtocolBufferException e) {
-            throw new UnknownTypeException(e);
-        }
-        checkState(result != null);
-        return result;
-    }
-
-    /**
-     * Builds and returns the registry of types known in the application.
+     * <p>If the passed message object is already packed as {@code Any}, just
+     * casts it to {@code Any} and returns the result.
      *
-     * @return {@code JsonFormat.TypeRegistry} instance
+     * @param messageOrAny the message object
+     * @return {@code Any}
      */
-    static JsonFormat.TypeRegistry forKnownTypes() {
-        final JsonFormat.TypeRegistry.Builder builder = JsonFormat.TypeRegistry.newBuilder();
-        for (TypeUrl typeUrl : KnownTypes.getAllUrls()) {
-            final Descriptors.GenericDescriptor genericDescriptor = typeUrl.getDescriptor();
-            if (genericDescriptor instanceof Descriptor) {
-                final Descriptor descriptor = (Descriptor) genericDescriptor;
-                builder.add(descriptor);
-            }
-        }
-        return builder.build();
+    public static Any toAny(Message messageOrAny) {
+        return (messageOrAny instanceof Any)
+                    ? (Any) messageOrAny
+                    : pack(messageOrAny);
     }
 
     /**
@@ -115,18 +89,6 @@ public class Messages {
                  | IllegalAccessException
                  | InvocationTargetException e) {
             throw new IllegalStateException(e);
-        }
-    }
-
-    private enum JsonPrinter {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final JsonFormat.Printer value = JsonFormat.printer()
-                                                           .usingTypeRegistry(forKnownTypes());
-
-        private static JsonFormat.Printer instance() {
-            return INSTANCE.value;
         }
     }
 }

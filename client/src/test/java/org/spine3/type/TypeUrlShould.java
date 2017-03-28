@@ -36,7 +36,6 @@ import org.spine3.base.CommandValidationError;
 import org.spine3.client.CommandFactory;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
-import org.spine3.type.error.UnknownTypeException;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;

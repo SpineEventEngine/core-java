@@ -30,9 +30,7 @@ import org.spine3.base.Error;
 import org.spine3.base.Response;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.MessageEnvelope;
-import org.spine3.server.command.error.CommandException;
-import org.spine3.server.command.error.InvalidCommandException;
-import org.spine3.server.command.error.UnsupportedCommandException;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.users.CurrentTenant;
 import org.spine3.test.Tests;
 import org.spine3.test.command.AddTask;
@@ -97,6 +95,19 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
+    public void allow_to_specify_failure_bus_via_builder() {
+        final FailureBus expectedFailureBus = mock(FailureBus.class);
+        final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setCommandStore(commandStore)
+                                                .setFailureBus(expectedFailureBus)
+                                                .build();
+        assertNotNull(commandBus);
+
+        final FailureBus actualFailureBus = commandBus.failureBus();
+        assertEquals(expectedFailureBus, actualFailureBus);
+    }
+
+    @Test
     public void have_log() {
         assertNotNull(Log.log());
     }
@@ -107,10 +118,25 @@ public class CommandBusShould extends AbstractCommandBusTestSuite {
     }
 
     @Test
+    public void have_failure_bus_if_no_custom_set() {
+        final CommandBus bus = CommandBus.newBuilder()
+                                           .setCommandStore(commandStore)
+                                           .build();
+        assertNotNull(bus.failureBus());
+    }
+
+    @Test
     public void close_CommandStore_when_closed() throws Exception {
         commandBus.close();
 
         verify(commandStore).close();
+    }
+
+    @Test
+    public void close_FailureBus_when_closed() throws Exception {
+        commandBus.close();
+
+        verify(failureBus).close();
     }
 
     @Test

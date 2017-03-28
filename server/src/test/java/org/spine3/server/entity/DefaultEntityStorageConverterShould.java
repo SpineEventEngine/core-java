@@ -99,7 +99,7 @@ public class DefaultEntityStorageConverterShould {
     private static class TestRepository
             extends DefaultRecordBasedRepository<Long, TestEntity, StringValue> {
         private TestRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 }

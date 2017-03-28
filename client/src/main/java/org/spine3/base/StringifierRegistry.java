@@ -22,32 +22,33 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.common.reflect.TypeToken;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Stringifiers.CommandIdStringifier;
-import org.spine3.base.Stringifiers.EventIdStringifier;
-import org.spine3.base.Stringifiers.TimestampStringifer;
+import org.spine3.protobuf.Timestamps2;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
 
 /**
  * The registry of converters of types to their string representations.
  *
  * @author Alexander Yevsyukov
+ * @author Illia Shepilov
  */
 public class StringifierRegistry {
 
-    private final Map<TypeToken<?>, Stringifier<?>> entries = synchronizedMap(
+    private final Map<Type, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(
-                    ImmutableMap.<TypeToken<?>, Stringifier<?>>builder()
-                            .put(TypeToken.of(Timestamp.class), new TimestampStringifer())
-                            .put(TypeToken.of(EventId.class), new EventIdStringifier())
-                            .put(TypeToken.of(CommandId.class), new CommandIdStringifier())
+                    ImmutableMap.<Type, Stringifier<?>>builder()
+                            .put(Timestamp.class, Timestamps2.stringifier())
+                            .put(EventId.class, Events.idStringifier())
+                            .put(CommandId.class, Commands.idStringifier())
+                            .put(Integer.class, Stringifiers.integerStringifier())
+                            .put(Long.class, Stringifiers.longStringifier())
                             .build()
             )
     );
@@ -56,24 +57,45 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    public <I extends Message> void register(TypeToken<I> valueClass, Stringifier<I> converter) {
-        checkNotNull(valueClass);
-        checkNotNull(converter);
-        entries.put(valueClass, converter);
+    static <T> Stringifier<T> getStringifier(Type typeOfT) {
+        checkNotNull(typeOfT);
+        final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
+
+        if (!stringifierOptional.isPresent()) {
+            final String errMsg =
+                    format("No stringifier registered for the type: %s", typeOfT);
+            throw new MissingStringifierException(errMsg);
+        }
+        final Stringifier<T> stringifier = stringifierOptional.get();
+        return stringifier;
+    }
+
+    /**
+     * Registers the passed stringifier in the registry.
+     *
+     * @param stringifier the stringifier to register
+     * @param typeOfT     the value of the type of objects handled by the stringifier
+     * @param <T>         the type of the objects handled by the stringifier
+     */
+    public <T> void register(Stringifier<T> stringifier, Type typeOfT) {
+        checkNotNull(typeOfT);
+        checkNotNull(stringifier);
+        stringifiers.put(typeOfT, stringifier);
     }
 
     /**
      * Obtains a {@code Stringifier} for the passed type.
      *
-     * @param <I> the type of the values to convert
+     * @param typeOfT the type to stringify
+     * @param <T>     the type of the values to convert
      * @return the found {@code Stringifer} or empty {@code Optional}
      */
-    public <I> Optional<Stringifier<I>> get(TypeToken<I> valueToken) {
-        checkNotNull(valueToken);
+    public <T> Optional<Stringifier<T>> get(Type typeOfT) {
+        checkNotNull(typeOfT);
 
-        final Stringifier<?> func = entries.get(valueToken);
+        final Stringifier<?> func = stringifiers.get(typeOfT);
 
-        final Stringifier<I> result = cast(func);
+        final Stringifier<T> result = cast(func);
         return Optional.fromNullable(result);
     }
 
@@ -81,22 +103,21 @@ public class StringifierRegistry {
      * Casts the passed instance.
      *
      * <p>The cast is safe as we check the first type when
-     * {@linkplain #register(TypeToken, Stringifier) adding}.
+     * {@linkplain #register(Stringifier, Type) adding}.
      */
     @SuppressWarnings("unchecked")
-    private static <I> Stringifier<I> cast(Stringifier<?> func) {
-        return (Stringifier<I>) func;
+    private static <T> Stringifier<T> cast(Stringifier<?> func) {
+        return (Stringifier<T>) func;
     }
 
     /**
      * Tells whether there is a Stringifier registered for the passed type.
      *
-     * @param valueToken the token with the type info
-     * @param <I> the type to be converted to a string
+     * @param type the type for which to find a stringifier
      * @return {@code true} if there is a registered stringifier, {@code false} otherwise
      */
-    public synchronized <I> boolean hasStringifierFor(TypeToken<I> valueToken) {
-        final boolean contains = entries.containsKey(valueToken);
+    synchronized boolean hasStringifierFor(Type type) {
+        final boolean contains = stringifiers.containsKey(type);
         return contains;
     }
 

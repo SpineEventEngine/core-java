@@ -39,6 +39,7 @@ public class FailuresShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(Command.class, Command.getDefaultInstance())
                 .testAllPublicStaticMethods(Failures.class);
     }
 

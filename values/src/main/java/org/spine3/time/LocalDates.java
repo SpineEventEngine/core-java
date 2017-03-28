@@ -40,6 +40,7 @@ import static org.spine3.validate.Validate.checkPositive;
 public class LocalDates {
 
     private LocalDates() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

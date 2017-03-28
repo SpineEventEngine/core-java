@@ -38,7 +38,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandBus;
 import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.command.CommandStore;
-import org.spine3.server.event.Subscribe;
+import org.spine3.base.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
 import org.spine3.test.TestCommandFactory;
@@ -87,7 +87,7 @@ public class ProcessManagerShould {
     public void setUp() {
         final InMemoryStorageFactory storageFactory = InMemoryStorageFactory.getInstance();
         final CommandStore commandStore = spy(
-                new CommandStore(storageFactory.createCommandStorage())
+                new CommandStore(storageFactory)
         );
 
         commandBus = spy(CommandBus.newBuilder()

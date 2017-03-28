@@ -20,10 +20,14 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregatePart;
+import org.spine3.test.Tests;
 
+import static org.junit.Assert.assertTrue;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
+import static org.spine3.test.Tests.newUuidValue;
 
 /**
  * @author Illia Shepilov
@@ -35,5 +39,42 @@ public class AbstractEntityShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
         getConstructor(AggregatePart.class, String.class);
+    }
+
+    @Test
+    public void accept_anything_to_isValidate() {
+        final AnEntity entity = new AnEntity(0L);
+
+        assertTrue(entity.isValid(Tests.<StringValue>nullRef()));
+        assertTrue(entity.isValid(StringValue.getDefaultInstance()));
+        assertTrue(entity.isValid(newUuidValue()));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_invalid_state() {
+        final NonblankString entity = new NonblankString(1L);
+
+        // This should pass.
+        entity.updateState(newUuidValue());
+
+        // This should fail.
+        entity.updateState(StringValue.getDefaultInstance());
+    }
+
+    private static class AnEntity extends AbstractEntity<Long, StringValue> {
+        protected AnEntity(Long id) {
+            super(id);
+        }
+    }
+
+    private static class NonblankString extends AbstractEntity<Long, StringValue> {
+        protected NonblankString(Long id) {
+            super(id);
+        }
+
+        @Override
+        protected boolean isValid(StringValue newState) {
+            return !newState.getValue().isEmpty();
+        }
     }
 }

@@ -20,24 +20,19 @@
 
 package org.spine3.base;
 
-import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
-import org.spine3.test.identifiers.TimestampFieldId;
 
-import java.text.ParseException;
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.base.Stringifiers.integerStringifier;
+import static org.spine3.base.Stringifiers.longStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StringifiersShould {
@@ -50,14 +45,14 @@ public class StringifiersShould {
     private static final Stringifier<IdWithPrimitiveFields> ID_TO_STRING_CONVERTER =
             new Stringifier<IdWithPrimitiveFields>() {
                 @Override
-                protected String doForward(IdWithPrimitiveFields id) {
+                protected String toString(IdWithPrimitiveFields id) {
                     return id.getName();
                 }
 
                 @Override
-                protected IdWithPrimitiveFields doBackward(String s) {
+                protected IdWithPrimitiveFields fromString(String str) {
                     return IdWithPrimitiveFields.newBuilder()
-                                                .setName(s)
+                                                .setName(str)
                                                 .build();
                 }
             };
@@ -65,8 +60,7 @@ public class StringifiersShould {
     @Test
     public void convert_to_string_registered_id_message_type() {
         StringifierRegistry.getInstance()
-                           .register(TypeToken.of(IdWithPrimitiveFields.class),
-                                     ID_TO_STRING_CONVERTER);
+                           .register(ID_TO_STRING_CONVERTER, IdWithPrimitiveFields.class);
 
         final String testId = "testId 123456";
         final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
@@ -82,13 +76,13 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertNull(registry.get(TypeToken.of(Timestamp.class))
+        assertNull(registry.get(Timestamp.class)
                            .get()
                            .convert(null));
-        assertNull(registry.get(TypeToken.of(EventId.class))
+        assertNull(registry.get(EventId.class)
                            .get()
                            .convert(null));
-        assertNull(registry.get(TypeToken.of(CommandId.class))
+        assertNull(registry.get(CommandId.class)
                            .get()
                            .convert(null));
     }
@@ -96,76 +90,30 @@ public class StringifiersShould {
     @Test
     public void return_false_on_attempt_to_find_unregistered_type() {
         assertFalse(StringifierRegistry.getInstance()
-                                       .hasStringifierFor(TypeToken.of(Random.class)));
-    }
-
-    @Test
-    public void convert_command_id_to_string() {
-        final CommandId id = Commands.generateId();
-
-        final String actual = Stringifiers.toString(id, TypeToken.of(CommandId.class));
-        assertEquals(idToString(id), actual);
-    }
-
-    @Test
-    public void convert_string_to_command_id() {
-        final String id = newUuid();
-        final CommandId expected = CommandId.newBuilder()
-                                            .setUuid(id)
-                                            .build();
-
-        final CommandId actual = Stringifiers.parse(id, TypeToken.of(CommandId.class));
-        assertEquals(expected, actual);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
-        final String time = Timestamps2.getCurrentTime()
-                                       .toString();
-        Stringifiers.parse(time, TypeToken.of(Timestamp.class));
-    }
-
-    @Test
-    public void convert_string_to_timestamp() throws ParseException {
-        final String date = "1972-01-01T10:00:20.021-05:00";
-        final Timestamp expected = Timestamps.parse(date);
-        final Timestamp actual = Stringifiers.parse(date, TypeToken.of(Timestamp.class));
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_timestamp_to_string() {
-        final Timestamp currentTime = getCurrentTime();
-        final TimestampFieldId id = TimestampFieldId.newBuilder()
-                                                    .setId(currentTime)
-                                                    .build();
-        final String expected = Stringifiers.toString(currentTime, TypeToken.of(Timestamp.class));
-        final String actual = idToString(id);
-
-        assertEquals(expected, actual);
-    }
-
-    @Test
-    public void convert_event_id_to_string() {
-        final EventId id = Events.generateId();
-        final String actual = Stringifiers.toString(id, TypeToken.of(EventId.class));
-
-        assertEquals(idToString(id), actual);
-    }
-
-    @Test
-    public void convert_string_to_event_id() {
-        final String id = newUuid();
-        final EventId expected = EventId.newBuilder()
-                                        .setUuid(id)
-                                        .build();
-        final EventId actual = Stringifiers.parse(id, TypeToken.of(EventId.class));
-        assertEquals(expected, actual);
+                                       .hasStringifierFor(Random.class));
     }
 
     @Test
     public void pass_the_null_tolerance_check() {
         final NullPointerTester tester = new NullPointerTester();
         tester.testStaticMethods(Stringifiers.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @Test
+    public void convert_long_to_string() {
+        final String convertedLong = longStringifier().toString(1L);
+        assertEquals("1", convertedLong);
+    }
+
+    @Test
+    public void convert_int_to_string() {
+        final String convertedInt = integerStringifier().toString(2);
+        assertEquals("2", convertedInt);
+    }
+
+    @SuppressWarnings("EmptyClass") // is the part of the test.
+    @Test(expected = MissingStringifierException.class)
+    public void raise_exception_on_missing_stringifer() {
+        Stringifiers.toString(new Object() {});
     }
 }

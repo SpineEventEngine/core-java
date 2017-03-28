@@ -517,11 +517,11 @@ public class AggregateShould {
         }
 
         /**
-         * This method attempts to call {@link #setState(Message, Version) setState()}
+         * This method attempts to call {@link #updateState(Message, Version) setState()}
          * directly, which should result in {@link IllegalStateException}.
          */
         void tryToUpdateStateDirectly() {
-            setState(Project.getDefaultInstance(), Version.getDefaultInstance());
+            updateState(Project.getDefaultInstance(), Version.getDefaultInstance());
         }
 
         @Assign
