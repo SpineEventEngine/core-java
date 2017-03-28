@@ -37,8 +37,14 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
      */
     LifecycleFlags getLifecycleFlags();
 
+    /**
+     * Shows if current instance if archived or not.
+     */
     boolean isArchived();
 
+    /**
+     * Shows if current instance if deleted or not.
+     */
     boolean isDeleted();
 
     /**
