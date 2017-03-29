@@ -75,9 +75,9 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      * {@code DEFAULT_ELEMENT_DELIMITER} by default.
      */
     private final char delimiter;
-    private final Class<T> listGenericClass;
     private final Escaper escaper;
     private final Splitter splitter;
+    private final Stringifier<T> elementStringifier;
 
     /**
      * Creates a {@code ListStringifier}.
@@ -89,10 +89,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      */
     ListStringifier(Class<T> listGenericClass) {
         super();
-        this.listGenericClass = listGenericClass;
+        this.elementStringifier = getStringifier(listGenericClass);
         this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        escaper = Stringifiers.createEscaper(delimiter);
-        splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
+        this.escaper = Stringifiers.createEscaper(delimiter);
+        this.splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
     }
 
     /**
@@ -106,10 +106,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      */
     ListStringifier(Class<T> listGenericClass, char delimiter) {
         super();
-        this.listGenericClass = listGenericClass;
+        this.elementStringifier = getStringifier(listGenericClass);
         this.delimiter = delimiter;
-        escaper = Stringifiers.createEscaper(delimiter);
-        splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
+        this.escaper = Stringifiers.createEscaper(delimiter);
+        this.splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
     }
 
     private static String createElementDelimiterPattern(char delimiter) {
@@ -119,12 +119,11 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final Stringifier<T> stringifier = getStringifier(listGenericClass);
         final Converter<String, String> quoteConverter = ItemQuoter.converter();
         final List<String> convertedItems = newArrayList();
         for (T item : list) {
-            final String convertedItem = stringifier.andThen(quoteConverter)
-                                                    .convert(item);
+            final String convertedItem = elementStringifier.andThen(quoteConverter)
+                                                           .convert(item);
             convertedItems.add(convertedItem);
         }
         final String result = Joiner.on(delimiter)
@@ -136,12 +135,11 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
         final List<String> items = newArrayList(splitter.split(escapedString));
-        final Stringifier<T> stringifier = getStringifier(listGenericClass);
         final Converter<String, String> quoteConverter = ItemQuoter.converter();
         final List<T> result = newArrayList();
         for (String item : items) {
             final T convertedItem = quoteConverter.reverse()
-                                                  .andThen(stringifier.reverse())
+                                                  .andThen(elementStringifier.reverse())
                                                   .convert(item);
             result.add(convertedItem);
         }

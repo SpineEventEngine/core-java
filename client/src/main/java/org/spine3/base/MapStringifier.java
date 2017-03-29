@@ -78,10 +78,10 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      * {@code DEFAULT_ELEMENT_DELIMITER} by default.
      */
     private final char delimiter;
-    private final Class<K> keyClass;
-    private final Class<V> valueClass;
     private final Escaper escaper;
     private final Splitter.MapSplitter splitter;
+    private final Stringifier<K> keyStringifier;
+    private final Stringifier<V> valueStringifier;
 
     /**
      * Creates a {@code MapStringifier}.
@@ -94,8 +94,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      */
     MapStringifier(Class<K> keyClass, Class<V> valueClass) {
         super();
-        this.keyClass = keyClass;
-        this.valueClass = valueClass;
+        this.keyStringifier = getStringifier(keyClass);
+        this.valueStringifier = getStringifier(valueClass);
         this.delimiter = DEFAULT_ELEMENT_DELIMITER;
         this.escaper = Stringifiers.createEscaper(delimiter);
         this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
@@ -113,8 +113,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      */
     MapStringifier(Class<K> keyClass, Class<V> valueClass, char delimiter) {
         super();
-        this.keyClass = keyClass;
-        this.valueClass = valueClass;
+        this.keyStringifier = getStringifier(keyClass);
+        this.valueStringifier = getStringifier(valueClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
         this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
@@ -141,8 +141,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     @Override
     protected String toString(Map<K, V> obj) {
         final Converter<String, String> quotedConverter = converter();
-        final Stringifier<K> keyStringifier = getStringifier(keyClass);
-        final Stringifier<V> valueStringifier = getStringifier(valueClass);
         final Map<String, String> resultMap = newHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
             final String convertedKey = keyStringifier.andThen(quotedConverter)
@@ -167,8 +165,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private Map<K, V> convert(Map<String, String> buckets) {
         final Converter<String, String> quotedConverter = converter();
-        final Stringifier<K> keyStringifier = getStringifier(keyClass);
-        final Stringifier<V> valueStringifier = getStringifier(valueClass);
         final Map<K, V> resultMap = newHashMap();
         try {
             for (Map.Entry<String, String> bucket : buckets.entrySet()) {
