@@ -434,7 +434,7 @@ public final class BoundedContext
             return this;
         }
 
-        public Optional<Supplier<StorageFactory>> storageFactorySupplier() {
+        public Optional<Supplier<StorageFactory>> getStorageFactorySupplier() {
             return Optional.fromNullable(storageFactorySupplier);
         }
 
@@ -443,7 +443,7 @@ public final class BoundedContext
             return this;
         }
 
-        public Optional<CommandStore> commandStore() {
+        public Optional<CommandStore> getCommandStore() {
             return Optional.fromNullable(commandStore);
         }
 
@@ -452,11 +452,11 @@ public final class BoundedContext
             return this;
         }
 
-        public Optional<CommandBus> commandBus() {
+        public Optional<CommandBus> getCommandBus() {
             return Optional.fromNullable(commandBus);
         }
 
-        public Optional<? extends TenantIndex> tenantIndex() {
+        public Optional<? extends TenantIndex> getTenantIndex() {
             return Optional.fromNullable(tenantIndex);
         }
 
@@ -465,7 +465,7 @@ public final class BoundedContext
             return this;
         }
 
-        public Optional<EventBus> eventBus() {
+        public Optional<EventBus> getEventBus() {
             return Optional.fromNullable(eventBus);
         }
 
@@ -474,11 +474,11 @@ public final class BoundedContext
             return this;
         }
 
-        public Optional<Stand> stand() {
+        public Optional<Stand> getStand() {
             return Optional.fromNullable(stand);
         }
 
-        public Optional<StandUpdateDelivery> standUpdateDelivery() {
+        public Optional<StandUpdateDelivery> getStandUpdateDelivery() {
             return Optional.fromNullable(standUpdateDelivery);
         }
 

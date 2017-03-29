@@ -75,14 +75,14 @@ public class BoundedContextBuilderShould {
         Supplier<StorageFactory> mock = mock(Supplier.class);
 
         assertEquals(mock, builder.setStorageFactorySupplier(mock)
-                                  .storageFactorySupplier()
+                                  .getStorageFactorySupplier()
                                   .get());
     }
 
     @Test
     public void allow_clearing_storage_factory_supplier() {
         assertFalse(builder.setStorageFactorySupplier(Tests.<Supplier<StorageFactory>>nullRef())
-                           .storageFactorySupplier()
+                           .getStorageFactorySupplier()
                            .isPresent());
     }
 
@@ -96,7 +96,7 @@ public class BoundedContextBuilderShould {
         final CommandBus expected = TestCommandBusFactory.create(storageFactory);
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
-        assertEquals(expected, builder.commandBus()
+        assertEquals(expected, builder.getCommandBus()
                                       .get());
     }
 
@@ -104,7 +104,7 @@ public class BoundedContextBuilderShould {
     public void return_EventBus() {
         final EventBus expected = TestEventBusFactory.create(storageFactory);
         builder.setEventBus(expected);
-        assertEquals(expected, builder.eventBus()
+        assertEquals(expected, builder.getEventBus()
                                       .get());
     }
 
@@ -125,7 +125,7 @@ public class BoundedContextBuilderShould {
         final TenantIndex tenantIndex = mock(TenantIndex.class);
         assertEquals(tenantIndex, BoundedContext.newBuilder()
                                                 .setTenantIndex(tenantIndex)
-                                                .tenantIndex()
+                                                .getTenantIndex()
                                                 .get());
     }
 
@@ -172,7 +172,7 @@ public class BoundedContextBuilderShould {
     public void accept_CommandStore() {
         final CommandStore commandStore = mock(CommandStore.class);
         builder.setCommandStore(commandStore);
-        assertEquals(commandStore, builder.commandStore().get());
+        assertEquals(commandStore, builder.getCommandStore().get());
     }
 
     @Test(expected = NullPointerException.class)
@@ -184,7 +184,7 @@ public class BoundedContextBuilderShould {
     public void return_StandUpdateDelivery_if_set() {
         final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
         assertEquals(mock, builder.setStandUpdateDelivery(mock)
-                                  .standUpdateDelivery().get());
+                                  .getStandUpdateDelivery().get());
     }
 
     @Test(expected = IllegalStateException.class)
