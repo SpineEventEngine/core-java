@@ -70,19 +70,19 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void return_storage_factory_supplier_if_it_was_set() {
-        @SuppressWarnings("unchecked") // OK for mocks.
+        @SuppressWarnings("unchecked") // OK for this mock.
         Supplier<StorageFactory> mock = mock(Supplier.class);
 
-        builder.setStorageFactorySupplier(mock);
-
-        assertEquals(mock, builder.storageFactorySupplier().get());
+        assertEquals(mock, builder.setStorageFactorySupplier(mock)
+                                  .storageFactorySupplier()
+                                  .get());
     }
 
     @Test
     public void allow_clearing_storage_factory_supplier() {
-        builder.setStorageFactorySupplier(Tests.<Supplier<StorageFactory>>nullRef());
-
-        assertFalse(builder.storageFactorySupplier().isPresent());
+        assertFalse(builder.setStorageFactorySupplier(Tests.<Supplier<StorageFactory>>nullRef())
+                           .storageFactorySupplier()
+                           .isPresent());
     }
 
     @Test(expected = NullPointerException.class)
