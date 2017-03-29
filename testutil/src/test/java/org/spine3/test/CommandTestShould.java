@@ -80,7 +80,8 @@ public class CommandTestShould {
     @Test
     public void accept_custom_CommandFactory() {
         final Class<? extends CommandTestShould> clazz = getClass();
-        final CommandTest<StringValue> commandTestWithFactory = new TestCommandTest(newCommandFactory(clazz));
+        final CommandTest<StringValue> commandTestWithFactory =
+                new TestCommandTest(newCommandFactory(clazz));
 
         createAndAssertCommand(commandTestWithFactory);
     }
@@ -112,7 +113,8 @@ public class CommandTestShould {
         assertFalse(commandTest.command().isPresent());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals are initialized.
+    @SuppressWarnings("OptionalGetWithoutIsPresent") // This test verifies that Optionals
+                                                     // are initialized.
     @Test
     public void stores_command_after_creation() {
         final StringValue commandMessage = newUuidValue();
@@ -150,7 +152,8 @@ public class CommandTestShould {
     public void create_different_command_with_timestamp() {
         final Message anotherCommandMsg = Timestamps2.getCurrentTime();
         final Timestamp timestamp = TimeTests.Past.minutesAgo(30);
-        final Command anotherCommand = commandTest.createDifferentCommand(anotherCommandMsg, timestamp);
+        final Command anotherCommand =
+                commandTest.createDifferentCommand(anotherCommandMsg, timestamp);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
         assertEquals(timestamp, anotherCommand.getContext().getTimestamp());

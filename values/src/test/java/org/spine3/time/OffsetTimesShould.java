@@ -39,7 +39,8 @@ public class OffsetTimesShould {
     private static final int millis = 124;
     private static final long nanos = 122L;
     private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(3, 30);
-    private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+    private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds,
+                                                             millis, nanos);
 
     @Test
     public void have_private_constructor() {

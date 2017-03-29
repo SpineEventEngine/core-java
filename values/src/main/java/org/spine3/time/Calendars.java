@@ -223,7 +223,8 @@ class Calendars {
      * @return new {@code Calendar} instance at specific zone offset
      */
     static Calendar at(ZoneOffset zoneOffset) {
-        @SuppressWarnings("NumericCastThatLosesPrecision") // OK as a valid zoneOffset isn't that big.
+        @SuppressWarnings("NumericCastThatLosesPrecision") // OK as a valid zoneOffset
+                                                           // isn't that big.
         final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
         final SimpleTimeZone timeZone = new SimpleTimeZone(offsetMillis, "temp");
         final Calendar result = getInstance(timeZone);

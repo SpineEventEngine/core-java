@@ -34,7 +34,6 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.time.ZoneOffsets.UTC;
 
-
 /**
  * Creates Context for tests.
  *
@@ -43,7 +42,8 @@ import static org.spine3.time.ZoneOffsets.UTC;
 @SuppressWarnings("UtilityClass")
 public class TestCommandContextFactory {
 
-    private TestCommandContextFactory() {}
+    private TestCommandContextFactory() {
+    }
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext createCommandContext() {
@@ -54,13 +54,17 @@ public class TestCommandContextFactory {
     }
 
     /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
-        final CommandContext.Builder builder = CommandContext.newBuilder()
-                                                             .setCommandId(commandId)
-                                                             .setActor(userId)
-                                                             .setTimestamp(when)
-                                                             .setZoneOffset(UTC)
-                                                             .setTenantId(TenantId.newBuilder().setValue(newUuid()));
+    public static CommandContext createCommandContext(UserId userId,
+                                                      CommandId commandId,
+                                                      Timestamp when) {
+        final CommandContext.Builder builder =
+                CommandContext.newBuilder()
+                              .setCommandId(commandId)
+                              .setActor(userId)
+                              .setTimestamp(when)
+                              .setZoneOffset(UTC)
+                              .setTenantId(TenantId.newBuilder()
+                                                   .setValue(newUuid()));
         return builder.build();
     }
 

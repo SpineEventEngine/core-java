@@ -70,7 +70,8 @@ public class AggregateCommandEndpointShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
+    /** Use spy only when it is required to avoid problems,
+     * make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
     private EventBus eventBus;
 
@@ -137,7 +138,8 @@ public class AggregateCommandEndpointShould {
         // Load should be executed twice due to repeated dispatching.
         verify(repositorySpy, times(2)).loadOrCreate(projectId);
 
-        // Reading event count is executed 2 times per dispatch (so 2 * 2) plus once upon storing the state.
+        // Reading event count is executed 2 times per dispatch
+        // (so 2 * 2) plus once upon storing the state.
         verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
     }
 
@@ -165,7 +167,8 @@ public class AggregateCommandEndpointShould {
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
             AggregateCommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
+        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor =
+                ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
     }

@@ -68,7 +68,8 @@ public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
+    /** Use spy only when it is required to avoid problems,
+     * make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
     @Before
@@ -157,7 +158,8 @@ public class AggregateRepositoryShould {
         repositorySpy.store(aggregate);
 
         verify(storage, never()).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
-        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), intThat(new GreaterThan<>(0)));
+        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class),
+                                                         intThat(new GreaterThan<>(0)));
     }
 
     @Test
@@ -352,7 +354,8 @@ public class AggregateRepositoryShould {
         }
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+    private static class ProjectAggregateRepository
+                   extends AggregateRepository<ProjectId, ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(InMemoryStorageFactory.getInstance());

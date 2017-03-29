@@ -82,7 +82,8 @@ public class AlternativeFieldValidatorShould {
 
     @Test
     public void should_report_missing_field() {
-        final AlternativeFieldValidator testee = new AlternativeFieldValidator(MessageWithMissingField.getDescriptor(),
+        final AlternativeFieldValidator testee =
+                new AlternativeFieldValidator(MessageWithMissingField.getDescriptor(),
                                                                                rootFieldPath);
         final MessageWithMissingField msg = MessageWithMissingField.newBuilder()
                                                                    .setPresent(true)
