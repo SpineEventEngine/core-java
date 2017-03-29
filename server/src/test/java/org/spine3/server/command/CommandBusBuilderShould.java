@@ -80,7 +80,7 @@ public class CommandBusBuilderShould {
                                                      .setCommandStore(commandStore)
                                                      .setCommandScheduler(expectedScheduler);
 
-        assertEquals(expectedScheduler, builder.commandScheduler()
+        assertEquals(expectedScheduler, builder.getCommandScheduler()
                                                .get());
 
         final CommandBus commandBus = builder.build();
@@ -97,7 +97,7 @@ public class CommandBusBuilderShould {
         final CommandBus.Builder builder = CommandBus.newBuilder()
                                                      .setCommandStore(commandStore)
                                                      .setFailureBus(expectedFailureBus);
-        assertEquals(expectedFailureBus, builder.failureBus()
+        assertEquals(expectedFailureBus, builder.getFailureBus()
                                                 .get());
     }
 

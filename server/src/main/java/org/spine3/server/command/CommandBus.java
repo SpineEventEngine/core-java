@@ -324,11 +324,11 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return commandStore;
         }
 
-        public Optional<CommandScheduler> commandScheduler() {
+        public Optional<CommandScheduler> getCommandScheduler() {
             return Optional.fromNullable(commandScheduler);
         }
 
-        public Optional<FailureBus> failureBus() {
+        public Optional<FailureBus> getFailureBus() {
             return Optional.fromNullable(failureBus);
         }
 
