@@ -102,7 +102,8 @@ class AlternativeFieldValidator {
                         violations.add(requiredFieldNotFound);
                     }
                 } else {
-                    log().warn("`{}` is not of string type. Found: {}", OPTION_REQUIRED_FIELD, optionType);
+                    log().warn("`{}` is not of string type. Found: {}",
+                               OPTION_REQUIRED_FIELD, optionType);
                 }
             }
         }
@@ -149,7 +150,9 @@ class AlternativeFieldValidator {
         }
 
         Object fieldValue = message.getField(field);
-        final FieldValidator<?> fieldValidator = FieldValidatorFactory.createStrict(field, fieldValue, rootFieldPath);
+        final FieldValidator<?> fieldValidator = FieldValidatorFactory.createStrict(field,
+                                                                                    fieldValue,
+                                                                                    rootFieldPath);
         final List<ConstraintViolation> violations = fieldValidator.validate();
 
         // Do not add violations to the results because we have options.

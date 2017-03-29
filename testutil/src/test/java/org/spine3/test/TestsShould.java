@@ -141,7 +141,8 @@ public class TestsShould {
     }
 
     private static class ClassWithPublicCtor {
-        @SuppressWarnings("PublicConstructorInNonPublicClass") // It's the purpose of this tests class.
+        @SuppressWarnings("PublicConstructorInNonPublicClass") // It's the purpose of this
+                                                               // test class.
         public ClassWithPublicCtor() {}
     }
 

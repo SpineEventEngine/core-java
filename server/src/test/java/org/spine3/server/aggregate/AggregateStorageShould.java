@@ -324,19 +324,22 @@ public abstract class AggregateStorageShould
                        .build();
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
+    private static class TestAggregateWithIdString
+                   extends Aggregate<String, Project, Project.Builder> {
         private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
+    private static class TestAggregateWithIdInteger
+                   extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
+    private static class TestAggregateWithIdLong
+                   extends Aggregate<Long, Project, Project.Builder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

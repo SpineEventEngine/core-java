@@ -66,7 +66,8 @@ public class IntMismatch {
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value
+     * different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected string
@@ -74,13 +75,15 @@ public class IntMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(int expected, int actual, int newValue, int version) {
+    public static ValueMismatch unexpectedValue(int expected, int actual,
+                                                int newValue, int version) {
         checkNotNullOrEqual(expected, actual);
         return of(expected, actual, newValue, version);
     }
 
     /**
-     * Creates a new instance of {@code ValueMismatch} with the passed values for an integer attribute.
+     * Creates a new instance of {@code ValueMismatch} with the passed values
+     * for an integer attribute.
      */
     public static ValueMismatch of(int expected, int actual, int newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()

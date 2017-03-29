@@ -34,7 +34,6 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.time.ZoneOffsets.UTC;
 
-
 /**
  * Creates Context for tests.
  *
@@ -42,7 +41,8 @@ import static org.spine3.time.ZoneOffsets.UTC;
  */
 public class TestCommandContextFactory {
 
-    private TestCommandContextFactory() {}
+    private TestCommandContextFactory() {
+    }
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext createCommandContext() {

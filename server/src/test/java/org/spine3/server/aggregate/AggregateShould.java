@@ -447,7 +447,8 @@ public class AggregateShould {
     }
 
     /** Class only for test cases: exception if missing command handler or missing event applier. */
-    private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class TestAggregateForCaseMissingHandlerOrApplier
+                   extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -574,7 +575,7 @@ public class AggregateShould {
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // because we need it for checking.
             final Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
@@ -590,7 +591,7 @@ public class AggregateShould {
                                                      .addEvent(projectCreated())
                                                      .build());
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // because we need it for checking.
             final Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());

@@ -31,6 +31,9 @@ public class EventClassShould {
 
     @Test
     public void create_set_on_varargs() {
-        assertEquals(3, EventClass.setOf(BoolValue.class, Int32Value.class, StringValue.class).size());
+        assertEquals(3, EventClass.setOf(
+                BoolValue.class,
+                Int32Value.class,
+                StringValue.class).size());
     }
 }
