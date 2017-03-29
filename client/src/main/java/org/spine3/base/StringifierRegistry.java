@@ -49,7 +49,7 @@ public class StringifierRegistry {
                             .put(CommandId.class, Commands.idStringifier())
                             .put(Integer.class, Stringifiers.integerStringifier())
                             .put(Long.class, Stringifiers.longStringifier())
-                            .put(String.class, Stringifiers.stringStringifier())
+                            .put(String.class, Stringifiers.noopStringifier())
                             .build()
             )
     );

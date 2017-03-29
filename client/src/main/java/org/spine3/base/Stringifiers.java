@@ -160,10 +160,12 @@ public class Stringifiers {
     /**
      * Obtains {@code Stringifier} for the string values.
      *
+     * <p>It does not make any modifications to {@code String}.
+     *
      * @return the stringifier for the string values
      */
-    static Stringifier<String> stringStringifier() {
-        final Stringifier<String> stringStringifier = new StringStringifier();
+    static Stringifier<String> noopStringifier() {
+        final Stringifier<String> stringStringifier = new NoopStringifier();
         return stringStringifier;
     }
 
@@ -214,8 +216,10 @@ public class Stringifiers {
 
     /**
      * The {@code Stringifier} for the {@code String} values.
+     *
+     * <p>Always returns the original {@code String} passed as an argument.
      */
-    private static class StringStringifier extends Stringifier<String> {
+    private static class NoopStringifier extends Stringifier<String> {
         @Override
         protected String toString(String obj) {
             return obj;
