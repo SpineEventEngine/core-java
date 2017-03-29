@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Serves as enclosure and disclosure for the elements into and from quotes.
+ * Encloses and discloses the {@code String} objects with quotes.
  */
 class ItemQuoter {
 
@@ -40,29 +40,6 @@ class ItemQuoter {
 
     static Converter<String, String> converter() {
         return new QuotedItemConverter();
-    }
-
-    /**
-     * Checks that the {@code CharSequence} contains escaped quotes.
-     *
-     * @param stringToCheck the sequence of chars to check
-     * @return {@code true} if sequence contains further
-     * and prior escaped quotes, {@code false} otherwise
-     */
-    static boolean isQuotedString(CharSequence stringToCheck) {
-        final int stringLength = stringToCheck.length();
-
-        if (stringLength < 2) {
-            return false;
-        }
-
-        boolean result = isQuote(stringToCheck.charAt(1)) &&
-                         isQuote(stringToCheck.charAt(stringLength - 1));
-        return result;
-    }
-
-    private static boolean isQuote(char character) {
-        return character == QUOTE_SYMBOL;
     }
 
     private static class QuotedItemConverter extends Converter<String, String> {
@@ -96,6 +73,29 @@ class ItemQuoter {
                                                 .matcher(value.substring(2, value.length() - 2))
                                                 .replaceAll("");
             return unquotedValue;
+        }
+
+        /**
+         * Checks that the {@code CharSequence} contains escaped quotes.
+         *
+         * @param stringToCheck the sequence of chars to check
+         * @return {@code true} if sequence contains further
+         * and prior escaped quotes, {@code false} otherwise
+         */
+        private static boolean isQuotedString(CharSequence stringToCheck) {
+            final int stringLength = stringToCheck.length();
+
+            if (stringLength < 2) {
+                return false;
+            }
+
+            boolean result = isQuote(stringToCheck.charAt(1)) &&
+                             isQuote(stringToCheck.charAt(stringLength - 1));
+            return result;
+        }
+
+        private static boolean isQuote(char character) {
+            return character == QUOTE_SYMBOL;
         }
     }
 }
