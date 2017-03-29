@@ -62,7 +62,7 @@ import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.aggregate.Given.Command.addTask;
 import static org.spine3.server.aggregate.Given.Command.createProject;
 import static org.spine3.server.aggregate.Given.Command.startProject;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 public class AggregateCommandEndpointShould {
 

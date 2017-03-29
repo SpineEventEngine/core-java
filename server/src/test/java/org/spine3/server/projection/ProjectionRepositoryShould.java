@@ -80,7 +80,7 @@ import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
 import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 /**
@@ -404,7 +404,7 @@ public class ProjectionRepositoryShould
     @Test
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
         // Set up bounded context
-        final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext(
+        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(
                 TestEventBusFactory.create());
         final int eventsCount = 10;
         final EventStore eventStore = boundedContext.getEventBus()

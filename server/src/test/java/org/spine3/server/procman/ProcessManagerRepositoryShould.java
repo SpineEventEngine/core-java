@@ -101,7 +101,7 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final BoundedContext boundedContext = TestBoundedContextFactory.newBoundedContext();
+        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
         repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         return repo;
@@ -135,7 +135,7 @@ public class ProcessManagerRepositoryShould
     public void setUp() {
         super.setUp();
         eventBus = spy(TestEventBusFactory.create());
-        boundedContext = TestBoundedContextFactory.newBoundedContext(eventBus);
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(eventBus);
 
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {

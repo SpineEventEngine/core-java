@@ -35,6 +35,7 @@ import org.spine3.server.stand.Stand;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
+import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.testdata.TestStandFactory;
 
 import java.util.Set;
@@ -48,7 +49,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alex Tymchenko
@@ -67,9 +67,10 @@ public class QueryServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository and one projection.
-        projectsContext = newBoundedContext(spy(TestStandFactory.create()));
+        projectsContext = SingleTenant.newBoundedContext(spy(TestStandFactory.create()));
 
-        final Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository(projectsContext);
+        final Given.ProjectAggregateRepository projectRepo =
+                new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository(projectsContext));
         projectsContext.register(projectDetailsRepository);
@@ -77,8 +78,9 @@ public class QueryServiceShould {
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        customersContext = newBoundedContext(spy(TestStandFactory.create()));
-        final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
+        customersContext = SingleTenant.newBoundedContext(spy(TestStandFactory.create()));
+        final Given.CustomerAggregateRepository customerRepo =
+                new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
@@ -119,7 +121,8 @@ public class QueryServiceShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_create_with_removed_bounded_context_from_builder() {
-        final BoundedContext boundedContext = newBoundedContext(TestStandFactory.create());
+        final BoundedContext boundedContext =
+                SingleTenant.newBoundedContext(TestStandFactory.create());
 
         final QueryService.Builder builder = QueryService.newBuilder();
         builder.add(boundedContext)
@@ -161,9 +164,10 @@ public class QueryServiceShould {
      * Stub repositories and projections
      ***************************************************/
 
-    private static class ProjectDetailsRepository extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
+    private static class ProjectDetailsRepository
+            extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
 
-        protected ProjectDetailsRepository(BoundedContext boundedContext) {
+        private ProjectDetailsRepository(BoundedContext boundedContext) {
             super(boundedContext);
         }
     }

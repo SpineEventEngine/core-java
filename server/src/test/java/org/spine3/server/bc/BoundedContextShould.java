@@ -56,6 +56,8 @@ import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
+import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
+import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 
 import java.util.List;
 
@@ -72,7 +74,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alexander Litus
@@ -89,7 +90,7 @@ public class BoundedContextShould {
 
     @Before
     public void setUp() {
-        boundedContext = newBoundedContext();
+        boundedContext = MultiTenant.newBoundedContext();
         storageFactory = InMemoryStorageFactory.getInstance(boundedContext.isMultitenant());
     }
 
@@ -186,7 +187,7 @@ public class BoundedContextShould {
         final EventBus eventBus = mock(EventBus.class);
         doReturn(false).when(eventBus)
                        .validate(any(Message.class), anyResponseObserver());
-        final BoundedContext boundedContext = newBoundedContext(eventBus);
+        final BoundedContext boundedContext = MultiTenant.newBoundedContext(eventBus);
         final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
 
         boundedContext.notify(event, new TestResponseObserver());
@@ -224,7 +225,7 @@ public class BoundedContextShould {
     @Test
     public void propagate_registered_repositories_to_stand() {
         final Stand stand = spy(mock(Stand.class));
-        final BoundedContext boundedContext = newBoundedContext(stand);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 
         final ProjectAggregateRepository repository =
