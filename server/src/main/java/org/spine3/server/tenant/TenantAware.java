@@ -33,7 +33,7 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-public class TenantAware {
+class TenantAware {
 
     private final TenantId tenantId;
 
@@ -85,8 +85,7 @@ public class TenantAware {
      * @return current tenant ID or {@link CurrentTenant#singleTenant() singleTenant()}
      * @throws IllegalStateException if there is no current tenant set in a multi-tenant context
      */
-    @Internal
-    public static TenantId getCurrentTenant(boolean multitenantContext) {
+    static TenantId getCurrentTenant(boolean multitenantContext) {
         if (!multitenantContext) {
             return CurrentTenant.singleTenant();
         }

@@ -20,12 +20,13 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.server.tenant.TenantAware;
+import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
@@ -52,19 +53,20 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
      * <p>If the slice has not been created for this tenant, it will be created.
      */
     S getStorage() {
-        final TenantId tenantId = currentTenant();
-        checkState(tenantId != null, "Current tenant is null");
-
-        S storage = tenantSlices.get(tenantId);
-        if (storage == null) {
-            storage = createSlice();
-            tenantSlices.put(tenantId, storage);
-        }
-        return storage;
-    }
-
-    private TenantId currentTenant() {
-        final TenantId result = TenantAware.getCurrentTenant(isMultitenant());
+        final TenantFunction<S> func = new TenantFunction<S>(isMultitenant()) {
+            @Nullable
+            @Override
+            public S apply(@Nullable TenantId tenantId) {
+                checkNotNull(tenantId);
+                S storage = tenantSlices.get(tenantId);
+                if (storage == null) {
+                    storage = createSlice();
+                    tenantSlices.put(tenantId, storage);
+                }
+                return storage;
+            }
+        };
+        final S result = func.execute();
         return result;
     }
 
