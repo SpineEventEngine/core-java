@@ -295,7 +295,7 @@ public class Validate {
      * @return the passed value
      * @throws IllegalArgumentException if the ID string value is empty or blank
      */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // is OK for this popular field name value.
+    @SuppressWarnings("DuplicateStringLiteralInspection") // is OK for this popular field name value
     public static String checkNameNotEmptyOrBlank(String name) {
         return checkNotEmptyOrBlank(name, "name");
     }

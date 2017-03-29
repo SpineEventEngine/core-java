@@ -162,8 +162,8 @@ public class Commands {
     public static CommandContext newContextBasedOn(CommandContext commandContext) {
         checkNotNull(commandContext);
         final CommandContext.Builder result = commandContext.toBuilder()
-                .setCommandId(generateId())
-                .setTimestamp(getCurrentTime());
+                                                            .setCommandId(generateId())
+                                                            .setTimestamp(getCurrentTime());
         return result.build();
     }
 
@@ -183,8 +183,8 @@ public class Commands {
 
         final Any packed = AnyPacker.pack(message);
         final Command.Builder result = Command.newBuilder()
-                                               .setMessage(packed)
-                                               .setContext(context);
+                                              .setMessage(packed)
+                                              .setContext(context);
         return result.build();
     }
 
@@ -271,7 +271,7 @@ public class Commands {
      *
      * @param file a descriptor of a {@code .proto} file to check
      * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX},
-     *                      {@code false} otherwise
+     * {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
         checkNotNull(file);
@@ -289,7 +289,7 @@ public class Commands {
      *
      * @param command a command to check
      * @return {@code true} if the command context has a scheduling option set,
-     *                      {@code false} otherwise
+     * {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
         checkNotNull(command);
@@ -360,8 +360,10 @@ public class Commands {
     public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
-        return  c1.getActor().equals(c2.getActor()) &&
-                c1.getTenantId().equals(c2.getTenantId());
+        return c1.getActor()
+                 .equals(c2.getActor()) &&
+               c1.getTenantId()
+                 .equals(c2.getTenantId());
     }
 
     /**

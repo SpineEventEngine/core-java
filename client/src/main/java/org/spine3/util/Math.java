@@ -20,7 +20,7 @@
 
 package org.spine3.util;
 
-import static java.lang.String.*;
+import static java.lang.String.format;
 
 /**
  * Math utilities.

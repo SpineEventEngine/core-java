@@ -44,8 +44,8 @@ import static com.google.common.collect.Sets.newHashSet;
  * @author Alexander Litus
  */
 @SuppressWarnings({"ExtendsUtilityClass" /* we do this to depend on this class from tests */,
-                   "ClassWithTooManyMethods", "OverlyComplexClass",
-                   "ErrorNotRethrown", "unused"})
+        "ClassWithTooManyMethods", "OverlyComplexClass",
+        "ErrorNotRethrown", "unused"})
 public final class Verify extends Assert {
 
     private static final String SHOULD_NOT_BE_EQUAL = " should not be equal:<";
@@ -66,11 +66,16 @@ public final class Verify extends Assert {
     private static final String PARAM_STRING = "string";
     private static final String PARAM_LIST = "list";
 
-    private static final String MSG_SHOULD_BE_EMPTY_ACTUAL_SIZE = " should be empty; actual size:<";
-    private static final String MSG_IN_STRING_TO_SEARCH = "> in stringToSearch:<";
-    private static final String MSG_STRING_TO_SEARCH_SHOULD_NOT_BE_NULL = "stringToSearch should not be null";
-    private static final String MSG_HAS_INCORRECT_ELEMENT_AT_INDEX = " has incorrect element at index:<";
-    private static final String MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM = " should not contain unexpectedItem:<";
+    private static final String MSG_SHOULD_BE_EMPTY_ACTUAL_SIZE =
+            " should be empty; actual size:<";
+    private static final String MSG_IN_STRING_TO_SEARCH =
+            "> in stringToSearch:<";
+    private static final String MSG_STRING_TO_SEARCH_SHOULD_NOT_BE_NULL =
+            "stringToSearch should not be null";
+    private static final String MSG_HAS_INCORRECT_ELEMENT_AT_INDEX =
+            " has incorrect element at index:<";
+    private static final String MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM =
+            " should not contain unexpectedItem:<";
     private static final String MSG_SHOULD_NOT_BE_NULL = " should not be null";
 
     private Verify() {
@@ -197,8 +202,8 @@ public final class Verify extends Assert {
             // handle infinity specially since subtracting to infinite values gives NaN and the
             // the following test fails
             if (areNaNs(notExpected, actual)
-                    || areSameKindOfInfinity(notExpected, actual)
-                    || Math.abs(notExpected - actual) <= delta) {
+                || areSameKindOfInfinity(notExpected, actual)
+                || Math.abs(notExpected - actual) <= delta) {
                 fail(itemName + SHOULD_NOT_BE_EQUAL + notExpected + '>');
             }
         } catch (AssertionError e) {
@@ -324,7 +329,7 @@ public final class Verify extends Assert {
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
             if (!fluentIterable.isEmpty()) {
                 fail(iterableName + " must be empty; actual size:<" +
-                            fluentIterable.size() + '>');
+                     fluentIterable.size() + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -402,7 +407,7 @@ public final class Verify extends Assert {
 
             if (!actualMultimap.isEmpty()) {
                 fail(multimapName + MSG_SHOULD_BE_EMPTY_ACTUAL_SIZE +
-                            actualMultimap.size() + '>');
+                     actualMultimap.size() + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -425,17 +430,17 @@ public final class Verify extends Assert {
             if (actualMap.keySet()
                          .size() != 0) {
                 fail(mapName + errorMessage + actualMap.keySet()
-                                                              .size() + '>');
+                                                       .size() + '>');
             }
             if (actualMap.values()
                          .size() != 0) {
                 fail(mapName + errorMessage + actualMap.values()
-                                                              .size() + '>');
+                                                       .size() + '>');
             }
             if (actualMap.entrySet()
                          .size() != 0) {
                 fail(mapName + errorMessage + actualMap.entrySet()
-                                                              .size() + '>');
+                                                       .size() + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -457,7 +462,7 @@ public final class Verify extends Assert {
             assertObjectNotNull(iterableName, actualIterable);
             final FluentIterable<?> fluentIterable = FluentIterable.from(actualIterable);
             assertFalse(iterableName + SHOULD_NOT_BE_EMPTY_MESSAGE,
-                               fluentIterable.isEmpty());
+                        fluentIterable.isEmpty());
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -487,16 +492,16 @@ public final class Verify extends Assert {
             assertObjectNotNull(mapName, actualMap);
             assertFalse(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, actualMap.isEmpty());
             assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
-                                   actualMap.size());
+                            actualMap.size());
             assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
-                                   actualMap.keySet()
-                                                                                      .size());
+                            actualMap.keySet()
+                                     .size());
             assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
-                                   actualMap.values()
-                                                                                      .size());
+                            actualMap.values()
+                                     .size());
             assertNotEquals(mapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
-                                   actualMap.entrySet()
-                                                                                      .size());
+                            actualMap.entrySet()
+                                     .size());
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -516,9 +521,9 @@ public final class Verify extends Assert {
         try {
             assertObjectNotNull(multimapName, actualMultimap);
             assertFalse(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE,
-                               actualMultimap.isEmpty());
+                        actualMultimap.isEmpty());
             assertNotEquals(multimapName + SHOULD_NOT_BE_EMPTY_MESSAGE, 0,
-                                   actualMultimap.size());
+                            actualMultimap.size());
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -634,12 +639,12 @@ public final class Verify extends Assert {
                                            int actualSize) {
         if (actualSize != expectedSize) {
             fail("Incorrect size for "
-                    + collectionName
-                    + "; expected:<"
-                    + expectedSize
-                    + "> but was:<"
-                    + actualSize
-                    + '>');
+                 + collectionName
+                 + "; expected:<"
+                 + expectedSize
+                 + "> but was:<"
+                 + actualSize
+                 + '>');
         }
     }
 
@@ -664,7 +669,10 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert that the given {@code stringToFind} is contained within the {@code stringToSearch}. */
+    /**
+     * Assert that the given {@code stringToFind} is contained within
+     * the {@code stringToSearch}.
+     */
     public static void assertContains(CharSequence stringToFind, String stringToSearch) {
         try {
             assertContains(PARAM_STRING, stringToFind, stringToSearch);
@@ -673,8 +681,10 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within
-     * the {@code stringToSearch}. */
+    /**
+     * Assert that the given {@code unexpectedString} is <em>not</em> contained within
+     * the {@code stringToSearch}.
+     */
     public static void assertNotContains(CharSequence unexpectedString, String stringToSearch) {
         try {
             assertNotContains(PARAM_STRING, unexpectedString, stringToSearch);
@@ -683,7 +693,8 @@ public final class Verify extends Assert {
         }
     }
 
-    /** Assert that the given {@code stringToFind} is contained
+    /**
+     * Assert that the given {@code stringToFind} is contained
      * within the {@code stringToSearch}.
      */
     public static void assertContains(String stringName,
@@ -695,19 +706,21 @@ public final class Verify extends Assert {
 
             if (!stringToSearch.contains(stringToFind)) {
                 fail(stringName
-                        + " did not contain stringToFind:<"
-                        + stringToFind
-                        + MSG_IN_STRING_TO_SEARCH
-                        + stringToSearch
-                        + '>');
+                     + " did not contain stringToFind:<"
+                     + stringToFind
+                     + MSG_IN_STRING_TO_SEARCH
+                     + stringToSearch
+                     + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
         }
     }
 
-    /** Assert that the given {@code unexpectedString} is <em>not</em> contained within
-     * the {@code stringToSearch}. */
+    /**
+     * Assert that the given {@code unexpectedString} is <em>not</em> contained within
+     * the {@code stringToSearch}.
+     */
     public static void assertNotContains(String stringName,
                                          CharSequence unexpectedString,
                                          String stringToSearch) {
@@ -717,11 +730,11 @@ public final class Verify extends Assert {
 
             if (stringToSearch.contains(unexpectedString)) {
                 fail(stringName
-                        + " contains unexpectedString:<"
-                        + unexpectedString
-                        + MSG_IN_STRING_TO_SEARCH
-                        + stringToSearch
-                        + '>');
+                     + " contains unexpectedString:<"
+                     + unexpectedString
+                     + MSG_IN_STRING_TO_SEARCH
+                     + stringToSearch
+                     + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -771,7 +784,7 @@ public final class Verify extends Assert {
 
             if (!actualCollection.contains(expectedItem)) {
                 fail(collectionName + " did not contain expectedItem:<" +
-                            expectedItem + '>');
+                     expectedItem + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -779,7 +792,7 @@ public final class Verify extends Assert {
     }
 
     @SafeVarargs
-    public static<T> void assertContainsAll(
+    public static <T> void assertContainsAll(
             Iterable<T> iterable,
             T... items) {
         try {
@@ -796,9 +809,9 @@ public final class Verify extends Assert {
         }
     }
 
-    public static<K, V> void assertMapsEqual(Map<K, V> expectedMap,
-                                             Map<K, V> actualMap,
-                                             String actualMapName) {
+    public static <K, V> void assertMapsEqual(Map<K, V> expectedMap,
+                                              Map<K, V> actualMap,
+                                              String actualMapName) {
         try {
             //noinspection ConstantConditions
             if (expectedMap == null) {
@@ -815,7 +828,7 @@ public final class Verify extends Assert {
                 final V actualValue = actualMap.get(expectedKey);
                 if (!Objects.equals(actualValue, expectedValue)) {
                     fail("Values differ at key " + expectedKey + " expected " +
-                                expectedValue + " but was " + actualValue);
+                         expectedValue + " but was " + actualValue);
                 }
             }
             assertSetsEqual(expectedMap.keySet(), actualMap.keySet());
@@ -825,7 +838,7 @@ public final class Verify extends Assert {
         }
     }
 
-    public static<T> void assertSetsEqual(Collection<T> expectedSet, Collection<T> actualSet) {
+    public static <T> void assertSetsEqual(Collection<T> expectedSet, Collection<T> actualSet) {
         try {
             //noinspection ConstantConditions
             if (expectedSet == null) {
@@ -880,7 +893,7 @@ public final class Verify extends Assert {
 
             if (!actualMultimap.containsEntry(expectedKey, expectedValue)) {
                 fail(multimapName + " did not contain entry: <" + expectedKey + ", "
-                            + expectedValue + '>');
+                     + expectedValue + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -956,15 +969,15 @@ public final class Verify extends Assert {
             if (!Objects.equals(actualValue, expectedValue)) {
                 fail(
                         mapName
-                                + " entry with expectedKey:<"
-                                + expectedKey
-                                + '>'
-                                + " did not contain expectedValue:<"
-                                + expectedValue
-                                + ">, "
-                                + "but had actualValue:<"
-                                + actualValue
-                                + '>');
+                        + " entry with expectedKey:<"
+                        + expectedKey
+                        + '>'
+                        + " did not contain expectedValue:<"
+                        + expectedValue
+                        + ">, "
+                        + "but had actualValue:<"
+                        + actualValue
+                        + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -990,7 +1003,7 @@ public final class Verify extends Assert {
 
             if (actualCollection.contains(unexpectedItem)) {
                 fail(collectionName + MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM +
-                            unexpectedItem + '>');
+                     unexpectedItem + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1017,7 +1030,7 @@ public final class Verify extends Assert {
             final FluentIterable<?> fluentIterable = FluentIterable.from(iterable);
             if (fluentIterable.contains(unexpectedItem)) {
                 fail(collectionName + MSG_SHOULD_NOT_CONTAIN_UNEXPECTED_ITEM +
-                            unexpectedItem + '>');
+                     unexpectedItem + '>');
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1053,7 +1066,7 @@ public final class Verify extends Assert {
      * Both the formerItem and the latterItem must appear in the collection, or this assert will
      * fail.
      */
-    public static<T> void assertBefore(T formerItem, T latterItem, List<T> actualList) {
+    public static <T> void assertBefore(T formerItem, T latterItem, List<T> actualList) {
         try {
             assertBefore(PARAM_LIST, formerItem, latterItem, actualList);
         } catch (AssertionError e) {
@@ -1066,7 +1079,7 @@ public final class Verify extends Assert {
      * {@link #assertContains(String, Object, Collection)} will be called for both the formerItem
      * and the latterItem, prior to the "before" assertion.
      */
-    public static<T> void assertBefore(
+    public static <T> void assertBefore(
             String listName,
             T formerItem,
             T latterItem,
@@ -1083,8 +1096,8 @@ public final class Verify extends Assert {
             final int latterPosition = actualList.indexOf(latterItem);
             if (latterPosition < formerPosition) {
                 fail("Items in " + listName + " are in incorrect order; " +
-                            "expected formerItem:<" + formerItem + '>' +
-                            " to appear before latterItem:<" + latterItem + ">, but didn't");
+                     "expected formerItem:<" + formerItem + '>' +
+                     " to appear before latterItem:<" + latterItem + ">, but didn't");
             }
         } catch (AssertionError e) {
             throw mangledException(e);
@@ -1335,7 +1348,7 @@ public final class Verify extends Assert {
             } catch (IllegalAccessException ignored) {
                 if (canInstantiateThroughReflection(aClass)) {
                     fail("Expected constructor of non-instantiable class '" + aClass +
-                                "' to throw an exception, but didn't");
+                         "' to throw an exception, but didn't");
                 }
             }
         } catch (AssertionError e) {
@@ -1365,11 +1378,11 @@ public final class Verify extends Assert {
             try {
                 assertSame(
                         "Caught error of type <"
-                                + ex.getClass()
-                                    .getName()
-                                + ">, expected one error of type <"
-                                + expectedErrorClass.getName()
-                                + '>',
+                        + ex.getClass()
+                            .getName()
+                        + ">, expected one error of type <"
+                        + expectedErrorClass.getName()
+                        + '>',
                         expectedErrorClass,
                         ex.getClass());
                 return;
@@ -1434,9 +1447,9 @@ public final class Verify extends Assert {
     private static String msgCaughtButExpectedWithMessage(Exception actual,
                                                           Class<? extends Exception> expectedClass) {
         return msgCaughtButExpected(actual, expectedClass)
-                + LINE_SEPARATOR
-                + "Exception Message: " + actual.getMessage()
-                + LINE_SEPARATOR;
+               + LINE_SEPARATOR
+               + "Exception Message: " + actual.getMessage()
+               + LINE_SEPARATOR;
     }
 
     /**
@@ -1607,23 +1620,24 @@ public final class Verify extends Assert {
         final Throwable actualCauseClass = actual.getCause();
         assertNotNull(
                 "Caught exception with null cause, expected cause of type <"
-                        + expectedCauseClass.getName()
-                        + '>',
+                + expectedCauseClass.getName()
+                + '>',
                 actualCauseClass);
         assertSame(
                 "Caught exception with cause of type<"
-                        + actualCauseClass.getClass()
-                                          .getName()
-                        + ">, expected cause of type <"
-                        + expectedCauseClass.getName()
-                        + '>',
+                + actualCauseClass.getClass()
+                                  .getName()
+                + ">, expected cause of type <"
+                + expectedCauseClass.getName()
+                + '>',
                 expectedCauseClass,
                 actualCauseClass.getClass());
     }
 
     private static String msgCaughtButExpected(Exception actual,
                                                Class<? extends Exception> expectedClass) {
-        return "Caught exception of type <" + actual.getClass().getName()+
+        return "Caught exception of type <" + actual.getClass()
+                                                    .getName() +
                ">, expected one of type <" + expectedClass.getName() + '>';
     }
 }
