@@ -20,6 +20,8 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Converter;
+
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,39 +38,8 @@ class ItemQuoter {
         // Disable instantiation from the outside.
     }
 
-    static String quote(String stringToQuote) {
-        return quoteElement(stringToQuote);
-    }
-
-    private static String quoteElement(String stringToQuote) {
-        checkNotNull(stringToQuote);
-        return QUOTE_SYMBOL + stringToQuote + QUOTE_SYMBOL;
-    }
-
-    /**
-     * Removes prior and further escaped quotes.
-     *
-     * @param elementToUnquote the element to unquote
-     * @return unquoted value
-     */
-    static String unquote(String elementToUnquote) {
-        checkElement(elementToUnquote);
-        return unquoteElement(elementToUnquote);
-    }
-
-    private static void checkElement(CharSequence element) {
-        final boolean isQuoted = isQuotedString(element);
-        if (!isQuoted) {
-            throw newIllegalArgumentException("Illegal format of the element: " + element);
-        }
-    }
-
-    private static String unquoteElement(String value) {
-        checkNotNull(value);
-        final String unquotedValue = Pattern.compile("\\\\")
-                                            .matcher(value.substring(2, value.length() - 2))
-                                            .replaceAll("");
-        return unquotedValue;
+    static Converter<String, String> converter() {
+        return new QuotedItemConverter();
     }
 
     /**
@@ -92,5 +63,39 @@ class ItemQuoter {
 
     private static boolean isQuote(char character) {
         return character == QUOTE_SYMBOL;
+    }
+
+    private static class QuotedItemConverter extends Converter<String, String> {
+
+        @Override
+        protected String doForward(String s) {
+            return quoteElement(s);
+        }
+
+        private static String quoteElement(String stringToQuote) {
+            checkNotNull(stringToQuote);
+            return QUOTE_SYMBOL + stringToQuote + QUOTE_SYMBOL;
+        }
+
+        @Override
+        protected String doBackward(String s) {
+            checkElement(s);
+            return unquoteElement(s);
+        }
+
+        private static void checkElement(CharSequence element) {
+            final boolean isQuoted = isQuotedString(element);
+            if (!isQuoted) {
+                throw newIllegalArgumentException("Illegal format of the element: " + element);
+            }
+        }
+
+        private static String unquoteElement(String value) {
+            checkNotNull(value);
+            final String unquotedValue = Pattern.compile("\\\\")
+                                                .matcher(value.substring(2, value.length() - 2))
+                                                .replaceAll("");
+            return unquotedValue;
+        }
     }
 }
