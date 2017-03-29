@@ -31,6 +31,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Tests;
 import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
@@ -117,6 +118,23 @@ public class BoundedContextBuilderShould {
     public void be_single_tenant_by_default() {
         assertFalse(BoundedContext.newBuilder()
                                   .isMultitenant());
+    }
+
+    @Test
+    public void allow_TenantIndex_configuration() {
+        final TenantIndex tenantIndex = mock(TenantIndex.class);
+        assertEquals(tenantIndex, BoundedContext.newBuilder()
+                                                .setTenantIndex(tenantIndex)
+                                                .tenantIndex()
+                                                .get());
+    }
+
+    @Test
+    public void create_default_TenantIndex_if_not_configured() {
+        assertNotNull(BoundedContext.newBuilder()
+                                    .setMultitenant(true)
+                                    .build()
+                                    .getTenantIndex());
     }
 
     @Test(expected = NullPointerException.class)

@@ -56,7 +56,6 @@ import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
-import org.spine3.server.tenant.TenantRepository;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -488,7 +487,7 @@ public final class BoundedContext
             return this;
         }
 
-        public Builder setTenantIndex(TenantRepository<?, ?> tenantIndex) {
+        public Builder setTenantIndex(TenantIndex tenantIndex) {
             if (this.multitenant) {
                 checkNotNull(tenantIndex,
                              "TenantRepository cannot be null in multi-tenant BoundedContext.");
