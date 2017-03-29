@@ -69,23 +69,23 @@ message Command {
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
 
-    // The id of the command.
+    // The ID of the command.
     CommandId command_id = 1 [(required) = true];
-
-    // The user who created the command.
-    users.UserId actor = 2 [(required) = true];
-
-    // The time when the command was created.
-    google.protobuf.Timestamp timestamp = 3 [(required) = true];
-
-    // The zone offset from which the command is made.
-    time.ZoneOffset zone_offset = 4 [(required) = true];
 
     // The ID of a tenant in a multi-tenant application.
     //
     // This field is not populated in single-tenant applications.
     //
-    users.TenantId tenant_id = 5;
+    users.TenantId tenant_id = 2;
+
+    // The user who created the command.
+    users.UserId actor = 3 [(required) = true];
+
+    // The time when the command was created.
+    google.protobuf.Timestamp timestamp = 4 [(required) = true];
+
+    // The zone offset from which the command is made.
+    time.ZoneOffset zone_offset = 5 [(required) = true];
 
     // A command may be scheduled. This type defines scheduling options.
     message Schedule {
@@ -102,7 +102,6 @@ message CommandContext {
         // Name the field `at`;
 
         //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence. Name the attribute `every`.
-        // The recurrence pattern should be a separate type somewhere under `time` package.
     }
 
     // The schedule to execute the command.
@@ -132,7 +131,8 @@ enum CommandValidationError {
     // in a multi-tenant application.
     TENANT_UNKNOWN = 3;
 
-    // The command context has non-default value of `tenant_id` in the command sent to a single-tenant application.
+    // The command context has non-default value of `tenant_id` in the command sent
+    // to a single-tenant application.
     TENANT_INAPPLICABLE = 4;
 }
 
