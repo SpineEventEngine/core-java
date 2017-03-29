@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.base.ItemQuoter.converter;
-import static org.spine3.base.Stringifiers.getStringifier;
+import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**

@@ -29,7 +29,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.Stringifiers.getStringifier;
+import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
  * The stringifier for the {@code List} classes.

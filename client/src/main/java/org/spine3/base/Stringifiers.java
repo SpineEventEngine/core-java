@@ -75,18 +75,9 @@ public class Stringifiers {
         checkNotNull(object);
         checkNotNull(typeOfT);
 
-        if (isString(typeOfT)) {
-            return (String) object;
-        }
-
         final Stringifier<T> stringifier = getStringifier(typeOfT);
         final String result = stringifier.convert(object);
         return result;
-    }
-
-    private static boolean isString(Type aType) {
-        checkNotNull(aType);
-        return String.class.equals(aType);
     }
 
     /**
@@ -167,6 +158,16 @@ public class Stringifiers {
     }
 
     /**
+     * Obtains {@code Stringifier} for the string values.
+     *
+     * @return the stringifier for the string values
+     */
+    static Stringifier<String> stringStringifier() {
+        final Stringifier<String> stringStringifier = new StringStringifier();
+        return stringStringifier;
+    }
+
+    /**
      * Obtains {@code Stringifier} for list with default delimiter for the passed list elements.
      *
      * @param elementClass the class of the list elements
@@ -197,27 +198,6 @@ public class Stringifiers {
     }
 
     /**
-     * Converts from string to the specified type.
-     *
-     * @param elementToConvert string to convert
-     * @param elementClass     the class of the converted element
-     * @param <I>              the class type of the converted element
-     * @return the converted string
-     */
-    @SuppressWarnings("unchecked") // It is OK because class is verified.
-    static <I> I convert(String elementToConvert, Class<I> elementClass) {
-        checkNotNull(elementToConvert);
-        checkNotNull(elementClass);
-
-        if (isString(elementClass)) {
-            return (I) elementToConvert;
-        }
-
-        final I convertedValue = fromString(elementToConvert, elementClass);
-        return convertedValue;
-    }
-
-    /**
      * Create the {@code Escaper} which contains will escape '\' and passed character.
      *
      * @param charToEscape the char to escape
@@ -233,9 +213,24 @@ public class Stringifiers {
     }
 
     /**
+     * The {@code Stringifier} for the {@code String} values.
+     */
+    private static class StringStringifier extends Stringifier<String> {
+        @Override
+        protected String toString(String obj) {
+            return obj;
+        }
+
+        @Override
+        protected String fromString(String s) {
+            return s;
+        }
+    }
+
+    /**
      * The {@code Stringifier} for the long values.
      */
-    static class LongStringifier extends Stringifier<Long> {
+    private static class LongStringifier extends Stringifier<Long> {
         @Override
         protected String toString(Long obj) {
             return Longs.stringConverter()
@@ -253,7 +248,7 @@ public class Stringifiers {
     /**
      * The {@code Stringifier} for the integer values.
      */
-    static class IntegerStringifier extends Stringifier<Integer> {
+    private static class IntegerStringifier extends Stringifier<Integer> {
         @Override
         protected String toString(Integer obj) {
             return Ints.stringConverter()
