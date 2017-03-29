@@ -150,7 +150,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                     .values();
 
        final Function<Map.Entry<String, String>, Map.Entry<String, String>> function =
-               quotedTransformer();
+               quoteTransformer();
         final Map<String, String> resultMap = newHashMap();
         for (Map.Entry<String, String> entry : convertedEntries) {
             Map.Entry<String, String> quotedEntry = function.apply(entry);
@@ -171,7 +171,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
         final Map<String, String> buckets = splitter.split(escapedString);
         final Maps.EntryTransformer<String, String, Map.Entry<String, String>> unquoteTransformer =
-                unquotedTransformer();
+                unquoteTransformer();
         final Map<String, Map.Entry<String, String>> transformedMap =
                 Maps.transformEntries(buckets, unquoteTransformer);
 
@@ -212,7 +212,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private static Function<Map.Entry<String, String>,
-                            Map.Entry<String, String>> quotedTransformer() {
+                            Map.Entry<String, String>> quoteTransformer() {
         final Function<Map.Entry<String, String>, Map.Entry<String, String>> function =
                 new Function<Map.Entry<String, String>, Map.Entry<String, String>>() {
                     @Nullable
@@ -225,8 +225,8 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                         checkNotNull(key);
                         checkNotNull(value);
 
-                        final String quotedKey = QuotedItem.quote(key);
-                        final String quotedValue = QuotedItem.quote(value);
+                        final String quotedKey = ItemQuoter.quote(key);
+                        final String quotedValue = ItemQuoter.quote(value);
                         final Map.Entry<String, String> result =
                                 new AbstractMap.SimpleEntry<>(quotedKey, quotedValue);
                         return result;
@@ -237,7 +237,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static Maps.EntryTransformer<String,
                                          String,
-                                         Map.Entry<String, String>> unquotedTransformer() {
+                                         Map.Entry<String, String>> unquoteTransformer() {
         return new Maps.EntryTransformer<String, String, Map.Entry<String, String>>() {
             @Override
             public Map.Entry<String, String> transformEntry(@Nullable String key,
@@ -245,15 +245,15 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                 checkNotNull(key);
                 checkNotNull(value);
 
-                if (!QuotedItem.isQuotedString(key) || !QuotedItem.isQuotedString(value)) {
+                if (!ItemQuoter.isQuotedString(key) || !ItemQuoter.isQuotedString(value)) {
                     final String exMessage =
                             "Illegal key-value format. The key-value should be quoted " +
                             "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
                     throw newIllegalArgumentException(exMessage);
                 }
 
-                final String unquotedKey = QuotedItem.unquote(key);
-                final String unquotedValue = QuotedItem.unquote(value);
+                final String unquotedKey = ItemQuoter.unquote(key);
+                final String unquotedValue = ItemQuoter.unquote(value);
                 final Map.Entry<String, String> result =
                         new AbstractMap.SimpleEntry<>(unquotedKey, unquotedValue);
                 return result;

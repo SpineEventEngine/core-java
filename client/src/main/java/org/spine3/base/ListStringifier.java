@@ -135,7 +135,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
             @Override
             public String apply(@Nullable String input) {
                 checkNotNull(input);
-                return QuotedItem.quote(input);
+                return ItemQuoter.quote(input);
             }
         };
         final List<String> quotedItems = Lists.transform(convertedList, function);
@@ -153,7 +153,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
             @Override
             public String apply(@Nullable String input) {
                 checkNotNull(input);
-                return QuotedItem.unquote(input);
+                return ItemQuoter.unquote(input);
             }
         };
         final Function<String, T> convertFunction = new Function<String, T>() {
