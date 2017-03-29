@@ -28,11 +28,11 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 /**
  * Serves as enclosure and disclosure for the elements into and from quotes.
  */
-class QuotedItem {
+class ItemQuoter {
 
     private static final char QUOTE_SYMBOL = '\"';
 
-    private QuotedItem() {
+    private ItemQuoter() {
         // Disable instantiation from the outside.
     }
 
