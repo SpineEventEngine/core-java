@@ -76,7 +76,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         }
     }
 
-    private static void handleUnsupported(Command request, StreamObserver<Response> responseObserver) {
+    private static void handleUnsupported(Command request,
+                                          StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
         responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
@@ -128,7 +129,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * that handle such commands.
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
-            final ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
+            final ImmutableMap.Builder<CommandClass, BoundedContext> builder =
+                    ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }

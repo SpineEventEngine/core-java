@@ -71,7 +71,9 @@ class EventMessageEnricher<S extends Message, T extends Message> extends Enrichm
         return new EventMessageEnricher<>(enricher, eventClass, enrichmentClass);
     }
 
-    private EventMessageEnricher(EventEnricher enricher, Class<S> eventClass, Class<T> enrichmentClass) {
+    private EventMessageEnricher(EventEnricher enricher,
+                                 Class<S> eventClass,
+                                 Class<T> enrichmentClass) {
         super(eventClass, enrichmentClass);
         this.enricher = enricher;
     }

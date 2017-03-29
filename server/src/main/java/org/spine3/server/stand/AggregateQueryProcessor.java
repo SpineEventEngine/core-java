@@ -99,7 +99,8 @@ class AggregateQueryProcessor implements QueryProcessor {
         return result;
     }
 
-    private ImmutableCollection<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
+    private ImmutableCollection<EntityRecord> doFetchWithFilters(Target target,
+                                                                 FieldMask fieldMask) {
         final EntityFilters filters = target.getFilters();
         final boolean idsAreDefined = !filters.getIdFilter()
                                               .getIdsList()

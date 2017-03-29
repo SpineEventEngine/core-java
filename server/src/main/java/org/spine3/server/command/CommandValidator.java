@@ -101,7 +101,8 @@ class CommandValidator {
         if (targetId.isPresent()) {
             final String targetIdString = idToString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {
-                result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
+                result.add(
+                        newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
             }
         }
     }

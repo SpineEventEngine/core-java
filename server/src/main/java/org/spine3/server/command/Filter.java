@@ -29,7 +29,8 @@ import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
-import static org.spine3.server.command.InvalidCommandException.*;
+import static org.spine3.server.command.InvalidCommandException.onMissingTenantId;
+import static org.spine3.server.command.InvalidCommandException.onConstraintViolations;
 import static org.spine3.validate.Validate.isDefault;
 
 /**

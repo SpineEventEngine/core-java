@@ -97,7 +97,8 @@ class AlternativeFieldValidator {
                                                              parse(requiredFieldExpression);
                     if (!alternativeFound(message, fieldOptions)) {
                         ConstraintViolation requiredFieldNotFound = ConstraintViolation.newBuilder()
-                            .setMsgFormat("None of the fields match the `required_field` definition: %s")
+                            .setMsgFormat("None of the fields match the " +
+                                          "`required_field` definition: %s")
                             .addParam(requiredFieldExpression)
                             .build();
                         violations.add(requiredFieldNotFound);

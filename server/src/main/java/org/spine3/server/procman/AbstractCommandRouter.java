@@ -86,7 +86,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * <p>This method provides return type covariance in fluent API methods.
      *
      * @see #add(Message)
-     * @see #addAll(Iterable) 
+     * @see #addAll(Iterable)
      */
     protected abstract T getThis();
 
@@ -167,7 +167,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<Response> newResponseObserver(final SettableFuture<Void> finishFuture) {
+    private static StreamObserver<Response> newResponseObserver(
+            final SettableFuture<Void> finishFuture) {
         return new StreamObserver<Response>() {
             @Override
             public void onNext(Response response) {

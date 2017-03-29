@@ -461,7 +461,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
 
         public EventBus build() {
             final String message =
-                    "Either storageFactory or eventStore must be set to build the EventBus instance";
+                    "Either storageFactory or eventStore must be " +
+                    "set to build the EventBus instance";
             checkState(storageFactory != null || eventStore != null, message);
 
             if (eventStoreStreamExecutor == null) {
