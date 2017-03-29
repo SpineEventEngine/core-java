@@ -75,7 +75,7 @@ public class MapStringifierShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
+        final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
         stringifier.fromString("first\":\"first\":\"first\"");
     }
 
