@@ -344,6 +344,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         private EventEnricher enricher;
 
         private Builder() {
+            // Prevent instantiation from outside.
         }
 
         /**
@@ -463,8 +464,11 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
                        "Either storageFactory or eventStore must be set to build the EventBus instance");
 
             if (eventStoreStreamExecutor == null) {
-                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
+                eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
+            /* The assert below prevents false warning for possible `null` value passed
+               to EventStore.Builder.setStreamExecutor(). */
+            assert(eventStoreStreamExecutor != null);
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
