@@ -140,12 +140,12 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Converter<String, String> quotedConverter = converter();
+        final Converter<String, String> quoteConverter = converter();
         final Map<String, String> resultMap = newHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
-            final String convertedKey = keyStringifier.andThen(quotedConverter)
+            final String convertedKey = keyStringifier.andThen(quoteConverter)
                                                       .convert(entry.getKey());
-            final String convertedValue = valueStringifier.andThen(quotedConverter)
+            final String convertedValue = valueStringifier.andThen(quoteConverter)
                                                           .convert(entry.getValue());
             resultMap.put(convertedKey, convertedValue);
         }
@@ -164,16 +164,16 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private Map<K, V> convert(Map<String, String> buckets) {
-        final Converter<String, String> quotedConverter = converter();
+        final Converter<String, String> quoteConverter = converter();
         final Map<K, V> resultMap = newHashMap();
         try {
             for (Map.Entry<String, String> bucket : buckets.entrySet()) {
-                final K convertedKey = quotedConverter.reverse()
-                                                      .andThen(keyStringifier.reverse())
-                                                      .convert(bucket.getKey());
-                final V convertedValue = quotedConverter.reverse()
-                                                        .andThen(valueStringifier.reverse())
-                                                        .convert(bucket.getValue());
+                final K convertedKey = quoteConverter.reverse()
+                                                     .andThen(keyStringifier.reverse())
+                                                     .convert(bucket.getKey());
+                final V convertedValue = quoteConverter.reverse()
+                                                       .andThen(valueStringifier.reverse())
+                                                       .convert(bucket.getValue());
                 resultMap.put(convertedKey, convertedValue);
             }
             return resultMap;
