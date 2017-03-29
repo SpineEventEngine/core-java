@@ -20,18 +20,16 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
+import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Lists;
 import com.google.common.escape.Escaper;
 
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.base.Stringifiers.getStringifier;
 
 /**
  * The stringifier for the {@code List} classes.
@@ -121,52 +119,32 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final Function<T, String> convertFunction = new Function<T, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable T input) {
-                checkNotNull(input);
-                return Stringifiers.toString(input, listGenericClass);
-            }
-        };
-        final List<String> convertedList = Lists.transform(list, convertFunction);
-        final Function<String, String> function = new Function<String, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable String input) {
-                checkNotNull(input);
-                return ItemQuoter.quote(input);
-            }
-        };
-        final List<String> quotedItems = Lists.transform(convertedList, function);
+        final Stringifier<T> stringifier = getStringifier(listGenericClass);
+        final Converter<String, String> quoteConverter = ItemQuoter.converter();
+        final List<String> convertedItems = newArrayList();
+        for (T item : list) {
+            final String convertedItem = stringifier.andThen(quoteConverter)
+                                                    .convert(item);
+            convertedItems.add(convertedItem);
+        }
         final String result = Joiner.on(delimiter)
-                                    .join(quotedItems);
+                                    .join(convertedItems);
         return result;
     }
 
     @Override
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
-        final List<String> elements = newArrayList(splitter.split(escapedString));
-        final Function<String, String> unquoteFunction = new Function<String, String>() {
-            @Nullable
-            @Override
-            public String apply(@Nullable String input) {
-                checkNotNull(input);
-                return ItemQuoter.unquote(input);
-            }
-        };
-        final Function<String, T> convertFunction = new Function<String, T>() {
-            @Nullable
-            @Override
-            public T apply(@Nullable String input) {
-                checkNotNull(input);
-                return Stringifiers.convert(input, listGenericClass);
-            }
-        };
-        final List<String> unquotedList = newArrayList(Lists.transform(elements, unquoteFunction));
-        final List<T> result = newArrayList(Lists.transform(unquotedList, convertFunction));
+        final List<String> items = newArrayList(splitter.split(escapedString));
+        final Stringifier<T> stringifier = getStringifier(listGenericClass);
+        final Converter<String, String> quoteConverter = ItemQuoter.converter();
+        final List<T> result = newArrayList();
+        for (String item : items) {
+            final T convertedItem = quoteConverter.reverse()
+                                                  .andThen(stringifier.reverse())
+                                                  .convert(item);
+            result.add(convertedItem);
+        }
         return result;
     }
-
 }

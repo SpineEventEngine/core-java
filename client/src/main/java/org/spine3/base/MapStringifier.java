@@ -20,20 +20,17 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Function;
+import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
-import com.google.common.collect.Maps;
 import com.google.common.escape.Escaper;
 
-import javax.annotation.Nullable;
-import java.util.AbstractMap;
-import java.util.Collection;
 import java.util.Map;
 import java.util.regex.Pattern;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.base.ItemQuoter.converter;
+import static org.spine3.base.Stringifiers.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -143,21 +140,17 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Maps.EntryTransformer<K, V, Map.Entry<String, String>> transformer =
-                entryTransformer();
-        final Collection<Map.Entry<String, String>> convertedEntries =
-                Maps.transformEntries(obj, transformer)
-                    .values();
-
-       final Function<Map.Entry<String, String>, Map.Entry<String, String>> function =
-               quoteTransformer();
+        final Converter<String, String> quotedConverter = converter();
+        final Stringifier<K> keyStringifier = getStringifier(keyClass);
+        final Stringifier<V> valueStringifier = getStringifier(valueClass);
         final Map<String, String> resultMap = newHashMap();
-        for (Map.Entry<String, String> entry : convertedEntries) {
-            Map.Entry<String, String> quotedEntry = function.apply(entry);
-            checkNotNull(quotedEntry);
-            resultMap.put(quotedEntry.getKey(), quotedEntry.getValue());
+        for (Map.Entry<K, V> entry : obj.entrySet()) {
+            final String convertedKey = keyStringifier.andThen(quotedConverter)
+                                                      .convert(entry.getKey());
+            final String convertedValue = valueStringifier.andThen(quotedConverter)
+                                                          .convert(entry.getValue());
+            resultMap.put(convertedKey, convertedValue);
         }
-
         final String result = Joiner.on(delimiter)
                                     .withKeyValueSeparator(KEY_VALUE_DELIMITER)
                                     .join(resultMap);
@@ -167,97 +160,29 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     @Override
     protected Map<K, V> fromString(String s) {
         final String escapedString = escaper.escape(s);
-        final Map<K, V> resultMap = newHashMap();
-
         final Map<String, String> buckets = splitter.split(escapedString);
-        final Maps.EntryTransformer<String, String, Map.Entry<String, String>> unquoteTransformer =
-                unquoteTransformer();
-        final Map<String, Map.Entry<String, String>> transformedMap =
-                Maps.transformEntries(buckets, unquoteTransformer);
-
-        for (Map.Entry<String, String> entry : transformedMap.values()) {
-            final Map.Entry<K, V> convertedEntry = convert(entry.getKey(), entry.getValue());
-            resultMap.put(convertedEntry.getKey(), convertedEntry.getValue());
-        }
-
+        final Map<K, V> resultMap = convert(buckets);
         return resultMap;
     }
 
-    private Map.Entry<K, V> convert(String keyToConvert, String value) {
+    private Map<K, V> convert(Map<String, String> buckets) {
+        final Converter<String, String> quotedConverter = converter();
+        final Stringifier<K> keyStringifier = getStringifier(keyClass);
+        final Stringifier<V> valueStringifier = getStringifier(valueClass);
+        final Map<K, V> resultMap = newHashMap();
         try {
-            final K convertedKey = Stringifiers.convert(keyToConvert, keyClass);
-            final V convertedValue = Stringifiers.convert(value, valueClass);
-            final Map.Entry<K, V> convertedBucket =
-                    new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
-            return convertedBucket;
+            for (Map.Entry<String, String> bucket : buckets.entrySet()) {
+                final K convertedKey = quotedConverter.reverse()
+                                                      .andThen(keyStringifier.reverse())
+                                                      .convert(bucket.getKey());
+                final V convertedValue = quotedConverter.reverse()
+                                                        .andThen(valueStringifier.reverse())
+                                                        .convert(bucket.getValue());
+                resultMap.put(convertedKey, convertedValue);
+            }
+            return resultMap;
         } catch (Throwable e) {
             throw newIllegalArgumentException("The exception occurred during the conversion", e);
         }
-    }
-
-    private Maps.EntryTransformer<K, V, Map.Entry<String, String>> entryTransformer() {
-        return new Maps.EntryTransformer<K, V, Map.Entry<String, String>>() {
-            @Override
-            public Map.Entry<String, String> transformEntry(@Nullable K key, @Nullable V value) {
-                checkNotNull(key);
-                checkNotNull(value);
-
-                final String convertedKey = Stringifiers.toString(key, keyClass);
-                final String convertedValue = Stringifiers.toString(value, valueClass);
-                final AbstractMap.SimpleEntry<String, String> entry =
-                        new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
-                return entry;
-            }
-        };
-    }
-
-    private static Function<Map.Entry<String, String>,
-                            Map.Entry<String, String>> quoteTransformer() {
-        final Function<Map.Entry<String, String>, Map.Entry<String, String>> function =
-                new Function<Map.Entry<String, String>, Map.Entry<String, String>>() {
-                    @Nullable
-                    @Override
-                    public Map.Entry<String, String> apply(
-                            @Nullable Map.Entry<String, String> input) {
-                        checkNotNull(input);
-                        final String key = input.getKey();
-                        final String value = input.getValue();
-                        checkNotNull(key);
-                        checkNotNull(value);
-
-                        final String quotedKey = ItemQuoter.quote(key);
-                        final String quotedValue = ItemQuoter.quote(value);
-                        final Map.Entry<String, String> result =
-                                new AbstractMap.SimpleEntry<>(quotedKey, quotedValue);
-                        return result;
-                    }
-                };
-        return function;
-    }
-
-    private static Maps.EntryTransformer<String,
-                                         String,
-                                         Map.Entry<String, String>> unquoteTransformer() {
-        return new Maps.EntryTransformer<String, String, Map.Entry<String, String>>() {
-            @Override
-            public Map.Entry<String, String> transformEntry(@Nullable String key,
-                                                            @Nullable String value) {
-                checkNotNull(key);
-                checkNotNull(value);
-
-                if (!ItemQuoter.isQuotedString(key) || !ItemQuoter.isQuotedString(value)) {
-                    final String exMessage =
-                            "Illegal key-value format. The key-value should be quoted " +
-                            "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
-                    throw newIllegalArgumentException(exMessage);
-                }
-
-                final String unquotedKey = ItemQuoter.unquote(key);
-                final String unquotedValue = ItemQuoter.unquote(value);
-                final Map.Entry<String, String> result =
-                        new AbstractMap.SimpleEntry<>(unquotedKey, unquotedValue);
-                return result;
-            }
-        };
     }
 }
