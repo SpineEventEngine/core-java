@@ -94,13 +94,15 @@ class AlternativeFieldValidator {
                 if (optionType == JavaType.STRING) {
                     final String requiredFieldExpression = (String) options.get(optionDescriptor);
                     final ImmutableList<RequiredFieldOption> fieldOptions =
-                                                             parse(requiredFieldExpression);
+                            parse(requiredFieldExpression);
                     if (!alternativeFound(message, fieldOptions)) {
-                        ConstraintViolation requiredFieldNotFound = ConstraintViolation.newBuilder()
-                            .setMsgFormat("None of the fields match the " +
-                                          "`required_field` definition: %s")
-                            .addParam(requiredFieldExpression)
-                            .build();
+                        final String msgFormat =
+                                "None of the fields match the `required_field` definition: %s";
+                        ConstraintViolation requiredFieldNotFound =
+                                ConstraintViolation.newBuilder()
+                                                   .setMsgFormat(msgFormat)
+                                                   .addParam(requiredFieldExpression)
+                                                   .build();
                         violations.add(requiredFieldNotFound);
                     }
                 } else {
@@ -224,8 +226,8 @@ class AlternativeFieldValidator {
             return fieldName;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // It is OK to suppress
-                                                            // as we're using ImmutableList.
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")
+            // It is OK to suppress as we're using ImmutableList.
         ImmutableList<String> getFieldNames() {
             if (fieldNames == null) {
                 final String msg = "The option is not a combination, but a single field.";

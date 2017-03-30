@@ -82,8 +82,8 @@ class FieldValidatorFactory {
                 final ImmutableList<Boolean> booleans = toValueList(fieldValue);
                 return new BooleanFieldValidator(descriptor, booleans, rootFieldPath);
             case ENUM:
-                final ImmutableList<Descriptors.EnumValueDescriptor> enums
-                        = toValueList(fieldValue);
+                final ImmutableList<Descriptors.EnumValueDescriptor> enums =
+                        toValueList(fieldValue);
                 return new EnumFieldValidator(descriptor, enums, rootFieldPath);
             default:
                 throw fieldTypeIsNotSupported(descriptor);
