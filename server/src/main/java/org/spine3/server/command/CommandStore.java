@@ -181,8 +181,9 @@ public class CommandStore implements AutoCloseable {
 
     /**
      * Updates the status of the command with the passed error.
-     *  @param commandEnvelope the ID of the command
-     * @param error the error, which occurred during command processing
+     *
+     * @param commandEnvelope the ID of the command
+     * @param error           the error, which occurred during command processing
      */
     private void updateStatus(CommandEnvelope commandEnvelope, final Error error) {
         keepTenantId(commandEnvelope.getCommand());
