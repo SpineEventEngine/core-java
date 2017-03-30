@@ -20,44 +20,17 @@
 
 package org.spine3.server.tenant;
 
-import org.spine3.users.TenantId;
+import org.junit.Test;
+import org.spine3.test.Tests;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public class AllTenantOperationShould {
 
-/**
- * An operation which runs for all tenants registered in the passed {@link TenantIndex}.
- *
- * @author Alexander Yevsyukov
- */
-public abstract class AllTenantOperation implements Runnable {
-
-    private final TenantIndex tenantIndex;
-
-    /**
-     * Creates a new instance of an operation that will be {@linkplain #execute()} executed}
-     * for all tenants in the passed index.
-     */
-    protected AllTenantOperation(TenantIndex tenantIndex) {
-        checkNotNull(tenantIndex);
-        this.tenantIndex = tenantIndex;
-    }
-
-    /**
-     * Executes {@linkplain #run() an operation} for all tenants.
-     */
-    public void execute() {
-        for (TenantId tenantId : tenantIndex.getAll()) {
-            executeForTenant(tenantId);
-        }
-    }
-
-    private void executeForTenant(TenantId tenantId) {
-        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_index() {
+        new AllTenantOperation(Tests.<TenantIndex>nullRef()) {
             @Override
             public void run() {
-                AllTenantOperation.this.run();
             }
         };
-        op.execute();
     }
 }
