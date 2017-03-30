@@ -20,14 +20,17 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Converter;
+import com.google.common.base.Joiner;
+import com.google.common.base.Splitter;
 import com.google.common.escape.Escaper;
-import com.google.common.escape.Escapers;
 
-import java.util.AbstractMap;
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.base.ItemQuoter.converter;
+import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -69,18 +72,16 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
     private static final char KEY_VALUE_DELIMITER = ':';
-    private static final char QUOTE = '"';
 
     /**
      * The delimiter for the passed elements in the {@code String} representation,
      * {@code DEFAULT_ELEMENT_DELIMITER} by default.
      */
     private final char delimiter;
-    private final Class<K> keyClass;
-    private final Class<V> valueClass;
-    private final String bucketPattern;
-    private final String keyValuePattern;
     private final Escaper escaper;
+    private final Splitter.MapSplitter splitter;
+    private final Stringifier<K> keyStringifier;
+    private final Stringifier<V> valueStringifier;
 
     /**
      * Creates a {@code MapStringifier}.
@@ -93,12 +94,11 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      */
     MapStringifier(Class<K> keyClass, Class<V> valueClass) {
         super();
-        this.keyClass = keyClass;
-        this.valueClass = valueClass;
+        this.keyStringifier = getStringifier(keyClass);
+        this.valueStringifier = getStringifier(valueClass);
         this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        escaper = createEscaper(delimiter);
-        bucketPattern = createBucketPattern(delimiter);
-        keyValuePattern = createKeyValuePattern();
+        this.escaper = Stringifiers.createEscaper(delimiter);
+        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
     }
 
     /**
@@ -113,12 +113,19 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      */
     MapStringifier(Class<K> keyClass, Class<V> valueClass, char delimiter) {
         super();
-        this.keyClass = keyClass;
-        this.valueClass = valueClass;
+        this.keyStringifier = getStringifier(keyClass);
+        this.valueStringifier = getStringifier(valueClass);
         this.delimiter = delimiter;
-        escaper = createEscaper(delimiter);
-        bucketPattern = createBucketPattern(delimiter);
-        keyValuePattern = createKeyValuePattern();
+        this.escaper = Stringifiers.createEscaper(delimiter);
+        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
+    }
+
+    private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
+                                                       String keyValuePattern) {
+        final Splitter.MapSplitter result =
+                Splitter.onPattern(bucketPattern)
+                        .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
+        return result;
     }
 
     private static String createBucketPattern(char delimiter) {
@@ -133,111 +140,45 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final StringBuilder stringBuilder = new StringBuilder(0);
+        final Converter<String, String> quoteConverter = converter();
+        final Map<String, String> resultMap = newHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
-            stringBuilder.append(QUOTE)
-                         .append(entry.getKey())
-                         .append(QUOTE)
-                         .append(KEY_VALUE_DELIMITER)
-                         .append(QUOTE)
-                         .append(entry.getValue())
-                         .append(QUOTE)
-                         .append(delimiter);
+            final String convertedKey = keyStringifier.andThen(quoteConverter)
+                                                      .convert(entry.getKey());
+            final String convertedValue = valueStringifier.andThen(quoteConverter)
+                                                          .convert(entry.getValue());
+            resultMap.put(convertedKey, convertedValue);
         }
-        final int length = stringBuilder.length();
-        final String result = stringBuilder.substring(0, length - 1);
+        final String result = Joiner.on(delimiter)
+                                    .withKeyValueSeparator(KEY_VALUE_DELIMITER)
+                                    .join(resultMap);
         return result;
     }
 
     @Override
     protected Map<K, V> fromString(String s) {
         final String escapedString = escaper.escape(s);
-        final String[] buckets = escapedString.split(bucketPattern);
-        final Map<K, V> resultMap = newHashMap();
-
-        for (String bucket : buckets) {
-            final Map.Entry<K, V> convertedBucket = convert(bucket);
-            resultMap.put(convertedBucket.getKey(), convertedBucket.getValue());
-        }
+        final Map<String, String> buckets = splitter.split(escapedString);
+        final Map<K, V> resultMap = convert(buckets);
         return resultMap;
     }
 
-    private Map.Entry<K, V> convert(String bucketToConvert) {
-        final String[] keyValue = bucketToConvert.split(keyValuePattern);
-        checkKeyValue(keyValue);
-
-        final String key = unquote(keyValue[0]);
-        final String value = unquote(keyValue[1]);
-
+    private Map<K, V> convert(Map<String, String> buckets) {
+        final Converter<String, String> quoteConverter = converter();
+        final Map<K, V> resultMap = newHashMap();
         try {
-            final K convertedKey = convert(keyClass, key);
-            final V convertedValue = convert(valueClass, value);
-            final Map.Entry<K, V> convertedBucket =
-                    new AbstractMap.SimpleEntry<>(convertedKey, convertedValue);
-            return convertedBucket;
+            for (Map.Entry<String, String> bucket : buckets.entrySet()) {
+                final K convertedKey = quoteConverter.reverse()
+                                                     .andThen(keyStringifier.reverse())
+                                                     .convert(bucket.getKey());
+                final V convertedValue = quoteConverter.reverse()
+                                                       .andThen(valueStringifier.reverse())
+                                                       .convert(bucket.getValue());
+                resultMap.put(convertedKey, convertedValue);
+            }
+            return resultMap;
         } catch (Throwable e) {
             throw newIllegalArgumentException("The exception occurred during the conversion", e);
         }
-    }
-
-    @SuppressWarnings("unchecked") // It is safe because the type is checked before the cast.
-    private static <I> I convert(Class<I> elementClass, String elementToConvert) {
-        if (isString(elementClass)) {
-            return (I) elementToConvert;
-        }
-
-        final I convertedValue = Stringifiers.fromString(elementToConvert, elementClass);
-        return convertedValue;
-
-    }
-
-    private static void checkKeyValue(String[] keyValue) {
-        if (keyValue.length != 2 || !isQuotedKeyValue(keyValue[0], keyValue[1])) {
-            final String exMessage =
-                    "Illegal key-value format. The key-value should be quoted " +
-                    "and separated with the `" + KEY_VALUE_DELIMITER + "` character.";
-            throw newIllegalArgumentException(exMessage);
-        }
-    }
-
-    private static boolean isString(Class<?> aClass) {
-        return String.class.equals(aClass);
-    }
-
-    private static String unquote(String value) {
-        final String unquotedValue = Pattern.compile("\\\\")
-                                            .matcher(value.substring(2, value.length() - 2))
-                                            .replaceAll("");
-        return unquotedValue;
-    }
-
-    private static boolean isQuotedKeyValue(CharSequence key, CharSequence value) {
-        final boolean result = isQuotedString(key) && isQuotedString(value);
-        return result;
-    }
-
-    private static boolean isQuotedString(CharSequence stringToCheck) {
-        final int stringLength = stringToCheck.length();
-
-        if (stringLength < 2) {
-            return false;
-        }
-
-        boolean result = isQuote(stringToCheck.charAt(1)) &&
-                         isQuote(stringToCheck.charAt(stringLength - 1));
-        return result;
-    }
-
-    private static boolean isQuote(char character) {
-        return character == QUOTE;
-    }
-
-    private static Escaper createEscaper(char charToEscape) {
-        final String escapedChar = "\\" + charToEscape;
-        final Escaper result = Escapers.builder()
-                                       .addEscape('\"', "\\\"")
-                                       .addEscape(charToEscape, escapedChar)
-                                       .build();
-        return result;
     }
 }
