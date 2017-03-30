@@ -220,7 +220,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * @throws InvalidEntityStateException if the state is not valid
      * @see #checkEntityState(Message)
      */
-    protected void validate(S newState) throws InvalidEntityStateException {
+    private void validate(S newState) throws InvalidEntityStateException {
         final List<ConstraintViolation> constraintViolations = checkEntityState(newState);
 
         if (!constraintViolations.isEmpty()) {
