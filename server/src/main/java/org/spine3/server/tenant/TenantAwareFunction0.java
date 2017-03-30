@@ -21,7 +21,7 @@
 package org.spine3.server.tenant;
 
 import com.google.protobuf.Empty;
-import org.spine3.annotations.Internal;
+import org.spine3.annotations.SPI;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
@@ -32,7 +32,7 @@ import javax.annotation.Nullable;
  * @param <T> the type of the result returned by the function
  * @author Alexander Yevsyukov
  */
-@Internal
+@SPI
 public abstract class TenantAwareFunction0<T> extends TenantAwareFunction<Empty, T> {
 
     protected TenantAwareFunction0() throws IllegalStateException {
