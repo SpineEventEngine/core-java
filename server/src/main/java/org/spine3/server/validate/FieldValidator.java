@@ -229,7 +229,8 @@ abstract class FieldValidator<V> {
      *
      * @param extension an extension key used to obtain a validation option
      */
-    protected final <Option> Option getFieldOption(GeneratedExtension<FieldOptions, Option> extension) {
+    protected final <Option> Option
+    getFieldOption(GeneratedExtension<FieldOptions, Option> extension) {
         final Option option = fieldDescriptor.getOptions().getExtension(extension);
         return option;
     }

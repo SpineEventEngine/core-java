@@ -145,7 +145,7 @@ class MessageFieldValidator extends FieldValidator<Message> {
      * @param whenExpected the time when the checked timestamp should be
      * @param now          the current moment
      * @return {@code true} if the time is valid according to {@code whenExpected} parameter,
-     *         {@code false} otherwise
+     * {@code false} otherwise
      */
     private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
         final boolean isValid = (whenExpected == FUTURE)
@@ -160,24 +160,27 @@ class MessageFieldValidator extends FieldValidator<Message> {
         final String when = timeOption.getIn()
                                       .toString()
                                       .toLowerCase();
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                                                                 .setMsgFormat(msg)
-                                                                 .addParam(when)
-                                                                 .setFieldPath(getFieldPath())
-                                                                 .setFieldValue(AnyPacker.pack(fieldValue))
-                                                                 .build();
+        final ConstraintViolation violation =
+                ConstraintViolation.newBuilder()
+                                   .setMsgFormat(msg)
+                                   .addParam(when)
+                                   .setFieldPath(getFieldPath())
+                                   .setFieldValue(AnyPacker.pack(fieldValue))
+                                   .build();
         return violation;
     }
 
     private ConstraintViolation newValidViolation(Message fieldValue,
                                                   Iterable<ConstraintViolation> violations) {
         final String msg = getErrorMsgFormat(ifInvalidOption, ifInvalidOption.getMsgFormat());
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                                                                 .setMsgFormat(msg)
-                                                                 .setFieldPath(getFieldPath())
-                                                                 .setFieldValue(AnyPacker.pack(fieldValue))
-                                                                 .addAllViolation(violations)
-                                                                 .build();
+        final ConstraintViolation violation =
+                ConstraintViolation.newBuilder()
+                                   .setMsgFormat(msg)
+                                   .setFieldPath(getFieldPath())
+                                   .setFieldValue(
+                                           AnyPacker.pack(fieldValue))
+                                   .addAllViolation(violations)
+                                   .build();
         return violation;
     }
 

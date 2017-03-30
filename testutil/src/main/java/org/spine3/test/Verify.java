@@ -1408,7 +1408,8 @@ public final class Verify extends Assert {
      * <p>
      * e.g.
      * <pre>
-     * Verify.<b>assertThrows</b>(StringIndexOutOfBoundsException.class, new Callable&lt;String&gt;()
+     * Verify.<b>assertThrows</b>(StringIndexOutOfBoundsException.class,
+     *                      new Callable&lt;String&gt;()
      * {
      *    public String call() throws Exception
      *    {

@@ -84,7 +84,8 @@ public class Producers {
     private static class ProducerFromFirstEventMessageField<I>
                    implements IdSetEventFunction<I, Message> {
 
-        private final GetProducerIdFromEvent<I, Message> func = GetProducerIdFromEvent.fromFieldIndex(0);
+        private final GetProducerIdFromEvent<I, Message> func =
+                GetProducerIdFromEvent.fromFieldIndex(0);
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
