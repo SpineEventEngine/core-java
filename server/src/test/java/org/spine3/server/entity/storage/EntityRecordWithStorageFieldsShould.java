@@ -43,17 +43,17 @@ public class EntityRecordWithStorageFieldsShould {
 
     @Test
     public void initialize_with_record_and_storage_fields() {
-        final EntityRecordWithStorageFields envelope =
+        final EntityRecordWithStorageFields record =
                 EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance(),
-                                                          Collections.<String, Column.MemoizedValue<?>>emptyMap());
-        assertNotNull(envelope);
+                                                          StorageFields.empty());
+        assertNotNull(record);
     }
 
     @Test
     public void initialize_with_record_only() {
-        final EntityRecordWithStorageFields envelope =
+        final EntityRecordWithStorageFields record =
                 EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance());
-        assertNotNull(envelope);
+        assertNotNull(record);
     }
 
     @Test
@@ -65,8 +65,8 @@ public class EntityRecordWithStorageFieldsShould {
 
     @Test
     public void store_record() {
-        final EntityRecordWithStorageFields envelope = newEnvelope();
-        final EntityRecord record = envelope.getRecord();
+        final EntityRecordWithStorageFields recordWithFields = newRecord();
+        final EntityRecord record = recordWithFields.getRecord();
         assertNotNull(record);
     }
 
@@ -88,10 +88,10 @@ public class EntityRecordWithStorageFieldsShould {
 
     @Test
     public void return_empty_map_if_no_storage_fields() {
-        final EntityRecordWithStorageFields envelope =
+        final EntityRecordWithStorageFields record =
                 EntityRecordWithStorageFields.newInstance(EntityRecord.getDefaultInstance());
-        assertFalse(envelope.hasStorageFields());
-        final Map<String, Column.MemoizedValue<?>> fields = envelope.getStorageFields();
+        assertFalse(record.hasStorageFields());
+        final Map<String, Column.MemoizedValue<?>> fields = record.getStorageFields();
         assertEmpty(fields);
     }
 
@@ -113,12 +113,12 @@ public class EntityRecordWithStorageFieldsShould {
                 );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
-                .addEqualityGroup(newEnvelope())
-                .addEqualityGroup(newEnvelope()) // Each one has different EntityRecord
+                .addEqualityGroup(newRecord())
+                .addEqualityGroup(newRecord()) // Each one has different EntityRecord
                 .testEquals();
     }
 
-    private static EntityRecordWithStorageFields newEnvelope() {
+    private static EntityRecordWithStorageFields newRecord() {
         return EntityRecordWithStorageFields.newInstance(Sample.messageOfType(EntityRecord.class),
                                                          Collections.<String, Column.MemoizedValue<?>>emptyMap());
     }

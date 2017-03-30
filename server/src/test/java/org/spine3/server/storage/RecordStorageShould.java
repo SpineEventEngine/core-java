@@ -227,9 +227,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Collection<EntityRecord> actual = newLinkedList(
                 storage.readMultiple(initial.keySet())
         );
-        final Collection<EntityRecord> expected =
-                Collections2.transform(initial.values(),
-                                       RECORD_EXTRACTOR_FUNCTION);
+        final Collection<EntityRecord> expected = Collections2.transform(initial.values(),
+                                                                         RECORD_EXTRACTOR_FUNCTION);
 
         assertEquals(expected.size(), actual.size());
         assertTrue(actual.containsAll(expected));

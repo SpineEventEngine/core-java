@@ -54,6 +54,12 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
+    protected void writeRecord(I id, EntityRecordWithStorageFields record) {
+        final RecordStorage<I> storage = recordStorage();
+        storage.write(id, record);
+    }
+
+    @Override
     protected void writeRecords(Map<I, EntityRecordWithStorageFields> records) {
         final RecordStorage<I> storage = recordStorage();
         storage.write(records);

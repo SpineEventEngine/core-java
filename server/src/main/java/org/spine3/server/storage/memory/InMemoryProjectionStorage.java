@@ -108,9 +108,4 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
         final Map<I, EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
-
-    @Override
-    protected void writeRecord(I id, EntityRecordWithStorageFields record) {
-        recordStorage.writeRecord(id, record);
-    }
 }

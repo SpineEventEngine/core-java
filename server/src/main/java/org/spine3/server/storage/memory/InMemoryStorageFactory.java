@@ -47,6 +47,12 @@ public class InMemoryStorageFactory implements StorageFactory {
         return this.multitenant;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In-memory implementation stores no values separately (Storage Fields), therefore
+     * returns {@linkplain ColumnTypeRegistry#empty() an empty ColumnTypeRegistry}.
+     */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
         return ColumnTypeRegistry.empty();

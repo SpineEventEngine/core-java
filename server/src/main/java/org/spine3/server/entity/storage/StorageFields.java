@@ -48,7 +48,7 @@ import static java.lang.String.format;
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean</a>
- *  getter spec are considered Storage Fields and indexed respectively.
+ *  getter spec are considered Storage Fields.
  *
  * <p>When passing an instance of already known {@link Entity} type, the methods are retrieved from
  * a cache and are not updated.
@@ -115,7 +115,7 @@ public class StorageFields {
      *
      * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
      * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
-     * a call to this method will create an index of the passed {@linkplain Entity entity's} getters
+     * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
      * and use it in all the successive calls.
      *
      * @param entity an {@link Entity} to get the Storage Fields from
@@ -142,7 +142,7 @@ public class StorageFields {
     }
 
     /**
-     * Generates the Storage Filed values considering the passed {@linkplain Entity entity type}
+     * Generates the Storage Field values considering the passed {@linkplain Entity entity type}
      * indexed.
      *
      * @param entityType indexed type of the {@link Entity}
@@ -169,13 +169,13 @@ public class StorageFields {
         if (knownEntityProperties.containsKey(entityType)) {
             return;
         }
-        addToIndexes(entityType);
+        addToCaches(entityType);
     }
 
     /**
-     * Indexes the {@linkplain Entity entity type} for further Storage Fields retrieving.
+     * Caches the {@linkplain Entity entity type} for further Storage Fields retrieving.
      */
-    private static void addToIndexes(Class<? extends Entity> entityType) {
+    private static void addToCaches(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
         try {
             entityDescriptor = Introspector.getBeanInfo(entityType);

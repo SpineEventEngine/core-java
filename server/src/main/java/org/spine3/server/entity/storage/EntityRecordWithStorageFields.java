@@ -29,8 +29,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * An associated with its {@linkplain StorageFields Storage Fields} value of
- * an {@link EntityRecord}.
+ * A value of {@link EntityRecord} associated with its {@linkplain StorageFields Storage Fields}.
  *
  * @author Dmytro Dashenkov
  */
@@ -69,11 +68,23 @@ public final class EntityRecordWithStorageFields {
         this.storageFields = null;
     }
 
+    /**
+     * Creates a new instance of the {@code EntityRecordWithStorageFields}.
+     */
     public static EntityRecordWithStorageFields newInstance(EntityRecord record,
                                                      Map<String, Column.MemoizedValue<?>> storageFields) {
         return new EntityRecordWithStorageFields(record, storageFields);
     }
 
+    /**
+     * Creates an instance of the {@link EntityRecordWithStorageFields} with no
+     * {@linkplain StorageFields Storage Fields}.
+     *
+     * <p>An object created with this factory method will always return {@code false} on
+     * {@link #hasStorageFields()}.
+     *
+     * @see #hasStorageFields()
+     */
     public static EntityRecordWithStorageFields newInstance(EntityRecord record) {
         return new EntityRecordWithStorageFields(record);
     }
@@ -90,14 +101,14 @@ public final class EntityRecordWithStorageFields {
     }
 
     /**
-     * Determines whether there are any Storage Fields for this record.
+     * Determines whether there are any Storage Fields associated with this record.
      *
      * <p>If returns {@code false}, the {@linkplain StorageFields Storage Fields} are not considered
      * by the storage.
      *
      * @return {@code true} if current object was constructed with
-     * {@linkplain #EntityRecordWithStorageFields(EntityRecord, Map)} and {@code false} if it was
-     * constructed with {@linkplain #EntityRecordWithStorageFields(EntityRecord)}
+     * {@linkplain #newInstance(EntityRecord, Map)} and {@code false} if it was
+     * constructed with {@linkplain #newInstance(EntityRecord)}
      */
     public boolean hasStorageFields() {
         return storageFields != null;

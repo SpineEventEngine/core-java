@@ -19,10 +19,9 @@
  */
 
 /**
- * This package contains classes and interfaces to work with
+ * This package contains classes and interfaces for working with
  * {@link org.spine3.server.entity.Entity entity} storage representation.
  */
-
 @ParametersAreNonnullByDefault
 package org.spine3.server.entity.storage;
 

@@ -59,7 +59,7 @@ public class Column<T> {
      * Creates new instance of the {@code Column} from the given getter method.
      *
      * @param getter the getter of the Storage Field
-     * @param <T> the type of the Storage Field
+     * @param <T>    the type of the Storage Field
      * @return new instance of the {@code Column} reflecting the given property
      */
     public static <T> Column<T> from(Method getter) {
@@ -99,7 +99,7 @@ public class Column<T> {
     /**
      * Shows if the Storage Field may return {@code null}s.
      *
-     * @return {@code true} if the getter method was annotated as {@link Nullable},
+     * @return {@code true} if the getter method is annotated as {@link Nullable},
      * {@code false} otherwise
      */
     public boolean isNullable() {
@@ -110,7 +110,7 @@ public class Column<T> {
      * Retrieves the Storage Field value from the given {@link Entity}.
      *
      * @param source the {@link Entity} to get the Fields from
-     * @return the value of the Storage Field represented y this instance of {@code Column}
+     * @return the value of the Storage Field represented by this instance of {@code Column}
      */
     public T getFor(Entity<?, ?> source) {
         try {

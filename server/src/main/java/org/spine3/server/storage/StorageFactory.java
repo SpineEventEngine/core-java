@@ -47,7 +47,7 @@ public interface StorageFactory extends AutoCloseable {
 
     /**
      * Retrieves the {@link ColumnTypeRegistry type registry} which declares how to store
-     * the columns of a certain Java type.
+     * values of certain types in the {@linkplain Storage storages} geberatd by this factory.
      *
      * @return immutable registry of type convection strategies
      */

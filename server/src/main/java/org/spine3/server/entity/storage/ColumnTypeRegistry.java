@@ -94,7 +94,7 @@ public class ColumnTypeRegistry<C extends ColumnType> {
         }
 
         /**
-         * Create the mapping between the Java class and the database
+         * Create a mapping between the Java class and the database
          * {@linkplain ColumnType column type}.
          *
          * @param javaType   the Java class to map the value from
