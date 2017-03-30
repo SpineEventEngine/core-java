@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * @author Alexander Yevsyukov
  */
-class FilterChain implements CommandBusFilter {
+final class FilterChain implements CommandBusFilter {
 
     private final ImmutableList<CommandBusFilter> filters;
 

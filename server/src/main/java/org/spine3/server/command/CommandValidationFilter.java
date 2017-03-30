@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
@@ -50,10 +51,16 @@ class CommandValidationFilter implements CommandBusFilter {
      */
     @Override
     public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+        final boolean tenantValid = isTenantIdValid(envelope, responseObserver);
+        final boolean commandValid = isCommandValid(envelope, responseObserver);
+        return tenantValid && commandValid;
+    }
+
+    private boolean isTenantIdValid(CommandEnvelope envelope,
+                                    StreamObserver<Response> responseObserver) {
         final TenantId tenantId = envelope.getCommandContext()
                                           .getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
-
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
@@ -66,7 +73,12 @@ class CommandValidationFilter implements CommandBusFilter {
                 return false;
             }
         }
+        return true;
+    }
 
+    private boolean isCommandValid(CommandEnvelope envelope,
+                                   StreamObserver<Response> responseObserver) {
+        final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = CommandValidator.getInstance()
                                                                      .validate(command);
         if (!violations.isEmpty()) {
@@ -77,7 +89,6 @@ class CommandValidationFilter implements CommandBusFilter {
             responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
             return false;
         }
-
         return true;
     }
 
@@ -91,7 +102,8 @@ class CommandValidationFilter implements CommandBusFilter {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(noTenantDefined));
+        final StatusRuntimeException exception = Statuses.invalidArgumentWithCause(noTenantDefined);
+        responseObserver.onError(exception);
     }
 
     private void reportTenantIdInapplicable(Command command,
@@ -100,6 +112,8 @@ class CommandValidationFilter implements CommandBusFilter {
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, tenantIdInapplicable);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(tenantIdInapplicable));
+        final StatusRuntimeException exception = Statuses.invalidArgumentWithCause(
+                tenantIdInapplicable);
+        responseObserver.onError(exception);
     }
 }
