@@ -51,7 +51,7 @@ class CommandValidationFilter implements CommandBusFilter {
      */
     @Override
     public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
-        if (isTenantIdValid(envelope, responseObserver)) {
+        if (!isTenantIdValid(envelope, responseObserver)) {
             return false;
         }
         final boolean commandValid = isCommandValid(envelope, responseObserver);
