@@ -183,7 +183,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for list with custom delimiter for the passed list elements.
+     * Obtains {@code Stringifier} for list with the custom delimiter for the passed list elements.
      *
      * @param elementClass the class of the list elements
      * @param delimiter    the delimiter or the list elements passed via string
@@ -200,7 +200,7 @@ public class Stringifiers {
     }
 
     /**
-     * Create the {@code Escaper} which contains will escape '\' and passed character.
+     * Creates the {@code Escaper} which escapes contained '\' and passed characters.
      *
      * @param charToEscape the char to escape
      * @return the constructed escaper

@@ -83,7 +83,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      * Creates a {@code ListStringifier}.
      *
      * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for element
-     * separation in {@code String} representation of the {@code List}.
+     * separation in the {@code String} representation of the {@code List}.
      *
      * @param listGenericClass the class of the list elements
      */
@@ -99,7 +99,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      * Creates a {@code ListStringifier}.
      *
      * <p>The specified delimiter is used for element separation
-     * in {@code String} representation of the {@code List}.
+     * in the {@code String} representation of the {@code List}.
      *
      * @param listGenericClass the class of the list elements
      * @param delimiter        the delimiter for the passed elements via string

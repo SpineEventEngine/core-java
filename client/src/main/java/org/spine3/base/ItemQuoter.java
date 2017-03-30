@@ -76,10 +76,10 @@ class ItemQuoter {
         }
 
         /**
-         * Checks that the {@code CharSequence} contains escaped quotes.
+         * Checks that the {@code CharSequence} contains the escaped quotes.
          *
          * @param stringToCheck the sequence of chars to check
-         * @return {@code true} if sequence contains further
+         * @return {@code true} if the sequence contains further
          * and prior escaped quotes, {@code false} otherwise
          */
         private static boolean isQuotedString(CharSequence stringToCheck) {

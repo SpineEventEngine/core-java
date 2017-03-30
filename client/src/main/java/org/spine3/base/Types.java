@@ -60,7 +60,7 @@ public class Types {
     }
 
     /**
-     * Create the parametrized {@code Type} of the list.
+     * Creates the parametrized {@code Type} of the list.
      *
      * @param elementClass the class of the list elements
      * @param <T>          the type of the elements in this list

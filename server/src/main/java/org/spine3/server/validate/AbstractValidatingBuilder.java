@@ -52,7 +52,7 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
      * Converts the passed `raw` value and returns it.
      *
      * @param type  the key of the {@code StringifierRegistry} storage
-     *              to obtain {@code Stringifier}
+     *              to obtain the {@code Stringifier}
      * @param value the value to convert
      * @param <V>   the type of the converted value
      * @return the converted value
@@ -60,7 +60,7 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
      */
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
     // It is OK because caught exception is not ignored,
-    // it delivers information for exception to throw.
+    // it delivers information for the exception to throw.
     public <V> V getConvertedValue(Type type, String value) throws ConversionException {
         try {
             final V convertedValue = Stringifiers.fromString(value, type);
