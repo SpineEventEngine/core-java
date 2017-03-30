@@ -81,6 +81,12 @@ public class ColumnTypeRegistry {
         return new Builder();
     }
 
+    public static Builder newBuilder(ColumnTypeRegistry src) {
+        final Builder builder = new Builder();
+        builder.columnTypeMap.putAll(src.columnTypeMap);
+        return builder;
+    }
+
     public static class Builder {
 
         private final Map<Class, ColumnType> columnTypeMap = new HashMap<>();
