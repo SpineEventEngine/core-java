@@ -83,12 +83,7 @@ public class ColumnTypeRegistryShould {
         return column;
     }
 
-    private static class AnyType implements ColumnType {
-
-        @Override
-        public Object convertColumnValue(Object fieldValue) {
-            return fieldValue;
-        }
+    private static class AnyType extends SimpleColumnType {
 
         @Override
         public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
