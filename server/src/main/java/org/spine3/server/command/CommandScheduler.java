@@ -73,7 +73,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
         this.rescheduler = new Rescheduler(commandBus);
     }
 
-    Rescheduler rescheduler() {
+    private Rescheduler rescheduler() {
         checkState(rescheduler != null, "Rescheduler is not initialized");
         return rescheduler;
     }
