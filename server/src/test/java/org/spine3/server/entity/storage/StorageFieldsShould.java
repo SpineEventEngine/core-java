@@ -23,20 +23,26 @@ package org.spine3.server.entity.storage;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractEntity;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.test.entity.Project;
+import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
 
 import javax.annotation.Nullable;
 import java.util.Map;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
 
@@ -119,6 +125,21 @@ public class StorageFieldsShould {
         final Map<?, ?> fields = StorageFields.from(new ExclusiveMethodsEntity(STRING_ID));
         assertNotNull(fields);
         assertEmpty(fields);
+    }
+
+    @Test
+    public void handle_inherited_fields() {
+        final Entity<?, ?> entity = new RealLifeEntity(Sample.messageOfType(ProjectId.class));
+        final Map<String, ?> storageFields = StorageFields.from(entity);
+        final Set<String> storageFieldNames = storageFields.keySet();
+
+        assertSize(5, storageFieldNames);
+
+        assertContains("archived", storageFieldNames);
+        assertContains("deleted", storageFieldNames);
+        assertContains("visible", storageFieldNames);
+        assertContains("version", storageFieldNames);
+        assertContains("someTime", storageFieldNames);
     }
 
     public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
@@ -211,6 +232,23 @@ public class StorageFieldsShould {
 
         public Message getBuilder() {
             throw new AssertionError("getBuilder invoked");
+        }
+    }
+
+    // Most read-life (non-test) Entities are children of AbstractVersionableEntity,
+    // which brings 3 storage fields from the box
+    public static class RealLifeEntity extends AbstractVersionableEntity<ProjectId, Project> {
+
+        protected RealLifeEntity(ProjectId id) {
+            super(id);
+        }
+
+        public Timestamp getSomeTime() {
+            return Timestamps2.getCurrentTime();
+        }
+
+        public boolean isVisible() {
+            return true;
         }
     }
 }
