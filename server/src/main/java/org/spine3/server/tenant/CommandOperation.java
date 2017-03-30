@@ -42,7 +42,8 @@ public abstract class CommandOperation extends TenantAwareOperation {
      * @param command the command from which context to obtain the tenant ID
      */
     protected CommandOperation(Command command) {
-        super(command.getContext().getTenantId());
+        super(command.getContext()
+                     .getTenantId());
         this.command = command;
     }
 

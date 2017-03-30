@@ -21,7 +21,6 @@
 package org.spine3.server.tenant;
 
 import com.google.common.base.Optional;
-import org.spine3.annotations.SPI;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -35,7 +34,6 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  * @see <a href="https://msdn.microsoft.com/en-us/library/aa479086.aspx">Multi-Tenant Data Architecture</a>
  */
-@SPI
 class CurrentTenant {
 
     private static final ThreadLocal<TenantId> threadLocal = new ThreadLocal<>();

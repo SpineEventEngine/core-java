@@ -64,7 +64,11 @@ public abstract class CommandScheduler implements CommandBusFilter {
     protected CommandScheduler() {
     }
 
-    public void setCommandBus(CommandBus commandBus) {
+    /**
+     * Assigns the {@code CommandBus} to the scheduler during {@code CommandBus}
+     * {@linkplain CommandBus.Builder#build() construction}.
+     */
+    protected void setCommandBus(CommandBus commandBus) {
         this.commandBus = commandBus;
         this.rescheduler = new Rescheduler(commandBus);
     }

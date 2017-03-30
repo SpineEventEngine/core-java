@@ -199,6 +199,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     public void handleDeadMessage(CommandEnvelope message,
                                   StreamObserver<Response> responseObserver) {
         // Do nothing because this is the responsibility of `DeadCommandFilter`.
+        //TODO:2017-03-30:alexander.yevsyukov: Handle dead messages in other buses using filters
+        // and remove this method from the interface.
     }
 
     /**
