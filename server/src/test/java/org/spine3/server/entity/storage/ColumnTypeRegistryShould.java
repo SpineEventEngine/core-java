@@ -27,7 +27,6 @@ import java.util.Collection;
 import java.util.Date;
 
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.spine3.test.Verify.assertEmpty;
@@ -46,13 +45,8 @@ public class ColumnTypeRegistryShould {
 
     @Test
     public void have_default_empty_singleton_instance() {
-        final ColumnTypeRegistry emptyInstanceOne = ColumnTypeRegistry.empty();
-        assertEmpty(emptyInstanceOne.getColumnTypeMap());
-
-        final ColumnTypeRegistry emptyInstanceTwo = ColumnTypeRegistry.empty();
-        assertEmpty(emptyInstanceTwo.getColumnTypeMap());
-
-        assertSame(emptyInstanceOne, emptyInstanceTwo);
+        final ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.empty();
+        assertEmpty(emptyInstance.getColumnTypeMap());
     }
 
     @SuppressWarnings("MethodWithMultipleLoops") // OK for a test

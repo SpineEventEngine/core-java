@@ -103,7 +103,7 @@ public class ColumnTypeRegistry<C extends ColumnType> {
          * @param <J>        the Java type
          * @return self for call chaining
          */
-        public <J> Builder put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
+        public <J> Builder<C> put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
             @SuppressWarnings("unchecked") final C columnTypeResolved = (C) columnType;
             columnTypeMap.put(javaType, columnTypeResolved);
             return this;
