@@ -20,10 +20,13 @@
 
 package org.spine3.base;
 
+import com.google.common.escape.Escaper;
+import com.google.common.escape.Escapers;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -67,6 +70,7 @@ public class Stringifiers {
      * @return the string representation of the passed object
      * @throws MissingStringifierException if passed value cannot be converted
      */
+    @SuppressWarnings("unchecked") // It is OK because the type is checked before cast.
     public static <T> String toString(T object, Type typeOfT) {
         checkNotNull(object);
         checkNotNull(typeOfT);
@@ -154,9 +158,83 @@ public class Stringifiers {
     }
 
     /**
+     * Obtains {@code Stringifier} for the string values.
+     *
+     * <p>It does not make any modifications to {@code String}.
+     *
+     * @return the stringifier for the string values
+     */
+    static Stringifier<String> noopStringifier() {
+        final Stringifier<String> stringStringifier = new NoopStringifier();
+        return stringStringifier;
+    }
+
+    /**
+     * Obtains {@code Stringifier} for list with default delimiter for the passed list elements.
+     *
+     * @param elementClass the class of the list elements
+     * @param <T>          the type of the elements in this list
+     * @return the stringifier for the list
+     */
+    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass) {
+        checkNotNull(elementClass);
+        final Stringifier<List<T>> listStringifier = new ListStringifier<>(elementClass);
+        return listStringifier;
+    }
+
+    /**
+     * Obtains {@code Stringifier} for list with the custom delimiter for the passed list elements.
+     *
+     * @param elementClass the class of the list elements
+     * @param delimiter    the delimiter or the list elements passed via string
+     * @param <T>          the type of the elements in this list
+     * @return the stringifier for the list
+     */
+    public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
+                                                           char delimiter) {
+        checkNotNull(elementClass);
+        checkNotNull(delimiter);
+        final Stringifier<List<T>> listStringifier =
+                new ListStringifier<>(elementClass, delimiter);
+        return listStringifier;
+    }
+
+    /**
+     * Creates the {@code Escaper} which escapes contained '\' and passed characters.
+     *
+     * @param charToEscape the char to escape
+     * @return the constructed escaper
+     */
+    static Escaper createEscaper(char charToEscape) {
+        final String escapedChar = "\\" + charToEscape;
+        final Escaper result = Escapers.builder()
+                                       .addEscape('\"', "\\\"")
+                                       .addEscape(charToEscape, escapedChar)
+                                       .build();
+        return result;
+    }
+
+    /**
+     * The {@code Stringifier} for the {@code String} values.
+     *
+     * <p>Always returns the original {@code String} passed as an argument.
+     */
+    private static class NoopStringifier extends Stringifier<String> {
+        @Override
+        protected String toString(String obj) {
+            return obj;
+        }
+
+        @Override
+        protected String fromString(String s) {
+            return s;
+        }
+    }
+
+    /**
      * The {@code Stringifier} for the long values.
      */
-    static class LongStringifier extends Stringifier<Long> {
+    private static class LongStringifier extends Stringifier<Long> {
         @Override
         protected String toString(Long obj) {
             return Longs.stringConverter()
@@ -174,7 +252,7 @@ public class Stringifiers {
     /**
      * The {@code Stringifier} for the integer values.
      */
-    static class IntegerStringifier extends Stringifier<Integer> {
+    private static class IntegerStringifier extends Stringifier<Integer> {
         @Override
         protected String toString(Integer obj) {
             return Ints.stringConverter()

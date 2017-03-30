@@ -75,7 +75,8 @@ public abstract class CommandScheduler {
     }
 
     /**
-     * Schedules a command and delivers it to the target according to the scheduling options set to a context.
+     * Schedules a command and delivers it to the target according to the scheduling options
+     * set to a context.
      *
      * @param command a command to deliver later
      * @see #post(Command)

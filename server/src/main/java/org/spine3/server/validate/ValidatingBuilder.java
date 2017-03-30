@@ -18,35 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.annotations;
+package org.spine3.server.validate;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.google.protobuf.Message;
 
 /**
- * Annotates a program element (class, method, package etc.) as an element of
- * Service Provider Interface (SPI).
+ * An interface for all validating builders.
  *
- * <p>SPI is used to enable framework extension and replaceable components
- * (implement a new storage, etc).
+ * <p>Validating builder is used to validate messages according
+ * to the business rules during the message building.
  *
- * <p>See "Effective Java 2nd Edition", chapter 2, item 1 for more info about
- * service provider framework pattern.
- *
- * @author Alexander Litus
+ * @author Illia Shepilov
  */
-@SPI
-@Retention(RetentionPolicy.SOURCE)
-@Target({
-        ElementType.ANNOTATION_TYPE,
-        ElementType.CONSTRUCTOR,
-        ElementType.FIELD,
-        ElementType.METHOD,
-        ElementType.PACKAGE,
-        ElementType.TYPE})
-@Documented
-public @interface SPI {
+@SuppressWarnings("InterfaceNeverImplemented")
+// It will be implemented during the build of project after the validating builders generation.
+public interface ValidatingBuilder<T extends Message> {
+
+    /**
+     * Returns constructed and validated {@code Message}.
+     *
+     * @return the {@code Message} instance
+     */
+    T build();
 }

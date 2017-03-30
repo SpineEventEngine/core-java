@@ -58,7 +58,8 @@ class AggregateQueryProcessor implements QueryProcessor {
         this.type = type;
     }
 
-    private final Function<EntityId, AggregateStateId> stateIdTransformer = new Function<EntityId, AggregateStateId>() {
+    private final Function<EntityId, AggregateStateId> stateIdTransformer =
+            new Function<EntityId, AggregateStateId>() {
         @Nullable
         @Override
         public AggregateStateId apply(@Nullable EntityId input) {

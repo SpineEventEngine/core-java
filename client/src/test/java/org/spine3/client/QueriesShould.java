@@ -40,12 +40,15 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Alex Tymchenko
  */
-@SuppressWarnings({"LocalVariableNamingConvention", "MagicNumber", "MethodParameterNamingConvention"})
+@SuppressWarnings({"LocalVariableNamingConvention",
+        "MagicNumber",
+        "MethodParameterNamingConvention"})
 public class QueriesShould {
 
     // See {@code queries_should.proto} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
-    private static final String TARGET_ENTITY_TYPE_URL = "type.spine3.org/spine.test.queries.TestEntity";
+    private static final String TARGET_ENTITY_TYPE_URL =
+            "type.spine3.org/spine.test.queries.TestEntity";
 
     @Test
     public void have_private_constructor() {
@@ -72,7 +75,8 @@ public class QueriesShould {
     public void compose_proper_read_all_query_with_single_path() {
         final Class<TestEntity> targetEntityClass = TestEntity.class;
         final String expectedEntityPath = singleTestEntityPath();
-        final Query readAllWithPathFilteringQuery = Queries.readAll(targetEntityClass, expectedEntityPath);
+        final Query readAllWithPathFilteringQuery =
+                Queries.readAll(targetEntityClass, expectedEntityPath);
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
@@ -158,7 +162,8 @@ public class QueriesShould {
         Queries.typeOf(query);
     }
 
-    private static void verifyMultiplePathsInQuery(String[] paths, Query readAllWithPathFilteringQuery) {
+    private static void verifyMultiplePathsInQuery(String[] paths,
+                                                   Query readAllWithPathFilteringQuery) {
         final FieldMask fieldMask = readAllWithPathFilteringQuery.getFieldMask();
         assertEquals(paths.length, fieldMask.getPathsCount());
         final ProtocolStringList pathsList = fieldMask.getPathsList();
@@ -217,7 +222,8 @@ public class QueriesShould {
         assertEquals(FieldMask.getDefaultInstance(), fieldMask);
     }
 
-    private static void checkTypeCorrectAndFiltersEmpty(Class<TestEntity> expectedTargetClass, Query query) {
+    private static void checkTypeCorrectAndFiltersEmpty(Class<TestEntity> expectedTargetClass,
+                                                        Query query) {
         final Target entityTarget = checkTarget(expectedTargetClass, query);
 
         final EntityFilters filters = entityTarget.getFilters();

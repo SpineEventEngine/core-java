@@ -31,7 +31,8 @@ import org.spine3.validate.ConstraintViolation;
 import java.util.List;
 
 /**
- * Validates messages according to Spine custom protobuf options and provides constraint violations found.
+ * Validates messages according to Spine custom protobuf options and provides constraint
+ * violations found.
  *
  * @author Alexander Litus
  */
@@ -48,7 +49,8 @@ public class MessageValidator {
     /**
      * Creates a new validator instance.
      *
-     * <p>Use this constructor for inner messages (which are marked with "valid" option in Protobuf).
+     * <p>Use this constructor for inner messages
+     * (which are marked with "valid" option in Protobuf).
      *
      * @param rootFieldPath the path to the message field which is the root for this message
      */
@@ -61,7 +63,8 @@ public class MessageValidator {
     }
 
     /**
-     * Validates messages according to Spine custom protobuf options and returns constraint violations found.
+     * Validates messages according to Spine custom protobuf options and returns constraint
+     * violations found.
      *
      * @param message a message to validate
      */
@@ -72,9 +75,11 @@ public class MessageValidator {
         return result.build();
     }
 
-    private void validateAlternativeFields(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private void validateAlternativeFields(Message message,
+                                           ImmutableList.Builder<ConstraintViolation> result) {
         final Descriptor typeDescr = message.getDescriptorForType();
-        final AlternativeFieldValidator altFieldValidator = new AlternativeFieldValidator(typeDescr, rootFieldPath);
+        final AlternativeFieldValidator altFieldValidator =
+                new AlternativeFieldValidator(typeDescr, rootFieldPath);
         result.addAll(altFieldValidator.validate(message));
     }
 
@@ -83,7 +88,9 @@ public class MessageValidator {
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator<?> fieldValidator = FieldValidatorFactory.create(field, value, rootFieldPath);
+            final FieldValidator<?> fieldValidator = FieldValidatorFactory.create(field,
+                                                                                  value,
+                                                                                  rootFieldPath);
             final List<ConstraintViolation> violations = fieldValidator.validate();
             result.addAll(violations);
         }

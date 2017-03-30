@@ -309,7 +309,8 @@ public abstract class AggregateStorageShould
         }
     }
 
-    protected static final Function<AggregateEventRecord, Event> TO_EVENT = new Function<AggregateEventRecord, Event>() {
+    protected static final Function<AggregateEventRecord, Event> TO_EVENT =
+            new Function<AggregateEventRecord, Event>() {
         @Nullable // return null because an exception won't be propagated in this case
         @Override
         public Event apply(@Nullable AggregateEventRecord input) {
@@ -324,19 +325,22 @@ public abstract class AggregateStorageShould
                        .build();
     }
 
-    private static class TestAggregateWithIdString extends Aggregate<String, Project, Project.Builder> {
+    private static class TestAggregateWithIdString
+                   extends Aggregate<String, Project, Project.Builder> {
         private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdInteger extends Aggregate<Integer, Project, Project.Builder> {
+    private static class TestAggregateWithIdInteger
+                   extends Aggregate<Integer, Project, Project.Builder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
-    private static class TestAggregateWithIdLong extends Aggregate<Long, Project, Project.Builder> {
+    private static class TestAggregateWithIdLong
+                   extends Aggregate<Long, Project, Project.Builder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

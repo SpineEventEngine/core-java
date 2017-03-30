@@ -18,35 +18,29 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.annotations;
+package org.spine3.validate;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.List;
+
+import static java.util.Collections.unmodifiableList;
 
 /**
- * Annotates a program element (class, method, package etc.) as an element of
- * Service Provider Interface (SPI).
+ * Signals that the validated value violates the constraints set for it.
  *
- * <p>SPI is used to enable framework extension and replaceable components
- * (implement a new storage, etc).
- *
- * <p>See "Effective Java 2nd Edition", chapter 2, item 1 for more info about
- * service provider framework pattern.
- *
- * @author Alexander Litus
+ * @author Illia Shepilov
  */
-@SPI
-@Retention(RetentionPolicy.SOURCE)
-@Target({
-        ElementType.ANNOTATION_TYPE,
-        ElementType.CONSTRUCTOR,
-        ElementType.FIELD,
-        ElementType.METHOD,
-        ElementType.PACKAGE,
-        ElementType.TYPE})
-@Documented
-public @interface SPI {
+public class ConstraintViolationThrowable extends Throwable {
+
+    private static final long serialVersionUID = 1L;
+
+    private final List<ConstraintViolation> constraintViolations;
+
+    public ConstraintViolationThrowable(List<ConstraintViolation> constraintViolations) {
+        super();
+        this.constraintViolations = constraintViolations;
+    }
+
+    public List<ConstraintViolation> getConstraintViolations() {
+        return unmodifiableList(constraintViolations);
+    }
 }

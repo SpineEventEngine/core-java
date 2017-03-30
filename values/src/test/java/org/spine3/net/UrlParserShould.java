@@ -155,7 +155,8 @@ public class UrlParserShould {
 
     @Test
     public void parse_url_with_all_sub_items() {
-        final String rawUrl = "https://user:password@spine3.org/index?auth=none&locale=us#fragment9";
+        final String rawUrl =
+                "https://user:password@spine3.org/index?auth=none&locale=us#fragment9";
 
         final Url.Record record = new UrlParser(rawUrl).parse().getRecord();
 

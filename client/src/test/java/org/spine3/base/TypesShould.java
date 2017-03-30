@@ -26,8 +26,10 @@ import org.junit.Test;
 
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.base.Types.listTypeOf;
 import static org.spine3.base.Types.mapTypeOf;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -54,6 +56,16 @@ public class TypesShould {
     public void create_map_type() {
         final Type type = mapTypeOf(String.class, Integer.class);
         final Type expectedType = new TypeToken<Map<String, Integer>>(){}.getType();
+        assertEquals(expectedType, type);
+    }
+
+    @Test
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+                       "SerializableInnerClassWithNonSerializableOuterClass"})
+                        // It is OK for test method.
+    public void create_list_type() {
+        final Type type = listTypeOf(String.class);
+        final Type expectedType = new TypeToken<List<String>>(){}.getType();
         assertEquals(expectedType, type);
     }
 }

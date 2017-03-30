@@ -97,20 +97,22 @@ public class CommandFactoryShould {
 
     @Test
     public void support_moving_between_timezones() {
-        final CommandFactory factoryInAnotherTimezone = commandFactory.switchTimezone(ZoneOffsets.ofHours(-8));
+        final CommandFactory factoryInAnotherTimezone =
+                commandFactory.switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(commandFactory.getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
 
     @Test
     public void create_new_instances_with_current_time() {
-        // We are creating a range of +/- second between the call to make sure the timestamp would fit
-        // into this range. The purpose of this test is to make sure it works with this precision
-        // and to add coverage.
+        // We are creating a range of +/- second between the call to make sure the timestamp
+        // would fit into this range. The purpose of this test is to make sure it works with
+        // this precision and to add coverage.
         final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
         final Command command = commandFactory.createCommand(StringValue.getDefaultInstance());
         final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
-        assertTrue(Timestamps2.isBetween(command.getContext().getTimestamp(), beforeCall, afterCall));
+        assertTrue(Timestamps2.isBetween(
+                command.getContext().getTimestamp(), beforeCall, afterCall));
     }
 
     @Test
