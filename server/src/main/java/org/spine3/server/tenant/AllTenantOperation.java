@@ -20,6 +20,7 @@
 
 package org.spine3.server.tenant;
 
+import org.spine3.annotations.Internal;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -29,6 +30,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public abstract class AllTenantOperation implements Runnable {
 
     private final TenantIndex tenantIndex;

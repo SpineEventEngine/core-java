@@ -20,6 +20,7 @@
 
 package org.spine3.server.tenant;
 
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 
@@ -28,6 +29,7 @@ import org.spine3.base.CommandId;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public abstract class CommandOperation extends TenantAwareOperation {
 
     /**

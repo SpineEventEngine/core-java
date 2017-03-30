@@ -21,6 +21,7 @@
 package org.spine3.server.tenant;
 
 import com.google.common.base.Optional;
+import org.spine3.annotations.Internal;
 import org.spine3.users.TenantId;
 
 /**
@@ -29,6 +30,7 @@ import org.spine3.users.TenantId;
  * @author Alexander Yevsyukov
  * @see #execute()
  */
+@Internal
 public abstract class TenantAwareOperation extends TenantAware implements Runnable {
 
     /**

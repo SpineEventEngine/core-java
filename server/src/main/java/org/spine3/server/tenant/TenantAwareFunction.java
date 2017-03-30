@@ -22,6 +22,7 @@ package org.spine3.server.tenant;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import org.spine3.annotations.Internal;
 import org.spine3.users.TenantId;
 
 /**
@@ -31,6 +32,7 @@ import org.spine3.users.TenantId;
  * @param <T> the type of the output
  * @author Alexander Yevsykov
  */
+@Internal
 public abstract class TenantAwareFunction<F, T> extends TenantAware implements Function<F, T> {
 
     protected TenantAwareFunction() throws IllegalStateException {

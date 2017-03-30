@@ -20,6 +20,7 @@
 
 package org.spine3.server.tenant;
 
+import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 
@@ -28,6 +29,7 @@ import org.spine3.base.EventId;
  *
  * @author Alexander Yevsyukov
  */
+@Internal
 public abstract class EventOperation extends TenantAwareOperation {
 
     /**
