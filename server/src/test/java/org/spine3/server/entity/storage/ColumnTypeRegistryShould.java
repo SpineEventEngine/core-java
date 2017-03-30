@@ -20,13 +20,18 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.protobuf.AbstractMessage;
+import com.google.protobuf.Any;
+import com.google.protobuf.GeneratedMessageV3;
 import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.spine3.test.Verify.assertEmpty;
@@ -70,6 +75,19 @@ public class ColumnTypeRegistryShould {
         }
     }
 
+    @Test
+    public void find_closest_superclass_column_type() {
+        final ColumnTypeRegistry registry =
+                ColumnTypeRegistry.newBuilder()
+                                  .put(GeneratedMessageV3.class, new GeneratedMessageType())
+                                  .put(AbstractMessage.class, new AbstractMessageType())
+                                  .build();
+        final Column column = mockProperty(Any.class);
+        final ColumnType type = registry.get(column);
+        assertNotNull(type);
+        assertThat(type, instanceOf(GeneratedMessageType.class));
+    }
+
     private static <T> Column<T> mockProperty(Class<T> cls) {
         @SuppressWarnings("unchecked")
         final Column<T> column = (Column<T>) mock(Column.class);
@@ -82,6 +100,34 @@ public class ColumnTypeRegistryShould {
         @Override
         public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
             // NOP
+        }
+    }
+
+    private static class AbstractMessageType
+            implements ColumnType<AbstractMessage, String, StringBuilder, String> {
+
+        @Override
+        public String convertColumnValue(AbstractMessage fieldValue) {
+            return fieldValue.toString();
+        }
+
+        @Override
+        public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
+            storageRecord.append(value);
+        }
+    }
+
+    private static class GeneratedMessageType
+            implements ColumnType<GeneratedMessageV3, String, StringBuilder, String> {
+
+        @Override
+        public String convertColumnValue(GeneratedMessageV3 fieldValue) {
+            return fieldValue.toString();
+        }
+
+        @Override
+        public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
+            storageRecord.append(value);
         }
     }
 }

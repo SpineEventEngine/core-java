@@ -63,11 +63,18 @@ public class ColumnTypeRegistry<C extends ColumnType> {
      */
     public C get(Column<?> field) {
         checkNotNull(field);
-        final Class javaType = field.getType();
-        final C type = columnTypeMap.get(javaType);
+
+        Class javaType = field.getType();
+        C type = null;
+
+        while (type == null && javaType != null) {
+            type = columnTypeMap.get(javaType);
+            javaType = javaType.getSuperclass();
+        }
+
         checkState(type != null,
                    "Could not find storage type for %s.",
-                   javaType.getName());
+                   field.getType());
         return type;
     }
 
