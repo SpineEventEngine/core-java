@@ -33,7 +33,7 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-class TenantAware {
+abstract class TenantAware {
 
     private final TenantId tenantId;
 
