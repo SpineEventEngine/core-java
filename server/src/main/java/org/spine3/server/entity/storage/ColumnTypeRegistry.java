@@ -58,6 +58,12 @@ public class ColumnTypeRegistry<C extends ColumnType> {
      * <p>By default, this method returns the {@link ColumnType} for the
      * {@linkplain Column column's} {@linkplain Column#getType() type}.
      *
+     * <p>If the {@link ColumnType} was not found by the {@code class} of the {@linkplain Column},
+     * its superclasses are checked one by one until a {@link ColumnType} is found or until
+     * the look up reaches the class representing {@link Object}
+     *
+     * <p>If no {@link ColumnType} is found, an {@link IllegalStateException} is thrown.
+     *
      * @param field the {@link Column} to get type conversion strategy for
      * @return the {@link ColumnType} for the given {@link Column}
      */
