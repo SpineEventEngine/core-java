@@ -28,7 +28,7 @@ import org.spine3.validate.ConstraintViolation;
 import java.util.List;
 
 /**
- * Validates fields of type {@link Descriptors.EnumValueDescriptor EnumValueDescriptor}.
+ * Validates fields of type {@link Descriptors.EnumValueDescriptor}.
  *
  * @author Dmitry Kashcheiev
  */

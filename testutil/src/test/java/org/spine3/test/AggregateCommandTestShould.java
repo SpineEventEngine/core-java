@@ -72,7 +72,8 @@ public class AggregateCommandTestShould {
      * A dummy aggregate that accepts a {@code Timestamp} as a command message
      * and prints it into its state.
      */
-    private static final class TimePrinter extends Aggregate<Long, StringValue, StringValue.Builder> {
+    private static final class TimePrinter
+                         extends Aggregate<Long, StringValue, StringValue.Builder> {
 
         TimePrinter(Long id) {
             super(id);

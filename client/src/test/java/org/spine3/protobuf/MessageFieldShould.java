@@ -28,6 +28,9 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.MessageField.getFieldDescriptor;
+import static org.spine3.protobuf.MessageField.getFieldName;
+import static org.spine3.protobuf.MessageField.toAccessorMethodName;
 import static org.spine3.protobuf.Values.newStringValue;
 
 public class MessageFieldShould {
@@ -89,23 +92,23 @@ public class MessageFieldShould {
 
     @Test
     public void return_field_descriptor() {
-        final FieldDescriptor descriptor = MessageField.getFieldDescriptor(stringValue, STR_VALUE_FIELD_INDEX);
+        final FieldDescriptor descriptor = getFieldDescriptor(stringValue, STR_VALUE_FIELD_INDEX);
 
         assertEquals(JavaType.STRING, descriptor.getJavaType());
     }
 
     @Test
     public void return_field_name() {
-        final String fieldName = MessageField.getFieldName(stringValue, STR_VALUE_FIELD_INDEX);
+        final String fieldName = getFieldName(stringValue, STR_VALUE_FIELD_INDEX);
 
         assertEquals(STR_VALUE_FIELD_NAME, fieldName);
     }
 
     @Test
     public void convert_field_name_to_method_name() {
-        assertEquals("getUserId", MessageField.toAccessorMethodName("user_id"));
-        assertEquals("getId", MessageField.toAccessorMethodName("id"));
-        assertEquals("getAggregateRootId", MessageField.toAccessorMethodName("aggregate_root_id"));
+        assertEquals("getUserId", toAccessorMethodName("user_id"));
+        assertEquals("getId", toAccessorMethodName("id"));
+        assertEquals("getAggregateRootId", toAccessorMethodName("aggregate_root_id"));
     }
 
     private static class TestMessageField extends MessageField {
@@ -121,7 +124,8 @@ public class MessageFieldShould {
         }
 
         @Override
-        protected RuntimeException createUnavailableFieldException(Message message, String fieldName) {
+        protected RuntimeException createUnavailableFieldException(Message message,
+                                                                   String fieldName) {
             return new IllegalStateException("");
         }
 

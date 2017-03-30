@@ -53,9 +53,9 @@ public class Types {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
 
-        final Type type =  new TypeToken<Map<K, V>>() {}.where(new TypeParameter<K>() {}, keyClass)
-                                                        .where(new TypeParameter<V>() {}, valueClass)
-                                                        .getType();
+        final Type type = new TypeToken<Map<K, V>>() {}.where(new TypeParameter<K>() {}, keyClass)
+                                                       .where(new TypeParameter<V>() {}, valueClass)
+                                                       .getType();
         return type;
     }
 

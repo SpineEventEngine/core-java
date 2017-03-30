@@ -97,7 +97,8 @@ public class AggregatePartCommandTestShould {
     /**
      * The test harness class that tests how {@code TimerCounterPart} handles its command.
      */
-    private static class TimerCountingTest extends AggregatePartCommandTest<Timestamp, TimerCounter> {
+    private static class TimerCountingTest
+                   extends AggregatePartCommandTest<Timestamp, TimerCounter> {
 
         protected TimerCountingTest(CommandFactory commandFactory) {
             super(commandFactory);

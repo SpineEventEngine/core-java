@@ -192,7 +192,8 @@ public class OffsetDateTimes {
     /**
      * Obtains a copy of this offset date and time with the specified number of minutes subtracted.
      */
-    public static OffsetDateTime minusMinutes(OffsetDateTime offsetDateTime, int minutesToSubtract) {
+    public static OffsetDateTime minusMinutes(OffsetDateTime offsetDateTime,
+                                              int minutesToSubtract) {
         checkNotNull(offsetDateTime);
         checkPositive(minutesToSubtract);
 
@@ -202,7 +203,8 @@ public class OffsetDateTimes {
     /**
      * Obtains a copy of this offset date and time with the specified number of seconds subtracted.
      */
-    public static OffsetDateTime minusSeconds(OffsetDateTime offsetDateTime, int secondsToSubtract) {
+    public static OffsetDateTime minusSeconds(OffsetDateTime offsetDateTime,
+                                              int secondsToSubtract) {
         checkNotNull(offsetDateTime);
         checkPositive(secondsToSubtract);
 
