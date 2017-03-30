@@ -34,6 +34,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
@@ -41,7 +42,6 @@ import org.spine3.server.command.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
-import org.spine3.base.Subscribe;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
@@ -101,9 +101,9 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
-                TestBoundedContextFactory.newBoundedContext());
-        repo.initStorage(InMemoryStorageFactory.getInstance());
+        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
+        repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         return repo;
     }
 
@@ -130,10 +130,12 @@ public class ProcessManagerRepositoryShould
         return procmans;
     }
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         eventBus = spy(TestEventBusFactory.create());
-        boundedContext = TestBoundedContextFactory.newBoundedContext(eventBus);
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(eventBus);
 
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
@@ -150,13 +152,15 @@ public class ProcessManagerRepositoryShould
                       });
 
         repository = new TestProcessManagerRepository(boundedContext);
-        repository.initStorage(InMemoryStorageFactory.getInstance());
+        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         boundedContext.close();
+        super.tearDown();
     }
 
     // Tests

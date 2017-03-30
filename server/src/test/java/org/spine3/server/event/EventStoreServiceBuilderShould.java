@@ -34,7 +34,7 @@ import static org.junit.Assert.assertNotNull;
 
 public class EventStoreServiceBuilderShould {
 
-    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance();
+    private final StorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
 
     private EventStore.ServiceBuilder builder;
 

@@ -43,13 +43,13 @@ import java.util.Iterator;
 public interface RepositoryView<I, E extends Entity<I, ?>> {
 
     /**
-     * Loads the entity with the passed ID.
+     * Finds an entity with the passed ID.
      *
      * @param id the ID of the entity to load
      * @return the entity or {@link Optional#absent()} if there's no entity with such ID
      */
     @CheckReturnValue
-    Optional<E> load(I id);
+    Optional<E> find(I id);
 
     /**
      * Returns an iterator over the entities exposed by the view
