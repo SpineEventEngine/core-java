@@ -33,15 +33,14 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A registry of type conversion strategies for the Storage Fields.
  *
+ * @param <C> storage-specific implementation of the {@link ColumnType}
  * @author Dmytro Dashenkov
  */
-public class ColumnTypeRegistry {
+public class ColumnTypeRegistry<C extends ColumnType> {
 
-    private static final ColumnTypeRegistry EMPTY_INSTANCE = newBuilder().build();
+    private final ImmutableMap<Class, C> columnTypeMap;
 
-    private final ImmutableMap<Class, ColumnType> columnTypeMap;
-
-    private ColumnTypeRegistry(Builder builder) {
+    private ColumnTypeRegistry(Builder<C> builder) {
         this.columnTypeMap = ImmutableMap.copyOf(builder.columnTypeMap);
     }
 
@@ -49,8 +48,8 @@ public class ColumnTypeRegistry {
      * @return an empty registry, used for
      * {@linkplain org.spine3.server.storage.memory.InMemoryStorageFactory in-memory storages} etc.
      */
-    public static ColumnTypeRegistry empty() {
-        return EMPTY_INSTANCE;
+    public static <C extends ColumnType> ColumnTypeRegistry<C> empty() {
+        return ColumnTypeRegistry.<C>newBuilder().build();
     }
 
     /**
@@ -62,10 +61,10 @@ public class ColumnTypeRegistry {
      * @param field the {@link Column} to get type conversion strategy for
      * @return the {@link ColumnType} for the given {@link Column}
      */
-    public ColumnType get(Column<?> field) {
+    public C get(Column<?> field) {
         checkNotNull(field);
         final Class javaType = field.getType();
-        final ColumnType type = columnTypeMap.get(javaType);
+        final C type = columnTypeMap.get(javaType);
         checkState(type != null,
                    "Could not find storage type for %s.",
                    javaType.getName());
@@ -73,23 +72,23 @@ public class ColumnTypeRegistry {
     }
 
     @VisibleForTesting
-    Map<Class, ColumnType> getColumnTypeMap() {
+    Map<Class, C> getColumnTypeMap() {
         return Collections.unmodifiableMap(columnTypeMap);
     }
 
-    public static Builder newBuilder() {
-        return new Builder();
+    public static <C extends ColumnType> Builder<C> newBuilder() {
+        return new Builder<>();
     }
 
-    public static Builder newBuilder(ColumnTypeRegistry src) {
-        final Builder builder = new Builder();
+    public static <C extends ColumnType> Builder<C> newBuilder(ColumnTypeRegistry<C> src) {
+        final Builder<C> builder = new Builder<>();
         builder.columnTypeMap.putAll(src.columnTypeMap);
         return builder;
     }
 
-    public static class Builder {
+    public static class Builder<C extends ColumnType> {
 
-        private final Map<Class, ColumnType> columnTypeMap = new HashMap<>();
+        private final Map<Class, C> columnTypeMap = new HashMap<>();
 
         private Builder() {
         }
@@ -99,17 +98,19 @@ public class ColumnTypeRegistry {
          * {@linkplain ColumnType column type}.
          *
          * @param javaType   the Java class to map the value from
-         * @param columnType the the database {@linkplain ColumnType column type} to map value to
+         * @param columnType the the database {@linkplain ColumnType column type} to map value to;
+         *                   must be an instance of {@code <C>}
          * @param <J>        the Java type
          * @return self for call chaining
          */
         public <J> Builder put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
-            columnTypeMap.put(javaType, columnType);
+            @SuppressWarnings("unchecked") final C columnTypeResolved = (C) columnType;
+            columnTypeMap.put(javaType, columnTypeResolved);
             return this;
         }
 
-        public ColumnTypeRegistry build() {
-            return new ColumnTypeRegistry(this);
+        public ColumnTypeRegistry<C> build() {
+            return new ColumnTypeRegistry<>(this);
         }
     }
 }

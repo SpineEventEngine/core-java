@@ -61,14 +61,14 @@ public class ColumnTypeRegistryShould {
         final Collection<Class> classes = Arrays.<Class>asList(String.class,
                                                                Integer.class,
                                                                Date.class);
-        final ColumnTypeRegistry.Builder registryBuilder =
-                ColumnTypeRegistry.<Object, Object>newBuilder();
+        final ColumnTypeRegistry.Builder<?> registryBuilder =
+                ColumnTypeRegistry.<ColumnType>newBuilder();
         for (Class<?> cls : classes) {
             final ColumnType type = new AnyType();
             registryBuilder.put(cls, type);
         }
 
-        final ColumnTypeRegistry registry = registryBuilder.build();
+        final ColumnTypeRegistry<?> registry = registryBuilder.build();
 
         for (Class<?> cls : classes) {
             final ColumnType type = registry.get(mockProperty(cls));

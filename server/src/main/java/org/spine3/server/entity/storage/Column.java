@@ -182,12 +182,12 @@ public class Column<T> {
      */
     public static class MemoizedValue<T> {
 
-        private final Column sourceColumn;
+        private final Column<T> sourceColumn;
 
         @Nullable
         private final T value;
 
-        private MemoizedValue(Column sourceColumn, @Nullable T value) {
+        private MemoizedValue(Column<T> sourceColumn, @Nullable T value) {
             this.sourceColumn = sourceColumn;
             this.value = value;
         }
@@ -204,7 +204,7 @@ public class Column<T> {
         /**
          * @return the {@link Column} representing this Storage Field
          */
-        public Column getSourceColumn() {
+        public Column<T> getSourceColumn() {
             return sourceColumn;
         }
     }
