@@ -38,11 +38,11 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-class CommandValidationFilter implements CommandBusFilter {
+class ValidationFilter implements CommandBusFilter {
 
     private final CommandBus commandBus;
 
-    CommandValidationFilter(CommandBus commandBus) {
+    ValidationFilter(CommandBus commandBus) {
         this.commandBus = commandBus;
     }
 
@@ -81,8 +81,8 @@ class CommandValidationFilter implements CommandBusFilter {
     private boolean isCommandValid(CommandEnvelope envelope,
                                    StreamObserver<Response> responseObserver) {
         final Command command = envelope.getCommand();
-        final List<ConstraintViolation> violations = CommandValidator.getInstance()
-                                                                     .validate(command);
+        final List<ConstraintViolation> violations = Validator.getInstance()
+                                                              .validate(command);
         if (!violations.isEmpty()) {
             final CommandException invalidCommand =
                     InvalidCommandException.onConstraintViolations(command, violations);

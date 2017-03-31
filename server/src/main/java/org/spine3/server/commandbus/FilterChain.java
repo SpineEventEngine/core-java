@@ -93,7 +93,7 @@ final class FilterChain implements CommandBusFilter {
             checkState(commandScheduler != null, "CommandScheduler must be set");
 
             filters.add(0, new DeadCommandFilter(commandBus));
-            filters.add(1, new CommandValidationFilter(commandBus));
+            filters.add(1, new ValidationFilter(commandBus));
             filters.add(2, commandScheduler);
 
             final FilterChain result = new FilterChain(ImmutableList.copyOf(filters));

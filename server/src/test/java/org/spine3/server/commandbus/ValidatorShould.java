@@ -36,9 +36,9 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
-public class CommandValidatorShould {
+public class ValidatorShould {
 
-    private final CommandValidator validator = CommandValidator.getInstance();
+    private final Validator validator = Validator.getInstance();
 
     @Test
     public void validate_command_and_return_nothing_if_it_is_valid() {
@@ -73,7 +73,7 @@ public class CommandValidatorShould {
     public void check_command_and_do_not_throw_exception_if_it_is_valid() {
         final Command cmd = Given.Command.createProject();
 
-        CommandValidator.checkCommand(cmd);
+        Validator.checkCommand(cmd);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -81,7 +81,7 @@ public class CommandValidatorShould {
         final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(),
                                                    createCommandContext());
 
-        CommandValidator.checkCommand(cmd);
+        Validator.checkCommand(cmd);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -89,6 +89,6 @@ public class CommandValidatorShould {
         final Command cmd = Commands.createCommand(createProjectMessage(),
                                                    CommandContext.getDefaultInstance());
 
-        CommandValidator.checkCommand(cmd);
+        Validator.checkCommand(cmd);
     }
 }

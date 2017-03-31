@@ -44,16 +44,16 @@ import static org.spine3.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-class CommandValidator {
+class Validator {
 
     private static final String COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK =
             "Command target entity ID cannot be empty or blank.";
 
-    private CommandValidator() {
+    private Validator() {
     }
 
     /** Returns a validator instance. */
-    public static CommandValidator getInstance() {
+    static Validator getInstance() {
         return Singleton.INSTANCE.value;
     }
 
@@ -64,7 +64,7 @@ class CommandValidator {
      * @param command a command to validate
      * @return constraint violations found
      */
-    public List<ConstraintViolation> validate(Command command) {
+    List<ConstraintViolation> validate(Command command) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         final Message message = Commands.getMessage(command);
         final CommandContext context = command.getContext();
@@ -117,7 +117,7 @@ class CommandValidator {
      * @param command a command to check
      * @throws IllegalArgumentException if any command field is invalid
      */
-    public static void checkCommand(Command command) {
+    static void checkCommand(Command command) {
         checkArgument(command.hasMessage(), "Command message must be set.");
         checkArgument(command.hasContext(), "Command context must be set.");
         final CommandContext context = command.getContext();
@@ -134,6 +134,6 @@ class CommandValidator {
     private enum Singleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final CommandValidator value = new CommandValidator();
+        private final Validator value = new Validator();
     }
 }
