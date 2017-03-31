@@ -22,6 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.primitives.Primitives;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -71,6 +72,7 @@ public class ColumnTypeRegistry<C extends ColumnType> {
         checkNotNull(field);
 
         Class javaType = field.getType();
+        javaType = Primitives.wrap(javaType);
         C type = null;
 
         while (type == null && javaType != null) {

@@ -30,6 +30,7 @@ import java.util.Collection;
 import java.util.Date;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
@@ -88,6 +89,20 @@ public class ColumnTypeRegistryShould {
         assertThat(type, instanceOf(GeneratedMessageType.class));
     }
 
+    @Test
+    public void map_primitives_autoboxed() {
+        final ColumnTypeRegistry<?> registry =
+                ColumnTypeRegistry.newBuilder()
+                                  .put(Integer.class, new IntegerType())
+                                  .build();
+        final ColumnType integerColumnType = registry.get(mockProperty(Integer.class));
+        assertNotNull(integerColumnType);
+        final ColumnType intColumnType = registry.get(mockProperty(int.class));
+        assertNotNull(intColumnType);
+
+        assertEquals(integerColumnType, intColumnType);
+    }
+
     private static <T> Column<T> mockProperty(Class<T> cls) {
         @SuppressWarnings("unchecked")
         final Column<T> column = (Column<T>) mock(Column.class);
@@ -127,6 +142,21 @@ public class ColumnTypeRegistryShould {
 
         @Override
         public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
+            storageRecord.append(value);
+        }
+    }
+
+    private static class IntegerType
+            implements ColumnType<Integer, String, StringBuilder, String> {
+
+        @Override
+        public String convertColumnValue(Integer fieldValue) {
+            return String.valueOf(fieldValue);
+        }
+
+        @Override
+        public void setColumnValue(StringBuilder storageRecord, String value,
+                                   String columnIdentifier) {
             storageRecord.append(value);
         }
     }
