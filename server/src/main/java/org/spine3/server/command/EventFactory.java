@@ -72,41 +72,6 @@ public class EventFactory {
     }
 
     /**
-     * Creates {@code Event} instance for import or integration operations.
-     *
-     * @param event      the event message
-     * @param producerId the ID of an entity which is generating the event packed into {@code Any}
-     * @return event with data from an external source
-     */
-    public static Event createImportEvent(Message event, Any producerId) {
-        checkNotNull(event);
-        checkNotNull(producerId);
-        final EventContext context = createImportEventContext(producerId);
-        final Event result = createEvent(event, context);
-        return result;
-    }
-
-    /**
-     * Creates {@code EventContext} instance for an event generated during data import.
-     *
-     * <p>The method does not set {@code CommandContext} because there was no command.
-     *
-     * <p>The {@code version} attribute is not populated either.
-     * It is the responsibility of the target aggregate to populate the missing fields.
-     *
-     * @param producerId the ID of the producer which generates the event packed into {@code Any}
-     * @return new instance of {@code EventContext} for the imported event
-     */
-    public static EventContext createImportEventContext(Any producerId) {
-        checkNotNull(producerId);
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(generateId())
-                                                         .setTimestamp(getCurrentTime())
-                                                         .setProducerId(producerId);
-        return builder.build();
-    }
-
-    /**
      * Creates new {@code CommandContext} with passed parameters.
      *
      * @param producerId the ID of an object which produced the event

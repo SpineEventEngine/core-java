@@ -21,51 +21,39 @@
 package org.spine3.server.command;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.command.EventFactory.createEvent;
-import static org.spine3.test.EventTests.newEventContext;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.newUuidValue;
+import static org.spine3.validate.Validate.isNotDefault;
 
-public class EventFactoryShould {
+public class ImportEventFactoryShould {
 
-    private EventContext context;
-    private StringValue stringValue;
+    private final Any producerId = AnyPacker.pack(newStringValue(getClass().getSimpleName()));
 
-    @Before
-    public void setUp() {
-        stringValue = newUuidValue();
-        context = newEventContext();
+    @Test
+    public void create_import_event() {
+        final StringValue stringValue = newUuidValue();
+        final Event event = ImportEventFactory.createEvent(stringValue, producerId);
+
+        assertEquals(stringValue, unpack(event.getMessage()));
+        assertEquals(unpack(producerId), unpack(event.getContext()
+                                                     .getProducerId()));
     }
 
     @Test
-    public void create_event() {
-        createEventTest(stringValue);
-        createEventTest(Timestamps2.getCurrentTime());
-    }
+    public void create_import_event_context() {
+        final EventContext context = ImportEventFactory.createEventContext(producerId);
 
-    private void createEventTest(Message msg) {
-        final Event event = createEvent(msg, context);
-
-        assertEquals(msg, unpack(event.getMessage()));
-        assertEquals(context, event.getContext());
-    }
-
-    @Test
-    public void create_event_with_Any() {
-        final Any msg = AnyPacker.pack(stringValue);
-        final Event event = createEvent(msg, context);
-
-        assertEquals(msg, event.getMessage());
-        assertEquals(context, event.getContext());
+        assertEquals(unpack(producerId), unpack(context.getProducerId()));
+        assertTrue(isNotDefault(context.getEventId()));
+        assertTrue(isNotDefault(context.getTimestamp()));
     }
 }
