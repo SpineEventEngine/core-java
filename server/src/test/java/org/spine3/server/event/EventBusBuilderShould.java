@@ -39,14 +39,14 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class EventBusBuilderShould {
 
     private StorageFactory storageFactory;
 
     @Before
     public void setUp() {
-        this.storageFactory = InMemoryStorageFactory.getInstance();
+        this.storageFactory = InMemoryStorageFactory.getInstance(true);
     }
 
     @Test(expected = NullPointerException.class)

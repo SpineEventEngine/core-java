@@ -18,37 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.command;
+package org.spine3.server.tenant;
 
-import org.spine3.base.CommandId;
-import org.spine3.base.FailureThrowable;
+import com.google.protobuf.Timestamp;
+import org.junit.Test;
+import org.spine3.protobuf.Timestamps2;
+
+import static org.spine3.test.Tests.newTenantUuid;
 
 /**
- * The service for updating a status of a command.
- *
  * @author Alexander Yevsyukov
  */
-public class CommandStatusService {
+public class TenantAwareFunction0Should {
 
-    private final CommandStore commandStore;
+    @Test(expected = IllegalStateException.class)
+    public void require_current_tenant_set() {
+        final TenantAwareFunction0<Timestamp> whichTime = new TenantAwareFunction0<Timestamp>() {
+            @Override
+            public Timestamp apply() {
+                return Timestamps2.getCurrentTime();
+            }
+        };
 
-    CommandStatusService(CommandStore commandStore) {
-        this.commandStore = commandStore;
-    }
+        // This should pass.
+        new TenantAwareOperation(newTenantUuid()) {
+            @Override
+            public void run() {
+                whichTime.execute();
+            }
+        }.execute();
 
-    public void setOk(CommandId commandId) {
-        commandStore.setCommandStatusOk(commandId);
-    }
-
-    public void setToError(CommandId commandId, Exception exception) {
-        commandStore.updateStatus(commandId, exception);
-    }
-
-    public void setToFailure(CommandId commandId, FailureThrowable failure) {
-        commandStore.updateStatus(commandId, failure.toFailure());
-    }
-
-    public void setToError(CommandId commandId, org.spine3.base.Error error) {
-        commandStore.updateStatus(commandId, error);
+        // This should fail.
+        whichTime.execute();
     }
 }

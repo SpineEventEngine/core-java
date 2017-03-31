@@ -288,7 +288,8 @@ public abstract class AggregateStorageShould
     public void rewrite_record_if_write_by_the_same_id() {
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
+    @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
+    // OK as we write right before we get.
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
         final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
 

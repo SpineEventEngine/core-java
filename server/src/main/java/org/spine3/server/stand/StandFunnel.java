@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Optional;
 import org.spine3.annotations.Internal;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
@@ -56,8 +57,10 @@ public class StandFunnel {
     private final StandUpdateDelivery delivery;
 
     private StandFunnel(Builder builder) {
-        this.delivery = builder.getDelivery();
-        this.delivery.setStand(builder.getStand());
+        this.delivery = builder.getDelivery()
+                               .get();
+        this.delivery.setStand(builder.getStand()
+                                      .get());
     }
 
     /**
@@ -94,8 +97,8 @@ public class StandFunnel {
          */
         private StandUpdateDelivery delivery;
 
-        public Stand getStand() {
-            return stand;
+        public Optional<Stand> getStand() {
+            return Optional.fromNullable(stand);
         }
 
         /**
@@ -111,8 +114,8 @@ public class StandFunnel {
             return this;
         }
 
-        public StandUpdateDelivery getDelivery() {
-            return delivery;
+        public Optional<StandUpdateDelivery> getDelivery() {
+            return Optional.fromNullable(delivery);
         }
 
         /**

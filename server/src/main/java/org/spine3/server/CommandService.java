@@ -54,8 +54,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     }
 
     /**
-     * Constructs new instance using the map from a {@code CommandClass}
-     * to a {@code BoundedContext} instance which handles the command.
+     * Constructs new instance using the map from a {@code CommandClass} to
+     * a {@code BoundedContext} instance which handles the command.
      */
     protected CommandService(Map<CommandClass, BoundedContext> map) {
         super();
@@ -125,8 +125,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         }
 
         /**
-         * Creates a map from {@code CommandClass}es to {@code BoundedContext}s
-         * that handle such commands.
+         * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that
+         * handle such commands.
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
             final ImmutableMap.Builder<CommandClass, BoundedContext> builder =
@@ -141,13 +141,12 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * Associates {@code CommandClass}es with the instance of {@code BoundedContext}
          * that handles such commands.
          */
-        private static void putIntoMap(
-                BoundedContext boundedContext,
-                ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder) {
+        private static void putIntoMap(BoundedContext boundedContext,
+                                       ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
             final CommandBus commandBus = boundedContext.getCommandBus();
             final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
-                mapBuilder.put(commandClass, boundedContext);
+                builder.put(commandClass, boundedContext);
             }
         }
     }

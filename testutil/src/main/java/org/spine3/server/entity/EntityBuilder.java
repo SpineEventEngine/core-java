@@ -72,6 +72,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
         // Have the constructor for finding usages easier.
     }
 
+    @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
     @Override
     public EntityBuilder<E, I, S> setResultClass(Class<E> entityClass) {
         super.setResultClass(entityClass);

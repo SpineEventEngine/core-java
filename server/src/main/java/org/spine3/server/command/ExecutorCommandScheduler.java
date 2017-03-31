@@ -45,7 +45,11 @@ public class ExecutorCommandScheduler extends CommandScheduler {
     private static final int MILLIS_IN_SECOND = 1_000;
 
     private final ScheduledExecutorService executorService =
-                                           Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
+            Executors.newScheduledThreadPool(MIN_THREAD_POOL_SIZE);
+
+    public ExecutorCommandScheduler() {
+        super();
+    }
 
     @Override
     protected void doSchedule(final Command command) {

@@ -114,10 +114,11 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
         return transformed;
     }
 
-    private void checkNotClosed() throws IllegalStateException {
-        if (!isOpen()) {
-            throw new IllegalStateException("Command storage is closed.");
-        }
+    ProcessingStatus getStatus(CommandId commandId) {
+        checkNotClosed();
+        final CommandEntity entity = loadEntity(commandId);
+        return entity.getState()
+                     .getStatus();
     }
 
     /**
@@ -157,7 +158,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
     }
 
     private CommandEntity loadEntity(CommandId commandId) {
-        final Optional<CommandEntity> loaded = load(commandId);
+        final Optional<CommandEntity> loaded = find(commandId);
         if (!loaded.isPresent()) {
             final String idStr = Identifiers.idToString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);

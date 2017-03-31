@@ -38,8 +38,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.server.storage.StorageFactorySwitch.init;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov
@@ -48,6 +46,7 @@ public class StorageFactorySwitchShould {
 
     // Environment protection START
     @SuppressWarnings("StaticVariableMayNotBeInitialized")
+        // OK as we use the field after the initialization in storeEnvironment().
     private static Environment storedEnvironment;
 
     @BeforeClass
@@ -56,24 +55,43 @@ public class StorageFactorySwitchShould {
     }
 
     @SuppressWarnings("StaticVariableUsedBeforeInitialization")
+        // OK as we invoke after the initialization in storeEnvironment().
     @AfterClass
     public static void restoreEnvironment() {
-        Environment.getInstance().restoreFrom(storedEnvironment);
+        Environment.getInstance()
+                   .restoreFrom(storedEnvironment);
     }
     // Environment protection END
 
     private StorageFactorySwitch storageFactorySwitch;
 
-    private final Supplier<StorageFactory> inMemorySupplier = new Supplier<StorageFactory>() {
+    private final boolean multitenant;
+
+    protected StorageFactorySwitchShould(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    public StorageFactorySwitchShould() {
+        this(false);
+    }
+
+    private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.getInstance();
+            return InMemoryStorageFactory.getInstance(multitenant);
+        }
+    };
+
+    private final Supplier<StorageFactory> productionSupplier = new Supplier<StorageFactory>() {
+        @Override
+        public StorageFactory get() {
+            return InMemoryStorageFactory.getInstance(multitenant);
         }
     };
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.getInstance();
+        storageFactorySwitch = StorageFactorySwitch.getInstance(multitenant);
     }
 
     @After
@@ -85,13 +103,8 @@ public class StorageFactorySwitchShould {
     /**
      * Clears the `storageFactorySwitch` instance by nullifying fields.
      */
-    private void clearSwitch() throws NoSuchFieldException, IllegalAccessException {
+    private void clearSwitch() {
         storageFactorySwitch.reset();
-    }
-
-    @Test
-    public void have_private_parameterless_constructor() {
-        assertHasPrivateParameterlessCtor(StorageFactorySwitch.class);
     }
 
     @Test
@@ -113,7 +126,7 @@ public class StorageFactorySwitchShould {
 
         final StorageFactory custom = mock(StorageFactory.class);
 
-        init(inMemorySupplier, new Supplier<StorageFactory>() {
+        storageFactorySwitch.init(testsSupplier, new Supplier<StorageFactory>() {
             @Override
             public StorageFactory get() {
                 return custom;
@@ -122,7 +135,8 @@ public class StorageFactorySwitchShould {
 
         // These calls ensure that we're under the testing mode and we get the supplier for tests.
         assertTrue(Environment.getInstance().isTests());
-        assertTrue(storageFactorySwitch.testsSupplier().isPresent());
+        assertTrue(storageFactorySwitch.testsSupplier()
+                                       .isPresent());
 
         // Get the StorageFactory from the switch.
         final StorageFactory obtained = storageFactorySwitch.get();
@@ -139,17 +153,19 @@ public class StorageFactorySwitchShould {
         // Pretend that we are not under tests for the `Environment`.
         Environment.getInstance().setToProduction();
 
-        assertFalse(storageFactorySwitch.productionSupplier().isPresent());
+        assertFalse(storageFactorySwitch.productionSupplier()
+                                        .isPresent());
         storageFactorySwitch.get();
     }
 
     @Test
     public void cache_instance_of_StorageFactory_in_testing() {
-        final Supplier<StorageFactory> testingSupplier = spy(inMemorySupplier);
+        final Supplier<StorageFactory> testingSupplier = spy(testsSupplier);
 
-        init(inMemorySupplier, testingSupplier);
+        storageFactorySwitch.init(productionSupplier, testingSupplier);
 
-        Environment.getInstance().setToTests();
+        Environment.getInstance()
+                   .setToTests();
 
         storageFactorySwitch.get();
         storageFactorySwitch.get();
@@ -159,21 +175,22 @@ public class StorageFactorySwitchShould {
 
     @Test
     public void cache_instance_of_StorageFactory_in_production() {
-        final Supplier<StorageFactory> productionSupplier = spy(inMemorySupplier);
+        final Supplier<StorageFactory> prodSupplier = spy(productionSupplier);
 
-        init(productionSupplier, inMemorySupplier);
+        storageFactorySwitch.init(prodSupplier, testsSupplier);
 
-        Environment.getInstance().setToProduction();
+        Environment.getInstance()
+                   .setToProduction();
 
         storageFactorySwitch.get();
         storageFactorySwitch.get();
 
-        verify(productionSupplier, times(1)).get();
+        verify(prodSupplier, times(1)).get();
     }
 
     @Test
     public void return_itself_on_init() {
-        final StorageFactorySwitch result = init(inMemorySupplier, inMemorySupplier);
+        final StorageFactorySwitch result = storageFactorySwitch.init(testsSupplier, testsSupplier);
         assertSame(storageFactorySwitch, result);
     }
 }

@@ -76,7 +76,7 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         recordStorage.close();
         super.close();
     }

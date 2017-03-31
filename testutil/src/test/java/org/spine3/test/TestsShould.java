@@ -23,7 +23,6 @@ package org.spine3.test;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Response;
-import org.spine3.io.StreamObservers;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
