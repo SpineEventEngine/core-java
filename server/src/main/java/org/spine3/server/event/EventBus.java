@@ -190,8 +190,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
 
     @Override
     protected Event enrich(Event event) {
-        if (enricher == null ||
-            !enricher.canBeEnriched(event)) {
+        if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
         final Event enriched = enricher.enrich(event);
@@ -470,7 +469,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
             }
             /* The assert below prevents false warning for possible `null` value passed
                to EventStore.Builder.setStreamExecutor(). */
-            assert(eventStoreStreamExecutor != null);
+            assert (eventStoreStreamExecutor != null);
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
