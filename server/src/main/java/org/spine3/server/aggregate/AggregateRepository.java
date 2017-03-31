@@ -29,7 +29,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.Repository;

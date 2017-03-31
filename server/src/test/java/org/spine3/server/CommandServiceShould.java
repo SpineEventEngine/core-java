@@ -30,8 +30,8 @@ import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.UnsupportedCommandException;
+import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.commandbus.UnsupportedCommandException;
 import org.spine3.server.transport.GrpcContainer;
 import org.spine3.testdata.TestCommandBusFactory;
 

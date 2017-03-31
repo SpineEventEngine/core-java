@@ -28,7 +28,7 @@ import org.spine3.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link org.spine3.server.command.CommandStore CommandStore},
+ * {@link org.spine3.server.commandbus.CommandStore CommandStore},
  * {@link org.spine3.server.event.EventStore EventStore},
  * and {@link org.spine3.server.stand.Stand Stand}.
  *
