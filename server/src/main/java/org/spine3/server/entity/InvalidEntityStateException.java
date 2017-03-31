@@ -21,12 +21,13 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import com.google.protobuf.Value;
 import org.spine3.base.Error;
-import org.spine3.base.ValidationError;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolations;
+import org.spine3.validate.ConstraintViolations.ExceptionFactory;
 
-import static java.lang.String.format;
+import java.util.Map;
+
 import static org.spine3.server.entity.EntityStateValidationError.INVALID_ENTITY_STATE;
 
 /**
@@ -40,7 +41,7 @@ public class InvalidEntityStateException extends EntityStateException {
     private static final long serialVersionUID = 0L;
 
     private static final String MSG_VALIDATION_ERROR =
-            "Entity state does match the validation constraints. ";
+            "Entity state does match the validation constraints.";
 
     private InvalidEntityStateException(String messageText, Message entityState, Error error) {
         super(messageText, entityState, error);
@@ -55,32 +56,53 @@ public class InvalidEntityStateException extends EntityStateException {
      */
     public static InvalidEntityStateException onConstraintViolations(
             Message entityState, Iterable<ConstraintViolation> violations) {
-        final String errorDetails = MSG_VALIDATION_ERROR + ConstraintViolations.toText(violations);
-        final Error error = invalidEventMessageError(entityState, violations, errorDetails);
-        final String text = format(
-                "%sEntity state class: %s. See Error.getValidationError() for details.",
-                MSG_VALIDATION_ERROR, EntityStateClass.of(entityState));
-        return new InvalidEntityStateException(text, entityState, error);
+        final ConstraintViolationExceptionFactory helper = new ConstraintViolationExceptionFactory(
+                entityState, violations);
+        return helper.newException();
     }
 
     /**
-     * Creates an instance of {@code Error} for an entity state,
-     * which has fields that violate validation constraint(s).
+     * A helper utility aimed to create an {@code InvalidEntityStateException} to report the
+     * entity state which field values violate validation constraint(s).
      */
-    private static Error invalidEventMessageError(Message entityState,
-                                                  Iterable<ConstraintViolation> violations,
-                                                  String errorText) {
-        final ValidationError validationError = ValidationError.newBuilder()
-                                                               .addAllConstraintViolation(
-                                                                       violations)
-                                                               .build();
-        final Error.Builder error = Error.newBuilder()
-                                         .setType(EntityStateValidationError.getDescriptor()
-                                                                            .getFullName())
-                                         .setCode(INVALID_ENTITY_STATE.getNumber())
-                                         .setValidationError(validationError)
-                                         .setMessage(errorText)
-                                         .putAllAttributes(entityStateTypeAttribute(entityState));
-        return error.build();
+    private static class ConstraintViolationExceptionFactory extends ExceptionFactory<
+            InvalidEntityStateException,
+            Message,
+            EntityStateClass,
+            EntityStateValidationError> {
+
+        private final EntityStateClass entityStateClass;
+
+        private ConstraintViolationExceptionFactory(Message entityState,
+                                                    Iterable<ConstraintViolation> violations) {
+            super(entityState, violations);
+            this.entityStateClass = EntityStateClass.of(entityState);
+        }
+
+        @Override
+        protected EntityStateClass getMessageClass() {
+            return entityStateClass;
+        }
+
+        @Override
+        protected EntityStateValidationError getErrorCode() {
+            return INVALID_ENTITY_STATE;
+        }
+
+        @Override
+        protected String getErrorText() {
+            return MSG_VALIDATION_ERROR;
+        }
+
+        @Override
+        protected Map<String, Value> getMessageTypeAttribute(Message message) {
+            return entityStateTypeAttribute(message);
+        }
+
+        @Override
+        protected InvalidEntityStateException createException(
+                String exceptionMsg, Message entityState, Error error) {
+            return new InvalidEntityStateException(exceptionMsg, entityState, error);
+        }
     }
 }
