@@ -68,27 +68,4 @@ public class ValidatorShould {
 
         assertEquals(2, violations.size());
     }
-
-    @Test
-    public void check_command_and_do_not_throw_exception_if_it_is_valid() {
-        final Command cmd = Given.Command.createProject();
-
-        Validator.checkCommand(cmd);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void check_command_and_throw_exception_if_message_is_NOT_valid() {
-        final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(),
-                                                   createCommandContext());
-
-        Validator.checkCommand(cmd);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void check_command_and_throw_exception_if_context_is_NOT_valid() {
-        final Command cmd = Commands.createCommand(createProjectMessage(),
-                                                   CommandContext.getDefaultInstance());
-
-        Validator.checkCommand(cmd);
-    }
 }

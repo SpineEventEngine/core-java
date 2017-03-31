@@ -23,7 +23,6 @@ package org.spine3.server.commandbus;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -33,10 +32,8 @@ import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.validate.Validate.checkValid;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -74,15 +71,18 @@ class Validator {
         return result.build();
     }
 
-    private static void validateMessage(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private static void validateMessage(Message message,
+                                        ImmutableList.Builder<ConstraintViolation> result) {
         if (isDefault(message)) {
             result.add(newConstraintViolation("Non-default command message must be set."));
         }
-        final List<ConstraintViolation> messageViolations = MessageValidator.newInstance().validate(message);
+        final List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
+                                                                            .validate(message);
         result.addAll(messageViolations);
     }
 
-    private static void validateContext(CommandContext context, ImmutableList.Builder<ConstraintViolation> result) {
+    private static void validateContext(CommandContext context,
+                                        ImmutableList.Builder<ConstraintViolation> result) {
         if (isDefault(context)) {
             result.add(newConstraintViolation("Non-default command context must be set."));
         }
@@ -92,12 +92,15 @@ class Validator {
         }
     }
 
-    private static void validateTargetId(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private static void validateTargetId(Message message,
+                                         ImmutableList.Builder<ConstraintViolation> result) {
         final Optional targetId = GetTargetIdFromCommand.asOptional(message);
         if (targetId.isPresent()) {
             final String targetIdString = idToString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {
-                result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
+                final ConstraintViolation violation = newConstraintViolation(
+                        COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK);
+                result.add(violation);
             }
         }
     }
@@ -107,28 +110,6 @@ class Validator {
                 .setMsgFormat(msgFormat)
                 .build();
         return violation;
-    }
-
-    /**
-     * Checks required fields of a command.
-     *
-     * <p>Does not validate a command message, only checks that it is set.
-     *
-     * @param command a command to check
-     * @throws IllegalArgumentException if any command field is invalid
-     */
-    static void checkCommand(Command command) {
-        checkArgument(command.hasMessage(), "Command message must be set.");
-        checkArgument(command.hasContext(), "Command context must be set.");
-        final CommandContext context = command.getContext();
-        checkValid(context.getCommandId());
-        Timestamps.checkValid(context.getTimestamp());
-        final Message commandMessage = Commands.getMessage(command);
-        final Optional targetId = GetTargetIdFromCommand.asOptional(commandMessage);
-        if (targetId.isPresent()) { // else - consider the command is not for an entity
-            final String targetIdString = idToString(targetId.get());
-            checkArgument(!targetIdString.equals(EMPTY_ID), "Target ID must not be an empty string.");
-        }
     }
 
     private enum Singleton {
