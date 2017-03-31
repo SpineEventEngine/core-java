@@ -44,14 +44,14 @@ import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the Storage fields {@linkplain Map}.
+ * A utility for generating the Storage Fields {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean</a>
  *  getter spec are considered Storage Fields.
  *
- * <p>When passing an instance of already known {@link Entity} type, the methods are retrieved from
- * a cache and are not updated.
+ * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
+ * from a cache and are not updated.
  *
  * <p>There are several excluded methods, which are never taken into account and are
  * <b>not</b> considered Storage Fields:
@@ -103,7 +103,7 @@ public class StorageFields {
     }
 
     /**
-     * @return an {@link Collections#emptyMap()} with the type of the Storage Fields map
+     * @return an {@link Collections#emptyMap() empty} Storage Fields map
      */
     @Internal
     public static Map<String, Column.MemoizedValue<?>> empty() {
@@ -134,7 +134,6 @@ public class StorageFields {
                            entityType.getCanonicalName()));
             return Collections.emptyMap();
         }
-
         ensureRegistered(entityType);
 
         final Map<String, Column.MemoizedValue<?>> fields = getStorageFields(entityType, entity);

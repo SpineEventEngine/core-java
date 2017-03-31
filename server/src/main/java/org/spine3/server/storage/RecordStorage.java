@@ -245,6 +245,14 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
 
+    /**
+     * Writes a record and the associated Storage Fields into the storage.
+     *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
+     * @param id     an ID of the record
+     * @param record a record to store
+     */
     protected abstract void writeRecord(I id, EntityRecordWithStorageFields record);
 
     /**

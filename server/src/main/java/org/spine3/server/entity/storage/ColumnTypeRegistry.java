@@ -61,7 +61,7 @@ public class ColumnTypeRegistry<C extends ColumnType> {
      *
      * <p>If the {@link ColumnType} was not found by the {@code class} of the {@linkplain Column},
      * its superclasses are checked one by one until a {@link ColumnType} is found or until
-     * the look up reaches the class representing {@link Object}
+     * the look up reaches the class representing {@link Object}.
      *
      * <p>If no {@link ColumnType} is found, an {@link IllegalStateException} is thrown.
      *

@@ -73,15 +73,15 @@ public class Column<T> {
 
     private static String nameFromGetterName(String getterName) {
         final Matcher prefixMatcher = GETTER_PREFIX_PATTERN.matcher(getterName);
-        String resullt;
+        String result;
         if (prefixMatcher.find()) {
-            resullt = prefixMatcher.replaceFirst("");
+            result = prefixMatcher.replaceFirst("");
         } else {
             throw new IllegalArgumentException(
                     format("Method %s is not a property getter", getterName));
         }
-        resullt = Character.toLowerCase(resullt.charAt(0)) + resullt.substring(1);
-        return resullt;
+        result = Character.toLowerCase(result.charAt(0)) + result.substring(1);
+        return result;
     }
 
     /**
@@ -133,10 +133,10 @@ public class Column<T> {
      * Retrieves the Storage Field value from the given {@link Entity}.
      *
      * <p>The value is wrapped into a special container, which bears information about the Field's
-     * metadata
+     * metadata.
      *
      * @param source the {@link Entity} to get the Fields from
-     * @return the value of the Storage Field represented y this instance of {@code Column} wrapped
+     * @return the value of the Storage Field represented by this instance of {@code Column} wrapped
      * into {@link MemoizedValue}
      * @see MemoizedValue
      */

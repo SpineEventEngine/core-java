@@ -71,8 +71,9 @@ public final class EntityRecordWithStorageFields {
     /**
      * Creates a new instance of the {@code EntityRecordWithStorageFields}.
      */
-    public static EntityRecordWithStorageFields newInstance(EntityRecord record,
-                                                     Map<String, Column.MemoizedValue<?>> storageFields) {
+    public static EntityRecordWithStorageFields newInstance(
+            EntityRecord record,
+            Map<String, Column.MemoizedValue<?>> storageFields) {
         return new EntityRecordWithStorageFields(record, storageFields);
     }
 
@@ -101,7 +102,7 @@ public final class EntityRecordWithStorageFields {
     }
 
     /**
-     * Determines whether there are any Storage Fields associated with this record.
+     * Determines whether or not there are any Storage Fields associated with this record.
      *
      * <p>If returns {@code false}, the {@linkplain StorageFields Storage Fields} are not considered
      * by the storage.
