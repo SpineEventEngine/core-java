@@ -49,14 +49,14 @@ import static org.spine3.base.CommandStatus.RECEIVED;
  *
  * @author Alexander Yevsyukov
  */
-class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEntity, CommandRecord> {
+class Storage extends DefaultRecordBasedRepository<CommandId, Entity, CommandRecord> {
 
     /** The function to obtain a {@code CommandRecord} from {@code CommandEntity}. */
-    private static final Function<CommandEntity, CommandRecord> GET_RECORD =
-            new Function<CommandEntity, CommandRecord>() {
+    private static final Function<Entity, CommandRecord> GET_RECORD =
+            new Function<Entity, CommandRecord>() {
         @Nullable
         @Override
-        public CommandRecord apply(@Nullable CommandEntity input) {
+        public CommandRecord apply(@Nullable Entity input) {
             if (input == null) {
                 return null;
             }
@@ -85,8 +85,8 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      */
     void store(Command command, CommandStatus status) {
         checkNotClosed();
-        final CommandEntity commandEntity = CommandEntity.createForStatus(command, status);
-        store(commandEntity);
+        final Entity entity = Entity.createForStatus(command, status);
+        store(entity);
     }
 
     /**
@@ -98,8 +98,8 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      */
     void store(Command command, Error error) {
         checkNotClosed();
-        final CommandEntity commandEntity = CommandEntity.createForError(command, error);
-        store(commandEntity);
+        final Entity entity = Entity.createForError(command, error);
+        store(entity);
     }
 
     /**
@@ -111,14 +111,14 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      */
     Iterator<CommandRecord> iterator(CommandStatus status) {
         checkNotClosed();
-        final Iterator<CommandEntity> filteredEntities = iterator(new MatchesStatus(status));
+        final Iterator<Entity> filteredEntities = iterator(new MatchesStatus(status));
         final Iterator<CommandRecord> transformed = transform(filteredEntities, getRecordFunc());
         return transformed;
     }
 
     ProcessingStatus getStatus(CommandId commandId) {
         checkNotClosed();
-        final CommandEntity entity = loadEntity(commandId);
+        final Entity entity = loadEntity(commandId);
         return entity.getState()
                      .getStatus();
     }
@@ -128,7 +128,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      */
     void setOkStatus(CommandId commandId) {
         checkNotClosed();
-        final CommandEntity entity = loadEntity(commandId);
+        final Entity entity = loadEntity(commandId);
         entity.setOkStatus();
         store(entity);
     }
@@ -141,7 +141,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      */
     void updateStatus(CommandId commandId, Error error) {
         checkNotClosed();
-        final CommandEntity entity = loadEntity(commandId);
+        final Entity entity = loadEntity(commandId);
         entity.setToError(error);
         store(entity);
     }
@@ -154,13 +154,13 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
      */
     void updateStatus(CommandId commandId, Failure failure) {
         checkNotClosed();
-        final CommandEntity entity = loadEntity(commandId);
+        final Entity entity = loadEntity(commandId);
         entity.setToFailure(failure);
         store(entity);
     }
 
-    private CommandEntity loadEntity(CommandId commandId) {
-        final Optional<CommandEntity> loaded = find(commandId);
+    private Entity loadEntity(CommandId commandId) {
+        final Optional<Entity> loaded = find(commandId);
         if (!loaded.isPresent()) {
             final String idStr = Identifiers.idToString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
@@ -172,7 +172,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
     /**
      * The predicate that filters entities by their processing status code.
      */
-    private static class MatchesStatus implements Predicate<CommandEntity> {
+    private static class MatchesStatus implements Predicate<Entity> {
 
         private final CommandStatus commandStatus;
 
@@ -181,7 +181,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
         }
 
         @Override
-        public boolean apply(@Nullable CommandEntity input) {
+        public boolean apply(@Nullable Entity input) {
             if (input == null) {
                 return false;
             }
@@ -197,7 +197,7 @@ class CommandStorage extends DefaultRecordBasedRepository<CommandId, CommandEnti
     }
 
     @VisibleForTesting
-    static Function<CommandEntity, CommandRecord> getRecordFunc() {
+    static Function<Entity, CommandRecord> getRecordFunc() {
         return GET_RECORD;
     }
 }

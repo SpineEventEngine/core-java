@@ -27,18 +27,18 @@ import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.Given;
 
 import static org.spine3.base.CommandStatus.RECEIVED;
-import static org.spine3.server.commandstore.CommandRecords.newRecordBuilder;
 import static org.spine3.server.commandstore.CommandTestUtil.checkRecord;
+import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsykov
  */
-public class CommandRecordsShould {
+public class RecordsShould {
 
     @Test
     public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(CommandRecords.class);
+        assertHasPrivateParameterlessCtor(Records.class);
     }
 
     /*

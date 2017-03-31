@@ -38,50 +38,50 @@ import static org.spine3.base.CommandStatus.OK;
  *
  * @author Alexander Yevyukov
  */
-class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
+class Entity extends AbstractEntity<CommandId, CommandRecord> {
 
     /**
      * {@inheritDoc}
      */
-    private CommandEntity(CommandId id) {
+    private Entity(CommandId id) {
         super(id);
     }
 
-    private static CommandEntity create(CommandId commandId) {
-        return new CommandEntity(commandId);
+    private static Entity create(CommandId commandId) {
+        return new Entity(commandId);
     }
 
-    static CommandEntity createForStatus(Command command, CommandStatus status) {
+    static Entity createForStatus(Command command, CommandStatus status) {
         checkNotNull(command);
         checkNotNull(status);
 
         final CommandId commandId = command.getContext()
                                            .getCommandId();
-        final CommandEntity commandEntity = create(commandId);
-        commandEntity.setCommandAndStatus(command, status);
-        return commandEntity;
+        final Entity entity = create(commandId);
+        entity.setCommandAndStatus(command, status);
+        return entity;
     }
 
-    static CommandEntity createForError(Command command, Error error) {
+    static Entity createForError(Command command, Error error) {
         checkNotNull(command);
         checkNotNull(error);
 
-        final CommandId id = CommandRecords.getOrGenerateCommandId(command);
+        final CommandId id = Records.getOrGenerateCommandId(command);
 
-        final CommandEntity result = create(id);
+        final Entity result = create(id);
         result.setError(id, command, error);
         return result;
     }
 
     private void setCommandAndStatus(Command command, CommandStatus status) {
-        final CommandRecord record = CommandRecords.newRecordBuilder(command,
-                                                                     status,
-                                                                     null).build();
+        final CommandRecord record = Records.newRecordBuilder(command,
+                                                              status,
+                                                              null).build();
         updateState(record);
     }
 
     private void setError(CommandId id, Command command, Error error) {
-        final CommandRecord.Builder builder = CommandRecords.newRecordBuilder(command, ERROR, id);
+        final CommandRecord.Builder builder = Records.newRecordBuilder(command, ERROR, id);
         builder.getStatusBuilder()
                .setError(error);
         final CommandRecord record = builder.build();

@@ -65,8 +65,8 @@ import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.server.commandstore.CommandRecords.newRecordBuilder;
-import static org.spine3.server.commandstore.CommandRecords.toCommandIterator;
+import static org.spine3.server.commandstore.Records.newRecordBuilder;
+import static org.spine3.server.commandstore.Records.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -76,19 +76,19 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ConstantConditions")
-public class CommandStorageShould extends TenantAwareTest {
+public class StorageShould extends TenantAwareTest {
 
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
 
-    private CommandStorage storage;
+    private Storage storage;
 
     private CommandId id;
 
     @Before
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
-        storage = new CommandStorage();
+        storage = new Storage();
         storage.initStorage(InMemoryStorageFactory.getInstance(true));
     }
 
@@ -119,7 +119,7 @@ public class CommandStorageShould extends TenantAwareTest {
      ****************************/
 
     private Optional<CommandRecord> read(CommandId commandId) {
-        final Optional<CommandEntity> entity = storage.find(commandId);
+        final Optional<Entity> entity = storage.find(commandId);
         if (entity.isPresent()) {
             return Optional.of(entity.get()
                                      .getState());
@@ -335,8 +335,8 @@ public class CommandStorageShould extends TenantAwareTest {
 
     @Test
     public void provide_null_accepting_record_retrieval_func() {
-        assertNull(CommandStorage.getRecordFunc()
-                                 .apply(null));
+        assertNull(Storage.getRecordFunc()
+                          .apply(null));
     }
 
     /*

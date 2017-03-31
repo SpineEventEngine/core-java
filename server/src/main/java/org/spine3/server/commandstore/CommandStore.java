@@ -52,7 +52,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class CommandStore implements AutoCloseable {
 
-    private final CommandStorage storage;
+    private final Storage storage;
     private final TenantIndex tenantIndex;
 
     /**
@@ -61,7 +61,7 @@ public class CommandStore implements AutoCloseable {
     public CommandStore(StorageFactory storageFactory, TenantIndex tenantIndex) {
         checkNotNull(storageFactory);
         this.tenantIndex = checkNotNull(tenantIndex);
-        final CommandStorage storage = new CommandStorage();
+        final Storage storage = new Storage();
         storage.initStorage(storageFactory);
         this.storage = storage;
     }
@@ -232,7 +232,7 @@ public class CommandStore implements AutoCloseable {
             @Override
             public Iterator<Command> apply(@Nullable final CommandStatus input) {
                 checkNotNull(input);
-                final Iterator<Command> commands = CommandRecords.toCommandIterator(storage.iterator(status));
+                final Iterator<Command> commands = Records.toCommandIterator(storage.iterator(status));
                 return commands;
             }
         };

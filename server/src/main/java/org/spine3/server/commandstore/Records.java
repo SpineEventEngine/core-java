@@ -44,7 +44,7 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
  *
  * @author Alexander Yevsyukov
  */
-class CommandRecords {
+class Records {
 
     private static final Function<CommandRecord, Command> TO_COMMAND =
             new Function<CommandRecord, Command>() {
@@ -58,7 +58,7 @@ class CommandRecords {
                 }
             };
 
-    private CommandRecords() {
+    private Records() {
         // Prevent instantiation of this utility class.
     }
 
