@@ -29,6 +29,6 @@ import "spine/annotations.proto";
 import "spine/validate.proto";
 
 message User {
-    string first_name = 1 [(pattern).regex = "^[A-Z].*"];
+    string first_name = 1 [(pattern).regex = "^[A-Z].*"]; // Starts with a capital letter.
     string last_name = 2 [(pattern).regex = "^[A-Z].*"];
 }
