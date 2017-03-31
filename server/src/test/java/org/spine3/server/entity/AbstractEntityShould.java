@@ -20,11 +20,15 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.Error;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.test.entity.number.NaturalNumber;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import static java.lang.System.lineSeparator;
 import static org.junit.Assert.assertEquals;
@@ -43,6 +47,22 @@ public class AbstractEntityShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_does_not_have_appropriate_constructor() {
         getConstructor(AggregatePart.class, String.class);
+    }
+
+    @Test
+    public void define_final_updateState_method() throws NoSuchMethodException {
+        final Method updateState = AbstractEntity.class.getDeclaredMethod(
+                "updateState", Message.class);
+        final int modifiers = updateState.getModifiers();
+        assertTrue(Modifier.isFinal(modifiers));
+    }
+
+    @Test
+    public void prevent_validate_overriding() throws NoSuchMethodException {
+        final Method validate = AbstractEntity.class.getDeclaredMethod(
+                "validate", Message.class);
+        final int modifiers = validate.getModifiers();
+        assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
     }
 
     @Test
@@ -65,7 +85,7 @@ public class AbstractEntityShould {
                                                    .getFullName(), error.getType());
             assertEquals(INVALID_ENTITY_STATE.getNumber(), error.getCode());
             assertEquals("Entity state does match the validation constraints. Violation list:"
-                         + lineSeparator() + "Number must be greater than or equal to 1.",
+                         + lineSeparator() + "Number must be greater than or equal to 0.",
                          error.getMessage());
         }
     }
