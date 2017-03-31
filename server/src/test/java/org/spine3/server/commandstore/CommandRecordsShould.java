@@ -18,16 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandStatus;
+import org.spine3.server.commandbus.CommandRecord;
+import org.spine3.server.commandbus.Given;
 
 import static org.spine3.base.CommandStatus.RECEIVED;
-import static org.spine3.server.commandbus.CommandRecords.newRecordBuilder;
-import static org.spine3.server.commandbus.CommandTestUtil.checkRecord;
-import static org.spine3.server.commandbus.Given.Command.createProject;
+import static org.spine3.server.commandstore.CommandRecords.newRecordBuilder;
+import static org.spine3.server.commandstore.CommandTestUtil.checkRecord;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -46,7 +47,7 @@ public class CommandRecordsShould {
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = createProject();
+        final Command command = Given.Command.createProject();
         final CommandStatus status = RECEIVED;
 
         final CommandRecord record = newRecordBuilder(command,

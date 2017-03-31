@@ -36,7 +36,7 @@ import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
-class Given {
+public class Given {
 
     private Given() {
         // Prevent construction from outside.
@@ -49,7 +49,7 @@ class Given {
                         .build();
     }
 
-    static class Command {
+    public static class Command {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = newProjectId();
@@ -68,7 +68,7 @@ class Given {
             return result;
         }
 
-        static org.spine3.base.Command addTask() {
+        public static org.spine3.base.Command addTask() {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
@@ -78,7 +78,7 @@ class Given {
         }
 
         /** Creates a new {@link Command} with default properties (current time etc). */
-        static org.spine3.base.Command createProject() {
+        public static org.spine3.base.Command createProject() {
             return createProject(getCurrentTime());
         }
 
@@ -99,7 +99,7 @@ class Given {
             return create(command, userId, when);
         }
 
-        static org.spine3.base.Command startProject() {
+        public static org.spine3.base.Command startProject() {
             return startProject(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
@@ -109,7 +109,7 @@ class Given {
         }
     }
 
-    static class CommandMessage {
+    public static class CommandMessage {
 
         private CommandMessage() {
             // Prevent construction from outside.
@@ -127,7 +127,7 @@ class Given {
                           .build();
         }
 
-        static CreateProject createProjectMessage() {
+        public static CreateProject createProjectMessage() {
             return createProjectMessage(newProjectId());
         }
 

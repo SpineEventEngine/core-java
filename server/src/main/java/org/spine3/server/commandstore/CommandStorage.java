@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
@@ -30,6 +30,8 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.Identifiers;
+import org.spine3.server.commandbus.CommandRecord;
+import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 
 import javax.annotation.Nullable;

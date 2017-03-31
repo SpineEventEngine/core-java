@@ -30,12 +30,12 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Error;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.server.commandstore.CommandStore;
+import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.time.Interval;
 import org.spine3.users.TenantId;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Set;
 
@@ -91,7 +91,7 @@ class Rescheduler {
 
     @VisibleForTesting
     private void doRescheduleCommands() {
-        final Set<TenantId> tenants = commandStore().tenantIndex()
+        final Set<TenantId> tenants = commandStore().getTenantIndex()
                                                     .getAll();
         for (TenantId tenantId : tenants) {
             rescheduleForTenant(tenantId);
@@ -99,11 +99,10 @@ class Rescheduler {
     }
 
     private void rescheduleForTenant(final TenantId tenantId) {
-        final TenantAwareFunction<Empty, Iterator<Command>> func =
-                new TenantAwareFunction<Empty, Iterator<Command>>(tenantId) {
-                    @Nullable
+        final TenantAwareFunction0<Iterator<Command>> func =
+                new TenantAwareFunction0<Iterator<Command>>(tenantId) {
                     @Override
-                    public Iterator<Command> apply(@Nullable Empty input) {
+                    public Iterator<Command> apply() {
                         return commandStore().iterator(SCHEDULED);
                     }
                 };

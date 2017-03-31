@@ -31,6 +31,7 @@ import org.spine3.base.Error;
 import org.spine3.client.CommandFactory;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;

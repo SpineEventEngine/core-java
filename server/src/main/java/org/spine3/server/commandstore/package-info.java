@@ -19,10 +19,10 @@
  */
 
 /**
- * This package provides classes and interfaces related to
- * {@link org.spine3.server.commandbus.CommandBus CommandBus} and its configuration.
+ * This package provides implementation of {@link org.spine3.server.commandstore.CommandStore
+ * CommandStore}.
  */
 @ParametersAreNonnullByDefault
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
 import javax.annotation.ParametersAreNonnullByDefault;

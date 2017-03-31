@@ -18,9 +18,8 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
@@ -30,6 +29,9 @@ import org.spine3.base.Errors;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.commandbus.CommandException;
+import org.spine3.server.commandbus.Log;
+import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.CommandOperation;
 import org.spine3.server.tenant.TenantAwareFunction;
@@ -41,7 +43,6 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.server.commandbus.CommandRecords.toCommandIterator;
 
 /**
  * Manages storage of commands received by a Bounded Context.
@@ -75,7 +76,7 @@ public class CommandStore implements AutoCloseable {
     }
 
     /** Returns {@code true} if the store is open, {@code false} otherwise */
-    boolean isOpen() {
+    public boolean isOpen() {
         final boolean isOpened = storage.isOpen();
         return isOpened;
     }
@@ -99,7 +100,7 @@ public class CommandStore implements AutoCloseable {
         op.execute();
     }
 
-    TenantIndex tenantIndex() {
+    public TenantIndex getTenantIndex() {
         return tenantIndex;
     }
 
@@ -144,7 +145,7 @@ public class CommandStore implements AutoCloseable {
      * @param exception the exception occurred, which encloses {@link org.spine3.base.Error Error}
      *                  to store
      */
-    void storeWithError(Command command, CommandException exception) {
+    public void storeWithError(Command command, CommandException exception) {
         store(command, exception.getError());
     }
 
@@ -168,7 +169,7 @@ public class CommandStore implements AutoCloseable {
     /**
      * Sets the status of the command to {@link CommandStatus#OK}
      */
-    void setCommandStatusOk(CommandEnvelope commandEnvelope) {
+    public void setCommandStatusOk(CommandEnvelope commandEnvelope) {
         keepTenantId(commandEnvelope.getCommand());
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
@@ -225,21 +226,23 @@ public class CommandStore implements AutoCloseable {
      * @param status a command status to search by
      * @return commands with the given status
      */
-    Iterator<Command> iterator(final CommandStatus status) {
+    public Iterator<Command> iterator(final CommandStatus status) {
         final Func<CommandStatus, Iterator<Command>> func =
                 new Func<CommandStatus, Iterator<Command>>(this) {
             @Override
             public Iterator<Command> apply(@Nullable final CommandStatus input) {
                 checkNotNull(input);
-                final Iterator<Command> commands = toCommandIterator(storage.iterator(status));
+                final Iterator<Command> commands = CommandRecords.toCommandIterator(storage.iterator(status));
                 return commands;
             }
         };
         return func.execute(status);
     }
 
-    @VisibleForTesting
-    ProcessingStatus getStatus(CommandId commandId) {
+    /**
+     * Obtains the processing status for the command with the passed ID.
+     */
+    public ProcessingStatus getStatus(CommandId commandId) {
         final Func<CommandId, ProcessingStatus> func = new Func<CommandId, ProcessingStatus>(this) {
             @Override
             public ProcessingStatus apply(@Nullable CommandId input) {
@@ -252,7 +255,7 @@ public class CommandStore implements AutoCloseable {
     }
 
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this consolidated error handling.
-    void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
+    public void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
         final Message commandMessage = commandEnvelope.getMessage();
         final CommandId commandId = commandEnvelope.getCommandId();
         if (cause instanceof FailureThrowable) {
@@ -270,7 +273,7 @@ public class CommandStore implements AutoCloseable {
         }
     }
 
-    void setToError(CommandEnvelope commandEnvelope, Error error) {
+    public void setToError(CommandEnvelope commandEnvelope, Error error) {
         updateStatus(commandEnvelope, error);
     }
 

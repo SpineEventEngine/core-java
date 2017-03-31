@@ -38,7 +38,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcher;
-import org.spine3.server.commandbus.CommandStore;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.server.tenant.TenantIndex;

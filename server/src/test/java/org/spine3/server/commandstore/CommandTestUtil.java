@@ -18,12 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.test.command.CreateProject;
 
 import static org.junit.Assert.assertEquals;

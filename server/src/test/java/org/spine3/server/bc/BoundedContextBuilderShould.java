@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandBus;
-import org.spine3.server.commandbus.CommandStore;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;

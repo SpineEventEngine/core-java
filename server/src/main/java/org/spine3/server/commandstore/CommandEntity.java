@@ -18,21 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
+import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.entity.AbstractEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandStatus.ERROR;
 import static org.spine3.base.CommandStatus.FAILURE;
 import static org.spine3.base.CommandStatus.OK;
-import static org.spine3.server.commandbus.CommandRecords.getOrGenerateCommandId;
-import static org.spine3.server.commandbus.CommandRecords.newRecordBuilder;
 
 /**
  * An entity for storing a command and its processing status.
@@ -67,7 +66,7 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
         checkNotNull(command);
         checkNotNull(error);
 
-        final CommandId id = getOrGenerateCommandId(command);
+        final CommandId id = CommandRecords.getOrGenerateCommandId(command);
 
         final CommandEntity result = create(id);
         result.setError(id, command, error);
@@ -75,14 +74,14 @@ class CommandEntity extends AbstractEntity<CommandId, CommandRecord> {
     }
 
     private void setCommandAndStatus(Command command, CommandStatus status) {
-        final CommandRecord record = newRecordBuilder(command,
-                                                      status,
-                                                      null).build();
+        final CommandRecord record = CommandRecords.newRecordBuilder(command,
+                                                                     status,
+                                                                     null).build();
         updateState(record);
     }
 
     private void setError(CommandId id, Command command, Error error) {
-        final CommandRecord.Builder builder = newRecordBuilder(command, ERROR, id);
+        final CommandRecord.Builder builder = CommandRecords.newRecordBuilder(command, ERROR, id);
         builder.getStatusBuilder()
                .setError(error);
         final CommandRecord record = builder.build();

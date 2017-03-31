@@ -22,6 +22,7 @@ package org.spine3.server.commandbus;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.TenantAwareTest;

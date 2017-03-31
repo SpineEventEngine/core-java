@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.commandbus;
+package org.spine3.server.commandstore;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
@@ -36,6 +36,9 @@ import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureContext;
 import org.spine3.base.Failures;
+import org.spine3.server.commandbus.CommandRecord;
+import org.spine3.server.commandbus.Given;
+import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
@@ -62,9 +65,8 @@ import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.server.commandbus.CommandRecords.newRecordBuilder;
-import static org.spine3.server.commandbus.CommandRecords.toCommandIterator;
-import static org.spine3.server.commandbus.Given.Command.createProject;
+import static org.spine3.server.commandstore.CommandRecords.newRecordBuilder;
+import static org.spine3.server.commandstore.CommandRecords.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -97,7 +99,7 @@ public class CommandStorageShould extends TenantAwareTest {
     }
 
     private static CommandRecord newStorageRecord() {
-        final Command command = createProject();
+        final Command command = Given.Command.createProject();
         final String commandType = TypeName.ofCommand(command)
                                            .value();
 
@@ -128,7 +130,7 @@ public class CommandStorageShould extends TenantAwareTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_and_read_command() {
-        final Command command = createProject();
+        final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
 
         storage.store(command);
@@ -140,7 +142,7 @@ public class CommandStorageShould extends TenantAwareTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_error() {
-        final Command command = createProject();
+        final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
         final Error error = newError();
 
@@ -170,7 +172,7 @@ public class CommandStorageShould extends TenantAwareTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_status() {
-        final Command command = createProject();
+        final Command command = Given.Command.createProject();
         final CommandId commandId = getId(command);
         final CommandStatus status = SCHEDULED;
 
@@ -182,14 +184,14 @@ public class CommandStorageShould extends TenantAwareTest {
 
     @Test
     public void load_commands_by_status() {
-        final List<Command> commands = ImmutableList.of(createProject(),
+        final List<Command> commands = ImmutableList.of(Given.Command.createProject(),
                                                         Given.Command.addTask(),
                                                         Given.Command.startProject());
         final CommandStatus status = SCHEDULED;
 
         store(commands, status);
         // store an extra command with another status
-        storage.store(createProject(), ERROR);
+        storage.store(Given.Command.createProject(), ERROR);
 
         final Iterator<CommandRecord> iterator = storage.iterator(status);
         final List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
@@ -249,7 +251,7 @@ public class CommandStorageShould extends TenantAwareTest {
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = createProject();
+        final Command command = Given.Command.createProject();
         final CommandStatus status = RECEIVED;
 
         final CommandRecord record = newRecordBuilder(command, status, null).build();
@@ -288,21 +290,21 @@ public class CommandStorageShould extends TenantAwareTest {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() throws Exception {
         storage.close();
-        storage.store(createProject());
+        storage.store(Given.Command.createProject());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() throws
                                                                                    Exception {
         storage.close();
-        storage.store(createProject(), newError());
+        storage.store(Given.Command.createProject(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() throws
                                                                                     Exception {
         storage.close();
-        storage.store(createProject(), OK);
+        storage.store(Given.Command.createProject(), OK);
     }
 
     @Test(expected = IllegalStateException.class)

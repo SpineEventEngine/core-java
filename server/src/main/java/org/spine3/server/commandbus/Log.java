@@ -37,14 +37,14 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  */
-class Log {
+public class Log {
 
     /** The logger instance used by {@code CommandBus}. */
     static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
 
-    void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
+    public void errorHandling(Exception exception, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId(
                 "Exception while handling command `%s` (ID: `%s`)",
                 commandMessage,
@@ -52,7 +52,7 @@ class Log {
         log().error(msg, exception);
     }
 
-    void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
+    public void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId(
                 "Business failure occurred when handling command `%s` (ID: `%s`)",
                 commandMessage,
@@ -60,7 +60,7 @@ class Log {
         log().warn(msg, flr);
     }
 
-    void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
+    public void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId(
                 "Throwable encountered when handling command `%s` (ID: `%s`)",
                 commandMessage,

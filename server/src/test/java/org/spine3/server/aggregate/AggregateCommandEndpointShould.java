@@ -34,7 +34,7 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
-import org.spine3.server.commandbus.CommandStore;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
