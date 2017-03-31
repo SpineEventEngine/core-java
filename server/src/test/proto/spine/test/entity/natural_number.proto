@@ -29,5 +29,5 @@ import "spine/annotations.proto";
 import "spine/validate.proto";
 
 message NaturalNumber {
-    int32 value = 1 [(min).value = "1"];
+    int32 value = 1 [(min).value = "0"];
 }
