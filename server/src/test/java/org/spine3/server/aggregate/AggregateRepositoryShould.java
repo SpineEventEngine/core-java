@@ -63,7 +63,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "ConstantConditions"})
 public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
@@ -98,7 +98,7 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
     public void create_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Sample.messageOfType(ProjectId.class))
+        final ProjectAggregate aggregate = repository.find(Sample.messageOfType(ProjectId.class))
                                                      .get();
         final Project state = aggregate.getState();
 
@@ -112,7 +112,7 @@ public class AggregateRepositoryShould {
 
         repository.store(expected);
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregate actual = repository.load(id)
+        final ProjectAggregate actual = repository.find(id)
                                                   .get();
 
         assertTrue(isNotDefault(actual.getState()));
@@ -130,7 +130,7 @@ public class AggregateRepositoryShould {
         repository.store(expected);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregate actual = repository.load(id)
+        final ProjectAggregate actual = repository.find(id)
                                                   .get();
 
         assertEquals(expected.getId(), actual.getId());
@@ -208,7 +208,7 @@ public class AggregateRepositoryShould {
         aggregate.setArchived(true);
         repository.store(aggregate);
 
-        assertFalse(repository.load(aggregate.getId())
+        assertFalse(repository.find(aggregate.getId())
                               .isPresent());
     }
 
@@ -219,7 +219,7 @@ public class AggregateRepositoryShould {
         aggregate.setDeleted(true);
         repository.store(aggregate);
 
-        assertFalse(repository.load(aggregate.getId())
+        assertFalse(repository.find(aggregate.getId())
                               .isPresent());
     }
 
@@ -358,7 +358,7 @@ public class AggregateRepositoryShould {
                    extends AggregateRepository<ProjectId, ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(InMemoryStorageFactory.getInstance());
+            initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
         }
     }
 }

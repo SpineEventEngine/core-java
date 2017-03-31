@@ -78,6 +78,7 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage<I
      *         {@code false} otherwise
      * @see #close()
      */
+    @Override
     public boolean isOpen() {
         return this.open;
     }
@@ -98,7 +99,7 @@ public abstract class AbstractStorage<I, R extends Message> implements Storage<I
      * @throws IllegalStateException if the storage was already closed
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         checkNotClosed();
         this.open = false;
     }

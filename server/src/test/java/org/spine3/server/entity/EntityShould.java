@@ -57,6 +57,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.assertSecondsEqual;
 import static org.spine3.test.TimeTests.currentTimeSeconds;
 
 /**
@@ -226,8 +227,8 @@ public class EntityShould {
         entityNew.incrementState(state);
         final long expectedTimeSec = currentTimeSeconds();
 
-        assertEquals(expectedTimeSec, entityNew.whenModified()
-                                               .getSeconds());
+        assertSecondsEqual(expectedTimeSec, entityNew.whenModified()
+                                                     .getSeconds(), 1);
     }
 
     @Test

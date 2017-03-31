@@ -35,6 +35,7 @@ import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 
 import java.util.List;
 
@@ -52,7 +53,7 @@ import static org.mockito.Mockito.when;
 import static org.spine3.base.Versions.newVersion;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 /**
  * @author Dmytro Dashenkov
@@ -322,7 +323,7 @@ public class SubscriptionServiceShould {
     private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
         final Stand stand = Stand.newBuilder()
                                  .build();
-        final BoundedContext boundedContext = newBoundedContext(stand);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
         return boundedContext;

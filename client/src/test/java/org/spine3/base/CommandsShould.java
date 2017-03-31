@@ -33,7 +33,6 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
@@ -108,7 +107,7 @@ public class CommandsShould {
                                                             userId,
                                                             zoneOffset,
                                                             targetVersion);
-        
+
         assertEquals(tenantId, commandContext.getTenantId());
         assertEquals(userId, commandContext.getActor());
         assertEquals(zoneOffset, commandContext.getZoneOffset());
@@ -138,7 +137,7 @@ public class CommandsShould {
     public void pass_null_tolerance_test() {
         new NullPointerTester()
                 .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
-                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(Timestamp.class, getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class,
                             commandFactory.createCommand(StringValue.getDefaultInstance(),
@@ -211,12 +210,12 @@ public class CommandsShould {
         final Command command5 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(5));
 
-        final ImmutableList<Command> commands = ImmutableList.of(command1, command2, command3,
-                                                                 command4, command5);
-        final Iterable<Command> filter = Iterables.filter(commands,
-                                                          Commands.wereWithinPeriod(minutesAgo(3),
-                                                                                    secondsAgo(
-                                                                                            10)));
+        final ImmutableList<Command> commands =
+                ImmutableList.of(command1, command2, command3, command4, command5);
+        final Iterable<Command> filter = Iterables.filter(
+                commands,
+                Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10))
+        );
 
         assertEquals(3, FluentIterable.from(filter)
                                       .size());
@@ -260,32 +259,6 @@ public class CommandsShould {
         final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
 
         Commands.isScheduled(cmd);
-    }
-
-    @Test
-    public void update_schedule_options() {
-        final Command cmd = commandFactory.createCommand(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations2.fromMinutes(5);
-
-        final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
-
-        final CommandContext.Schedule schedule = cmdUpdated.getContext()
-                                                           .getSchedule();
-        assertEquals(delay, schedule.getDelay());
-        assertEquals(schedulingTime, schedule.getSchedulingTime());
-    }
-
-    @Test
-    public void update_scheduling_time() {
-        final Command cmd = commandFactory.createCommand(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-
-        final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);
-
-        assertEquals(schedulingTime, cmdUpdated.getContext()
-                                               .getSchedule()
-                                               .getSchedulingTime());
     }
 
     @Test

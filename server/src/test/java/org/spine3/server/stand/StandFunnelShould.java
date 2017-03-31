@@ -239,7 +239,7 @@ public class StandFunnelShould {
                 // Init repository
                 final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
 
-                repository.initStorage(InMemoryStorageFactory.getInstance());
+                repository.initStorage(InMemoryStorageFactory.getInstance(context.isMultitenant()));
 
                 try {
                     // Mock aggregate and mock stand are not able to handle events
@@ -270,7 +270,7 @@ public class StandFunnelShould {
             public void perform(BoundedContext context) {
                 // Init repository
                 final ProjectionRepository repository = Given.projectionRepo(context);
-                repository.initStorage(InMemoryStorageFactory.getInstance());
+                repository.initStorage(InMemoryStorageFactory.getInstance(context.isMultitenant()));
 
                 // Dispatch an update from projection repo
                 repository.dispatch(EventEnvelope.of(Given.validEvent()));

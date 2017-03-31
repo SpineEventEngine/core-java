@@ -31,9 +31,11 @@ import "spine/annotations.proto";
 import "spine/net/internet_domain.proto";
 import "spine/net/email_address.proto";
 
-// An identifier of a tenant in a multitenant application.
+// An identifier of a tenant in a multi-tenant application.
 //
-// In a multitenant application a `CommandContext` of a command must have `tenant_id` attribute defined.
+// Commands sent in such application must have non-default value of
+// the `tenant_id` field in `CommandContext`.
+//
 message TenantId {
     oneof kind {
         // The tenant has Internet domain name.
@@ -47,4 +49,6 @@ message TenantId {
         // Application-specific value.
         string value = 20;
     }
+
+    reserved 3 to 19;
 }

@@ -38,9 +38,9 @@ import org.spine3.server.stand.StandStorage;
 public interface StorageFactory extends AutoCloseable {
 
     /**
-     * Verifies if the storage factory is configured to serve a multitenant application.
+     * Verifies if the storage factory is configured to serve a multi-tenant application.
      *
-     * @return {@code true} if the factory would produce multitenant storages,
+     * @return {@code true} if the factory would produce multi-tenant storages,
      *         {@code false} otherwise
      */
     boolean isMultitenant();
@@ -79,9 +79,20 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link ProjectionStorage} instance.
      *
-     * @param projectionClass the class of projections to store
      * @param <I>             the type of stream projection IDs
+     * @param projectionClass the class of projections to store
      */
     <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Entity<I, ?>> projectionClass);
+
+    /**
+     * Creates a single-tenant version of the factory.
+     *
+     * <p>This method is needed for creating single-tenant storages using
+     * a multi-tenant instance of a {@code StorageFactory}.
+     *
+     * @return a single-tenant version of the factory, or {@code this}
+     *         if the factory is single-tenant
+     */
+    StorageFactory toSingleTenant();
 }

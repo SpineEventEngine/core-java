@@ -99,7 +99,8 @@ public class GrpcContainerShould {
         }
 
         count--;
-        builder.removeService(definitions.get(count));
+        // Perform removal and check that the return value is builder itself.
+        assertEquals(builder, builder.removeService(definitions.get(count)));
 
         final Set<ServerServiceDefinition> serviceSet = builder.getServices();
         assertSize(count, serviceSet);
@@ -109,7 +110,8 @@ public class GrpcContainerShould {
     }
 
     @Test
-    public void stop_properly_upon_application_shutdown() throws NoSuchFieldException, IllegalAccessException, IOException {
+    public void stop_properly_upon_application_shutdown()
+            throws NoSuchFieldException, IllegalAccessException, IOException {
         final Class<Runtime> runtimeClass = Runtime.class;
         // Field signature: private static Runtime currentRuntime
         // Origin class: {@code java.lang.Runtime}.
@@ -198,5 +200,4 @@ public class GrpcContainerShould {
         }
         fail("Expected an exception.");
     }
-
 }
