@@ -27,9 +27,8 @@ import org.spine3.annotations.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.server.command.EventFactory;
 
 import static org.spine3.protobuf.Values.newStringValue;
 
@@ -53,10 +52,10 @@ public class TestEventFactory {
     }
 
     public Event createEvent(Message eventMessage, CommandContext commandContext) {
-        final EventContext eventContext = CommandHandlerMethod.createEventContext(
+        final EventContext eventContext = EventFactory.createEventContext(
                 producerId,
                 null,
                 commandContext);
-        return Events.createEvent(eventMessage, eventContext);
+        return EventFactory.createEvent(eventMessage, eventContext);
     }
 }

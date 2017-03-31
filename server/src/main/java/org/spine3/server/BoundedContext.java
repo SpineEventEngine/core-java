@@ -32,10 +32,10 @@ import org.slf4j.LoggerFactory;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Response;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.AggregateRepository;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.commandbus.DelegatingCommandDispatcher;
@@ -331,7 +331,7 @@ public final class BoundedContext
                                                  .setTimestamp(sourceContext.getTimestamp())
                                                  .setProducerId(AnyPacker.pack(producerId))
                                                  .build();
-        final Event result = Events.createEvent(integrationEvent.getMessage(), context);
+        final Event result = EventFactory.createEvent(integrationEvent.getMessage(), context);
         return result;
     }
 

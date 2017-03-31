@@ -28,12 +28,12 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.command.EventFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Events.generateId;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.server.command.EventFactory.generateId;
 import static org.spine3.test.Tests.newUuidValue;
 
 /**
@@ -69,12 +69,12 @@ public class EventTests {
 
     public static Event newEvent(Message eventMessage) {
         checkNotNull(eventMessage);
-        return Events.createEvent(eventMessage, newEventContext());
+        return EventFactory.createEvent(eventMessage, newEventContext());
     }
 
     public static Event newEvent(Message eventMessage, Timestamp when) {
         checkNotNull(eventMessage);
         checkNotNull(when);
-        return Events.createEvent(eventMessage, newEventContext(when));
+        return EventFactory.createEvent(eventMessage, newEventContext(when));
     }
 }

@@ -25,15 +25,13 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.EventFactory;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -47,8 +45,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.spine3.base.Events.generateId;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.wrappedCause;
@@ -163,33 +159,6 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         }
     }
 
-    /**
-     * Creates new {@code CommandContext} with passed parameters.
-     *
-     * @param producerId the ID of an object which produced the event
-     * @param version optional version of the object
-     * @param commandContext the context of the command handling of which produced the event
-     * @return new {@code CommandContext}
-     */
-    public static EventContext createEventContext(Any producerId,
-                                                  @Nullable Version version,
-                                                  CommandContext commandContext) {
-        checkNotNull(producerId);
-        checkNotNull(commandContext);
-
-        final EventId eventId = generateId();
-        final Timestamp timestamp = getCurrentTime();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setTimestamp(timestamp)
-                                                         .setCommandContext(commandContext)
-                                                         .setProducerId(producerId);
-        if (version != null) {
-            builder.setVersion(version);
-        }
-        return builder.build();
-    }
-
     public static List<Event> toEvents(final Any producerId,
                                        @Nullable final Version version,
                                        final List<? extends Message> eventMessages,
@@ -204,10 +173,10 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
                 if (eventMessage == null) {
                     return Event.getDefaultInstance();
                 }
-                final EventContext eventContext = createEventContext(producerId,
-                                                                     version,
-                                                                     commandContext);
-                final Event result = Events.createEvent(eventMessage, eventContext);
+                final EventContext eventContext = EventFactory.createEventContext(producerId,
+                                                                                  version,
+                                                                                  commandContext);
+                final Event result = EventFactory.createEvent(eventMessage, eventContext);
                 return result;
             }
         });

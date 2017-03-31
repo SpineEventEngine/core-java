@@ -22,7 +22,7 @@ package org.spine3.server.storage;
 
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
+import org.spine3.server.command.EventFactory;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.AddTask;
 import org.spine3.test.storage.command.CreateProject;
@@ -123,13 +123,13 @@ public class Given {
 
         public static Event projectCreated(ProjectId projectId, EventContext context) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
-            final Event event = Events.createEvent(msg, context);
+            final Event event = EventFactory.createEvent(msg, context);
             return event;
         }
 
         public static Event taskAdded(ProjectId projectId, EventContext context) {
             final TaskAdded msg = EventMessage.taskAdded(projectId);
-            final Event event = Events.createEvent(msg, context);
+            final Event event = EventFactory.createEvent(msg, context);
             return event;
         }
 

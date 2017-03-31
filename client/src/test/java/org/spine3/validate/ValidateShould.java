@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
-import org.spine3.base.Events;
+import org.spine3.server.command.EventFactory;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
 
@@ -154,7 +154,7 @@ public class ValidateShould {
 
     @Test
     public void not_throw_exception_if_checked_event_id_is_valid() {
-        checkValid(Events.generateId());
+        checkValid(EventFactory.generateId());
     }
 
     @Test

@@ -21,13 +21,13 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.command.EventFactory;
 import org.spine3.type.TypeName;
 
 import java.util.Comparator;
@@ -37,8 +37,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Events.createEvent;
-import static org.spine3.base.Events.generateId;
 import static org.spine3.base.Events.getActor;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.getProducer;
@@ -50,11 +48,12 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.command.EventFactory.createEvent;
+import static org.spine3.server.command.EventFactory.generateId;
 import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
-import static org.spine3.validate.Validate.isNotDefault;
 
 public class EventsShould {
 
@@ -108,48 +107,7 @@ public class EventsShould {
         assertTrue(comparator.compare(event1, event1) == 0);
     }
 
-    @Test
-    public void create_event() {
-        createEventTest(stringValue);
-        createEventTest(boolValue);
-        createEventTest(doubleValue);
-    }
-
-    private void createEventTest(Message msg) {
-        final Event event = createEvent(msg, context);
-
-        assertEquals(msg, unpack(event.getMessage()));
-        assertEquals(context, event.getContext());
-    }
-
-    @Test
-    public void create_event_with_Any() {
-        final Any msg = AnyPacker.pack(stringValue);
-        final Event event = createEvent(msg, context);
-
-        assertEquals(msg, event.getMessage());
-        assertEquals(context, event.getContext());
-    }
-
-    @Test
-    public void create_import_event() {
-        final Event event = Events.createImportEvent(stringValue, doubleValue);
-
-        assertEquals(stringValue, unpack(event.getMessage()));
-        assertEquals(doubleValue, unpack(event.getContext()
-                                              .getProducerId()));
-    }
-
-    @Test
-    public void create_import_event_context() {
-        final EventContext context = Events.createImportEventContext(doubleValue);
-
-        assertEquals(doubleValue, unpack(context.getProducerId()));
-        assertTrue(isNotDefault(context.getEventId()));
-        assertTrue(isNotDefault(context.getTimestamp()));
-    }
-
-    @Test
+   @Test
     public void get_message_from_event() {
         createEventAndAssertReturnedMessageFor(stringValue);
         createEventAndAssertReturnedMessageFor(boolValue);
@@ -272,7 +230,7 @@ public class EventsShould {
 
     @Test
     public void provide_EventId_stringifier() {
-        final EventId id = Events.generateId();
+        final EventId id = EventFactory.generateId();
         
         final String str = Stringifiers.toString(id);
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);

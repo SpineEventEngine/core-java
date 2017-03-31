@@ -28,9 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
@@ -178,7 +178,7 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
-        final Event event = Events.createEvent(newStringValue(newUuid()), createEventContext(/*doNotEnrich=*/true));
+        final Event event = EventFactory.createEvent(newStringValue(newUuid()), createEventContext(/*doNotEnrich=*/true));
 
         assertFalse(enricher.canBeEnriched(event));
     }
@@ -191,7 +191,7 @@ public class EventEnricherShould {
     }
 
     private static Event createEvent(Message msg) {
-        final Event event = Events.createEvent(msg, createEventContext());
+        final Event event = EventFactory.createEvent(msg, createEventContext());
         return event;
     }
 
