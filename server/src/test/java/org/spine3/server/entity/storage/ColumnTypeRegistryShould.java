@@ -78,7 +78,7 @@ public class ColumnTypeRegistryShould {
 
     @Test
     public void find_closest_superclass_column_type() {
-        final ColumnTypeRegistry registry =
+        final ColumnTypeRegistry<?> registry =
                 ColumnTypeRegistry.newBuilder()
                                   .put(GeneratedMessageV3.class, new GeneratedMessageType())
                                   .put(AbstractMessage.class, new AbstractMessageType())
