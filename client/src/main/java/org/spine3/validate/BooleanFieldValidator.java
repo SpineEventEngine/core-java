@@ -20,7 +20,6 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,9 +42,13 @@ class BooleanFieldValidator extends FieldValidator<Boolean> {
      * @param rootFieldPath a path to the root field (if present)
      */
     BooleanFieldValidator(Descriptors.FieldDescriptor descriptor,
-                          ImmutableList<Boolean> fieldValues,
+                          Object fieldValues,
                           FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath, false);
+        super(descriptor, FieldValidator.<Boolean>toValueList(fieldValues), rootFieldPath, false);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 
     /**
@@ -70,9 +73,5 @@ class BooleanFieldValidator extends FieldValidator<Boolean> {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(BooleanFieldValidator.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

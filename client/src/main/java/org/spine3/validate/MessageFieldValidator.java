@@ -55,7 +55,6 @@ class MessageFieldValidator extends FieldValidator<Message> {
 
     /**
      * Creates a new validator instance.
-     *
      * @param descriptor    a descriptor of the field to validate
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
@@ -63,9 +62,13 @@ class MessageFieldValidator extends FieldValidator<Message> {
      *                      if the corresponding field option is not present
      */
     MessageFieldValidator(FieldDescriptor descriptor,
-                          ImmutableList<Message> fieldValues,
-                          FieldPath rootFieldPath, boolean strict) {
-        super(descriptor, fieldValues, rootFieldPath, strict);
+                          Object fieldValues,
+                          boolean strict,
+                          FieldPath rootFieldPath) {
+        super(descriptor,
+              FieldValidator.<Message>toValueList(fieldValues),
+              rootFieldPath,
+              strict);
         this.timeOption = getFieldOption(ValidationProto.when);
         this.validateOption = getFieldOption(ValidationProto.valid);
         this.ifInvalidOption = getFieldOption(ValidationProto.ifInvalid);

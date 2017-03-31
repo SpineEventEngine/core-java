@@ -20,7 +20,6 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
@@ -43,18 +42,17 @@ class StringFieldValidator extends FieldValidator<String> {
 
     /**
      * Creates a new validator instance.
-     *
-     * @param descriptor    a descriptor of the field to validate
+     * @param descriptor   a descriptor of the field to validate
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
-     * @param strict        if {@code true} the validator would assume that the field is required even
-     *                      if the corresponding option is not set
+     * @param strict        if {@code true} the validator would assume that the field is required
+     *                      even if the corresponding option is not set
      */
     StringFieldValidator(FieldDescriptor descriptor,
-                         ImmutableList<String> fieldValues,
+                         Object fieldValues,
                          FieldPath rootFieldPath,
                          boolean strict) {
-        super(descriptor, fieldValues, rootFieldPath, strict);
+        super(descriptor, FieldValidator.<String>toValueList(fieldValues), rootFieldPath, strict);
         this.patternOption = getFieldOption(ValidationProto.pattern);
         this.regex = patternOption.getRegex();
     }

@@ -20,15 +20,9 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
-import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-
-import java.util.List;
 
 import static java.lang.String.format;
 
@@ -40,6 +34,7 @@ import static java.lang.String.format;
 class FieldValidatorFactory {
 
     private FieldValidatorFactory() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -48,65 +43,50 @@ class FieldValidatorFactory {
      * @param descriptor    a descriptor of the field to validate
      * @param fieldValue    a value of the field to validate
      * @param rootFieldPath a path to the root field
-     * @param strict        if {@code true} validators would always assume that the field is required
+     * @param strict        if {@code true} validators would always assume that the field is
+     *                      required
      */
+    @SuppressWarnings("OverlyComplexMethod")
+        // OK since an alternative map-based impl. would be a lot more code that would do the same.
     private static FieldValidator<?> create(FieldDescriptor descriptor,
-            Object fieldValue,
-            FieldPath rootFieldPath,
-            boolean strict) {
+                                            Object fieldValue,
+                                            FieldPath rootFieldPath,
+                                            boolean strict) {
         final JavaType fieldType = descriptor.getJavaType();
         switch (fieldType) {
             case MESSAGE:
-                final ImmutableList<Message> messages = toValueList(fieldValue);
-                return new MessageFieldValidator(descriptor, messages, rootFieldPath, strict);
+                return new MessageFieldValidator(descriptor, fieldValue, strict, rootFieldPath);
             case INT:
-                final ImmutableList<Integer> ints = toValueList(fieldValue);
-                return new IntegerFieldValidator(descriptor, ints, rootFieldPath);
+                return new IntegerFieldValidator(descriptor, fieldValue, rootFieldPath);
             case LONG:
-                final ImmutableList<Long> longs = toValueList(fieldValue);
-                return new LongFieldValidator(descriptor, longs, rootFieldPath);
+                return new LongFieldValidator(descriptor, fieldValue,   rootFieldPath);
             case FLOAT:
-                final ImmutableList<Float> floats = toValueList(fieldValue);
-                return new FloatFieldValidator(descriptor, floats, rootFieldPath);
+                return new FloatFieldValidator(descriptor, fieldValue, rootFieldPath);
             case DOUBLE:
-                final ImmutableList<Double> doubles = toValueList(fieldValue);
-                return new DoubleFieldValidator(descriptor, doubles, rootFieldPath);
+                return new DoubleFieldValidator(descriptor, fieldValue, rootFieldPath);
             case STRING:
-                final ImmutableList<String> strings = toValueList(fieldValue);
-                return new StringFieldValidator(descriptor, strings, rootFieldPath, strict);
+                return new StringFieldValidator(descriptor, fieldValue, rootFieldPath, strict);
             case BYTE_STRING:
-                final ImmutableList<ByteString> byteStrings = toValueList(fieldValue);
-                return new ByteStringFieldValidator(descriptor, byteStrings, rootFieldPath);
+                return new ByteStringFieldValidator(descriptor, fieldValue, rootFieldPath);
             case BOOLEAN:
-                final ImmutableList<Boolean> booleans = toValueList(fieldValue);
-                return new BooleanFieldValidator(descriptor, booleans, rootFieldPath);
+                return new BooleanFieldValidator(descriptor, fieldValue, rootFieldPath);
             case ENUM:
-                final ImmutableList<EnumValueDescriptor> enums = toValueList(fieldValue);
-                return new EnumFieldValidator(descriptor, enums, rootFieldPath);
+                return new EnumFieldValidator(descriptor, fieldValue, rootFieldPath);
             default:
                 throw fieldTypeIsNotSupported(descriptor);
         }
     }
 
     static FieldValidator<?> create(FieldDescriptor descriptor,
-            Object fieldValue,
-            FieldPath rootFieldPath) {
+                                    Object fieldValue,
+                                    FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, false);
     }
 
     static FieldValidator<?> createStrict(FieldDescriptor descriptor,
-            Object fieldValue,
-            FieldPath rootFieldPath) {
+                                          Object fieldValue,
+                                          FieldPath rootFieldPath) {
         return create(descriptor, fieldValue, rootFieldPath, true);
-    }
-
-    @SuppressWarnings({"unchecked", "IfMayBeConditional"})
-    private static <T> ImmutableList<T> toValueList(Object fieldValue) {
-        if (fieldValue instanceof List) {
-            return ImmutableList.copyOf((List<T>) fieldValue);
-        } else {
-            return ImmutableList.of((T) fieldValue);
-        }
     }
 
     private static IllegalArgumentException fieldTypeIsNotSupported(FieldDescriptor descriptor) {

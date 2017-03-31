@@ -20,7 +20,6 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
@@ -38,13 +37,14 @@ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
     /**
      * Creates a new validator instance.
-     *
-     * @param descriptor    a descriptor of the field to validate
+     *  @param descriptor    a descriptor of the field to validate
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+    IntegerFieldValidator(FieldDescriptor descriptor, Object fieldValues, FieldPath rootFieldPath) {
+        super(descriptor,
+              FieldValidator.<Integer>toValueList(fieldValues),
+              rootFieldPath);
     }
 
     @Override

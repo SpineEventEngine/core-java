@@ -38,14 +38,16 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static org.spine3.base.Commands.isCommandsFile;
 
 /**
- * Validates messages according to Spine custom protobuf options and provides constraint violations found.
+ * Validates messages according to Spine custom protobuf options and
+ * provides constraint violations found.
  *
  * @param <V> a type of field values
  * @author Alexander Litus
  */
 abstract class FieldValidator<V> {
 
-    private static final String ENTITY_ID_REPEATED_FIELD_MSG = "Entity ID must not be a repeated field.";
+    private static final String ENTITY_ID_REPEATED_FIELD_MSG =
+            "Entity ID must not be a repeated field.";
 
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
@@ -59,7 +61,8 @@ abstract class FieldValidator<V> {
     private final IfMissingOption ifMissingOption;
 
     /**
-     * If set the validator would assume that the field is required even if the {@code required} option is not set.
+     * If set the validator would assume that the field is required even if the {@code required}
+     * option is not set.
      */
     private final boolean strict;
 
@@ -69,10 +72,12 @@ abstract class FieldValidator<V> {
      * @param descr         a descriptor of the field to validate
      * @param values        values to validate
      * @param rootFieldPath a path to the root field (if present)
-     * @param strict        if {@code true} the validator would assume that the field is required, even
-     *                      if corresponding field option is not present
+     * @param strict        if {@code true} the validator would assume that the field is required,
+     *                      even if corresponding field option is not present
      */
-    protected FieldValidator(FieldDescriptor descr, ImmutableList<V> values, FieldPath rootFieldPath, boolean strict) {
+    protected FieldValidator(FieldDescriptor descr, ImmutableList<V> values,
+                             FieldPath rootFieldPath,
+                             boolean strict) {
         this.fieldDescriptor = descr;
         this.values = values;
         this.fieldPath = rootFieldPath.toBuilder()
@@ -84,6 +89,15 @@ abstract class FieldValidator<V> {
         this.isFirstField = fieldDescriptor.getIndex() == 0;
         this.required = getFieldOption(ValidationProto.required);
         this.ifMissingOption = getFieldOption(ValidationProto.ifMissing);
+    }
+
+    @SuppressWarnings({"unchecked", "IfMayBeConditional"})
+    static <T> ImmutableList<T> toValueList(Object fieldValue) {
+        if (fieldValue instanceof List) {
+            return ImmutableList.copyOf((List<T>) fieldValue);
+        } else {
+            return ImmutableList.of((T) fieldValue);
+        }
     }
 
     /**
@@ -220,10 +234,11 @@ abstract class FieldValidator<V> {
     /**
      * Returns a field validation option.
      *
+     * @param <T> the type of option
      * @param extension an extension key used to obtain a validation option
      */
-    protected final <Option> Option getFieldOption(GeneratedExtension<FieldOptions, Option> extension) {
-        final Option option = fieldDescriptor.getOptions().getExtension(extension);
+    protected final <T> T getFieldOption(GeneratedExtension<FieldOptions, T> extension) {
+        final T option = fieldDescriptor.getOptions().getExtension(extension);
         return option;
     }
 

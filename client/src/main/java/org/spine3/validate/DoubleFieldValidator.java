@@ -20,7 +20,6 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
@@ -43,8 +42,8 @@ class DoubleFieldValidator extends FloatFieldValidatorBase<Double> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    DoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+    DoubleFieldValidator(FieldDescriptor descriptor, Object fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, FieldValidator.<Double>toValueList(fieldValues), rootFieldPath);
     }
 
     @Override

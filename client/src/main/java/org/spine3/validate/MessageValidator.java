@@ -82,14 +82,14 @@ public class MessageValidator {
         result.addAll(altFieldValidator.validate(message));
     }
 
-    private void validateFields(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private void validateFields(Message message,
+                                ImmutableList.Builder<ConstraintViolation> result) {
         final Descriptor msgDescriptor = message.getDescriptorForType();
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {
             final Object value = message.getField(field);
-            final FieldValidator<?> fieldValidator = FieldValidatorFactory.create(field,
-                                                                                  value,
-                                                                                  rootFieldPath);
+            final FieldValidator<?> fieldValidator =
+                    FieldValidatorFactory.create(field, value, rootFieldPath);
             final List<ConstraintViolation> violations = fieldValidator.validate();
             result.addAll(violations);
         }

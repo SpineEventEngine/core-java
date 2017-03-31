@@ -20,7 +20,6 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
@@ -44,9 +43,18 @@ class ByteStringFieldValidator extends FieldValidator<ByteString> {
      * @param rootFieldPath a path to the root field (if present)
      */
     ByteStringFieldValidator(FieldDescriptor descriptor,
-                             ImmutableList<ByteString> fieldValues,
+                             Object fieldValues,
                              FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath, false);
+        super(descriptor,
+              FieldValidator.<ByteString>toValueList(fieldValues),
+              rootFieldPath,
+              false);
+    }
+
+    @Override
+    protected boolean isValueNotSet(ByteString value) {
+        final boolean result = value.isEmpty();
+        return result;
     }
 
     @Override
@@ -64,11 +72,5 @@ class ByteStringFieldValidator extends FieldValidator<ByteString> {
                                                                  .setFieldPath(getFieldPath())
                                                                  .build();
         addViolation(violation);
-    }
-
-    @Override
-    protected boolean isValueNotSet(ByteString value) {
-        final boolean result = value.isEmpty();
-        return result;
     }
 }

@@ -20,18 +20,18 @@
 
 package org.spine3.validate;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import org.spine3.base.FieldPath;
 
 import java.util.List;
 
 /**
- * Validates fields of type {@link Descriptors.EnumValueDescriptor}.
+ * Validates fields of type {@link EnumValueDescriptor}.
  *
  * @author Dmitry Kashcheiev
  */
-class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor> {
+class EnumFieldValidator extends FieldValidator<EnumValueDescriptor> {
 
     /**
      * Creates a new validator instance.
@@ -41,13 +41,16 @@ class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor>
      * @param rootFieldPath a path to the root field (if present)
      */
     EnumFieldValidator(Descriptors.FieldDescriptor descriptor,
-                       ImmutableList<Descriptors.EnumValueDescriptor> fieldValues,
+                       Object fieldValues,
                        FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath, false);
+        super(descriptor,
+              FieldValidator.<EnumValueDescriptor>toValueList(fieldValues),
+              rootFieldPath,
+              false);
     }
 
     @Override
-    protected boolean isValueNotSet(Descriptors.EnumValueDescriptor value) {
+    protected boolean isValueNotSet(EnumValueDescriptor value) {
         final int intValue = value.getNumber();
         final boolean result = intValue == 0;
         return result;
