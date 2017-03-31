@@ -199,7 +199,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
     }
 
     /**
-     * Verifies the new entity state.
+     * Verifies the new entity state and returns {@link ConstraintViolation}s, if any.
      *
      * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message)
      * message validation}.
