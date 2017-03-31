@@ -47,6 +47,7 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -65,6 +66,7 @@ import static org.spine3.server.aggregate.Given.Event.projectCreated;
 import static org.spine3.server.aggregate.Given.Event.projectStarted;
 import static org.spine3.server.aggregate.Given.Event.taskAdded;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.aggregate.Project.newBuilder;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
@@ -78,8 +80,9 @@ public class AggregateShould {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
+    private static final TenantId TENANT_ID = newTenantUuid();
     private static final CommandContext COMMAND_CONTEXT = createCommandContext();
-    private static final EventContext EVENT_CONTEXT = createEventContext(ID);
+    private static final EventContext EVENT_CONTEXT = createEventContext(ID, TENANT_ID);
 
     private final CreateProject createProject = Given.CommandMessage.createProject(ID);
     private final AddTask addTask = Given.CommandMessage.addTask(ID);
@@ -444,7 +447,8 @@ public class AggregateShould {
     }
 
     /** Class only for test cases: exception if missing command handler or missing event applier. */
-    private static class TestAggregateForCaseMissingHandlerOrApplier extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class TestAggregateForCaseMissingHandlerOrApplier
+                   extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -571,7 +575,7 @@ public class AggregateShould {
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // because we need it for checking.
             final Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
@@ -587,7 +591,7 @@ public class AggregateShould {
                                                      .addEvent(projectCreated())
                                                      .build());
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // ... because we need it for checking.
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // because we need it for checking.
             final Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
@@ -639,16 +643,16 @@ public class AggregateShould {
     private static List<Event> getProjectEvents() {
 
         final List<Event> events = ImmutableList.<Event>builder()
-                .add(projectCreated(ID, EVENT_CONTEXT.toBuilder()
-                                                     .setVersion(newVersionWithNumber(2))
-                                                     .build()))
-                .add(taskAdded(ID, EVENT_CONTEXT.toBuilder()
-                                                .setVersion(newVersionWithNumber(3))
-                                                .build()))
-                .add(projectStarted(ID, EVENT_CONTEXT.toBuilder()
-                                                     .setVersion(newVersionWithNumber(4))
-                                                     .build()))
+                .add(projectCreated(ID, withVersion(EVENT_CONTEXT, 1)))
+                .add(taskAdded(ID, withVersion(EVENT_CONTEXT, 3)))
+                .add(projectStarted(ID, withVersion(EVENT_CONTEXT, 4)))
                 .build();
         return events;
+    }
+
+    private static EventContext withVersion(EventContext eventContext, int versionNumber) {
+        return eventContext.toBuilder()
+                           .setVersion(newVersionWithNumber(versionNumber))
+                           .build();
     }
 }

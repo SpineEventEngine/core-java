@@ -45,9 +45,11 @@ import static org.spine3.protobuf.Durations2.minutes;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
-        "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
-        "ClassWithTooManyMethods", "OverlyCoupledClass" /* we test many data types and utility methods */})
+@SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check
+                                           handling of preconditions */,
+                   "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
+                   "ClassWithTooManyMethods",
+                   "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
     @Test

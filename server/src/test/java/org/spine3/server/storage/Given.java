@@ -20,11 +20,9 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Any;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.command.AddTask;
 import org.spine3.test.storage.command.CreateProject;
@@ -32,9 +30,10 @@ import org.spine3.test.storage.command.StartProject;
 import org.spine3.test.storage.event.ProjectCreated;
 import org.spine3.test.storage.event.ProjectStarted;
 import org.spine3.test.storage.event.TaskAdded;
+import org.spine3.testdata.TestEventContextFactory;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
+import static org.spine3.test.Tests.newTenantUuid;
 
 public class Given {
 
@@ -50,14 +49,6 @@ public class Given {
     }
 
     public static class EventMessage {
-
-        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
-        private static final TaskAdded TASK_ADDED = taskAdded(DUMMY_PROJECT_ID);
-        private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
-        private static final Any PROJECT_CREATED_ANY = AnyPacker.pack(PROJECT_CREATED);
-        private static final Any TASK_ADDED_ANY = AnyPacker.pack(TASK_ADDED);
-        private static final Any PROJECT_STARTED_ANY = AnyPacker.pack(PROJECT_STARTED);
 
         private EventMessage() {
         }
@@ -124,7 +115,10 @@ public class Given {
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            return projectCreated(projectId, createEventContext(projectId));
+            final EventContext eventContext =
+                    TestEventContextFactory.createEventContext(projectId,
+                                                               newTenantUuid());
+            return projectCreated(projectId, eventContext);
         }
 
         public static Event projectCreated(ProjectId projectId, EventContext context) {
@@ -139,11 +133,6 @@ public class Given {
             return event;
         }
 
-        public static Event projectStarted(ProjectId projectId, EventContext context) {
-            final ProjectStarted msg = EventMessage.projectStarted(projectId);
-            final Event event = Events.createEvent(msg, context);
-            return event;
-        }
     }
 
 

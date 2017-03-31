@@ -43,7 +43,10 @@ public abstract class MessageField {
     /** The prefix of generated getter methods for fields. */
     private static final String GETTER_METHOD_PREFIX = "get";
 
-    /** By convention underscore is used for separating words in field names of Protobuf messages. */
+    /**
+     * By convention underscore is used for separating words in field names
+     * of Protobuf messages.
+     */
     private static final char PROPERTY_NAME_SEPARATOR = '_';
 
     /** A zero-based index of the field in a Protobuf message. */
@@ -58,7 +61,8 @@ public abstract class MessageField {
      * @param index the zero-based index of the field
      */
     protected MessageField(int index) {
-        checkArgument(index >= 0, "Message field index must be a positive value, encountered: " + index);
+        final String message = "Message field index must be a positive value, encountered: ";
+        checkArgument(index >= 0, message + index);
         this.index = index;
     }
 
@@ -98,7 +102,8 @@ public abstract class MessageField {
      * @param fieldName a name of the field at the required index
      * @return new exception instance
      */
-    protected abstract RuntimeException createUnavailableFieldException(Message message, String fieldName);
+    protected abstract RuntimeException createUnavailableFieldException(Message message,
+                                                                        String fieldName);
 
     /**
      * Verifies if a field is available in the passed message.
@@ -137,7 +142,9 @@ public abstract class MessageField {
      * @return field descriptor
      */
     public static FieldDescriptor getFieldDescriptor(Message msg, int fieldIndex) {
-        final FieldDescriptor result = msg.getDescriptorForType().getFields().get(fieldIndex);
+        final FieldDescriptor result = msg.getDescriptorForType()
+                                          .getFields()
+                                          .get(fieldIndex);
         return result;
     }
 

@@ -203,7 +203,7 @@ public class Timestamps2Should {
     }
 
     @Test
-    public void compare_two_timestamps_using_comparator_return_negative_int_if_first_less_than_second_one() {
+    public void compare_timestamps_return_negative_int_if_first_less_than_second_one() {
         final Timestamp time1 = getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
@@ -233,7 +233,7 @@ public class Timestamps2Should {
     }
 
     @Test
-    public void compare_two_timestamps_using_comparator_return_positive_int_if_first_greater_than_second_one() {
+    public void compare_timestamps_return_positive_int_if_first_greater_than_second_one() {
         final Timestamp currentTime = getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
@@ -312,7 +312,7 @@ public class Timestamps2Should {
         assertEquals(timestamp, convertedBack);
     }
 
-    @Test(expected = IllegalStateException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         // This uses TextFormat printing, for the output won't be parsable.
         final String time = Timestamps2.getCurrentTime()

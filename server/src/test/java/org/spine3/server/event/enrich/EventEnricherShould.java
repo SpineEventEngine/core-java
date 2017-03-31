@@ -29,11 +29,11 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
-import org.spine3.base.Subscribe;
 import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
@@ -52,7 +52,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.getEnrichment;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 public class EventEnricherShould {

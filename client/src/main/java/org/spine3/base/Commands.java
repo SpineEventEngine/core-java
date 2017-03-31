@@ -42,7 +42,6 @@ import java.util.UUID;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -109,7 +108,8 @@ public class Commands {
      * Creates a new command context with the current time.
      *
      * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by {@link org.spine3.client.CommandFactory#createCommand(Message)},
+     * Commands in client applications should be created by
+     * {@link org.spine3.client.CommandFactory#createCommand(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
@@ -161,8 +161,8 @@ public class Commands {
     public static CommandContext newContextBasedOn(CommandContext commandContext) {
         checkNotNull(commandContext);
         final CommandContext.Builder result = commandContext.toBuilder()
-                .setCommandId(generateId())
-                .setTimestamp(getCurrentTime());
+                                                            .setCommandId(generateId())
+                                                            .setTimestamp(getCurrentTime());
         return result.build();
     }
 
@@ -182,8 +182,8 @@ public class Commands {
 
         final Any packed = AnyPacker.pack(message);
         final Command.Builder result = Command.newBuilder()
-                                               .setMessage(packed)
-                                               .setContext(context);
+                                              .setMessage(packed)
+                                              .setContext(context);
         return result.build();
     }
 
@@ -269,7 +269,8 @@ public class Commands {
      * Checks if the file is for commands.
      *
      * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX}, {@code false} otherwise
+     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX},
+     * {@code false} otherwise
      */
     public static boolean isCommandsFile(FileDescriptor file) {
         checkNotNull(file);
@@ -286,7 +287,8 @@ public class Commands {
      * Checks if the command is scheduled to be delivered later.
      *
      * @param command a command to check
-     * @return {@code true} if the command context has a scheduling option set, {@code false} otherwise
+     * @return {@code true} if the command context has a scheduling option set,
+     * {@code false} otherwise
      */
     public static boolean isScheduled(Command command) {
         checkNotNull(command);
@@ -302,54 +304,6 @@ public class Commands {
     }
 
     /**
-     * Sets a new scheduling time to {@link Schedule}.
-     *
-     * @param command        a command to update
-     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
-     * @return an updated command
-     */
-    @Internal
-    public static Command setSchedulingTime(Command command, Timestamp schedulingTime) {
-        checkNotNull(command);
-        checkNotNull(schedulingTime);
-
-        final Duration delay = command.getContext()
-                                      .getSchedule()
-                                      .getDelay();
-        final Command result = setSchedule(command, delay, schedulingTime);
-        return result;
-    }
-
-    /**
-     * Updates {@link Schedule}.
-     *
-     * @param command        a command to update
-     * @param delay          a delay to set (see {@link Schedule#getDelay()} for details)
-     * @param schedulingTime the time when the command was scheduled by the {@code CommandScheduler}
-     * @return an updated command
-     */
-    @Internal
-    public static Command setSchedule(Command command, Duration delay, Timestamp schedulingTime) {
-        checkNotNull(command);
-        checkNotNull(delay);
-        checkValid(schedulingTime);
-
-        final CommandContext context = command.getContext();
-        final Schedule scheduleUpdated = context.getSchedule()
-                                                .toBuilder()
-                                                .setDelay(delay)
-                                                .setSchedulingTime(schedulingTime)
-                                                .build();
-        final CommandContext contextUpdated = context.toBuilder()
-                                                     .setSchedule(scheduleUpdated)
-                                                     .build();
-        final Command result = command.toBuilder()
-                                      .setContext(contextUpdated)
-                                      .build();
-        return result;
-    }
-
-    /**
      * Tests whether both command contexts are from the same actor
      * working under the same tenant.
      */
@@ -357,8 +311,10 @@ public class Commands {
     public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
-        return  c1.getActor().equals(c2.getActor()) &&
-                c1.getTenantId().equals(c2.getTenantId());
+        return c1.getActor()
+                 .equals(c2.getActor()) &&
+               c1.getTenantId()
+                 .equals(c2.getTenantId());
     }
 
     /**

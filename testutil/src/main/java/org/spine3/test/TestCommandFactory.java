@@ -29,6 +29,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.client.CommandFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import static org.spine3.test.Tests.newUserId;
@@ -48,12 +49,22 @@ public class TestCommandFactory extends CommandFactory {
                           .setZoneOffset(zoneOffset));
     }
 
+    protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset, TenantId tenantId) {
+        super(newBuilder().setActor(actor)
+                          .setZoneOffset(zoneOffset)
+                          .setTenantId(tenantId));
+    }
+
     public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {
         return new TestCommandFactory(newUserId(actor), zoneOffset);
     }
 
     public static TestCommandFactory newInstance(Class<?> testClass) {
         return newInstance(testClass.getName(), ZoneOffsets.UTC);
+    }
+
+    public static TestCommandFactory newInstance(Class<?> testClass, TenantId tenantId) {
+        return new TestCommandFactory(newUserId(testClass.getName()), ZoneOffsets.UTC, tenantId);
     }
 
     /** Creates new command with the passed timestamp. */

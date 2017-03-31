@@ -37,6 +37,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.TenantId;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,15 +61,17 @@ public class Sample {
     private Sample() {
     }
 
-    public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
-        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
+    public static Event eventBy(Message producerId, Class<? extends Message> eventClass,
+                                TenantId tenantId) {
+        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId, tenantId);
         final Message eventMessage = messageOfType(eventClass);
         final Event event = Events.createEvent(eventMessage, eventContext);
         return event;
     }
 
-    public static Event eventBy(Message producerId, Message eventMessage) {
-        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
+    public static Event eventBy(Message producerId, Message eventMessage,
+                                TenantId tenantId) {
+        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId, tenantId);
         final Event event = Events.createEvent(eventMessage, eventContext);
         return event;
     }
@@ -80,14 +83,14 @@ public class Sample {
     }
 
     /**
-     * Generates a new stub {@link Message.Builder builder} with all the fields set to {@link Random random} values.
+     * Generates a new stub {@link Message.Builder} with all the fields set to {@link Random random} values.
      *
      * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
      * may or may not have their default values ({@code 0} and {@code false}).
      *
      * @param clazz Java class of the stub message
      * @param <M>   type of the required message
-     * @param <B>   type of the {@link Message.Builder builder} for the message
+     * @param <B>   type of the {@link Message.Builder} for the message
      * @return new instance of the {@link Message.Builder} for given type
      * @see #valueFor(FieldDescriptor)
      */

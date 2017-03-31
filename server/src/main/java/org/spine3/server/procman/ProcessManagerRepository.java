@@ -22,8 +22,6 @@ package org.spine3.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -40,7 +38,6 @@ import org.spine3.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
@@ -76,7 +73,7 @@ public abstract class ProcessManagerRepository<I,
 
     /** {@inheritDoc} */
     protected ProcessManagerRepository(BoundedContext boundedContext) {
-        super(boundedContext, EventDispatchingRepository.<I>producerFromFirstMessageField());
+        super(EventDispatchingRepository.<I>producerFromFirstMessageField());
         this.boundedContext = boundedContext;
     }
 
@@ -120,7 +117,7 @@ public abstract class ProcessManagerRepository<I,
         final CommandClass commandClass = envelope.getMessageClass();
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
-        final P manager = loadOrCreate(id);
+        final P manager = findOrCreate(id);
         final List<Event> events = manager.dispatchCommand(commandMessage, context);
         store(manager);
         postEvents(events);
@@ -161,13 +158,9 @@ public abstract class ProcessManagerRepository<I,
 
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
-        final P manager = loadOrCreate(id);
-        try {
-            manager.dispatchEvent(eventMessage, context);
-            store(manager);
-        } catch (InvocationTargetException e) {
-            log().error("Error during dispatching event", e);
-        }
+        final P manager = findOrCreate(id);
+        manager.dispatchEvent(eventMessage, context);
+        store(manager);
     }
 
     /**
@@ -183,8 +176,8 @@ public abstract class ProcessManagerRepository<I,
      */
     @Override
     @CheckReturnValue
-    protected P loadOrCreate(I id) {
-        final P result = super.loadOrCreate(id);
+    protected P findOrCreate(I id) {
+        final P result = super.findOrCreate(id);
         final CommandBus commandBus = getBoundedContext().getCommandBus();
         result.setCommandBus(commandBus);
         return result;
@@ -208,15 +201,5 @@ public abstract class ProcessManagerRepository<I,
                                                     .getName();
             throw newIllegalArgumentException("Unexpected event of class: %s", eventClassName);
         }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(ProcessManagerRepository.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
     }
 }

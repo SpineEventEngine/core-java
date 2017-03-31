@@ -69,15 +69,17 @@ public class AggregateRepositoryViewsShould {
         postCommand("createCommand");
     }
 
-    /** Creates a command and posts it to {@code CommandBus} for being processed by the repository. */
+    /** Creates a command and posts it to {@code CommandBus}
+     * for being processed by the repository. */
     private void postCommand(String cmd) {
-        final Command command = commandFactory.createCommand(SHRepository.createCommandMessage(id, cmd));
+        final Command command =
+                commandFactory.createCommand(SHRepository.createCommandMessage(id, cmd));
         boundedContext.getCommandBus().post(command, emptyObserver());
     }
 
     @Test
     public void load_aggregate_if_no_status_flags_set() {
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
         final SHAggregate agg = aggregate.get();
@@ -89,7 +91,7 @@ public class AggregateRepositoryViewsShould {
     public void not_load_aggregates_with_archived_status() {
         postCommand("archive");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertFalse(aggregate.isPresent());
     }
@@ -98,7 +100,7 @@ public class AggregateRepositoryViewsShould {
     public void not_load_aggregates_with_deleted_status() {
         postCommand("delete");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertFalse(aggregate.isPresent());
     }
@@ -174,7 +176,8 @@ public class AggregateRepositoryViewsShould {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final IdCommandFunction<Long, Message> parsingFunc = new IdCommandFunction<Long, Message>() {
+        private static final IdCommandFunction<Long, Message> parsingFunc =
+                new IdCommandFunction<Long, Message>() {
             @Override
             public Long apply(Message message, CommandContext context) {
                 final Long result = getId((StringValue)message);

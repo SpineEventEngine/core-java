@@ -33,14 +33,19 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
-@SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling of preconditions */,
+@SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling
+                                        of preconditions */,
         "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
-        "ClassWithTooManyMethods" , "OverlyCoupledClass" /* we test many data types and utility methods */})
+        "ClassWithTooManyMethods",
+        "OverlyCoupledClass" /* we test many data types and utility methods */})
 public class ChangesShould {
 
-    private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL = "do_not_accept_null_previousValue";
-    private static final String ERR_NEW_VALUE_CANNOT_BE_NULL = "do_not_accept_null_newValue";
-    private static final String ERR_VALUES_CANNOT_BE_EQUAL = "do_not_accept_equal_values";
+    private static final String ERR_PREVIOUS_VALUE_CANNOT_BE_NULL =
+            "do_not_accept_null_previousValue";
+    private static final String ERR_NEW_VALUE_CANNOT_BE_NULL =
+            "do_not_accept_null_newValue";
+    private static final String ERR_VALUES_CANNOT_BE_EQUAL =
+            "do_not_accept_equal_values";
 
     @Test
     public void have_private_constructor() {
@@ -80,7 +85,8 @@ public class ChangesShould {
     }
 
     private static String randomUuid() {
-        return UUID.randomUUID().toString();
+        return UUID.randomUUID()
+                   .toString();
     }
 
     @Test

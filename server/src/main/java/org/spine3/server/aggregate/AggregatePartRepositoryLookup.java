@@ -112,7 +112,7 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
         if (!idClass.equals(repoIdClass)) {
             final String errMsg = format("The ID class of the aggregate part repository (%s) " +
                                          "does not match the ID class of the AggregateRoot (%s)",
-                                         repoIdClass, 
+                                         repoIdClass,
                                          idClass);
             throw new IllegalStateException(errMsg);
         }

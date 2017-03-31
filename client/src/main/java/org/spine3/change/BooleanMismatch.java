@@ -67,7 +67,10 @@ public class BooleanMismatch {
      * @param version  the current version of the entity
      * @return new {@code ValueMismatch} instance
      */
-    private static ValueMismatch of(boolean expected, boolean actual, boolean newValue, int version) {
+    private static ValueMismatch of(boolean expected,
+                                    boolean actual,
+                                    boolean newValue,
+                                    int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))
                                                            .setActual(pack(actual))

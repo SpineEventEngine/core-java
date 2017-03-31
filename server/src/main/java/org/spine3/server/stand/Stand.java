@@ -379,7 +379,7 @@ public class Stand implements AutoCloseable {
     public static class Builder {
         private StandStorage storage;
         private Executor callbackExecutor;
-
+        private boolean multitenant;
         /**
          * Set an instance of {@link StandStorage} to be used to persist
          * the latest aggregate states.
@@ -418,6 +418,15 @@ public class Stand implements AutoCloseable {
             return storage;
         }
 
+        public Builder setMultitenant(boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
+        }
+
+        public boolean isMultitenant() {
+            return multitenant;
+        }
+
         /**
          * Build an instance of {@code Stand}.
          *
@@ -425,7 +434,7 @@ public class Stand implements AutoCloseable {
          */
         public Stand build() {
             if (storage == null) {
-                storage = InMemoryStorageFactory.getInstance()
+                storage = InMemoryStorageFactory.getInstance(multitenant)
                                                 .createStandStorage();
             }
             if (callbackExecutor == null) {
