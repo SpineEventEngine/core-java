@@ -23,19 +23,16 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.base.Error;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.test.entity.number.NaturalNumber;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static java.lang.System.lineSeparator;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
-import static org.spine3.server.entity.EntityStateValidationError.INVALID_ENTITY_STATE;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Illia Shepilov
@@ -78,15 +75,9 @@ public class AbstractEntityShould {
 
             fail("Exception expected.");
         } catch (InvalidEntityStateException e) {
-            final Error error = e.getError();
-
-            assertEquals(invalidNaturalNumber, e.getEntityState());
-            assertEquals(EntityStateValidationError.getDescriptor()
-                                                   .getFullName(), error.getType());
-            assertEquals(INVALID_ENTITY_STATE.getNumber(), error.getCode());
-            assertEquals("Entity state does match the validation constraints. Violation list:"
-                         + lineSeparator() + "Number must be greater than or equal to 0.",
-                         error.getMessage());
+            assertSize(1, e.getError()
+                           .getValidationError()
+                           .getConstraintViolationList());
         }
     }
 
