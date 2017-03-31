@@ -33,6 +33,16 @@ import "google/protobuf/wrappers.proto";
 import "spine/annotations.proto";
 import "spine/validate.proto";
 
+// Messages for general validation tests.
+
+message ProjectId {
+    string value = 1;
+}
+
+message TaskId {
+    string value = 1;
+}
+
 // Messages for "required" option tests.
 
 message RequiredMsgFieldValue {

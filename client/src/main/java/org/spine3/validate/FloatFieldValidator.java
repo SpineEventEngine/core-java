@@ -18,43 +18,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import com.google.protobuf.FloatValue;
-import org.junit.Test;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 
-import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.spine3.protobuf.Values.newFloatValue;
 
 /**
+ * Validates fields of {@link Float} types.
+ *
  * @author Alexander Litus
  */
-public class FloatFieldValidatorShould {
+class FloatFieldValidator extends FloatFieldValidatorBase<Float> {
 
-    private static final Float VALUE = 0.5F;
-    private static final Float NEGATIVE_VALUE = -0.5F;
-
-    private final FloatFieldValidator validator =
-            new FloatFieldValidator(Any.getDescriptor().getFields().get(0),
-                                    ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
-
-    @Test
-    public void convert_string_to_number() {
-        assertEquals(VALUE, validator.toNumber(VALUE.toString()));
+    /**
+     * Creates a new validator instance.
+     *
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
+     * @param rootFieldPath a path to the root field (if present)
+     */
+    FloatFieldValidator(FieldDescriptor descriptor, ImmutableList<Float> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
     }
 
-    @Test
-    public void return_absolute_number_value() {
-        assertEquals(VALUE, validator.getAbs(NEGATIVE_VALUE));
+    @Override
+    protected Float toNumber(String value) {
+        final Float min = Float.valueOf(value);
+        return min;
     }
 
-    @Test
-    public void wrap_to_any() {
-        final Any any = validator.wrap(VALUE);
-        final FloatValue msg = AnyPacker.unpack(any);
-        assertEquals(VALUE, (Float) msg.getValue());
+    @Override
+    protected Float getAbs(Float value) {
+        final Float abs = abs(value);
+        return abs;
+    }
+
+    @Override
+    protected Any wrap(Float value) {
+        final Any any = AnyPacker.pack(newFloatValue(value));
+        return any;
     }
 }

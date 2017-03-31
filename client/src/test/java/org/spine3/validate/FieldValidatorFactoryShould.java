@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
@@ -34,7 +34,7 @@ import org.spine3.test.validate.msg.RequiredMsgFieldValue;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.validate.FieldValidatorFactory.create;
+import static org.spine3.validate.FieldValidatorFactory.create;
 
 /**
  * @author Alexander Litus

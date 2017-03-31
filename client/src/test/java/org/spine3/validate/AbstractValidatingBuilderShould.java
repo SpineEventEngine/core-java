@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
@@ -27,11 +27,10 @@ import org.junit.Test;
 import org.spine3.base.ConversionException;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
-import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.TaskId;
 import org.spine3.test.types.Task;
 import org.spine3.test.validate.msg.PatternStringFieldValue;
-import org.spine3.validate.ConstraintViolationThrowable;
+import org.spine3.test.validate.msg.ProjectId;
+import org.spine3.test.validate.msg.TaskId;
 
 import java.lang.reflect.Type;
 import java.util.List;

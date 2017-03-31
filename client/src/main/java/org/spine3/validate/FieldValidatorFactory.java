@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.ByteString;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
@@ -81,7 +81,7 @@ class FieldValidatorFactory {
                 final ImmutableList<Boolean> booleans = toValueList(fieldValue);
                 return new BooleanFieldValidator(descriptor, booleans, rootFieldPath);
             case ENUM:
-                final ImmutableList<Descriptors.EnumValueDescriptor> enums = toValueList(fieldValue);
+                final ImmutableList<EnumValueDescriptor> enums = toValueList(fieldValue);
                 return new EnumFieldValidator(descriptor, enums, rootFieldPath);
             default:
                 throw fieldTypeIsNotSupported(descriptor);
@@ -110,7 +110,8 @@ class FieldValidatorFactory {
     }
 
     private static IllegalArgumentException fieldTypeIsNotSupported(FieldDescriptor descriptor) {
-        final String msg = format("The field type is not supported for validation: %s", descriptor.getType());
+        final String msg = format("The field type is not supported for validation: %s",
+                                  descriptor.getType());
         throw new IllegalArgumentException(msg);
     }
 }

@@ -18,50 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Int64Value;
+import org.junit.Test;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 
-import static java.lang.Math.abs;
-import static org.spine3.protobuf.Values.newLongValue;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Validates fields of {@link Long} number types.
- *
  * @author Alexander Litus
  */
-class LongFieldValidator extends NumberFieldValidator<Long> {
+public class LongFieldValidatorShould {
 
-    /**
-     * Creates a new validator instance.
-     *
-     * @param descriptor    a descriptor of the field to validate
-     * @param fieldValues   values to validate
-     * @param rootFieldPath a path to the root field (if present)
-     */
-    LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+    private static final Long VALUE = 2L;
+    private static final Long NEGATIVE_VALUE = -2L;
+
+    private final LongFieldValidator validator =
+            new LongFieldValidator(Any.getDescriptor().getFields().get(0),
+                                   ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
+
+    @Test
+    public void convert_string_to_number() {
+        assertEquals(VALUE, validator.toNumber(VALUE.toString()));
     }
 
-    @Override
-    protected Long toNumber(String value) {
-        final Long number = Long.valueOf(value);
-        return number;
+    @Test
+    public void return_absolute_number_value() {
+        assertEquals(VALUE, validator.getAbs(NEGATIVE_VALUE));
     }
 
-    @Override
-    protected Long getAbs(Long value) {
-        final Long abs = abs(value);
-        return abs;
-    }
-
-    @Override
-    protected Any wrap(Long value) {
-        final Any any = AnyPacker.pack(newLongValue(value));
-        return any;
+    @Test
+    public void wrap_to_any() {
+        final Any any = validator.wrap(VALUE);
+        final Int64Value msg = AnyPacker.unpack(any);
+        assertEquals(VALUE, (Long) msg.getValue());
     }
 }

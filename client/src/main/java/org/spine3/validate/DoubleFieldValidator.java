@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
@@ -27,14 +27,14 @@ import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Values.newIntValue;
+import static org.spine3.protobuf.Values.newDoubleValue;
 
 /**
- * Validates fields of {@link Integer} types.
+ * Validates fields of {@link Double} types.
  *
  * @author Alexander Litus
  */
-class IntegerFieldValidator extends NumberFieldValidator<Integer> {
+class DoubleFieldValidator extends FloatFieldValidatorBase<Double> {
 
     /**
      * Creates a new validator instance.
@@ -43,25 +43,25 @@ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues, FieldPath rootFieldPath) {
+    DoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> fieldValues, FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 
     @Override
-    protected Integer toNumber(String value) {
-        final Integer number = Integer.valueOf(value);
-        return number;
+    protected Double toNumber(String value) {
+        final Double min = Double.valueOf(value);
+        return min;
     }
 
     @Override
-    protected Integer getAbs(Integer value) {
-        final Integer abs = abs(value);
+    protected Double getAbs(Double value) {
+        final Double abs = abs(value);
         return abs;
     }
 
     @Override
-    protected Any wrap(Integer value) {
-        final Any any = AnyPacker.pack(newIntValue(value));
+    protected Any wrap(Double value) {
+        final Any any = AnyPacker.pack(newDoubleValue(value));
         return any;
     }
 }

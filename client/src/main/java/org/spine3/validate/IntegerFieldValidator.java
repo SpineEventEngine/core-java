@@ -18,43 +18,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import com.google.protobuf.Int32Value;
-import org.junit.Test;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 
-import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.spine3.protobuf.Values.newIntValue;
 
 /**
+ * Validates fields of {@link Integer} types.
+ *
  * @author Alexander Litus
  */
-public class IntegerFieldValidatorShould {
+class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
-    private static final Integer VALUE = 2;
-    private static final Integer NEGATIVE_VALUE = -2;
-
-    private final IntegerFieldValidator validator =
-            new IntegerFieldValidator(Any.getDescriptor().getFields().get(0),
-                                      ImmutableList.of(VALUE), FieldPath.getDefaultInstance());
-
-    @Test
-    public void convert_string_to_number() {
-        assertEquals(VALUE, validator.toNumber(VALUE.toString()));
+    /**
+     * Creates a new validator instance.
+     *
+     * @param descriptor    a descriptor of the field to validate
+     * @param fieldValues   values to validate
+     * @param rootFieldPath a path to the root field (if present)
+     */
+    IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
     }
 
-    @Test
-    public void return_absolute_number_value() {
-        assertEquals(VALUE, validator.getAbs(NEGATIVE_VALUE));
+    @Override
+    protected Integer toNumber(String value) {
+        final Integer number = Integer.valueOf(value);
+        return number;
     }
 
-    @Test
-    public void wrap_to_any() {
-        final Any any = validator.wrap(VALUE);
-        final Int32Value msg = AnyPacker.unpack(any);
-        assertEquals(VALUE, (Integer) msg.getValue());
+    @Override
+    protected Integer getAbs(Integer value) {
+        final Integer abs = abs(value);
+        return abs;
+    }
+
+    @Override
+    protected Any wrap(Integer value) {
+        final Any any = AnyPacker.pack(newIntValue(value));
+        return any;
     }
 }

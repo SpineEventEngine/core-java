@@ -27,12 +27,15 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.command.EventFactory.createEvent;
+import static org.spine3.server.command.EventFactory.generateId;
 import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.newUuidValue;
 
@@ -45,6 +48,14 @@ public class EventFactoryShould {
     public void setUp() {
         stringValue = newUuidValue();
         context = newEventContext();
+    }
+
+    @Test
+    public void generate_event_id() {
+        final EventId result = generateId();
+
+        assertFalse(result.getUuid()
+                          .isEmpty());
     }
 
     @Test

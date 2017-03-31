@@ -18,24 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.ByteString;
+import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.ConstraintViolation;
+import org.spine3.protobuf.AnyPacker;
 
-import java.util.List;
+import static java.lang.Math.abs;
+import static org.spine3.protobuf.Values.newLongValue;
 
 /**
- * Validates fields of type {@link ByteString}.
+ * Validates fields of {@link Long} number types.
  *
  * @author Alexander Litus
  */
-class ByteStringFieldValidator extends FieldValidator<ByteString> {
-
-    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a ByteString.";
+class LongFieldValidator extends NumberFieldValidator<Long> {
 
     /**
      * Creates a new validator instance.
@@ -44,32 +43,25 @@ class ByteStringFieldValidator extends FieldValidator<ByteString> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    ByteStringFieldValidator(FieldDescriptor descriptor,
-                             ImmutableList<ByteString> fieldValues,
-                             FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath, false);
+    LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
     }
 
     @Override
-    protected List<ConstraintViolation> validate() {
-        checkIfRequiredAndNotSet();
-        final List<ConstraintViolation> violations = super.validate();
-        return violations;
+    protected Long toNumber(String value) {
+        final Long number = Long.valueOf(value);
+        return number;
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest")
-    protected void validateEntityId() {
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                                                                 .setMsgFormat(INVALID_ID_TYPE_MSG)
-                                                                 .setFieldPath(getFieldPath())
-                                                                 .build();
-        addViolation(violation);
+    protected Long getAbs(Long value) {
+        final Long abs = abs(value);
+        return abs;
     }
 
     @Override
-    protected boolean isValueNotSet(ByteString value) {
-        final boolean result = value.isEmpty();
-        return result;
+    protected Any wrap(Long value) {
+        final Any any = AnyPacker.pack(newLongValue(value));
+        return any;
     }
 }

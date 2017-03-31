@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors;
@@ -65,7 +65,6 @@ import org.spine3.test.validate.msg.RequiredStringFieldValue;
 import org.spine3.test.validate.msg.TimeInFutureFieldValue;
 import org.spine3.test.validate.msg.TimeInPastFieldValue;
 import org.spine3.test.validate.msg.TimeWithoutOptsFieldValue;
-import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.Time;
 import org.spine3.validate.internal.ValidationProto;
 

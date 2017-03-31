@@ -18,21 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Descriptors;
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.ConstraintViolation;
-
-import java.util.List;
 
 /**
- * Validates fields of type {@link Descriptors.EnumValueDescriptor}.
+ * A base for floating point number field validators.
  *
- * @author Dmitry Kashcheiev
+ * @author Alexander Litus
  */
-class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor> {
+abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends NumberFieldValidator<V> {
+
+    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
 
     /**
      * Creates a new validator instance.
@@ -41,23 +40,19 @@ class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor>
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    EnumFieldValidator(Descriptors.FieldDescriptor descriptor,
-                       ImmutableList<Descriptors.EnumValueDescriptor> fieldValues,
-                       FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath, false);
+    protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath);
     }
 
     @Override
-    protected boolean isValueNotSet(Descriptors.EnumValueDescriptor value) {
-        final int intValue = value.getNumber();
-        final boolean result = intValue == 0;
-        return result;
-    }
-
-    @Override
-    protected List<ConstraintViolation> validate() {
-        checkIfRequiredAndNotSet();
-        final List<ConstraintViolation> violations = super.validate();
-        return violations;
+    @SuppressWarnings("RefusedBequest")
+    protected void validateEntityId() {
+        final V value = getValues().get(0);
+        final ConstraintViolation violation = ConstraintViolation.newBuilder()
+                                                                 .setMsgFormat(INVALID_ID_TYPE_MSG)
+                                                                 .setFieldPath(getFieldPath())
+                                                                 .setFieldValue(wrap(value))
+                                                                 .build();
+        addViolation(violation);
     }
 }

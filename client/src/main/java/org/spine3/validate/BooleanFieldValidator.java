@@ -18,21 +18,22 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
-import com.google.protobuf.Descriptors.FieldDescriptor;
+import com.google.protobuf.Descriptors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.ConstraintViolation;
+
+import java.util.List;
 
 /**
- * A base for floating point number field validators.
+ * Validates fields of type {@link Boolean}.
  *
- * @author Alexander Litus
+ * @author Dmitry Kashcheiev
  */
-abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends NumberFieldValidator<V> {
-
-    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
+class BooleanFieldValidator extends FieldValidator<Boolean> {
 
     /**
      * Creates a new validator instance.
@@ -41,19 +42,37 @@ abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, fieldValues, rootFieldPath);
+    BooleanFieldValidator(Descriptors.FieldDescriptor descriptor,
+                          ImmutableList<Boolean> fieldValues,
+                          FieldPath rootFieldPath) {
+        super(descriptor, fieldValues, rootFieldPath, false);
+    }
+
+    /**
+     * In Protobuf there is no way to tell if the value is {@code false} or was not set.
+     *
+     * @return false
+     */
+    @Override
+    protected boolean isValueNotSet(Boolean value) {
+        return false;
     }
 
     @Override
-    @SuppressWarnings("RefusedBequest")
-    protected void validateEntityId() {
-        final V value = getValues().get(0);
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                                                                 .setMsgFormat(INVALID_ID_TYPE_MSG)
-                                                                 .setFieldPath(getFieldPath())
-                                                                 .setFieldValue(wrap(value))
-                                                                 .build();
-        addViolation(violation);
+    protected List<ConstraintViolation> validate() {
+        if (isRequiredField()) {
+            log().warn("'required' option not allowed for boolean field");
+        }
+        return super.validate();
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(BooleanFieldValidator.class);
+    }
+
+    private static Logger log() {
+        return LogSingleton.INSTANCE.value;
     }
 }

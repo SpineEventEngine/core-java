@@ -18,23 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
 /**
- * Validates fields of type {@link Boolean}.
+ * Validates fields of type {@link Descriptors.EnumValueDescriptor}.
  *
  * @author Dmitry Kashcheiev
  */
-class BooleanFieldValidator extends FieldValidator<Boolean> {
+class EnumFieldValidator extends FieldValidator<Descriptors.EnumValueDescriptor> {
 
     /**
      * Creates a new validator instance.
@@ -43,37 +40,23 @@ class BooleanFieldValidator extends FieldValidator<Boolean> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    BooleanFieldValidator(Descriptors.FieldDescriptor descriptor,
-                          ImmutableList<Boolean> fieldValues,
-                          FieldPath rootFieldPath) {
+    EnumFieldValidator(Descriptors.FieldDescriptor descriptor,
+                       ImmutableList<Descriptors.EnumValueDescriptor> fieldValues,
+                       FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
     }
 
-    /**
-     * In Protobuf there is no way to tell if the value is {@code false} or was not set.
-     *
-     * @return false
-     */
     @Override
-    protected boolean isValueNotSet(Boolean value) {
-        return false;
+    protected boolean isValueNotSet(Descriptors.EnumValueDescriptor value) {
+        final int intValue = value.getNumber();
+        final boolean result = intValue == 0;
+        return result;
     }
 
     @Override
     protected List<ConstraintViolation> validate() {
-        if (isRequiredField()) {
-            log().warn("'required' option not allowed for boolean field");
-        }
-        return super.validate();
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(BooleanFieldValidator.class);
-    }
-
-    private static Logger log() {
-        return LogSingleton.INSTANCE.value;
+        checkIfRequiredAndNotSet();
+        final List<ConstraintViolation> violations = super.validate();
+        return violations;
     }
 }

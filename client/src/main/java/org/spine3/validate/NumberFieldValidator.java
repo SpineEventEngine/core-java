@@ -18,14 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.DecimalMaxOption;
 import org.spine3.validate.internal.DecimalMinOption;
 import org.spine3.validate.internal.DigitsOption;

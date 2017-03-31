@@ -18,10 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package provides validation classes.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.server.validate;
+package org.spine3.validate;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+import com.google.common.collect.ImmutableList;
+import com.google.protobuf.Any;
+import org.junit.Test;
+import org.spine3.base.FieldPath;
+
+import static org.junit.Assert.assertFalse;
+
+/**
+ * @author dmitry.kashcheiev
+ */
+public class BooleanFieldValidatorShould {
+
+    private final BooleanFieldValidator validator =
+            new BooleanFieldValidator(Any.getDescriptor().getFields().get(0),
+                                      ImmutableList.of(false), FieldPath.getDefaultInstance());
+
+    @Test
+    public void convert_string_to_number() {
+        assertFalse(validator.isValueNotSet(false));
+    }
+}

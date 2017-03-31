@@ -49,7 +49,6 @@ import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.EventFactory.createEvent;
-import static org.spine3.server.command.EventFactory.generateId;
 import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -67,14 +66,6 @@ public class EventsShould {
     @Test
     public void have_private_ctor() {
         assertHasPrivateParameterlessCtor(Events.class);
-    }
-
-    @Test
-    public void generate_event_id() {
-        final EventId result = generateId();
-
-        assertFalse(result.getUuid()
-                          .isEmpty());
     }
 
     @Test

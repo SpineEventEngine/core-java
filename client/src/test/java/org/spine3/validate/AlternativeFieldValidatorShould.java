@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.Descriptor;
 import org.junit.Before;
@@ -26,7 +26,6 @@ import org.junit.Test;
 import org.spine3.base.FieldPath;
 import org.spine3.test.validate.msg.altfields.MessageWithMissingField;
 import org.spine3.test.validate.msg.altfields.PersonName;
-import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 

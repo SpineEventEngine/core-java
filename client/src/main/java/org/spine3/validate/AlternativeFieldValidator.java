@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
@@ -29,7 +29,6 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.List;

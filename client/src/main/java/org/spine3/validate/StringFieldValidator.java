@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.validate;
+package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.internal.PatternOption;
 import org.spine3.validate.internal.ValidationProto;
 
