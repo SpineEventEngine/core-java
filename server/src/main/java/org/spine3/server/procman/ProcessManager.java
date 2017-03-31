@@ -39,6 +39,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
+import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -123,14 +124,16 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      *
      * @param eventMessage the event to be handled by the process manager
      * @param context of the event
-     * @throws InvocationTargetException if an exception occurs during event dispatching
      */
-    protected void dispatchEvent(Message eventMessage, EventContext context)
-            throws InvocationTargetException {
+    protected void dispatchEvent(Message eventMessage, EventContext context) {
         checkNotNull(context);
         checkNotNull(eventMessage);
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
-        method.invoke(this, eventMessage, context);
+        try {
+            method.invoke(this, eventMessage, context);
+        } catch (InvocationTargetException e) {
+            throw wrappedCause(e);
+        }
     }
 
     /**

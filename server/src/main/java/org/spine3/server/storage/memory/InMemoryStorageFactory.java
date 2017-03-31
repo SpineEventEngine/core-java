@@ -76,7 +76,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      *
-     * NOTE: the parameter is unused.
+     * @param unused the parameter is not used in this implementation
      */
     @Override
     public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {
@@ -96,12 +96,18 @@ public class InMemoryStorageFactory implements StorageFactory {
         // NOP
     }
 
-    public static InMemoryStorageFactory getInstance() {
-        return Singleton.INSTANCE.singleTenantInstance;
+    @Override
+    public StorageFactory toSingleTenant() {
+        if (!isMultitenant()) {
+            return this;
+        }
+        return getInstance(false);
     }
 
-    public static InMemoryStorageFactory getMultitenantInstance() {
-        return Singleton.INSTANCE.multitenantInstance;
+    public static InMemoryStorageFactory getInstance(boolean multitenant) {
+        return multitenant
+               ? Singleton.INSTANCE.multiTenantInstance
+               : Singleton.INSTANCE.singleTenantInstance;
     }
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
@@ -109,8 +115,8 @@ public class InMemoryStorageFactory implements StorageFactory {
         INSTANCE;
         private final InMemoryStorageFactory singleTenantInstance =
                 new InMemoryStorageFactory(false);
-
-        private final InMemoryStorageFactory multitenantInstance =
+      
+        private final InMemoryStorageFactory multiTenantInstance =
                 new InMemoryStorageFactory(true);
     }
 }

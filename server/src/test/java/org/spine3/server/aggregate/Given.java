@@ -34,6 +34,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import java.util.List;
@@ -44,6 +45,7 @@ import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.testdata.TestEventContextFactory.createEventContext;
@@ -80,6 +82,7 @@ class Given {
 
     static class Event {
 
+        private static final TenantId TENANT_ID = newTenantUuid();
         private Event() {
         }
 
@@ -88,7 +91,7 @@ class Given {
         }
 
         static org.spine3.base.Event projectCreated(ProjectId projectId) {
-            return projectCreated(projectId, createEventContext(projectId));
+            return projectCreated(projectId, createEventContext(projectId, TENANT_ID));
         }
 
         static org.spine3.base.Event projectCreated(ProjectId projectId, EventContext context) {
@@ -98,7 +101,7 @@ class Given {
         }
 
         static org.spine3.base.Event taskAdded(ProjectId projectId) {
-            return taskAdded(projectId, createEventContext(projectId));
+            return taskAdded(projectId, createEventContext(projectId, TENANT_ID));
         }
 
         static org.spine3.base.Event taskAdded(ProjectId projectId, EventContext context) {

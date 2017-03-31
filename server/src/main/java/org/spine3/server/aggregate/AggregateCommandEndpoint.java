@@ -20,36 +20,61 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.tenant.TenantAwareOperation;
+
+import javax.annotation.Nullable;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
  *
+ * <p>Loading and storing an aggregate is a tenant-sensitive operation,
+ * which depends on the tenant ID of the command we dispatch.
+ *
  * @param <I> the type of the aggregate IDs
- * @param <A> the type of the aggregates managed by this repository
+ * @param <A> the type of the aggregates managed by the parent repository
  * @author Alexander Yevsyukov
  */
-class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
+class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
+        extends TenantAwareOperation {
 
     private final AggregateRepository<I, A> repository;
+    private final CommandEnvelope command;
 
-    private AggregateCommandEndpoint(AggregateRepository<I, A> repository) {
-        this.repository = repository;
+    @Nullable
+    private A aggregate;
+
+    static <I, A extends Aggregate<I, ?, ?>>
+            AggregateCommandEndpoint<I, A> createFor(AggregateRepository<I, A> repository,
+                                                     CommandEnvelope command) {
+        return new AggregateCommandEndpoint<>(repository, command);
     }
 
-    static <I, A extends Aggregate<I, ?, ?>> AggregateCommandEndpoint<I, A> createFor(
-            AggregateRepository<I, A> repository) {
-        return new AggregateCommandEndpoint<>(repository);
+    private AggregateCommandEndpoint(AggregateRepository<I, A> repository,
+                                     CommandEnvelope command) {
+        super(command.getCommandContext().getTenantId());
+        this.repository = repository;
+        this.command = command;
+    }
+
+    @Override
+    public void run() {
+        aggregate = receive(command);
+    }
+
+    Optional<A> getAggregate() {
+        return Optional.fromNullable(aggregate);
     }
 
     /**
      * Dispatches the command.
      */
-    A receive(CommandEnvelope envelope) {
+    private A receive(CommandEnvelope envelope) {
         final Action<I, A> action = new Action<>(this, envelope);
         final A result = action.loadAndDispatch();
         return result;
@@ -84,7 +109,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>> {
          *
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
          * concurrent actor changes, the event count from the last snapshot should remain the same
-         * during the {@linkplain AggregateRepository#load(Object) loading}
+         * during the {@linkplain AggregateRepository#find(Object) loading}
          * and {@linkplain Aggregate#dispatchCommand(Message, CommandContext) command dispatching}.
          *
          * <p>In case the new events are detected, the loading and command

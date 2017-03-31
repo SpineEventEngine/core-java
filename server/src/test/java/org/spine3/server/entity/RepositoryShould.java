@@ -21,9 +21,9 @@
 package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
@@ -31,8 +31,11 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareFunction0;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
+import org.spine3.users.TenantId;
 
 import java.util.Iterator;
 import java.util.List;
@@ -42,19 +45,29 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.test.Tests.newTenantUuid;
 
 public class RepositoryShould {
 
     private BoundedContext boundedContext;
     private Repository<ProjectId, ProjectEntity> repository;
     private StorageFactory storageFactory;
+    private TenantId tenantId;
 
     @Before
     public void setUp() {
-        boundedContext = newBoundedContext();
-        repository = new TestRepo(boundedContext);
-        storageFactory = InMemoryStorageFactory.getInstance();
+        boundedContext = BoundedContext.newBuilder()
+                                       .setMultitenant(true)
+                                       .build();
+        repository = new TestRepo();
+        storageFactory = InMemoryStorageFactory.getInstance(boundedContext.isMultitenant());
+        tenantId = newTenantUuid();
+        //TODO:2017-03-26:alexander.yevsyukov: Have single-tenant version of tests too.
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        boundedContext.close();
     }
 
     //
@@ -87,7 +100,7 @@ public class RepositoryShould {
         }
 
         @Override
-        public Optional<EntityWithUnsupportedId> load(Exception id) {
+        public Optional<EntityWithUnsupportedId> find(Exception id) {
             return null;
         }
 
@@ -132,16 +145,12 @@ public class RepositoryShould {
                                                               .setId("CANNOT_BE_LOADED")
                                                               .build();
 
-        private TestRepo(BoundedContext boundedContext) {
-            super();
-        }
-
         @Override
-        public Optional<ProjectEntity> load(ProjectId id) {
+        public Optional<ProjectEntity> find(ProjectId id) {
             if (id.equals(troublesome)) {
                 return Optional.absent();
             }
-            return super.load(id);
+            return super.find(id);
         }
     }
 
@@ -185,32 +194,54 @@ public class RepositoryShould {
         assertNull(repository.getStorage());
     }
 
+    /**
+     * Creates three entities in the repository.
+     */
+    private void createAndStoreEntities() {
+        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                repository.initStorage(storageFactory);
+
+                createAndStore("Eins");
+                createAndStore("Zwei");
+                createAndStore("Drei");
+            }
+        };
+        op.execute();
+    }
+
     @Test
     public void iterate_over_entities() {
         createAndStoreEntities();
 
-        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
-        final List<ProjectEntity> entities = Lists.newArrayList(
-                repository.iterator(all)
-        );
+        final int numEntities = new TenantAwareFunction0<Integer>(tenantId) {
+            @Override
+            public Integer apply() {
+                final List<ProjectEntity> entities = Lists.newArrayList(getIterator(tenantId));
+                return entities.size();
+            }
+        }.execute();
+        
+        assertEquals(3, numEntities);
+    }
 
-        assertEquals(3, entities.size());
+    private Iterator<ProjectEntity> getIterator(TenantId tenantId) {
+        final TenantAwareFunction0<Iterator<ProjectEntity>> op =
+                new TenantAwareFunction0<Iterator<ProjectEntity>>(tenantId) {
+                    @Override
+                    public Iterator<ProjectEntity> apply() {
+                        return repository.iterator(Predicates.<ProjectEntity>alwaysTrue());
+                    }
+                };
+        return op.execute();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void do_not_allow_removal_in_iterator() {
         createAndStoreEntities();
-        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
-        repository.iterator(all)
-                  .remove();
-    }
-
-    private void createAndStoreEntities() {
-        repository.initStorage(storageFactory);
-
-        createAndStore("Eins");
-        createAndStore("Zwei");
-        createAndStore("Drei");
+        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
+        iterator.remove();
     }
 
     private static ProjectId createId(String value) {
@@ -222,24 +253,22 @@ public class RepositoryShould {
     private void createAndStore(String entityId) {
         ProjectEntity entity = repository.create(createId(entityId));
         repository.store(entity);
-
-    }
-
-    @Test(expected = UnsupportedOperationException.class)
-    public void do_not_allow_removal_from_iterator() {
-        createAndStoreEntities();
-
-        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
-        repository.iterator(all).remove();
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
         createAndStoreEntities();
-        createAndStore(TestRepo.troublesome.getId());
 
-        final Predicate<ProjectEntity> all = Predicates.alwaysTrue();
-        final Iterator<ProjectEntity> iterator = repository.iterator(all);
+        // Store a troublesome entity, which cannot be loaded.
+        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                createAndStore(TestRepo.troublesome.getId());
+            }
+        };
+        op.execute();
+
+        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
 
         // This should iterate through all.
         Lists.newArrayList(iterator);

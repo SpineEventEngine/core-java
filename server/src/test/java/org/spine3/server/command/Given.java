@@ -88,7 +88,9 @@ class Given {
 
         static org.spine3.base.Command createProject(Duration delay) {
             final org.spine3.base.Command cmd = Commands.createCommand(
-                    CommandMessage.createProjectMessage(), createCommandContext(delay));
+                    CommandMessage.createProjectMessage(),
+                    createCommandContext(delay)
+            );
             return cmd;
         }
 

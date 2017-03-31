@@ -29,11 +29,13 @@ public class InMemoryStorageFactoryShould {
 
     @Test
     public void have_single_tenant_instance() {
-        assertFalse(InMemoryStorageFactory.getInstance().isMultitenant());
+        assertFalse(InMemoryStorageFactory.getInstance(false)
+                                          .isMultitenant());
     }
 
     @Test
     public void have_multitenant_instance() {
-        assertTrue(InMemoryStorageFactory.getMultitenantInstance().isMultitenant());
+        assertTrue(InMemoryStorageFactory.getInstance(true)
+                                         .isMultitenant());
     }
 }

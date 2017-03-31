@@ -29,9 +29,9 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Responses;
+import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
-import org.spine3.base.Subscribe;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.validate.MessageValidator;
@@ -80,7 +80,7 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        this.storageFactory = InMemoryStorageFactory.getInstance();
+        this.storageFactory = InMemoryStorageFactory.getInstance(true);
         /**
          * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
          * because it's impossible to spy on {@code final} classes.
@@ -390,7 +390,6 @@ public class EventBusShould {
         final Class<ProjectId> eventFieldClass = ProjectId.class;
         final Class<String> enrichmentFieldClass = String.class;
         final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Nullable
             @Override
             public String apply(@Nullable ProjectId input) {
                 checkNotNull(input);
@@ -410,7 +409,6 @@ public class EventBusShould {
         final Class<ProjectId> eventFieldClass = ProjectId.class;
         final Class<String> enrichmentFieldClass = String.class;
         final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Nullable
             @Override
             public String apply(@Nullable ProjectId input) {
                 checkNotNull(input);

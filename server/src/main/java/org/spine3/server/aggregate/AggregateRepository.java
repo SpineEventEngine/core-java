@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
@@ -38,6 +39,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.tenant.CommandOperation;
 import org.spine3.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
@@ -81,7 +83,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
-    public static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
+    static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
 
     private final IdCommandFunction<I, Message> defaultIdFunction =
             GetTargetIdFromCommand.newInstance();
@@ -200,15 +202,30 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * <p>The repository loads the aggregate by this ID, or creates a new aggregate
      * if there is no aggregate with such ID.
      *
-     * @param command the command to dispatch
+     * @param envelope the envelope of the command to dispatch
      */
     @Override
-    public void dispatch(CommandEnvelope command) {
-        final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(this);
-        final A aggregate = commandEndpoint.receive(command);
-        final List<Event> events = aggregate.getUncommittedEvents();
-        storeAndPostToStand(aggregate);
-        postEvents(events);
+    public void dispatch(final CommandEnvelope envelope) {
+        final Command command = envelope.getCommand();
+        final CommandOperation op = new CommandOperation(command) {
+            @Override
+            public void run() {
+                final AggregateCommandEndpoint<I, A> commandEndpoint = createFor(
+                        AggregateRepository.this, envelope);
+                commandEndpoint.execute();
+
+                final Optional<A> processedAggregate = commandEndpoint.getAggregate();
+                if (!processedAggregate.isPresent()) {
+                    throw new IllegalStateException("No aggregate loaded for command: " + command);
+                }
+
+                final A aggregate = processedAggregate.get();
+                final List<Event> events = aggregate.getUncommittedEvents();
+                storeAndPostToStand(aggregate);
+                postEvents(events);
+            }
+        };
+        op.execute();
     }
 
     private void storeAndPostToStand(A aggregate) {
@@ -232,7 +249,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @see #DEFAULT_SNAPSHOT_TRIGGER
      */
     @CheckReturnValue
-    public int getSnapshotTrigger() {
+    protected int getSnapshotTrigger() {
         return this.snapshotTrigger;
     }
 
@@ -244,12 +261,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @param snapshotTrigger a positive number of the snapshot trigger
      */
     @SuppressWarnings("unused")
-    public void setSnapshotTrigger(int snapshotTrigger) {
+    protected void setSnapshotTrigger(int snapshotTrigger) {
         checkArgument(snapshotTrigger > 0);
         this.snapshotTrigger = snapshotTrigger;
     }
 
-    protected AggregateStorage<I> aggregateStorage() {
+    AggregateStorage<I> aggregateStorage() {
         @SuppressWarnings("unchecked") // We check the type on initialization.
         final AggregateStorage<I> result = (AggregateStorage<I>) getStorage();
         return checkStorage(result);
@@ -318,7 +335,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * @see AggregateStateRecord
      */
     @Override
-    public Optional<A> load(I id) throws IllegalStateException {
+    public Optional<A> find(I id) throws IllegalStateException {
         final Optional<LifecycleFlags> loadedFlags = aggregateStorage().readLifecycleFlags(id);
         if (loadedFlags.isPresent()) {
             final boolean isVisible = isEntityVisible().apply(loadedFlags.get());

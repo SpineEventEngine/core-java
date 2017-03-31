@@ -22,13 +22,11 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.entity.idfunc.Producers;
+import org.spine3.server.tenant.EventOperation;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
@@ -52,11 +50,9 @@ public abstract class EventDispatchingRepository<I,
     /**
      * Creates new repository instance.
      *
-     * @param boundedContext the {@code BoundedContext} in which the repository works
      * @param defaultFunction the default function for getting an target entity IDs
      */
-    protected EventDispatchingRepository(BoundedContext boundedContext,
-                                         IdSetEventFunction<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(IdSetEventFunction<I, Message> defaultFunction) {
         super();
         this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
     }
@@ -114,13 +110,18 @@ public abstract class EventDispatchingRepository<I,
      */
     @Override
     public void dispatch(EventEnvelope envelope) {
-        final Event event = envelope.getOuterObject();
-        final Message eventMessage = Events.getMessage(event);
-        final EventContext context = event.getContext();
+        final Message eventMessage = envelope.getMessage();
+        final EventContext context = envelope.getEventContext();
         final Set<I> ids = findIds(eventMessage, context);
-        for (I id : ids) {
-            dispatchToEntity(id, eventMessage, context);
-        }
+        final EventOperation op = new EventOperation(envelope.getOuterObject()) {
+            @Override
+            public void run() {
+                for (I id : ids) {
+                    dispatchToEntity(id, eventMessage, context);
+                }
+            }
+        };
+        op.execute();
     }
 
     /**
