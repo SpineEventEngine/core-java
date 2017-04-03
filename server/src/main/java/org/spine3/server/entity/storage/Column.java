@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * A reflective representation of a Storage Field.
+ * The representation of a field of an {@link Entity} which is converted into a Storage Field.
  *
  * <p>This class manages the access to the Storage Field value and the reference to its declaration.
  *
@@ -174,11 +174,12 @@ public class Column<T> {
     }
 
     /**
-     * A value of a Storage Field saved at some point in time.
+     * A value of the associated Storage Field saved at some point of time.
      *
      * <p>The class associates the Storage Field value with its metadata i.e. {@linkplain Column}.
      *
      * @param <T> the type of the Storage Field
+     * @see Column#memoizeFor(Entity)
      */
     public static class MemoizedValue<T> {
 

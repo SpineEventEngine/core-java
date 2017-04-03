@@ -229,10 +229,6 @@ public class StorageFieldsShould {
         public LifecycleFlags getLifecycleFlags() {
             throw new AssertionError("getLifecycleFlags invoked");
         }
-
-        public Message getBuilder() {
-            throw new AssertionError("getBuilder invoked");
-        }
     }
 
     // Most read-life (non-test) Entities are children of AbstractVersionableEntity,

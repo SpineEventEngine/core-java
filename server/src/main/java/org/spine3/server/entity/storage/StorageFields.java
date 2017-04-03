@@ -20,13 +20,13 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.annotations.Internal;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityWithLifecycle;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -74,20 +74,6 @@ public class StorageFields {
 
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
-
-    /**
-     * An immutable {@link java.util.Set set} of excluded methods which fit the getter pattern but
-     * are not Storage Fields.
-     */
-    private static final ImmutableSet<String> EXCLUDED_METHODS =
-            ImmutableSet.<String>builder()
-                        .add("getId")
-                        .add("getState")
-                        .add("getDefaultState")
-                        .add("getLifecycleFlags")
-                        .add("getBuilder")
-                        .add("getClass")
-                        .build();
 
     /**
      * A one to many container of the {@link Class} to {@link Column} relations.
@@ -184,7 +170,7 @@ public class StorageFields {
 
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
-            if (!EXCLUDED_METHODS.contains(getter.getName())) {
+            if (!ExcludedMethod.contain(getter.getName())) {
                 final Column<?> storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
@@ -199,5 +185,63 @@ public class StorageFields {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final Logger value = LoggerFactory.getLogger(StorageFields.class);
+    }
+
+    private enum ExcludedMethod {
+
+        /**
+         * @see Object#getClass()
+         */
+        GET_CLASS("getClass"),
+
+        /**
+         * The {@link Entity} identifier is stored separately and is used more widely then just
+         * for queries.
+         *
+         * @see Entity#getId()
+         */
+        GET_ID("getId"),
+
+        /**
+         * The {@link Entity#getState() Entity state} is stored as a binary by default.
+         *
+         * <p>This provides faster write and read operations, but slows down the queries.
+         *
+         * @see Entity#getState()
+         */
+        GET_STATE("getState"),
+
+        /**
+         * The default state is not a field of the {@link Entity}, but a method which provides
+         * the ancillary information to the repository etc.
+         *
+         * @see Entity#getDefaultState()
+         */
+        GET_DEFAULT_STATE("getDefaultState"),
+
+        /**
+         * The {@link org.spine3.server.entity.LifecycleFlags lifecycle flags} are fields that
+         * should be stored separately as well.
+         *
+         * <p>When querying multiple records, the lifecycle flags help to filter them.
+         *
+         * @see EntityWithLifecycle#getLifecycleFlags()
+         */
+        GET_LIFECYCLE_FLAGS("getLifecycleFlags");
+
+        private final String methodName;
+
+        ExcludedMethod(String methodName) {
+            this.methodName = methodName;
+        }
+
+        private static boolean contain(String methodName) {
+            for (ExcludedMethod method : ExcludedMethod.values()) {
+                if (method.methodName.equals(methodName)) {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }
