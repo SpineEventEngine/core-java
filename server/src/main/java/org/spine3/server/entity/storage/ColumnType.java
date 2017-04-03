@@ -33,6 +33,29 @@ import org.spine3.annotations.SPI;
  * which commonly is built in a key-value fashion. To do that, call {@link #setColumnValue} and pass
  * both the DTO to store the value to and the key to store it under.
  *
+ * <p>Example of implementing this interface for a JDBC-based storage:
+ * <code>
+ *     <pre>
+ *         class VarcharDateType implements ColumnType<Date, String, PreparedStatement, Integer> {
+ *             \@Override
+ *             public String convert(Date fieldValue) {
+ *                 return MY_DATE_FORMAT.format(fieldValue);
+ *             }
+ *
+ *             \@Override
+ *             public void set(PreparedStatement storageRecord, String value, Integer columnIdentifier) {
+ *                 storageRecord.setString(columnIdentifier, value);
+ *             }
+ *         }
+ *     </pre>
+ * </code>
+ *
+ * <p>The example above translates a {@linkplain java.util.Date} into a formatted {@code String},
+ * which is persisted into the DB.
+ *
+ * <p>It's necessary to make these operations atomic to allow automatic type conversion when
+ * performing the DB queries.
+ *
  * @param <J> the Java type represented by the column
  * @param <S> the "store as" type of the column
  * @param <R> the type of the record in the database, which holds a single cortege of data and

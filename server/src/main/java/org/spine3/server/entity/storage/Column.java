@@ -37,6 +37,52 @@ import static java.lang.String.format;
  *
  * <p>A Column is a value retrieved from an {@link Entity} getter.
  *
+ * <h2>Examples</h2>
+ *
+ *
+ * <p>These methods represent the Columns:
+ * <code>
+ *      <pre>
+ *
+ *         --UserGroupAggregate.java--
+ *
+ *         public int getUserCount() {
+ *             return getState().getUserCount();
+ *         }
+ *
+ *         --PaymentProcessManager.java--
+ *
+ *         \@Nullable
+ *         public Date getPaymentSystemName() {
+ *             if (getState().hasExpirationDate()) {
+ *                 return new Date();
+ *             } else {
+ *                 return null;
+ *             }
+ *         }
+ *     </pre>
+ * </code>
+ *
+ * <p>And these methods are not considered to represent Columns:
+ * <code>
+ *      <pre>
+ *         --UserAggregate.java--
+ *
+ *         // non-public methods may not represent Columns
+ *         private double getHourRate() { ... }
+ *
+ *         // only methods starting with "get" or "is" may be considered Columns
+ *         public boolean hasChildren() { ... }
+ *
+ *         // getter methods must not accept arguments
+ *         public User getStateOf(UserAggregate other) { ... }
+ *
+ *         // only instance methods are considered Columns
+ *         public static Integer isNew(UserAggregate aggregate) { ... }
+ *      </pre>
+ * </code>
+
+ *
  * <h2>Type policy</h2>
  *
  * <p>A Column can turn into any type. If use a ready implementation of
@@ -57,6 +103,19 @@ import static java.lang.String.format;
  *
  * <p>If a non-null getter method returns {@code null} when trying to get the value of a Column,
  * a {@linkplain RuntimeException} is thrown. See {@link #isNullable()}.
+ *
+ * <p>The example below shows a faulty Column, which will throw {@linkplain RuntimeException} when
+ * trying to get its value.
+ * <code>
+ *     <pre>
+ *         --EmployeeProjection.java--
+ *
+ *         // method should be annotated as @Nullable to return a null value
+ *         public Message getAddress() {
+ *             return null;
+ *         }
+ *     </pre>
+ * </code>
  *
  * @see ColumnType
  * @author Dmytro Dashenkov

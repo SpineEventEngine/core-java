@@ -34,6 +34,34 @@ import static com.google.common.base.Preconditions.checkState;
 /**
  * A registry of type conversion strategies for the {@link Column Columns}.
  *
+ * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
+ * <code>
+ *     <pre>
+ *         final ColumnTypeRegistry registry = ColumnTypeRegistry.newBuilder()
+ *                                                               .put(Date.class, new VarcharDateType())
+ *                                                               .build();
+ *
+ *         JdbcStorageFactory.newBuilder()
+ *                           // ...
+ *                           .setColumnTypeRegistry(registry)
+ *                           .build();
+ *     </pre>
+ * </code>
+ *
+ * <p>To retrieve the {@link ColumnType} instance (in case if you implement your own
+ * {@linkplain org.spine3.server.storage.Storage Storage}) call {@link #get(Column)}
+ * on the column which you'd like to retrieve the {@linkplain ColumnType type} for.
+ *
+ * <p>Note, that in the example above, if you try to get the {@linkplain ColumnType type} for
+ * a {@link Column} of e.g. class {@code java.sql.Timestamp}, which {@code extends Date} unless you
+ * specify a {@link ColumnType} for {@code java.sql.Timestamp} explicitly, the same value as for
+ * the class {@code Date} will be returned. I.e. the {@link ColumnType} of a parent class can be
+ * used for a derived class. But be careful, the {@code interface}s are not supported within this
+ * feature.
+ *
+ * <p>If several {@linkplain ColumnType ColumnTypes} are written under a single {@linkplain Class}
+ * object, the latest {@code put} overrides all the previous ones.
+ *
  * @param <C> storage-specific implementation of the {@link ColumnType}
  * @author Dmytro Dashenkov
  */
