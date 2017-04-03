@@ -65,8 +65,8 @@ public final class InvalidEntityStateException extends EntityStateException {
      * A helper utility aimed to create an {@code InvalidEntityStateException} to report the
      * entity state which field values violate validation constraint(s).
      */
-    private static class ConstraintViolationExceptionFactory extends ExceptionFactory<
-            InvalidEntityStateException,
+    private static class ConstraintViolationExceptionFactory
+            extends ExceptionFactory<InvalidEntityStateException,
             Message,
             EntityStateClass,
             EntityStateValidationError> {
