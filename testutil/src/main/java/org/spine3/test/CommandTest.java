@@ -126,7 +126,8 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage, Timestamp timestamp) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = adjustTimestamp(commandFactory.createCommand(commandMessage), checkNotNull(timestamp));
+        this.command = adjustTimestamp(commandFactory.createCommand(commandMessage),
+                                       checkNotNull(timestamp));
         return this.command;
     }
 

@@ -74,15 +74,18 @@ class CommandValidator {
         return result.build();
     }
 
-    private static void validateMessage(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private static void validateMessage(Message message,
+                                        ImmutableList.Builder<ConstraintViolation> result) {
         if (isDefault(message)) {
             result.add(newConstraintViolation("Non-default command message must be set."));
         }
-        final List<ConstraintViolation> messageViolations = MessageValidator.newInstance().validate(message);
+        final List<ConstraintViolation> messageViolations = MessageValidator.newInstance()
+                                                                            .validate(message);
         result.addAll(messageViolations);
     }
 
-    private static void validateContext(CommandContext context, ImmutableList.Builder<ConstraintViolation> result) {
+    private static void validateContext(CommandContext context,
+                                        ImmutableList.Builder<ConstraintViolation> result) {
         if (isDefault(context)) {
             result.add(newConstraintViolation("Non-default command context must be set."));
         }
@@ -92,12 +95,14 @@ class CommandValidator {
         }
     }
 
-    private static void validateTargetId(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private static void validateTargetId(Message message,
+                                         ImmutableList.Builder<ConstraintViolation> result) {
         final Optional targetId = GetTargetIdFromCommand.asOptional(message);
         if (targetId.isPresent()) {
             final String targetIdString = idToString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {
-                result.add(newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
+                result.add(
+                        newConstraintViolation(COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK));
             }
         }
     }
@@ -127,7 +132,8 @@ class CommandValidator {
         final Optional targetId = GetTargetIdFromCommand.asOptional(commandMessage);
         if (targetId.isPresent()) { // else - consider the command is not for an entity
             final String targetIdString = idToString(targetId.get());
-            checkArgument(!targetIdString.equals(EMPTY_ID), "Target ID must not be an empty string.");
+            final String msg = "Target ID must not be an empty string.";
+            checkArgument(!targetIdString.equals(EMPTY_ID), msg);
         }
     }
 

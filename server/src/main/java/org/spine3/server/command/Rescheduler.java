@@ -22,23 +22,29 @@ package org.spine3.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Duration;
+import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Error;
+import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.time.Interval;
+import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
+import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
-import static org.spine3.base.Commands.getMessage;
-import static org.spine3.base.Commands.setSchedule;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Timestamps2.isLaterThan;
 import static org.spine3.server.command.CommandExpiredException.commandExpiredError;
+import static org.spine3.server.command.CommandScheduler.setSchedule;
 import static org.spine3.time.Intervals.between;
 import static org.spine3.time.Intervals.toDuration;
 
@@ -71,13 +77,49 @@ class Rescheduler {
         }
     }
 
+    private CommandStore commandStore() {
+        return commandBus.commandStore();
+    }
+
+    private CommandScheduler scheduler() {
+        return commandBus.scheduler();
+    }
+
+    private Log log() {
+        return commandBus.problemLog();
+    }
+
     @VisibleForTesting
-    void doRescheduleCommands() {
-        final Iterator<Command> commands = commandBus.commandStore().iterator(SCHEDULED);
-        while (commands.hasNext()) {
-            final Command command = commands.next();
-            reschedule(command);
+    private void doRescheduleCommands() {
+        final Set<TenantId> tenants = commandStore().tenantIndex()
+                                                    .getAll();
+        for (TenantId tenantId : tenants) {
+            rescheduleForTenant(tenantId);
         }
+    }
+
+    private void rescheduleForTenant(final TenantId tenantId) {
+        final TenantAwareFunction<Empty, Iterator<Command>> func =
+                new TenantAwareFunction<Empty, Iterator<Command>>(tenantId) {
+                    @Nullable
+                    @Override
+                    public Iterator<Command> apply(@Nullable Empty input) {
+                        return commandStore().iterator(SCHEDULED);
+                    }
+                };
+
+        final Iterator<Command> commands = func.execute(Empty.getDefaultInstance());
+
+        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+            @Override
+            public void run() {
+                while (commands.hasNext()) {
+                    final Command command = commands.next();
+                    reschedule(command);
+                }
+            }
+        };
+        op.execute();
     }
 
     private void reschedule(Command command) {
@@ -88,8 +130,8 @@ class Rescheduler {
         } else {
             final Interval interval = between(now, timeToPost);
             final Duration newDelay = toDuration(interval);
-            final Command commandUpdated = setSchedule(command, newDelay, now);
-            commandBus.scheduler().schedule(commandUpdated);
+            final Command updatedCommand = setSchedule(command, newDelay, now);
+            scheduler().schedule(updatedCommand);
         }
     }
 
@@ -100,12 +142,22 @@ class Rescheduler {
         return timeToPost;
     }
 
+    /**
+     * Sets the status of the expired command to error.
+     *
+     * <p>We cannot post such a command because there is no handler or dispatcher registered yet.
+     * Or, posting such a command may be undesirable from the business logic point of view.
+     *
+     * @param command the expired command
+     * @see CommandExpiredException
+     */
     private void onScheduledCommandExpired(Command command) {
-        // We cannot post this command because there is no handler/dispatcher registered yet.
-        // Also, posting it can be undesirable.
-        final Message msg = getMessage(command);
-        final CommandId id = getId(command);
-        commandBus.problemLog().errorExpiredCommand(msg, id);
-        commandBus.getCommandStatusService().setToError(id, commandExpiredError(msg));
+        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        final Message msg = commandEnvelope.getMessage();
+        final CommandId id = commandEnvelope.getCommandId();
+
+        final Error error = commandExpiredError(msg);
+        commandStore().setToError(commandEnvelope, error);
+        log().errorExpiredCommand(msg, id);
     }
 }

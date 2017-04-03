@@ -50,7 +50,8 @@ import static org.spine3.io.IoUtil.loadAllProperties;
  * type name(s) of event(s) to enrich.
  *
  * <p>Example:
- * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},{@code proto.type.SecondEvent}
+ * <p>{@code proto.type.MyEventEnrichment} - {@code proto.type.FirstEvent},
+ * {@code proto.type.SecondEvent}
  *
  * @author Alexander Litus
  * @author Dmytro Dashenkov

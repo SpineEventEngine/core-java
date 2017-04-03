@@ -97,7 +97,8 @@ public class QueryService extends QueryServiceGrpc.QueryServiceImplBase {
          */
         public QueryService build() throws IllegalStateException {
             if (boundedContexts.isEmpty()) {
-                throw new IllegalStateException("Query service must have at least one `BoundedContext`.");
+                final String message = "Query service must have at least one `BoundedContext`.";
+                throw new IllegalStateException(message);
             }
             final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
             final QueryService result = new QueryService(map);

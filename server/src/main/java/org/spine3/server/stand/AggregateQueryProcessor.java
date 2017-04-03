@@ -58,7 +58,8 @@ class AggregateQueryProcessor implements QueryProcessor {
         this.type = type;
     }
 
-    private final Function<EntityId, AggregateStateId> stateIdTransformer = new Function<EntityId, AggregateStateId>() {
+    private final Function<EntityId, AggregateStateId> stateIdTransformer =
+            new Function<EntityId, AggregateStateId>() {
         @Nullable
         @Override
         public AggregateStateId apply(@Nullable EntityId input) {
@@ -98,7 +99,8 @@ class AggregateQueryProcessor implements QueryProcessor {
         return result;
     }
 
-    private ImmutableCollection<EntityRecord> doFetchWithFilters(Target target, FieldMask fieldMask) {
+    private ImmutableCollection<EntityRecord> doFetchWithFilters(Target target,
+                                                                 FieldMask fieldMask) {
         final EntityFilters filters = target.getFilters();
         final boolean idsAreDefined = !filters.getIdFilter()
                                               .getIdsList()
@@ -141,7 +143,8 @@ class AggregateQueryProcessor implements QueryProcessor {
         final boolean applyFieldMask = !fieldMask.getPathsList()
                                                  .isEmpty();
         final Iterable<EntityRecord> bulkReadResults = applyFieldMask
-                                                              ? standStorage.readMultiple(stateIds, fieldMask)
+                                                              ? standStorage.readMultiple(stateIds,
+                                                                                          fieldMask)
                                                               : standStorage.readMultiple(stateIds);
         final ImmutableCollection<EntityRecord> result
                 = FluentIterable.from(bulkReadResults)

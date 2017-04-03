@@ -62,7 +62,7 @@ public class MapStringifierShould {
         final Stringifier<Map<String, Integer>> stringifier =
                 mapStringifier(String.class, Integer.class);
         final String convertedMap = stringifier.toString(mapToConvert);
-        assertEquals(convertMapToString(mapToConvert), convertedMap);
+        assertEquals(convertMapToString(mapToConvert).length(), convertedMap.length());
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -75,7 +75,7 @@ public class MapStringifierShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final Stringifier<Map<Task, Long>> stringifier = mapStringifier(Task.class, Long.class);
+        final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
         stringifier.fromString("first\":\"first\":\"first\"");
     }
 
@@ -111,8 +111,8 @@ public class MapStringifierShould {
                                                                             String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
 
-        assertEquals(actualMap.get("1\"\""), "one,");
-        assertEquals(actualMap.get("2:"), "two");
+        assertEquals("one,", actualMap.get("1\"\""));
+        assertEquals("two", actualMap.get("2:"));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -143,6 +143,16 @@ public class MapStringifierShould {
     public void throw_exception_when_key_value_are_unquoted() {
         final String stringToConvert = "1:2";
         tryToConvert(stringToConvert);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_when_key_is_null(){
+        final Stringifier<Map<String, String>> stringifier =
+                mapStringifier(String.class, String.class);
+        final Map<String, String> mapWithNulls = newHashMap();
+        mapWithNulls.put("1", "2");
+        mapWithNulls.put(null, "2");
+        stringifier.toString(mapWithNulls);
     }
 
     private static void tryToConvert(String stringToConvert) {

@@ -31,17 +31,17 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
  *
  * @author Andrey Lavrov
  */
-@SuppressWarnings("UtilityClass")
 public class TestEventBusFactory {
 
     private TestEventBusFactory() {
     }
 
     public static EventBus create() {
-        final EventStore store = EventStore.newBuilder()
-                                           .setStreamExecutor(MoreExecutors.directExecutor())
-                                           .setStorageFactory(InMemoryStorageFactory.getInstance())
-                                           .build();
+        final EventStore store =
+                EventStore.newBuilder()
+                          .setStreamExecutor(MoreExecutors.directExecutor())
+                          .setStorageFactory(InMemoryStorageFactory.getInstance(true))
+                          .build();
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(store)
                                           .build();

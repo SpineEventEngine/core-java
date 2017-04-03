@@ -31,6 +31,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
@@ -52,11 +53,13 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -93,47 +96,68 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.server.stand.Given.StandTestProjection;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
 //It's OK for a test.
-@SuppressWarnings({"OverlyCoupledClass", "InstanceMethodNamingConvention", "ClassWithTooManyMethods"})
-public class StandShould {
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+public class StandShould extends TenantAwareTest {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
+    private boolean multitenant;
+
+    protected void setMultitenant(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    protected boolean isMultitenant() {
+        return multitenant;
+    }
+
+    @Before
+    public void setUp() {
+        setMultitenant(false);
+    }
+
     @Test
     public void initialize_with_empty_builder() {
-        final Stand.Builder builder = Stand.newBuilder();
+        final Stand.Builder builder = Stand.newBuilder()
+                                           .setMultitenant(isMultitenant());
         final Stand stand = builder.build();
 
         assertNotNull(stand);
-        assertTrue("Exposed types must be empty after the initialization.", stand.getExposedTypes()
-                                                                                 .isEmpty());
-        assertTrue("Exposed aggregate types must be empty after the initialization", stand.getExposedAggregateTypes()
-                                                                                          .isEmpty());
+        assertTrue("Exposed types must be empty after the initialization.",
+                   stand.getExposedTypes()
+                        .isEmpty());
+        assertTrue("Exposed aggregate types must be empty after the initialization",
+                   stand.getExposedAggregateTypes()
+                        .isEmpty());
     }
 
     @Test
     public void register_projection_repositories() {
         final Stand stand = Stand.newBuilder()
+                                 .setMultitenant(isMultitenant())
                                  .build();
-        final BoundedContext boundedContext = newBoundedContext(stand);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
 
         checkTypesEmpty(stand);
 
-        final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
+        final StandTestProjectionRepository standTestProjectionRepo =
+                new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
         checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
 
         final ImmutableSet<TypeUrl> knownAggregateTypes = stand.getExposedAggregateTypes();
         // As we registered a projection repo, known aggregate types should be still empty.
-        assertTrue("For some reason an aggregate type was registered", knownAggregateTypes.isEmpty());
+        assertTrue("For some reason an aggregate type was registered",
+                   knownAggregateTypes.isEmpty());
 
-        final StandTestProjectionRepository anotherTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
+        final StandTestProjectionRepository anotherTestProjectionRepo =
+                new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(anotherTestProjectionRepo);
         checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
     }
@@ -142,11 +166,12 @@ public class StandShould {
     public void register_aggregate_repositories() {
         final Stand stand = Stand.newBuilder()
                                  .build();
-        final BoundedContext boundedContext = newBoundedContext(stand);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
 
         checkTypesEmpty(stand);
 
-        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
@@ -154,7 +179,8 @@ public class StandShould {
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
         @SuppressWarnings("LocalVariableNamingConvention")
-        final CustomerAggregateRepository anotherCustomerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository anotherCustomerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
         checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
@@ -166,8 +192,9 @@ public class StandShould {
         final Stand stand = Stand.newBuilder()
                                  .setCallbackExecutor(executor)
                                  .build();
-        final BoundedContext boundedContext = newBoundedContext(stand);
-        final StandTestProjectionRepository standTestProjectionRepo = new StandTestProjectionRepository(boundedContext);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final StandTestProjectionRepository standTestProjectionRepo =
+                new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
 
         final Target projectProjectionTarget = Queries.Targets.allOf(Project.class);
@@ -185,6 +212,7 @@ public class StandShould {
         verify(executor, times(1)).execute(any(Runnable.class));
     }
 
+    @SuppressWarnings("OverlyCoupledMethod")
     @Test
     public void operate_with_storage_provided_through_builder() {
         final StandStorage standStorageMock = mock(StandStorage.class);
@@ -193,8 +221,9 @@ public class StandShould {
                                  .build();
         assertNotNull(stand);
 
-        final BoundedContext boundedContext = newBoundedContext(stand);
-        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final CustomerAggregateRepository customerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final int numericIdValue = 17;
@@ -209,11 +238,13 @@ public class StandShould {
 
         stand.update(customerId, packedState, stateVersion);
 
-        final AggregateStateId expectedAggregateStateId = AggregateStateId.of(customerId, customerType);
+        final AggregateStateId expectedAggregateStateId =
+                AggregateStateId.of(customerId, customerType);
         final EntityRecord expectedRecord = EntityRecord.newBuilder()
                                                         .setState(packedState)
                                                         .build();
-        verify(standStorageMock, times(1)).write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
+        verify(standStorageMock, times(1))
+                .write(eq(expectedAggregateStateId), recordStateMatcher(expectedRecord));
     }
 
     @Test
@@ -241,7 +272,8 @@ public class StandShould {
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
 
-        assertTrue("Query returned a non-empty response message list for an unknown type", messageList.isEmpty());
+        assertTrue("Query returned a non-empty response message list for an unknown type",
+                   messageList.isEmpty());
     }
 
     @Test
@@ -257,7 +289,8 @@ public class StandShould {
     @Test
     public void return_empty_list_for_aggregate_reads_with_filters_not_set() {
 
-        final Target noneOfCustomers = Queries.Targets.someOf(Customer.class, Collections.<Message>emptySet());
+        final Target noneOfCustomers = Queries.Targets.someOf(Customer.class,
+                                                              Collections.<Message>emptySet());
         checkEmptyResultOnNonEmptyStorageForQueryTarget(noneOfCustomers);
     }
 
@@ -285,7 +318,7 @@ public class StandShould {
     public void return_multiple_results_for_projection_batch_read_by_ids_with_field_mask() {
         final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
                                                                        .getFields();
-        doCheckReadingCustomersByIdAndFieldMask(
+        doCheckReadingCustomersByIdAndFieldMask(multitenant,
                 projectFields.get(0)
                              .getFullName(), // ID
                 projectFields.get(1)
@@ -426,7 +459,8 @@ public class StandShould {
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
-        final Target someCustomers = Queries.Targets.someOf(Customer.class, sampleCustomers.keySet());
+        final Target someCustomers = Queries.Targets.someOf(Customer.class,
+                                                            sampleCustomers.keySet());
         final Set<Customer> callbackStates = newHashSet();
         final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
@@ -450,7 +484,8 @@ public class StandShould {
         assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
     }
 
-    private static MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand, Target subscriptionTarget) {
+    private static MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
+                                                                     Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
         final Subscription subscription = stand.subscribe(subscriptionTarget);
         stand.activate(subscription, callback);
@@ -472,7 +507,7 @@ public class StandShould {
 
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -520,60 +555,68 @@ public class StandShould {
                 assertTrue(customer.getNicknamesList()
                                    .isEmpty());
             }
-        });
+        }, multitenant);
     }
 
     @Test
     public void retrieve_collection_fields_if_required() {
-        requestSampleCustomer(new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1}, new MemoizeQueryResponseObserver() {
-            @Override
-            public void onNext(QueryResponse value) {
-                super.onNext(value);
+        requestSampleCustomer(
+                new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1},
+                new MemoizeQueryResponseObserver() {
+                    @Override
+                    public void onNext(QueryResponse value) {
+                        super.onNext(value);
 
-                final List<Any> messages = value.getMessagesList();
-                assertFalse(messages.isEmpty());
+                        final List<Any> messages = value.getMessagesList();
+                        assertFalse(messages.isEmpty());
 
-                final Customer sampleCustomer = getSampleCustomer();
-                final Customer customer = AnyPacker.unpack(messages.get(0));
-                assertEquals(customer.getNicknamesList(), sampleCustomer.getNicknamesList());
+                        final Customer sampleCustomer = getSampleCustomer();
+                        final Customer customer = AnyPacker.unpack(messages.get(0));
+                        assertEquals(customer.getNicknamesList(),
+                                     sampleCustomer.getNicknamesList());
 
-                assertFalse(customer.hasName());
-                assertFalse(customer.hasId());
-            }
-        });
+                        assertFalse(customer.hasName());
+                        assertFalse(customer.hasId());
+                    }
+                },
+                multitenant);
     }
 
     @Test
     public void retrieve_all_requested_fields() {
-        requestSampleCustomer(new int[]{Customer.NICKNAMES_FIELD_NUMBER - 1, Customer.ID_FIELD_NUMBER - 1},
-                              new MemoizeQueryResponseObserver() {
-                                  @Override
-                                  public void onNext(QueryResponse value) {
-                                      super.onNext(value);
+        requestSampleCustomer(
+                new int[]{ Customer.NICKNAMES_FIELD_NUMBER - 1,
+                        Customer.ID_FIELD_NUMBER - 1 },
+                new MemoizeQueryResponseObserver() {
+                    @Override
+                    public void onNext(QueryResponse value) {
+                        super.onNext(value);
 
-                                      final List<Any> messages = value.getMessagesList();
-                                      assertFalse(messages.isEmpty());
+                        final List<Any> messages = value.getMessagesList();
+                        assertFalse(messages.isEmpty());
 
-                                      final Customer sampleCustomer = getSampleCustomer();
-                                      final Customer customer = AnyPacker.unpack(messages.get(0));
-                                      assertEquals(customer.getNicknamesList(), sampleCustomer.getNicknamesList());
+                        final Customer sampleCustomer = getSampleCustomer();
+                        final Customer customer = AnyPacker.unpack(messages.get(0));
+                        assertEquals(customer.getNicknamesList(),
+                                     sampleCustomer.getNicknamesList());
 
-                                      assertFalse(customer.hasName());
-                                      assertTrue(customer.hasId());
-                                  }
-                              });
+                        assertFalse(customer.hasName());
+                        assertTrue(customer.hasId());
+                    }
+                },
+                multitenant);
     }
 
     @Test
     public void retrieve_whole_entity_if_nothing_is_requested() {
         //noinspection ZeroLengthArrayAllocation
-        requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver());
+        requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver(), multitenant);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void select_entity_singleton_by_id_and_apply_field_masks() {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")   // clashes with non-related tests.
@@ -613,7 +656,7 @@ public class StandShould {
     @Test
     public void handle_mistakes_in_query_silently() {
         //noinspection ZeroLengthArrayAllocation
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -649,8 +692,8 @@ public class StandShould {
         verifyObserver(observer);
     }
 
-    private static StandStorage createStandStorage() {
-        return InMemoryStorageFactory.getInstance().createStandStorage();
+    private static StandStorage createStandStorage(boolean multitenant) {
+        return InMemoryStorageFactory.getInstance(multitenant).createStandStorage();
     }
 
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {
@@ -695,8 +738,10 @@ public class StandShould {
 
     }
 
-    private static void requestSampleCustomer(int[] fieldIndexes, final MemoizeQueryResponseObserver observer) {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
+    private static void requestSampleCustomer(int[] fieldIndexes,
+                                              final MemoizeQueryResponseObserver observer,
+                                              boolean multitenant) {
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -730,7 +775,8 @@ public class StandShould {
         stand.execute(readCustomersQuery, responseObserver);
 
         final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue("Query returned a non-empty response message list though the target was empty", messageList.isEmpty());
+        assertTrue("Query returned a non-empty response message list though the target was empty",
+                   messageList.isEmpty());
     }
 
     private static void doCheckReadingProjectsById(int numberOfProjects) {
@@ -739,13 +785,15 @@ public class StandShould {
         final TypeUrl projectType = TypeUrl.of(Project.class);
         fillSampleProjects(sampleProjects, numberOfProjects);
 
-        final StandTestProjectionRepository projectionRepository = mock(StandTestProjectionRepository.class);
+        final StandTestProjectionRepository projectionRepository =
+                mock(StandTestProjectionRepository.class);
         when(projectionRepository.getEntityStateType()).thenReturn(projectType);
         setupExpectedFindAllBehaviour(sampleProjects, projectionRepository);
 
         final Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
-        final Query readMultipleProjects = Queries.readByIds(Project.class, sampleProjects.keySet());
+        final Query readMultipleProjects =
+                Queries.readByIds(Project.class, sampleProjects.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -760,8 +808,8 @@ public class StandShould {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
-    private static void doCheckReadingCustomersByIdAndFieldMask(String... paths) {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
+    private static void doCheckReadingCustomersByIdAndFieldMask(boolean multitenant, String... paths) {
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
 
         final int querySize = 2;
 
@@ -817,7 +865,8 @@ public class StandShould {
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
         triggerMultipleUpdates(sampleCustomers, stand);
 
-        final Query readMultipleCustomers = Queries.readByIds(Customer.class, sampleCustomers.keySet());
+        final Query readMultipleCustomers = Queries.readByIds(Customer.class,
+                                                              sampleCustomers.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleCustomers, responseObserver);
@@ -836,12 +885,17 @@ public class StandShould {
 
         // Return non-empty results on any storage read call.
         final EntityRecord someRecord = EntityRecord.getDefaultInstance();
-        final ImmutableList<EntityRecord> nonEmptyList = ImmutableList.<EntityRecord>builder().add(someRecord)
-                                                                                              .build();
-        when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(nonEmptyList);
-        when(standStorageMock.read(any(AggregateStateId.class))).thenReturn(Optional.of(someRecord));
-        when(standStorageMock.readAll()).thenReturn(Maps.<AggregateStateId, EntityRecord>newHashMap());
-        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable())).thenReturn(nonEmptyList);
+        final ImmutableList<EntityRecord> nonEmptyList =
+                ImmutableList.<EntityRecord>builder().add(someRecord)
+                                                     .build();
+        when(standStorageMock.readAllByType(any(TypeUrl.class)))
+                .thenReturn(nonEmptyList);
+        when(standStorageMock.read(any(AggregateStateId.class)))
+                .thenReturn(Optional.of(someRecord));
+        when(standStorageMock.readAll())
+                .thenReturn(Maps.<AggregateStateId, EntityRecord>newHashMap());
+        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+                .thenReturn(nonEmptyList);
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
@@ -860,7 +914,9 @@ public class StandShould {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static void setupExpectedBulkReadBehaviour(Map<CustomerId, Customer> sampleCustomers, TypeUrl customerType,
+    private static void setupExpectedBulkReadBehaviour(Map<CustomerId,
+                                                       Customer> sampleCustomers,
+                                                       TypeUrl customerType,
                                                        StandStorage standStorageMock) {
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
         final ImmutableList.Builder<EntityRecord> recordsBuilder = ImmutableList.builder();
@@ -885,31 +941,38 @@ public class StandShould {
     }
 
     @SuppressWarnings("ConstantConditions")
-    private static void setupExpectedFindAllBehaviour(Map<ProjectId, Project> sampleProjects,
-                                                      StandTestProjectionRepository projectionRepository) {
+    private static void setupExpectedFindAllBehaviour(
+            Map<ProjectId,
+            Project> sampleProjects,
+            StandTestProjectionRepository projectionRepository) {
 
         final Set<ProjectId> projectIds = sampleProjects.keySet();
-        final ImmutableCollection<Given.StandTestProjection> allResults = toProjectionCollection(projectIds);
+        final ImmutableCollection<Given.StandTestProjection> allResults =
+                toProjectionCollection(projectIds);
 
         for (ProjectId projectId : projectIds) {
-            when(projectionRepository.load(eq(projectId)))
+            when(projectionRepository.find(eq(projectId)))
                     .thenReturn(Optional.of(new StandTestProjection(projectId)));
         }
 
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
 
-        when(projectionRepository.loadAll(matchingIds, any(FieldMask.class))).thenReturn(allResults);
-
-        when(projectionRepository.loadAll()).thenReturn(allResults);
+        when(projectionRepository.loadAll(matchingIds, any(FieldMask.class)))
+                .thenReturn(allResults);
+        when(projectionRepository.loadAll())
+                .thenReturn(allResults);
 
         final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
-        when(projectionRepository.find(matchingFilter, any(FieldMask.class))).thenReturn(allResults);
+        when(projectionRepository.find(matchingFilter, any(FieldMask.class)))
+                .thenReturn(allResults);
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
-    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(final Collection<ProjectId> projectIds) {
+    private static ArgumentMatcher<EntityFilters> entityFilterMatcher(
+            final Collection<ProjectId> projectIds) {
         // This argument matcher does NOT mimic the exact repository behavior.
-        // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with ALL the expected IDs.
+        // Instead, it only matches the EntityFilters instance in case it has EntityIdFilter with
+        // ALL the expected IDs.
         return new ArgumentMatcher<EntityFilters>() {
             @Override
             public boolean matches(EntityFilters argument) {
@@ -920,7 +983,8 @@ public class StandShould {
                     final Message rawId = AnyPacker.unpack(idAsAny);
                     if (rawId instanceof ProjectId) {
                         final ProjectId convertedProjectId = (ProjectId) rawId;
-                        everyElementPresent = everyElementPresent && projectIds.contains(convertedProjectId);
+                        everyElementPresent = everyElementPresent
+                                              && projectIds.contains(convertedProjectId);
                     } else {
                         everyElementPresent = false;
                     }
@@ -930,22 +994,23 @@ public class StandShould {
         };
     }
 
-    private static ImmutableCollection<Given.StandTestProjection> toProjectionCollection(Collection<ProjectId> values) {
-        final Collection<Given.StandTestProjection> transformed =
-                Collections2.transform(values,
-                                       new Function<ProjectId, Given.StandTestProjection>() {
-                                           @Nullable
-                                           @Override
-                                           public StandTestProjection apply(@Nullable ProjectId input) {
-                                               checkNotNull(input);
-                                               return new StandTestProjection(input);
-                                           }
-                                       });
+    private static ImmutableCollection<Given.StandTestProjection> toProjectionCollection(
+            Collection<ProjectId> values) {
+        final Collection<Given.StandTestProjection> transformed = Collections2.transform(
+                values,
+                new Function<ProjectId, Given.StandTestProjection>() {
+                    @Override
+                    public StandTestProjection apply(@Nullable ProjectId input) {
+                        checkNotNull(input);
+                        return new StandTestProjection(input);
+                    }
+                });
         final ImmutableList<Given.StandTestProjection> result = ImmutableList.copyOf(transformed);
         return result;
     }
 
-    private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(final Set<ProjectId> projectIds) {
+    private static ArgumentMatcher<Iterable<ProjectId>> projectionIdsIterableMatcher(
+            final Set<ProjectId> projectIds) {
         return new ArgumentMatcher<Iterable<ProjectId>>() {
             @Override
             public boolean matches(Iterable<ProjectId> argument) {
@@ -958,20 +1023,24 @@ public class StandShould {
         };
     }
 
-    private static ArgumentMatcher<Iterable<AggregateStateId>> idsMatcher(final List<AggregateStateId> stateIds) {
+    private static ArgumentMatcher<Iterable<AggregateStateId>> idsMatcher(
+            final List<AggregateStateId> stateIds) {
         return new ArgumentMatcher<Iterable<AggregateStateId>>() {
             @Override
             public boolean matches(Iterable<AggregateStateId> argument) {
                 boolean everyElementPresent = true;
                 for (AggregateStateId aggregateStateId : argument) {
-                    everyElementPresent = everyElementPresent && stateIds.contains(aggregateStateId);
+                    everyElementPresent = everyElementPresent
+                                          && stateIds.contains(aggregateStateId);
                 }
                 return everyElementPresent;
             }
         };
     }
 
-    private static void triggerMultipleUpdates(Map<CustomerId, Customer> sampleCustomers, Stand stand) {
+    private static void triggerMultipleUpdates(Map<CustomerId,
+                                               Customer> sampleCustomers,
+                                               Stand stand) {
         // Trigger the aggregate state updates.
         for (CustomerId id : sampleCustomers.keySet()) {
             final Customer sampleCustomer = sampleCustomers.get(id);
@@ -985,16 +1054,18 @@ public class StandShould {
         final Map<CustomerId, Customer> sampleCustomers = newHashMap();
 
         @SuppressWarnings("UnsecureRandomNumberGeneration")
-        final Random randomizer = new Random(Integer.MAX_VALUE);    // force non-negative numeric ID values.
+        final Random randomizer = new Random(Integer.MAX_VALUE);
+            // force non-negative numeric ID values.
 
         for (int customerIndex = 0; customerIndex < numberOfCustomers; customerIndex++) {
 
             final int numericId = randomizer.nextInt();
             final CustomerId customerId = customerIdFor(numericId);
-            final Customer customer = Customer.newBuilder()
-                                              .setName(PersonName.newBuilder()
-                                                                 .setGivenName(String.valueOf(numericId)))
-                                              .build();
+            final Customer customer =
+                    Customer.newBuilder()
+                            .setName(PersonName.newBuilder()
+                                               .setGivenName(String.valueOf(numericId)))
+                            .build();
             sampleCustomers.put(customerId, customer);
         }
         return sampleCustomers;
@@ -1004,7 +1075,8 @@ public class StandShould {
         final Map<ProjectId, Project> sampleProjects = newHashMap();
 
         @SuppressWarnings("UnsecureRandomNumberGeneration")
-        final Random randomizer = new Random(Integer.MAX_VALUE);    // force non-negative numeric ID values.
+        final Random randomizer = new Random(Integer.MAX_VALUE);
+            // force non-negative numeric ID values.
 
         for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
 
@@ -1019,7 +1091,8 @@ public class StandShould {
         return sampleProjects;
     }
 
-    private static void fillSampleProjects(Map<ProjectId, Project> sampleProjects, int numberOfProjects) {
+    private static void fillSampleProjects(Map<ProjectId, Project> sampleProjects,
+                                           int numberOfProjects) {
         for (int projectIndex = 0; projectIndex < numberOfProjects; projectIndex++) {
             final Project project = Project.getDefaultInstance();
             final ProjectId projectId = ProjectId.newBuilder()
@@ -1049,8 +1122,9 @@ public class StandShould {
                                  .build();
         assertNotNull(stand);
 
-        final BoundedContext boundedContext = newBoundedContext(stand);
-        final CustomerAggregateRepository customerAggregateRepo = new CustomerAggregateRepository(boundedContext);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final CustomerAggregateRepository customerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         return stand;
     }
@@ -1067,7 +1141,8 @@ public class StandShould {
         return argThat(new ArgumentMatcher<EntityRecord>() {
             @Override
             public boolean matches(EntityRecord argument) {
-                final boolean matchResult = Objects.equals(expectedRecord.getState(), argument.getState());
+                final boolean matchResult = Objects.equals(expectedRecord.getState(),
+                                                           argument.getState());
                 return matchResult;
             }
         });
@@ -1080,7 +1155,8 @@ public class StandShould {
                         .isEmpty());
     }
 
-    private static void checkHasExactlyOne(Set<TypeUrl> availableTypes, Descriptors.Descriptor expectedType) {
+    private static void checkHasExactlyOne(Set<TypeUrl> availableTypes,
+                                           Descriptors.Descriptor expectedType) {
         assertEquals(1, availableTypes.size());
 
         final TypeUrl actualTypeUrl = availableTypes.iterator()

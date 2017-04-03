@@ -95,7 +95,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Nonnull
     protected RecordStorage<I> recordStorage() {
-        @SuppressWarnings("unchecked") // It is safe to cast as we control the creation in createStorage().
+        @SuppressWarnings("unchecked") // It is safe to cast as we control
+                                       // the creation in createStorage().
         final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
         return checkStorage(storage);
     }
@@ -118,7 +119,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     @CheckReturnValue
-    public Optional<E> load(I id) {
+    public Optional<E> find(I id) {
         final RecordStorage<I> storage = recordStorage();
         final Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
@@ -136,8 +137,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      */
     @CheckReturnValue
-    protected E loadOrCreate(I id) {
-        final Optional<E> loaded = load(id);
+    protected E findOrCreate(I id) {
+        final Optional<E> loaded = find(id);
 
         if (!loaded.isPresent()) {
             final E result = create(id);
@@ -153,7 +154,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * contained within the passed {@code ids} values.
      *
      * <p>Provides a convenience wrapper around multiple invocations of
-     * {@link #load(Object)}. Descendants may optimize the execution of this
+     * {@link #find(Object)}. Descendants may optimize the execution of this
      * method, choosing the most suitable way for the particular storage engine used.
      *
      * <p>The result only contains those entities which IDs are contained inside
@@ -245,10 +246,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds all the entities passing the given filters and
      * applies the given {@link FieldMask} to the results.
      *
-     * <p>Field mask is applied according to
-     * <a
-     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
-     * >FieldMask specs</a>.
+     * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
      * <p>At this point only {@link org.spine3.client.EntityIdFilter EntityIdFilter} is supported.
      * All other filters are ignored.

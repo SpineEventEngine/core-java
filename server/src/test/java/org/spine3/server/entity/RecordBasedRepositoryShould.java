@@ -20,15 +20,19 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -39,15 +43,17 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
  */
+@SuppressWarnings("ConstantConditions")
 public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>,
                                                   I,
-                                                  S extends Message> {
+                                                  S extends Message> extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -60,19 +66,65 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     protected abstract I createId(int value);
 
-    @Before
-    public void initRepository() {
+    protected void initRepository() {
         this.repository = createRepository();
     }
 
-    private List<E> createAndStoreEntities(RecordBasedRepository<I, E, S> repo, int count) {
-        final List<E> entities = createEntities(count);
+    protected void setCurrentTenant() {
+        setCurrentTenant(newTenantUuid());
+    }
 
+    @Before
+    public void setUp() {
+        initRepository();
+        setCurrentTenant();
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        clearCurrentTenant();
+    }
+
+    /*
+     * Store/load functions for working in multi-tenant execution context
+     **********************************************************************/
+
+    private void storeEntity(final E entity) {
+        repository.store(entity);
+    }
+
+    private List<E> createAndStoreEntities(final RecordBasedRepository<I, E, S> repo, int count) {
+        final List<E> entities = createEntities(count);
         for (E entity : entities) {
             repo.store(entity);
         }
         return entities;
     }
+
+    private Optional<E> find(final I id) {
+        return repository.find(id);
+    }
+
+    private Collection<E> loadMany(final List<I> ids) {
+        return repository.loadAll(ids);
+    }
+
+    private Collection<E> loadAll() {
+        return repository.loadAll();
+    }
+
+    private E loadOrCreate(final I id) {
+        return repository.findOrCreate(id);
+    }
+
+    private ImmutableCollection<E> find(final EntityFilters filters,
+                                        final FieldMask firstFieldOnly) {
+        return repository.find(filters, firstFieldOnly);
+    }
+
+    /*
+     * Tests
+     ************/
 
     @Test
     public void create_entities() {
@@ -86,10 +138,9 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     public void find_single_entity_by_id() {
         final E entity = createEntity();
 
-        repository.store(entity);
+        storeEntity(entity);
 
-        @SuppressWarnings("OptionalGetWithoutIsPresent") // We're sure as we just stored the entity.
-        final Entity<?,?> found = repository.load(entity.getId()).get();
+        final Entity<?, ?> found = find(entity.getId()).get();
 
         assertEquals(found, entity);
     }
@@ -108,7 +159,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                             .getId());
         }
 
-        final Collection<E> found = repository.loadAll(ids);
+        final Collection<E> found = loadMany(ids);
 
         assertSize(ids.size(), found);
 
@@ -121,7 +172,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     @Test
     public void find_all_entities() {
         final List<E> entities = createAndStoreEntities(repository, 150);
-        final Collection<E> found = repository.loadAll();
+        final Collection<E> found = loadAll();
         assertSize(entities.size(), found);
 
         for (E entity : found) {
@@ -131,18 +182,17 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @Test
     public void find_no_entities_if_empty() {
-        final Collection<E> found = repository.loadAll();
+        final Collection<E> found = loadAll();
         assertSize(0, found);
     }
 
     @Test
     public void create_entity_on_loadOrCreate_if_not_found() {
         final int count = 3;
-        //noinspection ResultOfMethodCallIgnored
         createAndStoreEntities(repository, count);
 
-        I id = createId(count + 1);
-        final E entity = repository.loadOrCreate(id);
+        final I id = createId(count + 1);
+        final E entity = loadOrCreate(id);
 
         assertNotNull(entity);
         assertEquals(id, entity.getId());
@@ -161,7 +211,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final Entity<I,S> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
-        final Collection<E> found = repository.loadAll(ids);
+        final Collection<E> found = loadMany(ids);
         assertSize(ids.size() - 1, found); // Check we've found all existing items
 
         for (E entity : found) {
@@ -196,7 +246,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                                                                 .getState()
                                                                 .getDescriptorForType();
         final FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
-        final Iterable<E> readEntities = repository.find(filters, firstFieldOnly);
+        final Iterable<E> readEntities = find(filters, firstFieldOnly);
 
         assertSize(ids.size(), readEntities);
 
@@ -216,16 +266,16 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final E entity = createEntity();
         final I id = entity.getId();
 
-        repository.store(entity);
+        storeEntity(entity);
 
-        assertTrue(repository.load(id).isPresent());
+        assertTrue(find(id).isPresent());
 
         entity.setLifecycleFlags(LifecycleFlags.newBuilder()
                                                .setArchived(true)
                                                .build());
-        repository.store(entity);
+        storeEntity(entity);
 
-        assertFalse(repository.load(id).isPresent());
+        assertFalse(find(id).isPresent());
     }
 
     @Test
@@ -233,15 +283,15 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final E entity = createEntity();
         final I id = entity.getId();
 
-        repository.store(entity);
+        storeEntity(entity);
 
-        assertTrue(repository.load(id).isPresent());
+        assertTrue(find(id).isPresent());
 
         entity.setLifecycleFlags(LifecycleFlags.newBuilder()
                                                .setDeleted(true)
                                                .build());
-        repository.store(entity);
+        storeEntity(entity);
 
-        assertFalse(repository.load(id).isPresent());
+        assertFalse(find(id).isPresent());
     }
 }

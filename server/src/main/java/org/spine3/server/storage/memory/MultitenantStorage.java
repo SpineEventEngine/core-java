@@ -20,13 +20,13 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Optional;
-import org.spine3.server.users.CurrentTenant;
+import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
@@ -37,10 +37,6 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  */
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
 
-    /** A stub instance of {@code TenantId} to be used by the storage in single-tenant context. */
-    private static final TenantId singleTenant = TenantId.newBuilder()
-                                                         .setValue("SINGLE_TENANT")
-                                                         .build();
     /** The map from {@code TenantId} to its slice of data. */
     private final Map<TenantId, S> tenantSlices = newConcurrentMap();
 
@@ -57,30 +53,21 @@ abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {
      * <p>If the slice has not been created for this tenant, it will be created.
      */
     S getStorage() {
-        final TenantId tenantId = currentTenant();
-        checkState(tenantId != null, "Current tenant is null");
-
-        S storage = tenantSlices.get(tenantId);
-        if (storage == null) {
-            storage = createSlice();
-            tenantSlices.put(tenantId, storage);
-        }
-        return storage;
-    }
-
-    private TenantId currentTenant() {
-        if (!isMultitenant()) {
-            return singleTenant;
-        }
-
-        final Optional<TenantId> currentTenant = CurrentTenant.get();
-
-        if (!currentTenant.isPresent()) {
-            throw new IllegalStateException(
-                    "No current tenant found in multitenant execution context.");
-        }
-
-        return currentTenant.get();
+        final TenantFunction<S> func = new TenantFunction<S>(isMultitenant()) {
+            @Nullable
+            @Override
+            public S apply(@Nullable TenantId tenantId) {
+                checkNotNull(tenantId);
+                S storage = tenantSlices.get(tenantId);
+                if (storage == null) {
+                    storage = createSlice();
+                    tenantSlices.put(tenantId, storage);
+                }
+                return storage;
+            }
+        };
+        final S result = func.execute();
+        return result;
     }
 
     abstract S createSlice();

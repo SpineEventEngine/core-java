@@ -53,8 +53,8 @@ public final class EventClass extends MessageClass {
     /**
      * Creates a new instance of the event class by passed event instance.
      *
-     * <p>If an instance of {@link Event} (which implements {@code Message}) is passed to this method,
-     * enclosing event message will be un-wrapped to determine the class of the event.
+     * <p>If an instance of {@link Event} (which implements {@code Message}) is passed to
+     * this method, enclosing event message will be un-wrapped to determine the class of the event.
      *
      * @param event an event instance
      * @return new instance

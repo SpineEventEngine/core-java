@@ -38,12 +38,14 @@ import "spine/base/failure.proto";
 // A service may return either `ok` or an `error` (technical failure) or a `business_failure`.
 // The client may expect results (returned via a separate call to read-side or via event stream)
 // only upon receiving the `ok` status.
+//
 message Response {
     oneof status {
         // The request was accepted to execution.
         google.protobuf.Empty ok = 1;
 
-        // The technical error occurred upon receiving the request and no further processing would occur.
+        // The technical error occurred upon receiving the request and no further
+        // processing would occur.
         Error error = 2;
 
         // It is not possible to satisfy the request because of the business failure.

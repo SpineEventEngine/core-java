@@ -51,8 +51,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod") // as we override default implementation with
-                                                 // `unimplemented` status.
+@SuppressWarnings("MethodDoesntCallSuperMethod")
+// as we override default implementation with `unimplemented` status.
 public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionServiceImplBase {
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
@@ -96,11 +96,12 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                 @Override
                 public void onStateChanged(Any newEntityState) {
                     checkNotNull(subscription);
-                    final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
-                                                                        .setSubscription(subscription)
-                                                                        .setResponse(Responses.ok())
-                                                                        .addUpdates(newEntityState)
-                                                                        .build();
+                    final SubscriptionUpdate update =
+                            SubscriptionUpdate.newBuilder()
+                                              .setSubscription(subscription)
+                                              .setResponse(Responses.ok())
+                                              .addUpdates(newEntityState)
+                                              .build();
                     responseObserver.onNext(update);
                 }
             };

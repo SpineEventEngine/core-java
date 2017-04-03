@@ -67,7 +67,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         }
     };
 
-    private final Multimap<I, AggregateEventRecord> filtered = Multimaps.filterKeys(records, isVisible);
+    private final Multimap<I, AggregateEventRecord> filtered =
+            Multimaps.filterKeys(records, isVisible);
 
     private final Map<I, Integer> eventCounts = newHashMap();
 
@@ -174,7 +175,7 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
     /** Used for sorting by timestamp descending (from newer to older). */
     private static class AggregateStorageRecordReverseComparator
-                   implements Comparator<AggregateEventRecord>, Serializable {
+            implements Comparator<AggregateEventRecord>, Serializable {
         private static final long serialVersionUID = 0L;
 
         @Override

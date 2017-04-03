@@ -48,8 +48,8 @@ class StringFieldValidator extends FieldValidator<String> {
      * @param descriptor    a descriptor of the field to validate
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
-     * @param strict        if {@code true} the validator would assume that the field is required
-     *                      even if the corresponding option is not set
+     * @param strict        if {@code true} the validator would assume that the field
+     *                      is required even if the corresponding option is not set
      */
     StringFieldValidator(FieldDescriptor descriptor,
                          ImmutableList<String> fieldValues,
@@ -82,11 +82,13 @@ class StringFieldValidator extends FieldValidator<String> {
     private ConstraintViolation newViolation(String fieldValue) {
         final String msg = getErrorMsgFormat(patternOption, patternOption.getMsgFormat());
         final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(regex)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(AnyPacker.pack(newStringValue(fieldValue)))
-                .build();
+                                                                 .setMsgFormat(msg)
+                                                                 .addParam(regex)
+                                                                 .setFieldPath(getFieldPath())
+                                                                 .setFieldValue(AnyPacker.pack(
+                                                                         newStringValue(
+                                                                                 fieldValue)))
+                                                                 .build();
         return violation;
     }
 

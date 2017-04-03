@@ -43,7 +43,9 @@ class LongFieldValidator extends NumberFieldValidator<Long> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    LongFieldValidator(FieldDescriptor descriptor, ImmutableList<Long> fieldValues, FieldPath rootFieldPath) {
+    LongFieldValidator(FieldDescriptor descriptor,
+                       ImmutableList<Long> fieldValues,
+                       FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 
