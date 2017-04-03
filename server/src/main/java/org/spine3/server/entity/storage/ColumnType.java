@@ -25,6 +25,14 @@ import org.spine3.annotations.SPI;
 /**
  * An interface for handling type conversion for the Storage Fields.
  *
+ * <p>When retrieved from an instance of an {@link org.spine3.server.entity.Entity Entity},
+ * the Storage Field may be of an inappropriate type for storing. To convert the value into
+ * an appropriate type, use {@link #convertColumnValue}.
+ *
+ * <p>After the conversion, you might want to save the value into a special storage specific DTO,
+ * which commonly is built in a key-value fashion. To do that, call {@link #setColumnValue} and pass
+ * both the DTO to store the value to and the key to store it under.
+ *
  * @param <J> the Java type represented by the column
  * @param <S> the "store as" type of the column
  * @param <R> the type of the record in the database, which holds a single cortege of data and
