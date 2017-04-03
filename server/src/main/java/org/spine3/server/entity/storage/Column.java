@@ -214,10 +214,10 @@ public class Column<T> {
     /**
      * Retrieves the Column value from the given {@link Entity}.
      *
-     * <p>The value is wrapped into a special container, which bears information about the Field's
+     * <p>The value is wrapped into a special container, which bears information about the field's
      * metadata.
      *
-     * @param source the {@link Entity} to get the Fields from
+     * @param source the {@link Entity} to get the fields from
      * @return the value of the Column represented by this instance of {@code Column} wrapped
      * into {@link MemoizedValue}
      * @see MemoizedValue
