@@ -77,6 +77,7 @@ message LifecycleFlags {
 //
 // Contains the reasons of an errors, that are exclusively technical
 // and haven't relation to a business errors.
+//
 enum EntityStateValidationError {
 
     // Reserved value.
