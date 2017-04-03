@@ -79,10 +79,10 @@ public class EntityRecordWithColumnsShould {
         final EntityRecordWithColumns envelope =
                 EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
                                            storageFieldsExpected);
-        assertTrue(envelope.hasStorageFields());
+        assertTrue(envelope.hasColumns());
 
         final Map<String, Column.MemoizedValue<?>> storageFieldActual =
-                envelope.getStorageFields();
+                envelope.getColumns();
         assertMapsEqual(storageFieldsExpected, storageFieldActual, "storage fields");
     }
 
@@ -90,8 +90,8 @@ public class EntityRecordWithColumnsShould {
     public void return_empty_map_if_no_storage_fields() {
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
-        assertFalse(record.hasStorageFields());
-        final Map<String, Column.MemoizedValue<?>> fields = record.getStorageFields();
+        assertFalse(record.hasColumns());
+        final Map<String, Column.MemoizedValue<?>> fields = record.getColumns();
         assertEmpty(fields);
     }
 

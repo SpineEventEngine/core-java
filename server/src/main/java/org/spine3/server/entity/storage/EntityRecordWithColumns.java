@@ -44,12 +44,12 @@ public final class EntityRecordWithColumns {
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record        {@link EntityRecord} to pack
-     * @param storageFields {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
+     * @param columns {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
-                                          Map<String, Column.MemoizedValue<?>> storageFields) {
+                                          Map<String, Column.MemoizedValue<?>> columns) {
         this.record = checkNotNull(record);
-        this.storageFields = ImmutableMap.copyOf(storageFields);
+        this.storageFields = ImmutableMap.copyOf(columns);
         this.hasStorageFields = true;
     }
 
@@ -58,10 +58,10 @@ public final class EntityRecordWithColumns {
      * {@linkplain Columns {@link Column Columns}}.
      *
      * <p>An object created with this constructor will always return {@code false} on
-     * {@link #hasStorageFields()}.
+     * {@link #hasColumns()}.
      *
      * @param record {@link EntityRecord} to pack
-     * @see #hasStorageFields()
+     * @see #hasColumns()
      */
     private EntityRecordWithColumns(EntityRecord record) {
         this.record = checkNotNull(record);
@@ -82,9 +82,9 @@ public final class EntityRecordWithColumns {
      * Creates an instance of the {@link EntityRecordWithColumns} with no {@link Column Columns}.
      *
      * <p>An object created with this factory method will always return {@code false} on
-     * {@link #hasStorageFields()}.
+     * {@link #hasColumns()}.
      *
-     * @see #hasStorageFields()
+     * @see #hasColumns()
      */
     public static EntityRecordWithColumns of(EntityRecord record) {
         return new EntityRecordWithColumns(record);
@@ -95,7 +95,7 @@ public final class EntityRecordWithColumns {
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<String, Column.MemoizedValue<?>> getStorageFields() {
+    public Map<String, Column.MemoizedValue<?>> getColumns() {
         return storageFields;
     }
 
@@ -109,7 +109,7 @@ public final class EntityRecordWithColumns {
      * {@linkplain #of(EntityRecord, Map)} and {@code false} if it was
      * constructed with {@linkplain #of(EntityRecord)}
      */
-    public boolean hasStorageFields() {
+    public boolean hasColumns() {
         return hasStorageFields;
     }
 

@@ -326,7 +326,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = newStorageRecord(id);
         final EntityRecordWithColumns recordWithStorageFields =
                 EntityRecordWithColumns.of(record);
-        assertFalse(recordWithStorageFields.hasStorageFields());
+        assertFalse(recordWithStorageFields.hasColumns());
         final RecordStorage<I> storage = getStorage();
 
         storage.write(id, recordWithStorageFields);
@@ -340,7 +340,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             @Override
             public boolean matches(EntityRecordWithColumns argument) {
                 return argument.getRecord().equals(record)
-                        && !argument.hasStorageFields();
+                        && !argument.hasColumns();
             }
         });
     }
