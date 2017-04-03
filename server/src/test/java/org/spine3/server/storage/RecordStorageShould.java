@@ -28,12 +28,18 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps2;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.Column;
+import org.spine3.server.entity.storage.Columns;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
@@ -67,7 +73,7 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Dmytro Dashenkov
  */
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-       extends AbstractStorageShould<I, EntityRecord, S> {
+        extends AbstractStorageShould<I, EntityRecord, S> {
 
     private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
             new Function<EntityRecordWithColumns, EntityRecord>() {
@@ -100,7 +106,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @SuppressWarnings("ConstantConditions")
-        // Converter nullability issues and Optional getting
+    // Converter nullability issues and Optional getting
     @Test
     public void write_and_read_record_by_Message_id() {
         final RecordStorage<I> storage = getStorage();
@@ -108,7 +114,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
 
-        final EntityRecord actual = storage.read(id).get();
+        final EntityRecord actual = storage.read(id)
+                                           .get();
 
         assertEquals(expected, actual);
         close(storage);
@@ -146,7 +153,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"})
-        // Converter nullability issues
+    // Converter nullability issues
     @Test
     public void read_multiple_records_with_field_mask() {
         final RecordStorage<I> storage = getStorage();
@@ -193,7 +200,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertTrue(storage.delete(id));
 
         // There's no record with such ID.
-        assertFalse(storage.read(id).isPresent());
+        assertFalse(storage.read(id)
+                           .isPresent());
     }
 
     @Test
@@ -204,8 +212,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                 Sample.messageOfType(Project.class));
         final EntityRecord record =
                 Sample.<EntityRecord, EntityRecord.Builder>builderForType(EntityRecord.class)
-                      .setState(state)
-                      .build();
+                        .setState(state)
+                        .build();
         storage.write(id, record);
         verify(storage).write(eq(id), withRecordAndNoFields(record));
     }
@@ -261,8 +269,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
             // Some records are changed and some are not
             final EntityRecord alternateRecord = (i % 2 == 0)
-                                                 ? record
-                                                 : newStorageRecord(id);
+                    ? record
+                    : newStorageRecord(id);
             v1Records.put(id, record);
             v2Records.put(id, alternateRecord);
         }
@@ -317,7 +325,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());
-        assertTrue(optional.get().getArchived());
+        assertTrue(optional.get()
+                           .getArchived());
     }
 
     @Test
@@ -335,13 +344,70 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEquals(record, actualRecord.get());
     }
 
+    @Test
+    public void write_record_with_columns() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
+        final Map<String, Column.MemoizedValue<?>> columns = Columns.from(testEntity);
+        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record,
+                                                                                     columns);
+        final S storage = getStorage();
+        storage.write(id, recordWithColumns);
+
+        final Optional<EntityRecord> readRecord = storage.read(id);
+        assertTrue(readRecord.isPresent());
+        assertEquals(record, readRecord.get());
+    }
+
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
         return argThat(new ArgumentMatcher<EntityRecordWithColumns>() {
             @Override
             public boolean matches(EntityRecordWithColumns argument) {
-                return argument.getRecord().equals(record)
+                return argument.getRecord()
+                               .equals(record)
                         && !argument.hasColumns();
             }
         });
+    }
+
+    public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
+
+        private int counter = 0;
+
+        protected TestCounterEntity(I id) {
+            super(id);
+        }
+
+        public int getCounter() {
+            counter++;
+            return counter;
+        }
+
+        public long getBigCounter() {
+            return getCounter();
+        }
+
+        public boolean isCounterEven() {
+            return counter % 2 == 0;
+        }
+
+        public String getCounterName() {
+            return getId().toString();
+        }
+
+        public Version getCounterVersion() {
+            return Version.newBuilder()
+                          .setNumber(counter)
+                          .build();
+        }
+
+        public Timestamp getNow() {
+            return Timestamps2.getCurrentTime();
+        }
+
+        public Project getCounterState() {
+            return getState();
+        }
     }
 }
