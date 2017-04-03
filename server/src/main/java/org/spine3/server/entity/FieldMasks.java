@@ -145,7 +145,7 @@ public class FieldMasks {
      * @param message the {@link Message} to apply given mask to.
      * @param typeUrl type of given {@link Message}.
      * @return the message of the same type as the given one with only selected fields if
-     *         the {@code mask} is valid, original message otherwise.
+     * the {@code mask} is valid, original message otherwise.
      */
     public static <M extends Message> M applyMask(FieldMask mask, M message, TypeUrl typeUrl) {
         if (!mask.getPathsList()
@@ -186,8 +186,8 @@ public class FieldMasks {
             ProtocolStringList filter,
             Constructor<B> builderConstructor, Message wholeMessage)
             throws InstantiationException,
-            IllegalAccessException,
-            InvocationTargetException {
+                   IllegalAccessException,
+                   InvocationTargetException {
         final B builder = builderConstructor.newInstance();
 
         final List<Descriptors.FieldDescriptor> fields = wholeMessage.getDescriptorForType()
@@ -197,13 +197,14 @@ public class FieldMasks {
                 builder.setField(field, wholeMessage.getField(field));
             }
         }
-        @SuppressWarnings("unchecked")       // It's fine as the constructor is of {@code MessageCls.Builder} type.
+        @SuppressWarnings("unchecked")
+        // It's fine as the constructor is of {@code MessageCls.Builder} type.
         final M result = (M) builder.build();
         return result;
     }
 
     @SuppressWarnings("unchecked")
-        // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
+    // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
         Class<B> builderClass;

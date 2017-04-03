@@ -48,7 +48,8 @@ class FieldValidatorFactory {
      * @param descriptor    a descriptor of the field to validate
      * @param fieldValue    a value of the field to validate
      * @param rootFieldPath a path to the root field
-     * @param strict        if {@code true} validators would always assume that the field is required
+     * @param strict        if {@code true} validators would always assume that
+     *                      the field is required
      */
     private static FieldValidator<?> create(FieldDescriptor descriptor,
             Object fieldValue,
@@ -81,7 +82,8 @@ class FieldValidatorFactory {
                 final ImmutableList<Boolean> booleans = toValueList(fieldValue);
                 return new BooleanFieldValidator(descriptor, booleans, rootFieldPath);
             case ENUM:
-                final ImmutableList<Descriptors.EnumValueDescriptor> enums = toValueList(fieldValue);
+                final ImmutableList<Descriptors.EnumValueDescriptor> enums =
+                        toValueList(fieldValue);
                 return new EnumFieldValidator(descriptor, enums, rootFieldPath);
             default:
                 throw fieldTypeIsNotSupported(descriptor);
@@ -110,7 +112,8 @@ class FieldValidatorFactory {
     }
 
     private static IllegalArgumentException fieldTypeIsNotSupported(FieldDescriptor descriptor) {
-        final String msg = format("The field type is not supported for validation: %s", descriptor.getType());
+        final String msg = format(
+                "The field type is not supported for validation: %s", descriptor.getType());
         throw new IllegalArgumentException(msg);
     }
 }

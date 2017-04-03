@@ -93,12 +93,16 @@ class AlternativeFieldValidator {
                 final JavaType optionType = optionDescriptor.getJavaType();
                 if (optionType == JavaType.STRING) {
                     final String requiredFieldExpression = (String) options.get(optionDescriptor);
-                    final ImmutableList<RequiredFieldOption> fieldOptions = parse(requiredFieldExpression);
+                    final ImmutableList<RequiredFieldOption> fieldOptions =
+                            parse(requiredFieldExpression);
                     if (!alternativeFound(message, fieldOptions)) {
-                        ConstraintViolation requiredFieldNotFound = ConstraintViolation.newBuilder()
-                                .setMsgFormat("None of the fields match the `required_field` definition: %s")
-                                .addParam(requiredFieldExpression)
-                                .build();
+                        final String msgFormat =
+                                "None of the fields match the `required_field` definition: %s";
+                        ConstraintViolation requiredFieldNotFound =
+                                ConstraintViolation.newBuilder()
+                                                   .setMsgFormat(msgFormat)
+                                                   .addParam(requiredFieldExpression)
+                                                   .build();
                         violations.add(requiredFieldNotFound);
                     }
                 } else {
@@ -216,15 +220,18 @@ class AlternativeFieldValidator {
 
         String getFieldName() {
             if (fieldName == null) {
-                throw new IllegalStateException("The option is not a field but a combination of fields.");
+                final String msg = "The option is not a field but a combination of fields.";
+                throw new IllegalStateException(msg);
             }
             return fieldName;
         }
 
-        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // It is OK to suppress as we're using ImmutableList.
+        @SuppressWarnings("ReturnOfCollectionOrArrayField")
+            // It is OK to suppress as we're using ImmutableList.
         ImmutableList<String> getFieldNames() {
             if (fieldNames == null) {
-                throw new IllegalStateException("The option is not a combination, but a single field.");
+                final String msg = "The option is not a combination, but a single field.";
+                throw new IllegalStateException(msg);
             }
 
             return fieldNames;

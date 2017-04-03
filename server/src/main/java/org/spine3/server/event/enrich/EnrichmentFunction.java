@@ -34,9 +34,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
- * {@code EnrichmentFunction} defines how a source message class can be transformed into a target message class.
+ * {@code EnrichmentFunction} defines how a source message class can be transformed
+ * into a target message class.
  *
- * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events passed to {@link EventBus}.
+ * <p>{@code EnrichmentFunction}s are used by an {@link EventEnricher} to augment events
+ * passed to {@link EventBus}.
  *
  * @param <S> a type of the source object to enrich
  * @param <T> a type of the target enrichment

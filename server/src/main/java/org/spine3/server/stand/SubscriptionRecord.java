@@ -80,7 +80,8 @@ final class SubscriptionRecord {
      * @param type        the type to match
      * @param id          the ID to match
      * @param entityState the entity state to match
-     * @return {@code true} if this record matches all the given parameters, {@code false} otherwise.
+     * @return {@code true} if this record matches all the given parameters,
+     * {@code false} otherwise.
      */
     boolean matches(TypeUrl type,
                     Object id,
