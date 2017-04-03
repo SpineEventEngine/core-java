@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <C> storage-specific implementation of the {@link ColumnType}
  * @author Dmytro Dashenkov
  */
-public class ColumnTypeRegistry<C extends ColumnType> {
+public final class ColumnTypeRegistry<C extends ColumnType> {
 
     private final ImmutableMap<Class, C> columnTypeMap;
 
@@ -119,6 +119,9 @@ public class ColumnTypeRegistry<C extends ColumnType> {
          * @return self for call chaining
          */
         public <J> Builder<C> put(Class<J> javaType, ColumnType<J, ?, ?, ?> columnType) {
+            checkNotNull(javaType);
+            checkNotNull(columnType);
+
             @SuppressWarnings("unchecked")
             final C columnTypeResolved = (C) columnType;
             final Class<J> wrapped = Primitives.wrap(javaType);

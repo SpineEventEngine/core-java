@@ -168,13 +168,13 @@ public class StorageFields {
         if (knownEntityProperties.containsKey(entityType)) {
             return;
         }
-        addToCaches(entityType);
+        addToCache(entityType);
     }
 
     /**
      * Caches the {@linkplain Entity entity type} for further Storage Fields retrieving.
      */
-    private static void addToCaches(Class<? extends Entity> entityType) {
+    private static void addToCache(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
         try {
             entityDescriptor = Introspector.getBeanInfo(entityType);

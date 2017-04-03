@@ -93,8 +93,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     }
 
     /**
-     * Writes a record and its
-     * {@linkplain org.spine3.server.entity.storage.StorageFields Storage Fields} into the storage.
+     * Writes a record and its Storage Fields into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *

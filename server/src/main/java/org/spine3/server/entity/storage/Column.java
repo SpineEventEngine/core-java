@@ -176,7 +176,7 @@ public class Column<T> {
     /**
      * A value of a Storage Field saved at some point in time.
      *
-     * <p>The class associates the Storage Field value with its metadata - {@linkplain Column}.
+     * <p>The class associates the Storage Field value with its metadata i.e. {@linkplain Column}.
      *
      * @param <T> the type of the Storage Field
      */

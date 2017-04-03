@@ -21,6 +21,7 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
 
 import javax.annotation.Nullable;
@@ -29,7 +30,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value of {@link EntityRecord} associated with its {@linkplain StorageFields Storage Fields}.
+ * A value of {@link EntityRecord} associated with its Storage Fields.
  *
  * @author Dmytro Dashenkov
  */
@@ -44,7 +45,7 @@ public final class EntityRecordWithStorageFields {
      * Creates a new instance of the {@code EntityRecordWithStorageFields}.
      *
      * @param record        {@link EntityRecord} to pack
-     * @param storageFields {@linkplain StorageFields Storage Fields map} to pack
+     * @param storageFields {@linkplain StorageFields#from(Entity) Storage Fields map} to pack
      */
     private EntityRecordWithStorageFields(EntityRecord record,
                                           Map<String, Column.MemoizedValue<?>> storageFields) {
@@ -78,8 +79,7 @@ public final class EntityRecordWithStorageFields {
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithStorageFields} with no
-     * {@linkplain StorageFields Storage Fields}.
+     * Creates an instance of the {@link EntityRecordWithStorageFields} with no Storage Fields.
      *
      * <p>An object created with this factory method will always return {@code false} on
      * {@link #hasStorageFields()}.
@@ -104,7 +104,7 @@ public final class EntityRecordWithStorageFields {
     /**
      * Determines whether or not there are any Storage Fields associated with this record.
      *
-     * <p>If returns {@code false}, the {@linkplain StorageFields Storage Fields} are not considered
+     * <p>If returns {@code false}, the Storage Fields are not considered
      * by the storage.
      *
      * @return {@code true} if current object was constructed with

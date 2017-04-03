@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity.storage;
 
+import org.spine3.annotations.SPI;
+
 /**
  * A base for implementing {@link ColumnType} interface regardless the type conversion.
  *
@@ -29,6 +31,7 @@ package org.spine3.server.entity.storage;
  * @param <C> the type of the column identifier in the {@code R}
  * @author Dmytro Dashenkov
  */
+@SPI
 public abstract class SimpleColumnType<T, R, C> implements ColumnType<T, T, R, C> {
 
     @Override
