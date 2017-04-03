@@ -32,10 +32,33 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
- * The representation of a field of an {@link Entity} which is converted into a Storage Field.
+ * The representation of a field of an {@link Entity} which is stored in the storage in the way
+ * efficient for querying.
  *
- * <p>This class manages the access to the Storage Field value and the reference to its declaration.
+ * <p>A Column is a value retrieved from an {@link Entity} getter.
  *
+ * <h2>Type policy</h2>
+ *
+ * <p>A Column can turn into any type. If use a ready implementation of
+ * the {@link org.spine3.server.storage.Storage Spine Storages}, the most commonly used types should
+ * be already supported. However, you may override the behavior for any type whenever you  wish. For
+ * more info, see {@link ColumnTypeRegistry}.
+ *
+ * <p>To handle specific types of the Columns, which are not supported by default,
+ * implement the {@link ColumnType} {@code interface}, register it in a {@link ColumnTypeRegistry}
+ * and pass the instance of the registry into the
+ * {@link org.spine3.server.storage.StorageFactory StorageFactory} on creation.
+ *
+ * <h2>Nullability</h2>
+ *
+ * <p>A Column may turn into {@code null} value if the getter which declares it is annotated as
+ * {@link javax.annotation.Nullable javax.annotation.Nullable}. Otherwise, the Column is considered
+ * non-null.
+ *
+ * <p>If a non-null getter method returns {@code null} when trying to get the value of a Column,
+ * a {@linkplain RuntimeException} is thrown. See {@link #isNullable()}.
+ *
+ * @see ColumnType
  * @author Dmytro Dashenkov
  */
 public class Column<T> {

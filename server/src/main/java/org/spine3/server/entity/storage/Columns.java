@@ -44,17 +44,17 @@ import static com.google.common.collect.Multimaps.synchronizedListMultimap;
 import static java.lang.String.format;
 
 /**
- * A utility for generating the Storage Fields {@linkplain Map}.
+ * A utility for generating the {@link Column Columns} {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean</a>
- *  getter spec are considered Storage Fields.
+ *  getter spec are considered {@link Column Columns}.
  *
  * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
  * from a cache and are not updated.
  *
  * <p>There are several excluded methods, which are never taken into account and are
- * <b>not</b> considered Storage Fields:
+ * <b>not</b> considered {@link Column Columns}:
  * <ul>
  *     <li>{@link Object#getClass()}
  *     <li>{@link Entity#getId()}
@@ -70,7 +70,7 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  * @see Column
  */
-public class StorageFields {
+public class Columns {
 
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
@@ -84,12 +84,12 @@ public class StorageFields {
             synchronizedListMultimap(
                     LinkedListMultimap.<Class<? extends Entity>, Column<?>>create());
 
-    private StorageFields() {
+    private Columns() {
         // Prevent initialization of a utility class
     }
 
     /**
-     * @return an {@link Collections#emptyMap() empty} Storage Fields map
+     * @return an {@link Collections#emptyMap() empty} {@link Column Columns} map
      */
     @Internal
     public static Map<String, Column.MemoizedValue<?>> empty() {
@@ -97,14 +97,14 @@ public class StorageFields {
     }
 
     /**
-     * Generates the Storage Fields for the given {@linkplain Entity}.
+     * Generates the {@link Column Columns} for the given {@linkplain Entity}.
      *
      * <p>If there were no {@linkplain Entity entities} stored in the scope of current class
      * <a href="https://docs.oracle.com/javase/specs/jls/se7/html/jls-12.html">initialization</a>,
      * a call to this method will create a cache of the passed {@linkplain Entity entity's} getters
      * and use it in all the successive calls.
      *
-     * @param entity an {@link Entity} to get the Storage Fields from
+     * @param entity an {@link Entity} to get the {@link Column Columns} from
      * @param <E> the type of the {@link Entity}
      * @return a {@link Map} of the Storage Field names to their
      * {@linkplain Column.MemoizedValue memoized values}.
@@ -132,7 +132,7 @@ public class StorageFields {
      *
      * @param entityType indexed type of the {@link Entity}
      * @param entity the object which to take the values from
-     * @return a {@link Map} of the Storage Fields
+     * @return a {@link Map} of the {@link Column Columns}
      */
     private static Map<String, Column.MemoizedValue<?>> getStorageFields(
             Class<? extends Entity> entityType,
@@ -158,7 +158,7 @@ public class StorageFields {
     }
 
     /**
-     * Caches the {@linkplain Entity entity type} for further Storage Fields retrieving.
+     * Caches the {@linkplain Entity entity type} for further {@link Column Columns} retrieving.
      */
     private static void addToCache(Class<? extends Entity> entityType) {
         final BeanInfo entityDescriptor;
@@ -184,7 +184,7 @@ public class StorageFields {
     private enum LogSingleton {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(StorageFields.class);
+        private final Logger value = LoggerFactory.getLogger(Columns.class);
     }
 
     private enum ExcludedMethod {

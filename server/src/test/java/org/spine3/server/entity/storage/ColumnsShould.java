@@ -49,25 +49,25 @@ import static org.spine3.test.Verify.assertSize;
 /**
  * @author Dmytro Dashenkov
  */
-public class StorageFieldsShould {
+public class ColumnsShould {
 
     private static final String STRING_ID = "some-string-id-never-used";
 
     @Test
     public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(StorageFields.class);
+        assertHasPrivateParameterlessCtor(Columns.class);
     }
 
     @Test
     public void pass_null_check() {
         new NullPointerTester()
-                .testStaticMethods(StorageFields.class,
+                .testStaticMethods(Columns.class,
                                    NullPointerTester.Visibility.PACKAGE);
     }
 
     @Test
     public void return_empty_map() {
-        final Map<String, Column.MemoizedValue<?>> emptyFields = StorageFields.empty();
+        final Map<String, Column.MemoizedValue<?>> emptyFields = Columns.empty();
         assertNotNull(emptyFields);
         assertEmpty(emptyFields);
     }
@@ -75,7 +75,7 @@ public class StorageFieldsShould {
     @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final Map<String, Column.MemoizedValue<?>> fields = StorageFields.from(entity);
+        final Map<String, Column.MemoizedValue<?>> fields = Columns.from(entity);
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -83,7 +83,7 @@ public class StorageFieldsShould {
     @Test
     public void put_non_null_fields_to_fields_maps() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Map<String, Column.MemoizedValue<?>> fields = StorageFields.from(entity);
+        final Map<String, Column.MemoizedValue<?>> fields = Columns.from(entity);
         assertNotNull(fields);
 
         assertSize(3, fields);
@@ -108,21 +108,21 @@ public class StorageFieldsShould {
     @Test
     public void ignore_static_members() {
         final Map<String, Column.MemoizedValue<?>> fields =
-                StorageFields.from(new EntityWithManyGetters(STRING_ID));
+                Columns.from(new EntityWithManyGetters(STRING_ID));
         final Column.MemoizedValue<?> staticValue = fields.get("staticMember");
         assertNull(staticValue);
     }
 
     @Test
     public void handle_non_public_entity_class() {
-        final Map<?, ?> fields = StorageFields.from(new PrivateEntity(STRING_ID));
+        final Map<?, ?> fields = Columns.from(new PrivateEntity(STRING_ID));
         assertNotNull(fields);
         assertEmpty(fields);
     }
 
     @Test
     public void handle_exclusive_methods() {
-        final Map<?, ?> fields = StorageFields.from(new ExclusiveMethodsEntity(STRING_ID));
+        final Map<?, ?> fields = Columns.from(new ExclusiveMethodsEntity(STRING_ID));
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -130,7 +130,7 @@ public class StorageFieldsShould {
     @Test
     public void handle_inherited_fields() {
         final Entity<?, ?> entity = new RealLifeEntity(Sample.messageOfType(ProjectId.class));
-        final Map<String, ?> storageFields = StorageFields.from(entity);
+        final Map<String, ?> storageFields = Columns.from(entity);
         final Set<String> storageFieldNames = storageFields.keySet();
 
         assertSize(5, storageFieldNames);

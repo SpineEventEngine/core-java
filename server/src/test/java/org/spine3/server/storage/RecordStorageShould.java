@@ -34,7 +34,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
 import org.spine3.testdata.Sample;
@@ -69,11 +69,11 @@ import static org.spine3.validate.Validate.isDefault;
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
        extends AbstractStorageShould<I, EntityRecord, S> {
 
-    private static final Function<EntityRecordWithStorageFields, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
-            new Function<EntityRecordWithStorageFields, EntityRecord>() {
+    private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
+            new Function<EntityRecordWithColumns, EntityRecord>() {
                 @Override
                 public EntityRecord apply(
-                        @Nullable EntityRecordWithStorageFields entityRecord) {
+                        @Nullable EntityRecordWithColumns entityRecord) {
                     assertNotNull(entityRecord);
                     return entityRecord.getRecord();
                 }
@@ -215,12 +215,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         final int bulkSize = 5;
 
-        final Map<I, EntityRecordWithStorageFields> initial = new HashMap<>(bulkSize);
+        final Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
 
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            initial.put(id, EntityRecordWithStorageFields.of(record));
+            initial.put(id, EntityRecordWithColumns.of(record));
         }
         storage.write(initial);
 
@@ -241,15 +241,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final int recordCount = 3;
         final RecordStorage<I> storage = getStorage();
 
-        final Function<EntityRecord, EntityRecordWithStorageFields> recordPacker =
-                new Function<EntityRecord, EntityRecordWithStorageFields>() {
+        final Function<EntityRecord, EntityRecordWithColumns> recordPacker =
+                new Function<EntityRecord, EntityRecordWithColumns>() {
                     @Nullable
                     @Override
-                    public EntityRecordWithStorageFields apply(@Nullable EntityRecord record) {
+                    public EntityRecordWithColumns apply(@Nullable EntityRecord record) {
                         if (record == null) {
                             return null;
                         }
-                        return EntityRecordWithStorageFields.of(record);
+                        return EntityRecordWithColumns.of(record);
                     }
                 };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
@@ -311,7 +311,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, EntityRecordWithStorageFields.of(record));
+        storage.write(id, EntityRecordWithColumns.of(record));
 
         storage.writeLifecycleFlags(id, archived());
 
@@ -324,8 +324,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void accept_records_with_empty_storage_fields() {
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
-        final EntityRecordWithStorageFields recordWithStorageFields =
-                EntityRecordWithStorageFields.of(record);
+        final EntityRecordWithColumns recordWithStorageFields =
+                EntityRecordWithColumns.of(record);
         assertFalse(recordWithStorageFields.hasStorageFields());
         final RecordStorage<I> storage = getStorage();
 
@@ -335,10 +335,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEquals(record, actualRecord.get());
     }
 
-    private static EntityRecordWithStorageFields withRecordAndNoFields(final EntityRecord record) {
-        return argThat(new ArgumentMatcher<EntityRecordWithStorageFields>() {
+    private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
+        return argThat(new ArgumentMatcher<EntityRecordWithColumns>() {
             @Override
-            public boolean matches(EntityRecordWithStorageFields argument) {
+            public boolean matches(EntityRecordWithColumns argument) {
                 return argument.getRecord().equals(record)
                         && !argument.hasStorageFields();
             }

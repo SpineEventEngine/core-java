@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 /**
- * A registry of type conversion strategies for the Storage Fields.
+ * A registry of type conversion strategies for the {@link Column Columns}.
  *
  * @param <C> storage-specific implementation of the {@link ColumnType}
  * @author Dmytro Dashenkov

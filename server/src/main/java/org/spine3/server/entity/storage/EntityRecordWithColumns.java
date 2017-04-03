@@ -29,11 +29,11 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value of {@link EntityRecord} associated with its Storage Fields.
+ * A value of {@link EntityRecord} associated with its {@link Column Columns}.
  *
  * @author Dmytro Dashenkov
  */
-public final class EntityRecordWithStorageFields {
+public final class EntityRecordWithColumns {
 
     private final EntityRecord record;
 
@@ -41,12 +41,12 @@ public final class EntityRecordWithStorageFields {
     private final boolean hasStorageFields;
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithStorageFields}.
+     * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
      * @param record        {@link EntityRecord} to pack
-     * @param storageFields {@linkplain StorageFields#from(Entity) Storage Fields map} to pack
+     * @param storageFields {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
      */
-    private EntityRecordWithStorageFields(EntityRecord record,
+    private EntityRecordWithColumns(EntityRecord record,
                                           Map<String, Column.MemoizedValue<?>> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
@@ -54,8 +54,8 @@ public final class EntityRecordWithStorageFields {
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithStorageFields} with no
-     * {@linkplain StorageFields Storage Fields}.
+     * Creates an instance of the {@link EntityRecordWithColumns} with no
+     * {@linkplain Columns {@link Column Columns}}.
      *
      * <p>An object created with this constructor will always return {@code false} on
      * {@link #hasStorageFields()}.
@@ -63,31 +63,31 @@ public final class EntityRecordWithStorageFields {
      * @param record {@link EntityRecord} to pack
      * @see #hasStorageFields()
      */
-    private EntityRecordWithStorageFields(EntityRecord record) {
+    private EntityRecordWithColumns(EntityRecord record) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.of();
         this.hasStorageFields = false;
     }
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithStorageFields}.
+     * Creates a new instance of the {@code EntityRecordWithColumns}.
      */
-    public static EntityRecordWithStorageFields of(
+    public static EntityRecordWithColumns of(
             EntityRecord record,
             Map<String, Column.MemoizedValue<?>> storageFields) {
-        return new EntityRecordWithStorageFields(record, storageFields);
+        return new EntityRecordWithColumns(record, storageFields);
     }
 
     /**
-     * Creates an instance of the {@link EntityRecordWithStorageFields} with no Storage Fields.
+     * Creates an instance of the {@link EntityRecordWithColumns} with no {@link Column Columns}.
      *
      * <p>An object created with this factory method will always return {@code false} on
      * {@link #hasStorageFields()}.
      *
      * @see #hasStorageFields()
      */
-    public static EntityRecordWithStorageFields of(EntityRecord record) {
-        return new EntityRecordWithStorageFields(record);
+    public static EntityRecordWithColumns of(EntityRecord record) {
+        return new EntityRecordWithColumns(record);
     }
 
     public EntityRecord getRecord() {
@@ -100,9 +100,9 @@ public final class EntityRecordWithStorageFields {
     }
 
     /**
-     * Determines whether or not there are any Storage Fields associated with this record.
+     * Determines whether or not there are any {@link Column Columns} associated with this record.
      *
-     * <p>If returns {@code false}, the Storage Fields are not considered
+     * <p>If returns {@code false}, the {@link Column Columns} are not considered
      * by the storage.
      *
      * @return {@code true} if current object was constructed with
@@ -122,7 +122,7 @@ public final class EntityRecordWithStorageFields {
             return false;
         }
 
-        EntityRecordWithStorageFields envelope = (EntityRecordWithStorageFields) o;
+        EntityRecordWithColumns envelope = (EntityRecordWithColumns) o;
 
         return getRecord().equals(envelope.getRecord());
     }

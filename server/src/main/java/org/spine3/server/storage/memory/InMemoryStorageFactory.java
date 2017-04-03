@@ -50,7 +50,8 @@ public class InMemoryStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      *
-     * <p>In-memory implementation stores no values separately (Storage Fields), therefore
+     * <p>In-memory implementation stores no values separately
+     * ({@link org.spine3.server.entity.storage.Column Columns}), therefore
      * returns {@linkplain ColumnTypeRegistry#empty() an empty ColumnTypeRegistry}.
      */
     @Override

@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 
 import java.util.Collection;
@@ -107,14 +107,14 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected void writeRecord(I id, EntityRecordWithStorageFields record) {
+    protected void writeRecord(I id, EntityRecordWithColumns record) {
         getStorage().put(id, record.getRecord());
     }
 
     @Override
-    protected void writeRecords(Map<I, EntityRecordWithStorageFields> records) {
+    protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         final TenantRecords<I> storage = getStorage();
-        for (Map.Entry<I, EntityRecordWithStorageFields> record : records.entrySet()) {
+        for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue().getRecord());
         }
     }

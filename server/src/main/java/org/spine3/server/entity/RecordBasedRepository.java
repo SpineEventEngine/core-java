@@ -33,8 +33,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
-import org.spine3.server.entity.storage.EntityRecordWithStorageFields;
-import org.spine3.server.entity.storage.StorageFields;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
+import org.spine3.server.entity.storage.Columns;
 import org.spine3.server.entity.storage.Column;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
@@ -115,7 +115,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public void store(E entity) {
         final RecordStorage<I> storage = recordStorage();
-        final EntityRecordWithStorageFields record = toRecord(entity);
+        final EntityRecordWithColumns record = toRecord(entity);
         storage.write(entity.getId(), record);
     }
 
@@ -287,11 +287,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /**
      * Converts the passed entity into the record.
      */
-    protected EntityRecordWithStorageFields toRecord(E entity) {
+    protected EntityRecordWithColumns toRecord(E entity) {
         final EntityRecord entityRecord = entityConverter().convert(entity);
-        final Map<String, Column.MemoizedValue<?>> storageFields = StorageFields.from(entity);
-        final EntityRecordWithStorageFields envelope =
-                EntityRecordWithStorageFields.of(entityRecord, storageFields);
+        final Map<String, Column.MemoizedValue<?>> storageFields = Columns.from(entity);
+        final EntityRecordWithColumns envelope =
+                EntityRecordWithColumns.of(entityRecord, storageFields);
         return envelope;
     }
 

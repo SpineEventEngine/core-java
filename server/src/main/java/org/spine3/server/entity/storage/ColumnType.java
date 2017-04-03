@@ -23,7 +23,7 @@ package org.spine3.server.entity.storage;
 import org.spine3.annotations.SPI;
 
 /**
- * An interface for handling type conversion for the Storage Fields.
+ * An interface for handling type conversion for the {@link Column Columns}.
  *
  * <p>When retrieved from an instance of an {@link org.spine3.server.entity.Entity Entity},
  * the Storage Field may be of an inappropriate type for storing. To convert the value into
