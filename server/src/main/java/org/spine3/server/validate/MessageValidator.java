@@ -83,7 +83,8 @@ public class MessageValidator {
         result.addAll(altFieldValidator.validate(message));
     }
 
-    private void validateFields(Message message, ImmutableList.Builder<ConstraintViolation> result) {
+    private void validateFields(Message message,
+                                ImmutableList.Builder<ConstraintViolation> result) {
         final Descriptor msgDescriptor = message.getDescriptorForType();
         final List<FieldDescriptor> fields = msgDescriptor.getFields();
         for (FieldDescriptor field : fields) {

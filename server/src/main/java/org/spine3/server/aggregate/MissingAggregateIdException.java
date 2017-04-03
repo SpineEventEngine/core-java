@@ -47,6 +47,7 @@ public class MissingAggregateIdException extends RuntimeException {
 
     public MissingAggregateIdException(String commandClassName, String propertyName) {
         super("The first property of the aggregate command " + commandClassName +
-                " must define aggregate ID with a name ending with '" + Identifiers.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
+              " must define aggregate ID with a name ending with '" +
+              Identifiers.ID_PROPERTY_SUFFIX + "'. Found: " + propertyName);
     }
 }

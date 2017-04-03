@@ -43,7 +43,9 @@ class DoubleFieldValidator extends FloatFieldValidatorBase<Double> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    DoubleFieldValidator(FieldDescriptor descriptor, ImmutableList<Double> fieldValues, FieldPath rootFieldPath) {
+    DoubleFieldValidator(FieldDescriptor descriptor,
+                         ImmutableList<Double> fieldValues,
+                         FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 

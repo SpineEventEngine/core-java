@@ -81,9 +81,11 @@ public class Producers {
      *
      * @param <I> the type of entity IDs
      */
-    private static class ProducerFromFirstEventMessageField<I> implements IdSetEventFunction<I, Message> {
+    private static class ProducerFromFirstEventMessageField<I>
+            implements IdSetEventFunction<I, Message> {
 
-        private final GetProducerIdFromEvent<I, Message> func = GetProducerIdFromEvent.fromFieldIndex(0);
+        private final GetProducerIdFromEvent<I, Message> func =
+                GetProducerIdFromEvent.fromFieldIndex(0);
 
         @Override
         public Set<I> apply(Message message, EventContext context) {

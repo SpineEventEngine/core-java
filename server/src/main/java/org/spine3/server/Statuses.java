@@ -38,8 +38,8 @@ public class Statuses {
     }
 
     /**
-     * Creates an instance of {@code StatusRuntimeException} of status {@code Status.INVALID_ARGUMENT}
-     * with the passed exception.
+     * Creates an instance of {@code StatusRuntimeException} of status
+     * {@code Status.INVALID_ARGUMENT} with the passed exception.
      */
     public static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
         checkNotNull(exception);

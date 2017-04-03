@@ -43,7 +43,9 @@ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    IntegerFieldValidator(FieldDescriptor descriptor, ImmutableList<Integer> fieldValues, FieldPath rootFieldPath) {
+    IntegerFieldValidator(FieldDescriptor descriptor,
+                          ImmutableList<Integer> fieldValues,
+                          FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 
