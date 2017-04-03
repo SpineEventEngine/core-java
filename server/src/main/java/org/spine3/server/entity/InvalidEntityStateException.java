@@ -36,7 +36,7 @@ import static org.spine3.server.entity.EntityStateValidationError.INVALID_ENTITY
  *
  * @author Dmytro Grankin
  */
-public class InvalidEntityStateException extends EntityStateException {
+public final class InvalidEntityStateException extends EntityStateException {
 
     private static final long serialVersionUID = 0L;
 
