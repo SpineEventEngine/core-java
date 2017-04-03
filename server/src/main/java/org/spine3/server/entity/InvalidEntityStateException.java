@@ -20,9 +20,14 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Any;
+import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Error;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.ConstraintViolations.ExceptionFactory;
 
@@ -36,15 +41,26 @@ import static org.spine3.server.entity.EntityStateValidationError.INVALID_ENTITY
  *
  * @author Dmytro Grankin
  */
-public final class InvalidEntityStateException extends EntityStateException {
+public final class InvalidEntityStateException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 
     private static final String MSG_VALIDATION_ERROR =
             "Entity state does match the validation constraints.";
 
+    private final GeneratedMessageV3 entityState;
+
+    /**
+     * The error passed with the exception.
+     */
+    private final Error error;
+
     private InvalidEntityStateException(String messageText, Message entityState, Error error) {
-        super(messageText, entityState, error);
+        super(messageText);
+        this.entityState = entityState instanceof GeneratedMessageV3
+                           ? (GeneratedMessageV3) entityState
+                           : AnyPacker.pack(entityState);
+        this.error = error;
     }
 
     /**
@@ -62,6 +78,25 @@ public final class InvalidEntityStateException extends EntityStateException {
     }
 
     /**
+     * Returns a related event message.
+     */
+    public Message getEntityState() {
+        if (entityState instanceof Any) {
+            final Any any = (Any) entityState;
+            Message unpacked = AnyPacker.unpack(any);
+            return unpacked;
+        }
+        return entityState;
+    }
+
+    /**
+     * Returns an error occurred.
+     */
+    public Error getError() {
+        return error;
+    }
+
+    /**
      * A helper utility aimed to create an {@code InvalidEntityStateException} to report the
      * entity state which field values violate validation constraint(s).
      */
@@ -70,6 +105,14 @@ public final class InvalidEntityStateException extends EntityStateException {
             Message,
             EntityStateClass,
             EntityStateValidationError> {
+
+        /**
+         * The name of the attribute of the entity state type reported in an error.
+         *
+         * @see #getMessageTypeAttribute(Message)
+         * @see Error
+         */
+        private static final String ATTR_ENTITY_STATE_TYPE_NAME = "entityStateType";
 
         private final EntityStateClass entityStateClass;
 
@@ -94,9 +137,19 @@ public final class InvalidEntityStateException extends EntityStateException {
             return MSG_VALIDATION_ERROR;
         }
 
+        /**
+         * Returns a map with an entity state type attribute.
+         *
+         * @param entityState the entity state to get the type from
+         */
         @Override
-        protected Map<String, Value> getMessageTypeAttribute(Message message) {
-            return entityStateTypeAttribute(message);
+        protected Map<String, Value> getMessageTypeAttribute(Message entityState) {
+            final String entityStateType = TypeName.of(entityState)
+                                                   .value();
+            final Value value = Value.newBuilder()
+                                     .setStringValue(entityStateType)
+                                     .build();
+            return ImmutableMap.of(ATTR_ENTITY_STATE_TYPE_NAME, value);
         }
 
         @Override
