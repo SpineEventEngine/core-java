@@ -220,7 +220,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            initial.put(id, EntityRecordWithStorageFields.newInstance(record));
+            initial.put(id, EntityRecordWithStorageFields.of(record));
         }
         storage.write(initial);
 
@@ -249,7 +249,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                         if (record == null) {
                             return null;
                         }
-                        return EntityRecordWithStorageFields.newInstance(record);
+                        return EntityRecordWithStorageFields.of(record);
                     }
                 };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
@@ -311,7 +311,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, EntityRecordWithStorageFields.newInstance(record));
+        storage.write(id, EntityRecordWithStorageFields.of(record));
 
         storage.writeLifecycleFlags(id, archived());
 
@@ -325,7 +325,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final EntityRecordWithStorageFields recordWithStorageFields =
-                EntityRecordWithStorageFields.newInstance(record);
+                EntityRecordWithStorageFields.of(record);
         assertFalse(recordWithStorageFields.hasStorageFields());
         final RecordStorage<I> storage = getStorage();
 

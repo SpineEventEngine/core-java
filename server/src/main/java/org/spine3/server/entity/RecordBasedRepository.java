@@ -290,7 +290,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityRecord entityRecord = entityConverter().convert(entity);
         final Map<String, Column.MemoizedValue<?>> storageFields = StorageFields.from(entity);
         final EntityRecordWithStorageFields envelope =
-                EntityRecordWithStorageFields.newInstance(entityRecord, storageFields);
+                EntityRecordWithStorageFields.of(entityRecord, storageFields);
         return envelope;
     }
 

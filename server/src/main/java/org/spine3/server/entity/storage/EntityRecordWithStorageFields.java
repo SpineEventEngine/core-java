@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
 
-import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -38,8 +37,8 @@ public final class EntityRecordWithStorageFields {
 
     private final EntityRecord record;
 
-    @Nullable
     private final ImmutableMap<String, Column.MemoizedValue<?>> storageFields;
+    private final boolean hasStorageFields;
 
     /**
      * Creates a new instance of the {@code EntityRecordWithStorageFields}.
@@ -51,6 +50,7 @@ public final class EntityRecordWithStorageFields {
                                           Map<String, Column.MemoizedValue<?>> storageFields) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(storageFields);
+        this.hasStorageFields = true;
     }
 
     /**
@@ -63,16 +63,16 @@ public final class EntityRecordWithStorageFields {
      * @param record {@link EntityRecord} to pack
      * @see #hasStorageFields()
      */
-    @SuppressWarnings("ConstantConditions") // null value for the Storage Fields map
     private EntityRecordWithStorageFields(EntityRecord record) {
         this.record = checkNotNull(record);
-        this.storageFields = null;
+        this.storageFields = ImmutableMap.of();
+        this.hasStorageFields = false;
     }
 
     /**
      * Creates a new instance of the {@code EntityRecordWithStorageFields}.
      */
-    public static EntityRecordWithStorageFields newInstance(
+    public static EntityRecordWithStorageFields of(
             EntityRecord record,
             Map<String, Column.MemoizedValue<?>> storageFields) {
         return new EntityRecordWithStorageFields(record, storageFields);
@@ -86,7 +86,7 @@ public final class EntityRecordWithStorageFields {
      *
      * @see #hasStorageFields()
      */
-    public static EntityRecordWithStorageFields newInstance(EntityRecord record) {
+    public static EntityRecordWithStorageFields of(EntityRecord record) {
         return new EntityRecordWithStorageFields(record);
     }
 
@@ -96,9 +96,7 @@ public final class EntityRecordWithStorageFields {
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public Map<String, Column.MemoizedValue<?>> getStorageFields() {
-        return storageFields == null
-               ? StorageFields.empty()
-               : storageFields;
+        return storageFields;
     }
 
     /**
@@ -108,11 +106,11 @@ public final class EntityRecordWithStorageFields {
      * by the storage.
      *
      * @return {@code true} if current object was constructed with
-     * {@linkplain #newInstance(EntityRecord, Map)} and {@code false} if it was
-     * constructed with {@linkplain #newInstance(EntityRecord)}
+     * {@linkplain #of(EntityRecord, Map)} and {@code false} if it was
+     * constructed with {@linkplain #of(EntityRecord)}
      */
     public boolean hasStorageFields() {
-        return storageFields != null;
+        return hasStorageFields;
     }
 
     @Override
