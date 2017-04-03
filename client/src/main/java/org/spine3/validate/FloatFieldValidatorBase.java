@@ -29,9 +29,11 @@ import org.spine3.base.FieldPath;
  *
  * @author Alexander Litus
  */
-abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends NumberFieldValidator<V> {
+abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>>
+         extends NumberFieldValidator<V> {
 
-    private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a floating point number.";
+    private static final String INVALID_ID_TYPE_MSG =
+                                "Entity ID field must not be a floating point number.";
 
     /**
      * Creates a new validator instance.
@@ -40,7 +42,9 @@ abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>> extends
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    protected FloatFieldValidatorBase(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
+    protected FloatFieldValidatorBase(FieldDescriptor descriptor,
+                                      ImmutableList<V> fieldValues,
+                                      FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath);
     }
 

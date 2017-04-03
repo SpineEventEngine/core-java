@@ -90,7 +90,8 @@ final class SubscriptionRegistry {
     /**
      * Remove the subscription from this registry.
      *
-     * <p>If there is no such subscription in this instance of {@code SubscriptionRegistry}, invocation has no effect.
+     * <p>If there is no such subscription in this instance of {@code SubscriptionRegistry},
+     * invocation has no effect.
      *
      * @param subscription the subscription to remove
      */

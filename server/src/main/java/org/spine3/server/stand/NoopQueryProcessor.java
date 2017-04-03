@@ -27,7 +27,8 @@ import org.spine3.client.Query;
 /**
  * An {@link QueryProcessor} implementation that always returns empty result.
  *
- * <p>Used to define a processing result for {@link Query} which does not hit any of exposed state objects.
+ * <p>Used to define a processing result for {@link Query} which does not hit any of
+ * exposed state objects.
  *
  * @author Alex Tymchenko
  */

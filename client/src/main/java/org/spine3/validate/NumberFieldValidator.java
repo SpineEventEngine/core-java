@@ -63,7 +63,9 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
      * @param fieldValues   values to validate
      * @param rootFieldPath a path to the root field (if present)
      */
-    protected NumberFieldValidator(FieldDescriptor descriptor, ImmutableList<V> fieldValues, FieldPath rootFieldPath) {
+    protected NumberFieldValidator(FieldDescriptor descriptor,
+                                   ImmutableList<V> fieldValues,
+                                   FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
         this.minDecimalOpt = getFieldOption(ValidationProto.decimalMin);
         this.isMinDecimalInclusive = minDecimalOpt.getInclusive();

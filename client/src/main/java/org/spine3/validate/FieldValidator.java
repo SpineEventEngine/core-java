@@ -47,7 +47,7 @@ import static org.spine3.base.Commands.isCommandsFile;
 abstract class FieldValidator<V> {
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG =
-            "Entity ID must not be a repeated field.";
+                                "Entity ID must not be a repeated field.";
 
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
@@ -61,8 +61,8 @@ abstract class FieldValidator<V> {
     private final IfMissingOption ifMissingOption;
 
     /**
-     * If set the validator would assume that the field is required even if the {@code required}
-     * option is not set.
+     * If set the validator would assume that the field is required even
+     * if the {@code required} option is not set.
      */
     private final boolean strict;
 
@@ -75,7 +75,8 @@ abstract class FieldValidator<V> {
      * @param strict        if {@code true} the validator would assume that the field is required,
      *                      even if corresponding field option is not present
      */
-    protected FieldValidator(FieldDescriptor descr, ImmutableList<V> values,
+    protected FieldValidator(FieldDescriptor descr,
+                             ImmutableList<V> values,
                              FieldPath rootFieldPath,
                              boolean strict) {
         this.fieldDescriptor = descr;

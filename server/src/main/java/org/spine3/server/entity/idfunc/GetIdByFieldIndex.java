@@ -34,7 +34,8 @@ import org.spine3.protobuf.MessageField;
  * @param <C> either {@link org.spine3.base.EventContext EventContext} or
  *            {@link org.spine3.base.CommandContext CommandContext} type
  */
-abstract class GetIdByFieldIndex<I, M extends Message, C extends Message> implements IdFunction<I, M, C> {
+abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
+         implements IdFunction<I, M, C> {
 
     private final EntityIdField idField;
 

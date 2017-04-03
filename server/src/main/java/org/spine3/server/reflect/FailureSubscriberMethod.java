@@ -145,8 +145,8 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         return new FailureSubscriberMethod(method);
     }
 
-    private static IllegalStateException missingFailureHandler(Class<?> cls,
-                                                               Class<? extends Message> failureClass) {
+    private static IllegalStateException missingFailureHandler(
+            Class<?> cls, Class<? extends Message> failureClass) {
         final String msg = format(
                 "Missing failure handler for failure class %s in the class %s",
                 failureClass, cls
@@ -172,7 +172,8 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         return PREDICATE;
     }
 
-    /** The factory for filtering methods that match {@code FailureSubscriberMethod} specification. */
+    /** The factory for filtering methods that match
+     * {@code FailureSubscriberMethod} specification. */
     private static class Factory implements HandlerMethod.Factory<FailureSubscriberMethod> {
 
         @Override
