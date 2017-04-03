@@ -55,14 +55,14 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  * <h2>Receiving Events</h2>
  * <p>To receive event messages a subscriber object should:
  * <ol>
- *    <li>Expose a {@code public} method that accepts an event message as the first parameter
- *        and an {@link org.spine3.base.EventContext EventContext} as the second
- *        (optional) parameter.
- *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
- *    <li>{@linkplain #register(org.spine3.server.bus.MessageDispatcher)} Register} with an
- *    instance of {@code EventBus} directly, or rely on message delivery
- *    from an {@link EventDispatcher}. An example of such a dispatcher is
- *    {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
+ * <li>Expose a {@code public} method that accepts an event message as the first parameter
+ * and an {@link org.spine3.base.EventContext EventContext} as the second
+ * (optional) parameter.
+ * <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
+ * <li>{@linkplain #register(org.spine3.server.bus.MessageDispatcher)} Register} with an
+ * instance of {@code EventBus} directly, or rely on message delivery
+ * from an {@link EventDispatcher}. An example of such a dispatcher is
+ * {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
  * </ol>
  *
  * <p><strong>Note:</strong> A subscriber method cannot accept just {@link Message} as
@@ -190,8 +190,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
 
     @Override
     protected Event enrich(Event event) {
-        if (enricher == null ||
-                !enricher.canBeEnriched(event)) {
+        if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
         final Event enriched = enricher.enrich(event);
@@ -338,7 +337,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         /**
          * Optional enricher for events.
          *
-         * <p>If not set, the enrichments will NOT be supported in the {@code EventBus} instance built.
+         * <p>If not set, the enrichments will NOT be supported
+         * in the {@code EventBus} instance built.
          */
         @Nullable
         private EventEnricher enricher;
@@ -399,8 +399,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
          * new {@code EventStore} instance when building {@code EventBus}, <em>if</em>
          * {@code EventStore} was not explicitly set in the builder.
          *
-         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
-         * will be used.
+         * <p>If an {@code Executor} is not set in the builder,
+         * {@link MoreExecutors#directExecutor()} will be used.
          *
          * @see #setEventStore(EventStore)
          */
@@ -460,15 +460,16 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         }
 
         public EventBus build() {
-            checkState(storageFactory != null || eventStore != null,
-                       "Either storageFactory or eventStore must be set to build the EventBus instance");
+            final String message = "Either storageFactory or eventStore must be " +
+                                   "set to build the EventBus instance";
+            checkState(storageFactory != null || eventStore != null, message);
 
             if (eventStoreStreamExecutor == null) {
                 eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
             /* The assert below prevents false warning for possible `null` value passed
                to EventStore.Builder.setStreamExecutor(). */
-            assert(eventStoreStreamExecutor != null);
+            assert (eventStoreStreamExecutor != null);
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()

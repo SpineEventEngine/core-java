@@ -25,7 +25,6 @@ import com.google.protobuf.ProtocolMessageEnum;
 import com.google.protobuf.Value;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Error;
-import org.spine3.base.ValidationError;
 import org.spine3.type.MessageClass;
 
 import java.util.List;

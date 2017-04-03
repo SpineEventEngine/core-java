@@ -305,7 +305,8 @@ class ReferenceValidator {
          * Returns the validated list of {@code EnrichmentFunction}s that may be used for
          * the conversion in scope of the validated {@code EventEnricher}.
          */
-        @SuppressWarnings("ReturnOfCollectionOrArrayField")     // OK, since an `ImmutableList` is returned.
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK, since an `ImmutableList`
+                                                            // is returned.
         List<EnrichmentFunction<?, ?>> getFunctions() {
             return functions;
         }

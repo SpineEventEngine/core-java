@@ -63,7 +63,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // as we override default implementation with `unimplemented` status.
+    // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);

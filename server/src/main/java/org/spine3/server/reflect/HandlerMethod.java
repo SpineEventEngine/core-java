@@ -107,11 +107,13 @@ abstract class HandlerMethod<C extends Message> {
         try {
             final int paramCount = getParamCount();
             if (paramCount == 1) {
-                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                @SuppressWarnings("unchecked")
+                // it is assumed that the method returns the result of this type
                 final R result = (R) method.invoke(target, message);
                 return result;
             } else {
-                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                @SuppressWarnings("unchecked")
+                // it is assumed that the method returns the result of this type
                 final R result = (R) method.invoke(target, message, context);
                 return result;
             }
@@ -147,7 +149,8 @@ abstract class HandlerMethod<C extends Message> {
      * @return full method name
      */
     private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
+        return method.getDeclaringClass()
+                     .getName() + '.' + method.getName() + "()";
     }
 
     /**

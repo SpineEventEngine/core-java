@@ -39,7 +39,10 @@ import java.util.Set;
  */
 class IdSetFunctions<I> {
 
-    /** The map from event class to a function that generates a set of project IDs for the corresponding event. */
+    /**
+     * The map from event class to a function that generates a set of project IDs
+     * for the corresponding event.
+     */
     private final Map<EventClass, IdSetEventFunction<I, Message>> map = Maps.newHashMap();
 
     /** The function used when there's no matching entry in the map. */
@@ -67,7 +70,7 @@ class IdSetFunctions<I> {
      *
      * <p>If there is no function for the passed event applies the default function.
      *
-     * @param event the event message
+     * @param event   the event message
      * @param context the event context
      * @return the set of entity IDs
      */
@@ -87,13 +90,14 @@ class IdSetFunctions<I> {
      * Puts a function into the map.
      *
      * @param eventClass the class of the event handled by the function
-     * @param func the function instance
-     * @param <E> the type of the event message
+     * @param func       the function instance
+     * @param <E>        the type of the event message
      */
     public <E extends Message> void put(Class<E> eventClass, IdSetEventFunction<I, E> func) {
         final EventClass clazz = EventClass.of(eventClass);
 
-        @SuppressWarnings("unchecked")    // since we want to store {@code IdSetFunction}s for various event types.
+        @SuppressWarnings("unchecked")
+        // since we want to store {@code IdSetFunction}s for various event types.
         final IdSetEventFunction<I, Message> casted = (IdSetEventFunction<I, Message>) func;
         map.put(clazz, casted);
     }
@@ -102,8 +106,9 @@ class IdSetFunctions<I> {
      * Obtains a function for the passed event class.
      *
      * @param eventClass the class of the event message
-     * @param <E> the type of the event message
-     * @return the function wrapped into {@code Optional} or empty {@code Optional} if there is no matching function
+     * @param <E>        the type of the event message
+     * @return the function wrapped into {@code Optional} or empty {@code Optional}
+     * if there is no matching function
      */
     public <E extends Message> Optional<IdSetEventFunction<I, E>> get(Class<E> eventClass) {
         final EventClass clazz = EventClass.of(eventClass);
