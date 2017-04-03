@@ -28,6 +28,14 @@ option java_multiple_files = true;
 import "spine/annotations.proto";
 import "spine/validate.proto";
 
+// A natural number.
+//
+// Zero is considered natural number.
+//
 message NaturalNumber {
+
+    // Natural number value.
+    //
+    // Must be greater than or equal to zero.
     int32 value = 1 [(min).value = "0"];
 }
