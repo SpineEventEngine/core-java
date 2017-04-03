@@ -169,8 +169,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
          */
         public SubscriptionService build() throws IllegalStateException {
             if (boundedContexts.isEmpty()) {
-                final String message = "Subscription service must have at least one bounded context.";
-                throw new IllegalStateException(message);
+                throw new IllegalStateException(
+                        "Subscription service must have at least one bounded context.");
             }
             final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
             final SubscriptionService result = new SubscriptionService(map);
