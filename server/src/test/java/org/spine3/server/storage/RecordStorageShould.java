@@ -371,6 +371,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         });
     }
 
+    @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
 
         private int counter = 0;
