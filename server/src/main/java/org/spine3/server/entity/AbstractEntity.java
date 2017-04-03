@@ -22,11 +22,14 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.validate.MessageValidator;
+import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -187,39 +190,42 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      * <p>The new state must be {@linkplain #validate(Message) valid}.
      *
      * @param state the new state to set
-     * @throws IllegalStateException
-     *                if the passed state is not {@linkplain #validate(S) valid}
+     * @throws InvalidEntityStateException if the passed state is not
+     *                                     {@linkplain #validate(S) valid}
      */
-    protected void updateState(S state) {
+    protected final void updateState(S state) {
         validate(state);
         injectState(state);
     }
 
     /**
-     * Verifies whether the new state is valid.
+     * Verifies the new entity state and returns {@link ConstraintViolation}s, if any.
      *
-     * <p>Default implementation does nothing always returning {@code true}.
-     * Derived classes may provide custom validation logic by overriding this method.
+     * <p>Default implementation uses the {@linkplain MessageValidator#validate(Message)
+     * message validation}.
      *
      * @param newState a state object to replace the current state
-     * @return {@code true} if the new state object is valid, {@code false} otherwise
+     * @return the violation constraints
      */
-    protected boolean isValid(S newState) {
-        return true;
+    protected List<ConstraintViolation> checkEntityState(S newState) {
+        checkNotNull(newState);
+        return MessageValidator.newInstance()
+                               .validate(newState);
     }
 
     /**
      * Ensures that the passed new state is valid.
      *
      * @param newState a state object to replace the current state
-     * @throws IllegalStateException if the state is not valid
-     * @see #isValid(Message)
+     * @throws InvalidEntityStateException if the state is not valid
+     * @see #checkEntityState(Message)
      */
-    protected void validate(S newState) throws IllegalStateException {
-        if (!isValid(newState)) {
-            final String errMsg = format("The passed new state (%s) is not valid.",
-                                         newState);
-            throw new IllegalStateException(errMsg);
+    private void validate(S newState) throws InvalidEntityStateException {
+        final List<ConstraintViolation> constraintViolations = checkEntityState(newState);
+
+        if (!constraintViolations.isEmpty()) {
+            throw InvalidEntityStateException.onConstraintViolations(newState,
+                                                                     constraintViolations);
         }
     }
 

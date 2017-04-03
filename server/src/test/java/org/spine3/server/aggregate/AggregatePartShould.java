@@ -25,14 +25,21 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.InvalidEntityStateException;
+import org.spine3.test.aggregate.user.User;
+import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.Constructor;
+import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePart.create;
 import static org.spine3.server.aggregate.AggregatePart.getConstructor;
+import static org.spine3.test.Given.aggregatePartOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Illia Shepilov
@@ -52,8 +59,7 @@ public class AggregatePartShould {
     @Test
     public void not_accept_nulls_as_parameter_values() throws NoSuchMethodException {
         final Constructor constructor = AnAggregateRoot.class
-                                            .getDeclaredConstructor(BoundedContext.class,
-                                                                    String.class);
+                .getDeclaredConstructor(BoundedContext.class, String.class);
         final NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
@@ -68,7 +74,6 @@ public class AggregatePartShould {
         final AggregatePart aggregatePart = create(constructor, root);
         assertNotNull(aggregatePart);
     }
-
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
@@ -95,6 +100,41 @@ public class AggregatePartShould {
         assertHasPrivateParameterlessCtor(AggregatePart.TypeInfo.class);
     }
 
+    @Test
+    public void throw_InvalidEntityStateException_if_state_is_invalid() {
+        final User user = User.newBuilder()
+                              .setFirstName("|")
+                              .setLastName("|")
+                              .build();
+        try {
+            aggregatePartOfClass(AnAggregatePart.class).withRoot(root)
+                                                       .withId(getClass().getName())
+                                                       .withVersion(1)
+                                                       .withState(user)
+                                                       .build();
+            fail();
+        } catch (InvalidEntityStateException e) {
+            final List<ConstraintViolation> violations = e.getError()
+                                                          .getValidationError()
+                                                          .getConstraintViolationList();
+            assertSize(user.getAllFields()
+                           .size(), violations);
+        }
+    }
+
+    @Test
+    public void update_valid_entity_state() {
+        final User user = User.newBuilder()
+                              .setFirstName("Firstname")
+                              .setLastName("Lastname")
+                              .build();
+        aggregatePartOfClass(AnAggregatePart.class).withRoot(root)
+                                                   .withId(getClass().getName())
+                                                   .withVersion(1)
+                                                   .withState(user)
+                                                   .build();
+    }
+
     /*
      Test environment classes
     ***************************/
@@ -106,9 +146,9 @@ public class AggregatePartShould {
     }
 
     private static class WrongAggregatePart extends AggregatePart<String,
-                                                                  StringValue,
-                                                                  StringValue.Builder,
-                                                                  AnAggregateRoot> {
+            StringValue,
+            StringValue.Builder,
+            AnAggregateRoot> {
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
         protected WrongAggregatePart() {
@@ -117,9 +157,9 @@ public class AggregatePartShould {
     }
 
     private static class AnAggregatePart extends AggregatePart<String,
-                                                               StringValue,
-                                                               StringValue.Builder,
-                                                               AnAggregateRoot> {
+            User,
+            User.Builder,
+            AnAggregateRoot> {
 
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);

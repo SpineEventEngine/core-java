@@ -17,37 +17,33 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+
 package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
-import org.spine3.type.MessageClass;
+import com.google.protobuf.StringValue;
+import org.junit.Test;
+import org.spine3.validate.ConstraintViolation;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Collections.singletonList;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.server.entity.InvalidEntityStateException.onConstraintViolations;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
- * @author Alex Tymchenko
+ * @author Dmytro Grankin
  */
-public final class EntityStateClass extends MessageClass {
+public class InvalidEntityStateExceptionShould {
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
-    }
+    @Test
+    public void create_exception_with_violations() {
+        final StringValue entityState = StringValue.getDefaultInstance();
 
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        final Message state = entity.getState();
+        final InvalidEntityStateException exception = onConstraintViolations(
+                entityState,
+                singletonList(ConstraintViolation.getDefaultInstance()));
 
-        checkNotNull(state);
-        final Class<? extends Message> stateClass = state.getClass();
-
-        final EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
-    }
-
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        return new EntityStateClass(entityState.getClass());
+        assertNotNull(exception.getMessage());
+        assertNotNull(exception.getError());
+        assertEquals(entityState, exception.getEntityState());
     }
 }
