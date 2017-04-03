@@ -45,7 +45,7 @@ public class EntityRecordWithColumnsShould {
     public void initialize_with_record_and_storage_fields() {
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(),
-                                           Columns.empty());
+                                           Collections.<String, Column.MemoizedValue<?>>emptyMap());
         assertNotNull(record);
     }
 

@@ -24,7 +24,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.annotations.Internal;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityWithLifecycle;
 
@@ -86,14 +85,6 @@ public class Columns {
 
     private Columns() {
         // Prevent initialization of a utility class
-    }
-
-    /**
-     * @return an {@link Collections#emptyMap() empty} {@link Column Columns} map
-     */
-    @Internal
-    public static Map<String, Column.MemoizedValue<?>> empty() {
-        return Collections.emptyMap();
     }
 
     /**

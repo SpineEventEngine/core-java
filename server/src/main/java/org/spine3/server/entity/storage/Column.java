@@ -172,7 +172,7 @@ public class Column<T> {
      * <p>For example, if the getter method has name "isArchivedOrDeleted", the returned value is
      * "archivedOrDeleted".
      *
-     * @return the name of the property reflected by this object
+     * @return the name of the property exposed by this object
      */
     public String getName() {
         return name;
@@ -191,7 +191,7 @@ public class Column<T> {
     /**
      * Retrieves the Column value from the given {@link Entity}.
      *
-     * @param source the {@link Entity} to get the Fields from
+     * @param source the {@link Entity} to get the Columns from
      * @return the value of the Column represented by this instance of {@code Column}
      */
     public T getFor(Entity<?, ?> source) {

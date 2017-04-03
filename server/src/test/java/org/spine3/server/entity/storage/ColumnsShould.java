@@ -35,6 +35,7 @@ import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Map;
 import java.util.Set;
 
@@ -67,7 +68,7 @@ public class ColumnsShould {
 
     @Test
     public void return_empty_map() {
-        final Map<String, Column.MemoizedValue<?>> emptyFields = Columns.empty();
+        final Map<String, Column.MemoizedValue<?>> emptyFields = Collections.emptyMap();
         assertNotNull(emptyFields);
         assertEmpty(emptyFields);
     }
