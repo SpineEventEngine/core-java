@@ -34,11 +34,11 @@ message User {
 
     // First name.
     //
-    // Must starts with a capital letter.
+    // Must start with a capital letter.
     string first_name = 1 [(pattern).regex = "^[A-Z].*"];
 
     // Last name.
     //
-    // Must starts with a capital letter.
+    // Must start with a capital letter.
     string last_name = 2 [(pattern).regex = "^[A-Z].*"];
 }

@@ -30,7 +30,7 @@ import "spine/validate.proto";
 
 // A natural number.
 //
-// Zero is considered natural number.
+// Zero is considered a natural number.
 //
 message NaturalNumber {
 
