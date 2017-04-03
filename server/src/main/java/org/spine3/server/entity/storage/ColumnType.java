@@ -26,7 +26,7 @@ import org.spine3.annotations.SPI;
  * An interface for handling type conversion for the {@link Column Columns}.
  *
  * <p>When retrieved from an instance of an {@link org.spine3.server.entity.Entity Entity},
- * the Storage Field may be of an inappropriate type for storing. To convert the value into
+ * the {@link Column Column} may be of an inappropriate type for storing. To convert the value into
  * an appropriate type, use {@link #convertColumnValue}.
  *
  * <p>After the conversion, you might want to save the value into a special storage specific DTO,
@@ -43,7 +43,7 @@ import org.spine3.annotations.SPI;
 public interface ColumnType<J, S, R, C> {
 
     /**
-     * Converts the Storage Field specified in
+     * Converts the {@link Column Column} specified in
      * the {@link org.spine3.server.entity.Entity Entity} declaration to the type in which the Field
      * is stored.
      *
@@ -51,13 +51,13 @@ public interface ColumnType<J, S, R, C> {
      * {@link com.google.protobuf.Timestamp com.google.protobuf.Timestamp} into
      * {@link java.util.Date java.util.Date}.
      *
-     * @param fieldValue the Storage Field of the initial type
-     * @return the Storage Field of the "store as" type
+     * @param fieldValue the {@link Column Column} of the initial type
+     * @return the {@link Column Column} of the "store as" type
      */
     S convertColumnValue(J fieldValue);
 
     /**
-     * Set the Storage Field value to the database record type.
+     * Set the {@link Column Column} value to the database record type.
      *
      * <p>Common example is setting a value to
      * a {@link java.sql.PreparedStatement PreparedStatement} instance into a determined position.

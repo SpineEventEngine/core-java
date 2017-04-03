@@ -81,8 +81,8 @@ public class Column<T> {
     /**
      * Creates new instance of the {@code Column} from the given getter method.
      *
-     * @param getter the getter of the Storage Field
-     * @param <T>    the type of the Storage Field
+     * @param getter the getter of the Column
+     * @param <T>    the type of the Column
      * @return new instance of the {@code Column} reflecting the given property
      */
     public static <T> Column<T> from(Method getter) {
@@ -108,7 +108,7 @@ public class Column<T> {
     }
 
     /**
-     * Retrieves the name of the property which represents the Storage Field.
+     * Retrieves the name of the property which represents the Column.
      *
      * <p>For example, if the getter method has name "isArchivedOrDeleted", the returned value is
      * "archivedOrDeleted".
@@ -120,7 +120,7 @@ public class Column<T> {
     }
 
     /**
-     * Shows if the Storage Field may return {@code null}s.
+     * Shows if the Column may return {@code null}s.
      *
      * @return {@code true} if the getter method is annotated as {@link Nullable},
      * {@code false} otherwise
@@ -130,10 +130,10 @@ public class Column<T> {
     }
 
     /**
-     * Retrieves the Storage Field value from the given {@link Entity}.
+     * Retrieves the Column value from the given {@link Entity}.
      *
      * @param source the {@link Entity} to get the Fields from
-     * @return the value of the Storage Field represented by this instance of {@code Column}
+     * @return the value of the Column represented by this instance of {@code Column}
      */
     public T getFor(Entity<?, ?> source) {
         try {
@@ -153,13 +153,13 @@ public class Column<T> {
     }
 
     /**
-     * Retrieves the Storage Field value from the given {@link Entity}.
+     * Retrieves the Column value from the given {@link Entity}.
      *
      * <p>The value is wrapped into a special container, which bears information about the Field's
      * metadata.
      *
      * @param source the {@link Entity} to get the Fields from
-     * @return the value of the Storage Field represented by this instance of {@code Column} wrapped
+     * @return the value of the Column represented by this instance of {@code Column} wrapped
      * into {@link MemoizedValue}
      * @see MemoizedValue
      */
@@ -170,7 +170,7 @@ public class Column<T> {
     }
 
     /**
-     * @return the type of the Storage Field
+     * @return the type of the Column
      */
     @SuppressWarnings("unchecked")
     public Class<T> getType() {
@@ -197,11 +197,11 @@ public class Column<T> {
     }
 
     /**
-     * A value of the associated Storage Field saved at some point of time.
+     * A value of the associated Column saved at some point of time.
      *
-     * <p>The class associates the Storage Field value with its metadata i.e. {@linkplain Column}.
+     * <p>The class associates the Column value with its metadata i.e. {@linkplain Column}.
      *
-     * @param <T> the type of the Storage Field
+     * @param <T> the type of the Column
      * @see Column#memoizeFor(Entity)
      */
     public static class MemoizedValue<T> {
@@ -226,7 +226,7 @@ public class Column<T> {
         }
 
         /**
-         * @return the {@link Column} representing this Storage Field
+         * @return the {@link Column} representing this Column
          */
         public Column<T> getSourceColumn() {
             return sourceColumn;

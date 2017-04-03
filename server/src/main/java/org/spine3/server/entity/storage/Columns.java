@@ -65,7 +65,7 @@ import static java.lang.String.format;
  * </ul>
  *
  * <p>Note: if creating a getter method with a name which intersects with one of these method
- * names, your getter method will also <b>not</b> be considered a Storage Field.
+ * names, your getter method will also <b>not</b> be considered a {@link Column Column}.
  *
  * @author Dmytro Dashenkov
  * @see Column
@@ -106,7 +106,7 @@ public class Columns {
      *
      * @param entity an {@link Entity} to get the {@link Column Columns} from
      * @param <E> the type of the {@link Entity}
-     * @return a {@link Map} of the Storage Field names to their
+     * @return a {@link Map} of the {@link Column Column} names to their
      * {@linkplain Column.MemoizedValue memoized values}.
      * @see Column.MemoizedValue
      */
@@ -127,7 +127,7 @@ public class Columns {
     }
 
     /**
-     * Generates the Storage Field values considering the passed {@linkplain Entity entity type}
+     * Generates the {@link Column Column} values considering the passed {@linkplain Entity entity type}
      * indexed.
      *
      * @param entityType indexed type of the {@link Entity}
