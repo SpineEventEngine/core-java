@@ -51,7 +51,8 @@ public class ColumnTypeRegistryShould {
 
     @Test
     public void have_default_empty_singleton_instance() {
-        final ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.empty();
+        final ColumnTypeRegistry emptyInstance = ColumnTypeRegistry.newBuilder()
+                                                                   .build();
         assertEmpty(emptyInstance.getColumnTypeMap());
     }
 

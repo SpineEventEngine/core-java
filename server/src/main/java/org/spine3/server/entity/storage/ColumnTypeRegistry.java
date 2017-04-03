@@ -74,14 +74,6 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
     }
 
     /**
-     * @return an empty registry, used for
-     * {@linkplain org.spine3.server.storage.memory.InMemoryStorageFactory in-memory storages} etc.
-     */
-    public static <C extends ColumnType> ColumnTypeRegistry<C> empty() {
-        return ColumnTypeRegistry.<C>newBuilder().build();
-    }
-
-    /**
      * Retrieves the {@link ColumnType} for specified {@link Column}.
      *
      * <p>By default, this method returns the {@link ColumnType} for the

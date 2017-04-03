@@ -56,7 +56,8 @@ public class InMemoryStorageFactory implements StorageFactory {
      */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
-        return ColumnTypeRegistry.empty();
+        return ColumnTypeRegistry.newBuilder()
+                                 .build();
     }
 
     @Override
@@ -107,8 +108,8 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     public static InMemoryStorageFactory getInstance(boolean multitenant) {
         return multitenant
-               ? Singleton.INSTANCE.multiTenantInstance
-               : Singleton.INSTANCE.singleTenantInstance;
+                ? Singleton.INSTANCE.multiTenantInstance
+                : Singleton.INSTANCE.singleTenantInstance;
     }
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
@@ -116,7 +117,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         INSTANCE;
         private final InMemoryStorageFactory singleTenantInstance =
                 new InMemoryStorageFactory(false);
-      
+
         private final InMemoryStorageFactory multiTenantInstance =
                 new InMemoryStorageFactory(true);
     }
