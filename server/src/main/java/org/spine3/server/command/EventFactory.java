@@ -45,7 +45,9 @@ public class EventFactory {
 
     private EventFactory() {}
 
-    /** Generates a new random UUID-based {@code EventId}. */
+    /**
+     * Generates a new random UUID-based {@code EventId}.
+     */
     public static EventId generateId() {
         final String value = Identifiers.newUuid();
         return EventId.newBuilder()
@@ -74,8 +76,8 @@ public class EventFactory {
     /**
      * Creates new {@code CommandContext} with passed parameters.
      *
-     * @param producerId the ID of an object which produced the event
-     * @param version optional version of the object
+     * @param producerId     the ID of an object which produced the event
+     * @param version        optional version of the object
      * @param commandContext the context of the command handling of which produced the event
      * @return new {@code CommandContext}
      */
