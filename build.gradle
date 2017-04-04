@@ -38,7 +38,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.7-SNAPSHOT'
+        spineToolsVersion = '0.8.9-SNAPSHOT'
     }
 
     dependencies {
@@ -54,7 +54,7 @@ buildscript {
            Please note that offline builds will not be available then. */
                                              //, changing: true
 
-        classpath group: 'org.spine3.tools', name: 'javadoc-checker',
+        classpath group: 'org.spine3.tools', name: 'spine-codestyle-checker',
                                              version: spineToolsVersion
     }
     configurations.all({
@@ -82,7 +82,7 @@ ext {
     jUnitVersion = '4.12'
 
     spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
-    spineJavadocFqnCheckerId = 'org.spine3.tools.javadoc-checker'
+    spineCodestyleCheckerId = 'org.spine3.tools.spine-codestyle-checker'
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
@@ -118,14 +118,14 @@ subprojects {
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
 
-    apply plugin: 'org.spine3.tools.javadoc-checker'
+    apply plugin: 'org.spine3.tools.spine-codestyle-checker'
     // Javadoc checker plugin allows finding FQN links with the wrong format.
     // "threshold" - is a number of bearable wrong links that triggers a response.
     // "responseType" - can be either "error" or "warn"
     //      "warn" type allows to see all errors in build result records without failing it.
     //      "error" type will fail the build process.
-    //      For more details please see org.spine3.tools.javadoc-checker.Response
-    checkJavadoc {
+    //      For more details please see org.spine3.tools.codestyle.Response
+    checkCodestyle {
         threshold = 0
         responseType = "warn"
     }
@@ -219,6 +219,7 @@ subprojects {
         //    https://github.com/google/protobuf/issues/2054
         generateProtoTasks {
             all().each { final task ->
+                task.descriptorSetOptions.includeSourceInfo = true
                 task.doLast {
                     ant.replaceregexp(
                             match:'@java.lang.Deprecated|@deprecated',
