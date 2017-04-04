@@ -29,11 +29,22 @@ option java_package = "org.spine3.client";
 
 
 import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 
 import "spine/annotations.proto";
+import "spine/validate.proto";
+import "spine/ui/language.proto";
+import "spine/users/user_id.proto";
+import "spine/users/tenant_id.proto";
 import "spine/base/response.proto";
 import "spine/client/entities.proto";
+import "spine/time/zone_offset.proto";
+
+// Topic identifier.
+message TopicId {
+    string uuid = 1;
+}
 
 // An object defining a unit of subscription.
 //
@@ -48,8 +59,38 @@ message Topic {
     // Applied to each of the entity state messages before returning in scope of SubscriptionUpdate.
     google.protobuf.FieldMask field_mask = 2;
 
+    // Service information about the environment in which the topic was created.
+    TopicContext context = 3;
+
     // Reserved for utility fields.
-    reserved 3 to 6;
+    reserved 4 to 6;
+}
+
+message TopicContext {
+
+    TopicId topic_id = 1 [(required) = true];
+
+    // The ID of a tenant in a multi-tenant application.
+    //
+    // This field is not populated in single-tenant applications.
+    //
+    users.TenantId tenant_id = 2;
+
+    // The user who created the topic.
+    users.UserId actor = 3 [(required) = true];
+
+    // The time when the topic was created.
+    google.protobuf.Timestamp timestamp = 4 [(required) = true];
+
+    // The zone offset from which the topic was created.
+    time.ZoneOffset zone_offset = 5 [(required) = true];
+
+    // The human language in which the topic updates are expected.
+    //
+    // If this attribute is not defined, or the specified language is not supported
+    // the updates will be submitted in the default human language of the system.
+    //
+    ui.Language language = 6;
 }
 
 // Wrapped collection of read-side entity updates on a topic with the specific subscription ID.
@@ -58,7 +99,8 @@ message SubscriptionUpdate {
     // The subscription in which scope this update is propagated.
     Subscription subscription = 1;
 
-    // Represents the base part of the response. I.e. whether the Topic subscription requires has been acked or not.
+    // Represents the base part of the response,
+    //   i.e. whether the Topic subscription has been acked or not.
     base.Response response = 2;
 
     // Reserved for more subscription update attributes.
@@ -70,6 +112,12 @@ message SubscriptionUpdate {
     repeated google.protobuf.Any updates = 10;
 }
 
+
+// Subscription identifier.
+message SubscriptionId {
+    string uuid = 1;
+}
+
 // The subscription object.
 //
 // Created when the client subscribes to a topic inside the read-side implementation.
@@ -79,9 +127,8 @@ message Subscription {
 
     // Unique identifier of the subscription.
     //
-    // Typically built using Java's UUID.toString() functionality.
     // Must be unique in scope of a bounded context.
-    string id = 1;
+    SubscriptionId id = 1;
 
     // Represents TypeUrl of the target entity for this subscription.
     string type = 2;
