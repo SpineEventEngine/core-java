@@ -43,6 +43,7 @@ import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
+import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
@@ -400,8 +401,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = Stand.newBuilder()
                                  .build();
         final Subscription inexistentSubscription = Subscription.newBuilder()
-                                                                .setId(UUID.randomUUID()
-                                                                           .toString())
+                                                                .setId(Subscriptions.newId())
                                                                 .build();
         stand.cancel(inexistentSubscription);
     }

@@ -19,8 +19,9 @@
  */
 package org.spine3.server.stand;
 
-import org.spine3.base.Identifiers;
 import org.spine3.client.Subscription;
+import org.spine3.client.SubscriptionId;
+import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
@@ -67,7 +68,7 @@ final class SubscriptionRegistry {
      * @return the created subscription
      */
     synchronized Subscription addSubscription(Target target) {
-        final String subscriptionId = Identifiers.newUuid();
+        final SubscriptionId subscriptionId = Subscriptions.newId();
         final String typeAsString = target.getType();
         final TypeUrl type = TypeName.of(typeAsString)
                                      .toUrl();
