@@ -64,8 +64,10 @@ public class ColumnRecords {
         checkNotNull(destination);
         checkNotNull(recordWithColumns);
         checkNotNull(columnTypeRegistry);
+        checkArgument(recordWithColumns.hasColumns(),
+                      "Passed record has no Entity Columns.");
 
-        for (Map.Entry<String, Column.MemoizedValue<?>> column : recordWithColumns.getColumns()
+        for (Map.Entry<String, Column.MemoizedValue<?>> column : recordWithColumns.getColumnValues()
                                                                                   .entrySet()) {
             final I columnIdentifier = mapColumnIdentifier.apply(column.getKey());
             checkNotNull(columnIdentifier);

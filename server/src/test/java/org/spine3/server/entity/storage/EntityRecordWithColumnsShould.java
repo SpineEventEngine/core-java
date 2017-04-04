@@ -33,6 +33,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.spine3.test.Verify.assertContainsKeyValue;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertMapsEqual;
 
@@ -71,27 +73,46 @@ public class EntityRecordWithColumnsShould {
     }
 
     @Test
-    public void store_storage_fields() {
+    public void store_column_values() {
         final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
-        final Map<String, Column.MemoizedValue<?>> storageFieldsExpected =
+        final Map<String, Column.MemoizedValue<?>> columnsExpected =
                 Collections.<String, Column.MemoizedValue<?>>singletonMap("some-key", mockValue);
 
-        final EntityRecordWithColumns envelope =
+        final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                                           storageFieldsExpected);
-        assertTrue(envelope.hasColumns());
+                                           columnsExpected);
+        assertTrue(record.hasColumns());
 
-        final Map<String, Column.MemoizedValue<?>> storageFieldActual =
-                envelope.getColumns();
-        assertMapsEqual(storageFieldsExpected, storageFieldActual, "storage fields");
+        final Map<String, Column.MemoizedValue<?>> columnsActual =
+                record.getColumnValues();
+        assertMapsEqual(columnsExpected, columnsActual, "column values");
     }
+
+    @Test
+    public void store_column_definitions() {
+        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
+        final Column mockColumn = mock(Column.class);
+        when(mockValue.getSourceColumn()).thenReturn(mockColumn);
+
+        final String key = "arbitrary";
+        final Map<String, Column.MemoizedValue<?>> columnsExpected =
+                Collections.<String, Column.MemoizedValue<?>>singletonMap(key, mockValue);
+
+        final EntityRecordWithColumns record =
+                EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
+                                           columnsExpected);
+        assertTrue(record.hasColumns());
+        final Map<String, Column<?>> columnsActual = record.getColumns();
+        assertContainsKeyValue(key, mockColumn, columnsActual);
+    }
+
 
     @Test
     public void return_empty_map_if_no_storage_fields() {
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
         assertFalse(record.hasColumns());
-        final Map<String, Column.MemoizedValue<?>> fields = record.getColumns();
+        final Map<String, Column.MemoizedValue<?>> fields = record.getColumnValues();
         assertEmpty(fields);
     }
 

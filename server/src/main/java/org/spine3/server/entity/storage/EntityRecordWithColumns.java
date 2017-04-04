@@ -22,9 +22,11 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,6 +37,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  */
 public final class EntityRecordWithColumns {
+
+    private static final Maps.EntryTransformer<String, Column.MemoizedValue<?>, Column<?>>
+    columnTransformer = new Maps.EntryTransformer<String, Column.MemoizedValue<?>, Column<?>>() {
+        @Override
+        public Column<?> transformEntry(@Nullable String s,
+                @Nullable Column.MemoizedValue<?> memoizedValue) {
+            checkNotNull(s);
+            checkNotNull(memoizedValue);
+            return memoizedValue.getSourceColumn();
+        }
+    };
 
     private final EntityRecord record;
 
@@ -105,8 +118,13 @@ public final class EntityRecordWithColumns {
         return record;
     }
 
+    public Map<String, Column<?>> getColumns() {
+        return Maps.transformEntries(storageFields,
+                                     columnTransformer);
+    }
+
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<String, Column.MemoizedValue<?>> getColumns() {
+    Map<String, Column.MemoizedValue<?>> getColumnValues() {
         return storageFields;
     }
 
