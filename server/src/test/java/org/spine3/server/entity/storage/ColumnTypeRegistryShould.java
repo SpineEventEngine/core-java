@@ -117,6 +117,11 @@ public class ColumnTypeRegistryShould {
         public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
             // NOP
         }
+
+        @Override
+        public void setNull(Object storageRecord, Object columnIdentifier) {
+            // NOP
+        }
     }
 
     private static class AbstractMessageType
@@ -130,6 +135,11 @@ public class ColumnTypeRegistryShould {
         @Override
         public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
             storageRecord.append(value);
+        }
+
+        @Override
+        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
+            storageRecord.append(' ');
         }
     }
 
@@ -145,6 +155,11 @@ public class ColumnTypeRegistryShould {
         public void setColumnValue(StringBuilder storageRecord, String value, String columnIdentifier) {
             storageRecord.append(value);
         }
+
+        @Override
+        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
+            storageRecord.append(' ');
+        }
     }
 
     private static class IntegerType
@@ -159,6 +174,11 @@ public class ColumnTypeRegistryShould {
         public void setColumnValue(StringBuilder storageRecord, String value,
                                    String columnIdentifier) {
             storageRecord.append(value);
+        }
+
+        @Override
+        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
+            storageRecord.append(' ');
         }
     }
 }

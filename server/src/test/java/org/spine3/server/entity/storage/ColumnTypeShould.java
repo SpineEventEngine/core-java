@@ -81,5 +81,10 @@ public class ColumnTypeShould {
                          .append(": ")
                          .append(value);
         }
+
+        @Override
+        public void setNull(StringBuilder storageRecord, String columnIdentifier) {
+            setColumnValue(storageRecord, "null", columnIdentifier);
+        }
     }
 }

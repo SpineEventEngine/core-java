@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -70,12 +71,12 @@ public final class EntityRecordWithColumns {
     }
 
     /**
-     * Creates a new instance of the {@code EntityRecordWithColumns}.
+     * Creates a new instance of the {@code EntityRecordWithColumns} with
+     * {@linkplain Column Column values} from the given {@linkplain Entity}.
      */
-    public static EntityRecordWithColumns of(
-            EntityRecord record,
-            Map<String, Column.MemoizedValue<?>> storageFields) {
-        return new EntityRecordWithColumns(record, storageFields);
+    public static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
+        final Map<String, Column.MemoizedValue<?>> columns = Columns.from(entity);
+        return of(record, columns);
     }
 
     /**
@@ -88,6 +89,16 @@ public final class EntityRecordWithColumns {
      */
     public static EntityRecordWithColumns of(EntityRecord record) {
         return new EntityRecordWithColumns(record);
+    }
+
+    /**
+     * Creates a new instance of the {@code EntityRecordWithColumns}.
+     */
+    @VisibleForTesting
+    static EntityRecordWithColumns of(
+            EntityRecord record,
+            Map<String, Column.MemoizedValue<?>> storageFields) {
+        return new EntityRecordWithColumns(record, storageFields);
     }
 
     public EntityRecord getRecord() {
@@ -106,7 +117,7 @@ public final class EntityRecordWithColumns {
      * by the storage.
      *
      * @return {@code true} if current object was constructed with
-     * {@linkplain #of(EntityRecord, Map)} and {@code false} if it was
+     * {@linkplain #create(EntityRecord, Entity)} and {@code false} if it was
      * constructed with {@linkplain #of(EntityRecord)}
      */
     public boolean hasColumns() {

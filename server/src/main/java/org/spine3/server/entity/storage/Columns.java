@@ -69,7 +69,7 @@ import static java.lang.String.format;
  * @author Dmytro Dashenkov
  * @see Column
  */
-public class Columns {
+class Columns {
 
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
@@ -101,7 +101,7 @@ public class Columns {
      * {@linkplain Column.MemoizedValue memoized values}.
      * @see Column.MemoizedValue
      */
-    public static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue<?>> from(E entity) {
+    static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue<?>> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();

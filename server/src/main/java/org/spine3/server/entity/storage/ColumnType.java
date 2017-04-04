@@ -38,13 +38,18 @@ import org.spine3.annotations.SPI;
  *     <pre>
  *         class VarcharDateType implements ColumnType<Date, String, PreparedStatement, Integer> {
  *             \@Override
- *             public String convert(Date fieldValue) {
+ *             public String convertColumnValue(Date fieldValue) {
  *                 return MY_DATE_FORMAT.format(fieldValue);
  *             }
  *
  *             \@Override
- *             public void set(PreparedStatement storageRecord, String value, Integer columnIdentifier) {
+ *             public void setColumnValue(PreparedStatement storageRecord, String value, Integer columnIdentifier) {
  *                 storageRecord.setString(columnIdentifier, value);
+ *             }
+ *
+ *             \@Override
+ *             public void setNull(PreparedStatement storageRecord, Integer columnIdentifier) {
+ *                 storageRecord.setNull(columnIdentifier, Types.VARCHAR);
  *             }
  *         }
  *     </pre>
@@ -88,6 +93,19 @@ public interface ColumnType<J, S, R, C> {
      * @param storageRecord    the database record
      * @param value            the value to store
      * @param columnIdentifier the identifier of the column, e.g. its index
+     * @see #setNull(Object, Object)
      */
     void setColumnValue(R storageRecord, S value, C columnIdentifier);
+
+    /**
+     * Sets the {@code null} value to the {@linkplain Column}.
+     *
+     * <p>This method is called when the {@linkplain Column} value desired for storing turn out
+     * to be {@code null}.
+     *
+     * @param storageRecord the database record
+     * @param columnIdentifier the identifier of the column, e.g. its index
+     * @see #setColumnValue(Object, Object, Object)
+     */
+    void setNull(R storageRecord, C columnIdentifier);
 }

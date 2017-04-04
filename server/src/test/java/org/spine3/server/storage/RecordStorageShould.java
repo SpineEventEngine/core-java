@@ -38,8 +38,6 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.Column;
-import org.spine3.server.entity.storage.Columns;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
@@ -349,9 +347,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
-        final Map<String, Column.MemoizedValue<?>> columns = Columns.from(testEntity);
-        final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.of(record,
-                                                                                     columns);
+        final EntityRecordWithColumns recordWithColumns =
+                EntityRecordWithColumns.create(record, testEntity);
         final S storage = getStorage();
         storage.write(id, recordWithColumns);
 

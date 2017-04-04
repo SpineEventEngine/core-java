@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
+import org.spine3.annotations.Internal;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
@@ -217,7 +218,7 @@ public class Column<T> {
      * <p>The value is wrapped into a special container, which bears information about the field's
      * metadata.
      *
-     * @param source the {@link Entity} to get the fields from
+     * @param source the {@link Entity} to get the Fields from
      * @return the value of the Column represented by this instance of {@code Column} wrapped
      * into {@link MemoizedValue}
      * @see MemoizedValue
@@ -263,7 +264,8 @@ public class Column<T> {
      * @param <T> the type of the Column
      * @see Column#memoizeFor(Entity)
      */
-    public static class MemoizedValue<T> {
+    @Internal
+    static class MemoizedValue<T> {
 
         private final Column<T> sourceColumn;
 
@@ -280,14 +282,14 @@ public class Column<T> {
             return value;
         }
 
-        public boolean isNull() {
+        boolean isNull() {
             return value == null;
         }
 
         /**
          * @return the {@link Column} representing this Column
          */
-        public Column<T> getSourceColumn() {
+        Column<T> getSourceColumn() {
             return sourceColumn;
         }
     }

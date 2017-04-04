@@ -34,8 +34,6 @@ import com.google.protobuf.Message;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
-import org.spine3.server.entity.storage.Columns;
-import org.spine3.server.entity.storage.Column;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -290,10 +288,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     protected EntityRecordWithColumns toRecord(E entity) {
         final EntityRecord entityRecord = entityConverter().convert(entity);
         checkNotNull(entityRecord);
-        final Map<String, Column.MemoizedValue<?>> storageFields = Columns.from(entity);
-        final EntityRecordWithColumns envelope =
-                EntityRecordWithColumns.of(entityRecord, storageFields);
-        return envelope;
+        final EntityRecordWithColumns recordWithColumns =
+                EntityRecordWithColumns.create(entityRecord, entity);
+        return recordWithColumns;
     }
 
     private E toEntity(EntityRecord record) {
