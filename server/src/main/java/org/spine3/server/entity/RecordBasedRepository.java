@@ -289,6 +289,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     protected EntityRecordWithColumns toRecord(E entity) {
         final EntityRecord entityRecord = entityConverter().convert(entity);
+        checkNotNull(entityRecord);
         final Map<String, Column.MemoizedValue<?>> storageFields = Columns.from(entity);
         final EntityRecordWithColumns envelope =
                 EntityRecordWithColumns.of(entityRecord, storageFields);
