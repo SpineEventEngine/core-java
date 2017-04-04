@@ -42,6 +42,7 @@ import java.util.Map;
 
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -204,7 +205,7 @@ public abstract class ProjectionStorageShould<I>
 
         for (int i = 0; i < count; i++) {
             final I id = newId();
-            final Project state = Given.project(id.toString(), String.format("project-%d", i));
+            final Project state = Given.project(id.toString(), format("project-%d", i));
             final Any packedState = AnyPacker.pack(state);
 
             final EntityRecord record = EntityRecord.newBuilder()
