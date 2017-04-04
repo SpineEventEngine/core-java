@@ -119,8 +119,9 @@ subprojects {
     apply plugin: 'java'
 
     apply plugin: 'org.spine3.tools.spine-codestyle-checker'
-    // Javadoc checker plugin allows finding FQN links with the wrong format.
-    // "threshold" - is a number of bearable wrong links that triggers a response.
+    // Spine code style checker plugin verifies the code style.
+    // In particular, it allows finding FQN links with the wrong format.
+    // "threshold" - is a number of bearable wrong links that will not trigger a response.
     // "responseType" - can be either "error" or "warn"
     //      "warn" type allows to see all errors in build result records without failing it.
     //      "error" type will fail the build process.
