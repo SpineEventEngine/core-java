@@ -118,6 +118,9 @@ import static java.lang.String.format;
  *     </pre>
  * </code>
  *
+ * <p>This class is effectively {@code final} since it has a single {@code private} constructor.
+ * Though the modifier "{@code final}" is absent to make it possible to create mocks for testing.
+ *
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
