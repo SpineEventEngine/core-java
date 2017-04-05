@@ -21,6 +21,7 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.base.Function;
+import org.spine3.server.entity.storage.Column.MemoizedValue;
 
 import java.util.Map;
 
@@ -43,8 +44,8 @@ public class ColumnRecords {
      * Feeds the given {@link EntityRecordWithColumns} to the given record representation.
      *
      * <p>This method deals with the {@linkplain Column columns} only.
-     * You should handle {@link org.spine3.server.entity.EntityRecord EntityRecord} separately when
-     * persisting a record.
+     * The {@link org.spine3.server.entity.EntityRecord EntityRecord} should be handled separately
+     * while persisting a record.
      *
      * @param destination         the representation of a record in the database; implementation
      *                            specific
@@ -67,15 +68,15 @@ public class ColumnRecords {
         checkArgument(recordWithColumns.hasColumns(),
                       "Passed record has no Entity Columns.");
 
-        for (Map.Entry<String, Column.MemoizedValue<?>> column : recordWithColumns.getColumnValues()
+        for (Map.Entry<String, MemoizedValue<?>> column : recordWithColumns.getColumnValues()
                                                                                   .entrySet()) {
             final I columnIdentifier = mapColumnIdentifier.apply(column.getKey());
             checkNotNull(columnIdentifier);
-            @SuppressWarnings("unchecked")
-            final Column.MemoizedValue<Object> columnValue =
-                    (Column.MemoizedValue<Object>) column.getValue();
+            @SuppressWarnings("unchecked") // We don't know the exact type of the value
+            final MemoizedValue<Object> columnValue =
+                    (MemoizedValue<Object>) column.getValue();
             final Column<?> columnMetadata = columnValue.getSourceColumn();
-            @SuppressWarnings("unchecked")
+            @SuppressWarnings("unchecked") // We don't know the exact types of the value
             final ColumnType<Object, Object, D, I> columnType =
                     (ColumnType<Object, Object, D, I>) columnTypeRegistry.get(columnMetadata);
             checkArgument(columnType != null,
@@ -86,7 +87,7 @@ public class ColumnRecords {
         }
     }
 
-    private static <J, S, D, I> void setValue(Column.MemoizedValue<J> columnValue,
+    private static <J, S, D, I> void setValue(MemoizedValue<J> columnValue,
                                               D destination,
                                               I columnIdentifier,
                                               ColumnType<J, S, D, I> columnType) {

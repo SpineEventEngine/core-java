@@ -100,8 +100,7 @@ public interface ColumnType<J, S, R, C> {
     /**
      * Sets the {@code null} value to the {@linkplain Column}.
      *
-     * <p>This method is called when the {@linkplain Column} value desired for storing turn out
-     * to be {@code null}.
+     * <p>Used if the actual value of the {@linkplain Column}, defined for storing, is {@code null}.
      *
      * @param storageRecord the database record
      * @param columnIdentifier the identifier of the column, e.g. its index

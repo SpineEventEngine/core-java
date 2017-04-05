@@ -38,17 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityRecordWithColumns {
 
-    private static final Maps.EntryTransformer<String, Column.MemoizedValue<?>, Column<?>>
-    columnTransformer = new Maps.EntryTransformer<String, Column.MemoizedValue<?>, Column<?>>() {
-        @Override
-        public Column<?> transformEntry(@Nullable String s,
-                @Nullable Column.MemoizedValue<?> memoizedValue) {
-            checkNotNull(s);
-            checkNotNull(memoizedValue);
-            return memoizedValue.getSourceColumn();
-        }
-    };
-
     private final EntityRecord record;
 
     private final ImmutableMap<String, Column.MemoizedValue<?>> storageFields;
@@ -120,7 +109,7 @@ public final class EntityRecordWithColumns {
 
     public Map<String, Column<?>> getColumns() {
         return Maps.transformEntries(storageFields,
-                                     columnTransformer);
+                                     ColumnTransformer.INSTANCE);
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
@@ -159,5 +148,19 @@ public final class EntityRecordWithColumns {
     @Override
     public int hashCode() {
         return getRecord().hashCode();
+    }
+
+    private enum ColumnTransformer
+            implements Maps.EntryTransformer<String, Column.MemoizedValue<?>, Column<?>> {
+
+        INSTANCE;
+
+        @Override
+        public Column<?> transformEntry(@Nullable String s,
+                @Nullable Column.MemoizedValue<?> memoizedValue) {
+            checkNotNull(s);
+            checkNotNull(memoizedValue);
+            return memoizedValue.getSourceColumn();
+        }
     }
 }
