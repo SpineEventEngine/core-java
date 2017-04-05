@@ -65,8 +65,8 @@ public final class AggregateStateId<I> {
     private final TypeUrl stateType;
 
     private AggregateStateId(I aggregateId, TypeUrl stateType) {
-        this.aggregateId = aggregateId;
-        this.stateType = stateType;
+        this.aggregateId = checkNotNull(aggregateId);
+        this.stateType = checkNotNull(stateType);
     }
 
     @CheckReturnValue
