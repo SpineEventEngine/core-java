@@ -28,6 +28,8 @@ import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
 
+import static java.lang.String.format;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -51,7 +53,7 @@ public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId, 
         final Project project = Project.newBuilder()
                                        .setId(id)
                                        .setStatus(Project.Status.CREATED)
-                                       .setName(String.format("record-storage-test-%s", id.getId()))
+                                       .setName(format("record-storage-test-%s", id.getId()))
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;

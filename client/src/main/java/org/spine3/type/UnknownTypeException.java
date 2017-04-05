@@ -19,6 +19,8 @@
  */
 package org.spine3.type;
 
+import static java.lang.String.format;
+
 /**
  * Exception that is thrown when unsupported message is obtained
  * or in case when there is no class for given Protobuf message.
@@ -42,7 +44,7 @@ public class UnknownTypeException extends RuntimeException {
     }
 
     private static String makeMsg(String typeName) {
-        return String.format(ERR_MSG_NO_JAVA_CLASS_FOUND, typeName);
+        return format(ERR_MSG_NO_JAVA_CLASS_FOUND, typeName);
     }
 
     /**
