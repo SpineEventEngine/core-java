@@ -121,7 +121,7 @@ import static java.lang.String.format;
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
-public final class Column<T> {
+public class Column<T> {
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
