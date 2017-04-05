@@ -228,6 +228,7 @@ public final class AggregateStateId<I> {
                     final Class result = Class.forName(className.value());
                     return result;
                 } catch (ClassNotFoundException e) {
+                    // Should never happen
                     throw wrappedCause(e);
                 }
             }

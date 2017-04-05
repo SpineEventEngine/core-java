@@ -179,6 +179,14 @@ public class AggregateStateIdStringifierShould {
                    .convert(stringId);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_convert_invalid_string() {
+        final String invalidId = "I'm invalid!";
+        AggregateStateId.stringifier()
+                        .reverse()
+                        .convert(invalidId);
+    }
+
     private static void ensureProjectIdStringifier() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
         if (registry.get(ProjectId.class)
