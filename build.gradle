@@ -32,13 +32,13 @@ buildscript {
     ext {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
-        
+
         spineVersion = '0.8.29-SNAPSHOT'
-        
+
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.9-SNAPSHOT'
+        spineToolsVersion = '0.8.11-SNAPSHOT'
     }
 
     dependencies {
@@ -119,16 +119,27 @@ subprojects {
     apply plugin: 'java'
 
     apply plugin: 'org.spine3.tools.spine-codestyle-checker'
-    // Spine code style checker plugin verifies the code style.
-    // In particular, it allows finding FQN links with the wrong format.
-    // "threshold" - is a number of bearable wrong links that will not trigger a response.
-    // "responseType" - can be either "error" or "warn"
-    //      "warn" type allows to see all errors in build result records without failing it.
-    //      "error" type will fail the build process.
+
+    // Verifies code style.
+    // The parameters are common for any kind of verification:
+    //
+    //      * "threshold" - is a number of bearable code violations that will not trigger a response.
+    //      * "responseType" - can be either "error" or "warn"
+    //              "warn" type allows to see all errors in build result records without failing it.
+    //              "error" type will fail the build process.
+    //
     //      For more details please see org.spine3.tools.codestyle.Response
-    checkCodestyle {
-        threshold = 0
-        responseType = "warn"
+    codestyleChecker {
+
+        // Javadoc @link/@linkplain format checker.
+        //
+        // Finds and reports FQNs used in links in the wrong format.
+        javadocLinkChecker {
+
+            // A number of bearable wrong links.
+            threshold = 0
+            responseType = "warn"
+        }
     }
 
     sourceCompatibility = 1.7
