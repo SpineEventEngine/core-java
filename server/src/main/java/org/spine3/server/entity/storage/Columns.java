@@ -64,7 +64,7 @@ import static java.lang.String.format;
  * </ul>
  *
  * <p>Note: if creating a getter method with a name which intersects with one of these method
- * names, your getter method will also <b>not</b> be considered a {@link Column Column}.
+ * names, this getter method will also <b>not</b> be considered a {@link Column Column}.
  *
  * @author Dmytro Dashenkov
  * @see Column
