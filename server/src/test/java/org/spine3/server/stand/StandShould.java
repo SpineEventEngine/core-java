@@ -50,6 +50,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -234,7 +235,7 @@ public class StandShould extends TenantAwareTest {
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = Tests.newVersionWithNumber(1);
 
-        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecord.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordWithColumns.class));
 
         stand.update(customerId, packedState, stateVersion);
 
@@ -511,7 +512,9 @@ public class StandShould extends TenantAwareTest {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(sampleCustomer.getId(),
+                                AnyPacker.pack(sampleCustomer),
+                                stateVersion);
 
         final Query customerQuery = Queries.readAll(Customer.class);
 
@@ -660,7 +663,9 @@ public class StandShould extends TenantAwareTest {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(sampleCustomer.getId(),
+                                AnyPacker.pack(sampleCustomer),
+                                stateVersion);
 
         // FieldMask with invalid type URLs.
         final String[] paths = {"invalid_type_url_example", Project.getDescriptor()
@@ -745,7 +750,9 @@ public class StandShould extends TenantAwareTest {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(sampleCustomer.getId(),
+                                AnyPacker.pack(sampleCustomer),
+                                stateVersion);
 
         final String[] paths = new String[fieldIndexes.length];
 
