@@ -259,13 +259,12 @@ public class Given {
                     @Nullable
                     @Override
                     public String apply(@Nullable EventId input) {
-                        return input == null ? "" : input.getUuid();
+                        return input == null ? "" : input.getValue();
                     }
                 };
 
         private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
                 new Function<Timestamp, String>() {
-                    @Nullable
                     @Override
                     public String apply(@Nullable Timestamp input) {
                         return input == null ? "" : input.toString();
@@ -274,7 +273,6 @@ public class Given {
 
         private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
                 new Function<CommandContext, String>() {
-                    @Nullable
                     @Override
                     public String apply(@Nullable CommandContext input) {
                         return input == null ? "" : input.toString();

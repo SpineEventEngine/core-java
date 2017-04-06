@@ -36,11 +36,6 @@ import "spine/base/command.proto";
 import "spine/base/version.proto";
 import "spine/base/enrichment.proto";
 
-// Event identifier.
-message EventId {
-    string uuid = 1;
-}
-
 // `Event` is something, which happened in the past.
 //
 // An event consists of two parts: event message and its context.
@@ -67,6 +62,22 @@ message Event {
 
     // The context of the event.
     EventContext context = 2 [(required) = true];
+}
+
+// Event identifier.
+message EventId {
+
+    // The value is based on an identifier of a command handling of which produced the event.
+    //
+    // This field has the following format:
+    //
+    //     `<commandId>-<sequenceNumber>`
+    //
+    // where the `sequenceNumber` is a hexadecimal number in the sequence of events generated
+    // in response to the command. The number may have one or more leading zeroes, if a command
+    // results in more than 15 events.
+    //
+    string value = 1;
 }
 
 // Meta-information for an event.

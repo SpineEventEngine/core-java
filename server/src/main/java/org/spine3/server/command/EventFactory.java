@@ -51,7 +51,7 @@ public class EventFactory {
     public static EventId generateId() {
         final String value = Identifiers.newUuid();
         return EventId.newBuilder()
-                      .setUuid(value)
+                      .setValue(value)
                       .build();
     }
 

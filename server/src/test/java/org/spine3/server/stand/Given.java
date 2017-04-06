@@ -28,7 +28,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
@@ -36,6 +35,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
@@ -80,9 +80,7 @@ class Given {
                                             .setEnrichment(Enrichment.newBuilder()
                                                                      .setDoNotEnrich(true))
                                             .setCommandContext(CommandContext.getDefaultInstance())
-                                            .setEventId(EventId.newBuilder()
-                                                               .setUuid(Identifiers.newUuid())
-                                                               .build()))
+                                            .setEventId(EventFactory.generateId()))
                     .build();
     }
 

@@ -54,7 +54,7 @@ public class EventFactoryShould {
     public void generate_event_id() {
         final EventId result = generateId();
 
-        assertFalse(result.getUuid()
+        assertFalse(result.getValue()
                           .isEmpty());
     }
 

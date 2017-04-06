@@ -33,6 +33,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -195,19 +196,31 @@ public class Events {
     }
 
     /**
+     * Ensures that the passed ID is valid.
+     *
+     * @param id an ID to check
+     * @throws IllegalArgumentException if the ID string value is empty or blank
+     */
+    public static EventId checkValid(EventId id) {
+        checkNotNull(id);
+        checkNotEmptyOrBlank(id.getValue(), "event ID");
+        return id;
+    }
+
+    /**
      * The stringifier of event IDs.
      */
     static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String toString(EventId eventId) {
-            final String result = eventId.getUuid();
+            final String result = eventId.getValue();
             return result;
         }
 
         @Override
         protected EventId fromString(String str) {
             final EventId result = EventId.newBuilder()
-                                          .setUuid(str)
+                                          .setValue(str)
                                           .build();
             return result;
         }

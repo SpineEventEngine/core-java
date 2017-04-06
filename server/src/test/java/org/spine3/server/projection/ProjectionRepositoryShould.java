@@ -32,7 +32,6 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.protobuf.AnyPacker;
@@ -379,8 +378,7 @@ public class ProjectionRepositoryShould
                                                    .build();
         final EventContext context =
                 EventContext.newBuilder()
-                            .setEventId(EventId.newBuilder()
-                                               .setUuid("mock-event"))
+                            .setEventId(EventFactory.generateId())
                             .setProducerId(AnyPacker.pack(projectId))
                             .setCommandContext(CommandContext.newBuilder()
                                                              .setTenantId(tenantId()))
@@ -418,8 +416,7 @@ public class ProjectionRepositoryShould
                                                        .setProjectId(projectId)
                                                        .build();
             final EventContext context = EventContext.newBuilder()
-                                                     .setEventId(EventId.newBuilder()
-                                                                        .setUuid(String.valueOf(i)))
+                                                     .setEventId(EventFactory.generateId())
                                                      .setProducerId(AnyPacker.pack(projectId))
                                                      .setTimestamp(Timestamps2.getCurrentTime())
                                                      .build();
