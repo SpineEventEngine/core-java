@@ -27,7 +27,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
@@ -166,17 +165,20 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(producerId);
         checkNotNull(eventMessages);
         checkNotNull(commandContext);
-        
+
+        final EventFactory eventFactory = EventFactory.newBuilder()
+                .setProducerId(producerId)
+                .setMaxEventCount(eventMessages.size())
+                .setCommandContext(commandContext)
+                .build();
+
         return Lists.transform(eventMessages, new Function<Message, Event>() {
             @Override
             public Event apply(@Nullable Message eventMessage) {
                 if (eventMessage == null) {
                     return Event.getDefaultInstance();
                 }
-                final EventContext eventContext = EventFactory.createEventContext(producerId,
-                                                                                  version,
-                                                                                  commandContext);
-                final Event result = EventFactory.createEvent(eventMessage, eventContext);
+                final Event result = eventFactory.createEvent(eventMessage, version);
                 return result;
             }
         });

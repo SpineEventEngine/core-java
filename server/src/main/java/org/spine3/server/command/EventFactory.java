@@ -62,7 +62,7 @@ public class EventFactory {
      * @param messageOrAny the message of the event or the message packed into {@code Any}
      * @param version      the version of the entity which produces the event
      */
-    public Event create(Message messageOrAny, Version version) {
+    public Event createEvent(Message messageOrAny, @Nullable Version version) {
         checkNotNull(messageOrAny);
         final EventId eventId = idSequence.next();
         final EventContext context = createContext(eventId,
@@ -80,7 +80,7 @@ public class EventFactory {
     /**
      * Generates a new random UUID-based {@code EventId}.
      *
-     * @deprecated use {@link EventFactory#create(Message, Version)} which would generate proper IDs for you
+     * @deprecated use {@link EventFactory#createEvent(Message, Version)} which would generate proper IDs for you
      */
     @Deprecated
     public static EventId generateId() {
@@ -106,26 +106,6 @@ public class EventFactory {
                                   .setContext(context)
                                   .build();
         return result;
-    }
-
-    /**
-     * Creates new {@code CommandContext} with passed parameters.
-     *
-     * @param producerId     the ID of an object which produced the event
-     * @param version        optional version of the object
-     * @param commandContext the context of the command handling of which produced the event
-     * @return new {@code CommandContext}
-     * @deprecated use {@link EventFactory#create(Message, Version)} which would generate a proper context
-     */
-    @Deprecated
-    public static EventContext createEventContext(Any producerId,
-                                                  @Nullable Version version,
-                                                  CommandContext commandContext) {
-        checkNotNull(producerId);
-        checkNotNull(commandContext);
-
-        final EventId eventId = generateId();
-        return createContext(eventId, producerId, commandContext, version);
     }
 
     private static EventContext createContext(EventId eventId,

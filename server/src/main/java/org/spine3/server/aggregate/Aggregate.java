@@ -339,12 +339,19 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             if (eventOrMessage instanceof Event) {
                 event = importEvent((Event) eventOrMessage, commandContext);
             } else {
-                event = eventFactory.create(eventMessage, getVersion());
+                event = eventFactory.createEvent(eventMessage, getVersion());
             }
             uncommittedEvents.add(event);
         }
     }
 
+    /**
+     * Creates an event based on the event received in an import command.
+     *
+     * @param event          the event to import
+     * @param commandContext the context of the import command
+     * @return an event with updated command context and entity version
+     */
     private Event importEvent(Event event, CommandContext commandContext) {
         final EventContext eventContext = event.getContext()
                                                .toBuilder()
