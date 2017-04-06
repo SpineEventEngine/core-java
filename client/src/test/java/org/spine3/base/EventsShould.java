@@ -25,9 +25,14 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.junit.Before;
 import org.junit.Test;
+import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
 
 import java.util.Comparator;
@@ -57,12 +62,25 @@ import static org.spine3.test.TimeTests.Past.secondsAgo;
 
 public class EventsShould {
 
-    private final EventContext context = newEventContext();
+    private EventContext context;
 
     private final StringValue stringValue = newStringValue(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = newDoubleValue(10.1);
+
+    @Before
+    public void setUp() {
+        final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+        final Command cmd = commandFactory.createCommand(Timestamps2.getCurrentTime());
+        final StringValue producerId = newStringValue(getClass().getSimpleName());
+        EventFactory eventFactory = EventFactory.newBuilder()
+                                                .setProducerId(producerId)
+                                                .setCommandContext(cmd.getContext())
+                                                .build();
+        context = eventFactory.createEvent(Timestamps2.getCurrentTime(), Tests.<Version>nullRef())
+                              .getContext();
+    }
 
     @Test
     public void have_private_ctor() {
@@ -222,7 +240,7 @@ public class EventsShould {
 
     @Test
     public void provide_EventId_stringifier() {
-        final EventId id = EventFactory.generateId();
+        final EventId id = context.getEventId();
         
         final String str = Stringifiers.toString(id);
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
@@ -237,6 +255,6 @@ public class EventsShould {
 
     @Test
     public void accept_generated_event_id() {
-        checkValid(EventFactory.generateId());
+        checkValid(context.getEventId());
     }
 }

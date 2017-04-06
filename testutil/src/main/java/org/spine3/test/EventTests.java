@@ -22,16 +22,12 @@ package org.spine3.test;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.command.EventFactory;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.server.command.EventFactory.generateId;
 import static org.spine3.test.Tests.newUuidValue;
@@ -65,16 +61,5 @@ public class EventTests {
                                                          .setTimestamp(time)
                                                          .setCommandContext(cmdContext);
         return builder.build();
-    }
-
-    public static Event newEvent(Message eventMessage) {
-        checkNotNull(eventMessage);
-        return EventFactory.createEvent(eventMessage, newEventContext());
-    }
-
-    public static Event newEvent(Message eventMessage, Timestamp when) {
-        checkNotNull(eventMessage);
-        checkNotNull(when);
-        return EventFactory.createEvent(eventMessage, newEventContext(when));
     }
 }
