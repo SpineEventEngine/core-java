@@ -38,7 +38,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.11-SNAPSHOT'
+        spineToolsVersion = '0.8.12-SNAPSHOT'
     }
 
     dependencies {
@@ -48,7 +48,7 @@ buildscript {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin',
+        classpath group: 'org.spine3.tools', name: 'spine-model-compiler',
                                              version: spineToolsVersion
         /* Uncomment the below statement if you want the dependency to be fetched on each build.
            Please note that offline builds will not be available then. */
@@ -81,7 +81,7 @@ ext {
     slf4JVersion = '1.7.21'
     jUnitVersion = '4.12'
 
-    spineProtobufPluginId = 'org.spine3.tools.protobuf-plugin'
+    spineProtobufPluginId = 'org.spine3.tools.spine-model-compiler'
     spineCodestyleCheckerId = 'org.spine3.tools.spine-codestyle-checker'
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
@@ -121,14 +121,14 @@ subprojects {
     apply plugin: 'org.spine3.tools.spine-codestyle-checker'
 
     // Verifies code style.
-    // The parameters are common for any kind of verification:
+    // The parameters are same for any kind of verification:
     //
     //      * "threshold" - is a number of bearable code violations that will not trigger a response.
-    //      * "responseType" - can be either "error" or "warn"
+    //      * "reportType" - can be either "error" or "warn"
     //              "warn" type allows to see all errors in build result records without failing it.
     //              "error" type will fail the build process.
     //
-    //      For more details please see org.spine3.tools.codestyle.Response
+    //      For more details please see org.spine3.tools.codestyle.ReportType
     codestyleChecker {
 
         // Javadoc @link/@linkplain format checker.
@@ -138,7 +138,7 @@ subprojects {
 
             // A number of bearable wrong links.
             threshold = 0
-            responseType = "warn"
+            reportType = "warn"
         }
     }
 
