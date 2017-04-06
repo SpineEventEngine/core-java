@@ -20,63 +20,39 @@
 
 package org.spine3.server.command;
 
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
-import org.junit.Before;
+import com.google.protobuf.Empty;
 import org.junit.Test;
-import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.base.CommandContext;
+import org.spine3.client.CommandFactory;
+import org.spine3.test.TestCommandFactory;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.command.EventFactory.createEvent;
-import static org.spine3.server.command.EventFactory.generateId;
-import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.newUuidValue;
 
 public class EventFactoryShould {
 
-    private EventContext context;
-    private StringValue stringValue;
+    private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
 
-    @Before
-    public void setUp() {
-        stringValue = newUuidValue();
-        context = newEventContext();
+    @Test(expected = NullPointerException.class)
+    public void require_producer_id_in_builder() {
+        final CommandContext ctx = commandFactory.createCommand(Empty.getDefaultInstance())
+                                                 .getContext();
+        EventFactory.newBuilder()
+                    .setCommandContext(ctx)
+                    .build();
     }
 
-    @Test
-    public void generate_event_id() {
-        final EventId result = generateId();
-
-        assertFalse(result.getValue()
-                          .isEmpty());
+    @Test(expected = NullPointerException.class)
+    public void require_non_null_command_context_in_builder() {
+        EventFactory.newBuilder()
+                    .setProducerId(newUuidValue())
+                    .build();
     }
 
-    @Test
-    public void create_event() {
-        createEventTest(stringValue);
-        createEventTest(Timestamps2.getCurrentTime());
-    }
-
-    private void createEventTest(Message msg) {
-        final Event event = createEvent(msg, context);
-
-        assertEquals(msg, unpack(event.getMessage()));
-        assertEquals(context, event.getContext());
-    }
-
-    @Test
-    public void create_event_with_Any() {
-        final Any msg = AnyPacker.pack(stringValue);
-        final Event event = createEvent(msg, context);
-
-        assertEquals(msg, event.getMessage());
-        assertEquals(context, event.getContext());
+    @Test(expected = IllegalArgumentException.class)
+    public void require_non_default_command_context_in_builder() {
+        EventFactory.newBuilder()
+                    .setProducerId(newUuidValue())
+                    .setCommandContext(CommandContext.getDefaultInstance())
+                    .build();
     }
 }

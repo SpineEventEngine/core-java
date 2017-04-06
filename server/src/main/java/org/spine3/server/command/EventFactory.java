@@ -37,11 +37,12 @@ import org.spine3.server.integration.IntegrationEventContext;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * Produces events in response to a command.
@@ -59,21 +60,6 @@ public class EventFactory {
         this.commandContext = builder.commandContext;
         this.idSequence = EventIdSequence.on(commandContext.getCommandId())
                                          .withMaxSize(builder.maxEventCount);
-    }
-
-    /**
-     * Creates an event based on the passed integration event.
-     */
-    public static Event toEvent(IntegrationEvent integrationEvent) {
-        final IntegrationEventContext sourceContext = integrationEvent.getContext();
-        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
-        final EventContext context = EventContext.newBuilder()
-                                                 .setEventId(sourceContext.getEventId())
-                                                 .setTimestamp(sourceContext.getTimestamp())
-                                                 .setProducerId(AnyPacker.pack(producerId))
-                                                 .build();
-        final Event result = createEvent(integrationEvent.getMessage(), context);
-        return result;
     }
 
     /**
@@ -128,6 +114,21 @@ public class EventFactory {
         return result;
     }
 
+    /**
+     * Creates an event based on the passed integration event.
+     */
+    public static Event toEvent(IntegrationEvent integrationEvent) {
+        final IntegrationEventContext sourceContext = integrationEvent.getContext();
+        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
+        final EventContext context = EventContext.newBuilder()
+                                                 .setEventId(sourceContext.getEventId())
+                                                 .setTimestamp(sourceContext.getTimestamp())
+                                                 .setProducerId(AnyPacker.pack(producerId))
+                                                 .build();
+        final Event result = createEvent(integrationEvent.getMessage(), context);
+        return result;
+    }
+
     private static EventContext createContext(EventId eventId,
                                               Any producerId,
                                               CommandContext commandContext,
@@ -176,7 +177,9 @@ public class EventFactory {
          * Sets the command in response to which we generate events.
          */
         public Builder setCommandContext(CommandContext commandContext) {
-            this.commandContext = checkNotNull(commandContext);
+            checkNotNull(commandContext);
+            checkArgument(isNotDefault(commandContext));
+            this.commandContext = commandContext;
             return this;
         }
 
@@ -195,8 +198,8 @@ public class EventFactory {
         }
 
         public EventFactory build() {
-            checkState(producerId != null, "Producer ID must be set.");
-            checkState(commandContext != null, "Command must be set.");
+            checkNotNull(producerId, "Producer ID must be set.");
+            checkNotNull(commandContext, "Command must be set.");
 
             final EventFactory result = new EventFactory(this);
             return result;
