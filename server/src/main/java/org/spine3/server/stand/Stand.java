@@ -40,6 +40,7 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.QueryOperation;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
@@ -67,6 +68,11 @@ import java.util.concurrent.Executor;
  * @author Alex Tymchenko
  */
 public class Stand implements AutoCloseable {
+
+    /**
+     * Used to return an empty result collection for {@link Query}.
+     */
+    private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
 
     /**
      * Persistent storage for the latest {@code Aggregate} states.
@@ -105,14 +111,12 @@ public class Stand implements AutoCloseable {
      */
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
-    /**
-     * Used to return an empty result collection for {@link Query}.
-     */
-    private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
+    private final boolean multitenant;
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
         callbackExecutor = builder.getCallbackExecutor();
+        multitenant = builder.isMultitenant();
     }
 
     public static Builder newBuilder() {
@@ -163,6 +167,10 @@ public class Stand implements AutoCloseable {
         }
 
         notifyMatchingSubscriptions(id, entityState, typeUrl);
+    }
+
+    public boolean isMultitenant() {
+        return multitenant;
     }
 
     /**
@@ -254,18 +262,25 @@ public class Stand implements AutoCloseable {
      * @param query            an instance of query
      * @param responseObserver an observer to feed the query results to.
      */
-    public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
+    public void execute(final Query query,
+                              final StreamObserver<QueryResponse> responseObserver) {
 
         final TypeUrl type = Queries.typeOf(query);
         final QueryProcessor queryProcessor = processorFor(type);
 
-        final ImmutableCollection<Any> readResult = queryProcessor.process(query);
-        final QueryResponse response = QueryResponse.newBuilder()
-                                                    .addAllMessages(readResult)
-                                                    .setResponse(Responses.ok())
-                                                    .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        final QueryOperation op = new QueryOperation(query) {
+            @Override
+            public void run() {
+                final ImmutableCollection<Any> readResult = queryProcessor.process(query());
+                final QueryResponse response = QueryResponse.newBuilder()
+                                                            .addAllMessages(readResult)
+                                                            .setResponse(Responses.ok())
+                                                            .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+        };
+        op.execute();
     }
 
     private void notifyMatchingSubscriptions(Object id, final Any entityState, TypeUrl typeUrl) {
@@ -380,6 +395,7 @@ public class Stand implements AutoCloseable {
         private StandStorage storage;
         private Executor callbackExecutor;
         private boolean multitenant;
+
         /**
          * Set an instance of {@link StandStorage} to be used to persist
          * the latest aggregate states.

@@ -60,6 +60,7 @@ import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.type.TypeUrl;
 
@@ -109,10 +110,10 @@ public class StandShould extends TenantAwareTest {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
-    private boolean multitenant;
+    private static boolean multitenant = false;
 
-    protected void setMultitenant(boolean multitenant) {
-        this.multitenant = multitenant;
+    protected static void setMultitenant(boolean multitenant) {
+        StandShould.multitenant = multitenant;
     }
 
     protected boolean isMultitenant() {
@@ -141,10 +142,11 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void register_projection_repositories() {
+        final boolean multitenant = isMultitenant();
         final Stand stand = Stand.newBuilder()
-                                 .setMultitenant(isMultitenant())
+                                 .setMultitenant(multitenant)
                                  .build();
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final BoundedContext boundedContext = createBoundedContext(stand);
 
         checkTypesEmpty(stand);
 
@@ -162,6 +164,12 @@ public class StandShould extends TenantAwareTest {
                 new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(anotherTestProjectionRepo);
         checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
+    }
+
+    private static BoundedContext createBoundedContext(Stand stand) {
+        return stand.isMultitenant()
+                    ? MultiTenant.newBoundedContext(stand)
+                    : SingleTenant.newBoundedContext(stand);
     }
 
     @Test
@@ -329,7 +337,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void trigger_subscription_callback_upon_update_of_aggregate() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
@@ -352,7 +360,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void trigger_subscription_callback_upon_update_of_projection() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
         final Target allProjects = Queries.Targets.allOf(Project.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
@@ -375,7 +383,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void allow_cancelling_subscriptions() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
@@ -410,7 +418,7 @@ public class StandShould extends TenantAwareTest {
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void trigger_each_subscription_callback_once_for_multiple_subscriptions() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
@@ -438,7 +446,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void do_not_trigger_subscription_callbacks_in_case_of_another_type_criterion_mismatch() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
         final Target allProjects = Queries.Targets.allOf(Project.class);
         final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
 
@@ -456,7 +464,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void trigger_subscription_callbacks_matching_by_id() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
@@ -508,7 +516,8 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
+                                                          multitenant);
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -617,7 +626,8 @@ public class StandShould extends TenantAwareTest {
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void select_entity_singleton_by_id_and_apply_field_masks() {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
+                                                          multitenant);
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")   // clashes with non-related tests.
@@ -657,7 +667,8 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void handle_mistakes_in_query_silently() {
         //noinspection ZeroLengthArrayAllocation
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
+                                                          multitenant);
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -742,7 +753,8 @@ public class StandShould extends TenantAwareTest {
     private static void requestSampleCustomer(int[] fieldIndexes,
                                               final MemoizeQueryResponseObserver observer,
                                               boolean multitenant) {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
+                                                          multitenant);
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -770,7 +782,7 @@ public class StandShould extends TenantAwareTest {
         final ImmutableList<EntityRecord> emptyResultList = ImmutableList.<EntityRecord>builder().build();
         when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock, multitenant);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readCustomersQuery, responseObserver);
@@ -810,7 +822,8 @@ public class StandShould extends TenantAwareTest {
 
     @SuppressWarnings("MethodWithMultipleLoops")
     private static void doCheckReadingCustomersByIdAndFieldMask(boolean multitenant, String... paths) {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant));
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
+                                                          multitenant);
 
         final int querySize = 2;
 
@@ -863,7 +876,7 @@ public class StandShould extends TenantAwareTest {
         final StandStorage standStorageMock = mock(StandStorage.class);
         setupExpectedBulkReadBehaviour(sampleCustomers, customerType, standStorageMock);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock, multitenant);
         triggerMultipleUpdates(sampleCustomers, stand);
 
         final Query readMultipleCustomers = Queries.readByIds(Customer.class,
@@ -898,7 +911,7 @@ public class StandShould extends TenantAwareTest {
         when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
                 .thenReturn(nonEmptyList);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock, multitenant);
 
         final Query queryWithNoFilters = Query.newBuilder()
                                               .setTarget(customerTarget)
@@ -1117,13 +1130,15 @@ public class StandShould extends TenantAwareTest {
         return messageList;
     }
 
-    private static Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
+    private static Stand prepareStandWithAggregateRepo(StandStorage standStorage,
+                                                       boolean multitenant) {
         final Stand stand = Stand.newBuilder()
                                  .setStorage(standStorage)
+                                 .setMultitenant(multitenant)
                                  .build();
         assertNotNull(stand);
 
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final BoundedContext boundedContext = createBoundedContext(stand);
         final CustomerAggregateRepository customerAggregateRepo =
                 new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);

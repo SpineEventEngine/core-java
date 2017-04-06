@@ -67,7 +67,7 @@ public class SubscriptionServiceShould {
 
     @Test
     public void initialize_properly_with_one_bounded_context() {
-        final BoundedContext singleBoundedContext = newBoundedContext("Single", newSimpleStand());
+        final BoundedContext singleBoundedContext = newBoundedContext("Single", newMultitenantStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                        .add(singleBoundedContext);
@@ -82,9 +82,9 @@ public class SubscriptionServiceShould {
 
     @Test
     public void initialize_properly_with_several_bounded_contexts() {
-        final BoundedContext firstBoundedContext = newBoundedContext("First", newSimpleStand());
-        final BoundedContext secondBoundedContext = newBoundedContext("Second", newSimpleStand());
-        final BoundedContext thirdBoundedContext = newBoundedContext("Third", newSimpleStand());
+        final BoundedContext firstBoundedContext = newBoundedContext("First", newMultitenantStand());
+        final BoundedContext secondBoundedContext = newBoundedContext("Second", newMultitenantStand());
+        final BoundedContext thirdBoundedContext = newBoundedContext("Third", newMultitenantStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                        .add(firstBoundedContext)
@@ -102,9 +102,9 @@ public class SubscriptionServiceShould {
 
     @Test
     public void be_able_to_remove_bounded_context_from_builder() {
-        final BoundedContext firstBoundedContext = newBoundedContext("Removed", newSimpleStand());
-        final BoundedContext secondBoundedContext = newBoundedContext("Also removed", newSimpleStand());
-        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay", newSimpleStand());
+        final BoundedContext firstBoundedContext = newBoundedContext("Removed", newMultitenantStand());
+        final BoundedContext secondBoundedContext = newBoundedContext("Also removed", newMultitenantStand());
+        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay", newMultitenantStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                        .add(firstBoundedContext)
@@ -333,8 +333,9 @@ public class SubscriptionServiceShould {
         return Queries.Targets.allOf(Project.class);
     }
 
-    private static Stand newSimpleStand() {
+    private static Stand newMultitenantStand() {
         return Stand.newBuilder()
+                    .setMultitenant(true)
                     .build();
     }
 
