@@ -67,15 +67,17 @@ message Event {
 // Event identifier.
 message EventId {
 
-    // The value is based on an identifier of a command handling of which produced the event.
-    //
-    // This field has the following format:
+    // If an event is generated in response to a command, the value is based on an identifier of a
+    // command handling of which produced the event, and has the following format:
     //
     //     `<commandId>-<sequenceNumber>`
     //
     // where the `sequenceNumber` is a hexadecimal number in the sequence of events generated
     // in response to the command. The number may have one or more leading zeroes, if a command
     // results in more than 15 events.
+    //
+    // If the event is generated in response to an integration event, this field contains the value
+    // from the context of the integration event.
     //
     string value = 1;
 }

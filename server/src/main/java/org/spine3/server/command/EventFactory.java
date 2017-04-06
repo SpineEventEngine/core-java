@@ -22,6 +22,7 @@ package org.spine3.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -29,7 +30,10 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
+import org.spine3.server.integration.IntegrationEvent;
+import org.spine3.server.integration.IntegrationEventContext;
 
 import javax.annotation.Nullable;
 
@@ -37,6 +41,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * Produces events in response to a command.
@@ -54,6 +59,21 @@ public class EventFactory {
         this.commandContext = builder.commandContext;
         this.idSequence = EventIdSequence.on(commandContext.getCommandId())
                                          .withMaxSize(builder.maxEventCount);
+    }
+
+    /**
+     * Creates an event based on the passed integration event.
+     */
+    public static Event toEvent(IntegrationEvent integrationEvent) {
+        final IntegrationEventContext sourceContext = integrationEvent.getContext();
+        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
+        final EventContext context = EventContext.newBuilder()
+                                                 .setEventId(sourceContext.getEventId())
+                                                 .setTimestamp(sourceContext.getTimestamp())
+                                                 .setProducerId(AnyPacker.pack(producerId))
+                                                 .build();
+        final Event result = createEvent(integrationEvent.getMessage(), context);
+        return result;
     }
 
     /**
