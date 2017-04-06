@@ -22,6 +22,7 @@ package org.spine3.server.stand;
 
 import org.junit.After;
 import org.junit.Before;
+import org.spine3.users.TenantId;
 
 import static org.spine3.test.Tests.newTenantUuid;
 
@@ -33,8 +34,11 @@ public class MultiTenantStandShould extends StandShould {
     @Override
     @Before
     public void setUp() {
-        setCurrentTenant(newTenantUuid());
+        final TenantId tenantId = newTenantUuid();
+
+        setCurrentTenant(tenantId);
         setMultitenant(true);
+        setQueryFactory(createQueryFactory(tenantId));
     }
 
     @After

@@ -41,6 +41,7 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.Queries;
 import org.spine3.client.Query;
+import org.spine3.client.QueryFactory;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Subscriptions;
@@ -62,7 +63,9 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
+import org.spine3.time.ZoneOffsets;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -96,8 +99,10 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.Topics.createFor;
 import static org.spine3.server.stand.Given.StandTestProjection;
+import static org.spine3.test.Tests.newUserId;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -105,15 +110,21 @@ import static org.spine3.test.Verify.assertSize;
  * @author Dmytro Dashenkov
  */
 //It's OK for a test.
-@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods"})
+@SuppressWarnings({"OverlyCoupledClass", "ClassWithTooManyMethods", "OverlyComplexClass"})
 public class StandShould extends TenantAwareTest {
     private static final int TOTAL_CUSTOMERS_FOR_BATCH_READING = 10;
     private static final int TOTAL_PROJECTS_FOR_BATCH_READING = 10;
 
-    private static boolean multitenant = false;
+    private boolean multitenant = false;
 
-    protected static void setMultitenant(boolean multitenant) {
-        StandShould.multitenant = multitenant;
+    private QueryFactory queryFactory;
+
+    protected void setMultitenant(boolean multitenant) {
+        this.multitenant = multitenant;
+    }
+
+    public void setQueryFactory(QueryFactory queryFactory) {
+        this.queryFactory = queryFactory;
     }
 
     protected boolean isMultitenant() {
@@ -123,6 +134,17 @@ public class StandShould extends TenantAwareTest {
     @Before
     public void setUp() {
         setMultitenant(false);
+        queryFactory = createQueryFactory(null);
+    }
+
+    protected static QueryFactory createQueryFactory(@Nullable TenantId tenant) {
+        final QueryFactory.Builder builder = QueryFactory.newBuilder()
+                                                         .setActor(newUserId(newUuid()))
+                                                         .setZoneOffset(ZoneOffsets.UTC);
+        if (tenant != null) {
+            builder.setTenantId(tenant);
+        }
+        return builder.build();
     }
 
     @Test
@@ -259,7 +281,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
-        final Query readAllCustomers = Queries.readAll(Customer.class);
+        final Query readAllCustomers = queryFactory.readAll(Customer.class);
         checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
     }
 
@@ -273,7 +295,7 @@ public class StandShould extends TenantAwareTest {
 
         // Customer type was NOT registered.
         // So create a query for an unknown type.
-        final Query readAllCustomers = Queries.readAll(Customer.class);
+        final Query readAllCustomers = queryFactory.readAll(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
@@ -289,7 +311,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
 
-        final Query readCustomersById = Queries.readByIds(Customer.class, newHashSet(
+        final Query readCustomersById = queryFactory.readByIds(Customer.class, newHashSet(
                 customerIdFor(1), customerIdFor(2)
         ));
 
@@ -328,7 +350,7 @@ public class StandShould extends TenantAwareTest {
     public void return_multiple_results_for_projection_batch_read_by_ids_with_field_mask() {
         final List<Descriptors.FieldDescriptor> projectFields = Project.getDescriptor()
                                                                        .getFields();
-        doCheckReadingCustomersByIdAndFieldMask(multitenant,
+        doCheckReadingCustomersByIdAndFieldMask(
                 projectFields.get(0)
                              .getFullName(), // ID
                 projectFields.get(1)
@@ -337,7 +359,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void trigger_subscription_callback_upon_update_of_aggregate() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
@@ -360,7 +382,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void trigger_subscription_callback_upon_update_of_projection() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allProjects = Queries.Targets.allOf(Project.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
@@ -383,7 +405,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void allow_cancelling_subscriptions() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
@@ -418,7 +440,7 @@ public class StandShould extends TenantAwareTest {
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void trigger_each_subscription_callback_once_for_multiple_subscriptions() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allCustomers = Queries.Targets.allOf(Customer.class);
 
         final Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
@@ -446,7 +468,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void do_not_trigger_subscription_callbacks_in_case_of_another_type_criterion_mismatch() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
         final Target allProjects = Queries.Targets.allOf(Project.class);
         final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
 
@@ -464,7 +486,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void trigger_subscription_callbacks_matching_by_id() {
-        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class), multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
@@ -516,14 +538,13 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void retrieve_all_data_if_field_mask_is_not_set() {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
-                                                          multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
 
-        final Query customerQuery = Queries.readAll(Customer.class);
+        final Query customerQuery = queryFactory.readAll(Customer.class);
 
         //noinspection OverlyComplexAnonymousInnerClass
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
@@ -565,7 +586,7 @@ public class StandShould extends TenantAwareTest {
                 assertTrue(customer.getNicknamesList()
                                    .isEmpty());
             }
-        }, multitenant);
+        });
     }
 
     @Test
@@ -588,8 +609,8 @@ public class StandShould extends TenantAwareTest {
                         assertFalse(customer.hasName());
                         assertFalse(customer.hasId());
                     }
-                },
-                multitenant);
+                }
+        );
     }
 
     @Test
@@ -613,21 +634,20 @@ public class StandShould extends TenantAwareTest {
                         assertFalse(customer.hasName());
                         assertTrue(customer.hasId());
                     }
-                },
-                multitenant);
+                }
+        );
     }
 
     @Test
     public void retrieve_whole_entity_if_nothing_is_requested() {
         //noinspection ZeroLengthArrayAllocation
-        requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver(), multitenant);
+        requestSampleCustomer(new int[]{}, getDuplicateCostumerStreamObserver());
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
     public void select_entity_singleton_by_id_and_apply_field_masks() {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
-                                                          multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
         final String customerDescriptor = Customer.getDescriptor()
                                                   .getFullName();
         @SuppressWarnings("DuplicateStringLiteralInspection")   // clashes with non-related tests.
@@ -649,7 +669,7 @@ public class StandShould extends TenantAwareTest {
 
         final Set<CustomerId> ids = Collections.singleton(customers.get(0)
                                                                    .getId());
-        final Query customerQuery = Queries.readByIds(Customer.class, ids, paths);
+        final Query customerQuery = queryFactory.readByIds(Customer.class, ids, paths);
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver();
         stand.execute(customerQuery, observer);
@@ -667,8 +687,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void handle_mistakes_in_query_silently() {
         //noinspection ZeroLengthArrayAllocation
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
-                                                          multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -679,7 +698,7 @@ public class StandShould extends TenantAwareTest {
                                                                    .getFields()
                                                                    .get(2).getFullName()};
 
-        final Query customerQuery = Queries.readAll(Customer.class, paths);
+        final Query customerQuery = queryFactory.readAll(Customer.class, paths);
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
@@ -704,7 +723,7 @@ public class StandShould extends TenantAwareTest {
         verifyObserver(observer);
     }
 
-    private static StandStorage createStandStorage(boolean multitenant) {
+    private StandStorage createStandStorage() {
         return InMemoryStorageFactory.getInstance(multitenant).createStandStorage();
     }
 
@@ -750,11 +769,9 @@ public class StandShould extends TenantAwareTest {
 
     }
 
-    private static void requestSampleCustomer(int[] fieldIndexes,
-                                              final MemoizeQueryResponseObserver observer,
-                                              boolean multitenant) {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
-                                                          multitenant);
+    private void requestSampleCustomer(int[] fieldIndexes,
+                                       final MemoizeQueryResponseObserver observer) {
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -769,20 +786,20 @@ public class StandShould extends TenantAwareTest {
                                .getFullName();
         }
 
-        final Query customerQuery = Queries.readAll(Customer.class, paths);
+        final Query customerQuery = queryFactory.readAll(Customer.class, paths);
 
         stand.execute(customerQuery, observer);
 
         verifyObserver(observer);
     }
 
-    private static void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
+    private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
         final StandStorage standStorageMock = mock(StandStorage.class);
         // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
         final ImmutableList<EntityRecord> emptyResultList = ImmutableList.<EntityRecord>builder().build();
         when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock, multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readCustomersQuery, responseObserver);
@@ -792,7 +809,7 @@ public class StandShould extends TenantAwareTest {
                    messageList.isEmpty());
     }
 
-    private static void doCheckReadingProjectsById(int numberOfProjects) {
+    private void doCheckReadingProjectsById(int numberOfProjects) {
         // Define the types and values used as a test data.
         final Map<ProjectId, Project> sampleProjects = newHashMap();
         final TypeUrl projectType = TypeUrl.of(Project.class);
@@ -806,7 +823,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
         final Query readMultipleProjects =
-                Queries.readByIds(Project.class, sampleProjects.keySet());
+                queryFactory.readByIds(Project.class, sampleProjects.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -821,9 +838,8 @@ public class StandShould extends TenantAwareTest {
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
-    private static void doCheckReadingCustomersByIdAndFieldMask(boolean multitenant, String... paths) {
-        final Stand stand = prepareStandWithAggregateRepo(createStandStorage(multitenant),
-                                                          multitenant);
+    private void doCheckReadingCustomersByIdAndFieldMask(String... paths) {
+        final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final int querySize = 2;
 
@@ -839,7 +855,7 @@ public class StandShould extends TenantAwareTest {
             ids.add(customer.getId());
         }
 
-        final Query customerQuery = Queries.readByIds(Customer.class, ids, paths);
+        final Query customerQuery = queryFactory.readByIds(Customer.class, ids, paths);
 
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
@@ -867,7 +883,7 @@ public class StandShould extends TenantAwareTest {
         verifyObserver(observer);
     }
 
-    private static void doCheckReadingCustomersById(int numberOfCustomers) {
+    private void doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(numberOfCustomers);
@@ -876,10 +892,10 @@ public class StandShould extends TenantAwareTest {
         final StandStorage standStorageMock = mock(StandStorage.class);
         setupExpectedBulkReadBehaviour(sampleCustomers, customerType, standStorageMock);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock, multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
         triggerMultipleUpdates(sampleCustomers, stand);
 
-        final Query readMultipleCustomers = Queries.readByIds(Customer.class,
+        final Query readMultipleCustomers = queryFactory.readByIds(Customer.class,
                                                               sampleCustomers.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
@@ -894,7 +910,7 @@ public class StandShould extends TenantAwareTest {
         }
     }
 
-    private static void checkEmptyResultOnNonEmptyStorageForQueryTarget(Target customerTarget) {
+    private void checkEmptyResultOnNonEmptyStorageForQueryTarget(Target customerTarget) {
         final StandStorage standStorageMock = mock(StandStorage.class);
 
         // Return non-empty results on any storage read call.
@@ -911,7 +927,7 @@ public class StandShould extends TenantAwareTest {
         when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
                 .thenReturn(nonEmptyList);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock, multitenant);
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
         final Query queryWithNoFilters = Query.newBuilder()
                                               .setTarget(customerTarget)
@@ -1130,8 +1146,7 @@ public class StandShould extends TenantAwareTest {
         return messageList;
     }
 
-    private static Stand prepareStandWithAggregateRepo(StandStorage standStorage,
-                                                       boolean multitenant) {
+    private Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
         final Stand stand = Stand.newBuilder()
                                  .setStorage(standStorage)
                                  .setMultitenant(multitenant)
