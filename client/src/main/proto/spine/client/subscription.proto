@@ -29,7 +29,6 @@ option java_package = "org.spine3.client";
 
 
 import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 
 import "spine/annotations.proto";
@@ -39,7 +38,7 @@ import "spine/users/user_id.proto";
 import "spine/users/tenant_id.proto";
 import "spine/base/response.proto";
 import "spine/client/entities.proto";
-import "spine/time/zone_offset.proto";
+import "spine/client/actor_context.proto";
 
 // Topic identifier.
 message TopicId {
@@ -51,46 +50,21 @@ message TopicId {
 // Defines the target (entities and criteria) of subscription.
 message Topic {
 
+    TopicId id = 1 [(required) = true];
+
     // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
-    Target target = 1 [(required) = true];
+    Target target = 2 [(required) = true];
 
     // Field mask to be applied to the entity updates applicable to this topic.
     //
     // Applied to each of the entity state messages before returning in scope of SubscriptionUpdate.
-    google.protobuf.FieldMask field_mask = 2;
+    google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the topic was created.
-    TopicContext context = 3;
+    ActorContext context = 4 [(required) = true];
 
     // Reserved for utility fields.
-    reserved 4 to 6;
-}
-
-message TopicContext {
-
-    TopicId topic_id = 1 [(required) = true];
-
-    // The ID of a tenant in a multi-tenant application.
-    //
-    // This field is not populated in single-tenant applications.
-    //
-    users.TenantId tenant_id = 2;
-
-    // The user who created the topic.
-    users.UserId actor = 3 [(required) = true];
-
-    // The time when the topic was created.
-    google.protobuf.Timestamp timestamp = 4 [(required) = true];
-
-    // The zone offset from which the topic was created.
-    time.ZoneOffset zone_offset = 5 [(required) = true];
-
-    // The human language in which the topic updates are expected.
-    //
-    // If this attribute is not defined, or the specified language is not supported
-    // the updates will be submitted in the default human language of the system.
-    //
-    ui.Language language = 6;
+    reserved 5 to 10;
 }
 
 // Wrapped collection of read-side entity updates on a topic with the specific subscription ID.

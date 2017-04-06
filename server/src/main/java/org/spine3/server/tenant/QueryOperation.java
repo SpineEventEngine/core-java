@@ -49,8 +49,7 @@ public abstract class QueryOperation extends TenantAwareOperation {
      * Obtains the ID of the query.
      */
     protected QueryId queryId() {
-        return query.getContext()
-                    .getQueryId();
+        return query.getId();
     }
 
     /**
