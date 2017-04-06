@@ -159,7 +159,7 @@ public class SubscriptionServiceShould {
 
         assertNotNull(observer.streamFlowValue);
         assertTrue(observer.streamFlowValue.isInitialized());
-        assertEquals(observer.streamFlowValue.getType(), type);
+        assertEquals(observer.streamFlowValue.getTopic().getTarget().getType(), type);
 
         assertNull(observer.throwable);
         assertTrue(observer.isCompleted);

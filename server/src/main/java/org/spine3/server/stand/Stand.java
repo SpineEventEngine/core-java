@@ -32,7 +32,7 @@ import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
-import org.spine3.client.Target;
+import org.spine3.client.Topic;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -166,22 +166,22 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Subscribe for all further changes of an entity state, which satisfies the {@link Target}.
+     * Subscribe for all further changes of an entity state, which satisfies the {@link Topic}.
      *
      * <p>Once this instance of {@code Stand} receives an update of an entity
      * with the given {@code TypeUrl}, all such callbacks are executed.
      *
-     * @param target an instance {@link Target}, defining the entity and criteria,
+     * @param topic an instance {@link Topic}, defining the entity and criteria,
      *               which changes should be propagated to the {@code callback}
      */
     @CheckReturnValue
-    public Subscription subscribe(Target target) {
-        final Subscription subscription = subscriptionRegistry.addSubscription(target);
+    public Subscription subscribe(Topic topic) {
+        final Subscription subscription = subscriptionRegistry.addSubscription(topic);
         return subscription;
     }
 
     /**
-     * Activate the subscription created via {@link #subscribe(Target)}.
+     * Activate the subscription created via {@link #subscribe(Topic)}.
      *
      * <p>After the activation, the clients will start receiving the updates via
      * {@code EntityUpdateCallback} upon the changes in the entities, defined by
@@ -189,7 +189,7 @@ public class Stand implements AutoCloseable {
      *
      * @param subscription the subscription to activate.
      * @param callback     an instance of {@link EntityUpdateCallback} executed upon entity update.
-     * @see #subscribe(Target)
+     * @see #subscribe(Topic)
      */
     public void activate(Subscription subscription, EntityUpdateCallback callback) {
         subscriptionRegistry.activate(subscription, callback);

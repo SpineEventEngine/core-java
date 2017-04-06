@@ -23,6 +23,7 @@ import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionId;
 import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
+import org.spine3.client.Topic;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -43,7 +44,7 @@ import static com.google.common.collect.Maps.newHashMap;
  * @author Alex Tymchenko
  */
 final class SubscriptionRegistry {
-    private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
+    private final Map<TypeUrl, Set<SubscriptionRecord>> typeToRecord = newHashMap();
     private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
 
     /**
@@ -62,29 +63,31 @@ final class SubscriptionRegistry {
     }
 
     /**
-     * Creates a subscription for the passed {@code Target} and adds it to the registry.
+     * Creates a subscription for the passed {@link Topic} and adds it to the registry.
      *
-     * @param target the target for a new subscription
+     * @param topic the topic to subscribe to
      * @return the created subscription
      */
-    synchronized Subscription addSubscription(Target target) {
+    synchronized Subscription addSubscription(Topic topic) {
         final SubscriptionId subscriptionId = Subscriptions.newId();
-        final String typeAsString = target.getType();
+        final Target target = topic.getTarget();
+        final String typeAsString = target
+                                         .getType();
         final TypeUrl type = TypeName.of(typeAsString)
                                      .toUrl();
         final Subscription subscription = Subscription.newBuilder()
                                                       .setId(subscriptionId)
-                                                      .setType(typeAsString)
+                                                      .setTopic(topic)
                                                       .build();
-        final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type);
+        final SubscriptionRecord record = new SubscriptionRecord(subscription, target, type);
 
-        if (!typeToAttrs.containsKey(type)) {
-            typeToAttrs.put(type, new HashSet<SubscriptionRecord>());
+        if (!typeToRecord.containsKey(type)) {
+            typeToRecord.put(type, new HashSet<SubscriptionRecord>());
         }
-        typeToAttrs.get(type)
-                   .add(attributes);
+        typeToRecord.get(type)
+                    .add(record);
 
-        subscriptionToAttrs.put(subscription, attributes);
+        subscriptionToAttrs.put(subscription, record);
         return subscription;
     }
 
@@ -100,11 +103,11 @@ final class SubscriptionRegistry {
         if (!subscriptionToAttrs.containsKey(subscription)) {
             return;
         }
-        final SubscriptionRecord attributes = subscriptionToAttrs.get(subscription);
+        final SubscriptionRecord record = subscriptionToAttrs.get(subscription);
 
-        if (typeToAttrs.containsKey(attributes.getType())) {
-            typeToAttrs.get(attributes.getType())
-                       .remove(attributes);
+        if (typeToRecord.containsKey(record.getType())) {
+            typeToRecord.get(record.getType())
+                        .remove(record);
         }
         subscriptionToAttrs.remove(subscription);
     }
@@ -116,7 +119,7 @@ final class SubscriptionRegistry {
      * @return the collection of filtered records
      */
     synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
-        final Set<SubscriptionRecord> result = typeToAttrs.get(type);
+        final Set<SubscriptionRecord> result = typeToRecord.get(type);
         return result;
     }
 
@@ -127,7 +130,7 @@ final class SubscriptionRegistry {
      * @return {@code true} if there are records with the given type, {@code false} otherwise
      */
     synchronized boolean hasType(TypeUrl type) {
-        final boolean result = typeToAttrs.containsKey(type);
+        final boolean result = typeToRecord.containsKey(type);
         return result;
     }
 }
