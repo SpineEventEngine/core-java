@@ -63,6 +63,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -95,7 +96,7 @@ public class ProcessManagerRepositoryShould
     @Override
     protected ProjectId createId(int value) {
         return ProjectId.newBuilder()
-                        .setId(String.format("procman-number-%s", value))
+                        .setId(format("procman-number-%s", value))
                         .build();
     }
 

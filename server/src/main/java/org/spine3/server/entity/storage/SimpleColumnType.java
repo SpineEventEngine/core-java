@@ -17,33 +17,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.reflect;
 
-import com.google.protobuf.Message;
+package org.spine3.server.entity.storage;
 
-import static java.lang.String.format;
+import org.spine3.annotations.SPI;
 
 /**
- * Indicates that more than one handling method for the same message class are present
- * in the declaring class.
+ * A base for implementing {@link ColumnType} interface regardless the type conversion.
  *
- * @author Mikhail Melnik
- * @author Alexander Yevsyukov
+ * @param <T> the type of the storage field
+ * @param <R> the type of the record in the database, which holds a single cortege of data and
+ *            is consumed by the database upon write
+ * @param <C> the type of the column identifier in the {@code R}
+ * @author Dmytro Dashenkov
  */
-public class DuplicateHandlerMethodException extends RuntimeException {
+@SPI
+public abstract class SimpleColumnType<T, R, C> implements ColumnType<T, T, R, C> {
 
-    private static final long serialVersionUID = 0L;
-
-    public DuplicateHandlerMethodException(
-            Class<?> targetClass,
-            Class<? extends Message> messageClass,
-            String firstMethodName,
-            String secondMethodName) {
-
-        super(format(
-                "The %s class defines more than one method for handling the message class %s." +
-                        " Methods encountered: %s, %s.",
-                targetClass.getName(), messageClass.getName(),
-                firstMethodName, secondMethodName));
+    @Override
+    public T convertColumnValue(T fieldValue) {
+        return fieldValue;
     }
 }

@@ -36,6 +36,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -99,7 +100,7 @@ public class FieldMasksShould {
         final Collection<Project> original = new LinkedList<>();
 
         for (int i = 0; i < count; i++) {
-            final Project project = Given.newProject(String.format("project-%s", i));
+            final Project project = Given.newProject(format("project-%s", i));
             original.add(project);
         }
 
@@ -145,7 +146,7 @@ public class FieldMasksShould {
         final int count = 5;
 
         for (int i = 0; i < count; i++) {
-            final Project project = Given.newProject(String.format("test-data--%s", i));
+            final Project project = Given.newProject(format("test-data--%s", i));
             original.add(project);
         }
 
@@ -201,7 +202,7 @@ public class FieldMasksShould {
 
             final Project project = Project.newBuilder()
                                            .setId(projectId)
-                                           .setName(String.format("Test project : %s", id))
+                                           .setName(format("Test project : %s", id))
                                            .addTask(first)
                                            .addTask(second)
                                            .setStatus(Status.CREATED)
