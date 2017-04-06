@@ -24,7 +24,14 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import com.google.protobuf.InvalidProtocolBufferException;
+import com.google.protobuf.Message;
+import com.google.protobuf.util.JsonFormat;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +116,7 @@ public class Stringifiers {
      * @return the stringifier for the map
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
-                                                               Class<V> valueClass) {
+            Class<V> valueClass) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
         final Stringifier<Map<K, V>> mapStringifier = new MapStringifier<>(keyClass, valueClass);
@@ -127,8 +134,8 @@ public class Stringifiers {
      * @return the stringifier for the map
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
-                                                               Class<V> valueClass,
-                                                               char delimiter) {
+            Class<V> valueClass,
+            char delimiter) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
         checkNotNull(delimiter);
@@ -191,12 +198,17 @@ public class Stringifiers {
      * @return the stringifier for the list
      */
     public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
-                                                           char delimiter) {
+            char delimiter) {
         checkNotNull(elementClass);
         checkNotNull(delimiter);
         final Stringifier<List<T>> listStringifier =
                 new ListStringifier<>(elementClass, delimiter);
         return listStringifier;
+    }
+
+    public static <T extends Message> Stringifier<T> defaultStringifier(Class<T> messageClass) {
+        final MessageStringifier<T> messageStringifier = new MessageStringifier<>(messageClass);
+        return messageStringifier;
     }
 
     /**
@@ -212,6 +224,56 @@ public class Stringifiers {
                                        .addEscape(charToEscape, escapedChar)
                                        .build();
         return result;
+    }
+
+    private static class MessageStringifier<T extends Message> extends Stringifier<T> {
+
+        private final Class<T> messageType;
+        private final Message.Builder messageBuilder;
+        private final JsonFormat.Parser parser = JsonFormat.parser();
+
+        public MessageStringifier(Class<T> messageType) {
+            this.messageType = messageType;
+            this.messageBuilder = getBuilder();
+        }
+
+        private Message.Builder getBuilder() {
+            try {
+                final Method method = messageType.getMethod("newBuilder");
+                method.setAccessible(true);
+                final Message.Builder builder = (Message.Builder) method.invoke(null);
+                return builder;
+            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected String toString(T obj) {
+            try {
+                final BufferedReader jsonReader = new BufferedReader(null);
+                parser.merge(jsonReader, obj.newBuilderForType()
+                                            .mergeFrom(obj));
+                final StringBuilder result = new StringBuilder(0);
+                String json;
+                while ((json = jsonReader.readLine()) != null) {
+                    result.append(json);
+                }
+                return result.toString();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
+        @Override
+        protected T fromString(String s) {
+            try {
+                parser.merge(s, messageBuilder);
+                return (T) messageBuilder.build();
+            } catch (InvalidProtocolBufferException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
     /**
