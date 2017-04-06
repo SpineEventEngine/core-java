@@ -32,6 +32,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.CommandHandlingEntity;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 import org.spine3.type.CommandClass;
@@ -44,7 +45,6 @@ import java.util.Set;
 
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.server.command.EventFactory.createEvent;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -273,7 +273,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                 final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    applyEvent(message);
+                    apply(message);
                     final Version newVersion = context.getVersion();
                     advanceVersion(newVersion);
                 } catch (InvocationTargetException e) {
@@ -326,28 +326,45 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     private void applyMessages(Iterable<? extends Message> eventMessages,
                                CommandContext commandContext) throws InvocationTargetException {
-        for (Message eventOrMessage : eventMessages) {
+        final List<? extends Message> messages = Lists.newArrayList(eventMessages);
+        final EventFactory eventFactory = createEventFactory(commandContext, messages.size());
+
+        for (Message eventOrMessage : messages) {
             final Message eventMessage = ensureEventMessage(eventOrMessage);
 
-            applyEvent(eventMessage);
+            apply(eventMessage);
             incrementVersion();
 
-            final EventContext eventContext;
+            final Event event;
             if (eventOrMessage instanceof Event) {
-                final Event event = (Event) eventOrMessage;
-                eventContext = event.getContext()
-                                    .toBuilder()
-                                    .setCommandContext(commandContext)
-                                    .setTimestamp(getCurrentTime())
-                                    .setVersion(getVersion())
-                                    .build();
+                event = importEvent((Event) eventOrMessage, commandContext);
             } else {
-                eventContext = createEventContext(commandContext);
+                event = eventFactory.create(eventMessage, getVersion());
             }
-
-            final Event event = createEvent(eventMessage, eventContext);
             uncommittedEvents.add(event);
         }
+    }
+
+    private Event importEvent(Event event, CommandContext commandContext) {
+        final EventContext eventContext = event.getContext()
+                                               .toBuilder()
+                                               .setCommandContext(commandContext)
+                                               .setTimestamp(getCurrentTime())
+                                               .setVersion(getVersion())
+                                               .build();
+        final Event result = event.toBuilder()
+                                  .setContext(eventContext)
+                                  .build();
+        return result;
+    }
+
+    private EventFactory createEventFactory(CommandContext commandContext, int eventCount) {
+        final EventFactory result = EventFactory.newBuilder()
+                                                .setProducerId(getProducerId())
+                                                .setMaxEventCount(eventCount)
+                                                .setCommandContext(commandContext)
+                                                .build();
+        return result;
     }
 
     /**
@@ -377,15 +394,10 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies an event to the aggregate.
      *
-     * <p>If the event is {@link Snapshot} its state is copied. Otherwise, the event
-     * is dispatched to corresponding applier method.
-     *
      * @param eventMessage an event message
-     * @throws MissingEventApplierException if there is no applier method defined for
-     *                                      this type of event
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
-    private void applyEvent(Message eventMessage) throws InvocationTargetException {
+    private void apply(Message eventMessage) throws InvocationTargetException {
         invokeApplier(eventMessage);
     }
 

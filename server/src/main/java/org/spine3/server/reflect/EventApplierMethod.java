@@ -96,8 +96,7 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
      *
      * @throws InvocationTargetException if the method call results in an exception
      */
-    public <R> R invoke(Aggregate aggregate, Message message)
-            throws InvocationTargetException {
+    public <R> R invoke(Aggregate aggregate, Message message) throws InvocationTargetException {
         // Make this method visible to Aggregate class.
         return invoke(aggregate, message, Empty.getDefaultInstance());
     }
