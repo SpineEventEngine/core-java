@@ -53,10 +53,10 @@ public class EventIdSequenceShould {
         assertEquals(LEADING_ZERO, eventId.charAt(separatorIndex + 1));
     }
 
-    @Test(expected = IndexOutOfBoundsException.class)
-    public void throw_exception_when_going_out_of_bounds() throws Exception {
+    @Test
+    public void generate_id_event_when_going_over_max_size() throws Exception {
         final EventIdSequence sequence = on(Commands.generateId());
-        for (int i = 1; i <= MAX_ONE_DIGIT_SIZE + 1; i++) {
+        for (int i = 1; i <= MAX_ONE_DIGIT_SIZE + 5; i++) {
             sequence.next();
         }
     }

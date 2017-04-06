@@ -310,9 +310,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             throws InvocationTargetException {
         createBuilder();
         try {
-            for (Message message : eventMessages) {
-                apply(message, commandContext);
-            }
+            applyMessages(eventMessages, commandContext);
         } finally {
             updateState();
         }
@@ -321,33 +319,35 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies the passed event message or {@code Event} to the aggregate.
      *
-     * @param eventOrMessage an event message or {@code Event}
+     * @param eventMessages  the event message to apply
      * @param commandContext the context of the command which handler generated the message or event
-     * @throws InvocationTargetException if the applier method throws the exception
+     * @throws InvocationTargetException if the applier method throws an exception
      * @see #ensureEventMessage(Message)
      */
-    private void apply(Message eventOrMessage, CommandContext commandContext)
-            throws InvocationTargetException {
-        final Message eventMessage = ensureEventMessage(eventOrMessage);
+    private void applyMessages(Iterable<? extends Message> eventMessages,
+                               CommandContext commandContext) throws InvocationTargetException {
+        for (Message eventOrMessage : eventMessages) {
+            final Message eventMessage = ensureEventMessage(eventOrMessage);
 
-        applyEvent(eventMessage);
-        incrementVersion();
+            applyEvent(eventMessage);
+            incrementVersion();
 
-        final EventContext eventContext;
-        if (eventOrMessage instanceof Event) {
-            final Event event = (Event) eventOrMessage;
-            eventContext = event.getContext()
-                                  .toBuilder()
-                                  .setCommandContext(commandContext)
-                                  .setTimestamp(getCurrentTime())
-                                  .setVersion(getVersion())
-                                  .build();
-        } else {
-            eventContext = createEventContext(commandContext);
+            final EventContext eventContext;
+            if (eventOrMessage instanceof Event) {
+                final Event event = (Event) eventOrMessage;
+                eventContext = event.getContext()
+                                    .toBuilder()
+                                    .setCommandContext(commandContext)
+                                    .setTimestamp(getCurrentTime())
+                                    .setVersion(getVersion())
+                                    .build();
+            } else {
+                eventContext = createEventContext(commandContext);
+            }
+
+            final Event event = createEvent(eventMessage, eventContext);
+            uncommittedEvents.add(event);
         }
-
-        final Event event = createEvent(eventMessage, eventContext);
-        uncommittedEvents.add(event);
     }
 
     /**

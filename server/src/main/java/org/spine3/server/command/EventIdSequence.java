@@ -25,7 +25,6 @@ import com.google.common.base.Strings;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
 
-import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToString;
 
 /**
@@ -50,7 +49,6 @@ class EventIdSequence {
     /**
      * The maximum number of events that fit into one digit sequence number.
      */
-    @VisibleForTesting
     static final int MAX_ONE_DIGIT_SIZE = RADIX;
 
     /**
@@ -64,11 +62,6 @@ class EventIdSequence {
      * The prefix with the command ID.
      */
     private final String commandIdPrefix;
-
-    /**
-     * The maximum number of events in the sequence.
-     */
-    private final int maxSize;
 
     /**
      * The length of the sequence number suffix.
@@ -93,7 +86,6 @@ class EventIdSequence {
 
     private EventIdSequence(String prefix, int maxSize) {
         this.commandIdPrefix = prefix;
-        this.maxSize = maxSize;
         this.suffixLength = maxSize % RADIX + 1;
     }
 
@@ -115,19 +107,9 @@ class EventIdSequence {
 
     /**
      * Generates the next event ID in the sequence.
-     *
-     * @throws IndexOutOfBoundsException if the sequence counter goes above the maximum size
      */
     EventId next() {
         ++count;
-
-        if (count > maxSize) {
-            final String errMsg = format("Sequence counter (%d) is out of bounds (%d).",
-                                         count,
-                                         maxSize);
-            throw new IndexOutOfBoundsException(errMsg);
-        }
-
         final String value = buildValue();
         final EventId result = EventId.newBuilder()
                                       .setValue(value)
