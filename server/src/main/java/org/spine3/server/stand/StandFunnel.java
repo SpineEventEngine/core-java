@@ -57,10 +57,8 @@ public class StandFunnel {
     private final StandUpdateDelivery delivery;
 
     private StandFunnel(Builder builder) {
-        this.delivery = builder.getDelivery()
-                               .get();
-        this.delivery.setStand(builder.getStand()
-                                      .get());
+        this.delivery = builder.delivery;
+        this.delivery.setStand(builder.stand);
     }
 
     /**
