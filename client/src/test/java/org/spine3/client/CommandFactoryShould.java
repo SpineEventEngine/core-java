@@ -22,84 +22,21 @@ package org.spine3.client;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.TimeTests;
-import org.spine3.time.ZoneOffset;
-import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.test.Tests.newUserId;
 
-public class CommandFactoryShould {
+public class CommandFactoryShould extends ActorRequestFactoryShould<CommandFactory,
+                                                                    CommandFactory.Builder> {
 
-    private final UserId actor = newUserId(newUuid());
-    private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
-
-    private CommandFactory commandFactory;
-
-    @Before
-    public void setUp() {
-        commandFactory = CommandFactory.newBuilder()
-                                       .setActor(actor)
-                                       .setZoneOffset(zoneOffset)
-                                       .build();
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void require_actor_in_Builder() {
-        CommandFactory.newBuilder()
-                      .setZoneOffset(zoneOffset)
-                      .build();
-    }
-
-    @Test
-    public void return_set_values_in_Builder() {
-        final CommandFactory.Builder builder = CommandFactory.newBuilder()
-                                                             .setActor(actor)
-                                                             .setZoneOffset(zoneOffset);
-        assertNotNull(builder.getActor());
-        assertNotNull(builder.getZoneOffset());
-        assertNull(builder.getTenantId());
-    }
-
-    @Test
-    public void create_instance_by_user() {
-        final int currentOffset = ZoneOffsets.getDefault()
-                                             .getAmountSeconds();
-        final CommandFactory comFactory = CommandFactory.newBuilder()
-                                                        .setActor(actor)
-                                                        .build();
-
-        assertEquals(actor, comFactory.getActor());
-        assertEquals(currentOffset, comFactory.getZoneOffset().getAmountSeconds());
-    }
-
-    @Test
-    public void create_instance_by_user_and_timezone() {
-        assertEquals(actor, commandFactory.getActor());
-        assertEquals(zoneOffset, commandFactory.getZoneOffset());
-    }
-
-    @Test
-    public void be_single_tenant_by_default() {
-        assertNull(commandFactory.getTenantId());
-    }
-
-    @Test
-    public void support_moving_between_timezones() {
-        final CommandFactory factoryInAnotherTimezone =
-                commandFactory.switchTimezone(ZoneOffsets.ofHours(-8));
-        assertNotEquals(commandFactory.getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
+    @Override
+    protected CommandFactory.Builder builder() {
+        return CommandFactory.newBuilder();
     }
 
     @Test
@@ -108,7 +45,7 @@ public class CommandFactoryShould {
         // would fit into this range. The purpose of this test is to make sure it works with
         // this precision and to add coverage.
         final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-        final Command command = commandFactory.createCommand(StringValue.getDefaultInstance());
+        final Command command = factory().createCommand(StringValue.getDefaultInstance());
         final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
         assertTrue(Timestamps2.isBetween(
@@ -117,7 +54,7 @@ public class CommandFactoryShould {
 
     @Test
     public void create_new_instance_with_entity_version() {
-        final Command command = commandFactory.createCommand(StringValue.getDefaultInstance(), 2);
+        final Command command = factory().createCommand(StringValue.getDefaultInstance(), 2);
 
         assertEquals(2, command.getContext().getTargetVersion());
     }
@@ -129,8 +66,8 @@ public class CommandFactoryShould {
                                           .build();
         final CommandFactory mtCommandFactory = CommandFactory.newBuilder()
                                                               .setTenantId(tenantId)
-                                                              .setActor(actor)
-                                                              .setZoneOffset(zoneOffset)
+                                                              .setActor(getActor())
+                                                              .setZoneOffset(getZoneOffset())
                                                               .build();
         final Command command = mtCommandFactory.createCommand(StringValue.getDefaultInstance());
 
