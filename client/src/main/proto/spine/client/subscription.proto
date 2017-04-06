@@ -52,7 +52,7 @@ message TopicId {
 message Topic {
 
     // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
-    Target target = 1;
+    Target target = 1 [(required) = true];
 
     // Field mask to be applied to the entity updates applicable to this topic.
     //
@@ -130,8 +130,8 @@ message Subscription {
     // Must be unique in scope of a bounded context.
     SubscriptionId id = 1;
 
-    // Represents TypeUrl of the target entity for this subscription.
-    string type = 2;
+    // Represents the original topic for this subscription.
+    Topic topic = 2;
 
     // Reserved for subscription attributes.
     reserved 3 to 10;
