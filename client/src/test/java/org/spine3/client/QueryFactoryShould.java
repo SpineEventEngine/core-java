@@ -52,36 +52,33 @@ public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
 
     @Test
     public void compose_proper_read_all_query() {
-        final Class<TestEntity> targetEntityClass = TestEntity.class;
-        final Query readAllQuery = factory().readAll(targetEntityClass);
+        final Query readAllQuery = factory().readAll(TARGET_ENTITY_CLASS);
         assertNotNull(readAllQuery);
 
-        checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllQuery);
+        checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllQuery);
 
         checkFieldMaskEmpty(readAllQuery);
     }
 
     @Test
     public void compose_proper_read_all_query_with_single_path() {
-        final Class<TestEntity> targetEntityClass = TestEntity.class;
         final String expectedEntityPath = singleTestEntityPath();
         final Query readAllWithPathFilteringQuery =
-                factory().readAll(targetEntityClass, expectedEntityPath);
+                factory().readAll(TARGET_ENTITY_CLASS, expectedEntityPath);
         assertNotNull(readAllWithPathFilteringQuery);
 
-        checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
+        checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
         verifySinglePathInQuery(expectedEntityPath, readAllWithPathFilteringQuery);
     }
 
     @Test
     public void compose_proper_read_all_query_with_multiple_random_paths() {
-        final Class<TestEntity> targetEntityClass = TestEntity.class;
 
         final String[] paths = multipleRandomPaths();
-        final Query readAllWithPathFilteringQuery = factory().readAll(targetEntityClass, paths);
+        final Query readAllWithPathFilteringQuery = factory().readAll(TARGET_ENTITY_CLASS, paths);
         assertNotNull(readAllWithPathFilteringQuery);
 
-        checkTypeCorrectAndFiltersEmpty(targetEntityClass, readAllWithPathFilteringQuery);
+        checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
         verifyMultiplePathsInQuery(paths, readAllWithPathFilteringQuery);
     }
 
