@@ -42,7 +42,7 @@ import static org.junit.Assert.assertTrue;
 public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
         QueryFactory.Builder> {
 
-    // See {@code queries_should.proto} for declaration.
+    // See {@code client_requests} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
 
     @Override

@@ -22,14 +22,14 @@ syntax = "proto3";
 package spine.test.queries;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.queries";
+option java_package="org.spine3.test.client";
 option java_multiple_files = true;
-option java_outer_classname = "QueriesShouldProto";
+option java_outer_classname = "ClientRequestsProto";
 
 
 import "spine/annotations.proto";
 
-// Only for usage in `QueriesShould` class.
+// Sample objects for testing Queries and Topics.
 
 // Simple ID for tests.
 message TestEntityId {
