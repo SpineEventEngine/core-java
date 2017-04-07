@@ -55,8 +55,8 @@ import org.spine3.annotations.SPI;
  *     </pre>
  * </code>
  *
- * <p>The example above translates a {@linkplain java.util.Date} into a formatted {@code String},
- * which is persisted into the DB.
+ * <p>The example above translates a {@linkplain java.util.Date Date} into a formatted
+ * {@code String}, which is persisted into the DB.
  *
  * <p>It's necessary to make these operations atomic to allow automatic type conversion when
  * performing the DB queries.
