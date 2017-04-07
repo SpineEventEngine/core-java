@@ -55,10 +55,9 @@ import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.EventFactory.createEvent;
+import static org.spine3.test.EventTests.createEventOccurredMinutesAgo;
 import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.test.TimeTests.Past.minutesAgo;
-import static org.spine3.test.TimeTests.Past.secondsAgo;
 
 public class EventsShould {
 
@@ -95,9 +94,9 @@ public class EventsShould {
 
     @Test
     public void sort_events_by_time() {
-        final Event event1 = createEvent(stringValue, newEventContext(minutesAgo(30)));
-        final Event event2 = createEvent(boolValue, newEventContext(minutesAgo(20)));
-        final Event event3 = createEvent(doubleValue, newEventContext(secondsAgo(10)));
+        final Event event1 = createEventOccurredMinutesAgo(30);
+        final Event event2 = createEventOccurredMinutesAgo(20);
+        final Event event3 = createEventOccurredMinutesAgo(10);
         final List<Event> sortedEvents = newArrayList(event1, event2, event3);
         final List<Event> eventsToSort = newArrayList(event2, event1, event3);
 
@@ -108,8 +107,8 @@ public class EventsShould {
 
     @Test
     public void have_event_comparator() {
-        final Event event1 = createEvent(stringValue, newEventContext(minutesAgo(120)));
-        final Event event2 = createEvent(boolValue, newEventContext(minutesAgo(2)));
+        final Event event1 = createEventOccurredMinutesAgo(120);
+        final Event event2 = createEventOccurredMinutesAgo(2);
 
         final Comparator<Event> comparator = Events.eventComparator();
         assertTrue(comparator.compare(event1, event2) < 0);
