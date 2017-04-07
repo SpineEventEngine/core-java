@@ -44,7 +44,7 @@ public class CommandFactory extends ActorRequestFactory<CommandFactory> {
     }
 
     /**
-     * Creates new factory with the same user and bounded context name and new time zone offset.
+     * Creates new factory with the same user and tenant ID, but with new time zone offset.
      *
      * @param zoneOffset the offset of the time zone
      * @return new command factory at new time zone

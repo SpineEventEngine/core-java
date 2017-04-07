@@ -145,10 +145,10 @@ public class QueryFactory extends ActorRequestFactory<QueryFactory> {
     }
 
     /**
-     * Creates new factory with the same user and bounded context name and new time zone offset.
+     * Creates new factory with the same user and tenant ID, but with new time zone offset.
      *
      * @param zoneOffset the offset of the time zone
-     * @return new command factory at new time zone
+     * @return new query factory at new time zone
      */
     @Override
     public QueryFactory switchTimezone(ZoneOffset zoneOffset) {
