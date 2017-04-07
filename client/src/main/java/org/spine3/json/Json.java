@@ -32,7 +32,9 @@ import org.spine3.type.UnknownTypeException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static java.lang.String.format;
 import static org.spine3.protobuf.Messages.builderFor;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utilities for working with Json.
@@ -72,11 +74,14 @@ public class Json {
         checkNotNull(json);
         try {
             final Message.Builder messageBuilder = builderFor(messageClass);
-            JsonParser.instance().merge(json, messageBuilder);
+            JsonParser.instance()
+                      .merge(json, messageBuilder);
             final T result = (T) messageBuilder.build();
             return result;
         } catch (InvalidProtocolBufferException e) {
-            throw new RuntimeException(e);
+            final String exMessage = format("The %s cannot be parsed to the %s class",
+                                            json, messageClass);
+            throw newIllegalArgumentException(exMessage, e);
         }
     }
 

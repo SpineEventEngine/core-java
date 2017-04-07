@@ -293,6 +293,7 @@ public class Stringifiers {
         private final Class<T> messageClass;
 
         private DefaultMessageStringifier(Class<T> messageType) {
+            super();
             this.messageClass = messageType;
         }
 

@@ -102,6 +102,7 @@ public class Messages {
      * @return the message builder
      */
     public static <B extends Message.Builder> B builderFor(Class<? extends Message> clazz) {
+        checkNotNull(clazz);
         try {
             final Method factoryMethod = clazz.getDeclaredMethod("newBuilder");
             @SuppressWarnings("unchecked")
