@@ -118,6 +118,9 @@ public class QueryFactory extends ActorRequestFactory<QueryFactory> {
      */
     public Query readByIds(Class<? extends Message> entityClass,
                            Set<? extends Message> ids) {
+        checkNotNull(entityClass);
+        checkNotNull(ids);
+
         return composeQuery(entityClass, ids, null);
     }
 
@@ -131,6 +134,8 @@ public class QueryFactory extends ActorRequestFactory<QueryFactory> {
      * @return an instance of {@code Query} formed according to the passed parameters
      */
     public Query readAll(Class<? extends Message> entityClass) {
+        checkNotNull(entityClass);
+
         return composeQuery(entityClass, null, null);
     }
 

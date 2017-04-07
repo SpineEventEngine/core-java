@@ -19,12 +19,20 @@
  */
 package org.spine3.client;
 
+import com.google.common.reflect.TypeToken;
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.client.ActorRequestFactory.AbstractBuilder;
+import org.spine3.test.Tests;
+import org.spine3.test.queries.TestEntity;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.UserId;
 
+import java.util.Set;
+
+import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -59,10 +67,13 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
                         .build();
     }
 
+    protected ActorContext actorContext() {
+        return factory().actorContext();
+    }
+
     @Test(expected = NullPointerException.class)
     public void require_actor_in_Builder() {
-        builder()
-                .setZoneOffset(zoneOffset)
+        builder().setZoneOffset(zoneOffset)
                 .build();
     }
 
@@ -105,5 +116,18 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
         final F factoryInAnotherTimezone =
                 factory().switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
+    }
+
+    @SuppressWarnings({"SerializableNonStaticInnerClassWithoutSerialVersionUID",
+            "SerializableInnerClassWithNonSerializableOuterClass"})
+    @Test
+    public void not_accept_nulls_as_public_method_arguments() {
+        new NullPointerTester()
+                .setDefault(Message.class, TestEntity.getDefaultInstance())
+                .setDefault((new TypeToken<Class<? extends Message>>(){}).getRawType(),
+                            TestEntity.class)
+                .setDefault((new TypeToken<Set<? extends Message>>(){}).getRawType(),
+                            newHashSet(Tests.newUuidValue()))
+                .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 }
