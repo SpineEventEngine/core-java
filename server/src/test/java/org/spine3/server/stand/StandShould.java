@@ -46,6 +46,8 @@ import org.spine3.client.Subscription;
 import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
 import org.spine3.client.Targets;
+import org.spine3.client.Topic;
+import org.spine3.client.TopicFactory;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
@@ -100,7 +102,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.Topics.createFor;
 import static org.spine3.server.stand.Given.StandTestProjection;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.test.Verify.assertSize;
@@ -118,6 +119,7 @@ public class StandShould extends TenantAwareTest {
     private boolean multitenant = false;
 
     private QueryFactory queryFactory;
+    private TopicFactory topicFactory;
 
     protected void setMultitenant(boolean multitenant) {
         this.multitenant = multitenant;
@@ -125,6 +127,10 @@ public class StandShould extends TenantAwareTest {
 
     public void setQueryFactory(QueryFactory queryFactory) {
         this.queryFactory = queryFactory;
+    }
+
+    public void setTopicFactory(TopicFactory topicFactory) {
+        this.topicFactory = topicFactory;
     }
 
     protected boolean isMultitenant() {
@@ -135,6 +141,7 @@ public class StandShould extends TenantAwareTest {
     public void setUp() {
         setMultitenant(false);
         queryFactory = createQueryFactory(null);
+        topicFactory = createTopicFactory(null);
     }
 
     protected static QueryFactory createQueryFactory(@Nullable TenantId tenant) {
@@ -146,6 +153,17 @@ public class StandShould extends TenantAwareTest {
         }
         return builder.build();
     }
+
+    protected static TopicFactory createTopicFactory(@Nullable TenantId tenant) {
+        final TopicFactory.Builder builder = TopicFactory.newBuilder()
+                                                         .setActor(newUserId(newUuid()))
+                                                         .setZoneOffset(ZoneOffsets.UTC);
+        if (tenant != null) {
+            builder.setTenantId(tenant);
+        }
+        return builder.build();
+    }
+
 
     @Test
     public void initialize_with_empty_builder() {
@@ -229,8 +247,9 @@ public class StandShould extends TenantAwareTest {
                 new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
 
-        final Target projectProjectionTarget = Targets.allOf(Project.class);
-        final Subscription subscription = stand.subscribe(createFor(projectProjectionTarget));
+        final Topic projectProjections = topicFactory.allOf(Project.class);
+
+        final Subscription subscription = stand.subscribe(projectProjections);
         stand.activate(subscription, emptyUpdateCallback());
         assertNotNull(subscription);
 
@@ -360,10 +379,10 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_subscription_callback_upon_update_of_aggregate() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allCustomers = Targets.allOf(Customer.class);
+        final Topic allCustomers = topicFactory.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        final Subscription subscription = stand.subscribe(createFor(allCustomers));
+        final Subscription subscription = stand.subscribe(allCustomers);
         stand.activate(subscription, memoizeCallback);
         assertNotNull(subscription);
         assertNull(memoizeCallback.newEntityState);
@@ -383,10 +402,10 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_subscription_callback_upon_update_of_projection() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allProjects = Targets.allOf(Project.class);
+        final Topic allProjects = topicFactory.allOf(Project.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        final Subscription subscription = stand.subscribe(createFor(allProjects));
+        final Subscription subscription = stand.subscribe(allProjects);
         stand.activate(subscription, memoizeCallback);
         assertNotNull(subscription);
         assertNull(memoizeCallback.newEntityState);
@@ -406,10 +425,10 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void allow_cancelling_subscriptions() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allCustomers = Targets.allOf(Customer.class);
+        final Topic allCustomers = topicFactory.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        final Subscription subscription = stand.subscribe(createFor(allCustomers));
+        final Subscription subscription = stand.subscribe(allCustomers);
         stand.activate(subscription, memoizeCallback);
         assertNull(memoizeCallback.newEntityState);
 
@@ -490,8 +509,7 @@ public class StandShould extends TenantAwareTest {
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
-        final Target someCustomers = Targets.someOf(Customer.class,
-                                                    sampleCustomers.keySet());
+        final Topic someCustomers = topicFactory.someOf(Customer.class, sampleCustomers.keySet());
         final Set<Customer> callbackStates = newHashSet();
         final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
@@ -501,7 +519,7 @@ public class StandShould extends TenantAwareTest {
                 callbackStates.add(customerInCallback);
             }
         };
-        final Subscription subscription = stand.subscribe(createFor(someCustomers));
+        final Subscription subscription = stand.subscribe(someCustomers);
         stand.activate(subscription, callback);
 
         for (Map.Entry<CustomerId, Customer> sampleEntry : sampleCustomers.entrySet()) {
@@ -515,10 +533,12 @@ public class StandShould extends TenantAwareTest {
         assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
     }
 
-    private static MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
+    private MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
                                                                      Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
-        final Subscription subscription = stand.subscribe(createFor(subscriptionTarget));
+        final Topic topic = topicFactory.forTarget(subscriptionTarget);
+        final Subscription subscription = stand.subscribe(
+                topic);
         stand.activate(subscription, callback);
         assertNull(callback.newEntityState);
         return callback;

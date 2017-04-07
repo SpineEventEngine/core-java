@@ -52,24 +52,33 @@ public class TopicFactory extends ActorRequestFactory<TopicFactory> {
         checkNotNull(ids);
 
         final Target target = composeTarget(entityClass, ids);
-        final Topic result = topicForTarget(target);
+        final Topic result = forTarget(target);
         return result;
     }
 
     /**
-     * Create a {@link Topic} for all of the specified entity states.
+     * Creates a {@link Topic} for all of the specified entity states.
      *
      * @param entityClass the class of a target entity
-     * @return the instance of {@code Target} assembled according to the parameters.
+     * @return the instance of {@code Topic} assembled according to the parameters.
      */
     public Topic allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
         final Target target = composeTarget(entityClass, null);
-        final Topic result = topicForTarget(target);
+        final Topic result = forTarget(target);
         return result;
     }
 
-    private Topic topicForTarget(Target target) {
+    /**
+     * Creates a {@link Topic} for the specified {@linkplain Target}.
+     *
+     * @param target the {@code} Target to create a topic for.
+     * @return the instance of {@code Topic}.
+     */
+    public Topic forTarget(Target target) {
+        //TODO:4/7/17:alex.tymchenko: validate Target.
+        checkNotNull(target);
+
         return Topic.newBuilder()
                     .setContext(actorContext())
                     .setTarget(target)

@@ -39,6 +39,7 @@ public class MultiTenantStandShould extends StandShould {
         setCurrentTenant(tenantId);
         setMultitenant(true);
         setQueryFactory(createQueryFactory(tenantId));
+        setTopicFactory(createTopicFactory(tenantId));
     }
 
     @After
