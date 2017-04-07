@@ -134,6 +134,10 @@ public class StandShould extends TenantAwareTest {
         this.topicFactory = topicFactory;
     }
 
+    public TopicFactory getTopicFactory() {
+        return topicFactory;
+    }
+
     protected boolean isMultitenant() {
         return multitenant;
     }
@@ -1099,7 +1103,7 @@ public class StandShould extends TenantAwareTest {
         }
     }
 
-    private static Map<CustomerId, Customer> fillSampleCustomers(int numberOfCustomers) {
+    protected static Map<CustomerId, Customer> fillSampleCustomers(int numberOfCustomers) {
         final Map<CustomerId, Customer> sampleCustomers = newHashMap();
 
         @SuppressWarnings("UnsecureRandomNumberGeneration")
@@ -1165,7 +1169,7 @@ public class StandShould extends TenantAwareTest {
         return messageList;
     }
 
-    private Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
+    protected Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
         final Stand stand = Stand.newBuilder()
                                  .setStorage(standStorage)
                                  .setMultitenant(multitenant)
@@ -1271,19 +1275,20 @@ public class StandShould extends TenantAwareTest {
         public Throwable getThrowable() {
             return throwable;
         }
-
-        public boolean isCompleted() {
-            return isCompleted;
-        }
     }
 
-    private static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {
+    protected static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {
 
-        private Any newEntityState;
+        private Any newEntityState = null;
 
         @Override
         public void onStateChanged(Any newEntityState) {
             this.newEntityState = newEntityState;
+        }
+
+        @Nullable
+        public Any getNewEntityState() {
+            return newEntityState;
         }
     }
 }
