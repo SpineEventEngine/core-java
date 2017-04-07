@@ -21,7 +21,7 @@ package org.spine3.client;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.queries.TestEntity;
+import org.spine3.test.client.TestEntity;
 import org.spine3.type.TypeUrl;
 
 import static org.junit.Assert.assertEquals;

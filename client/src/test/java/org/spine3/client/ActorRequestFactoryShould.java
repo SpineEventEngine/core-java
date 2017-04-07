@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.client.ActorRequestFactory.AbstractBuilder;
 import org.spine3.test.Tests;
-import org.spine3.test.queries.TestEntity;
+import org.spine3.test.client.TestEntity;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.UserId;

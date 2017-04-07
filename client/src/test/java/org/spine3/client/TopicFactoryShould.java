@@ -23,8 +23,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.test.queries.TestEntity;
-import org.spine3.test.queries.TestEntityId;
+import org.spine3.test.client.TestEntity;
+import org.spine3.test.client.TestEntityId;
 import org.spine3.type.TypeName;
 
 import java.util.List;
