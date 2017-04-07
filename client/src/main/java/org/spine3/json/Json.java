@@ -32,6 +32,7 @@ import org.spine3.type.UnknownTypeException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static org.spine3.protobuf.Messages.builderFor;
 
 /**
  * Utilities for working with Json.
@@ -66,6 +67,19 @@ public class Json {
         return result;
     }
 
+    @SuppressWarnings("unchecked") // It is OK as the builder is obtained by the specified class.
+    public static <T extends Message> T fromJson(String json, Class<T> messageClass) {
+        checkNotNull(json);
+        try {
+            final Message.Builder messageBuilder = builderFor(messageClass);
+            JsonParser.instance().merge(json, messageBuilder);
+            final T result = (T) messageBuilder.build();
+            return result;
+        } catch (InvalidProtocolBufferException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     /**
      * Builds the registry of types known in the application.
      */
@@ -93,6 +107,18 @@ public class Json {
                                                            .usingTypeRegistry(typeRegistry);
 
         private static JsonFormat.Printer instance() {
+            return INSTANCE.value;
+        }
+    }
+
+    private enum JsonParser {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final JsonFormat.Parser value = JsonFormat.parser()
+                                                          .usingTypeRegistry(typeRegistry);
+
+        private static JsonFormat.Parser instance() {
             return INSTANCE.value;
         }
     }
