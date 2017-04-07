@@ -287,8 +287,30 @@ public class Stringifiers {
      * The default {@code Stringifier} for the {@code Message} classes.
      *
      * <p>The sample of the usage:
+     * // The `TaskId` Protobuf message definition.
      * {@code
-     * // Define the message.
+     * message TaskId {
+     * string value = 1;
+     * }
+     * }
+     *
+     * // The `TaskName` Protobuf message definition.
+     * {@code
+     * message TaskName {
+     * string value = 1;
+     * }
+     * }
+     *
+     * // The `Task` Protobuf message definition.
+     * {@code
+     * message Task {
+     * TaskId id = 1;
+     * TaskName name = 2;
+     * }
+     * }
+     *
+     * {@code
+     * // Construct the message.
      * final TaskId taskId = TaskId.newBuilder().setValue("task-id").build();
      * final TaskName taskName = TaskName.newBuilder().setValue("task-name").build();
      * final Task task = Task.newBuilder().setId(taskId).setTaskName(taskName).build();
