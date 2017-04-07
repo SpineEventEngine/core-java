@@ -22,6 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
 
@@ -58,17 +59,27 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
+    @SuppressWarnings("unchecked") // It is OK because the class is checked before the cast.
     static <T> Stringifier<T> getStringifier(Type typeOfT) {
         checkNotNull(typeOfT);
         final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
 
-        if (!stringifierOptional.isPresent()) {
-            final String errMsg =
-                    format("No stringifier registered for the type: %s", typeOfT);
-            throw new MissingStringifierException(errMsg);
+        if (stringifierOptional.isPresent()) {
+            final Stringifier<T> stringifier = stringifierOptional.get();
+            return stringifier;
         }
-        final Stringifier<T> stringifier = stringifierOptional.get();
-        return stringifier;
+
+        if (typeOfT instanceof Class) {
+            final Class<?> aClass = (Class)typeOfT;
+            final boolean isMessage = Message.class.isAssignableFrom(aClass);
+            if(isMessage) {
+                return (Stringifier<T>) Stringifiers.defaultStringifier((Class<Message>) typeOfT);
+            }
+        }
+
+        final String errMsg =
+                format("No stringifier registered for the type: %s", typeOfT);
+        throw new MissingStringifierException(errMsg);
     }
 
     /**
