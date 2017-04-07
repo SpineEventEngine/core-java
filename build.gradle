@@ -123,12 +123,12 @@ subprojects {
     // Verifies code style.
     // The parameters are same for any kind of verification:
     //
-    //      * "threshold" - is a number of bearable code violations that will not trigger a response.
-    //      * "reportType" - can be either "error" or "warn"
-    //              "warn" type allows to see all errors in build result records without failing it.
-    //              "error" type will fail the build process.
+    //      - "threshold" - is a number of code style violations to consider check passed.
+    //      - "reportType" - report type if a check is not passed. Can be either "error" or "warn".
+    //              * "warn" - the violations are logged to the build report.
+    //              * "error" - build will fail and its report will contain the violations.
     //
-    //      For more details please see org.spine3.tools.codestyle.ReportType
+    //      For more details please see org.spine3.tools.codestyle.CodestyleCheckerPlugin
     codestyleChecker {
 
         // Javadoc @link/@linkplain format checker.
@@ -136,7 +136,6 @@ subprojects {
         // Finds and reports FQNs used in links in the wrong format.
         javadocLinkChecker {
 
-            // A number of bearable wrong links.
             threshold = 0
             reportType = "warn"
         }
