@@ -289,7 +289,7 @@ public class Stringifiers {
      * <p>The sample of the usage:
      * {@code
      * // The message
-     * final Human human = Human.newBuilder.setHairColor("black") .setEyesColor("blue").build();
+     * final Human human = Human.newBuilder.setHairColor("black").setEyesColor("blue").build();
      *
      * final Stringifier<Human> humanStringifer = StringifierRegistry.getStringifier(Human.class);
      *
