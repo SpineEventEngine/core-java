@@ -26,6 +26,7 @@ import com.google.protobuf.TextFormat;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
@@ -113,5 +114,21 @@ public class Messages {
                                          clazz.getCanonicalName());
             throw new IllegalArgumentException(errMsg, e);
         }
+    }
+
+    /**
+     * Checks that the {@code Type} is a {@code Class} of the {@code Message}.
+     *
+     * @param typeToCheck the type to check
+     * @return {@code true} if the type is message class, {@code false} otherwise
+     */
+    public static boolean isMessage(Type typeToCheck) {
+        checkNotNull(typeToCheck);
+        if (typeToCheck instanceof Class) {
+            final Class<?> aClass = (Class) typeToCheck;
+            final boolean isMessage = Message.class.isAssignableFrom(aClass);
+            return isMessage;
+        }
+        return false;
     }
 }

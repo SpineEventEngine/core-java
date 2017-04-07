@@ -33,6 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
+import static org.spine3.protobuf.Messages.isMessage;
 
 /**
  * The registry of converters of types to their string representations.
@@ -59,7 +60,6 @@ public class StringifierRegistry {
         // Prevent external instantiation of this singleton class.
     }
 
-    @SuppressWarnings("unchecked") // It is OK because the class is checked before the cast.
     static <T> Stringifier<T> getStringifier(Type typeOfT) {
         checkNotNull(typeOfT);
         final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
@@ -69,17 +69,19 @@ public class StringifierRegistry {
             return stringifier;
         }
 
-        if (typeOfT instanceof Class) {
-            final Class<?> aClass = (Class)typeOfT;
-            final boolean isMessage = Message.class.isAssignableFrom(aClass);
-            if(isMessage) {
-                return (Stringifier<T>) Stringifiers.defaultStringifier((Class<Message>) typeOfT);
-            }
+        if (isMessage(typeOfT)) {
+            return getDefaultStringifier(typeOfT);
         }
 
-        final String errMsg =
-                format("No stringifier registered for the type: %s", typeOfT);
+        final String errMsg = format("No stringifier registered for the type: %s", typeOfT);
         throw new MissingStringifierException(errMsg);
+    }
+
+    @SuppressWarnings("unchecked") // It is OK because the class is checked before the cast.
+    private static <T> Stringifier<T> getDefaultStringifier(Type typeOfT) {
+        final Stringifier<T> result =
+                (Stringifier<T>) Stringifiers.defaultStringifier((Class<Message>) typeOfT);
+        return result;
     }
 
     /**

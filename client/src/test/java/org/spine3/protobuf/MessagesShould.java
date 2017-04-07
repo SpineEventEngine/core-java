@@ -26,8 +26,11 @@ import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.Messages.builderFor;
+import static org.spine3.protobuf.Messages.isMessage;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {
@@ -52,6 +55,16 @@ public class MessagesShould {
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_try_to_get_builder_for_not_the_generated_message() {
         builderFor(Message.class);
+    }
+
+    @Test
+    public void return_true_when_message_is_checked(){
+        assertTrue(isMessage(UserId.class));
+    }
+
+    @Test
+    public void return_false_when_not_message_is_checked(){
+        assertFalse(isMessage(getClass()));
     }
 
     @Test
