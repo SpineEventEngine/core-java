@@ -225,8 +225,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>Overrides to apply generated events to the state.
      */
     @Override
-    protected List<? extends Message> dispatchCommand(Message command, CommandContext context) {
-        final List<? extends Message> eventMessages = super.dispatchCommand(command, context);
+    protected List<? extends Message> dispatchCommand(Message commandMessage, CommandContext context) {
+        final List<? extends Message> eventMessages = super.dispatchCommand(commandMessage, context);
 
         try {
             apply(eventMessages, context);
