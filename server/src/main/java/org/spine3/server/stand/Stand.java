@@ -141,7 +141,8 @@ public class Stand implements AutoCloseable {
      * by the entity {@code TypeUrl}.
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
-     *  @param id            the entity identifier
+     *
+     * @param id            the entity identifier
      * @param entityState   the entity state
      * @param entityVersion the version of the entity
      */
@@ -300,7 +301,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      *
-     * @see #update(Object, Any, Version)
+     * @see #update
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends VersionableEntity<I, ?>>

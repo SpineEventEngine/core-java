@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -90,7 +91,7 @@ public class GrpcContainerShould {
         for (int i = 0; i < count; i++) {
             final BindableService mockService = mock(BindableService.class);
             final ServerServiceDefinition mockDefinition = ServerServiceDefinition
-                    .builder(String.format("service-%s", i))
+                    .builder(format("service-%s", i))
                     .build();
             when(mockService.bindService()).thenReturn(mockDefinition);
             definitions.add(mockDefinition);

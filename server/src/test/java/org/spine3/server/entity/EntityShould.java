@@ -168,10 +168,10 @@ public class EntityShould {
     }
 
     @Test
-    public void validate_state_when_set_it() {
+    public void check_entity_state_when_set_it() {
         final TestEntity spyEntityNew = spy(entityNew);
         spyEntityNew.updateState(state, Versions.create());
-        verify(spyEntityNew).validate(eq(state));
+        verify(spyEntityNew).checkEntityState(eq(state));
     }
 
     @Test(expected = NullPointerException.class)

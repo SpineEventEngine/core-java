@@ -36,6 +36,7 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.TestEventFactory;
+import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TimeTests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -47,7 +48,11 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.test.aggregate.user.User;
+import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
+import org.spine3.users.TenantId;
+import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -61,12 +66,15 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
 import static org.spine3.server.aggregate.Given.EventMessage.projectStarted;
 import static org.spine3.server.aggregate.Given.EventMessage.taskAdded;
+import static org.spine3.test.Given.aggregateOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
+import static org.spine3.test.Verify.assertSize;
 import static org.spine3.test.aggregate.Project.newBuilder;
 
 /**
@@ -463,7 +471,7 @@ public class AggregateShould {
 
     /** Class only for test cases: exception if missing command handler or missing event applier. */
     private static class TestAggregateForCaseMissingHandlerOrApplier
-                   extends Aggregate<ProjectId, Project, Project.Builder> {
+            extends Aggregate<ProjectId, Project, Project.Builder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -584,13 +592,14 @@ public class AggregateShould {
     @Test
     public void propagate_RuntimeException_when_applier_throws() {
         final FaultyAggregate faultyAggregate =
-                new FaultyAggregate(ID,false,true);
+                new FaultyAggregate(ID, false, true);
 
         final Command command = Given.Command.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // because we need it for checking.
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+            // because we need it for checking.
             final Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
@@ -607,7 +616,8 @@ public class AggregateShould {
                                                      .addEvent(event)
                                                      .build());
         } catch (RuntimeException e) {
-            @SuppressWarnings("ThrowableResultOfMethodCallIgnored") // because we need it for checking.
+            @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
+            // because we need it for checking.
             final Throwable cause = getRootCause(e);
             assertTrue(cause instanceof IllegalStateException);
             assertEquals(FaultyAggregate.BROKEN_APPLIER, cause.getMessage());
@@ -631,6 +641,45 @@ public class AggregateShould {
     @Test
     public void have_TypeInfo_utility_class() {
         assertHasPrivateParameterlessCtor(Aggregate.TypeInfo.class);
+    }
+
+    @Test
+    public void throw_InvalidEntityStateException_if_state_is_invalid() {
+        final User user = User.newBuilder()
+                              .setFirstName("|")
+                              .setLastName("|")
+                              .build();
+        try {
+            aggregateOfClass(UserAggregate.class).withId(getClass().getName())
+                                                 .withVersion(1)
+                                                 .withState(user)
+                                                 .build();
+            fail();
+        } catch (InvalidEntityStateException e) {
+            final List<ConstraintViolation> violations = e.getError()
+                                                          .getValidationError()
+                                                          .getConstraintViolationList();
+            assertSize(user.getAllFields()
+                           .size(), violations);
+        }
+    }
+
+    @Test
+    public void update_valid_entity_state() {
+        final User user = User.newBuilder()
+                              .setFirstName("Fname")
+                              .setLastName("Lname")
+                              .build();
+        aggregateOfClass(UserAggregate.class).withId(getClass().getName())
+                                             .withVersion(1)
+                                             .withState(user)
+                                             .build();
+    }
+
+    private static class UserAggregate extends Aggregate<String, User, User.Builder> {
+        private UserAggregate(String id) {
+            super(id);
+        }
     }
 
     /*

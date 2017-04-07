@@ -32,6 +32,9 @@ import org.spine3.type.UnknownTypeException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static java.lang.String.format;
+import static org.spine3.protobuf.Messages.builderFor;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * Utilities for working with Json.
@@ -53,17 +56,52 @@ public class Json {
      * @return Json string
      */
     public static String toJson(Message message) {
+        final String result = toJson(message, JsonPrinter.instance());
+        return result;
+    }
+
+    /**
+     * Converts the passed message into compact Json representation.
+     *
+     * <p>The resulted Json does not contain the line separators.
+     *
+     * @param message the {@code Message} object
+     * @return the converted message to Json
+     */
+    public static String toCompactJson(Message message) {
+        final JsonFormat.Printer compactPrinter = JsonPrinter.instance()
+                                                             .omittingInsignificantWhitespace();
+        final String result = toJson(message, compactPrinter);
+        return result;
+    }
+
+    private static String toJson(Message message, JsonFormat.Printer printer) {
         checkNotNull(message);
         String result;
         try {
-            result = JsonPrinter.instance()
-                                .print(message);
+            result = printer.print(message);
         } catch (InvalidProtocolBufferException e) {
             final Throwable rootCause = getRootCause(e);
             throw new UnknownTypeException(rootCause);
         }
         checkState(result != null);
         return result;
+    }
+
+    @SuppressWarnings("unchecked") // It is OK as the builder is obtained by the specified class.
+    public static <T extends Message> T fromJson(String json, Class<T> messageClass) {
+        checkNotNull(json);
+        try {
+            final Message.Builder messageBuilder = builderFor(messageClass);
+            JsonParser.instance()
+                      .merge(json, messageBuilder);
+            final T result = (T) messageBuilder.build();
+            return result;
+        } catch (InvalidProtocolBufferException e) {
+            final String exMessage = format("%s cannot be parsed to the %s class",
+                                            json, messageClass);
+            throw newIllegalArgumentException(exMessage, e);
+        }
     }
 
     /**
@@ -93,6 +131,18 @@ public class Json {
                                                            .usingTypeRegistry(typeRegistry);
 
         private static JsonFormat.Printer instance() {
+            return INSTANCE.value;
+        }
+    }
+
+    private enum JsonParser {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final JsonFormat.Parser value = JsonFormat.parser()
+                                                          .usingTypeRegistry(typeRegistry);
+
+        private static JsonFormat.Parser instance() {
             return INSTANCE.value;
         }
     }

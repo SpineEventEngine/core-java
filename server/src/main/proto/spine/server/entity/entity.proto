@@ -72,3 +72,17 @@ message LifecycleFlags {
     //
     bool deleted = 2;
 }
+
+// Enumeration of possible entity state validation errors.
+//
+// Contains the reasons of an errors, that are exclusively technical
+// and haven't relation to a business errors.
+//
+enum EntityStateValidationError {
+
+    // Reserved value.
+    UNKNOWN_REASON = 0;
+
+    // The entity state does not pass the validation.
+    INVALID_ENTITY_STATE = 1;
+}

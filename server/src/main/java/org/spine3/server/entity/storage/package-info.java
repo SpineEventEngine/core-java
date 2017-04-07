@@ -17,37 +17,12 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.entity;
-
-import com.google.protobuf.Message;
-import org.spine3.type.MessageClass;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
- * @author Alex Tymchenko
+ * This package contains classes and interfaces for working with
+ * {@link org.spine3.server.entity.Entity entity} storage representation.
  */
-public final class EntityStateClass extends MessageClass {
+@ParametersAreNonnullByDefault
+package org.spine3.server.entity.storage;
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
-    }
-
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        final Message state = entity.getState();
-
-        checkNotNull(state);
-        final Class<? extends Message> stateClass = state.getClass();
-
-        final EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
-    }
-
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        return new EntityStateClass(entityState.getClass());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

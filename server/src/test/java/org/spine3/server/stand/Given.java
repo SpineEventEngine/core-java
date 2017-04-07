@@ -21,6 +21,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.spine3.base.Command;
@@ -38,6 +39,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.EventFactory;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
@@ -184,6 +186,17 @@ class Given {
         @Subscribe
         public void handle(ProjectCreated event, EventContext context) {
             // Do nothing
+        }
+    }
+
+    private static class TestEntity extends AbstractVersionableEntity<Object, Message> {
+        protected TestEntity(Object id) {
+            super(id);
+        }
+
+        @Override
+        public Message getDefaultState() {
+            return Any.getDefaultInstance();
         }
     }
 }

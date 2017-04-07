@@ -65,6 +65,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static java.lang.String.format;
+import static java.lang.String.valueOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -141,7 +143,7 @@ public class ProjectionRepositoryShould
     @Override
     protected ProjectId createId(int i) {
         return ProjectId.newBuilder()
-                        .setId(String.format("test-projection-%s", i))
+                        .setId(format("test-projection-%s", i))
                         .build();
     }
 
@@ -410,7 +412,7 @@ public class ProjectionRepositoryShould
                                                     .getEventStore();
         for (int i = 0; i < eventsCount; i++) {
             final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(String.valueOf(i))
+                                                 .setId(valueOf(i))
                                                  .build();
             final Message eventMessage = ProjectCreated.newBuilder()
                                                        .setProjectId(projectId)

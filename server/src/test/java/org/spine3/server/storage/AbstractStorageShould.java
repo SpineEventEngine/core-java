@@ -48,9 +48,11 @@ import static org.junit.Assert.fail;
  * @author Alexander Litus
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class AbstractStorageShould<I, R extends Message, S extends AbstractStorage<I, R>> {
+public abstract class AbstractStorageShould<I,
+                                            R extends Message,
+                                            S extends AbstractStorage<I, R>> {
 
-    private AbstractStorage<I, R> storage;
+    private S storage;
 
     @Before
     public void setUpAbstractStorageTest() {

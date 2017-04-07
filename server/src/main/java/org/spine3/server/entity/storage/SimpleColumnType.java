@@ -17,37 +17,25 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.entity;
 
-import com.google.protobuf.Message;
-import org.spine3.type.MessageClass;
+package org.spine3.server.entity.storage;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spine3.annotations.SPI;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
+ * A base for implementing {@link ColumnType} interface regardless the type conversion.
  *
- * @author Alex Tymchenko
+ * @param <T> the type of the storage field
+ * @param <R> the type of the record in the database, which holds a single cortege of data and
+ *            is consumed by the database upon write
+ * @param <C> the type of the column identifier in the {@code R}
+ * @author Dmytro Dashenkov
  */
-public final class EntityStateClass extends MessageClass {
+@SPI
+public abstract class SimpleColumnType<T, R, C> implements ColumnType<T, T, R, C> {
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
-    }
-
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        final Message state = entity.getState();
-
-        checkNotNull(state);
-        final Class<? extends Message> stateClass = state.getClass();
-
-        final EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
-    }
-
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        return new EntityStateClass(entityState.getClass());
+    @Override
+    public T convertColumnValue(T fieldValue) {
+        return fieldValue;
     }
 }
