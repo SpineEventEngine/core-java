@@ -111,7 +111,7 @@ public class Stringifiers {
      * @return the stringifier for the map
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
-            Class<V> valueClass) {
+                                                               Class<V> valueClass) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
         final Stringifier<Map<K, V>> mapStringifier = new MapStringifier<>(keyClass, valueClass);
@@ -129,8 +129,8 @@ public class Stringifiers {
      * @return the stringifier for the map
      */
     public static <K, V> Stringifier<Map<K, V>> mapStringifier(Class<K> keyClass,
-            Class<V> valueClass,
-            char delimiter) {
+                                                               Class<V> valueClass,
+                                                               char delimiter) {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
         checkNotNull(delimiter);
@@ -193,7 +193,7 @@ public class Stringifiers {
      * @return the stringifier for the list
      */
     public static <T> Stringifier<List<T>> listStringifier(Class<T> elementClass,
-            char delimiter) {
+                                                           char delimiter) {
         checkNotNull(elementClass);
         checkNotNull(delimiter);
         final Stringifier<List<T>> listStringifier =
@@ -209,6 +209,7 @@ public class Stringifiers {
      * @return the default stringifier
      */
     static <T extends Message> Stringifier<T> defaultStringifier(Class<T> messageClass) {
+        checkNotNull(messageClass);
         final DefaultMessageStringifier<T> defaultStringifier =
                 new DefaultMessageStringifier<>(messageClass);
         return defaultStringifier;
