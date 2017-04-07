@@ -29,10 +29,17 @@ import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.UserId;
 
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.json.Json.fromJson;
+import static org.spine3.json.Json.toCompactJson;
+import static org.spine3.json.Json.toJson;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -61,16 +68,34 @@ public class JsonShould {
         assertFalse(found.isEmpty());
     }
 
-
     @Test(expected = NullPointerException.class)
     public void toJson_fail_on_null() {
-        Json.toJson(Tests.<Message>nullRef());
+        toJson(Tests.<Message>nullRef());
     }
 
     @Test
     public void print_to_json() {
         final StringValue value = newStringValue("print_to_json");
-        assertFalse(Json.toJson(value)
-                        .isEmpty());
+        assertFalse(toJson(value).isEmpty());
+    }
+
+    @Test
+    public void print_to_compact_json() {
+        final String idValue = newUuid();
+        final UserId userId = UserId.newBuilder()
+                                    .setValue(idValue)
+                                    .build();
+        final String result = toCompactJson(userId);
+        assertFalse(result.isEmpty());
+        assertFalse(result.contains(System.lineSeparator()));
+    }
+
+    @Test
+    public void parse_from_json() {
+        final String idValue = newUuid();
+        final String jsonMessage = String.format("{value:%s}", idValue);
+        final UserId userId = fromJson(jsonMessage, UserId.class);
+        assertNotNull(userId);
+        assertEquals(idValue, userId.getValue());
     }
 }

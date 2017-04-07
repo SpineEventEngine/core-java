@@ -22,6 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
 
@@ -32,6 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
+import static org.spine3.protobuf.Messages.isMessage;
 
 /**
  * The registry of converters of types to their string representations.
@@ -62,13 +64,24 @@ public class StringifierRegistry {
         checkNotNull(typeOfT);
         final Optional<Stringifier<T>> stringifierOptional = getInstance().get(typeOfT);
 
-        if (!stringifierOptional.isPresent()) {
-            final String errMsg =
-                    format("No stringifier registered for the type: %s", typeOfT);
-            throw new MissingStringifierException(errMsg);
+        if (stringifierOptional.isPresent()) {
+            final Stringifier<T> stringifier = stringifierOptional.get();
+            return stringifier;
         }
-        final Stringifier<T> stringifier = stringifierOptional.get();
-        return stringifier;
+
+        if (isMessage(typeOfT)) {
+            return getDefaultStringifier(typeOfT);
+        }
+
+        final String errMsg = format("No stringifier registered for the type: %s", typeOfT);
+        throw new MissingStringifierException(errMsg);
+    }
+
+    @SuppressWarnings("unchecked") // It is OK because the class is checked before the cast.
+    private static <T> Stringifier<T> getDefaultStringifier(Type typeOfT) {
+        final Stringifier<T> result =
+                (Stringifier<T>) Stringifiers.defaultStringifier((Class<Message>) typeOfT);
+        return result;
     }
 
     /**
