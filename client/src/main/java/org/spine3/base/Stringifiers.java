@@ -24,14 +24,9 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
-import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import com.google.protobuf.util.JsonFormat;
+import org.spine3.json.Json;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -206,9 +201,17 @@ public class Stringifiers {
         return listStringifier;
     }
 
-    public static <T extends Message> Stringifier<T> defaultStringifier(Class<T> messageClass) {
-        final MessageStringifier<T> messageStringifier = new MessageStringifier<>(messageClass);
-        return messageStringifier;
+    /**
+     * Obtains the default {@code Stringifier} for the {@code Message} classes.
+     *
+     * @param messageClass the message class
+     * @param <T>          the type of the message
+     * @return the default stringifier
+     */
+    static <T extends Message> Stringifier<T> defaultStringifier(Class<T> messageClass) {
+        final DefaultMessageStringifier<T> defaultStringifier =
+                new DefaultMessageStringifier<>(messageClass);
+        return defaultStringifier;
     }
 
     /**
@@ -224,56 +227,6 @@ public class Stringifiers {
                                        .addEscape(charToEscape, escapedChar)
                                        .build();
         return result;
-    }
-
-    private static class MessageStringifier<T extends Message> extends Stringifier<T> {
-
-        private final Class<T> messageType;
-        private final Message.Builder messageBuilder;
-        private final JsonFormat.Parser parser = JsonFormat.parser();
-
-        public MessageStringifier(Class<T> messageType) {
-            this.messageType = messageType;
-            this.messageBuilder = getBuilder();
-        }
-
-        private Message.Builder getBuilder() {
-            try {
-                final Method method = messageType.getMethod("newBuilder");
-                method.setAccessible(true);
-                final Message.Builder builder = (Message.Builder) method.invoke(null);
-                return builder;
-            } catch (IllegalAccessException | NoSuchMethodException | InvocationTargetException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        protected String toString(T obj) {
-            try {
-                final BufferedReader jsonReader = new BufferedReader(null);
-                parser.merge(jsonReader, obj.newBuilderForType()
-                                            .mergeFrom(obj));
-                final StringBuilder result = new StringBuilder(0);
-                String json;
-                while ((json = jsonReader.readLine()) != null) {
-                    result.append(json);
-                }
-                return result.toString();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Override
-        protected T fromString(String s) {
-            try {
-                parser.merge(s, messageBuilder);
-                return (T) messageBuilder.build();
-            } catch (InvalidProtocolBufferException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     /**
@@ -326,6 +279,30 @@ public class Stringifiers {
         protected Integer fromString(String s) {
             return Ints.stringConverter()
                        .convert(s);
+        }
+    }
+
+    /**
+     * The default {@code Stringifier} for the {@code Message} classes.
+     *
+     * @param <T> the message type
+     */
+    private static class DefaultMessageStringifier<T extends Message> extends Stringifier<T> {
+
+        private final Class<T> messageClass;
+
+        private DefaultMessageStringifier(Class<T> messageType) {
+            this.messageClass = messageType;
+        }
+
+        @Override
+        protected String toString(T obj) {
+            return Json.toJson(obj);
+        }
+
+        @Override
+        protected T fromString(String s) {
+            return Json.fromJson(s, messageClass);
         }
     }
 }
