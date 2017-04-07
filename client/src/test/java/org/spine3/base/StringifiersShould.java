@@ -24,13 +24,17 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
+import org.spine3.users.UserId;
 
 import java.util.Random;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.integerStringifier;
 import static org.spine3.base.Stringifiers.longStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -109,6 +113,31 @@ public class StringifiersShould {
     public void convert_int_to_string() {
         final String convertedInt = integerStringifier().toString(2);
         assertEquals("2", convertedInt);
+    }
+
+    @Test
+    public void convert_from_json_to_message() {
+        final Stringifier<UserId> messageStringifier =
+                StringifierRegistry.getStringifier(UserId.class);
+        final String idValue = newUuid();
+        final UserId result = messageStringifier.reverse()
+                                                .convert("{value:" + idValue + '}');
+        assertNotNull(result);
+        assertEquals(idValue, result.getValue());
+    }
+
+    @Test
+    public void convert_from_message_to_json() {
+        final String idValue = newUuid();
+        final UserId userId = UserId.newBuilder()
+                                    .setValue(idValue)
+                                    .build();
+        final Stringifier<UserId> messageStringifier =
+                StringifierRegistry.getStringifier(UserId.class);
+        final String convertedMessage = messageStringifier.convert(userId);
+
+        assertNotNull(convertedMessage);
+        assertTrue(convertedMessage.contains(idValue));
     }
 
     @SuppressWarnings("EmptyClass") // is the part of the test.
