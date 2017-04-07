@@ -55,7 +55,7 @@ public class EventFactory {
     private final CommandContext commandContext;
     private final EventIdSequence idSequence;
 
-    private EventFactory(Builder builder) {
+    protected EventFactory(Builder builder) {
         this.producerId = builder.producerId;
         this.commandContext = builder.commandContext;
         this.idSequence = EventIdSequence.on(commandContext.getCommandId())

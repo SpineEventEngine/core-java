@@ -24,7 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.server.command.EventFactory;
+import org.spine3.test.TestEventFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,7 +32,6 @@ import static org.spine3.base.EventPredicates.isAfter;
 import static org.spine3.base.EventPredicates.isBefore;
 import static org.spine3.base.EventPredicates.isBetween;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -43,9 +42,13 @@ import static org.spine3.test.TimeTests.Past.secondsAgo;
  */
 public class EventPredicatesShould {
 
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(EventPredicatesShould.class);
+
     private static Event createEvent(int minutesAgo) {
-        final Event result = EventFactory.createEvent(newUuidValue(),
-                                                      newEventContext(minutesAgo(minutesAgo)));
+        final Event result = eventFactory.createEvent(newUuidValue(),
+                                                      null,
+                                                      minutesAgo(minutesAgo));
         return result;
     }
 

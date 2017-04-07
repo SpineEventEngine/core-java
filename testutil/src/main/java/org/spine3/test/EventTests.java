@@ -62,4 +62,5 @@ public class EventTests {
                                                          .setCommandContext(cmdContext);
         return builder.build();
     }
+
 }

@@ -45,8 +45,10 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
  * Creates event contexts for tests.
  *
  * @author Alexander Litus
+ * @deprecated use {@link org.spine3.test.TestEventFactory TestEventFactory}
  */
 @SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
+@Deprecated
 public class TestEventContextFactory {
 
     private static final Any AGGREGATE_ID = pack(newStringValue(newUuid()));
