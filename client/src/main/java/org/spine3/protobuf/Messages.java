@@ -25,8 +25,10 @@ import com.google.protobuf.TextFormat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
@@ -65,8 +67,8 @@ public class Messages {
      */
     public static Any toAny(Message messageOrAny) {
         return (messageOrAny instanceof Any)
-                    ? (Any) messageOrAny
-                    : pack(messageOrAny);
+                ? (Any) messageOrAny
+                : pack(messageOrAny);
     }
 
     /**
@@ -85,10 +87,30 @@ public class Messages {
             final M state = constructor.newInstance();
             return state;
         } catch (NoSuchMethodException
-                 | InstantiationException
-                 | IllegalAccessException
-                 | InvocationTargetException e) {
+                | InstantiationException
+                | IllegalAccessException
+                | InvocationTargetException e) {
             throw new IllegalStateException(e);
+        }
+    }
+
+    /**
+     * Returns the builder of the {@code Message}.
+     *
+     * @param clazz the message class
+     * @param <B>   the builder type
+     * @return the message builder
+     */
+    public static <B extends Message.Builder> B builderFor(Class<? extends Message> clazz) {
+        try {
+            final Method factoryMethod = clazz.getDeclaredMethod("newBuilder");
+            @SuppressWarnings("unchecked")
+            final B result = (B) factoryMethod.invoke(null);
+            return result;
+        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+            final String errMsg = format("Class %s must be a generated proto message",
+                                         clazz.getCanonicalName());
+            throw new IllegalArgumentException(errMsg, e);
         }
     }
 }
