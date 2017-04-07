@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -903,16 +904,17 @@ public class StandShould extends TenantAwareTest {
         verifyObserver(observer);
     }
 
-    private void doCheckReadingCustomersById(int numberOfCustomers) {
+    @CanIgnoreReturnValue
+    protected Stand doCheckReadingCustomersById(int numberOfCustomers) {
         // Define the types and values used as a test data.
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(numberOfCustomers);
 
-        // Prepare the stand and its mock storage to act.
-        final StandStorage standStorageMock = mock(StandStorage.class);
-        setupExpectedBulkReadBehaviour(sampleCustomers, customerType, standStorageMock);
+        // Prepare the stand and its storage to act.
+        final StandStorage standStorage = setupStandStorageWithCustomers(sampleCustomers,
+                                                                         customerType);
+        final Stand stand = prepareStandWithAggregateRepo(standStorage);
 
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
         triggerMultipleUpdates(sampleCustomers, stand);
 
         final Query readMultipleCustomers = queryFactory.readByIds(Customer.class,
@@ -928,6 +930,7 @@ public class StandShould extends TenantAwareTest {
             final Customer unpackedSingleResult = AnyPacker.unpack(singleRecord);
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
+        return stand;
     }
 
     private void checkEmptyResultOnNonEmptyStorageForQueryTarget(Target customerTarget) {
@@ -963,11 +966,11 @@ public class StandShould extends TenantAwareTest {
                            "though the filter was not set", messageList.isEmpty());
     }
 
-    @SuppressWarnings("ConstantConditions")
-    private static void setupExpectedBulkReadBehaviour(Map<CustomerId,
-                                                       Customer> sampleCustomers,
-                                                       TypeUrl customerType,
-                                                       StandStorage standStorageMock) {
+    private StandStorage setupStandStorageWithCustomers(Map<CustomerId, Customer> sampleCustomers,
+                                                        TypeUrl customerType) {
+        final StandStorage standStorage = InMemoryStorageFactory.getInstance(isMultitenant())
+                                                                .createStandStorage();
+
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
         final ImmutableList.Builder<EntityRecord> recordsBuilder = ImmutableList.builder();
         for (CustomerId customerId : sampleCustomers.keySet()) {
@@ -980,14 +983,10 @@ public class StandShould extends TenantAwareTest {
             stateIdsBuilder.add(stateId);
             recordsBuilder.add(entityRecord);
 
-            when(standStorageMock.read(eq(stateId))).thenReturn(Optional.of(entityRecord));
+            standStorage.write(stateId, entityRecord);
         }
 
-        final ImmutableList<AggregateStateId> stateIds = stateIdsBuilder.build();
-        final ImmutableList<EntityRecord> records = recordsBuilder.build();
-
-        final Iterable<AggregateStateId> matchingIds = argThat(idsMatcher(stateIds));
-        when(standStorageMock.readMultiple(matchingIds)).thenReturn(records);
+        return standStorage;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -1244,7 +1243,7 @@ public class StandShould extends TenantAwareTest {
     /**
      * A {@link StreamObserver} storing the state of {@link Query} execution.
      */
-    private static class MemoizeQueryResponseObserver implements StreamObserver<QueryResponse> {
+    protected static class MemoizeQueryResponseObserver implements StreamObserver<QueryResponse> {
 
         private QueryResponse responseHandled;
         private Throwable throwable;
@@ -1265,6 +1264,17 @@ public class StandShould extends TenantAwareTest {
             this.isCompleted = true;
         }
 
+        public QueryResponse getResponseHandled() {
+            return responseHandled;
+        }
+
+        public Throwable getThrowable() {
+            return throwable;
+        }
+
+        public boolean isCompleted() {
+            return isCompleted;
+        }
     }
 
     private static class MemoizeEntityUpdateCallback implements Stand.EntityUpdateCallback {

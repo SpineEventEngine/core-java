@@ -22,8 +22,16 @@ package org.spine3.server.stand;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.spine3.base.Responses;
+import org.spine3.client.Query;
+import org.spine3.client.QueryFactory;
+import org.spine3.client.QueryResponse;
+import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.users.TenantId;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.newTenantUuid;
 
 /**
@@ -45,5 +53,21 @@ public class MultiTenantStandShould extends StandShould {
     @After
     public void tearDown() {
         clearCurrentTenant();
+    }
+
+    @Test
+    public void not_allow_reading_aggregate_records_for_another_tenant() {
+        final Stand stand = doCheckReadingCustomersById(15);
+
+        final TenantId anotherTenant = newTenantUuid();
+        final QueryFactory queryFactory = createQueryFactory(anotherTenant);
+
+        final Query readAllCustomers = queryFactory.readAll(Customer.class);
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readAllCustomers, responseObserver);
+        final QueryResponse response = responseObserver.getResponseHandled();
+        assertTrue(Responses.isOk(response.getResponse()));
+        assertEquals(0, response.getMessagesCount());
     }
 }
