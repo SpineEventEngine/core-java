@@ -19,7 +19,13 @@
  */
 package org.spine3.client;
 
+import com.google.protobuf.Message;
 import org.spine3.time.ZoneOffset;
+
+import java.util.Set;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.Targets.composeTarget;
 
 /**
  * @author Alex Tymchenko
@@ -32,6 +38,42 @@ public class TopicFactory extends ActorRequestFactory<TopicFactory> {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Creates a {@link Topic} for a subset of the entity states by specifying their IDs.
+     *
+     * @param entityClass the class of a target entity
+     * @param ids         the IDs of interest
+     * @return the instance of {@code Topic} assembled according to the parameters.
+     */
+    public Topic someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
+        checkNotNull(entityClass);
+        checkNotNull(ids);
+
+        final Target target = composeTarget(entityClass, ids);
+        final Topic result = topicForTarget(target);
+        return result;
+    }
+
+    /**
+     * Create a {@link Topic} for all of the specified entity states.
+     *
+     * @param entityClass the class of a target entity
+     * @return the instance of {@code Target} assembled according to the parameters.
+     */
+    public Topic allOf(Class<? extends Message> entityClass) {
+        checkNotNull(entityClass);
+        final Target target = composeTarget(entityClass, null);
+        final Topic result = topicForTarget(target);
+        return result;
+    }
+
+    private Topic topicForTarget(Target target) {
+        return Topic.newBuilder()
+                    .setContext(actorContext())
+                    .setTarget(target)
+                    .build();
     }
 
     /**

@@ -24,10 +24,10 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Response;
-import org.spine3.client.Queries;
 import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
+import org.spine3.client.Targets;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
@@ -330,7 +330,7 @@ public class SubscriptionServiceShould {
     }
 
     private static Target getProjectQueryTarget() {
-        return Queries.Targets.allOf(Project.class);
+        return Targets.allOf(Project.class);
     }
 
     private static Stand newMultitenantStand() {

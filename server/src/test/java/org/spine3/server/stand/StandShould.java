@@ -39,13 +39,13 @@ import org.spine3.base.Responses;
 import org.spine3.base.Version;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
-import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryFactory;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
+import org.spine3.client.Targets;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
@@ -229,7 +229,7 @@ public class StandShould extends TenantAwareTest {
                 new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
 
-        final Target projectProjectionTarget = Queries.Targets.allOf(Project.class);
+        final Target projectProjectionTarget = Targets.allOf(Project.class);
         final Subscription subscription = stand.subscribe(createFor(projectProjectionTarget));
         stand.activate(subscription, emptyUpdateCallback());
         assertNotNull(subscription);
@@ -321,8 +321,8 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void return_empty_list_for_aggregate_reads_with_filters_not_set() {
 
-        final Target noneOfCustomers = Queries.Targets.someOf(Customer.class,
-                                                              Collections.<Message>emptySet());
+        final Target noneOfCustomers = Targets.someOf(Customer.class,
+                                                      Collections.<Message>emptySet());
         checkEmptyResultOnNonEmptyStorageForQueryTarget(noneOfCustomers);
     }
 
@@ -360,7 +360,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_subscription_callback_upon_update_of_aggregate() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allCustomers = Queries.Targets.allOf(Customer.class);
+        final Target allCustomers = Targets.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(createFor(allCustomers));
@@ -383,7 +383,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_subscription_callback_upon_update_of_projection() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allProjects = Queries.Targets.allOf(Project.class);
+        final Target allProjects = Targets.allOf(Project.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(createFor(allProjects));
@@ -406,7 +406,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void allow_cancelling_subscriptions() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allCustomers = Queries.Targets.allOf(Customer.class);
+        final Target allCustomers = Targets.allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(createFor(allCustomers));
@@ -441,7 +441,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_each_subscription_callback_once_for_multiple_subscriptions() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allCustomers = Queries.Targets.allOf(Customer.class);
+        final Target allCustomers = Targets.allOf(Customer.class);
 
         final Set<MemoizeEntityUpdateCallback> callbacks = newHashSet();
         final int totalCallbacks = 100;
@@ -469,7 +469,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void do_not_trigger_subscription_callbacks_in_case_of_another_type_criterion_mismatch() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Target allProjects = Queries.Targets.allOf(Project.class);
+        final Target allProjects = Targets.allOf(Project.class);
         final MemoizeEntityUpdateCallback callback = subscribeWithCallback(stand, allProjects);
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
@@ -490,8 +490,8 @@ public class StandShould extends TenantAwareTest {
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
-        final Target someCustomers = Queries.Targets.someOf(Customer.class,
-                                                            sampleCustomers.keySet());
+        final Target someCustomers = Targets.someOf(Customer.class,
+                                                    sampleCustomers.keySet());
         final Set<Customer> callbackStates = newHashSet();
         final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override

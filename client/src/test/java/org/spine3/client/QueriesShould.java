@@ -42,11 +42,6 @@ public class QueriesShould {
     }
 
     @Test
-    public void have_private_constructor_of_targets_class() {
-        assertHasPrivateParameterlessCtor(Queries.Targets.class);
-    }
-
-    @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
                 .testAllPublicStaticMethods(Queries.class);
@@ -54,7 +49,7 @@ public class QueriesShould {
 
     @Test
     public void return_proper_type_for_known_target() {
-        final Target target = Queries.Targets.allOf(TestEntity.class);
+        final Target target = Targets.allOf(TestEntity.class);
         final Query query = Query.newBuilder()
                                  .setTarget(target)
                                  .build();

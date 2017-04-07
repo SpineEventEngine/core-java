@@ -19,10 +19,8 @@
  */
 package org.spine3.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -30,8 +28,8 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.Queries.Targets.allOf;
-import static org.spine3.client.Queries.Targets.someOf;
+import static org.spine3.client.Targets.allOf;
+import static org.spine3.client.Targets.someOf;
 
 /**
  * Client-side utilities for working with queries.
@@ -76,72 +74,4 @@ public class Queries {
         return type;
     }
 
-    /**
-     * Client-side utilities for working with {@link Query} and
-     * {@link org.spine3.client.Subscription Subscription} targets.
-     *
-     * @author Alex Tymchenko
-     * @author Dmytro Dashenkov
-     */
-    public static class Targets {
-
-        private Targets() {
-        }
-
-        /**
-         * Create a {@link Target} for a subset of the entity states by specifying their IDs.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids         the IDs of interest
-         * @return the instance of {@code Target} assembled according to the parameters.
-         */
-        public static Target someOf(Class<? extends Message> entityClass,
-                                    Set<? extends Message> ids) {
-            final Target result = composeTarget(entityClass, ids);
-            return result;
-        }
-
-        /**
-         * Create a {@link Target} for all of the specified entity states.
-         *
-         * @param entityClass the class of a target entity
-         * @return the instance of {@code Target} assembled according to the parameters.
-         */
-        public static Target allOf(Class<? extends Message> entityClass) {
-            final Target result = composeTarget(entityClass, null);
-            return result;
-        }
-
-        static Target composeTarget(Class<? extends Message> entityClass,
-                                    @Nullable Set<? extends Message> ids) {
-            final boolean includeAll = (ids == null);
-
-            final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
-
-            if (!includeAll) {
-                for (Message rawId : ids) {
-                    final Any packedId = AnyPacker.pack(rawId);
-                    final EntityId entityId = EntityId.newBuilder()
-                                                      .setId(packedId)
-                                                      .build();
-                    idFilterBuilder.addIds(entityId);
-                }
-            }
-            final EntityIdFilter idFilter = idFilterBuilder.build();
-            final EntityFilters filters = EntityFilters.newBuilder()
-                                                       .setIdFilter(idFilter)
-                                                       .build();
-            final String typeName = TypeName.of(entityClass)
-                                            .value();
-            final Target.Builder builder = Target.newBuilder()
-                                                 .setType(typeName);
-            if (includeAll) {
-                builder.setIncludeAll(true);
-            } else {
-                builder.setFilters(filters);
-            }
-
-            return builder.build();
-        }
-    }
 }
