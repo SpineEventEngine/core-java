@@ -19,10 +19,15 @@
  */
 package org.spine3.protobuf;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.test.Tests;
+import org.spine3.users.UserId;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.spine3.protobuf.Messages.builderFor;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {
@@ -35,5 +40,23 @@ public class MessagesShould {
     @Test(expected = NullPointerException.class)
     public void toText_fail_on_null() {
         Messages.toText(Tests.<Message>nullRef());
+    }
+
+    @Test
+    public void return_builder_for_the_message() {
+        final Message.Builder messageBuilder = builderFor(UserId.class);
+        assertNotNull(messageBuilder);
+        assertEquals(UserId.class, messageBuilder.build().getClass());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_try_to_get_builder_for_not_the_generated_message() {
+        builderFor(Message.class);
+    }
+
+    @Test
+    public void pass_the_null_tolerance_check() {
+        final NullPointerTester tester = new NullPointerTester();
+        tester.testStaticMethods(Messages.class, NullPointerTester.Visibility.PACKAGE);
     }
 }
