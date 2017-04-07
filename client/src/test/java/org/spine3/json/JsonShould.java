@@ -38,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.json.Json.fromJson;
+import static org.spine3.json.Json.toCompactJson;
 import static org.spine3.json.Json.toJson;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -76,6 +77,17 @@ public class JsonShould {
     public void print_to_json() {
         final StringValue value = newStringValue("print_to_json");
         assertFalse(toJson(value).isEmpty());
+    }
+
+    @Test
+    public void print_to_compact_json() {
+        final String idValue = newUuid();
+        final UserId userId = UserId.newBuilder()
+                                    .setValue(idValue)
+                                    .build();
+        final String result = toCompactJson(userId);
+        assertFalse(result.isEmpty());
+        assertFalse(result.contains(System.lineSeparator()));
     }
 
     @Test
