@@ -286,6 +286,20 @@ public class Stringifiers {
     /**
      * The default {@code Stringifier} for the {@code Message} classes.
      *
+     * <p>The sample of the usage:
+     * {@code
+     * // The message
+     * final Human human = Human.newBuilder.setHairColor("black") .setEyesColor("blue").build();
+     *
+     * final Stringifier<Human> humanStringifer = StringifierRegistry.getStringifier(Human.class);
+     *
+     * // The result is {"eyesColor" : "blue", "hairColor" : "black"}
+     * final String json = humanStringifer.reverse().convert(humanStringifier);
+     *
+     * // human.equals(humanFromJson) == true;
+     * final Human humanFromJson = humanStringifier.convert(json);
+     * }
+     *
      * @param <T> the message type
      */
     private static class DefaultMessageStringifier<T extends Message> extends Stringifier<T> {
