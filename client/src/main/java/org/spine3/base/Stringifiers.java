@@ -288,16 +288,19 @@ public class Stringifiers {
      *
      * <p>The sample of the usage:
      * {@code
-     * // The message
-     * final Human human = Human.newBuilder.setHairColor("black").setEyesColor("blue").build();
+     * // Define the message.
+     * final TaskId taskId = TaskId.newBuilder().setValue("task-id").build();
+     * final TaskName taskName = TaskName.newBuilder().setValue("task-name").build();
+     * final Task task = Task.newBuilder().setId(taskId).setTaskName(taskName).build();
      *
-     * final Stringifier<Human> humanStringifier = StringifierRegistry.getStringifier(Human.class);
+     * // Obtain the default `Stringifier`.
+     * final Stringifier<Task> taskStringifier = StringifierRegistry.getStringifier(Task.class);
      *
-     * // The result is {"eyesColor" : "blue", "hairColor" : "black"}
-     * final String json = humanStringifier.reverse().convert(humanStringifier);
+     * // The result is {"id":{"value":"task-id"},"name":{"value":"task-name"}}.
+     * final String json = taskStringifier.reverse().convert(task);
      *
-     * // human.equals(humanFromJson) == true;
-     * final Human humanFromJson = humanStringifier.convert(json);
+     * // human.equals(taskFromJson) == true.
+     * final Task taskFromJson = taskStringifier.convert(json);
      * }
      *
      * @param <T> the message type
@@ -313,7 +316,7 @@ public class Stringifiers {
 
         @Override
         protected String toString(T obj) {
-            return Json.toJson(obj);
+            return Json.toCompactJson(obj);
         }
 
         @Override

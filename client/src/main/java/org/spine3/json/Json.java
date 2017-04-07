@@ -56,11 +56,30 @@ public class Json {
      * @return Json string
      */
     public static String toJson(Message message) {
+        final String result = toJson(message, JsonPrinter.instance());
+        return result;
+    }
+
+    /**
+     * Converts the passed message into compact Json representation.
+     *
+     * <p>The resulted Json does not contain the line separators.
+     *
+     * @param message the {@code Message} object
+     * @return the converted message to Json
+     */
+    public static String toCompactJson(Message message) {
+        final JsonFormat.Printer compactPrinter = JsonPrinter.instance()
+                                                             .omittingInsignificantWhitespace();
+        final String result = toJson(message, compactPrinter);
+        return result;
+    }
+
+    private static String toJson(Message message, JsonFormat.Printer printer) {
         checkNotNull(message);
         String result;
         try {
-            result = JsonPrinter.instance()
-                                .print(message);
+            result = printer.print(message);
         } catch (InvalidProtocolBufferException e) {
             final Throwable rootCause = getRootCause(e);
             throw new UnknownTypeException(rootCause);
