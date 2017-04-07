@@ -291,10 +291,10 @@ public class Stringifiers {
      * // The message
      * final Human human = Human.newBuilder.setHairColor("black").setEyesColor("blue").build();
      *
-     * final Stringifier<Human> humanStringifer = StringifierRegistry.getStringifier(Human.class);
+     * final Stringifier<Human> humanStringifier = StringifierRegistry.getStringifier(Human.class);
      *
      * // The result is {"eyesColor" : "blue", "hairColor" : "black"}
-     * final String json = humanStringifer.reverse().convert(humanStringifier);
+     * final String json = humanStringifier.reverse().convert(humanStringifier);
      *
      * // human.equals(humanFromJson) == true;
      * final Human humanFromJson = humanStringifier.convert(json);
