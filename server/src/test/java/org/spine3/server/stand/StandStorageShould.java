@@ -116,7 +116,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         checkByTypeRead(mask);
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // OK for this test.
+    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
     private void checkByTypeRead(FieldMask fieldMask) {
         final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
         final StandStorage storage = getStorage();
@@ -164,6 +164,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return DEFAULT_ID_SUPPLIER.get();
     }
 
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     protected List<AggregateStateId> fill(StandStorage storage,
                                           int count,
                                           Supplier<AggregateStateId<ProjectId>> idSupplier) {

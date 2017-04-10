@@ -24,6 +24,8 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
+import com.google.protobuf.Message;
+import org.spine3.json.Json;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -200,6 +202,20 @@ public class Stringifiers {
     }
 
     /**
+     * Obtains the default {@code Stringifier} for the {@code Message} classes.
+     *
+     * @param messageClass the message class
+     * @param <T>          the type of the message
+     * @return the default stringifier
+     */
+    static <T extends Message> Stringifier<T> defaultStringifier(Class<T> messageClass) {
+        checkNotNull(messageClass);
+        final DefaultMessageStringifier<T> defaultStringifier =
+                new DefaultMessageStringifier<>(messageClass);
+        return defaultStringifier;
+    }
+
+    /**
      * Creates the {@code Escaper} which escapes contained '\' and passed characters.
      *
      * @param charToEscape the char to escape
@@ -264,6 +280,70 @@ public class Stringifiers {
         protected Integer fromString(String s) {
             return Ints.stringConverter()
                        .convert(s);
+        }
+    }
+
+    /**
+     * The default {@code Stringifier} for the {@code Message} classes.
+     *
+     * <p>The sample of the usage:
+     * // The `TaskId` Protobuf message definition.
+     * {@code
+     * message TaskId {
+     * string value = 1;
+     * }
+     * }
+     *
+     * // The `TaskName` Protobuf message definition.
+     * {@code
+     * message TaskName {
+     * string value = 1;
+     * }
+     * }
+     *
+     * // The `Task` Protobuf message definition.
+     * {@code
+     * message Task {
+     * TaskId id = 1;
+     * TaskName name = 2;
+     * }
+     * }
+     *
+     * {@code
+     * // Construct the message.
+     * final TaskId taskId = TaskId.newBuilder().setValue("task-id").build();
+     * final TaskName taskName = TaskName.newBuilder().setValue("task-name").build();
+     * final Task task = Task.newBuilder().setId(taskId).setTaskName(taskName).build();
+     *
+     * // Obtain the default `Stringifier`.
+     * final Stringifier<Task> taskStringifier = StringifierRegistry.getStringifier(Task.class);
+     *
+     * // The result is {"id":{"value":"task-id"},"name":{"value":"task-name"}}.
+     * final String json = taskStringifier.reverse().convert(task);
+     *
+     * // human.equals(taskFromJson) == true.
+     * final Task taskFromJson = taskStringifier.convert(json);
+     * }
+     *
+     * @param <T> the message type
+     */
+    private static class DefaultMessageStringifier<T extends Message> extends Stringifier<T> {
+
+        private final Class<T> messageClass;
+
+        private DefaultMessageStringifier(Class<T> messageType) {
+            super();
+            this.messageClass = messageType;
+        }
+
+        @Override
+        protected String toString(T obj) {
+            return Json.toCompactJson(obj);
+        }
+
+        @Override
+        protected T fromString(String s) {
+            return Json.fromJson(s, messageClass);
         }
     }
 }
