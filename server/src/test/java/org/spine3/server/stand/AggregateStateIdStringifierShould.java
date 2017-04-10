@@ -23,7 +23,6 @@ package org.spine3.server.stand;
 import com.google.protobuf.Any;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
-import org.spine3.base.MissingStringifierException;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Stringifiers;
@@ -102,13 +101,6 @@ public class AggregateStateIdStringifierShould {
                    CoreMatchers.containsString(Stringifiers.toString(id.getAggregateId())));
     }
 
-    @Test(expected = MissingStringifierException.class)
-    public void not_accept_message_ids_of_unregistered_types() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
-        final AggregateStateId id = newRandomMessageId();
-        stringifier.convert(id);
-    }
-
     @Test
     public void unpack_int_ids() {
         final int intId = 42;
@@ -166,17 +158,6 @@ public class AggregateStateIdStringifierShould {
         assertNotNull(id);
         assertEquals(ANY_TYPE_URL, id.getStateType());
         assertEquals(messageId, id.getAggregateId());
-    }
-
-    @Test(expected = MissingStringifierException.class)
-    public void fail_to_unpack_unregistered_message_ids() {
-        final Any messageId = Sample.messageOfType(Any.class);
-        final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(Any.class)
-                + '-' + messageId.toString();
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
-
-        stringifier.reverse()
-                   .convert(stringId);
     }
 
     @Test(expected = IllegalArgumentException.class)
