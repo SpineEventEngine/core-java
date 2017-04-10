@@ -34,9 +34,9 @@ import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
+import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TestCommandFactory;
 import org.spine3.test.TestEventFactory;
-import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TimeTests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -48,10 +48,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.test.aggregate.user.User;
-import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
-import org.spine3.users.TenantId;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -74,8 +71,9 @@ import static org.spine3.server.aggregate.Given.EventMessage.taskAdded;
 import static org.spine3.test.Given.aggregateOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
-import static org.spine3.test.Verify.assertSize;
 import static org.spine3.test.aggregate.Project.newBuilder;
+
+S
 
 /**
  * @author Alexander Litus

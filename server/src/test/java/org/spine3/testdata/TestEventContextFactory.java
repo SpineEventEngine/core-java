@@ -108,12 +108,12 @@ public class TestEventContextFactory {
 
     public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
         final EventId eventId = EventFactory.generateId();
-        final IntegrationEventContext.Builder builder = IntegrationEventContext.newBuilder()
-                                                                               .setEventId(eventId)
-                                                                               .setTimestamp(getCurrentTime())
-                                                                               .setBoundedContextName(TEST_BC_NAME)
-                                                                               .setProducerId(
-                                                                                       pack(aggregateId));
+        final IntegrationEventContext.Builder builder =
+                IntegrationEventContext.newBuilder()
+                                       .setEventId(eventId)
+                                       .setTimestamp(getCurrentTime())
+                                       .setBoundedContextName(TEST_BC_NAME)
+                                       .setProducerId(pack(aggregateId));
         return builder.build();
     }
 

@@ -39,7 +39,6 @@ import static org.spine3.server.aggregate.AggregatePart.create;
 import static org.spine3.server.aggregate.AggregatePart.getConstructor;
 import static org.spine3.test.Given.aggregatePartOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Illia Shepilov
