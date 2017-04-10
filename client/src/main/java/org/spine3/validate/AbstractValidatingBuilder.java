@@ -24,7 +24,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
-import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Stringifiers;
 
 import java.lang.reflect.Type;
@@ -38,15 +37,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Illia Shepilov
  * @see ValidatingBuilder
  */
-@SuppressWarnings({
-        "AbstractClassNeverImplemented",
-        /* It will be implemented during the build of project
-         after the validating builders generation.*/
-        "unused" // It will be used by auto-generated code.
-})
 public abstract class AbstractValidatingBuilder<T extends Message> implements ValidatingBuilder<T> {
-
-    private final StringifierRegistry registry = StringifierRegistry.getInstance();
 
     /**
      * Converts the passed `raw` value and returns it.
