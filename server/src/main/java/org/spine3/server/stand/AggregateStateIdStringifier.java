@@ -20,13 +20,9 @@
 
 package org.spine3.server.stand;
 
-import com.google.common.base.Enums;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.Stringifier;
 import org.spine3.base.Stringifiers;
-import org.spine3.type.ClassName;
-import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -38,8 +34,11 @@ import static org.spine3.util.Exceptions.wrappedCause;
 /**
  * A {@link Stringifier} for the {@link AggregateStateId}.
  *
- * <p>The protocol of strigification is as follows:
- * {@code {@linkplain TypeUrl}_of_the_state_type}-{@code ID_TYPE_NAME_or_SHORT_REPR_FOR_PRIMITIVES}-{@code generic_ID_stringifier_output}
+ * <p>An example of a stringified {@link AggregateStateId AggregateStateId<Int>}:
+ * {@code "my.domain/my.type.of.State-Integer-271828"}.
+ *
+ * <p>An example of a stringified {@link AggregateStateId AggregateStateId<MyType>}:
+ * {@code "my.domain/my.type.of.State-my.type.MyType-{foo=42, bar="abc"}"}.
  *
  * @author Dmytro Dashenkov
  */
@@ -47,6 +46,8 @@ class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
 
     private static final String DIVIDER = "-";
     private static final int MEAN_STRING_LENGTH = 256;
+    private static final String TYPE_NAME_DIVIDER = ".";
+    private static final String JAVA_LANG_PACKAGE_NAME = "java.lang.";
 
     @Override
     protected String toString(AggregateStateId id) {
@@ -95,87 +96,27 @@ class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
 
     private static String idTypeToString(Class idType) {
         checkSupported(idType);
-        final IdType type = IdType.get(idType);
-        final String typeString = type.describe(idType);
-        return typeString;
+        final String result;
+        if (Message.class.isAssignableFrom(idType)) {
+            result = TypeName.of(idType).value();
+        } else {
+            result = idType.getSimpleName();
+        }
+        return result;
     }
 
     private static Class idTypeFromString(String idTypeString) {
-        final Class type = IdType.getTypeFrom(idTypeString);
-        return type;
-    }
-
-    /**
-     * An {@code enum} of allowed ID types.
-     */
-    private enum IdType {
-
-        STRING {
-            @Override
-            Class getType() {
-                return String.class;
-            }
-        },
-        INT {
-            @Override
-            Class getType() {
-                return Integer.class;
-            }
-        },
-        LONG {
-            @Override
-            Class getType() {
-                return Long.class;
-            }
-        },
-        MESSAGE {
-            @SuppressWarnings("unchecked") // Logically checked
-            @Override
-            String describe(Class cls) {
-                return TypeName.of(cls)
-                               .value();
-            }
-
-            @Override
-            Class getType() {
-                return Message.class;
-            }
-        };
-
-        static IdType get(Class cls) {
-            if (cls.equals(String.class)) {
-                return STRING;
-            } else if (cls.equals(Integer.class)) {
-                return INT;
-            } else if (cls.equals(Long.class)) {
-                return LONG;
-            } else {
-                return MESSAGE;
+        final Class result;
+        if (idTypeString.contains(TYPE_NAME_DIVIDER)) {
+            final TypeName typeName = TypeName.of(idTypeString);
+            result = typeName.getJavaClass();
+        } else {
+            try {
+                result = Class.forName(JAVA_LANG_PACKAGE_NAME + idTypeString);
+            } catch (ClassNotFoundException e) {
+                throw wrappedCause(e);
             }
         }
-
-        static Class getTypeFrom(String description) {
-            final Optional<IdType> type = Enums.getIfPresent(IdType.class, description);
-            if (type.isPresent()) {
-                return type.get()
-                           .getType();
-            } else {
-                final TypeName typeName = TypeName.of(description);
-                final ClassName className = KnownTypes.getClassName(typeName.toUrl());
-                try {
-                    final Class result = Class.forName(className.value());
-                    return result;
-                } catch (ClassNotFoundException e) {
-                    // Should never happen
-                    throw wrappedCause(e);
-                }
-            }
-        }
-
-        String describe(Class cls) {
-            return name();
-        }
-
-        abstract Class getType();
+        return result;
     }
 }

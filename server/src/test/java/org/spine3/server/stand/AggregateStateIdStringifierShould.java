@@ -30,9 +30,6 @@ import org.spine3.testdata.Sample;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
@@ -92,7 +89,7 @@ public class AggregateStateIdStringifierShould {
     @Test
     public void unpack_int_ids() {
         final int intId = 42;
-        final String stringId = ANY_TYPE_URL.value() + "-INT-" + String.valueOf(intId);
+        final String stringId = ANY_TYPE_URL.value() + "-Integer-" + String.valueOf(intId);
         final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
@@ -106,7 +103,7 @@ public class AggregateStateIdStringifierShould {
     @Test
     public void unpack_long_ids() {
         final long longId = 31415;
-        final String stringId = ANY_TYPE_URL.value() + "-LONG-" + String.valueOf(longId);
+        final String stringId = ANY_TYPE_URL.value() + "-Long-" + String.valueOf(longId);
         final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
@@ -120,7 +117,7 @@ public class AggregateStateIdStringifierShould {
     @Test
     public void unpack_string_ids() {
         final String stringIdValue = "abcde";
-        final String stringId = ANY_TYPE_URL.value() + "-STRING-" + stringIdValue;
+        final String stringId = ANY_TYPE_URL.value() + "-String-" + stringIdValue;
         final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
@@ -185,22 +182,5 @@ public class AggregateStateIdStringifierShould {
 
     private static Stringifier<AggregateStateId> stringifier() {
         return new AggregateStateIdStringifier();
-    }
-
-    private static class ProjectIdStringifier extends Stringifier<ProjectId> {
-
-        private static final Map<String, ProjectId> convertedInstances = new HashMap<>();
-
-        @Override
-        protected String toString(ProjectId obj) {
-            final String stringValue = obj.toString();
-            convertedInstances.put(stringValue, obj);
-            return stringValue;
-        }
-
-        @Override
-        protected ProjectId fromString(String s) {
-            return convertedInstances.get(s);
-        }
     }
 }
