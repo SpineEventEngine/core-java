@@ -31,7 +31,6 @@ import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Messages;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 
@@ -169,7 +168,7 @@ public class EventFactory {
          * Sets the ID of an entity which is producing the events wrapped into {@code Any}.
          */
         public Builder setProducerId(Message messageOrAny) {
-            this.producerId = Messages.toAny(checkNotNull(messageOrAny));
+            this.producerId = toAny(checkNotNull(messageOrAny));
             return this;
         }
 
