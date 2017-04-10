@@ -41,8 +41,8 @@ buildscript {
         spineToolsVersion = '0.8.13-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
-        // Indicates is needed the generation of the validating builders or not.
-        generateValidatorsOption = false
+        // Indicates whether the generation of the validating builders is enabled.
+        generateValidators = false
     }
 
     dependencies {
