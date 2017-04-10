@@ -39,6 +39,10 @@ buildscript {
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
         spineToolsVersion = '0.8.13-SNAPSHOT'
+
+        // Defines option for the `spine-model-compiler` plugin.
+        // Indicates is needed the generation of the validating builders or not.
+        generateValidatorsOption = false
     }
 
     dependencies {
