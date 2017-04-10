@@ -52,7 +52,7 @@ public class InMemoryStorageFactory implements StorageFactory {
      *
      * <p>In-memory implementation stores no values separately
      * ({@link org.spine3.server.entity.storage.Column Columns}), therefore
-     * returns {@linkplain ColumnTypeRegistry#empty() an empty ColumnTypeRegistry}.
+     * returns an empty ColumnTypeRegistry.
      */
     @Override
     public ColumnTypeRegistry getTypeRegistry() {
