@@ -28,7 +28,6 @@ import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.type.TypeUrl;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -52,11 +51,5 @@ public class AggregateStateIdShould {
                 StringifierRegistry.getInstance()
                                    .get(AggregateStateId.class);
         assertTrue(stringifierOptional.isPresent());
-    }
-
-    @Test
-    public void provide_stringifier() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
-        assertNotNull(stringifier);
     }
 }

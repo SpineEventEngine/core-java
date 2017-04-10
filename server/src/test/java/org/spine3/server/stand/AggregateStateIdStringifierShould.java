@@ -36,6 +36,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.spine3.server.stand.AggregateStateId.of;
 
 /**
  * @author Dmytro Dashenkov
@@ -46,7 +47,7 @@ public class AggregateStateIdStringifierShould {
 
     @Test
     public void accept_string_ids() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newStringId();
 
         final String stringAggregateId = stringifier.convert(id);
@@ -57,7 +58,7 @@ public class AggregateStateIdStringifierShould {
 
     @Test
     public void accept_int_ids() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newIntId();
 
         final String stringAggregateId = stringifier.convert(id);
@@ -68,7 +69,7 @@ public class AggregateStateIdStringifierShould {
 
     @Test
     public void accept_long_ids() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newLongId();
 
         final String stringAggregateId = stringifier.convert(id);
@@ -79,7 +80,7 @@ public class AggregateStateIdStringifierShould {
 
     @Test
     public void accept_message_ids_of_registered_types() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newMessageId();
 
         final String stringAggregateId = stringifier.convert(id);
@@ -92,7 +93,7 @@ public class AggregateStateIdStringifierShould {
     public void unpack_int_ids() {
         final int intId = 42;
         final String stringId = ANY_TYPE_URL.value() + "-INT-" + String.valueOf(intId);
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
                                                .convert(stringId);
@@ -106,7 +107,7 @@ public class AggregateStateIdStringifierShould {
     public void unpack_long_ids() {
         final long longId = 31415;
         final String stringId = ANY_TYPE_URL.value() + "-LONG-" + String.valueOf(longId);
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
                                                .convert(stringId);
@@ -120,7 +121,7 @@ public class AggregateStateIdStringifierShould {
     public void unpack_string_ids() {
         final String stringIdValue = "abcde";
         final String stringId = ANY_TYPE_URL.value() + "-STRING-" + stringIdValue;
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
                                                .convert(stringId);
@@ -136,7 +137,7 @@ public class AggregateStateIdStringifierShould {
         final String stringMessageId = Stringifiers.toString(messageId);
         final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(ProjectId.class)
                 + '-' + stringMessageId;
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
 
         final AggregateStateId id = stringifier.reverse()
                                                .convert(stringId);
@@ -149,14 +150,14 @@ public class AggregateStateIdStringifierShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_convert_invalid_string() {
         final String invalidId = "I'm invalid!";
-        AggregateStateId.stringifier()
+        stringifier()
                         .reverse()
                         .convert(invalidId);
     }
 
     @Test
     public void convert_objects_back_and_forth() {
-        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final Stringifier<AggregateStateId> stringifier = stringifier();
         final AggregateStateId id = newMessageId();
 
         final String stringAggregateId = stringifier.convert(id);
@@ -167,19 +168,23 @@ public class AggregateStateIdStringifierShould {
     }
 
     private static AggregateStateId newStringId() {
-        return AggregateStateId.of("some-aggregate-id", TypeUrl.of(Any.class));
+        return of("some-aggregate-id", TypeUrl.of(Any.class));
     }
 
     private static AggregateStateId newIntId() {
-        return AggregateStateId.of(42, TypeUrl.of(Any.class));
+        return of(42, TypeUrl.of(Any.class));
     }
 
     private static AggregateStateId newLongId() {
-        return AggregateStateId.of(42L, TypeUrl.of(Any.class));
+        return of(42L, TypeUrl.of(Any.class));
     }
 
     private static AggregateStateId newMessageId() {
-        return AggregateStateId.of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
+        return of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
+    }
+
+    private static Stringifier<AggregateStateId> stringifier() {
+        return new AggregateStateIdStringifier();
     }
 
     private static class ProjectIdStringifier extends Stringifier<ProjectId> {

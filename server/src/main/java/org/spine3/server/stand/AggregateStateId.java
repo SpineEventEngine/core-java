@@ -21,8 +21,6 @@ package org.spine3.server.stand;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
@@ -42,15 +40,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class AggregateStateId<I> {
 
-    private static final AggregateStateIdStringifier stringifier =
-            new AggregateStateIdStringifier();
-
-    static {
-        StringifierRegistry.getInstance()
-                           .register(stringifier(),
-                                     AggregateStateId.class);
-    }
-
     private final I aggregateId;
     private final TypeUrl stateType;
 
@@ -62,10 +51,6 @@ public final class AggregateStateId<I> {
     @CheckReturnValue
     public static <I> AggregateStateId of(I aggregateId, TypeUrl stateType) {
         return new AggregateStateId<>(aggregateId, stateType);
-    }
-
-    public static Stringifier<AggregateStateId> stringifier() {
-        return stringifier;
     }
 
     public I getAggregateId() {
