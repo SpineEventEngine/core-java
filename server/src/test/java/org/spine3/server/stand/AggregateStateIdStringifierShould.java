@@ -24,21 +24,18 @@ import com.google.protobuf.Any;
 import org.hamcrest.CoreMatchers;
 import org.junit.Test;
 import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
 import org.spine3.base.Stringifiers;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.Sample;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -46,14 +43,6 @@ import static org.junit.Assert.assertTrue;
 public class AggregateStateIdStringifierShould {
 
     private static final TypeUrl ANY_TYPE_URL = TypeUrl.of(Any.class);
-
-    @Test
-    public void be_private_class() throws ClassNotFoundException {
-        final Class cls = Class.forName(
-                "org.spine3.server.stand.AggregateStateId$AggregateStateIdStringifier");
-        final int modifiers = cls.getModifiers();
-        assertTrue(Modifier.isPrivate(modifiers));
-    }
 
     @Test
     public void accept_string_ids() {
@@ -92,8 +81,6 @@ public class AggregateStateIdStringifierShould {
     public void accept_message_ids_of_registered_types() {
         final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
         final AggregateStateId id = newMessageId();
-
-        ensureProjectIdStringifier();
 
         final String stringAggregateId = stringifier.convert(id);
         assertNotNull(stringAggregateId);
@@ -145,7 +132,6 @@ public class AggregateStateIdStringifierShould {
 
     @Test
     public void unpack_registered_message_ids() {
-        ensureProjectIdStringifier();
         final ProjectId messageId = Sample.messageOfType(ProjectId.class);
         final String stringMessageId = Stringifiers.toString(messageId);
         final String stringId = ANY_TYPE_URL.value() + '-' + TypeName.of(ProjectId.class)
@@ -168,13 +154,16 @@ public class AggregateStateIdStringifierShould {
                         .convert(invalidId);
     }
 
-    private static void ensureProjectIdStringifier() {
-        final StringifierRegistry registry = StringifierRegistry.getInstance();
-        if (registry.get(ProjectId.class)
-                    .isPresent()) {
-            return;
-        }
-        registry.register(new ProjectIdStringifier(), ProjectId.class);
+    @Test
+    public void convert_objects_back_and_forth() {
+        final Stringifier<AggregateStateId> stringifier = AggregateStateId.stringifier();
+        final AggregateStateId id = newMessageId();
+
+        final String stringAggregateId = stringifier.convert(id);
+        assertNotNull(stringAggregateId);
+
+        final AggregateStateId restored = stringifier.reverse().convert(stringAggregateId);
+        assertEquals(id, restored);
     }
 
     private static AggregateStateId newStringId() {
@@ -191,10 +180,6 @@ public class AggregateStateIdStringifierShould {
 
     private static AggregateStateId newMessageId() {
         return AggregateStateId.of(Sample.messageOfType(ProjectId.class), TypeUrl.of(Any.class));
-    }
-
-    private static AggregateStateId newRandomMessageId() {
-        return AggregateStateId.of(Sample.messageOfType(Any.class), TypeUrl.of(Any.class));
     }
 
     private static class ProjectIdStringifier extends Stringifier<ProjectId> {
