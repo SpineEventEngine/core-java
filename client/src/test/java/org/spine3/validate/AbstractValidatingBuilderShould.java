@@ -76,6 +76,7 @@ public class AbstractValidatingBuilderShould {
                            .build(), converted);
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored") // OK for this test.
     @Test(expected = ConversionException.class)
     public void throw_exception_when_string_cannot_be_converted() throws ConversionException {
         final String stringToConvert = "";
