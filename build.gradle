@@ -42,7 +42,7 @@ buildscript {
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.
-        generateValidators = false
+        generateValidatorsOption = false
     }
 
     dependencies {
