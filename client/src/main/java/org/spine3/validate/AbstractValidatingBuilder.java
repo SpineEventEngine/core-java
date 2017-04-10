@@ -30,6 +30,8 @@ import org.spine3.base.Stringifiers;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static com.google.common.base.Throwables.getRootCause;
+
 /**
  * Serves as an abstract base for all validating builders.
  *
@@ -49,22 +51,20 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     /**
      * Converts the passed `raw` value and returns it.
      *
+     * @param <V>   the type of the converted value
+     * @param value the value to convert
      * @param type  the key of the {@code StringifierRegistry} storage
      *              to obtain the {@code Stringifier}
-     * @param value the value to convert
-     * @param <V>   the type of the converted value
      * @return the converted value
      * @throws ConversionException if passed value cannot be converted
      */
-    @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
-    // It is OK because caught exception is not ignored,
-    // it delivers information for the exception to throw.
-    public <V> V getConvertedValue(Type type, String value) throws ConversionException {
+    public <V> V convert(String value, Type type) throws ConversionException {
         try {
             final V convertedValue = Stringifiers.fromString(value, type);
             return convertedValue;
         } catch (RuntimeException ex) {
-            throw new ConversionException(ex.getMessage(), ex);
+            final Throwable rootCause = getRootCause(ex);
+            throw new ConversionException(ex.getMessage(), rootCause);
         }
     }
 

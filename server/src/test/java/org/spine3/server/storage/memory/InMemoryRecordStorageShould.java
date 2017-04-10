@@ -28,6 +28,8 @@ import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
 
+import static java.lang.String.format;
+
 /**
  * @author Dmytro Dashenkov
  */

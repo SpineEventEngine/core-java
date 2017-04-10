@@ -48,6 +48,7 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.test.aggregate.user.User;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
 
@@ -71,9 +72,8 @@ import static org.spine3.server.aggregate.Given.EventMessage.taskAdded;
 import static org.spine3.test.Given.aggregateOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
+import static org.spine3.test.Verify.assertSize;
 import static org.spine3.test.aggregate.Project.newBuilder;
-
-S
 
 /**
  * @author Alexander Litus

@@ -38,6 +38,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.base.Stringifiers.listStringifier;
 import static org.spine3.base.Types.listTypeOf;
@@ -61,16 +62,18 @@ public class AbstractValidatingBuilderShould {
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         final List<Integer> convertedValue =
-                validatingBuilder.getConvertedValue(type, "\"1\"");
+                validatingBuilder.convert("\"1\"", type);
         final List<Integer> expectedList = newArrayList(1);
         assertThat(convertedValue, is(expectedList));
     }
 
-    @Test(expected = ConversionException.class)
-    public void throw_exception_when_appropriate_stringifier_is_not_found() throws
-                                                                            ConversionException {
+    @Test
+    public void use_default_message_stringifier() throws ConversionException {
         final String stringToConvert = "{value:1}";
-        validatingBuilder.getConvertedValue(TaskId.class, stringToConvert);
+        final TaskId converted = validatingBuilder.convert(stringToConvert, TaskId.class);
+        assertEquals(TaskId.newBuilder()
+                           .setValue("1")
+                           .build(), converted);
     }
 
     @Test(expected = ConversionException.class)
@@ -80,7 +83,7 @@ public class AbstractValidatingBuilderShould {
         final Stringifier<List<Timestamp>> stringifier = listStringifier(Timestamp.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
-        validatingBuilder.getConvertedValue(type, stringToConvert);
+        validatingBuilder.convert(stringToConvert, type);
     }
 
     @Test
