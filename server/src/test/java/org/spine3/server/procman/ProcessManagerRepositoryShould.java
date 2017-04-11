@@ -33,12 +33,12 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.EventFactory;
+import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
@@ -180,7 +180,7 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchEvent(Message eventMessage) {
-        final Event event = Events.createEvent(eventMessage, EventContext.getDefaultInstance());
+        final Event event = EventFactory.createEvent(eventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
         assertTrue(TestProcessManager.processed(eventMessage));
     }
@@ -230,7 +230,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
+        final Event event = EventFactory.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
         repository.dispatch(event);
     }
 

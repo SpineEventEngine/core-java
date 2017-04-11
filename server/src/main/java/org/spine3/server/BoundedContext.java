@@ -25,28 +25,24 @@ import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Response;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandDispatcher;
-import org.spine3.server.command.CommandStore;
-import org.spine3.server.command.DelegatingCommandDispatcher;
+import org.spine3.server.command.EventFactory;
+import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.commandbus.CommandDispatcher;
+import org.spine3.server.commandbus.DelegatingCommandDispatcher;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.integration.IntegrationEvent;
-import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.stand.Stand;
@@ -66,7 +62,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
 
 /**
@@ -318,21 +313,9 @@ public final class BoundedContext
         final Message eventMsg = unpack(integrationEvent.getMessage());
         final boolean isValid = eventBus.validate(eventMsg, responseObserver);
         if (isValid) {
-            final Event event = toEvent(integrationEvent);
+            final Event event = EventFactory.toEvent(integrationEvent);
             eventBus.post(event);
         }
-    }
-
-    private static Event toEvent(IntegrationEvent integrationEvent) {
-        final IntegrationEventContext sourceContext = integrationEvent.getContext();
-        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
-        final EventContext context = EventContext.newBuilder()
-                                                 .setEventId(sourceContext.getEventId())
-                                                 .setTimestamp(sourceContext.getTimestamp())
-                                                 .setProducerId(AnyPacker.pack(producerId))
-                                                 .build();
-        final Event result = Events.createEvent(integrationEvent.getMessage(), context);
-        return result;
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */

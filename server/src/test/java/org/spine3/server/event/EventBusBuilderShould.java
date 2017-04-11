@@ -26,8 +26,8 @@ import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
+import org.spine3.validate.MessageValidator;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;

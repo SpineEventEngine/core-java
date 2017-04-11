@@ -45,7 +45,7 @@ public class DispatcherRegistry<C extends MessageClass,
      * The map from a message class to one or more dispatchers of
      * messages of this class.
      *
-     * <p>Some implementations like {@link org.spine3.server.command.CommandBus CommandBus}
+     * <p>Some implementations like {@link org.spine3.server.commandbus.CommandBus CommandBus}
      * will allow only one dispatcher per message class. This should be handled
      * when registering dispatchers.
      */

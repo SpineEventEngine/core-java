@@ -246,7 +246,7 @@ public class Tests {
      * Returns {@code StreamObserver} that records the responses.
      *
      * <p>Use this method when you need to verify the responses of calls like
-     * {@link org.spine3.server.command.CommandBus#post(org.spine3.base.Command, StreamObserver)
+     * {@link org.spine3.server.commandbus.CommandBus#post(org.spine3.base.Command, StreamObserver)
      * CommandBus.post()} and similar methods.
      *
      * <p>Returns a fresh instance upon every call to avoid state clashes.

@@ -29,7 +29,7 @@ import org.mockito.stubbing.Answer;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Response;
-import org.spine3.server.command.CommandBus;
+import org.spine3.server.commandbus.CommandBus;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;

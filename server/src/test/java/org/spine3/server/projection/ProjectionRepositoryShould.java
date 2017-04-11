@@ -32,13 +32,13 @@ import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
@@ -203,7 +203,7 @@ public class ProjectionRepositoryShould
     }
 
     private void checkDispatchesEvent(Message eventMessage) {
-        final Event event = Events.createEvent(eventMessage, createEventContext(ID, tenantId()));
+        final Event event = EventFactory.createEvent(eventMessage, createEventContext(ID, tenantId()));
 
         keepTenantIdFromEvent(event);
 
@@ -227,7 +227,7 @@ public class ProjectionRepositoryShould
     private void checkDoesNotDispatchEventWith(Status status) {
         repository().setStatus(status);
         final ProjectCreated eventMsg = projectCreated();
-        final Event event = Events.createEvent(eventMsg, createEventContext(ID, tenantId()));
+        final Event event = EventFactory.createEvent(eventMsg, createEventContext(ID, tenantId()));
 
         repository().dispatch(event);
 
@@ -238,8 +238,8 @@ public class ProjectionRepositoryShould
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
-        final Event event = Events.createEvent(unknownEventMessage,
-                                               EventContext.getDefaultInstance());
+        final Event event = EventFactory.createEvent(unknownEventMessage,
+                                                     EventContext.getDefaultInstance());
 
         repository().dispatch(event);
     }
@@ -380,14 +380,13 @@ public class ProjectionRepositoryShould
                                                    .build();
         final EventContext context =
                 EventContext.newBuilder()
-                            .setEventId(EventId.newBuilder()
-                                               .setUuid("mock-event"))
+                            .setEventId(EventFactory.generateId())
                             .setProducerId(AnyPacker.pack(projectId))
                             .setCommandContext(CommandContext.newBuilder()
                                                              .setTenantId(tenantId()))
                             .setTimestamp(Timestamps2.getCurrentTime())
                             .build();
-        final Event event = Events.createEvent(eventMessage, context);
+        final Event event = EventFactory.createEvent(eventMessage, context);
         appendEvent(boundedContext.getEventBus()
                                   .getEventStore(), event);
         // Set up repository
@@ -419,12 +418,11 @@ public class ProjectionRepositoryShould
                                                        .setProjectId(projectId)
                                                        .build();
             final EventContext context = EventContext.newBuilder()
-                                                     .setEventId(EventId.newBuilder()
-                                                                        .setUuid(valueOf(i)))
+                                                     .setEventId(EventFactory.generateId())
                                                      .setProducerId(AnyPacker.pack(projectId))
                                                      .setTimestamp(Timestamps2.getCurrentTime())
                                                      .build();
-            final Event event = Events.createEvent(eventMessage, context);
+            final Event event = EventFactory.createEvent(eventMessage, context);
             appendEvent(eventStore, event);
         }
         // Set up repository
