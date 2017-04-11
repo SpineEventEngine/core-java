@@ -20,6 +20,7 @@
 
 package org.spine3.test;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -59,9 +60,8 @@ public class TestEventFactory extends EventFactory {
         return result;
     }
 
-    public static TestEventFactory newInstance(TestCommandFactory commandFactory) {
+    public static TestEventFactory newInstance(Any producerId, TestCommandFactory commandFactory) {
         checkNotNull(commandFactory);
-        final Message producerId = commandFactory.getActor();
         final CommandContext commandContext = commandFactory.createContext();
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
@@ -70,10 +70,9 @@ public class TestEventFactory extends EventFactory {
         return result;
     }
 
-    public static TestEventFactory newInstance(Class<?> testSuiteClass) {
-        final TestCommandFactory commandFactory =
-                TestCommandFactory.newInstance(testSuiteClass);
-        return newInstance(commandFactory);
+    public static TestEventFactory newInstance(Any producerId, Class<?> testSuiteClass) {
+        final TestCommandFactory commandFactory = TestCommandFactory.newInstance(testSuiteClass);
+        return newInstance(producerId, commandFactory);
     }
     /**
      * Creates an event produced at the passed time.

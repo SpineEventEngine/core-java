@@ -23,18 +23,18 @@ package org.spine3.server.projection;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.base.Version;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
@@ -48,6 +48,9 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestEventFactory;
+import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
@@ -76,6 +79,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
 import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
@@ -87,7 +91,9 @@ import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 /**
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
                                             ProjectId,
@@ -378,15 +384,8 @@ public class ProjectionRepositoryShould
         final Message eventMessage = ProjectCreated.newBuilder()
                                                    .setProjectId(projectId)
                                                    .build();
-        final EventContext context =
-                EventContext.newBuilder()
-                            .setEventId(EventFactory.generateId())
-                            .setProducerId(AnyPacker.pack(projectId))
-                            .setCommandContext(CommandContext.newBuilder()
-                                                             .setTenantId(tenantId()))
-                            .setTimestamp(Timestamps2.getCurrentTime())
-                            .build();
-        final Event event = EventFactory.createEvent(eventMessage, context);
+        final Event event = createEvent(pack(projectId), eventMessage);
+
         appendEvent(boundedContext.getEventBus()
                                   .getEventStore(), event);
         // Set up repository
@@ -401,12 +400,18 @@ public class ProjectionRepositoryShould
         verify(repository, never()).store(any(TestProjection.class));
     }
 
+    private TestEventFactory newEventFactory(Any producerId) {
+        return TestEventFactory.newInstance(producerId,
+                TestCommandFactory.newInstance(getClass(), tenantId()));
+    }
+
     @SuppressWarnings("unchecked") // Due to mockito matcher usage
     @Test
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
         // Set up bounded context
-        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(
-                TestEventBusFactory.create());
+        final BoundedContext boundedContext =
+                TestBoundedContextFactory.MultiTenant.newBoundedContext(
+                        TestEventBusFactory.create());
         final int eventsCount = 10;
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
@@ -417,12 +422,7 @@ public class ProjectionRepositoryShould
             final Message eventMessage = ProjectCreated.newBuilder()
                                                        .setProjectId(projectId)
                                                        .build();
-            final EventContext context = EventContext.newBuilder()
-                                                     .setEventId(EventFactory.generateId())
-                                                     .setProducerId(AnyPacker.pack(projectId))
-                                                     .setTimestamp(Timestamps2.getCurrentTime())
-                                                     .build();
-            final Event event = EventFactory.createEvent(eventMessage, context);
+            final Event event = createEvent(pack(projectId), eventMessage);
             appendEvent(eventStore, event);
         }
         // Set up repository
@@ -434,6 +434,10 @@ public class ProjectionRepositoryShould
 
         // Check bulk write
         verify(repository, never()).store(any(Projection.class));
+    }
+
+    private Event createEvent(Any producerId, Message eventMessage) {
+        return newEventFactory(producerId).createEvent(eventMessage, Tests.<Version>nullRef());
     }
 
     @Test

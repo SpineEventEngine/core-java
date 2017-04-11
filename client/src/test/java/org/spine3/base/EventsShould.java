@@ -32,6 +32,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
 
@@ -50,23 +51,44 @@ import static org.spine3.base.Events.getTimestamp;
 import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.command.EventFactory.createEvent;
-import static org.spine3.test.EventTests.createEventOccurredMinutesAgo;
-import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newUuidValue;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 
+/**
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 public class EventsShould {
 
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(pack(newStringValue(EventsShould.class.getSimpleName())),
+                                         EventsShould.class);
     private EventContext context;
 
     private final StringValue stringValue = newStringValue(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = newDoubleValue(10.1);
+
+    public static EventContext newEventContext() {
+        final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
+                                                     Tests.<Version>nullRef());
+        return event.getContext();
+    }
+
+    public static Event createEventOccurredMinutesAgo(int minutesAgo) {
+        final Event result = eventFactory.createEvent(newUuidValue(),
+                                                      null,
+                                                      minutesAgo(minutesAgo));
+        return result;
+    }
 
     @Before
     public void setUp() {
