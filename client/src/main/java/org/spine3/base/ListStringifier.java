@@ -39,32 +39,32 @@ import static org.spine3.base.StringifierRegistry.getStringifier;
  * for the correct usage of the {@code ListStringifier}.
  *
  * <h3>Example</h3>
+ * <pre>    {@code
+ *   // Stringifier creation.
+ *   final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
  *
- * {@code
- *    // Stringifier creation.
- *    final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
+ *   // The registration of the stringifier.
+ *   final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
+ *   final Type type = Types.listTypeOf(Integer.class);
+ *   StringifierRegistry.getInstance().register(listStringifier, type);
  *
- *    // The registration of the stringifier.
- *    final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
- *    final Type type = Types.listTypeOf(Integer.class);
- *    StringifierRegistry.getInstance().register(listStringifier, type);
+ *   // Obtain already registered stringifier.
+ *   final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
+ *                                                                         .getStringifier(type);
  *
- *    // Obtain already registered stringifier.
- *    final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
- *                                                                          .getStringifier(type);
+ *   // Convert to string.
+ *   final List<Integer> listToConvert = newArrayList(1, 2, 3);
  *
- *    // Convert to string.
- *    final List<Integer> listToConvert = newArrayList(1, 2, 3);
+ *   // The result is: \"1\",\"2\",\"3\".
+ *   final String convertedString = listStringifer.toString(listToConvert);
  *
- *    // The result is: \"1\",\"2\",\"3\".
- *    final String convertedString = listStringifer.toString(listToConvert);
- *
- *    // Convert from string.
- *    final String stringToConvert = ...
- *    final List<Integer> convertedList = listStringifier.fromString(stringToConvert);
- * }
+ *   // Convert from string.
+ *   final String stringToConvert = ...
+ *   final List<Integer> convertedList = listStringifier.fromString(stringToConvert);}
+ * </pre>
  *
  * @param <T> the type of the elements in the list.
+ * @author Illia Shepilov
  */
 class ListStringifier<T> extends Stringifier<List<T>> {
 

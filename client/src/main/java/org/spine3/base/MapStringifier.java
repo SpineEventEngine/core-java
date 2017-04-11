@@ -40,32 +40,32 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * for the correct usage of {@code MapStringifier}.
  *
  * <h3>Example</h3>
+ * <pre>    {@code
+ *   // The registration of the stringifier.
+ *   final Type type = Types.mapTypeOf(String.class, Long.class);
+ *   StringifierRegistry.getInstance().register(stringifier, type);
  *
- * {@code
- *  // The registration of the stringifier.
- *  final Type type = Types.mapTypeOf(String.class, Long.class);
- *  StringifierRegistry.getInstance().register(stringifier, type);
+ *   // Obtain already registered `MapStringifier`.
+ *   final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
+ *                                                                            .getStringifier(type);
  *
- *  // Obtain already registered `MapStringifier`.
- *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
- *                                                                           .getStringifier(type);
+ *   // Convert to string.
+ *   final Map<String, Long> mapToConvert = newHashMap();
+ *   mapToConvert.put("first", 1);
+ *   mapToConvert.put("second", 2);
  *
- *  // Convert to string.
- *  final Map<String, Long> mapToConvert = newHashMap();
- *  mapToConvert.put("first", 1);
- *  mapToConvert.put("second", 2);
- *
- *  // The result is: \"first\":\"1\",\"second\":\"2\".
- *  final String convertedString = mapStringifier.toString(mapToConvert);
+ *   // The result is: \"first\":\"1\",\"second\":\"2\".
+ *   final String convertedString = mapStringifier.toString(mapToConvert);
  *
  *
- *  // Convert from string.
- *  final String stringToConvert = ...
- *  final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert);
- * }
+ *   // Convert from string.
+ *   final String stringToConvert = ...
+ *   final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert); }
+ * </pre>
  *
  * @param <K> the type of the keys in the map
  * @param <V> the type of the values in the map
+ * @author Illia Shepilov
  */
 class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
@@ -120,7 +120,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
-                                                       String keyValuePattern) {
+            String keyValuePattern) {
         final Splitter.MapSplitter result =
                 Splitter.onPattern(bucketPattern)
                         .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
