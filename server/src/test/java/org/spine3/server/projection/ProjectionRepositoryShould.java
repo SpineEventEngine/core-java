@@ -87,7 +87,6 @@ import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 /**
  * @author Alexander Litus
@@ -100,6 +99,7 @@ public class ProjectionRepositoryShould
                                             Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
+    private static final Any PRODUCER_ID = pack(ID);
 
     private BoundedContext boundedContext;
 
@@ -161,6 +161,20 @@ public class ProjectionRepositoryShould
         TestProjection.clearMessageDeliveryHistory();
     }
 
+    private TestEventFactory newEventFactory(Any producerId) {
+        return TestEventFactory.newInstance(producerId,
+                                            TestCommandFactory.newInstance(getClass(), tenantId()));
+    }
+
+    private Event createEvent(Any producerId, Message eventMessage) {
+        return newEventFactory(producerId).createEvent(eventMessage, Tests.<Version>nullRef());
+    }
+
+    private void appendEvent(EventStore eventStore, Event event) {
+        eventStore.append(event);
+        keepTenantIdFromEvent(event);
+    }
+
     // Tests
     //-------------------------
 
@@ -209,7 +223,8 @@ public class ProjectionRepositoryShould
     }
 
     private void checkDispatchesEvent(Message eventMessage) {
-        final Event event = EventFactory.createEvent(eventMessage, createEventContext(ID, tenantId()));
+        final TestEventFactory eventFactory = newEventFactory(PRODUCER_ID);
+        final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
 
         keepTenantIdFromEvent(event);
 
@@ -233,7 +248,7 @@ public class ProjectionRepositoryShould
     private void checkDoesNotDispatchEventWith(Status status) {
         repository().setStatus(status);
         final ProjectCreated eventMsg = projectCreated();
-        final Event event = EventFactory.createEvent(eventMsg, createEventContext(ID, tenantId()));
+        final Event event = createEvent(PRODUCER_ID, eventMsg);
 
         repository().dispatch(event);
 
@@ -337,11 +352,6 @@ public class ProjectionRepositoryShould
         assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
     }
 
-    private void appendEvent(EventStore eventStore, Event event) {
-        eventStore.append(event);
-        keepTenantIdFromEvent(event);
-    }
-
     @Test
     public void use_id_set_function() {
         final IdSetEventFunction<ProjectId, ProjectCreated> delegateFn =
@@ -400,11 +410,6 @@ public class ProjectionRepositoryShould
         verify(repository, never()).store(any(TestProjection.class));
     }
 
-    private TestEventFactory newEventFactory(Any producerId) {
-        return TestEventFactory.newInstance(producerId,
-                TestCommandFactory.newInstance(getClass(), tenantId()));
-    }
-
     @SuppressWarnings("unchecked") // Due to mockito matcher usage
     @Test
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
@@ -434,10 +439,6 @@ public class ProjectionRepositoryShould
 
         // Check bulk write
         verify(repository, never()).store(any(Projection.class));
-    }
-
-    private Event createEvent(Any producerId, Message eventMessage) {
-        return newEventFactory(producerId).createEvent(eventMessage, Tests.<Version>nullRef());
     }
 
     @Test
