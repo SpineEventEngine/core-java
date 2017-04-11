@@ -25,12 +25,11 @@ import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.protobuf.AnyPacker;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -39,7 +38,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  */
 public class ImportEventFactoryShould {
 
-    private final Any producerId = AnyPacker.pack(newStringValue(getClass().getSimpleName()));
+    private final Any producerId = pack(getClass().getSimpleName());
 
     @Test
     public void create_import_event() {

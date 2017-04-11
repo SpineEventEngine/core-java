@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.base.ItemQuoter.converter;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
@@ -140,7 +139,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Converter<String, String> quoteConverter = converter();
+        final Converter<String, String> quoteConverter = Quoter.instance();
         final Map<String, String> resultMap = newHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
             final String convertedKey = keyStringifier.andThen(quoteConverter)
@@ -164,7 +163,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private Map<K, V> convert(Map<String, String> buckets) {
-        final Converter<String, String> quoteConverter = converter();
+        final Converter<String, String> quoteConverter = Quoter.instance();
         final Map<K, V> resultMap = newHashMap();
         try {
             for (Map.Entry<String, String> bucket : buckets.entrySet()) {

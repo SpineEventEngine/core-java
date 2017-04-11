@@ -46,11 +46,11 @@ import static org.spine3.base.Events.getProducer;
 import static org.spine3.base.Events.getTimestamp;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 import static org.spine3.server.command.EventFactory.createEvent;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
@@ -63,7 +63,7 @@ import static org.spine3.test.TimeTests.Past.minutesAgo;
 public class EventsShould {
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(pack(newStringValue(EventsShould.class.getSimpleName())),
+            TestEventFactory.newInstance(pack(EventsShould.class.getSimpleName()),
                                          EventsShould.class);
     private EventContext context;
 
