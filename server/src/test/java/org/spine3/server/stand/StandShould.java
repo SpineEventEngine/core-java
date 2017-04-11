@@ -55,6 +55,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -260,10 +261,9 @@ public class StandShould extends TenantAwareTest {
 
         verify(executor, never()).execute(any(Runnable.class));
 
-        final Any someUpdate = AnyPacker.pack(Project.getDefaultInstance());
-        final Object someId = new Object();
+        final ProjectId someId = ProjectId.getDefaultInstance();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(someId, someUpdate, stateVersion);
+        stand.update(asEnvelope(someId, Project.getDefaultInstance(), stateVersion));
 
         verify(executor, times(1)).execute(any(Runnable.class));
     }
@@ -286,16 +286,16 @@ public class StandShould extends TenantAwareTest {
         final CustomerId customerId = customerIdFor(numericIdValue);
         final CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
         final Customer customerState = customerAggregate.getState();
-        final Any packedState = AnyPacker.pack(customerState);
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = Tests.newVersionWithNumber(1);
 
         verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecord.class));
 
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(asEnvelope(customerId, customerState, stateVersion));
 
         final AggregateStateId expectedAggregateStateId =
                 AggregateStateId.of(customerId, customerType);
+        final Any packedState = AnyPacker.pack(customerState);
         final EntityRecord expectedRecord = EntityRecord.newBuilder()
                                                         .setState(packedState)
                                                         .build();
@@ -397,10 +397,10 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
 
+        final Any packedState = AnyPacker.pack(customer);
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
 
@@ -420,10 +420,10 @@ public class StandShould extends TenantAwareTest {
                                                                               .next();
         final ProjectId projectId = sampleData.getKey();
         final Project project = sampleData.getValue();
-        final Any packedState = AnyPacker.pack(project);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(projectId, packedState, stateVersion);
+        stand.update(asEnvelope(projectId, project, stateVersion));
 
+        final Any packedState = AnyPacker.pack(project);
         assertEquals(packedState, memoizeCallback.newEntityState);
     }
 
@@ -444,9 +444,8 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
 
         assertNull(memoizeCallback.newEntityState);
     }
@@ -480,10 +479,10 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
 
+        final Any packedState = AnyPacker.pack(customer);
         for (MemoizeEntityUpdateCallback callback : callbacks) {
             assertEquals(packedState, callback.newEntityState);
             verify(callback, times(1)).onStateChanged(any(Any.class));
@@ -501,9 +500,8 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
 
         verify(callback, never()).onStateChanged(any(Any.class));
     }
@@ -530,9 +528,8 @@ public class StandShould extends TenantAwareTest {
         for (Map.Entry<CustomerId, Customer> sampleEntry : sampleCustomers.entrySet()) {
             final CustomerId customerId = sampleEntry.getKey();
             final Customer customer = sampleEntry.getValue();
-            final Any packedState = AnyPacker.pack(customer);
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(customerId, packedState, stateVersion);
+            stand.update(asEnvelope(customerId, customer, stateVersion));
         }
 
         assertEquals(newHashSet(sampleCustomers.values()), callbackStates);
@@ -567,7 +564,7 @@ public class StandShould extends TenantAwareTest {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
         final Query customerQuery = queryFactory.readAll(Customer.class);
 
@@ -689,7 +686,7 @@ public class StandShould extends TenantAwareTest {
             final Customer customer = getSampleCustomer();
             customers.add(customer);
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
+            stand.update(asEnvelope(customer.getId(), customer, stateVersion));
         }
 
         final Set<CustomerId> ids = Collections.singleton(customers.get(0)
@@ -716,7 +713,7 @@ public class StandShould extends TenantAwareTest {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
         // FieldMask with invalid type URLs.
         final String[] paths = {"invalid_type_url_example", Project.getDescriptor()
@@ -800,7 +797,7 @@ public class StandShould extends TenantAwareTest {
 
         final Customer sampleCustomer = getSampleCustomer();
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(sampleCustomer.getId(), AnyPacker.pack(sampleCustomer), stateVersion);
+        stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
         final String[] paths = new String[fieldIndexes.length];
 
@@ -875,7 +872,7 @@ public class StandShould extends TenantAwareTest {
                                                                           .setNumber(i))
                                                          .build();
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(customer.getId(), AnyPacker.pack(customer), stateVersion);
+            stand.update(asEnvelope(customer.getId(), customer, stateVersion));
 
             ids.add(customer.getId());
         }
@@ -1091,15 +1088,14 @@ public class StandShould extends TenantAwareTest {
         };
     }
 
-    private static void triggerMultipleUpdates(Map<CustomerId,
+    private void triggerMultipleUpdates(Map<CustomerId,
                                                Customer> sampleCustomers,
                                                Stand stand) {
         // Trigger the aggregate state updates.
         for (CustomerId id : sampleCustomers.keySet()) {
             final Customer sampleCustomer = sampleCustomers.get(id);
-            final Any customerState = AnyPacker.pack(sampleCustomer);
             final Version stateVersion = Tests.newVersionWithNumber(1);
-            stand.update(id, customerState, stateVersion);
+            stand.update(asEnvelope(id, sampleCustomer, stateVersion));
         }
     }
 
@@ -1240,6 +1236,17 @@ public class StandShould extends TenantAwareTest {
 
             assertEquals(message.hasField(field), paths.contains(field.getFullName()));
         }
+    }
+
+    /**
+     * Packs the parameters as {@code EntityStateEnvelope}
+     * bounded by the current {@linkplain #tenantId() tenant ID}.
+     */
+    protected EntityStateEnvelope asEnvelope(Object entityId,
+                                           Message entityState,
+                                           Version entityVersion) {
+        final TenantId tenantId = isMultitenant() ? tenantId() : TenantId.getDefaultInstance();
+        return EntityStateEnvelope.of(entityId, entityState, entityVersion, tenantId);
     }
 
     // ***** Inner classes used for tests. *****

@@ -110,10 +110,10 @@ public class MultiTenantStandShould extends StandShould {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Any packedState = AnyPacker.pack(customer);
         final Version stateVersion = Tests.newVersionWithNumber(1);
-        stand.update(customerId, packedState, stateVersion);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
 
+        final Any packedState = AnyPacker.pack(customer);
         // Verify that Default Tenant callback has got the update.
         assertEquals(packedState, defaultTenantCallback.getNewEntityState());
 

@@ -21,6 +21,7 @@ package org.spine3.server.stand;
 
 import com.google.common.base.Optional;
 import org.spine3.annotations.Internal;
+import org.spine3.base.CommandContext;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 
@@ -64,10 +65,12 @@ public class StandFunnel {
     /**
      * Post the state of an {@link VersionableEntity} to an instance of {@link Stand}.
      *
-     * @param entity the entity which state should be delivered to the {@code Stand}
+     * @param entity         the entity which state should be delivered to the {@code Stand}
+     * @param commandContext the context of the command, which triggered the entity state update.
      */
-    public void post(VersionableEntity entity) {
-        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity);
+    public void post(final VersionableEntity entity, CommandContext commandContext) {
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
+                                                                    commandContext.getTenantId());
         delivery.deliver(envelope);
     }
 

@@ -33,6 +33,7 @@ import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
+import org.spine3.test.TestCommandFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
@@ -59,6 +60,9 @@ import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBound
  * @author Dmytro Dashenkov
  */
 public class SubscriptionServiceShould {
+
+    private final TestCommandFactory commandFactory =
+            TestCommandFactory.newInstance(SubscriptionServiceShould.class);
 
     /*
      * Creation tests
@@ -214,7 +218,7 @@ public class SubscriptionServiceShould {
 
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
-                      .post(entity);
+                      .post(entity, commandFactory.createContext());
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
@@ -282,7 +286,7 @@ public class SubscriptionServiceShould {
         final int version = 1;
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
-                      .post(entity);
+                      .post(entity, commandFactory.createContext());
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -297,6 +301,7 @@ public class SubscriptionServiceShould {
                                                                            .add(boundedContext)
                                                                            .build();
         final Target target = getProjectQueryTarget();
+
         final Topic topic = Topic.newBuilder()
                                  .setTarget(target)
                                  .build();
