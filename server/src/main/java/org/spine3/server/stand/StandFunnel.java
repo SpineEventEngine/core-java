@@ -32,7 +32,7 @@ import static com.google.common.base.Preconditions.checkState;
  * the entity repositories to the {@link Stand}.
  *
  * <p><strong>Note:</strong> Unlike {@link org.spine3.server.event.EventBus EventBus} and
- * {@link org.spine3.server.command.CommandBus CommandBus}, which assume many publishers and
+ * {@link org.spine3.server.commandbus.CommandBus CommandBus}, which assume many publishers and
  * many subscribers, the funnel may have zero or more publishers (typically, instances of
  * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository} or
  * {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}),

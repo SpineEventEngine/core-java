@@ -20,7 +20,7 @@
 
 /**
  * This package provides classes for working with the
- * {@linkplain org.spine3.server.command.CommandBus bus} output.
+ * {@linkplain org.spine3.server.commandbus.CommandBus bus} output.
  */
 
 @ParametersAreNonnullByDefault

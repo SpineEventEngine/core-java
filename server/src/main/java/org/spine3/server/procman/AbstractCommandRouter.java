@@ -29,7 +29,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Response;
-import org.spine3.server.command.CommandBus;
+import org.spine3.server.commandbus.CommandBus;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;

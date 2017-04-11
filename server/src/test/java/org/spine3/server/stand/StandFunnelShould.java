@@ -203,7 +203,8 @@ public class StandFunnelShould {
         return result;
     }
 
-    private static void checkUpdatesDelivery(boolean isConcurrent, BoundedContextAction... dispatchActions) {
+    private static void checkUpdatesDelivery(boolean isConcurrent,
+                                             BoundedContextAction... dispatchActions) {
         checkNotNull(dispatchActions);
 
         final Stand stand = mock(Stand.class);

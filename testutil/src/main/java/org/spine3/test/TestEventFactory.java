@@ -20,43 +20,75 @@
 
 package org.spine3.test;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.annotations.Internal;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.base.Version;
+import org.spine3.server.command.EventFactory;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
- * A factory for creating tests instances of {@link Event}s.
+ * The factory or producing events for tests.
  *
  * @author Alexander Yevsyukov
  */
-@Internal
-@VisibleForTesting
-public class TestEventFactory {
+public class TestEventFactory extends EventFactory {
 
-    private final Any producerId;
-
-    private TestEventFactory(Class<?> testClass) {
-        this.producerId = AnyPacker.pack(newStringValue(testClass.getName()));
+    private TestEventFactory(Builder builder) {
+        super(builder);
     }
 
-    public static TestEventFactory newInstance(Class<?> testClass) {
-        return new TestEventFactory(testClass);
+    public static TestEventFactory newInstance(Class<?> testSuiteClass,
+                                               CommandContext commandContext) {
+        checkNotNull(testSuiteClass);
+        checkNotNull(commandContext);
+
+        final StringValue producerId = newStringValue(testSuiteClass.getName());
+        final Builder builder = EventFactory.newBuilder()
+                                            .setProducerId(producerId)
+                                            .setCommandContext(commandContext);
+
+        final TestEventFactory result = new TestEventFactory(builder);
+        return result;
     }
 
-    public Event createEvent(Message eventMessage, CommandContext commandContext) {
-        final EventContext eventContext = CommandHandlerMethod.createEventContext(
-                producerId,
-                null,
-                commandContext);
-        return Events.createEvent(eventMessage, eventContext);
+    public static TestEventFactory newInstance(TestCommandFactory commandFactory) {
+        checkNotNull(commandFactory);
+        final Message producerId = commandFactory.getActor();
+        final CommandContext commandContext = commandFactory.createContext();
+        final Builder builder = EventFactory.newBuilder()
+                                            .setProducerId(producerId)
+                                            .setCommandContext(commandContext);
+        final TestEventFactory result = new TestEventFactory(builder);
+        return result;
+    }
+
+    public static TestEventFactory newInstance(Class<?> testSuiteClass) {
+        final TestCommandFactory commandFactory =
+                TestCommandFactory.newInstance(testSuiteClass);
+        return newInstance(commandFactory);
+    }
+    /**
+     * Creates an event produced at the passed time.
+     */
+    public Event createEvent(Message messageOrAny,
+            @Nullable Version version,
+            Timestamp atTime) {
+        final Event event = createEvent(messageOrAny, version);
+        final EventContext context = event.getContext()
+                                          .toBuilder()
+                                          .setTimestamp(atTime)
+                                          .build();
+        final Event result = event.toBuilder()
+                                  .setContext(context)
+                                  .build();
+        return result;
     }
 }

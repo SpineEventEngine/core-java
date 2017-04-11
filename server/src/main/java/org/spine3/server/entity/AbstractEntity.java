@@ -22,8 +22,8 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.MessageValidator;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
