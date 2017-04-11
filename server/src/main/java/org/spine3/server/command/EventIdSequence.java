@@ -25,6 +25,8 @@ import com.google.common.base.Strings;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 import static org.spine3.base.Identifiers.idToString;
 
 /**
@@ -71,7 +73,7 @@ final class EventIdSequence {
     /**
      * The number of the next ID in the sequence.
      */
-    private int count = 0;
+    private final AtomicInteger count = new AtomicInteger(0);
 
     /**
      * Creates a new one digit event ID sequence for the command with the passed ID.
@@ -109,7 +111,7 @@ final class EventIdSequence {
      * Generates the next event ID in the sequence.
      */
     EventId next() {
-        ++count;
+        count.incrementAndGet();
         final String value = buildValue();
         final EventId result = EventId.newBuilder()
                                       .setValue(value)
@@ -118,7 +120,7 @@ final class EventIdSequence {
     }
 
     private String buildValue() {
-        final String sequenceNumber = Integer.toString(count, RADIX);
+        final String sequenceNumber = Integer.toString(count.get(), RADIX);
         final String suffix = (suffixLength == 1)
                     ? sequenceNumber
                     : Strings.padStart(sequenceNumber, suffixLength, LEADING_ZERO);
