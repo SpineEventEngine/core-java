@@ -147,9 +147,22 @@ public class AggregateStateIdStringifierShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_convert_invalid_string() {
         final String invalidId = "I'm invalid!";
-        stringifier()
-                        .reverse()
-                        .convert(invalidId);
+        stringifier().reverse()
+                     .convert(invalidId);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_convert_string_with_no_ID_type() {
+        final String invalidId = "google.protobuf/google.protobuf.Any-42";
+        stringifier().reverse()
+                     .convert(invalidId);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_convert_string_with_no_state_type_URL() {
+        final String invalidId = "-INT-42";
+        stringifier().reverse()
+                     .convert(invalidId);
     }
 
     @Test
@@ -160,7 +173,8 @@ public class AggregateStateIdStringifierShould {
         final String stringAggregateId = stringifier.convert(id);
         assertNotNull(stringAggregateId);
 
-        final AggregateStateId restored = stringifier.reverse().convert(stringAggregateId);
+        final AggregateStateId restored = stringifier.reverse()
+                                                     .convert(stringAggregateId);
         assertEquals(id, restored);
     }
 

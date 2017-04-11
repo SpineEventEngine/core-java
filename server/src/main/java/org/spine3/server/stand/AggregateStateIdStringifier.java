@@ -81,7 +81,7 @@ class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
 
         final int idTypeStartIndex = typeUrlEndIndex + 1;
         final int idTypeEndIndex = s.indexOf(DIVIDER, idTypeStartIndex);
-        checkArgument(typeUrlEndIndex > 0,
+        checkArgument(idTypeEndIndex > 0,
                       "Passed string does not contain the ID type.");
         final String idTypeString = s.substring(idTypeStartIndex, idTypeEndIndex);
         final Class idType = idTypeFromString(idTypeString);
