@@ -25,6 +25,8 @@ import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * An identifier for the state of a certain {@link org.spine3.server.aggregate.Aggregate Aggregate}.
  *
@@ -37,12 +39,13 @@ import javax.annotation.CheckReturnValue;
  * @author Alex Tymchenko
  */
 public final class AggregateStateId<I> {
+
     private final I aggregateId;
     private final TypeUrl stateType;
 
     private AggregateStateId(I aggregateId, TypeUrl stateType) {
-        this.aggregateId = aggregateId;
-        this.stateType = stateType;
+        this.aggregateId = checkNotNull(aggregateId);
+        this.stateType = checkNotNull(stateType);
     }
 
     @CheckReturnValue
