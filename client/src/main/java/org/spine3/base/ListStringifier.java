@@ -88,11 +88,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      * @param listGenericClass the class of the list elements
      */
     ListStringifier(Class<T> listGenericClass) {
-        super();
-        this.elementStringifier = getStringifier(listGenericClass);
-        this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
+        this(listGenericClass, DEFAULT_ELEMENT_DELIMITER);
     }
 
     /**
@@ -119,10 +115,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final Converter<String, String> quoteConverter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.instance();
         final List<String> convertedItems = newArrayList();
         for (T item : list) {
-            final String convertedItem = elementStringifier.andThen(quoteConverter)
+            final String convertedItem = elementStringifier.andThen(quoter)
                                                            .convert(item);
             convertedItems.add(convertedItem);
         }
@@ -135,12 +131,12 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
         final List<String> items = newArrayList(splitter.split(escapedString));
-        final Converter<String, String> quoteConverter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<String, T> converter = quoter.reverse()
+                                                     .andThen(elementStringifier.reverse());
         final List<T> result = newArrayList();
         for (String item : items) {
-            final T convertedItem = quoteConverter.reverse()
-                                                  .andThen(elementStringifier.reverse())
-                                                  .convert(item);
+            final T convertedItem = converter.convert(item);
             result.add(convertedItem);
         }
         return result;

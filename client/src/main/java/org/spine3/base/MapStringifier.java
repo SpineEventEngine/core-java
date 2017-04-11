@@ -92,12 +92,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      * @param valueClass the class of the value elements
      */
     MapStringifier(Class<K> keyClass, Class<V> valueClass) {
-        super();
-        this.keyStringifier = getStringifier(keyClass);
-        this.valueStringifier = getStringifier(valueClass);
-        this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
+        this(keyClass, valueClass, DEFAULT_ELEMENT_DELIMITER);
     }
 
     /**
@@ -116,11 +111,11 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         this.valueStringifier = getStringifier(valueClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
+        this.splitter = createMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
     }
 
-    private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
-            String keyValuePattern) {
+    private static Splitter.MapSplitter createMapSplitter(String bucketPattern,
+                                                          String keyValuePattern) {
         final Splitter.MapSplitter result =
                 Splitter.onPattern(bucketPattern)
                         .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
@@ -139,13 +134,14 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Converter<String, String> quoteConverter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<K, String> keyConverter = keyStringifier.andThen(quoter);
+        final Converter<V, String> valueConverter = valueStringifier.andThen(quoter);
+
         final Map<String, String> resultMap = newHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
-            final String convertedKey = keyStringifier.andThen(quoteConverter)
-                                                      .convert(entry.getKey());
-            final String convertedValue = valueStringifier.andThen(quoteConverter)
-                                                          .convert(entry.getValue());
+            final String convertedKey = keyConverter.convert(entry.getKey());
+            final String convertedValue = valueConverter.convert(entry.getValue());
             resultMap.put(convertedKey, convertedValue);
         }
         final String result = Joiner.on(delimiter)
@@ -163,16 +159,16 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private Map<K, V> convert(Map<String, String> buckets) {
-        final Converter<String, String> quoteConverter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<String, K> keyConverter = quoter.reverse()
+                                                        .andThen(keyStringifier.reverse());
+        final Converter<String, V> valueConverter = quoter.reverse()
+                                                          .andThen(valueStringifier.reverse());
         final Map<K, V> resultMap = newHashMap();
         try {
             for (Map.Entry<String, String> bucket : buckets.entrySet()) {
-                final K convertedKey = quoteConverter.reverse()
-                                                     .andThen(keyStringifier.reverse())
-                                                     .convert(bucket.getKey());
-                final V convertedValue = quoteConverter.reverse()
-                                                       .andThen(valueStringifier.reverse())
-                                                       .convert(bucket.getValue());
+                final K convertedKey = keyConverter.convert(bucket.getKey());
+                final V convertedValue = valueConverter.convert(bucket.getValue());
                 resultMap.put(convertedKey, convertedValue);
             }
             return resultMap;
