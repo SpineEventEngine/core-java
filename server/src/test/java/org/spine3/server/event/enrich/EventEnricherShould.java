@@ -49,7 +49,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Events.getEnrichment;
+import static org.spine3.base.Enrichments.getEnrichment;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
@@ -178,14 +178,16 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
-        final Event event = EventFactory.createEvent(newStringValue(newUuid()), createEventContext(/*doNotEnrich=*/true));
+        final Event event = EventFactory.createEvent(newStringValue(newUuid()),
+                                                     createEventContext(/*doNotEnrich=*/true));
 
         assertFalse(enricher.canBeEnriched(event));
     }
 
     @Test
     public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class, String.class)
+        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class,
+                                                                        String.class)
                                                                     .apply(null);
         assertFalse(result);
     }

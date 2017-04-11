@@ -52,8 +52,8 @@ import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.LinkedListMultimap.create;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
+import static org.spine3.base.Enrichments.isEnrichmentEnabled;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.server.command.EventFactory.createEvent;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
