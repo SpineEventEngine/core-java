@@ -20,6 +20,7 @@
 
 package org.spine3.validate;
 
+import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 
 /**
@@ -31,6 +32,19 @@ import com.google.protobuf.Message;
  * @author Illia Shepilov
  */
 public interface ValidatingBuilder<T extends Message> {
+
+    /**
+     * Validates the field according to the protocol buffer message declaration.
+     *
+     * @param descriptor the {@code FieldDescriptor} of the field
+     * @param fieldValue the value of the field
+     * @param fieldName  the name of the field
+     * @param <V>        the type of the field value
+     * @throws ConstraintViolationThrowable if there are some constraint violations
+     */
+    <V> void validate(FieldDescriptor descriptor,
+                      V fieldValue,
+                      String fieldName) throws ConstraintViolationThrowable;
 
     /**
      * Returns constructed and validated {@code Message}.

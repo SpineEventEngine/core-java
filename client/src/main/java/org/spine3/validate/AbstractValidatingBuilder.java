@@ -59,15 +59,7 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
         }
     }
 
-    /**
-     * Validates the field according to the protocol buffer message declaration.
-     *
-     * @param descriptor the {@code FieldDescriptor} of the field
-     * @param fieldValue the value of the field
-     * @param fieldName  the name of the field
-     * @param <V>        the type of the field value
-     * @throws ConstraintViolationThrowable if there are some constraint violations
-     */
+    @Override
     public <V> void validate(FieldDescriptor descriptor, V fieldValue, String fieldName)
             throws ConstraintViolationThrowable {
         final FieldPath fieldPath = FieldPath.newBuilder()
