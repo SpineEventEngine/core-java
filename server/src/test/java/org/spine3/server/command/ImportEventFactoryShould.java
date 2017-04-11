@@ -34,6 +34,9 @@ import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.isNotDefault;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class ImportEventFactoryShould {
 
     private final Any producerId = AnyPacker.pack(newStringValue(getClass().getSimpleName()));

@@ -33,7 +33,7 @@ import static org.spine3.base.Identifiers.idToString;
  * @author Alexander Yevsyukov
  * @see EventId
  */
-class EventIdSequence {
+final class EventIdSequence {
 
     /**
      * The separator between command ID part and sequence number part.
