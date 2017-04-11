@@ -36,54 +36,55 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 class Quoter extends Converter<String, String> {
 
     private static final char QUOTE_SYMBOL = '\"';
+    private static final Pattern DOUBLE_BACKSLASH = Pattern.compile("\\\\");
 
     @Override
     protected String doForward(String s) {
-        return quoteElement(s);
+        return quote(s);
     }
 
-    private static String quoteElement(String stringToQuote) {
+    private static String quote(String stringToQuote) {
         checkNotNull(stringToQuote);
         return QUOTE_SYMBOL + stringToQuote + QUOTE_SYMBOL;
     }
 
     @Override
     protected String doBackward(String s) {
-        checkElement(s);
-        return unquoteElement(s);
+        checkNotNull(s);
+        checkQuoted(s);
+        return unquoteAndRemoveDoubleBackslashes(s);
     }
 
-    private static void checkElement(CharSequence element) {
+    private static void checkQuoted(CharSequence element) {
         final boolean isQuoted = isQuoted(element);
         if (!isQuoted) {
             throw newIllegalArgumentException("Illegal format of the element: %s", element);
         }
     }
 
-    private static String unquoteElement(String value) {
-        checkNotNull(value);
-        final String unquotedValue = Pattern.compile("\\\\")
-                                            .matcher(value.substring(2, value.length() - 2))
-                                            .replaceAll("");
+    private static String unquoteAndRemoveDoubleBackslashes(String value) {
+        final String unquotedValue = DOUBLE_BACKSLASH
+                .matcher(value.substring(2, value.length() - 2))
+                .replaceAll("");
         return unquotedValue;
     }
 
     /**
      * Checks that the {@code CharSequence} contains the escaped quotes.
      *
-     * @param stringToCheck the sequence of chars to check
+     * @param str the sequence of chars to check
      * @return {@code true} if the sequence contains further
      * and prior escaped quotes, {@code false} otherwise
      */
-    private static boolean isQuoted(CharSequence stringToCheck) {
-        final int stringLength = stringToCheck.length();
+    private static boolean isQuoted(CharSequence str) {
+        final int stringLength = str.length();
 
         if (stringLength < 2) {
             return false;
         }
 
-        boolean result = isQuote(stringToCheck.charAt(1)) &&
-                         isQuote(stringToCheck.charAt(stringLength - 1));
+        boolean result = isQuote(str.charAt(1)) &&
+                         isQuote(str.charAt(stringLength - 1));
         return result;
     }
 
