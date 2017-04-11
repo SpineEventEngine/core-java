@@ -74,12 +74,20 @@ public class TestEventFactory extends EventFactory {
         final TestCommandFactory commandFactory = TestCommandFactory.newInstance(testSuiteClass);
         return newInstance(producerId, commandFactory);
     }
+
+    /**
+     * Creates an event without version information.
+     */
+    public Event createEvent(Message messageOrAny) {
+        return createEvent(messageOrAny, Tests.<Version>nullRef());
+    }
+
     /**
      * Creates an event produced at the passed time.
      */
     public Event createEvent(Message messageOrAny,
-            @Nullable Version version,
-            Timestamp atTime) {
+                             @Nullable Version version,
+                             Timestamp atTime) {
         final Event event = createEvent(messageOrAny, version);
         final EventContext context = event.getContext()
                                           .toBuilder()
