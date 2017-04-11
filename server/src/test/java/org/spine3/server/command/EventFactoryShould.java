@@ -28,6 +28,9 @@ import org.spine3.test.TestCommandFactory;
 
 import static org.spine3.test.Tests.newUuidValue;
 
+/**
+ * @author Alexander Yevsyukov
+ */
 public class EventFactoryShould {
 
     private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
