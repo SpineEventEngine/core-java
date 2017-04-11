@@ -22,6 +22,7 @@ package org.spine3.server.storage;
 
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
@@ -29,7 +30,7 @@ import org.spine3.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
- * {@link org.spine3.server.command.CommandStore CommandStore},
+ * {@link CommandStore CommandStore},
  * {@link org.spine3.server.event.EventStore EventStore},
  * and {@link org.spine3.server.stand.Stand Stand}.
  *

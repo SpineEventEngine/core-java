@@ -29,29 +29,32 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Subscribe;
+import org.spine3.base.Version;
+import org.spine3.client.CommandFactory;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
+import org.spine3.test.TestCommandFactory;
+import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
-import org.spine3.type.TypeUrl;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * @author Dmytro Dashenkov
@@ -66,33 +69,31 @@ class Given {
     private Given() {
     }
 
-    static Event validEvent() {
-        return Event.newBuilder()
-                    .setMessage(
-                            pack(ProjectCreated.newBuilder()
-                                               .setProjectId(ProjectId.newBuilder()
-                                                                      .setId("12345AD0"))
-                                               .build())
-                                    .toBuilder()
-                                    .setTypeUrl(TypeUrl.Prefix.SPINE.value() + '/' +
-                                                ProjectCreated.getDescriptor()
-                                                              .getFullName())
-                                    .build())
-                    .setContext(EventContext.newBuilder()
-                                            .setEnrichment(Enrichment.newBuilder()
-                                                                     .setDoNotEnrich(true))
-                                            .setCommandContext(CommandContext.getDefaultInstance())
-                                            .setEventId(EventId.newBuilder()
-                                                               .setUuid(Identifiers.newUuid())
-                                                               .build()))
-                    .build();
+    static Command validCommand() {
+        final CommandFactory commandFactory = TestCommandFactory.newInstance(Given.class);
+        return commandFactory.createCommand(CreateProject.getDefaultInstance());
     }
 
-    static Command validCommand() {
-        return Command.newBuilder()
-                      .setMessage(pack(CreateProject.getDefaultInstance()))
-                      .setContext(CommandContext.getDefaultInstance())
-                      .build();
+    static Event validEvent() {
+        final Command cmd = validCommand();
+        final ProjectCreated eventMessage = ProjectCreated.newBuilder()
+                                                          .setProjectId(ProjectId.newBuilder()
+                                                                                 .setId("12345AD0"))
+                                                          .build();
+        final StringValue producerId = newStringValue(Given.class.getSimpleName());
+        final EventFactory eventFactory = EventFactory.newBuilder()
+                                                      .setProducerId(producerId)
+                                                      .setCommandContext(cmd.getContext())
+                                                      .build();
+        final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
+        final Event result = event.toBuilder()
+                                  .setContext(event.getContext()
+                                               .toBuilder()
+                                               .setEnrichment(Enrichment.newBuilder()
+                                                                        .setDoNotEnrich(true))
+                                               .build())
+                                  .build();
+        return result;
     }
 
     static ProjectionRepository<?, ?, ?> projectionRepo(BoundedContext context) {

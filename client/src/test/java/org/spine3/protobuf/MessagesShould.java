@@ -20,17 +20,21 @@
 package org.spine3.protobuf;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.builderFor;
 import static org.spine3.protobuf.Messages.isMessage;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {
@@ -40,9 +44,16 @@ public class MessagesShould {
         assertHasPrivateParameterlessCtor(Messages.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void toText_fail_on_null() {
-        Messages.toText(Tests.<Message>nullRef());
+    @Test
+    public void return_the_same_any_from_toAny() {
+        final Any any = Any.pack(newStringValue(getClass().getSimpleName()));
+        assertSame(any, Messages.toAny(any));
+    }
+
+    @Test
+    public void pack_to_Any() {
+        final Timestamp timestamp = Timestamps2.getCurrentTime();
+        assertEquals(timestamp, unpack(Messages.toAny(timestamp)));
     }
 
     @Test

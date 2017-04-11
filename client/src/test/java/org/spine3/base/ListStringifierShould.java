@@ -23,7 +23,6 @@ package org.spine3.base;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import org.junit.Test;
-import org.spine3.test.types.Task;
 
 import java.util.List;
 

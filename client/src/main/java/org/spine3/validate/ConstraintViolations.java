@@ -42,7 +42,7 @@ import static java.lang.System.lineSeparator;
 public class ConstraintViolations {
 
     private ConstraintViolations() {
-        //prevent instantiation of this utility class
+        // Prevent instantiation of this utility class.
     }
 
     /**

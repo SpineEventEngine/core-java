@@ -32,10 +32,8 @@ import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Utility class for working with {@link Event} objects.
@@ -60,14 +58,6 @@ public class Events {
 
     private Events() {
         // Prevent instantiation of this utility class.
-    }
-
-    /** Generates a new random UUID-based {@code EventId}. */
-    public static EventId generateId() {
-        final String value = Identifiers.newUuid();
-        return EventId.newBuilder()
-                      .setUuid(value)
-                      .build();
     }
 
     /**
@@ -95,39 +85,6 @@ public class Events {
         checkNotNull(event);
         final Timestamp result = event.getContext()
                                       .getTimestamp();
-        return result;
-    }
-
-    /**
-     * Creates a new {@code Event} instance.
-     *
-     * @param messageOrAny the event message or {@code Any} containing the message
-     * @param context      the event context
-     * @return created event instance
-     */
-    public static Event createEvent(Message messageOrAny, EventContext context) {
-        checkNotNull(messageOrAny);
-        checkNotNull(context);
-        final Any packed = toAny(messageOrAny);
-        final Event result = Event.newBuilder()
-                                  .setMessage(packed)
-                                  .setContext(context)
-                                  .build();
-        return result;
-    }
-
-    /**
-     * Creates {@code Event} instance for import or integration operations.
-     *
-     * @param event      the event message
-     * @param producerId the ID of an entity which is generating the event
-     * @return event with data from an external source
-     */
-    public static Event createImportEvent(Message event, Message producerId) {
-        checkNotNull(event);
-        checkNotNull(producerId);
-        final EventContext context = createImportEventContext(producerId);
-        final Event result = createEvent(event, context);
         return result;
     }
 
@@ -173,26 +130,6 @@ public class Events {
         final I id = (I) aggregateId;
         return id;
 
-    }
-
-    /**
-     * Creates {@code EventContext} instance for an event generated during data import.
-     *
-     * <p>The method does not set {@code CommandContext} because there was no command.
-     *
-     * <p>The {@code version} attribute is not populated either.
-     * It is the responsibility of the target aggregate to populate the missing fields.
-     *
-     * @param producerId the ID of the producer which generates the event
-     * @return new instance of {@code EventContext} for the imported event
-     */
-    public static EventContext createImportEventContext(Message producerId) {
-        checkNotNull(producerId);
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(generateId())
-                                                         .setTimestamp(getCurrentTime())
-                                                         .setProducerId(pack(producerId));
-        return builder.build();
     }
 
     /**
@@ -259,19 +196,31 @@ public class Events {
     }
 
     /**
+     * Ensures that the passed ID is valid.
+     *
+     * @param id an ID to check
+     * @throws IllegalArgumentException if the ID string value is empty or blank
+     */
+    public static EventId checkValid(EventId id) {
+        checkNotNull(id);
+        checkNotEmptyOrBlank(id.getValue(), "event ID");
+        return id;
+    }
+
+    /**
      * The stringifier of event IDs.
      */
     static class EventIdStringifier extends Stringifier<EventId> {
         @Override
         protected String toString(EventId eventId) {
-            final String result = eventId.getUuid();
+            final String result = eventId.getValue();
             return result;
         }
 
         @Override
         protected EventId fromString(String str) {
             final EventId result = EventId.newBuilder()
-                                          .setUuid(str)
+                                          .setValue(str)
                                           .build();
             return result;
         }

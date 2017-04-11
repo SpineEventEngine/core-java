@@ -21,7 +21,6 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.TextFormat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -43,18 +42,6 @@ public class Messages {
 
     private Messages() {
         // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Prints the passed message into well formatted text.
-     *
-     * @param message the message object
-     * @return text representation of the passed message
-     */
-    public static String toText(Message message) {
-        checkNotNull(message);
-        final String result = TextFormat.printToString(message);
-        return result;
     }
 
     /**

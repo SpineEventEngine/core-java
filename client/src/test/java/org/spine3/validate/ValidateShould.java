@@ -24,10 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
 
@@ -41,7 +37,6 @@ import static org.spine3.validate.Validate.checkBounds;
 import static org.spine3.validate.Validate.checkDefault;
 import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
-import static org.spine3.validate.Validate.checkValid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -135,26 +130,6 @@ public class ValidateShould {
     @Test
     public void do_not_throw_exception_if_checked_string_is_valid() {
         checkNotEmptyOrBlank("valid_string", "");
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_checked_command_id_is_empty() {
-        checkValid(CommandId.getDefaultInstance());
-    }
-
-    @Test
-    public void not_throw_exception_if_checked_command_id_is_valid() {
-        checkValid(Commands.generateId());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_if_checked_event_id_is_empty() {
-        checkValid(EventId.getDefaultInstance());
-    }
-
-    @Test
-    public void not_throw_exception_if_checked_event_id_is_valid() {
-        checkValid(Events.generateId());
     }
 
     @Test

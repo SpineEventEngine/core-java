@@ -27,20 +27,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Responses;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
 import org.spine3.test.Tests.MemoizingObserver;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.MessageValidator;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -460,7 +460,7 @@ public class EventBusShould {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
-            this.eventHandled = Events.createEvent(event, context);
+            this.eventHandled = EventFactory.createEvent(event, context);
         }
 
         private Event getEventHandled() {
