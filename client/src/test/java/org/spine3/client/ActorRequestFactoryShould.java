@@ -23,7 +23,6 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.client.ActorRequestFactory.AbstractBuilder;
 import org.spine3.test.Tests;
 import org.spine3.test.client.TestEntity;
 import org.spine3.time.ZoneOffset;
@@ -46,13 +45,14 @@ import static org.spine3.test.Tests.newUserId;
  *
  * @author Alex Tymchenko
  */
-public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>,
-                                                B extends AbstractBuilder<F, B>> {
+public abstract class ActorRequestFactoryShould {
 
     private final UserId actor = newUserId(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
 
-    protected abstract B builder();
+    protected ActorRequestFactory.Builder builder() {
+        return ActorRequestFactory.newBuilder();
+    }
 
     protected UserId getActor() {
         return actor;
@@ -62,7 +62,7 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
         return zoneOffset;
     }
 
-    protected F factory() {
+    protected ActorRequestFactory factory() {
         return builder().setZoneOffset(zoneOffset)
                         .setActor(actor)
                         .build();
@@ -75,12 +75,12 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
     @Test(expected = NullPointerException.class)
     public void require_actor_in_Builder() {
         builder().setZoneOffset(zoneOffset)
-                .build();
+                 .build();
     }
 
     @Test
     public void return_set_values_in_Builder() {
-        final B builder = builder()
+        final ActorRequestFactory.Builder builder = builder()
                 .setActor(actor)
                 .setZoneOffset(zoneOffset);
         assertNotNull(builder.getActor());
@@ -92,7 +92,7 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
     public void create_instance_by_user() {
         final int currentOffset = ZoneOffsets.getDefault()
                                              .getAmountSeconds();
-        final F aFactory = builder()
+        final ActorRequestFactory aFactory = builder()
                 .setActor(actor)
                 .build();
 
@@ -115,7 +115,7 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
 
     @Test
     public void support_moving_between_timezones() {
-        final F factoryInAnotherTimezone =
+        final ActorRequestFactory factoryInAnotherTimezone =
                 factory().switchTimezone(ZoneOffsets.ofHours(-8));
         assertNotEquals(factory().getZoneOffset(), factoryInAnotherTimezone.getZoneOffset());
     }
@@ -126,9 +126,11 @@ public abstract class ActorRequestFactoryShould<F extends ActorRequestFactory<F>
     public void not_accept_nulls_as_public_method_arguments() {
         new NullPointerTester()
                 .setDefault(Message.class, TestEntity.getDefaultInstance())
-                .setDefault((new TypeToken<Class<? extends Message>>(){}).getRawType(),
+                .setDefault((new TypeToken<Class<? extends Message>>() {
+                            }).getRawType(),
                             TestEntity.class)
-                .setDefault((new TypeToken<Set<? extends Message>>(){}).getRawType(),
+                .setDefault((new TypeToken<Set<? extends Message>>() {
+                            }).getRawType(),
                             newHashSet(Tests.newUuidValue()))
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }

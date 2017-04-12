@@ -31,13 +31,7 @@ import org.spine3.users.TenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class CommandFactoryShould extends ActorRequestFactoryShould<CommandFactory,
-                                                                    CommandFactory.Builder> {
-
-    @Override
-    protected CommandFactory.Builder builder() {
-        return CommandFactory.newBuilder();
-    }
+public class CommandFactoryShould extends ActorRequestFactoryShould {
 
     @Test
     public void create_new_instances_with_current_time() {
@@ -45,18 +39,22 @@ public class CommandFactoryShould extends ActorRequestFactoryShould<CommandFacto
         // would fit into this range. The purpose of this test is to make sure it works with
         // this precision and to add coverage.
         final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
-        final Command command = factory().createCommand(StringValue.getDefaultInstance());
+        final Command command = factory().command()
+                                         .createCommand(StringValue.getDefaultInstance());
         final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
         assertTrue(Timestamps2.isBetween(
-                command.getContext().getTimestamp(), beforeCall, afterCall));
+                command.getContext()
+                       .getTimestamp(), beforeCall, afterCall));
     }
 
     @Test
     public void create_new_instance_with_entity_version() {
-        final Command command = factory().createCommand(StringValue.getDefaultInstance(), 2);
+        final Command command = factory().command()
+                                         .createCommand(StringValue.getDefaultInstance(), 2);
 
-        assertEquals(2, command.getContext().getTargetVersion());
+        assertEquals(2, command.getContext()
+                               .getTargetVersion());
     }
 
     @Test
@@ -64,13 +62,15 @@ public class CommandFactoryShould extends ActorRequestFactoryShould<CommandFacto
         final TenantId tenantId = TenantId.newBuilder()
                                           .setValue(getClass().getSimpleName())
                                           .build();
-        final CommandFactory mtCommandFactory = CommandFactory.newBuilder()
-                                                              .setTenantId(tenantId)
-                                                              .setActor(getActor())
-                                                              .setZoneOffset(getZoneOffset())
-                                                              .build();
-        final Command command = mtCommandFactory.createCommand(StringValue.getDefaultInstance());
+        final ActorRequestFactory mtFactory = ActorRequestFactory.newBuilder()
+                                                                 .setTenantId(tenantId)
+                                                                 .setActor(getActor())
+                                                                 .setZoneOffset(getZoneOffset())
+                                                                 .build();
+        final Command command = mtFactory.command()
+                                         .createCommand(StringValue.getDefaultInstance());
 
-        assertEquals(tenantId, command.getContext().getTenantId());
+        assertEquals(tenantId, command.getContext()
+                                      .getTenantId());
     }
 }

@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
 import org.spine3.server.entity.failure.CannotModifyDeletedEntity;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.time.ZoneOffset;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -63,9 +63,10 @@ public class VisibilityTests {
     public void setUp() {
         entity = new MiniEntity(ThreadLocalRandom.current()
                                                  .nextLong());
-        final TestCommandFactory factory =
-                TestCommandFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
-        modificationCommand = factory.createCommand(newStringValue("Entity modification command"));
+        final TestActorRequestFactory factory =
+                TestActorRequestFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
+        modificationCommand =
+                factory.command().createCommand(newStringValue("Entity modification command"));
     }
 
     @Test

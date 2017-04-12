@@ -70,7 +70,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     public void set_command_status_to_OK_when_handler_returns() {
         commandBus.register(createProjectHandler);
 
-        final Command command = commandFactory.createCommand(createProjectMessage());
+        final Command command = requestFactory.command()
+                                              .createCommand(createProjectMessage());
         commandBus.post(command, responseObserver);
 
         final TenantId tenantId = command.getContext()
@@ -86,7 +87,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     public void set_command_status_to_error_when_dispatcher_throws() {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
-        final Command command = commandFactory.createCommand(createProjectMessage());
+        final Command command = requestFactory.command()
+                                              .createCommand(createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
@@ -255,7 +257,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final CommandHandler handler = new ThrowingCreateProjectHandler(throwable);
         commandBus.register(handler);
         final CreateProject msg = createProjectMessage();
-        final Command command = commandFactory.createCommand(msg);
+        final Command command = requestFactory.command()
+                                              .createCommand(msg);
         return command;
     }
 

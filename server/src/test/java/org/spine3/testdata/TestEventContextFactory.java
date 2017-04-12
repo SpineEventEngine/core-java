@@ -29,7 +29,7 @@ import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.server.integration.IntegrationEventContext;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -73,8 +73,8 @@ public class TestEventContextFactory {
                                                   TenantId tenantId) {
         final EventId eventId = Events.generateId();
         final CommandContext commandContext =
-                TestCommandFactory.newInstance(TestEventContextFactory.class, tenantId)
-                                  .createContext();
+                TestActorRequestFactory.newInstance(TestEventContextFactory.class, tenantId)
+                                       .createCommandContext();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setProducerId(pack(aggregateId))

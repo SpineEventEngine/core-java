@@ -28,13 +28,13 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.server.tenant.TenantIndex;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
@@ -60,7 +60,7 @@ public abstract class AbstractCommandBusTestSuite {
 
     private final boolean multitenant;
 
-    protected CommandFactory commandFactory;
+    protected ActorRequestFactory requestFactory;
 
     protected CommandBus commandBus;
     protected CommandStore commandStore;
@@ -140,9 +140,9 @@ public abstract class AbstractCommandBusTestSuite {
                                .setAutoReschedule(false)
                                .build();
         eventBus = TestEventBusFactory.create(storageFactory);
-        commandFactory = this.multitenant
-                            ? TestCommandFactory.newInstance(getClass(), newTenantUuid())
-                            : TestCommandFactory.newInstance(getClass());
+        requestFactory = this.multitenant
+                            ? TestActorRequestFactory.newInstance(getClass(), newTenantUuid())
+                            : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         responseObserver = new TestResponseObserver();
     }

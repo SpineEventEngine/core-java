@@ -26,7 +26,7 @@ import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -41,9 +41,9 @@ public class FailureThrowableShould {
 
     @Before
     public void setUp() {
-        final TestCommandFactory commandFactory =
-                TestCommandFactory.newInstance(FailureThrowable.class);
-        this.command = commandFactory.createCommand(newUuidValue());
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(FailureThrowable.class);
+        this.command = requestFactory.command().createCommand(newUuidValue());
     }
 
     @Test

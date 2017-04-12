@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.type.CommandClass;
 
 import static org.junit.Assert.assertEquals;
@@ -43,15 +43,15 @@ import static org.spine3.validate.Validate.isDefault;
  */
 public class CommandEnvelopeShould {
 
-    private final TestCommandFactory commandFactory =
-            TestCommandFactory.newInstance(CommandEnvelopeShould.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
 
     private Command command;
     private CommandEnvelope envelope;
 
     @Before
     public void setUp() {
-        command = commandFactory.createCommand(newUuidValue());
+        command = requestFactory.command().createCommand(newUuidValue());
         envelope = CommandEnvelope.of(command);
     }
 
@@ -91,7 +91,8 @@ public class CommandEnvelopeShould {
 
     @Test
     public void have_equals() {
-        final Command anotherCommand = commandFactory.createCommand(Timestamps2.getCurrentTime());
+        final Command anotherCommand = requestFactory.command()
+                                                     .createCommand(Timestamps2.getCurrentTime());
 
         new EqualsTester().addEqualityGroup(envelope)
                           .addEqualityGroup(CommandEnvelope.of(anotherCommand))

@@ -28,9 +28,9 @@ import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.validate.internal.IfMissingOption;
 
@@ -46,8 +46,8 @@ import static org.spine3.test.Tests.newUuidValue;
  */
 public class TypeNameShould {
 
-    private static final CommandFactory commandFactory =
-            TestCommandFactory.newInstance(TypeNameShould.class);
+    private static final ActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(TypeNameShould.class);
 
     @Test
     public void pass_the_null_tolerance_check() {
@@ -98,7 +98,7 @@ public class TypeNameShould {
 
     @Test
     public void obtain_type_of_command() {
-        final Command command = commandFactory.createCommand(newUuidValue());
+        final Command command = requestFactory.command().createCommand(newUuidValue());
 
         final TypeName typeName = TypeName.ofCommand(command);
         assertNotNull(typeName);
@@ -107,7 +107,7 @@ public class TypeNameShould {
 
     @Test
     public void obtain_type_name_of_event() {
-        final Command command = commandFactory.createCommand(newUuidValue());
+        final Command command = requestFactory.command().createCommand(newUuidValue());
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
         final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),

@@ -28,7 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
 import org.spine3.base.Identifiers;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.failures.Failures.CannotPerformBusinessOperation;
 import org.spine3.type.FailureClass;
 
@@ -39,8 +39,8 @@ import static org.junit.Assert.assertEquals;
  */
 public class FailureEnvelopeShould {
 
-    private final TestCommandFactory commandFactory =
-            TestCommandFactory.newInstance(FailureEnvelopeShould.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(FailureEnvelopeShould.class);
 
 
     private FailureEnvelope envelope;
@@ -51,7 +51,7 @@ public class FailureEnvelopeShould {
     @Before
     public void setUp() {
         this.commandMessage = Int32Value.getDefaultInstance();
-        this.command = commandFactory.createCommand(commandMessage);
+        this.command = requestFactory.command().createCommand(commandMessage);
         this.failureMessage = CannotPerformBusinessOperation.newBuilder()
                                                             .setOperationId(Identifiers.newUuid())
                                                             .build();

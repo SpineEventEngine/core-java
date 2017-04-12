@@ -33,8 +33,8 @@ import com.google.protobuf.UInt32Value;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
-import org.spine3.client.CommandFactory;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
 
@@ -148,9 +148,9 @@ public class TypeUrlShould {
 
     @Test
     public void obtain_type_of_command() {
-        final CommandFactory factory = TestCommandFactory.newInstance(TypeUrlShould.class);
+        final ActorRequestFactory factory = TestActorRequestFactory.newInstance(TypeUrlShould.class);
         final StringValue message = newStringValue(newUuid());
-        final Command command = factory.createCommand(message);
+        final Command command = factory.command().createCommand(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);
 

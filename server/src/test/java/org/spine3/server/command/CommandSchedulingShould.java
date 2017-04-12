@@ -28,7 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.Durations2;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 
 import java.util.List;
@@ -57,8 +57,8 @@ import static org.spine3.test.TimeTests.Past.minutesAgo;
 
 public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
-    private final TestCommandFactory commandFactory =
-            TestCommandFactory.newInstance(CommandSchedulingShould.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(CommandSchedulingShould.class);
 
     public CommandSchedulingShould() {
         super(true);
@@ -196,7 +196,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = commandFactory.createCommand(newStringValue(newUuid()));
+        final Command cmd = requestFactory.command().createCommand(newStringValue(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations2.minutes(5);
 
@@ -209,7 +209,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = commandFactory.createCommand(newStringValue(newUuid()));
+        final Command cmd = requestFactory.command().createCommand(newStringValue(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);

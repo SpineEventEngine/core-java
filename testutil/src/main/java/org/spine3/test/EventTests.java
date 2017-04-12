@@ -44,8 +44,8 @@ import static org.spine3.test.Tests.newUuidValue;
 @VisibleForTesting
 public class EventTests {
 
-    private static final TestCommandFactory factory =
-            TestCommandFactory.newInstance(EventTests.class);
+    private static final TestActorRequestFactory factory =
+            TestActorRequestFactory.newInstance(EventTests.class);
 
     private EventTests() {
         // Prevent instantiation of this utility class.
@@ -58,7 +58,7 @@ public class EventTests {
     public static EventContext newEventContext(Timestamp time) {
         final EventId eventId = generateId();
         final Any producerId = AnyPacker.pack(newUuidValue());
-        final CommandContext cmdContext = factory.createContext();
+        final CommandContext cmdContext = factory.createCommandContext();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setProducerId(producerId)
