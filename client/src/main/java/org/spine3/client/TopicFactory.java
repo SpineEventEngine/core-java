@@ -86,10 +86,7 @@ public class TopicFactory extends ActorRequestFactory<TopicFactory> {
     }
 
     /**
-     * Creates new factory with the same user and tenant ID, but with new time zone offset.
-     *
-     * @param zoneOffset the offset of the time zone
-     * @return new query factory at new time zone
+     * {@inheritDoc}
      */
     @Override
     public TopicFactory switchTimezone(ZoneOffset zoneOffset) {

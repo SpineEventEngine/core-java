@@ -97,8 +97,13 @@ abstract class ActorRequestFactory<F extends ActorRequestFactory> {
                       .build();
     }
 
+    /**
+     * Creates new factory with the same user and tenant ID, but with new time zone offset.
+     *
+     * @param zoneOffset the offset of the time zone
+     * @return new factory at new time zone
+     */
     public abstract F switchTimezone(ZoneOffset zoneOffset);
-
 
     /**
      * An abstract base for {@code Builder}s in {@link ActorRequestFactory} descendants.
