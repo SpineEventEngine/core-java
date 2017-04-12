@@ -88,6 +88,17 @@ class Quoter extends Converter<String, String> {
         return result;
     }
 
+    /**
+     * Creates the pattern to match the delimiters.
+     *
+     * @param delimiter the character to match
+     * @return the created pattern
+     */
+    static String createDelimiterPattern(char delimiter) {
+        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
+                      .pattern();
+    }
+
     private static boolean isQuote(char character) {
         return character == QUOTE_SYMBOL;
     }
