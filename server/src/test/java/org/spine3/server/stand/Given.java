@@ -32,7 +32,6 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Subscribe;
 import org.spine3.base.Version;
-import org.spine3.client.CommandFactory;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
@@ -43,7 +42,7 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
@@ -70,8 +69,9 @@ class Given {
     }
 
     static Command validCommand() {
-        final CommandFactory commandFactory = TestCommandFactory.newInstance(Given.class);
-        return commandFactory.createCommand(CreateProject.getDefaultInstance());
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(Given.class);
+        return requestFactory.command().create(CreateProject.getDefaultInstance());
     }
 
     static Event validEvent() {

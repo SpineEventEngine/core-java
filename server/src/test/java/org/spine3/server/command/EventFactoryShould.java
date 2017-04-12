@@ -23,8 +23,8 @@ package org.spine3.server.command;
 import com.google.protobuf.Empty;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.client.CommandFactory;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.test.TestActorRequestFactory;
 
 import static org.spine3.test.Tests.newUuidValue;
 
@@ -33,11 +33,12 @@ import static org.spine3.test.Tests.newUuidValue;
  */
 public class EventFactoryShould {
 
-    private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+    private final ActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
 
     @Test(expected = NullPointerException.class)
     public void require_producer_id_in_builder() {
-        final CommandContext ctx = commandFactory.createCommand(Empty.getDefaultInstance())
+        final CommandContext ctx = requestFactory.command().create(Empty.getDefaultInstance())
                                                  .getContext();
         EventFactory.newBuilder()
                     .setCommandContext(ctx)
