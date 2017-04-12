@@ -355,6 +355,18 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
+    /**
+     * Ensures that the {@link AggregateStateRecord} is valid.
+     *
+     * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
+     * <ul>
+     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;</li>
+     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.</li>
+     * </ul>
+     *
+     * @param aggregateStateRecord the record to check
+     * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
+     */
     private static void checkAggregateStateRecord(AggregateStateRecord aggregateStateRecord) {
         final boolean snapshotIsNotSet =
                 aggregateStateRecord.getSnapshot().equals(Snapshot.getDefaultInstance());
