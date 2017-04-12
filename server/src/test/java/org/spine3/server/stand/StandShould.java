@@ -287,7 +287,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
-        final Query readAllCustomers = requestFactory.query().readAll(Customer.class);
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
         checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
     }
 
@@ -301,7 +301,7 @@ public class StandShould extends TenantAwareTest {
 
         // Customer type was NOT registered.
         // So create a query for an unknown type.
-        final Query readAllCustomers = requestFactory.query().readAll(Customer.class);
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
@@ -317,7 +317,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
 
-        final Query readCustomersById = requestFactory.query().readByIds(Customer.class, newHashSet(
+        final Query readCustomersById = requestFactory.query().byIds(Customer.class, newHashSet(
                 customerIdFor(1), customerIdFor(2)
         ));
 
@@ -548,7 +548,7 @@ public class StandShould extends TenantAwareTest {
         final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
-        final Query customerQuery = requestFactory.query().readAll(Customer.class);
+        final Query customerQuery = requestFactory.query().all(Customer.class);
 
         //noinspection OverlyComplexAnonymousInnerClass
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
@@ -673,7 +673,7 @@ public class StandShould extends TenantAwareTest {
 
         final Set<CustomerId> ids = Collections.singleton(customers.get(0)
                                                                    .getId());
-        final Query customerQuery = requestFactory.query().readByIds(Customer.class, ids, paths);
+        final Query customerQuery = requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver();
         stand.execute(customerQuery, observer);
@@ -702,7 +702,7 @@ public class StandShould extends TenantAwareTest {
                                                                    .getFields()
                                                                    .get(2).getFullName()};
 
-        final Query customerQuery = requestFactory.query().readAll(Customer.class, paths);
+        final Query customerQuery = requestFactory.query().allWithMask(Customer.class, paths);
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
@@ -790,7 +790,7 @@ public class StandShould extends TenantAwareTest {
                                .getFullName();
         }
 
-        final Query customerQuery = requestFactory.query().readAll(Customer.class, paths);
+        final Query customerQuery = requestFactory.query().allWithMask(Customer.class, paths);
 
         stand.execute(customerQuery, observer);
 
@@ -827,7 +827,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
         final Query readMultipleProjects =
-                requestFactory.query().readByIds(Project.class, sampleProjects.keySet());
+                requestFactory.query().byIds(Project.class, sampleProjects.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -859,7 +859,7 @@ public class StandShould extends TenantAwareTest {
             ids.add(customer.getId());
         }
 
-        final Query customerQuery = requestFactory.query().readByIds(Customer.class, ids, paths);
+        final Query customerQuery = requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
 
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
@@ -900,8 +900,8 @@ public class StandShould extends TenantAwareTest {
 
         triggerMultipleUpdates(sampleCustomers, stand);
 
-        final Query readMultipleCustomers = requestFactory.query().readByIds(Customer.class,
-                                                              sampleCustomers.keySet());
+        final Query readMultipleCustomers = requestFactory.query().byIds(Customer.class,
+                                                                         sampleCustomers.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleCustomers, responseObserver);

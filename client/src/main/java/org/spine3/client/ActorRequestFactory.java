@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -111,6 +112,9 @@ public class ActorRequestFactory {
         return new ForCommand();
     }
 
+    /**
+     * @see ForCommand#createContext()
+     */
     @VisibleForTesting
     protected CommandContext createCommandContext() {
         return command().createContext();
@@ -134,7 +138,7 @@ public class ActorRequestFactory {
      * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}
      * configuration.
      */
-    public class ForQuery {
+    public final class ForQuery {
 
         private ForQuery() {
             // Prevent instantiation from the outside.
@@ -158,18 +162,18 @@ public class ActorRequestFactory {
          *
          * @param entityClass the class of a target entity
          * @param ids         the entity IDs of interest
-         * @param paths       the property paths for the {@code FieldMask} applied
+         * @param maskPaths   the property paths for the {@code FieldMask} applied
          *                    to each of results
          * @return an instance of {@code Query} formed according to the passed parameters
          */
-        public Query readByIds(Class<? extends Message> entityClass,
-                               Set<? extends Message> ids,
-                               String... paths) {
+        public Query byIdsWithMask(Class<? extends Message> entityClass,
+                                   Set<? extends Message> ids,
+                                   String... maskPaths) {
             checkNotNull(ids);
             checkArgument(!ids.isEmpty(), "Entity ID set must not be empty");
 
             final FieldMask fieldMask = FieldMask.newBuilder()
-                                                 .addAllPaths(Arrays.asList(paths))
+                                                 .addAllPaths(Arrays.asList(maskPaths))
                                                  .build();
             final Query result = composeQuery(entityClass, ids, fieldMask);
             return result;
@@ -182,15 +186,15 @@ public class ActorRequestFactory {
          * The processing results will contain only the entities, which IDs are present among
          * the {@code ids}.
          *
-         * <p>Unlike {@link #readByIds(Class, Set, String...)}, the {@code Query} processing
+         * <p>Unlike {@link #byIdsWithMask(Class, Set, String...)}, the {@code Query} processing
          * will not change the resulting entities.
          *
          * @param entityClass the class of a target entity
          * @param ids         the entity IDs of interest
          * @return an instance of {@code Query} formed according to the passed parameters
          */
-        public Query readByIds(Class<? extends Message> entityClass,
-                               Set<? extends Message> ids) {
+        public Query byIds(Class<? extends Message> entityClass,
+                           Set<? extends Message> ids) {
             checkNotNull(entityClass);
             checkNotNull(ids);
 
@@ -210,13 +214,13 @@ public class ActorRequestFactory {
          * are silently ignored.
          *
          * @param entityClass the class of a target entity
-         * @param paths       the property paths for the {@code FieldMask} applied
+         * @param maskPaths   the property paths for the {@code FieldMask} applied
          *                    to each of results
          * @return an instance of {@code Query} formed according to the passed parameters
          */
-        public Query readAll(Class<? extends Message> entityClass, String... paths) {
+        public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
             final FieldMask fieldMask = FieldMask.newBuilder()
-                                                 .addAllPaths(Arrays.asList(paths))
+                                                 .addAllPaths(Arrays.asList(maskPaths))
                                                  .build();
             final Query result = composeQuery(entityClass, null, fieldMask);
             return result;
@@ -225,13 +229,13 @@ public class ActorRequestFactory {
         /**
          * Creates a {@link Query} to read all states of a certain entity.
          *
-         * <p>Unlike {@link #readAll(Class, String...)}, the {@code Query} processing will
+         * <p>Unlike {@link #allWithMask(Class, String...)}, the {@code Query} processing will
          * not change the resulting entities.
          *
          * @param entityClass the class of a target entity
          * @return an instance of {@code Query} formed according to the passed parameters
          */
-        public Query readAll(Class<? extends Message> entityClass) {
+        public Query all(Class<? extends Message> entityClass) {
             checkNotNull(entityClass);
 
             return composeQuery(entityClass, null, null);
@@ -252,7 +256,7 @@ public class ActorRequestFactory {
      * Public API for creating {@link Topic} instances, using the {@code ActorRequestFactory}
      * configuration.
      */
-    public class ForTopic {
+    public final class ForTopic {
 
         private ForTopic() {
             // Prevent instantiation from the outside.
@@ -308,7 +312,7 @@ public class ActorRequestFactory {
      * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
      * configuration.
      */
-    public class ForCommand {
+    public final class ForCommand {
 
         private ForCommand() {
             // Prevent instantiation from the outside.
@@ -325,7 +329,7 @@ public class ActorRequestFactory {
         public Command create(Message message) {
             checkNotNull(message);
             final CommandContext context = createContext();
-            final Command result = org.spine3.base.Commands.createCommand(message, context);
+            final Command result = Commands.createCommand(message, context);
             return result;
         }
 
@@ -344,7 +348,7 @@ public class ActorRequestFactory {
             checkNotNull(targetVersion);
 
             final CommandContext context = createContext(targetVersion);
-            final Command result = org.spine3.base.Commands.createCommand(message, context);
+            final Command result = Commands.createCommand(message, context);
             return result;
         }
 
@@ -352,14 +356,17 @@ public class ActorRequestFactory {
          * Creates command context for a new command with entity ID.
          */
         private CommandContext createContext(int targetVersion) {
-            return org.spine3.base.Commands.createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
+            return Commands.createContext(getTenantId(), getActor(),
+                                          getZoneOffset(), targetVersion);
         }
 
         /**
          * Creates command context for a new command.
          */
         private CommandContext createContext() {
-            return org.spine3.base.Commands.createContext(getTenantId(), getActor(), getZoneOffset());
+            return org.spine3.base.Commands.createContext(getTenantId(),
+                                                          getActor(),
+                                                          getZoneOffset());
         }
     }
 

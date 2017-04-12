@@ -74,7 +74,7 @@ public class MultiTenantStandShould extends StandShould {
         final TenantId anotherTenant = newTenantUuid();
         final ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
 
-        final Query readAllCustomers = requestFactory.query().readAll(Customer.class);
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
