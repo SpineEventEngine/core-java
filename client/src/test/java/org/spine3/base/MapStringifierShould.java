@@ -24,6 +24,7 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.test.types.Task;
 
@@ -113,6 +114,18 @@ public class MapStringifierShould {
 
         assertEquals("one,", actualMap.get("1\"\""));
         assertEquals("two", actualMap.get("2:"));
+    }
+
+    @Test
+    @Ignore
+    public void convert_string_which_contains_delimiter_in_content_to_map_and_backward() {
+        final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\",\"2\\:\":\"two\"";
+        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                            String.class);
+        final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
+        final String convertedMap = stringifier.toString(actualMap);
+
+        assertEquals(stringToConvert, convertedMap);
     }
 
     @Test(expected = IllegalArgumentException.class)
