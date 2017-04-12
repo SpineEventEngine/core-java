@@ -28,6 +28,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.annotations.Internal;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.time.ZoneOffset;
@@ -86,14 +87,15 @@ public class Commands {
      *
      * <p>This method is not supposed to be called from outside the framework.
      * Commands in client applications should be created by
-     * {@link org.spine3.client.CommandFactory#createCommand(Message) CommandFactory.create(Message)},
+     * {@link ActorRequestFactory.ForCommand#create(Message)
+     * ActorRequestFactory.command().create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
      * @param userId     the actor ID
      * @param zoneOffset the offset of the timezone in which the user works
      * @return new {@code CommandContext}
-     * @see org.spine3.client.CommandFactory#createCommand(Message)
+     * @see ActorRequestFactory.ForCommand#create(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,
@@ -111,7 +113,8 @@ public class Commands {
      *
      * <p>This method is not supposed to be called from outside the framework.
      * Commands in client applications should be created by
-     * {@link org.spine3.client.CommandFactory#createCommand(Message)},
+     * {@link ActorRequestFactory.ForCommand#create(Message)
+     * ActorRequestFactory.command().create(Message)},
      * which creates {@code CommandContext} automatically.
      *
      * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
@@ -119,7 +122,7 @@ public class Commands {
      * @param zoneOffset    the offset of the timezone in which the user works
      * @param targetVersion the the ID of the entity for applying commands
      * @return new {@code CommandContext}
-     * @see org.spine3.client.CommandFactory#createCommand(Message)
+     * @see ActorRequestFactory.ForCommand#create(Message)
      */
     @Internal
     public static CommandContext createContext(@Nullable TenantId tenantId,

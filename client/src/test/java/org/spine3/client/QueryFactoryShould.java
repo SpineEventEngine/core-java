@@ -39,20 +39,15 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 @SuppressWarnings({"LocalVariableNamingConvention", "MethodParameterNamingConvention"})
-public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
-        QueryFactory.Builder> {
+public class QueryFactoryShould extends ActorRequestFactoryShould {
 
     // See {@code client_requests} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
 
-    @Override
-    protected QueryFactory.Builder builder() {
-        return QueryFactory.newBuilder();
-    }
-
     @Test
     public void compose_proper_read_all_query() {
-        final Query readAllQuery = factory().readAll(TARGET_ENTITY_CLASS);
+        final Query readAllQuery = factory().query()
+                                            .all(TARGET_ENTITY_CLASS);
         assertNotNull(readAllQuery);
 
         checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllQuery);
@@ -64,7 +59,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
     public void compose_proper_read_all_query_with_single_path() {
         final String expectedEntityPath = singleTestEntityPath();
         final Query readAllWithPathFilteringQuery =
-                factory().readAll(TARGET_ENTITY_CLASS, expectedEntityPath);
+                factory().query()
+                         .allWithMask(TARGET_ENTITY_CLASS, expectedEntityPath);
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
@@ -75,7 +71,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
     public void compose_proper_read_all_query_with_multiple_random_paths() {
 
         final String[] paths = multipleRandomPaths();
-        final Query readAllWithPathFilteringQuery = factory().readAll(TARGET_ENTITY_CLASS, paths);
+        final Query readAllWithPathFilteringQuery = factory().query()
+                                                             .allWithMask(TARGET_ENTITY_CLASS, paths);
         assertNotNull(readAllWithPathFilteringQuery);
 
         checkTypeCorrectAndFiltersEmpty(TARGET_ENTITY_CLASS, readAllWithPathFilteringQuery);
@@ -85,7 +82,8 @@ public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
     @Test
     public void compose_proper_read_by_ids_query() {
         final Set<TestEntityId> testEntityIds = multipleIds();
-        final Query readByIdsQuery = factory().readByIds(TARGET_ENTITY_CLASS, testEntityIds);
+        final Query readByIdsQuery = factory().query()
+                                              .byIds(TARGET_ENTITY_CLASS, testEntityIds);
         assertNotNull(readByIdsQuery);
 
         checkFieldMaskEmpty(readByIdsQuery);
@@ -99,10 +97,11 @@ public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
     public void compose_proper_read_by_ids_query_with_single_path() {
         final Set<TestEntityId> testEntityIds = multipleIds();
         final String expectedPath = singleTestEntityPath();
-        final Query readByIdsWithSinglePathQuery = factory().readByIds(
-                TARGET_ENTITY_CLASS,
-                testEntityIds,
-                expectedPath);
+        final Query readByIdsWithSinglePathQuery = factory().query()
+                                                            .byIdsWithMask(
+                                                                    TARGET_ENTITY_CLASS,
+                                                                    testEntityIds,
+                                                                    expectedPath);
         assertNotNull(readByIdsWithSinglePathQuery);
 
         final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsWithSinglePathQuery);
@@ -115,10 +114,11 @@ public class QueryFactoryShould extends ActorRequestFactoryShould<QueryFactory,
     public void compose_proper_read_by_ids_query_with_multiple_random_paths() {
         final Set<TestEntityId> testEntityIds = multipleIds();
         final String[] paths = multipleRandomPaths();
-        final Query readByIdsWithSinglePathQuery = factory().readByIds(
-                TARGET_ENTITY_CLASS,
-                testEntityIds,
-                paths);
+        final Query readByIdsWithSinglePathQuery = factory().query()
+                                                            .byIdsWithMask(
+                                                                    TARGET_ENTITY_CLASS,
+                                                                    testEntityIds,
+                                                                    paths);
         assertNotNull(readByIdsWithSinglePathQuery);
 
         final Target target = checkTarget(TARGET_ENTITY_CLASS, readByIdsWithSinglePathQuery);

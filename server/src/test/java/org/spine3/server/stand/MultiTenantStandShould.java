@@ -27,12 +27,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Responses;
 import org.spine3.base.Version;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.client.Query;
-import org.spine3.client.QueryFactory;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Topic;
-import org.spine3.client.TopicFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Tests;
@@ -60,8 +59,7 @@ public class MultiTenantStandShould extends StandShould {
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
-        setQueryFactory(createQueryFactory(tenantId));
-        setTopicFactory(createTopicFactory(tenantId));
+        setRequestFactory(createRequestFactory(tenantId));
     }
 
     @After
@@ -74,9 +72,9 @@ public class MultiTenantStandShould extends StandShould {
         final Stand stand = doCheckReadingCustomersById(15);
 
         final TenantId anotherTenant = newTenantUuid();
-        final QueryFactory queryFactory = createQueryFactory(anotherTenant);
+        final ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
 
-        final Query readAllCustomers = queryFactory.readAll(Customer.class);
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
@@ -92,14 +90,14 @@ public class MultiTenantStandShould extends StandShould {
         final Stand stand = prepareStandWithAggregateRepo(standStorage);
 
         // --- Default Tenant
-        final TopicFactory topicFactory = getTopicFactory();
+        final ActorRequestFactory requestFactory = getRequestFactory();
         final MemoizeEntityUpdateCallback defaultTenantCallback = subscribeToAllOf(stand,
-                                                                                   topicFactory,
+                                                                                   requestFactory,
                                                                                    Customer.class);
 
         // --- Another Tenant
         final TenantId anotherTenant = newTenantUuid();
-        final TopicFactory anotherFactory = createTopicFactory(anotherTenant);
+        final ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
         final MemoizeEntityUpdateCallback anotherCallback = subscribeToAllOf(stand,
                                                                              anotherFactory,
                                                                              Customer.class);
@@ -121,9 +119,9 @@ public class MultiTenantStandShould extends StandShould {
         assertEquals(null, anotherCallback.getNewEntityState());
     }
 
-    protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand, TopicFactory topicFactory,
+    protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand, ActorRequestFactory requestFactory,
                                                            Class<? extends Message> entityClass) {
-        final Topic allCustomers = topicFactory.allOf(entityClass);
+        final Topic allCustomers = requestFactory.topic().allOf(entityClass);
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allCustomers);
         stand.activate(subscription, memoizeCallback);

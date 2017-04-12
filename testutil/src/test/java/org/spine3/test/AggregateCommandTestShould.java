@@ -25,14 +25,14 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.CommandTestShould.newCommandFactory;
+import static org.spine3.test.CommandTestShould.newRequestFactory;
 
 /**
  * @author Alexander Yevsyukov
@@ -64,8 +64,8 @@ public class AggregateCommandTestShould {
      */
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we don't need the result.
     @Test
-    public void has_constructor_with_CommandFactory() {
-        new TimePrintingTest(newCommandFactory(getClass()));
+    public void has_constructor_with_ActorRequestFactory() {
+        new TimePrintingTest(newRequestFactory(getClass()));
     }
 
     /**
@@ -95,8 +95,8 @@ public class AggregateCommandTestShould {
      */
     private static class TimePrintingTest extends AggregateCommandTest<Timestamp, TimePrinter> {
 
-        private TimePrintingTest(CommandFactory commandFactory) {
-            super(commandFactory);
+        private TimePrintingTest(ActorRequestFactory requestFactory) {
+            super(requestFactory);
         }
 
         private TimePrintingTest() {

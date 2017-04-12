@@ -57,7 +57,7 @@ public class TestCommandContextFactory {
                                                       CommandId commandId,
                                                       Timestamp when) {
 
-        //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestCommandFactory
+        //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestActorRequestFactory
 
         final TenantId.Builder generatedTenantId = TenantId.newBuilder()
                                                            .setValue(newUuid());

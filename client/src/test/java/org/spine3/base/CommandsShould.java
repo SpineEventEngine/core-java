@@ -33,7 +33,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
 import org.spine3.time.ZoneOffset;
@@ -70,7 +70,7 @@ public class CommandsShould {
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
 
-    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(
+    private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
             CommandsShould.class);
     private final StringValue stringValue = newStringValue(newUuid());
 
@@ -81,11 +81,11 @@ public class CommandsShould {
 
     @Test
     public void sort_commands_by_timestamp() {
-        final Command cmd1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+        final Command cmd1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                           minutesAgo(1));
-        final Command cmd2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+        final Command cmd2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
                                                           secondsAgo(30));
-        final Command cmd3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command cmd3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                           secondsAgo(5));
         final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
@@ -140,9 +140,9 @@ public class CommandsShould {
                 .setDefault(Timestamp.class, getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class,
-                            commandFactory.createCommand(StringValue.getDefaultInstance(),
+                            requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                          minutesAgo(1)))
-                .setDefault(CommandContext.class, commandFactory.createContext())
+                .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, Tests.newUserUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
@@ -184,7 +184,8 @@ public class CommandsShould {
 
     @Test
     public void extract_id_from_command() {
-        final Command command = commandFactory.createCommand(stringValue);
+        final Command command = requestFactory.command()
+                                              .create(stringValue);
 
         assertEquals(command.getContext()
                             .getCommandId(), getId(command));
@@ -192,22 +193,23 @@ public class CommandsShould {
 
     @Test
     public void create_wereAfter_predicate() {
-        final Command command = commandFactory.createCommand(BoolValue.getDefaultInstance());
+        final Command command = requestFactory.command()
+                                              .create(BoolValue.getDefaultInstance());
         assertTrue(Commands.wereAfter(secondsAgo(5))
                            .apply(command));
     }
 
     @Test
     public void create_wereBetween_predicate() {
-        final Command command1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+        final Command command1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                               minutesAgo(5));
-        final Command command2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+        final Command command2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
                                                               minutesAgo(2));
-        final Command command3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command command3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(30));
-        final Command command4 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command command4 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(20));
-        final Command command5 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command command5 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(5));
 
         final ImmutableList<Command> commands =

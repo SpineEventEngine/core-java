@@ -38,23 +38,23 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.Responses;
 import org.spine3.base.Version;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.Query;
-import org.spine3.client.QueryFactory;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
 import org.spine3.client.Targets;
 import org.spine3.client.Topic;
-import org.spine3.client.TopicFactory;
 import org.spine3.people.PersonName;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
@@ -120,23 +120,18 @@ public class StandShould extends TenantAwareTest {
 
     private boolean multitenant = false;
 
-    private QueryFactory queryFactory;
-    private TopicFactory topicFactory;
+    private ActorRequestFactory requestFactory;
 
     protected void setMultitenant(boolean multitenant) {
         this.multitenant = multitenant;
     }
 
-    public void setQueryFactory(QueryFactory queryFactory) {
-        this.queryFactory = queryFactory;
+    public ActorRequestFactory getRequestFactory() {
+        return requestFactory;
     }
 
-    public void setTopicFactory(TopicFactory topicFactory) {
-        this.topicFactory = topicFactory;
-    }
-
-    public TopicFactory getTopicFactory() {
-        return topicFactory;
+    public void setRequestFactory(ActorRequestFactory requestFactory) {
+        this.requestFactory = requestFactory;
     }
 
     protected boolean isMultitenant() {
@@ -146,12 +141,11 @@ public class StandShould extends TenantAwareTest {
     @Before
     public void setUp() {
         setMultitenant(false);
-        queryFactory = createQueryFactory(null);
-        topicFactory = createTopicFactory(null);
+        requestFactory = createRequestFactory(null);
     }
 
-    protected static QueryFactory createQueryFactory(@Nullable TenantId tenant) {
-        final QueryFactory.Builder builder = QueryFactory.newBuilder()
+    protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
+        final ActorRequestFactory.Builder builder = ActorRequestFactory.newBuilder()
                                                          .setActor(newUserId(newUuid()))
                                                          .setZoneOffset(ZoneOffsets.UTC);
         if (tenant != null) {
@@ -159,17 +153,6 @@ public class StandShould extends TenantAwareTest {
         }
         return builder.build();
     }
-
-    protected static TopicFactory createTopicFactory(@Nullable TenantId tenant) {
-        final TopicFactory.Builder builder = TopicFactory.newBuilder()
-                                                         .setActor(newUserId(newUuid()))
-                                                         .setZoneOffset(ZoneOffsets.UTC);
-        if (tenant != null) {
-            builder.setTenantId(tenant);
-        }
-        return builder.build();
-    }
-
 
     @Test
     public void initialize_with_empty_builder() {
@@ -253,7 +236,7 @@ public class StandShould extends TenantAwareTest {
                 new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
 
-        final Topic projectProjections = topicFactory.allOf(Project.class);
+        final Topic projectProjections = requestFactory.topic().allOf(Project.class);
 
         final Subscription subscription = stand.subscribe(projectProjections);
         stand.activate(subscription, emptyUpdateCallback());
@@ -289,7 +272,7 @@ public class StandShould extends TenantAwareTest {
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = Tests.newVersionWithNumber(1);
 
-        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecord.class));
+        verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordWithColumns.class));
 
         stand.update(asEnvelope(customerId, customerState, stateVersion));
 
@@ -305,7 +288,7 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void return_empty_list_for_aggregate_read_all_on_empty_stand_storage() {
-        final Query readAllCustomers = queryFactory.readAll(Customer.class);
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
         checkEmptyResultForTargetOnEmptyStorage(readAllCustomers);
     }
 
@@ -319,7 +302,7 @@ public class StandShould extends TenantAwareTest {
 
         // Customer type was NOT registered.
         // So create a query for an unknown type.
-        final Query readAllCustomers = queryFactory.readAll(Customer.class);
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readAllCustomers, responseObserver);
@@ -335,7 +318,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void return_empty_list_for_aggregate_read_by_ids_on_empty_stand_storage() {
 
-        final Query readCustomersById = queryFactory.readByIds(Customer.class, newHashSet(
+        final Query readCustomersById = requestFactory.query().byIds(Customer.class, newHashSet(
                 customerIdFor(1), customerIdFor(2)
         ));
 
@@ -384,7 +367,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_subscription_callback_upon_update_of_aggregate() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Topic allCustomers = topicFactory.allOf(Customer.class);
+        final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allCustomers);
@@ -407,7 +390,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void trigger_subscription_callback_upon_update_of_projection() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Topic allProjects = topicFactory.allOf(Project.class);
+        final Topic allProjects = requestFactory.topic().allOf(Project.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allProjects);
@@ -430,7 +413,7 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void allow_cancelling_subscriptions() {
         final Stand stand = prepareStandWithAggregateRepo(mock(StandStorage.class));
-        final Topic allCustomers = topicFactory.allOf(Customer.class);
+        final Topic allCustomers = requestFactory.topic().allOf(Customer.class);
 
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = stand.subscribe(allCustomers);
@@ -512,7 +495,7 @@ public class StandShould extends TenantAwareTest {
 
         final Map<CustomerId, Customer> sampleCustomers = fillSampleCustomers(10);
 
-        final Topic someCustomers = topicFactory.someOf(Customer.class, sampleCustomers.keySet());
+        final Topic someCustomers = requestFactory.topic().someOf(Customer.class, sampleCustomers.keySet());
         final Set<Customer> callbackStates = newHashSet();
         final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback() {
             @Override
@@ -538,7 +521,7 @@ public class StandShould extends TenantAwareTest {
     private MemoizeEntityUpdateCallback subscribeWithCallback(Stand stand,
                                                                      Target subscriptionTarget) {
         final MemoizeEntityUpdateCallback callback = spy(new MemoizeEntityUpdateCallback());
-        final Topic topic = topicFactory.forTarget(subscriptionTarget);
+        final Topic topic = requestFactory.topic().forTarget(subscriptionTarget);
         final Subscription subscription = stand.subscribe(
                 topic);
         stand.activate(subscription, callback);
@@ -566,7 +549,7 @@ public class StandShould extends TenantAwareTest {
         final Version stateVersion = Tests.newVersionWithNumber(1);
         stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
-        final Query customerQuery = queryFactory.readAll(Customer.class);
+        final Query customerQuery = requestFactory.query().all(Customer.class);
 
         //noinspection OverlyComplexAnonymousInnerClass
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
@@ -691,7 +674,7 @@ public class StandShould extends TenantAwareTest {
 
         final Set<CustomerId> ids = Collections.singleton(customers.get(0)
                                                                    .getId());
-        final Query customerQuery = queryFactory.readByIds(Customer.class, ids, paths);
+        final Query customerQuery = requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver();
         stand.execute(customerQuery, observer);
@@ -720,7 +703,7 @@ public class StandShould extends TenantAwareTest {
                                                                    .getFields()
                                                                    .get(2).getFullName()};
 
-        final Query customerQuery = queryFactory.readAll(Customer.class, paths);
+        final Query customerQuery = requestFactory.query().allWithMask(Customer.class, paths);
 
         final MemoizeQueryResponseObserver observer = new MemoizeQueryResponseObserver() {
             @Override
@@ -808,7 +791,7 @@ public class StandShould extends TenantAwareTest {
                                .getFullName();
         }
 
-        final Query customerQuery = queryFactory.readAll(Customer.class, paths);
+        final Query customerQuery = requestFactory.query().allWithMask(Customer.class, paths);
 
         stand.execute(customerQuery, observer);
 
@@ -845,7 +828,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = prepareStandWithProjectionRepo(projectionRepository);
 
         final Query readMultipleProjects =
-                queryFactory.readByIds(Project.class, sampleProjects.keySet());
+                requestFactory.query().byIds(Project.class, sampleProjects.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleProjects, responseObserver);
@@ -877,7 +860,7 @@ public class StandShould extends TenantAwareTest {
             ids.add(customer.getId());
         }
 
-        final Query customerQuery = queryFactory.readByIds(Customer.class, ids, paths);
+        final Query customerQuery = requestFactory.query().byIdsWithMask(Customer.class, ids, paths);
 
         final FieldMask fieldMask = FieldMask.newBuilder()
                                              .addAllPaths(Arrays.asList(paths))
@@ -918,8 +901,8 @@ public class StandShould extends TenantAwareTest {
 
         triggerMultipleUpdates(sampleCustomers, stand);
 
-        final Query readMultipleCustomers = queryFactory.readByIds(Customer.class,
-                                                              sampleCustomers.keySet());
+        final Query readMultipleCustomers = requestFactory.query().byIds(Customer.class,
+                                                                         sampleCustomers.keySet());
 
         final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
         stand.execute(readMultipleCustomers, responseObserver);

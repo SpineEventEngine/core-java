@@ -56,6 +56,15 @@ public abstract class AggregateStorage<I>
         super(multitenant);
     }
 
+    /**
+     * Forms and returns an {@link AggregateStateRecord} based on the
+     * {@linkplain #historyBackward(Object) aggregate history}.
+     *
+     * @param aggregateId the aggregate ID for which to form a record
+     * @return the record instance or {@code Optional.absent()} if the
+     *         {@linkplain #historyBackward(Object) aggregate history} is empty
+     * @throws IllegalStateException if the storage was closed before
+     */
     @Override
     public Optional<AggregateStateRecord> read(I aggregateId) {
         checkNotClosed();
@@ -65,6 +74,10 @@ public abstract class AggregateStorage<I>
         Snapshot snapshot = null;
 
         final Iterator<AggregateEventRecord> historyBackward = historyBackward(aggregateId);
+
+        if (!historyBackward.hasNext()) {
+            return Optional.absent();
+        }
 
         while (historyBackward.hasNext()
                 && snapshot == null) {

@@ -39,20 +39,15 @@ import static org.junit.Assert.assertTrue;
  * @author Alex Tymchenko
  */
 public class TopicFactoryShould
-        extends ActorRequestFactoryShould<TopicFactory, TopicFactory.Builder> {
+        extends ActorRequestFactoryShould {
 
     // See {@code client_requests.proto} for declaration.
     private static final Class<TestEntity> TARGET_ENTITY_CLASS = TestEntity.class;
     private static final TypeName TARGET_ENTITY_TYPE_NAME = TypeName.of(TARGET_ENTITY_CLASS);
 
-    @Override
-    protected TopicFactory.Builder builder() {
-        return TopicFactory.newBuilder();
-    }
-
     @Test
     public void create_topic_for_all_entities_of_kind() {
-        final Topic topic = factory().allOf(TARGET_ENTITY_CLASS);
+        final Topic topic = factory().topic().allOf(TARGET_ENTITY_CLASS);
 
         verifyTargetAndContext(topic);
 
@@ -67,7 +62,7 @@ public class TopicFactoryShould
 
         final Set<TestEntityId> ids = newHashSet(entityId(1), entityId(2),
                                                  entityId(3));
-        final Topic topic = factory().someOf(TARGET_ENTITY_CLASS, ids);
+        final Topic topic = factory().topic().someOf(TARGET_ENTITY_CLASS, ids);
 
         verifyTargetAndContext(topic);
 
@@ -86,7 +81,7 @@ public class TopicFactoryShould
     @Test
     public void create_topic_for_given_target() {
         final Target givenTarget = Targets.allOf(TARGET_ENTITY_CLASS);
-        final Topic topic = factory().forTarget(givenTarget);
+        final Topic topic = factory().topic().forTarget(givenTarget);
 
         verifyTargetAndContext(topic);
     }

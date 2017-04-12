@@ -35,7 +35,7 @@ import org.spine3.base.Version;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.InvalidEntityStateException;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.TimeTests;
 import org.spine3.test.aggregate.Project;
@@ -83,8 +83,10 @@ import static org.spine3.test.aggregate.Project.newBuilder;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class AggregateShould {
 
-    private static final TestCommandFactory commandFactory =
-            TestCommandFactory.newInstance(AggregateShould.class);
+    private static final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(AggregateShould.class);
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(requestFactory);
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("prj-01")
@@ -103,7 +105,7 @@ public class AggregateShould {
     @Before
     public void setUp() {
         aggregate = newAggregate(ID);
-        commandContext = commandFactory.createContext();
+        commandContext = requestFactory.createCommandContext();
     }
 
     private static TestAggregate newAggregate(ProjectId id) {
@@ -330,7 +332,7 @@ public class AggregateShould {
     }
 
     private static Command command(Message commandMessage) {
-        return commandFactory.createCommand(commandMessage);
+        return requestFactory.command().create(commandMessage);
     }
 
     @Test

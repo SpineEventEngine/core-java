@@ -28,11 +28,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,7 +45,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings("OptionalGetWithoutIsPresent") // we do get() in assertions.
 public class AggregateRepositoryViewsShould {
 
-    private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+    private final ActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
     private BoundedContext boundedContext;
     /**
      * The default behaviour of an {@code AggregateRepository}.
@@ -73,7 +73,7 @@ public class AggregateRepositoryViewsShould {
      * for being processed by the repository. */
     private void postCommand(String cmd) {
         final Command command =
-                commandFactory.createCommand(SHRepository.createCommandMessage(id, cmd));
+                requestFactory.command().create(SHRepository.createCommandMessage(id, cmd));
         boundedContext.getCommandBus().post(command, emptyObserver());
     }
 

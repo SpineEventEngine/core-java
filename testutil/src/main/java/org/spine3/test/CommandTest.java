@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 
 import javax.annotation.Nullable;
 
@@ -47,7 +47,7 @@ import static org.spine3.test.TimeTests.adjustTimestamp;
  */
 public abstract class CommandTest<C extends Message> {
 
-    private final CommandFactory commandFactory;
+    private final ActorRequestFactory requestFactory;
 
     @Nullable
     private C commandMessage;
@@ -56,17 +56,17 @@ public abstract class CommandTest<C extends Message> {
     private Command command;
 
     /**
-     * Creates instance with the passed {@code CommandFactory}.
+     * Creates instance with the passed {@code ActorRequestFactory}.
      */
-    protected CommandTest(CommandFactory commandFactory) {
-        this.commandFactory = checkNotNull(commandFactory);
+    protected CommandTest(ActorRequestFactory requestFactory) {
+        this.requestFactory = checkNotNull(requestFactory);
     }
 
     /**
-     * Creates new instance with {@link TestCommandFactory}.
+     * Creates new instance with {@link TestActorRequestFactory}.
      */
     protected CommandTest() {
-        this.commandFactory = TestCommandFactory.newInstance(getClass());
+        this.requestFactory = TestActorRequestFactory.newInstance(getClass());
     }
 
     /**
@@ -82,7 +82,7 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = commandFactory.createCommand(commandMessage);
+        this.command = requestFactory.command().create(commandMessage);
         return this.command;
     }
 
@@ -96,7 +96,7 @@ public abstract class CommandTest<C extends Message> {
      * @return new command instance
      */
     protected Command createDifferentCommand(Message commandMessage) {
-        return commandFactory.createCommand(checkNotNull(commandMessage));
+        return requestFactory.command().create(checkNotNull(commandMessage));
     }
 
     /**
@@ -126,7 +126,7 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage, Timestamp timestamp) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = adjustTimestamp(commandFactory.createCommand(commandMessage),
+        this.command = adjustTimestamp(requestFactory.command().create(commandMessage),
                                        checkNotNull(timestamp));
         return this.command;
     }

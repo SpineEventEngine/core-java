@@ -39,7 +39,7 @@ import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
 
@@ -66,8 +66,8 @@ import static org.spine3.base.Versions.newVersion;
  */
 public class StandFunnelShould {
 
-    private final TestCommandFactory commandFactory =
-            TestCommandFactory.newInstance(StandFunnelShould.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(StandFunnelShould.class);
 
     // **** Positive scenarios (unit) ****
 
@@ -120,7 +120,7 @@ public class StandFunnelShould {
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
                                               .build();
-        funnel.post(entity, commandFactory.createContext());
+        funnel.post(entity, requestFactory.createCommandContext());
 
         final ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
                 new ArgumentMatcher<EntityStateEnvelope<?, ?>>() {
@@ -166,7 +166,7 @@ public class StandFunnelShould {
         when(entity.getId()).thenReturn(id);
         when(entity.getVersion()).thenReturn(newVersion(17, Timestamps2.getCurrentTime()));
 
-        final CommandContext context = commandFactory.createContext();
+        final CommandContext context = requestFactory.createCommandContext();
         standFunnel.post(entity, context);
 
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, context.getTenantId());
@@ -329,7 +329,7 @@ public class StandFunnelShould {
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);
-                standFunnel.post(entity, commandFactory.createContext());
+                standFunnel.post(entity, requestFactory.createCommandContext());
 
                 threadInvocationRegistry.add(threadName);
             }
