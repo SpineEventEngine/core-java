@@ -47,7 +47,7 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
@@ -161,8 +161,9 @@ public class ProjectionRepositoryShould
     }
 
     private TestEventFactory newEventFactory(Any producerId) {
-        return TestEventFactory.newInstance(producerId,
-                                            TestCommandFactory.newInstance(getClass(), tenantId()));
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(getClass(), tenantId());
+        return TestEventFactory.newInstance(producerId, requestFactory);
     }
 
     private Event createEvent(Any producerId, Message eventMessage) {

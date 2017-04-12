@@ -85,15 +85,12 @@ public class AggregateShould {
 
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(AggregateShould.class);
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(requestFactory);
-
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("prj-01")
                                                  .build();
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(pack(ID), commandFactory);
+            TestEventFactory.newInstance(pack(ID), requestFactory);
 
     private static final CreateProject createProject = Given.CommandMessage.createProject(ID);
     private static final AddTask addTask = Given.CommandMessage.addTask(ID);

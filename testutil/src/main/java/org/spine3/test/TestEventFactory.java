@@ -33,6 +33,7 @@ import org.spine3.server.command.EventFactory;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -60,15 +61,26 @@ public class TestEventFactory extends EventFactory {
         return result;
     }
 
-    public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
+    public static TestEventFactory newInstance(Any producerId, Class<?> testSuiteClass) {
+        final TestActorRequestFactory commandFactory =
+                TestActorRequestFactory.newInstance(testSuiteClass);
+        return newInstance(producerId, commandFactory);
+    }
+
+    public static TestEventFactory newInstance(Any producerId,
+                                               TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        final Message producerId = requestFactory.getActor();
         final CommandContext commandContext = requestFactory.createCommandContext();
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(commandContext);
         final TestEventFactory result = new TestEventFactory(builder);
         return result;
+    }
+
+    public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
+        final Message producerId = requestFactory.getActor();
+        return newInstance(pack(producerId), requestFactory);
     }
 
     public static TestEventFactory newInstance(Class<?> testSuiteClass) {
