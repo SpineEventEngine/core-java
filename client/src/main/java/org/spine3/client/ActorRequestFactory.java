@@ -44,6 +44,7 @@ import static org.spine3.client.Targets.composeTarget;
  * A factory for the various requests fired from the client-side by an actor.
  *
  * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
 public class ActorRequestFactory {
 
@@ -86,19 +87,6 @@ public class ActorRequestFactory {
     }
 
     /**
-     * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
-     */
-    protected ActorContext actorContext() {
-        final ActorContext.Builder builder = ActorContext.newBuilder()
-                                                         .setActor(actor)
-                                                         .setZoneOffset(zoneOffset);
-        if(tenantId != null) {
-            builder.setTenantId(tenantId);
-        }
-        return builder.build();
-    }
-
-    /**
      * Creates new factory with the same user and tenant ID, but with new time zone offset.
      *
      * @param zoneOffset the offset of the time zone
@@ -130,6 +118,19 @@ public class ActorRequestFactory {
         return command().createContext();
     }
 
+    /**
+     * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
+     */
+    private ActorContext actorContext() {
+        final ActorContext.Builder builder = ActorContext.newBuilder()
+                                                         .setActor(actor)
+                                                         .setZoneOffset(zoneOffset);
+        if(tenantId != null) {
+            builder.setTenantId(tenantId);
+        }
+        return builder.build();
+    }
+
     public class Queries {
 
         /**
@@ -145,11 +146,13 @@ public class ActorRequestFactory {
          * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
          *
          * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-         * (e.g. a {@code path} references a missing field), such invalid paths are silently ignored.
+         * (e.g. a {@code path} references a missing field),
+         * such invalid paths are silently ignored.
          *
          * @param entityClass the class of a target entity
          * @param ids         the entity IDs of interest
-         * @param paths       the property paths for the {@code FieldMask} applied to each of results
+         * @param paths       the property paths for the {@code FieldMask} applied
+         *                    to each of results
          * @return an instance of {@code Query} formed according to the passed parameters
          */
         public Query readByIds(Class<? extends Message> entityClass,
@@ -174,10 +177,12 @@ public class ActorRequestFactory {
          * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
          *
          * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-         * (e.g. a {@code path} references a missing field), such invalid paths are silently ignored.
+         * (e.g. a {@code path} references a missing field), such invalid paths
+         * are silently ignored.
          *
          * @param entityClass the class of a target entity
-         * @param paths       the property paths for the {@code FieldMask} applied to each of results
+         * @param paths       the property paths for the {@code FieldMask} applied
+         *                    to each of results
          * @return an instance of {@code Query} formed according to the passed parameters
          */
         public Query readAll(Class<? extends Message> entityClass, String... paths) {
@@ -237,6 +242,7 @@ public class ActorRequestFactory {
     }
 
     public class Topics {
+
         /**
          * Creates a {@link Topic} for a subset of the entity states by specifying their IDs.
          *
@@ -284,6 +290,7 @@ public class ActorRequestFactory {
     }
 
     public class Commands {
+
         /**
          * Creates new {@code Command} with the passed message.
          *
