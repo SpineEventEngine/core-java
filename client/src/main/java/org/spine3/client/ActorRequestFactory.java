@@ -364,9 +364,9 @@ public class ActorRequestFactory {
          * Creates command context for a new command.
          */
         private CommandContext createContext() {
-            return org.spine3.base.Commands.createContext(getTenantId(),
-                                                          getActor(),
-                                                          getZoneOffset());
+            return Commands.createContext(getTenantId(),
+                                          getActor(),
+                                          getZoneOffset());
         }
     }
 
