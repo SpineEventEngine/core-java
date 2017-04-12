@@ -29,6 +29,7 @@ import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Targets;
 import org.spine3.client.Topic;
+import org.spine3.client.TopicFactory;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.VersionableEntity;
@@ -52,6 +53,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.spine3.base.Versions.newVersion;
+import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
@@ -63,6 +65,10 @@ public class SubscriptionServiceShould {
 
     private final TestCommandFactory commandFactory =
             TestCommandFactory.newInstance(SubscriptionServiceShould.class);
+
+    private final TopicFactory topicFactory = TopicFactory.newBuilder()
+                                                          .setActor(newUserUuid())
+                                                          .build();
 
     /*
      * Creation tests
@@ -153,9 +159,7 @@ public class SubscriptionServiceShould {
 
         assertEquals(type, target.getType());
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+        final Topic topic = topicFactory.forTarget(target);
 
         final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
 
@@ -195,10 +199,9 @@ public class SubscriptionServiceShould {
                                                                            .build();
         final Target target = getProjectQueryTarget();
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-        // Subscribe on the topic
+        final Topic topic = topicFactory.forTarget(target);
+
+        // Subscribe to the topic
         final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
         subscriptionObserver.verifyState();
@@ -259,9 +262,7 @@ public class SubscriptionServiceShould {
 
         final Target target = getProjectQueryTarget();
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+        final Topic topic = topicFactory.forTarget(target);
 
         // Subscribe
         final MemoizeStreamObserver<Subscription> subscribeObserver = new MemoizeStreamObserver<>();
@@ -302,9 +303,8 @@ public class SubscriptionServiceShould {
                                                                            .build();
         final Target target = getProjectQueryTarget();
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+        final Topic topic = topicFactory.forTarget(target);
+
         final MemoizeStreamObserver<Subscription> subscriptionObserver =
                 new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);

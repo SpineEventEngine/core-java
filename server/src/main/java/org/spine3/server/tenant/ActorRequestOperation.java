@@ -17,44 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package org.spine3.server.tenant;
 
-import org.spine3.annotations.Internal;
-import org.spine3.client.Query;
-import org.spine3.client.QueryId;
+import org.spine3.client.ActorContext;
 
 /**
- * A tenant-aware operation performed in response to a query.
+ * A tenant-aware operation performed in relation to a request sent by an actor.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-@Internal
-public abstract class QueryOperation extends ActorRequestOperation {
+abstract class ActorRequestOperation extends TenantAwareOperation {
 
-    private final Query query;
-
-    /**
-     * Creates new instance of the operation.
-     *
-     * @param query the query in response to which the operation is performed.
-     */
-    protected QueryOperation(Query query) {
-        super(query.getContext());
-        this.query = query;
-    }
-
-    /**
-     * Obtains the ID of the query.
-     */
-    protected QueryId queryId() {
-        return query.getId();
-    }
-
-    /**
-     * Obtains the query in response to which the operation is performed.
-     */
-    protected Query query() {
-        return query;
+    protected ActorRequestOperation(ActorContext context) {
+        super(context.getTenantId());
     }
 }

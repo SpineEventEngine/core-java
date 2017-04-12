@@ -19,6 +19,7 @@
  */
 package org.spine3.server.tenant;
 
+import org.spine3.annotations.Internal;
 import org.spine3.server.entity.EntityStateEnvelope;
 
 /**
@@ -28,6 +29,7 @@ import org.spine3.server.entity.EntityStateEnvelope;
  *
  * @author Alex Tymchenko
  */
+@Internal
 public abstract class EntityUpdateOperation extends TenantAwareOperation {
 
     protected EntityUpdateOperation(EntityStateEnvelope envelope) {

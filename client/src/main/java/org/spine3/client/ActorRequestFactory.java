@@ -113,7 +113,10 @@ abstract class ActorRequestFactory<F extends ActorRequestFactory> {
                                                     B extends AbstractBuilder> {
 
         private UserId actor;
+
+        @Nullable
         private ZoneOffset zoneOffset;
+
         @Nullable
         private TenantId tenantId;
 
@@ -131,6 +134,7 @@ abstract class ActorRequestFactory<F extends ActorRequestFactory> {
             return thisInstance();
         }
 
+        @Nullable
         public ZoneOffset getZoneOffset() {
             return zoneOffset;
         }
@@ -181,6 +185,11 @@ abstract class ActorRequestFactory<F extends ActorRequestFactory> {
             if (zoneOffset == null) {
                 setZoneOffset(ZoneOffsets.getDefault());
             }
+
+            if(tenantId == null) {
+                tenantId = TenantId.getDefaultInstance();
+            }
+
             return null;
         }
     }

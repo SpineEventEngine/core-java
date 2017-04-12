@@ -45,8 +45,8 @@ import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.EntityUpdateOperation;
 import org.spine3.server.tenant.QueryOperation;
+import org.spine3.server.tenant.SubscriptionOperation;
 import org.spine3.server.tenant.TenantAwareFunction;
-import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
@@ -214,7 +214,7 @@ public class Stand implements AutoCloseable {
     @CheckReturnValue
     public Subscription subscribe(final Topic topic) {
         final TenantAwareFunction<Topic, Subscription> fn =
-                new TenantAwareFunction<Topic, Subscription>() {
+                new TenantAwareFunction<Topic, Subscription>(topic.getContext().getTenantId()) {
 
                     @Nullable
                     @Override
@@ -242,8 +242,7 @@ public class Stand implements AutoCloseable {
         checkNotNull(subscription);
         checkNotNull(callback);
 
-        final TenantAwareOperation op = new TenantAwareOperation() {
-
+        final SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
                 subscriptionRegistry.activate(subscription, callback);
@@ -267,7 +266,7 @@ public class Stand implements AutoCloseable {
     public void cancel(final Subscription subscription) {
         checkNotNull(subscription);
 
-        final TenantAwareOperation op = new TenantAwareOperation() {
+        final SubscriptionOperation op = new SubscriptionOperation(subscription) {
 
             @Override
             public void run() {
@@ -503,7 +502,7 @@ public class Stand implements AutoCloseable {
             return multitenant;
         }
 
-        public SubscriptionRegistry getSubscriptionRegistry() {
+        private SubscriptionRegistry getSubscriptionRegistry() {
             return subscriptionRegistry;
         }
 
