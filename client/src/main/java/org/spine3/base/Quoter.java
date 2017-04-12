@@ -34,7 +34,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Alexander Yevsyukov
  */
 class Quoter extends Converter<String, String> {
-    
+
     private static final char QUOTE_CHAR = '"';
     private static final String QUOTE = String.valueOf(QUOTE_CHAR);
     private static final String BACKSLASH_QUOTE = "\\\"";
@@ -42,9 +42,8 @@ class Quoter extends Converter<String, String> {
     private static final String ESCAPED_QUOTE = DOUBLE_BACKSLASH + QUOTE_CHAR;
     private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
     private static final Pattern QUOTE_PATTERN = Pattern.compile(QUOTE);
-    private static final String TRIPLE_BACKSLASH = "\\\\\\";
     private static final String DELIMITER_PATTERN_PREFIX = "(?<!" + DOUBLE_BACKSLASH + ')'
-                                                            + TRIPLE_BACKSLASH;
+                                                            + DOUBLE_BACKSLASH;
 
     @Override
     protected String doForward(String s) {
@@ -98,8 +97,10 @@ class Quoter extends Converter<String, String> {
      * @return the created pattern
      */
     static String createDelimiterPattern(char delimiter) {
-        return Pattern.compile(DELIMITER_PATTERN_PREFIX + delimiter)
-                      .pattern();
+        final String quotedDelimiter = Pattern.quote(String.valueOf(delimiter));
+        final String result = Pattern.compile(DELIMITER_PATTERN_PREFIX + quotedDelimiter)
+                                     .pattern();
+        return result;
     }
 
     private enum Singleton {
