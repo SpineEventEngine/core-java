@@ -356,8 +356,11 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     }
 
     private static void checkAggregateStateRecord(AggregateStateRecord aggregateStateRecord) {
-        if (aggregateStateRecord.getSnapshot() == null || aggregateStateRecord.getEventList()
-                                                                              .isEmpty()) {
+        final boolean snapshotIsNotSet =
+                aggregateStateRecord.getSnapshot().equals(Snapshot.getDefaultInstance());
+
+        if (snapshotIsNotSet && aggregateStateRecord.getEventList()
+                                                    .isEmpty()) {
             throw new IllegalStateException("AggregateStateRecord instance should have either "
                                                     + "snapshot or non-empty event list.");
         }

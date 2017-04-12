@@ -107,6 +107,13 @@ public abstract class AggregateStorageShould
         assertFalse(iterator.hasNext());
     }
 
+    @Test
+    public void return_absent_AggregateStateRecord_if_read_history_from_empty_storage() {
+        final Optional<AggregateStateRecord> aggregateStateRecord = storage.read(id);
+
+        assertFalse(aggregateStateRecord.isPresent());
+    }
+
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_read_history_by_null_id() {
         storage.historyBackward(Tests.<ProjectId>nullRef());

@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -118,6 +119,18 @@ public class AggregateRepositoryShould {
         assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void reject_invalid_AggregateStateRecord_instance() {
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+
+        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance()))
+                .when(storage)
+                .read(id);
+
+        repositorySpy.loadOrCreate(id);
     }
 
     @Test
