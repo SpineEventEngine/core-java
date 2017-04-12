@@ -135,7 +135,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Update the state of an entity inside of the current instance of {@code Stand}.
+     * Updates the state of an entity inside of the current instance of {@code Stand}.
      *
      * <p>In case the entity update represents the new
      * {@link org.spine3.server.aggregate.Aggregate Aggregate} state,
@@ -203,7 +203,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Subscribe for all further changes of an entity state, which satisfies the {@link Topic}.
+     * Subscribes for all further changes of an entity state, which satisfies the {@link Topic}.
      *
      * <p>Once this instance of {@code Stand} receives an update of an entity
      * with the given {@code TypeUrl}, all such callbacks are executed.
@@ -228,7 +228,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Activate the subscription created via {@link #subscribe(Topic)}.
+     * Activates the subscription created via {@link #subscribe(Topic)}.
      *
      * <p>After the activation, the clients will start receiving the updates via
      * {@code EntityUpdateCallback} upon the changes in the entities, defined by
@@ -253,7 +253,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Cancel the {@link Subscription}.
+     * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
      * {@link #activate(Subscription, EntityUpdateCallback) activate()} call.
@@ -277,7 +277,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
+     * Reads all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
      *
@@ -310,7 +310,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read a particular set of items from the read-side of the application and
+     * Reads a particular set of items from the read-side of the application and
      * feed the result into an instance.
      *
      * <p>{@link Query} defines the query target and the expected detail level for response.
@@ -363,7 +363,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Register a supplier for the objects of a certain {@link TypeUrl} to be able
+     * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
      * to read them in response to a {@link org.spine3.client.Query Query}.
      *
      * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
@@ -456,7 +456,7 @@ public class Stand implements AutoCloseable {
         private boolean multitenant;
 
         /**
-         * Set an instance of {@link StandStorage} to be used to persist
+         * Sets an instance of {@link StandStorage} to be used to persist
          * the latest aggregate states.
          *
          * <p>If no {@code storage} is assigned,
@@ -476,7 +476,7 @@ public class Stand implements AutoCloseable {
         }
 
         /**
-         * Set an {@code Executor} to be used for executing callback methods.
+         * Sets an {@code Executor} to be used for executing callback methods.
          *
          * <p>If the {@code Executor} is not set,
          * {@link MoreExecutors#directExecutor() directExecutor()} will be used.
@@ -507,7 +507,7 @@ public class Stand implements AutoCloseable {
         }
 
         /**
-         * Build an instance of {@code Stand}.
+         * Builds an instance of {@code Stand}.
          *
          * @return the instance of Stand
          */

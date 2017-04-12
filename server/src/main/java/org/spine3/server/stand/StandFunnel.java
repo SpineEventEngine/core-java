@@ -63,7 +63,7 @@ public class StandFunnel {
     }
 
     /**
-     * Post the state of an {@link VersionableEntity} to an instance of {@link Stand}.
+     * Posts the state of an {@link VersionableEntity} to an instance of {@link Stand}.
      *
      * @param entity         the entity which state should be delivered to the {@code Stand}
      * @param commandContext the context of the command, which triggered the entity state update.
@@ -75,7 +75,7 @@ public class StandFunnel {
     }
 
     /**
-     * Create a new {@code Builder} for {@link StandFunnel}.
+     * Creates a new {@code Builder} for {@link StandFunnel}.
      *
      * @return a new {@code Builder} instance.
      */
@@ -103,7 +103,7 @@ public class StandFunnel {
         }
 
         /**
-         * Set the {@link Stand} instance for this {@code StandFunnel}.
+         * Sets the {@link Stand} instance for this {@code StandFunnel}.
          *
          * <p> The value must not be null.
          *
@@ -120,7 +120,7 @@ public class StandFunnel {
         }
 
         /**
-         * Set the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
+         * Sets the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
          *
          * <p>The value must not be {@code null}.
          *
