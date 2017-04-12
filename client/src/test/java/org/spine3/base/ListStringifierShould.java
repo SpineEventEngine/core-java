@@ -39,6 +39,15 @@ import static org.spine3.base.Stringifiers.listStringifier;
 public class ListStringifierShould {
 
     @Test
+    public void convert_string_with_backslashes_to_list_and_backward() {
+        final String stringToConvert = "\"\\\"\\1\\\"\\\"";
+        Stringifier<List<String>> stringifier = listStringifier(String.class);
+        final List<String> convertedList = stringifier.fromString(stringToConvert);
+        final String convertedString = stringifier.toString(convertedList);
+        assertEquals(stringToConvert, convertedString);
+    }
+
+    @Test
     public void convert_string_to_list_of_strings() {
         final String stringToConvert = "\"1\\\"\",\"2\",\"3\\\"\",\"4\",\"5\"";
         final List<String> actualList = listStringifier(String.class).reverse()
