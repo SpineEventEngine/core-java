@@ -28,7 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
- * Encloses and discloses the {@code String} objects with quotes.
+ * Encloses and discloses the {@code String} objects with double quotes.
  *
  * @author Illia Shepilov
  * @author Alexander Yevsyukov
