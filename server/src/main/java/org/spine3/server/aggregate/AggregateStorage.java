@@ -57,11 +57,12 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * {@inheritDoc}
+     * Forms and returns an {@link AggregateStateRecord} based on the
+     * {@linkplain #historyBackward(Object) aggregate history}.
      *
-     * @param aggregateId the ID of the record to read
-     * @return the record instance or {@code Optional.absent()} if either
-     * the aggregate history is empty or there is no record with this ID
+     * @param aggregateId the aggregate ID for which to form a record
+     * @return the record instance or {@code Optional.absent()} if the
+     *         {@linkplain #historyBackward(Object) aggregate history} is empty
      * @throws IllegalStateException if the storage was closed before
      */
     @Override
