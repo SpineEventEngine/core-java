@@ -77,8 +77,8 @@ import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVi
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-        extends Repository<I, A>
-        implements CommandDispatcher {
+                extends Repository<I, A>
+                implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
