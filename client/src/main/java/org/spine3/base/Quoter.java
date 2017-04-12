@@ -42,7 +42,9 @@ class Quoter extends Converter<String, String> {
     private static final String ESCAPED_QUOTE = DOUBLE_BACKSLASH + QUOTE_CHAR;
     private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
     private static final Pattern QUOTE_PATTERN = Pattern.compile(QUOTE);
-    private static final String DELIMITER_PATTERN_PREFIX = "(?<!\\\\)\\\\\\";
+    private static final String TRIPLE_BACKSLASH = "\\\\\\";
+    private static final String DELIMITER_PATTERN_PREFIX = "(?<!" + DOUBLE_BACKSLASH + ')'
+                                                            + TRIPLE_BACKSLASH;
 
     @Override
     protected String doForward(String s) {
