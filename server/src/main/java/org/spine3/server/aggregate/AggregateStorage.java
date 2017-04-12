@@ -74,6 +74,10 @@ public abstract class AggregateStorage<I>
 
         final Iterator<AggregateEventRecord> historyBackward = historyBackward(aggregateId);
 
+        if (!historyBackward.hasNext()) {
+            return Optional.absent();
+        }
+
         while (historyBackward.hasNext()
                 && snapshot == null) {
 
@@ -91,10 +95,6 @@ public abstract class AggregateStorage<I>
                     throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
                                                    shortDebugString(record));
             }
-        }
-
-        if (snapshot == null && history.isEmpty()) {
-            return Optional.absent();
         }
 
         final AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();
