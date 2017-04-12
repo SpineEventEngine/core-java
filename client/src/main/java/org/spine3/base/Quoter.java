@@ -89,7 +89,7 @@ class Quoter extends Converter<String, String> {
     }
 
     /**
-     * Creates the pattern to match the delimiters.
+     * Creates the pattern to match the escaped delimiters.
      *
      * @param delimiter the character to match
      * @return the created pattern
