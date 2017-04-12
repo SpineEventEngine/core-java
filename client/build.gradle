@@ -34,5 +34,5 @@ apply from: testArtifactsScript
 apply plugin: spineProtobufPluginId
 
 modelCompiler {
-    generateValidators = generateValidatorsOption
+    generateValidatingBuilders = generateValidatingBuildersValue
 }

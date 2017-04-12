@@ -28,5 +28,5 @@ apply from: generateDescriptorSetScript
 apply plugin: spineProtobufPluginId
 
 modelCompiler {
-    generateValidators = generateValidatorsOption
+    generateValidatingBuilders = generateValidatingBuildersValue
 }
