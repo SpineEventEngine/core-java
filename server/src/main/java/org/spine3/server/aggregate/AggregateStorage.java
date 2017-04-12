@@ -56,6 +56,14 @@ public abstract class AggregateStorage<I>
         super(multitenant);
     }
 
+    /**
+     * Reads a {@link AggregateStateRecord} by the passed ID.
+     *
+     * @param aggregateId the ID of the record to read
+     * @return the record instance or {@code Optional.absent()} if either
+     * the aggregate history is empty or there is no record with this ID
+     * @throws IllegalStateException if the storage was closed before
+     */
     @Override
     public Optional<AggregateStateRecord> read(I aggregateId) {
         checkNotClosed();
@@ -83,6 +91,10 @@ public abstract class AggregateStorage<I>
                     throw newIllegalStateException("Event or snapshot missing in record: \"%s\"",
                                                    shortDebugString(record));
             }
+        }
+
+        if (snapshot == null && history.isEmpty()) {
+            return Optional.absent();
         }
 
         final AggregateStateRecord.Builder builder = AggregateStateRecord.newBuilder();

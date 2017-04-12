@@ -49,8 +49,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.String.format;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
@@ -79,8 +77,8 @@ import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVi
  * @author Alexander Yevsyukov
  */
 public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
-                extends Repository<I, A>
-                implements CommandDispatcher {
+        extends Repository<I, A>
+        implements CommandDispatcher {
 
     /** The default number of events to be stored before a next snapshot is made. */
     static final int DEFAULT_SNAPSHOT_TRIGGER = 100;
@@ -281,12 +279,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @VisibleForTesting
     A loadOrCreate(I id) {
         final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
-        if (!eventsFromStorage.isPresent()) {
-            throw unableToLoadEvents(id);
-        }
-        final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
         final A result = create(id);
-        result.play(aggregateStateRecord);
+
+        if (eventsFromStorage.isPresent()) {
+            final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
+            checkAggregateStateRecord(aggregateStateRecord);
+            result.play(aggregateStateRecord);
+        }
+
         return result;
     }
 
@@ -355,12 +355,12 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    private static <I> IllegalStateException unableToLoadEvents(I id) {
-        final String errMsg = format(
-                "Unable to load events for the aggregate with ID: %s",
-                idToString(id)
-        );
-        throw new IllegalStateException(errMsg);
+    private static void checkAggregateStateRecord(AggregateStateRecord aggregateStateRecord) {
+        if (aggregateStateRecord.getSnapshot() == null || aggregateStateRecord.getEventList()
+                                                                              .isEmpty()) {
+            throw new IllegalStateException("AggregateStateRecord instance should have either "
+                                                    + "snapshot or non-empty event list.");
+        }
     }
 
     private enum LogSingleton {

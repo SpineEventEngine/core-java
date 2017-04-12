@@ -100,20 +100,6 @@ public abstract class AggregateStorageShould
         return Sample.messageOfType(ProjectId.class);
     }
 
-    /**
-     * Overwrites the test behaviour checking that {@code AggregatStorage}
-     * always returns events.
-     */
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType",
-            "MethodDoesntCallSuperMethod", "OptionalGetWithoutIsPresent"}) // This is what we want.
-    @Override
-    protected void assertResultForMissingId(Optional<AggregateStateRecord> record) {
-        assertTrue(record.isPresent());
-        assertTrue(record.get()
-                         .getEventList()
-                         .isEmpty());
-    }
-
     @Test
     public void return_iterator_over_empty_collection_if_read_history_from_empty_storage() {
         final Iterator<AggregateEventRecord> iterator = storage.historyBackward(id);
