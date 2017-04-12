@@ -298,7 +298,6 @@ public class ActorRequestFactory {
          * @return the instance of {@code Topic}.
          */
         public Topic forTarget(Target target) {
-            //TODO:4/7/17:alex.tymchenko: validate Target.
             checkNotNull(target);
 
             return Topic.newBuilder()
