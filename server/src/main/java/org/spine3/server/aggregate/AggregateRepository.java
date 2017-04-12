@@ -49,8 +49,6 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.String.format;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.aggregate.AggregateCommandEndpoint.createFor;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
@@ -280,12 +278,14 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     @VisibleForTesting
     A loadOrCreate(I id) {
         final Optional<AggregateStateRecord> eventsFromStorage = aggregateStorage().read(id);
-        if (!eventsFromStorage.isPresent()) {
-            throw unableToLoadEvents(id);
-        }
-        final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
         final A result = create(id);
-        result.play(aggregateStateRecord);
+
+        if (eventsFromStorage.isPresent()) {
+            final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
+            checkAggregateStateRecord(aggregateStateRecord);
+            result.play(aggregateStateRecord);
+        }
+
         return result;
     }
 
@@ -354,12 +354,27 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         return result;
     }
 
-    private static <I> IllegalStateException unableToLoadEvents(I id) {
-        final String errMsg = format(
-                "Unable to load events for the aggregate with ID: %s",
-                idToString(id)
-        );
-        throw new IllegalStateException(errMsg);
+    /**
+     * Ensures that the {@link AggregateStateRecord} is valid.
+     *
+     * <p>{@link AggregateStateRecord} is considered valid when one of the following is true:
+     * <ul>
+     *     <li>{@linkplain AggregateStateRecord#getSnapshot() snapshot} is not default;</li>
+     *     <li>{@linkplain AggregateStateRecord#getEventList() event list} is not empty.</li>
+     * </ul>
+     *
+     * @param aggregateStateRecord the record to check
+     * @throws IllegalStateException if the {@link AggregateStateRecord} is not valid
+     */
+    private static void checkAggregateStateRecord(AggregateStateRecord aggregateStateRecord) {
+        final boolean snapshotIsNotSet =
+                aggregateStateRecord.getSnapshot().equals(Snapshot.getDefaultInstance());
+
+        if (snapshotIsNotSet && aggregateStateRecord.getEventList()
+                                                    .isEmpty()) {
+            throw new IllegalStateException("AggregateStateRecord instance should have either "
+                                                    + "snapshot or non-empty event list.");
+        }
     }
 
     private enum LogSingleton {
