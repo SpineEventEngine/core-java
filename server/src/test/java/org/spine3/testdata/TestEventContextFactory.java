@@ -27,7 +27,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Enrichment;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Events;
+import org.spine3.server.command.EventFactory;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.users.TenantId;
@@ -45,8 +45,10 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
  * Creates event contexts for tests.
  *
  * @author Alexander Litus
+ * @deprecated use {@link org.spine3.test.TestEventFactory TestEventFactory}
  */
 @SuppressWarnings({"UtilityClass", "OverloadedMethodsWithSameNumberOfParameters"})
+@Deprecated
 public class TestEventContextFactory {
 
     private static final Any AGGREGATE_ID = pack(newStringValue(newUuid()));
@@ -60,7 +62,7 @@ public class TestEventContextFactory {
         final Timestamp now = getCurrentTime();
         final UserId userId = newUserId(newUuid());
         final CommandContext commandContext = createCommandContext(userId, generateId(), now);
-        final EventId eventId = Events.generateId();
+        final EventId eventId = EventFactory.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setCommandContext(commandContext)
@@ -71,7 +73,7 @@ public class TestEventContextFactory {
 
     public static EventContext createEventContext(Message aggregateId,
                                                   TenantId tenantId) {
-        final EventId eventId = Events.generateId();
+        final EventId eventId = EventFactory.generateId();
         final CommandContext commandContext =
                 TestActorRequestFactory.newInstance(TestEventContextFactory.class, tenantId)
                                        .createCommandContext();
@@ -94,7 +96,7 @@ public class TestEventContextFactory {
 
     /** Creates a new {@link IntegrationEventContext} with default properties. */
     public static IntegrationEventContext createIntegrationEventContext() {
-        final EventId eventId = Events.generateId();
+        final EventId eventId = EventFactory.generateId();
         final IntegrationEventContext.Builder builder =
                 IntegrationEventContext.newBuilder()
                                        .setEventId(eventId)
@@ -105,18 +107,18 @@ public class TestEventContextFactory {
     }
 
     public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
-        final EventId eventId = Events.generateId();
-        final IntegrationEventContext.Builder builder = IntegrationEventContext.newBuilder()
-                                                                               .setEventId(eventId)
-                                                                               .setTimestamp(getCurrentTime())
-                                                                               .setBoundedContextName(TEST_BC_NAME)
-                                                                               .setProducerId(
-                                                                                       pack(aggregateId));
+        final EventId eventId = EventFactory.generateId();
+        final IntegrationEventContext.Builder builder =
+                IntegrationEventContext.newBuilder()
+                                       .setEventId(eventId)
+                                       .setTimestamp(getCurrentTime())
+                                       .setBoundedContextName(TEST_BC_NAME)
+                                       .setProducerId(pack(aggregateId));
         return builder.build();
     }
 
     public static EventContext createEventContext(Timestamp timestamp) {
-        final EventId eventId = Events.generateId();
+        final EventId eventId = EventFactory.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)
@@ -125,7 +127,7 @@ public class TestEventContextFactory {
     }
 
     public static EventContext createEventContext(Message aggregateId, Timestamp timestamp) {
-        final EventId eventId = Events.generateId();
+        final EventId eventId = EventFactory.generateId();
         final EventContext.Builder builder = EventContext.newBuilder()
                                                          .setEventId(eventId)
                                                          .setTimestamp(timestamp)

@@ -49,6 +49,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -76,7 +77,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         final Project project = Project.newBuilder()
                                        .setId((ProjectId) id.getAggregateId())
                                        .setStatus(Project.Status.CREATED)
-                                       .setName(String.format("test-project-%s", id.toString()))
+                                       .setName(format("test-project-%s", id.toString()))
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;
@@ -115,7 +116,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         checkByTypeRead(mask);
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops") // OK for this test.
+    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
     private void checkByTypeRead(FieldMask fieldMask) {
         final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
         final StandStorage storage = getStorage();
@@ -163,6 +164,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return DEFAULT_ID_SUPPLIER.get();
     }
 
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     protected List<AggregateStateId> fill(StandStorage storage,
                                           int count,
                                           Supplier<AggregateStateId<ProjectId>> idSupplier) {

@@ -33,8 +33,8 @@ import org.spine3.base.Commands;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.type.CommandClass;
 

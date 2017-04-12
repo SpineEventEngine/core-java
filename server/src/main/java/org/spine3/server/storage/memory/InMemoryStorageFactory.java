@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -44,6 +45,19 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public boolean isMultitenant() {
         return this.multitenant;
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In-memory implementation stores no values separately
+     * ({@link org.spine3.server.entity.storage.Column Columns}), therefore
+     * returns an empty ColumnTypeRegistry.
+     */
+    @Override
+    public ColumnTypeRegistry getTypeRegistry() {
+        return ColumnTypeRegistry.newBuilder()
+                                 .build();
     }
 
     @Override
@@ -94,8 +108,8 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     public static InMemoryStorageFactory getInstance(boolean multitenant) {
         return multitenant
-               ? Singleton.INSTANCE.multiTenantInstance
-               : Singleton.INSTANCE.singleTenantInstance;
+                ? Singleton.INSTANCE.multiTenantInstance
+                : Singleton.INSTANCE.singleTenantInstance;
     }
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
@@ -103,7 +117,7 @@ public class InMemoryStorageFactory implements StorageFactory {
         INSTANCE;
         private final InMemoryStorageFactory singleTenantInstance =
                 new InMemoryStorageFactory(false);
-        
+
         private final InMemoryStorageFactory multiTenantInstance =
                 new InMemoryStorageFactory(true);
     }

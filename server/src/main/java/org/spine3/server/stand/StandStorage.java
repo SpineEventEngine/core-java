@@ -22,6 +22,7 @@ package org.spine3.server.stand;
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.FieldMask;
 import org.spine3.annotations.SPI;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.type.TypeUrl;
@@ -39,6 +40,12 @@ import org.spine3.type.TypeUrl;
  */
 @SPI
 public abstract class StandStorage extends RecordStorage<AggregateStateId> {
+
+    static {
+        StringifierRegistry.getInstance()
+                           .register(new AggregateStateIdStringifier(),
+                                     AggregateStateId.class);
+    }
 
     protected StandStorage(boolean multitenant) {
         super(multitenant);

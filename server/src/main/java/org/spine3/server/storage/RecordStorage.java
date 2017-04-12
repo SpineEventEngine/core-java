@@ -28,6 +28,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
 
@@ -92,15 +93,32 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     }
 
     /**
+     * Writes a record and its {@link org.spine3.server.entity.storage.Column Columns} into
+     * the storage.
+     *
+     * <p>Rewrites it if a record with this ID already exists in the storage.
+     *
+     * @param id     the ID for the record
+     * @param record a record to store
+     * @throws IllegalStateException if the storage is closed
+     * @see #write(Object, EntityRecord)
+     */
+    public void write(I id, EntityRecordWithColumns record) {
+        checkNotNull(id);
+        checkArgument(record.getRecord().hasState(), "Record does not have state field.");
+        checkNotClosed();
+
+        writeRecord(id, record);
+    }
+
+    /**
      * {@inheritDoc}
      */
     @Override
     public void write(I id, EntityRecord record) {
-        checkNotNull(id);
-        checkArgument(record.hasState(), "Record does not have state field.");
-        checkNotClosed();
-
-        writeRecord(id, record);
+        final EntityRecordWithColumns recordWithStorageFields =
+                EntityRecordWithColumns.of(record);
+        write(id, recordWithStorageFields);
     }
 
     /**
@@ -111,7 +129,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param records an ID to record map with the entries to store
      * @throws IllegalStateException if the storage is closed
      */
-    public void write(Map<I, EntityRecord> records) {
+    public void write(Map<I, EntityRecordWithColumns> records) {
         checkNotNull(records);
         checkNotClosed();
 
@@ -143,7 +161,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
                                  ? id.toString()
                                  : idToString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s",
-                                            idStr);
+                                           idStr);
         }
     }
 
@@ -228,14 +246,15 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
 
     /**
-     * Writes a record into the storage.
+     * Writes a record and the associated
+     * {@link org.spine3.server.entity.storage.Column Column values} into the storage.
      *
      * <p>Rewrites it if a record with this ID already exists in the storage.
      *
      * @param id     an ID of the record
      * @param record a record to store
      */
-    protected abstract void writeRecord(I id, EntityRecord record);
+    protected abstract void writeRecord(I id, EntityRecordWithColumns record);
 
     /**
      * Writes a bulk of records into the storage.
@@ -244,5 +263,5 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      *
      * @param records an ID to record map with the entries to store
      */
-    protected abstract void writeRecords(Map<I, EntityRecord> records);
+    protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
 }

@@ -23,7 +23,7 @@ package org.spine3.server.procman;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.server.command.CommandBus;
+import org.spine3.server.commandbus.CommandBus;
 
 /**
  * The command router that routes all commands in one call.

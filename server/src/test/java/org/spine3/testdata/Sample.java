@@ -34,13 +34,11 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.command.EventFactory;
 import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.List;
@@ -49,6 +47,7 @@ import java.util.Random;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.protobuf.Messages.builderFor;
 
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and {@link Command}),
@@ -65,14 +64,14 @@ public class Sample {
                                 TenantId tenantId) {
         final EventContext eventContext = TestEventContextFactory.createEventContext(producerId, tenantId);
         final Message eventMessage = messageOfType(eventClass);
-        final Event event = Events.createEvent(eventMessage, eventContext);
+        final Event event = EventFactory.createEvent(eventMessage, eventContext);
         return event;
     }
 
     public static Event eventBy(Message producerId, Message eventMessage,
                                 TenantId tenantId) {
         final EventContext eventContext = TestEventContextFactory.createEventContext(producerId, tenantId);
-        final Event event = Events.createEvent(eventMessage, eventContext);
+        final Event event = EventFactory.createEvent(eventMessage, eventContext);
         return event;
     }
 
@@ -216,19 +215,5 @@ public class Sample {
     private static <M extends Message> Class<M> classFor(TypeUrl url) {
         final Class<M> javaClass = url.getJavaClass();
         return javaClass;
-    }
-
-    private static <B extends Message.Builder> B builderFor(Class<? extends Message> clazz) {
-        try {
-            final Method factoryMethod = clazz.getDeclaredMethod("newBuilder");
-            @SuppressWarnings("unchecked")
-            final B result = (B) factoryMethod.invoke(null);
-            return result;
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            final String errMsg = format("Class %s must be a generated proto message",
-                                         clazz.getCanonicalName());
-            throw new IllegalArgumentException(errMsg, e);
-        }
-
     }
 }

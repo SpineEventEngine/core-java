@@ -19,7 +19,7 @@
  */
 
 /**
- * This package provides validation classes.
+ * This package provides validation classes and interfaces.
  */
 @ParametersAreNonnullByDefault
 package org.spine3.validate;

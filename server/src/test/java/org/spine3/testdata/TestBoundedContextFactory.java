@@ -21,7 +21,7 @@
 package org.spine3.testdata;
 
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.CommandBus;
+import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.stand.Stand;

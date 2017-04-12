@@ -23,7 +23,6 @@ package org.spine3.base;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import org.junit.Test;
-import org.spine3.test.types.Task;
 
 import java.util.List;
 
@@ -79,7 +78,7 @@ public class ListStringifierShould {
     @Test(expected = MissingStringifierException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
         final String stringToConvert = "\"{value:123456}\"";
-        final Stringifier<List<Task>> stringifier = listStringifier(Task.class);
+        final Stringifier<List<Object>> stringifier = listStringifier(Object.class);
         stringifier.fromString(stringToConvert);
     }
 

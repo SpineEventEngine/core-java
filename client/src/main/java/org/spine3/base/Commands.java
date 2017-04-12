@@ -45,6 +45,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
+import static org.spine3.base.Identifiers.EMPTY_ID;
+import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -325,6 +327,19 @@ public class Commands {
      */
     public static Stringifier<CommandId> idStringifier() {
         return idStringifier;
+    }
+
+    /**
+     * Ensures that the passed ID is valid.
+     *
+     * @param id an ID to check
+     * @throws IllegalArgumentException if the ID string value is empty or blank
+     */
+    public static CommandId checkValid(CommandId id) {
+        checkNotNull(id);
+        final String idStr = idToString(id);
+        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
+        return id;
     }
 
     /**

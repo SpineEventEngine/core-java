@@ -21,8 +21,6 @@
 package org.spine3.validate;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -30,8 +28,6 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -261,31 +257,6 @@ public class Validate {
 
     private static boolean isBetween(int value, int lowBound, int highBound) {
         return lowBound <= value && value <= highBound;
-    }
-
-    /**
-     * Ensures that the passed ID is valid.
-     *
-     * @param id an ID to check
-     * @throws IllegalArgumentException if the ID string value is empty or blank
-     */
-    public static EventId checkValid(EventId id) {
-        checkNotNull(id);
-        checkNotEmptyOrBlank(id.getUuid(), "event ID");
-        return id;
-    }
-
-    /**
-     * Ensures that the passed ID is valid.
-     *
-     * @param id an ID to check
-     * @throws IllegalArgumentException if the ID string value is empty or blank
-     */
-    public static CommandId checkValid(CommandId id) {
-        checkNotNull(id);
-        final String idStr = idToString(id);
-        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
-        return id;
     }
 
     /**

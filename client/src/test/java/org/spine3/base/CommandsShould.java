@@ -271,4 +271,14 @@ public class CommandsShould {
         final CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
         assertEquals(id, convertedBack);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_command_id_is_empty() {
+        Commands.checkValid(CommandId.getDefaultInstance());
+    }
+
+    @Test
+    public void not_throw_exception_if_checked_command_id_is_valid() {
+        Commands.checkValid(Commands.generateId());
+    }
 }
