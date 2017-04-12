@@ -34,63 +34,59 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Alexander Yevsyukov
  */
 class Quoter extends Converter<String, String> {
-
-    private static final char QUOTE_SYMBOL = '\"';
+    
+    private static final char QUOTE_CHAR = '"';
+    private static final String QUOTE = String.valueOf(QUOTE_CHAR);
+    private static final String BACKSLASH_QUOTE = "\\\"";
     private static final String DOUBLE_BACKSLASH = "\\\\";
+    private static final String ESCAPED_QUOTE = DOUBLE_BACKSLASH + QUOTE_CHAR;
     private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
-    private static final Pattern ESCAPED_QUOTE = Pattern.compile("\"");
+    private static final Pattern QUOTE_PATTERN = Pattern.compile(QUOTE);
+    private static final String DELIMITER_PATTERN_PREFIX = "(?<!\\\\)\\\\\\";
 
     @Override
     protected String doForward(String s) {
         return quote(s);
     }
 
-    private static String quote(String stringToQuote) {
-        checkNotNull(stringToQuote);
-        final String escapedString = ESCAPED_QUOTE.matcher(stringToQuote)
-                                                  .replaceAll(DOUBLE_BACKSLASH + QUOTE_SYMBOL);
-        final String result = QUOTE_SYMBOL + escapedString + QUOTE_SYMBOL;
-        return result;
-    }
-
     @Override
     protected String doBackward(String s) {
         checkNotNull(s);
-        checkQuoted(s);
-        return unquoteAndRemoveDoubleBackslashes(s);
-    }
-
-    private static void checkQuoted(CharSequence element) {
-        final boolean isQuoted = isQuoted(element);
-        if (!isQuoted) {
-            throw newIllegalArgumentException("Illegal format of the element: %s", element);
-        }
-    }
-
-    private static String unquoteAndRemoveDoubleBackslashes(String value) {
-        final String unquotedValue = DOUBLE_BACKSLASH_PATTERN
-                .matcher(value.substring(2, value.length() - 2))
-                .replaceAll("");
-        return unquotedValue;
+        return unquote(s);
     }
 
     /**
-     * Checks that the {@code CharSequence} contains the escaped quotes.
-     *
-     * @param str the sequence of chars to check
-     * @return {@code true} if the sequence contains further
-     * and prior escaped quotes, {@code false} otherwise
+     * Prepends quote characters in the passed string with two leading backslashes,
+     * and then wraps the string into quotes.
      */
-    private static boolean isQuoted(CharSequence str) {
-        final int stringLength = str.length();
-
-        if (stringLength < 2) {
-            return false;
-        }
-
-        boolean result = isQuote(str.charAt(1)) &&
-                isQuote(str.charAt(stringLength - 1));
+    private static String quote(String stringToQuote) {
+        checkNotNull(stringToQuote);
+        final String escapedString = QUOTE_PATTERN.matcher(stringToQuote)
+                                                  .replaceAll(ESCAPED_QUOTE);
+        final String result = QUOTE_CHAR + escapedString + QUOTE_CHAR;
         return result;
+    }
+
+    /**
+     * Unquotes the passed string and removes double backslash prefixes for quote symbols
+     * found inside the passed value.
+     */
+    private static String unquote(String value) {
+        checkQuoted(value);
+        final String unquoted = value.substring(2, value.length() - 2);
+        final String unescaped = DOUBLE_BACKSLASH_PATTERN.matcher(unquoted)
+                                                         .replaceAll("");
+        return unescaped;
+    }
+
+    /**
+     * @throws IllegalArgumentException if the passed char sequence is not wrapped into {@code \"}
+     */
+    private static void checkQuoted(String str) {
+        if (!(str.startsWith(BACKSLASH_QUOTE)
+                && str.endsWith(BACKSLASH_QUOTE))) {
+            throw newIllegalArgumentException("The passed string is not quoted: %s", str);
+        }
     }
 
     /**
@@ -100,12 +96,8 @@ class Quoter extends Converter<String, String> {
      * @return the created pattern
      */
     static String createDelimiterPattern(char delimiter) {
-        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
+        return Pattern.compile(DELIMITER_PATTERN_PREFIX + delimiter)
                       .pattern();
-    }
-
-    private static boolean isQuote(char character) {
-        return character == '\"';
     }
 
     private enum Singleton {
