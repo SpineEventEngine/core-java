@@ -27,7 +27,6 @@ import org.spine3.test.Tests;
 import org.spine3.test.client.TestEntity;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
-import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import java.util.Set;
@@ -109,8 +108,7 @@ public abstract class ActorRequestFactoryShould {
 
     @Test
     public void be_single_tenant_by_default() {
-        final TenantId actualTenantId = factory().getTenantId();
-        assertEquals(TenantId.getDefaultInstance(), actualTenantId);
+        assertNull(factory().getTenantId());
     }
 
     @Test

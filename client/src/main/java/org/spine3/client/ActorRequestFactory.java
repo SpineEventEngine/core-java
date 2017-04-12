@@ -442,10 +442,6 @@ public class ActorRequestFactory {
                 setZoneOffset(ZoneOffsets.getDefault());
             }
 
-            if(tenantId == null) {
-                tenantId = TenantId.getDefaultInstance();
-            }
-
             return new ActorRequestFactory(this);
         }
     }
