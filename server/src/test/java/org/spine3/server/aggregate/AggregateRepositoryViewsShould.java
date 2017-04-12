@@ -73,7 +73,7 @@ public class AggregateRepositoryViewsShould {
      * for being processed by the repository. */
     private void postCommand(String cmd) {
         final Command command =
-                requestFactory.command().createCommand(SHRepository.createCommandMessage(id, cmd));
+                requestFactory.command().create(SHRepository.createCommandMessage(id, cmd));
         boundedContext.getCommandBus().post(command, emptyObserver());
     }
 

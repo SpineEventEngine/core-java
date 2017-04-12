@@ -51,7 +51,7 @@ public class FailureEnvelopeShould {
     @Before
     public void setUp() {
         this.commandMessage = Int32Value.getDefaultInstance();
-        this.command = requestFactory.command().createCommand(commandMessage);
+        this.command = requestFactory.command().create(commandMessage);
         this.failureMessage = CannotPerformBusinessOperation.newBuilder()
                                                             .setOperationId(Identifiers.newUuid())
                                                             .build();

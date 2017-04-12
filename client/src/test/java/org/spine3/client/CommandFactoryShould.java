@@ -40,7 +40,7 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
         // this precision and to add coverage.
         final Timestamp beforeCall = TimeTests.Past.secondsAgo(1);
         final Command command = factory().command()
-                                         .createCommand(StringValue.getDefaultInstance());
+                                         .create(StringValue.getDefaultInstance());
         final Timestamp afterCall = TimeTests.Future.secondsFromNow(1);
 
         assertTrue(Timestamps2.isBetween(
@@ -51,7 +51,7 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
     @Test
     public void create_new_instance_with_entity_version() {
         final Command command = factory().command()
-                                         .createCommand(StringValue.getDefaultInstance(), 2);
+                                         .create(StringValue.getDefaultInstance(), 2);
 
         assertEquals(2, command.getContext()
                                .getTargetVersion());
@@ -68,7 +68,7 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
                                                                  .setZoneOffset(getZoneOffset())
                                                                  .build();
         final Command command = mtFactory.command()
-                                         .createCommand(StringValue.getDefaultInstance());
+                                         .create(StringValue.getDefaultInstance());
 
         assertEquals(tenantId, command.getContext()
                                       .getTenantId());

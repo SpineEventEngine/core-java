@@ -68,7 +68,7 @@ public abstract class ActorRequestFactoryShould {
                         .build();
     }
 
-    protected ActorContext actorContext() {
+    ActorContext actorContext() {
         return factory().actorContext();
     }
 

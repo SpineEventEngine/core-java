@@ -196,7 +196,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = requestFactory.command().createCommand(newStringValue(newUuid()));
+        final Command cmd = requestFactory.command().create(newStringValue(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations2.minutes(5);
 
@@ -209,7 +209,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = requestFactory.command().createCommand(newStringValue(newUuid()));
+        final Command cmd = requestFactory.command().create(newStringValue(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);

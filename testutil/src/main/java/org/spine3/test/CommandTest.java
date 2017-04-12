@@ -82,7 +82,7 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = requestFactory.command().createCommand(commandMessage);
+        this.command = requestFactory.command().create(commandMessage);
         return this.command;
     }
 
@@ -96,7 +96,7 @@ public abstract class CommandTest<C extends Message> {
      * @return new command instance
      */
     protected Command createDifferentCommand(Message commandMessage) {
-        return requestFactory.command().createCommand(checkNotNull(commandMessage));
+        return requestFactory.command().create(checkNotNull(commandMessage));
     }
 
     /**
@@ -126,7 +126,7 @@ public abstract class CommandTest<C extends Message> {
      */
     protected Command createCommand(C commandMessage, Timestamp timestamp) {
         this.commandMessage = checkNotNull(commandMessage);
-        this.command = adjustTimestamp(requestFactory.command().createCommand(commandMessage),
+        this.command = adjustTimestamp(requestFactory.command().create(commandMessage),
                                        checkNotNull(timestamp));
         return this.command;
     }

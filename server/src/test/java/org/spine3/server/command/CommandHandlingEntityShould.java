@@ -68,7 +68,7 @@ public class CommandHandlingEntityShould {
             // Simulate the production mode.
             environment.setToProduction();
 
-            final Command cmd = requestFactory.command().createCommand(msg());
+            final Command cmd = requestFactory.command().create(msg());
             entity.dispatchForTest(cmd.getMessage(), cmd.getContext());
 
         } finally {

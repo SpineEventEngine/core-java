@@ -185,7 +185,7 @@ public class CommandsShould {
     @Test
     public void extract_id_from_command() {
         final Command command = requestFactory.command()
-                                              .createCommand(stringValue);
+                                              .create(stringValue);
 
         assertEquals(command.getContext()
                             .getCommandId(), getId(command));
@@ -194,7 +194,7 @@ public class CommandsShould {
     @Test
     public void create_wereAfter_predicate() {
         final Command command = requestFactory.command()
-                                              .createCommand(BoolValue.getDefaultInstance());
+                                              .create(BoolValue.getDefaultInstance());
         assertTrue(Commands.wereAfter(secondsAgo(5))
                            .apply(command));
     }

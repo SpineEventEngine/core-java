@@ -51,7 +51,7 @@ public class CommandEnvelopeShould {
 
     @Before
     public void setUp() {
-        command = requestFactory.command().createCommand(newUuidValue());
+        command = requestFactory.command().create(newUuidValue());
         envelope = CommandEnvelope.of(command);
     }
 
@@ -92,7 +92,7 @@ public class CommandEnvelopeShould {
     @Test
     public void have_equals() {
         final Command anotherCommand = requestFactory.command()
-                                                     .createCommand(Timestamps2.getCurrentTime());
+                                                     .create(Timestamps2.getCurrentTime());
 
         new EqualsTester().addEqualityGroup(envelope)
                           .addEqualityGroup(CommandEnvelope.of(anotherCommand))

@@ -69,7 +69,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
 
     /** Creates new command with the passed timestamp. */
     public Command createCommand(Message message, Timestamp timestamp) {
-        final Command command = command().createCommand(message);
+        final Command command = command().create(message);
         return TimeTests.adjustTimestamp(command, timestamp);
 
     }

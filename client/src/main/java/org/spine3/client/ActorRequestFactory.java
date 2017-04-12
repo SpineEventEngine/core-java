@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.time.ZoneOffset;
@@ -100,19 +99,18 @@ public class ActorRequestFactory {
         return result;
     }
 
-    public Queries query() {
-        return new Queries();
+    public ForQuery query() {
+        return new ForQuery();
     }
 
-    public Topics topic() {
-        return new Topics();
+    public ForTopic topic() {
+        return new ForTopic();
     }
 
-    public Commands command() {
-        return new Commands();
+    public ForCommand command() {
+        return new ForCommand();
     }
 
-    @Internal
     @VisibleForTesting
     protected CommandContext createCommandContext() {
         return command().createContext();
@@ -121,7 +119,8 @@ public class ActorRequestFactory {
     /**
      * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
      */
-    private ActorContext actorContext() {
+    @VisibleForTesting
+    ActorContext actorContext() {
         final ActorContext.Builder builder = ActorContext.newBuilder()
                                                          .setActor(actor)
                                                          .setZoneOffset(zoneOffset);
@@ -131,7 +130,15 @@ public class ActorRequestFactory {
         return builder.build();
     }
 
-    public class Queries {
+    /**
+     * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}
+     * configuration.
+     */
+    public class ForQuery {
+
+        private ForQuery() {
+            // Prevent instantiation from the outside.
+        }
 
         /**
          * Creates a {@link Query} to read certain entity states by IDs with the {@link FieldMask}
@@ -169,6 +176,28 @@ public class ActorRequestFactory {
         }
 
         /**
+         * Creates a {@link Query} to read certain entity states by IDs.
+         *
+         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
+         * The processing results will contain only the entities, which IDs are present among
+         * the {@code ids}.
+         *
+         * <p>Unlike {@link #readByIds(Class, Set, String...)}, the {@code Query} processing
+         * will not change the resulting entities.
+         *
+         * @param entityClass the class of a target entity
+         * @param ids         the entity IDs of interest
+         * @return an instance of {@code Query} formed according to the passed parameters
+         */
+        public Query readByIds(Class<? extends Message> entityClass,
+                               Set<? extends Message> ids) {
+            checkNotNull(entityClass);
+            checkNotNull(ids);
+
+            return composeQuery(entityClass, ids, null);
+        }
+
+        /**
          * Creates a {@link Query} to read all entity states with the {@link FieldMask}
          * applied to each of the results.
          *
@@ -191,28 +220,6 @@ public class ActorRequestFactory {
                                                  .build();
             final Query result = composeQuery(entityClass, null, fieldMask);
             return result;
-        }
-
-        /**
-         * Creates a {@link Query} to read certain entity states by IDs.
-         *
-         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
-         * The processing results will contain only the entities, which IDs are present among
-         * the {@code ids}.
-         *
-         * <p>Unlike {@link #readByIds(Class, Set, String...)}, the {@code Query} processing
-         * will not change the resulting entities.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids         the entity IDs of interest
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query readByIds(Class<? extends Message> entityClass,
-                               Set<? extends Message> ids) {
-            checkNotNull(entityClass);
-            checkNotNull(ids);
-
-            return composeQuery(entityClass, ids, null);
         }
 
         /**
@@ -241,7 +248,15 @@ public class ActorRequestFactory {
         }
     }
 
-    public class Topics {
+    /**
+     * Public API for creating {@link Topic} instances, using the {@code ActorRequestFactory}
+     * configuration.
+     */
+    public class ForTopic {
+
+        private ForTopic() {
+            // Prevent instantiation from the outside.
+        }
 
         /**
          * Creates a {@link Topic} for a subset of the entity states by specifying their IDs.
@@ -289,7 +304,15 @@ public class ActorRequestFactory {
         }
     }
 
-    public class Commands {
+    /**
+     * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
+     * configuration.
+     */
+    public class ForCommand {
+
+        private ForCommand() {
+            // Prevent instantiation from the outside.
+        }
 
         /**
          * Creates new {@code Command} with the passed message.
@@ -299,7 +322,7 @@ public class ActorRequestFactory {
          * @param message the command message
          * @return new command instance
          */
-        public Command createCommand(Message message) {
+        public Command create(Message message) {
             checkNotNull(message);
             final CommandContext context = createContext();
             final Command result = org.spine3.base.Commands.createCommand(message, context);
@@ -316,7 +339,7 @@ public class ActorRequestFactory {
          *                      the commands can be applied to any entity
          * @return new command instance
          */
-        public Command createCommand(Message message, int targetVersion) {
+        public Command create(Message message, int targetVersion) {
             checkNotNull(message);
             checkNotNull(targetVersion);
 
@@ -328,14 +351,14 @@ public class ActorRequestFactory {
         /**
          * Creates command context for a new command with entity ID.
          */
-        protected CommandContext createContext(int targetVersion) {
+        private CommandContext createContext(int targetVersion) {
             return org.spine3.base.Commands.createContext(getTenantId(), getActor(), getZoneOffset(), targetVersion);
         }
 
         /**
          * Creates command context for a new command.
          */
-        protected CommandContext createContext() {
+        private CommandContext createContext() {
             return org.spine3.base.Commands.createContext(getTenantId(), getActor(), getZoneOffset());
         }
     }
@@ -347,7 +370,6 @@ public class ActorRequestFactory {
 
         private UserId actor;
 
-        @Nullable
         private ZoneOffset zoneOffset;
 
         @Nullable

@@ -71,7 +71,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final Command command = requestFactory.command()
-                                              .createCommand(createProjectMessage());
+                                              .create(createProjectMessage());
         commandBus.post(command, responseObserver);
 
         final TenantId tenantId = command.getContext()
@@ -88,7 +88,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final ThrowingDispatcher dispatcher = new ThrowingDispatcher();
         commandBus.register(dispatcher);
         final Command command = requestFactory.command()
-                                              .createCommand(createProjectMessage());
+                                              .create(createProjectMessage());
 
         commandBus.post(command, responseObserver);
 
@@ -258,7 +258,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         commandBus.register(handler);
         final CreateProject msg = createProjectMessage();
         final Command command = requestFactory.command()
-                                              .createCommand(msg);
+                                              .create(msg);
         return command;
     }
 

@@ -150,7 +150,7 @@ public class TypeUrlShould {
     public void obtain_type_of_command() {
         final ActorRequestFactory factory = TestActorRequestFactory.newInstance(TypeUrlShould.class);
         final StringValue message = newStringValue(newUuid());
-        final Command command = factory.command().createCommand(message);
+        final Command command = factory.command().create(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);
 

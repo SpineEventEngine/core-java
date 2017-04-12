@@ -98,7 +98,7 @@ public class TypeNameShould {
 
     @Test
     public void obtain_type_of_command() {
-        final Command command = requestFactory.command().createCommand(newUuidValue());
+        final Command command = requestFactory.command().create(newUuidValue());
 
         final TypeName typeName = TypeName.ofCommand(command);
         assertNotNull(typeName);
@@ -107,7 +107,7 @@ public class TypeNameShould {
 
     @Test
     public void obtain_type_name_of_event() {
-        final Command command = requestFactory.command().createCommand(newUuidValue());
+        final Command command = requestFactory.command().create(newUuidValue());
         final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
 
         final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
