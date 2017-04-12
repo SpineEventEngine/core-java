@@ -131,7 +131,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.mapQuoterInstance();
         final Converter<K, String> keyConverter = keyStringifier.andThen(quoter);
         final Converter<V, String> valueConverter = valueStringifier.andThen(quoter);
 
@@ -156,7 +156,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private Map<K, V> convert(Map<String, String> buckets) {
-        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.mapQuoterInstance();
         final Converter<String, K> keyConverter = quoter.reverse()
                                                         .andThen(keyStringifier.reverse());
         final Converter<String, V> valueConverter = quoter.reverse()

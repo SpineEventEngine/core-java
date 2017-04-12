@@ -110,7 +110,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
 
     @Override
     protected String toString(List<T> list) {
-        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.listQuoterInstance();
         final List<String> convertedItems = newArrayList();
         for (T item : list) {
             final String convertedItem = elementStringifier.andThen(quoter)
@@ -126,7 +126,7 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
         final List<String> items = newArrayList(splitter.split(escapedString));
-        final Converter<String, String> quoter = Quoter.instance();
+        final Converter<String, String> quoter = Quoter.listQuoterInstance();
         final Converter<String, T> converter = quoter.reverse()
                                                      .andThen(elementStringifier.reverse());
         final List<T> result = newArrayList();

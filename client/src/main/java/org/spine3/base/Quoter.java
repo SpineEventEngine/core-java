@@ -40,10 +40,12 @@ class Quoter extends Converter<String, String> {
     private static final String BACKSLASH_QUOTE = "\\\"";
     private static final String DOUBLE_BACKSLASH = "\\\\";
     private static final String ESCAPED_QUOTE = DOUBLE_BACKSLASH + QUOTE_CHAR;
-    private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
+    private static final Pattern BACKSLASH_MAP_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
+    private static final Pattern BACKSLASH_LIST_PATTERN = Pattern.compile("\\\\\\\\");
     private static final Pattern QUOTE_PATTERN = Pattern.compile(QUOTE);
     private static final String DELIMITER_PATTERN_PREFIX = "(?<!" + DOUBLE_BACKSLASH + ')'
-                                                            + DOUBLE_BACKSLASH;
+            + DOUBLE_BACKSLASH;
+    private static Pattern backslashPattern;
 
     @Override
     protected String doForward(String s) {
@@ -75,8 +77,8 @@ class Quoter extends Converter<String, String> {
     private static String unquote(String value) {
         checkQuoted(value);
         final String unquoted = value.substring(2, value.length() - 2);
-        final String unescaped = DOUBLE_BACKSLASH_PATTERN.matcher(unquoted)
-                                                         .replaceAll("");
+        final String unescaped = backslashPattern.matcher(unquoted)
+                                                 .replaceAll("");
         return unescaped;
     }
 
@@ -110,7 +112,13 @@ class Quoter extends Converter<String, String> {
         private final Quoter value = new Quoter();
     }
 
-    static Quoter instance() {
+    static Quoter listQuoterInstance() {
+        backslashPattern = BACKSLASH_LIST_PATTERN;
+        return Singleton.INSTANCE.value;
+    }
+
+    static Quoter mapQuoterInstance() {
+        backslashPattern = BACKSLASH_MAP_PATTERN;
         return Singleton.INSTANCE.value;
     }
 }
