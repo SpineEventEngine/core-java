@@ -39,8 +39,12 @@ public final class EntityStateClass extends MessageClass {
         checkNotNull(entity);
         final Message state = entity.getState();
 
-        checkNotNull(state);
-        final Class<? extends Message> stateClass = state.getClass();
+        return of(state);
+    }
+
+    public static EntityStateClass of(Message entityState) {
+        checkNotNull(entityState);
+        final Class<? extends Message> stateClass = entityState.getClass();
 
         final EntityStateClass result = new EntityStateClass(stateClass);
         return result;

@@ -74,7 +74,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             final BoundedContext boundedContext = selectBoundedContext(target);
             final Stand stand = boundedContext.getStand();
 
-            final Subscription subscription = stand.subscribe(target);
+            final Subscription subscription = stand.subscribe(topic);
 
             responseObserver.onNext(subscription);
             responseObserver.onCompleted();
@@ -130,7 +130,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     private BoundedContext selectBoundedContext(Subscription subscription) {
-        final TypeName typeName = TypeName.of(subscription.getType());
+        final TypeName typeName = TypeName.of(subscription.getTopic()
+                                                          .getTarget()
+                                                          .getType());
         final TypeUrl type = typeName.toUrl();
         final BoundedContext result = typeToContextMap.get(type);
         return result;

@@ -25,11 +25,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
-import org.spine3.time.ZoneOffsets;
-import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -38,27 +33,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class CommandFactory {
-
-    private final UserId actor;
-
-    /**
-     * In case the zone offset is not defined, the current time zone offset value is set by default.
-     */
-    private final ZoneOffset zoneOffset;
-
-    /**
-     * The ID of the tenant in a multitenant application.
-     *
-     * <p>This field is null in a single tenant application.
-     */
-    @Nullable
-    private final TenantId tenantId;
+public class CommandFactory extends ActorRequestFactory<CommandFactory> {
 
     protected CommandFactory(Builder builder) {
-        this.actor = builder.actor;
-        this.zoneOffset = builder.zoneOffset;
-        this.tenantId = builder.tenantId;
+        super(builder);
     }
 
     public static Builder newBuilder() {
@@ -66,29 +44,14 @@ public class CommandFactory {
     }
 
     /**
-     * Creates new factory with the same user and bounded context name and new time zone offset.
+     * Creates new factory with the same user and tenant ID, but with new time zone offset.
      *
      * @param zoneOffset the offset of the time zone
      * @return new command factory at new time zone
      */
+    @Override
     public CommandFactory switchTimezone(ZoneOffset zoneOffset) {
-        return newBuilder().setActor(getActor())
-                           .setZoneOffset(zoneOffset)
-                           .setTenantId(getTenantId())
-                           .build();
-    }
-
-    public UserId getActor() {
-        return actor;
-    }
-
-    public ZoneOffset getZoneOffset() {
-        return zoneOffset;
-    }
-
-    @Nullable
-    public TenantId getTenantId() {
-        return tenantId;
+        return switchTimezone(zoneOffset, newBuilder());
     }
 
     /**
@@ -139,64 +102,17 @@ public class CommandFactory {
         return Commands.createContext(getTenantId(), getActor(), getZoneOffset());
     }
 
-    public static class Builder {
-        private UserId actor;
-        private ZoneOffset zoneOffset;
-        @Nullable
-        private TenantId tenantId;
-        private Builder() {
-            // Prevent instantiations from outside.
-        }
+    public static class Builder
+            extends ActorRequestFactory.AbstractBuilder<CommandFactory, Builder> {
 
-        public UserId getActor() {
-            return actor;
-        }
-
-        /**
-         * Sets the ID for the user generating commands.
-         *
-         * @param actor the ID of the user generating commands
-         */
-        public Builder setActor(UserId actor) {
-            this.actor = checkNotNull(actor);
+        @Override
+        protected Builder thisInstance() {
             return this;
         }
 
-        public ZoneOffset getZoneOffset() {
-            return zoneOffset;
-        }
-
-        /**
-         * Sets the time zone in which the user works.
-         *
-         * @param zoneOffset the offset of the timezone the user works in
-         */
-        public Builder setZoneOffset(ZoneOffset zoneOffset) {
-            this.zoneOffset = checkNotNull(zoneOffset);
-            return this;
-        }
-
-        @Nullable
-        public TenantId getTenantId() {
-            return tenantId;
-        }
-
-        /**
-         * Sets the ID of a tenant in a multi-tenant application to which this user belongs.
-         *
-         * @param tenantId the ID of the tenant or null for single-tenant applications
-         */
-        public Builder setTenantId(@Nullable TenantId tenantId) {
-            this.tenantId = tenantId;
-            return this;
-        }
-
+        @Override
         public CommandFactory build() {
-            checkNotNull(actor, "`actor` must be defined");
-
-            if (zoneOffset == null) {
-                setZoneOffset(ZoneOffsets.getDefault());
-            }
+            super.build();
             final CommandFactory result = new CommandFactory(this);
             return result;
         }
