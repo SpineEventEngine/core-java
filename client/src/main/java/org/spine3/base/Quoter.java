@@ -36,7 +36,9 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 class Quoter extends Converter<String, String> {
 
     private static final char QUOTE_SYMBOL = '\"';
-    private static final Pattern DOUBLE_BACKSLASH = Pattern.compile("\\\\");
+    private static final String DOUBLE_BACKSLASH = "\\\\";
+    private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
+    private static final Pattern ESCAPED_QUOTE = Pattern.compile("\"");
 
     @Override
     protected String doForward(String s) {
@@ -45,7 +47,10 @@ class Quoter extends Converter<String, String> {
 
     private static String quote(String stringToQuote) {
         checkNotNull(stringToQuote);
-        return QUOTE_SYMBOL + stringToQuote + QUOTE_SYMBOL;
+        final String escapedString = ESCAPED_QUOTE.matcher(stringToQuote)
+                                                  .replaceAll(DOUBLE_BACKSLASH + QUOTE_SYMBOL);
+        final String result = QUOTE_SYMBOL + escapedString + QUOTE_SYMBOL;
+        return result;
     }
 
     @Override
@@ -63,7 +68,7 @@ class Quoter extends Converter<String, String> {
     }
 
     private static String unquoteAndRemoveDoubleBackslashes(String value) {
-        final String unquotedValue = DOUBLE_BACKSLASH
+        final String unquotedValue = DOUBLE_BACKSLASH_PATTERN
                 .matcher(value.substring(2, value.length() - 2))
                 .replaceAll("");
         return unquotedValue;
@@ -84,7 +89,7 @@ class Quoter extends Converter<String, String> {
         }
 
         boolean result = isQuote(str.charAt(1)) &&
-                         isQuote(str.charAt(stringLength - 1));
+                isQuote(str.charAt(stringLength - 1));
         return result;
     }
 
@@ -100,7 +105,7 @@ class Quoter extends Converter<String, String> {
     }
 
     private static boolean isQuote(char character) {
-        return character == QUOTE_SYMBOL;
+        return character == '\"';
     }
 
     private enum Singleton {
