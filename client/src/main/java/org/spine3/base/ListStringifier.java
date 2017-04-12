@@ -26,9 +26,9 @@ import com.google.common.base.Splitter;
 import com.google.common.escape.Escaper;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.base.Quoter.createDelimiterPattern;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
@@ -82,18 +82,6 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     /**
      * Creates a {@code ListStringifier}.
      *
-     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for element
-     * separation in the {@code String} representation of the {@code List}.
-     *
-     * @param listGenericClass the class of the list elements
-     */
-    ListStringifier(Class<T> listGenericClass) {
-        this(listGenericClass, DEFAULT_ELEMENT_DELIMITER);
-    }
-
-    /**
-     * Creates a {@code ListStringifier}.
-     *
      * <p>The specified delimiter is used for element separation
      * in the {@code String} representation of the {@code List}.
      *
@@ -105,12 +93,19 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         this.elementStringifier = getStringifier(listGenericClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
+        this.splitter = Splitter.onPattern(createDelimiterPattern(delimiter));
     }
 
-    private static String createElementDelimiterPattern(char delimiter) {
-        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
-                      .pattern();
+    /**
+     * Creates a {@code ListStringifier}.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for element
+     * separation in the {@code String} representation of the {@code List}.
+     *
+     * @param listGenericClass the class of the list elements
+     */
+    ListStringifier(Class<T> listGenericClass) {
+        this(listGenericClass, DEFAULT_ELEMENT_DELIMITER);
     }
 
     @Override

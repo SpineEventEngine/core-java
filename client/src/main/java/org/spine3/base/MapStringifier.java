@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static org.spine3.base.Quoter.createDelimiterPattern;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
@@ -85,19 +86,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     /**
      * Creates a {@code MapStringifier}.
      *
-     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for key-value
-     * separation in {@code String} representation of the {@code Map}.
-     *
-     * @param keyClass   the class of the key elements
-     * @param valueClass the class of the value elements
-     */
-    MapStringifier(Class<K> keyClass, Class<V> valueClass) {
-        this(keyClass, valueClass, DEFAULT_ELEMENT_DELIMITER);
-    }
-
-    /**
-     * Creates a {@code MapStringifier}.
-     *
      * <p>The specified delimiter is used for key-value separation
      * in {@code String} representation of the {@code Map}.
      *
@@ -111,7 +99,21 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         this.valueStringifier = getStringifier(valueClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = createMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
+        this.splitter = createMapSplitter(createDelimiterPattern(delimiter),
+                                          createKeyValuePattern());
+    }
+
+    /**
+     * Creates a {@code MapStringifier}.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for key-value
+     * separation in {@code String} representation of the {@code Map}.
+     *
+     * @param keyClass   the class of the key elements
+     * @param valueClass the class of the value elements
+     */
+    MapStringifier(Class<K> keyClass, Class<V> valueClass) {
+        this(keyClass, valueClass, DEFAULT_ELEMENT_DELIMITER);
     }
 
     private static Splitter.MapSplitter createMapSplitter(String bucketPattern,
@@ -120,11 +122,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
                 Splitter.onPattern(bucketPattern)
                         .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
         return result;
-    }
-
-    private static String createBucketPattern(char delimiter) {
-        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
-                      .pattern();
     }
 
     private static String createKeyValuePattern() {
