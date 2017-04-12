@@ -57,7 +57,7 @@ public abstract class AggregateStorage<I>
     }
 
     /**
-     * Reads a {@link AggregateStateRecord} by the passed ID.
+     * {@inheritDoc}
      *
      * @param aggregateId the ID of the record to read
      * @return the record instance or {@code Optional.absent()} if either
