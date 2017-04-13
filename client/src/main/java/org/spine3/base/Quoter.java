@@ -89,14 +89,14 @@ abstract class Quoter extends Converter<String, String> {
     /**
      * Returns the {@code MapQuoter} instance.
      */
-    static Quoter mapQuoterInstance() {
+    static Quoter forMaps() {
         return Singleton.INSTANCE.mapQuoter;
     }
 
     /**
      * Returns the {@code ListQuoter} instance.
      */
-    static Quoter listQuoterInstance() {
+    static Quoter forLists() {
         return Singleton.INSTANCE.listQuoter;
     }
 
