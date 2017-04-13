@@ -20,6 +20,8 @@
 
 package org.spine3.server.bc;
 
+import com.google.protobuf.Message;
+import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
@@ -29,9 +31,12 @@ import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 class Given {
+
+    private Given() {}
 
     static class AggregateId {
 
@@ -73,6 +78,7 @@ class Given {
     static class AnIntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+        private static final String TEST_BC_NAME = "Test BC";
 
         private AnIntegrationEvent() {
         }
@@ -93,6 +99,22 @@ class Given {
                     IntegrationEvent.newBuilder()
                                     .setContext(eventContext)
                                     .setMessage(AnyPacker.pack(event));
+            return builder.build();
+        }
+
+        public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
+            // An integration event ID may have a value which does not follow our internal
+            // conventions. We simulate this in the initialization below
+            final EventId eventId = EventId.newBuilder()
+                                           .setValue("ieid-" + newUuid())
+                                           .build();
+
+            final IntegrationEventContext.Builder builder =
+                    IntegrationEventContext.newBuilder()
+                                           .setEventId(eventId)
+                                           .setTimestamp(getCurrentTime())
+                                           .setBoundedContextName(TEST_BC_NAME)
+                                           .setProducerId(pack(aggregateId));
             return builder.build();
         }
     }
