@@ -28,7 +28,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.integration.IntegrationEvent;
@@ -80,19 +79,6 @@ public class EventFactory {
                                   .setContext(context)
                                   .build();
         return result;
-    }
-
-    /**
-     * Generates a new random UUID-based {@code EventId}.
-     *
-     * @deprecated use {@link EventFactory#createEvent(Message, Version)} which would generate proper IDs for you
-     */
-    @Deprecated
-    public static EventId generateId() {
-        final String value = Identifiers.newUuid();
-        return EventId.newBuilder()
-                      .setValue(value)
-                      .build();
     }
 
     /**
