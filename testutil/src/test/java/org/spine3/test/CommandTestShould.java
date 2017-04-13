@@ -27,7 +27,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Commands;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -49,7 +49,7 @@ public class CommandTestShould {
      * Creates a new command and checks its content.
      *
      * <p>If the method completes, we assume that the passed command test
-     * has correctly working {@link CommandFactory}.
+     * has correctly working {@link org.spine3.client.ActorRequestFactory}.
      */
     private static void createAndAssertCommand(CommandTest<StringValue> commandTest) {
         final StringValue commandMessage = newUuidValue();
@@ -66,28 +66,28 @@ public class CommandTestShould {
     }
 
     @Test
-    public void initialize_with_default_CommandFactory_and_produce_commands() {
+    public void initialize_with_default_ActorRequestFactory_and_produce_commands() {
         createAndAssertCommand(commandTest);
     }
 
     @SuppressWarnings({"ConstantConditions" /* Passing `null` is the purpose of this test. */,
             "ResultOfObjectAllocationIgnored" /* because the constructor should fail. */})
     @Test(expected = NullPointerException.class)
-    public void do_not_allow_null_CommandFactory() {
+    public void do_not_allow_null_ActorRequestFactory() {
         new TestCommandTest(null);
     }
 
     @Test
-    public void accept_custom_CommandFactory() {
+    public void accept_custom_ActorRequestFactory() {
         final Class<? extends CommandTestShould> clazz = getClass();
         final CommandTest<StringValue> commandTestWithFactory =
-                new TestCommandTest(newCommandFactory(clazz));
+                new TestCommandTest(newRequestFactory(clazz));
 
         createAndAssertCommand(commandTestWithFactory);
     }
 
     /**
-     * Creates a test instance of {@code CommandFactory}.
+     * Creates a test instance of {@code ActorRequestFactory}.
      *
      * <p>The factory gets:
      * <ul>
@@ -96,8 +96,8 @@ public class CommandTestShould {
      *     <li>{@code TenantId} based on the simple name of the passed class.
      * </ul>
      */
-    static CommandFactory newCommandFactory(Class<?> clazz) {
-        return CommandFactory.newBuilder()
+    static ActorRequestFactory newRequestFactory(Class<?> clazz) {
+        return ActorRequestFactory.newBuilder()
                              .setActor(newUserUuid())
                              .setZoneOffset(ZoneOffsets.UTC)
                              .setTenantId(TenantId.newBuilder()
@@ -163,8 +163,8 @@ public class CommandTestShould {
      * The test class for verifying the behaviour of the abstract parent.
      */
     private static class TestCommandTest extends CommandTest<StringValue> {
-        protected TestCommandTest(CommandFactory commandFactory) {
-            super(commandFactory);
+        protected TestCommandTest(ActorRequestFactory requestFactory) {
+            super(requestFactory);
         }
 
         protected TestCommandTest() {

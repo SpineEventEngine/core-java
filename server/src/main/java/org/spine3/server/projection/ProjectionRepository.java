@@ -295,7 +295,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             storeNow(projection, eventTime);
         }
 
-        standFunnel.post(projection);
+        standFunnel.post(projection, context.getCommandContext());
     }
 
     /**

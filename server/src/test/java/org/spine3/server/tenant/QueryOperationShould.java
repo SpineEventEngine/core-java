@@ -22,7 +22,6 @@ package org.spine3.server.tenant;
 
 import org.junit.Test;
 import org.spine3.client.Query;
-import org.spine3.client.QueryContext;
 import org.spine3.client.QueryId;
 import org.spine3.test.Tests;
 
@@ -66,8 +65,7 @@ public class QueryOperationShould {
                                      .setUuid(newUuid())
                                      .build();
         final Query query = Query.newBuilder()
-                                 .setContext(QueryContext.newBuilder()
-                                                         .setQueryId(id))
+                                 .setId(id)
                                  .build();
 
         final QueryOperation op = new QueryOperation(query) {

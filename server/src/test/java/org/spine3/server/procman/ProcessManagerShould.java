@@ -43,7 +43,7 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Given;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.command.AddTask;
 import org.spine3.test.procman.command.CreateProject;
@@ -78,7 +78,8 @@ public class ProcessManagerShould {
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
     private static final EventContext EVENT_CONTEXT = EventContext.getDefaultInstance();
 
-    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
 
     private CommandBus commandBus;
 
@@ -141,7 +142,7 @@ public class ProcessManagerShould {
 
     private List<Event> testDispatchCommand(Message command) {
         final List<Event> events = processManager.dispatchCommand(command,
-                                                                  commandFactory.createContext());
+                                                                  requestFactory.createCommandContext());
         assertEquals(AnyPacker.pack(command), processManager.getState());
         return events;
     }
@@ -202,7 +203,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, commandFactory.createContext());
+        processManager.dispatchCommand(unknownCommand, requestFactory.createCommandContext());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -224,7 +225,7 @@ public class ProcessManagerShould {
     @Test
     public void create_iterating_router() {
         final StringValue commandMessage = newStringValue("create_iterating_router");
-        final CommandContext commandContext = commandFactory.createContext();
+        final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 
@@ -247,7 +248,7 @@ public class ProcessManagerShould {
     @Test
     public void create_router() {
         final StringValue commandMessage = newStringValue("create_router");
-        final CommandContext commandContext = commandFactory.createContext();
+        final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
 

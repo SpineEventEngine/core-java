@@ -85,6 +85,12 @@ public class TestBoundedContextFactory {
                     .build();
         }
 
+        public static BoundedContext newBoundedContext(Stand stand) {
+            return newBuilder()
+                    .setStand(stand)
+                    .build();
+        }
+
         public static BoundedContext newBoundedContext(EventEnricher enricher) {
             final EventBus eventBus = EventBus.newBuilder()
                                               .setEnricher(enricher)

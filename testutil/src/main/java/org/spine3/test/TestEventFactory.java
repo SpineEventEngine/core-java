@@ -59,10 +59,10 @@ public class TestEventFactory extends EventFactory {
         return result;
     }
 
-    public static TestEventFactory newInstance(TestCommandFactory commandFactory) {
-        checkNotNull(commandFactory);
-        final Message producerId = commandFactory.getActor();
-        final CommandContext commandContext = commandFactory.createContext();
+    public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
+        checkNotNull(requestFactory);
+        final Message producerId = requestFactory.getActor();
+        final CommandContext commandContext = requestFactory.createCommandContext();
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(commandContext);
@@ -71,9 +71,9 @@ public class TestEventFactory extends EventFactory {
     }
 
     public static TestEventFactory newInstance(Class<?> testSuiteClass) {
-        final TestCommandFactory commandFactory =
-                TestCommandFactory.newInstance(testSuiteClass);
-        return newInstance(commandFactory);
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(testSuiteClass);
+        return newInstance(requestFactory);
     }
     /**
      * Creates an event produced at the passed time.

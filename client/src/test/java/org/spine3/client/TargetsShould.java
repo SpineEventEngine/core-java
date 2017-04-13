@@ -17,36 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.entity;
+package org.spine3.client;
 
-import com.google.protobuf.Message;
-import org.spine3.type.MessageClass;
+import com.google.common.testing.NullPointerTester;
+import org.junit.Test;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
- *
  * @author Alex Tymchenko
  */
-public final class EntityStateClass extends MessageClass {
+public class TargetsShould {
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
+    @Test
+    public void have_private_constructor_of_targets_class() {
+        assertHasPrivateParameterlessCtor(Targets.class);
     }
 
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        final Message state = entity.getState();
-
-        return of(state);
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Targets.class);
     }
 
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        final Class<? extends Message> stateClass = entityState.getClass();
-
-        final EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
-    }
 }

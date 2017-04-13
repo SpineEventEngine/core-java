@@ -17,36 +17,18 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.entity;
+package org.spine3.server.tenant;
 
-import com.google.protobuf.Message;
-import org.spine3.type.MessageClass;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spine3.client.ActorContext;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
+ * A tenant-aware operation performed in relation to a request sent by an actor.
  *
  * @author Alex Tymchenko
  */
-public final class EntityStateClass extends MessageClass {
+abstract class ActorRequestOperation extends TenantAwareOperation {
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
-    }
-
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        final Message state = entity.getState();
-
-        return of(state);
-    }
-
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        final Class<? extends Message> stateClass = entityState.getClass();
-
-        final EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
+    protected ActorRequestOperation(ActorContext context) {
+        super(context.getTenantId());
     }
 }

@@ -219,17 +219,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
                 final A aggregate = processedAggregate.get();
                 final List<Event> events = aggregate.getUncommittedEvents();
-                storeAndPostToStand(aggregate);
+
+                store(aggregate);
+                standFunnel.post(aggregate, command.getContext());
+
                 postEvents(events);
             }
         };
         op.execute();
     }
 
-    private void storeAndPostToStand(A aggregate) {
-        store(aggregate);
-        standFunnel.post(aggregate);
-    }
 
     /**
      * Posts passed events to {@link EventBus}.

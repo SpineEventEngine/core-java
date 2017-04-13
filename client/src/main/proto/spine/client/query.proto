@@ -28,7 +28,6 @@ option java_outer_classname = "QueryProto";
 option java_package = "org.spine3.client";
 
 import "google/protobuf/any.proto";
-import "google/protobuf/timestamp.proto";
 import "google/protobuf/field_mask.proto";
 
 import "spine/annotations.proto";
@@ -38,7 +37,7 @@ import "spine/users/user_id.proto";
 import "spine/users/tenant_id.proto";
 import "spine/base/response.proto";
 import "spine/client/entities.proto";
-import "spine/time/zone_offset.proto";
+import "spine/client/actor_context.proto";
 
 // Query identifier.
 message QueryId {
@@ -51,45 +50,19 @@ message QueryId {
 //
 message Query {
 
+    QueryId id = 1 [(required) = true];
+
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
-    Target target = 1;
+    Target target = 2 [(required) = true];
 
     // Field mask to be applied to the items of the query result.
-    google.protobuf.FieldMask field_mask = 2;
+    google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the query was created.
-    QueryContext context = 3;
+    ActorContext context = 4 [(required) = true]    ;
 
     // Reserved for utility fields required response timeframe etc.
-    reserved 4 to 6;
-}
-
-// Meta-information about the query and the environment in which it was created.
-message QueryContext {
-
-    QueryId query_id = 1 [(required) = true];
-
-    // The ID of a tenant in a multi-tenant application.
-    //
-    // This field is not populated in single-tenant applications.
-    //
-    users.TenantId tenant_id = 2;
-
-    // The user who created the query.
-    users.UserId actor = 3 [(required) = true];
-
-    // The time when the query was created.
-    google.protobuf.Timestamp timestamp = 4 [(required) = true];
-
-    // The zone offset from which the query was made.
-    time.ZoneOffset zone_offset = 5 [(required) = true];
-
-    // The human language in which the response is expected.
-    //
-    // If this attribute is not defined, or the specified language is not supported
-    // the query will be returned in the default human language of the system.
-    //
-    ui.Language language = 6;
+    reserved 5 to 10;
 }
 
 // The result of `Query` processing.

@@ -30,7 +30,7 @@ import org.spine3.client.QueryId;
  * @author Alexander Yevsyukov
  */
 @Internal
-public abstract class QueryOperation extends TenantAwareOperation {
+public abstract class QueryOperation extends ActorRequestOperation {
 
     private final Query query;
 
@@ -40,8 +40,7 @@ public abstract class QueryOperation extends TenantAwareOperation {
      * @param query the query in response to which the operation is performed.
      */
     protected QueryOperation(Query query) {
-        super(query.getContext()
-                   .getTenantId());
+        super(query.getContext());
         this.query = query;
     }
 
@@ -49,8 +48,7 @@ public abstract class QueryOperation extends TenantAwareOperation {
      * Obtains the ID of the query.
      */
     protected QueryId queryId() {
-        return query.getContext()
-                    .getQueryId();
+        return query.getId();
     }
 
     /**

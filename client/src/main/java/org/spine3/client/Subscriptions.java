@@ -17,36 +17,46 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.entity;
+package org.spine3.client;
 
-import com.google.protobuf.Message;
-import org.spine3.type.MessageClass;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spine3.annotations.Internal;
+import org.spine3.base.Identifiers;
 
 /**
- * A value object holding a class of an {@linkplain Entity#getState() entity state}.
+ * Utility class for working with {@linkplain Subscription subscriptions}.
  *
  * @author Alex Tymchenko
  */
-public final class EntityStateClass extends MessageClass {
+@Internal
+public class Subscriptions {
 
-    private EntityStateClass(Class<? extends Message> value) {
-        super(value);
+    private Subscriptions() {
+        // prevent instantiation.
     }
 
-    public static EntityStateClass of(Entity entity) {
-        checkNotNull(entity);
-        final Message state = entity.getState();
-
-        return of(state);
+    /**
+     * Generates a new subscription identifier.
+     *
+     * <p>The result is based upon UUID generation.
+     *
+     * @return new subscription identifier.
+     */
+    public static SubscriptionId newId() {
+        return newId(Identifiers.newUuid());
     }
 
-    public static EntityStateClass of(Message entityState) {
-        checkNotNull(entityState);
-        final Class<? extends Message> stateClass = entityState.getClass();
-
-        final EntityStateClass result = new EntityStateClass(stateClass);
-        return result;
+    /**
+     * Wraps a given {@code String} as a subscription identifier
+     *
+     * <p>Not recommended for a production usage. Use {@linkplain #newId() automatic generation}
+     * instead.
+     *
+     * @return new subscription identifier.
+     */
+    @Internal
+    public static SubscriptionId newId(String value) {
+        return SubscriptionId.newBuilder()
+                             .setUuid(value)
+                             .build();
     }
 }
