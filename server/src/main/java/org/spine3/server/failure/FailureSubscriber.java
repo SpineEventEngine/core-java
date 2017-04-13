@@ -50,8 +50,8 @@ public class FailureSubscriber implements FailureDispatcher {
     @Override
     public void dispatch(final FailureEnvelope envelope) {
         final Command originCommand = envelope.getOuterObject()
-                                        .getContext()
-                                        .getCommand();
+                                              .getContext()
+                                              .getCommand();
         final CommandOperation op = new CommandOperation(originCommand) {
 
             @Override

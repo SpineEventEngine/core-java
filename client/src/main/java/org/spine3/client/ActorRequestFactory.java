@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -286,6 +287,7 @@ public class ActorRequestFactory {
          */
         public Topic allOf(Class<? extends Message> entityClass) {
             checkNotNull(entityClass);
+
             final Target target = composeTarget(entityClass, null);
             final Topic result = forTarget(target);
             return result;
@@ -294,9 +296,14 @@ public class ActorRequestFactory {
         /**
          * Creates a {@link Topic} for the specified {@linkplain Target}.
          *
+         * <p>This method is intended for internal use only. To achieve the similar result,
+         * {@linkplain #allOf(Class) allOf()} and {@linkplain #someOf(Class, Set) someOf()} methods
+         * should be used.
+         *
          * @param target the {@code} Target to create a topic for.
          * @return the instance of {@code Topic}.
          */
+        @Internal
         public Topic forTarget(Target target) {
             checkNotNull(target);
 
