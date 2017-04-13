@@ -23,9 +23,12 @@ import org.spine3.base.Error;
 import org.spine3.client.Query;
 
 /**
+ * An exception thrown if the {@linkplain Query} instance
+ * cannot be submitted to {@linkplain Stand} due to a technical error, such as validation failure.
+ *
  * @author Alex Tymchenko
  */
-public class InvalidQueryException extends InvalidRequestException {
+class InvalidQueryException extends InvalidRequestException {
 
     private static final long serialVersionUID = 0L;
 

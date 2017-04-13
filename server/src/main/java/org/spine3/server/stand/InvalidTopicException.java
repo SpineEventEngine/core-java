@@ -23,7 +23,8 @@ import org.spine3.base.Error;
 import org.spine3.client.Topic;
 
 /**
- * An exception thrown in case an invalid {@link Topic} has been submitted to {@linkplain Stand}.
+ * An exception thrown in case an invalid or unsupported {@link Topic}
+ * has been submitted to {@linkplain Stand}.
  *
  * @author Alex Tymchenko
  */

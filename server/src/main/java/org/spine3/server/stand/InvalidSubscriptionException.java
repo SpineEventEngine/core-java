@@ -23,6 +23,9 @@ import org.spine3.base.Error;
 import org.spine3.client.Subscription;
 
 /**
+ * An exception thrown in case an invalid or unsupported {@link Subscription}
+ * has been submitted to {@linkplain Stand}.
+ *
  * @author Alex Tymchenko
  */
 public class InvalidSubscriptionException extends InvalidRequestException {
