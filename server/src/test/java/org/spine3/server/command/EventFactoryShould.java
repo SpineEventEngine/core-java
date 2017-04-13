@@ -38,7 +38,8 @@ public class EventFactoryShould {
 
     @Test(expected = NullPointerException.class)
     public void require_producer_id_in_builder() {
-        final CommandContext ctx = requestFactory.command().create(Empty.getDefaultInstance())
+        final CommandContext ctx = requestFactory.command()
+                                                 .create(Empty.getDefaultInstance())
                                                  .getContext();
         EventFactory.newBuilder()
                     .setCommandContext(ctx)
