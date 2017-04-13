@@ -53,7 +53,8 @@ message Topic {
     TopicId id = 1 [(required) = true];
 
     // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
-    Target target = 2 [(required) = true];
+    Target target = 2 [(required) = true, (valid) = true,
+                       (if_invalid).msg_format = "Invalid topic target"];
 
     // Field mask to be applied to the entity updates applicable to this topic.
     //
@@ -116,10 +117,10 @@ message Subscription {
 enum TopicValidationError {
 
     // Reserved value.
-    UNKNOWN_REASON = 0;
+    TVE_UNKNOWN_REASON = 0;
 
     // The topic target is not supported by the server.
-    UNSUPPORTED_TARGET = 1;
+    UNSUPPORTED_TOPIC_TARGET = 1;
 
     // The topic message is invalid according to custom Protobuf options set.
     INVALID_TOPIC = 2;

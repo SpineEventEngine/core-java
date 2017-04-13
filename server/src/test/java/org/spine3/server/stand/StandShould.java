@@ -54,8 +54,8 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.Given.CustomerAggregate;
 import org.spine3.server.Given.CustomerAggregateRepository;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.entity.EntityStateEnvelope;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Given.StandTestProjectionRepository;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -327,10 +327,35 @@ public class StandShould extends TenantAwareTest {
 
     @Test
     public void return_empty_list_for_aggregate_reads_with_filters_not_set() {
+        final StandStorage standStorageMock = mock(StandStorage.class);
 
-        final Target noneOfCustomers = Targets.someOf(Customer.class,
-                                                      Collections.<Message>emptySet());
-        checkEmptyResultOnNonEmptyStorageForQueryTarget(noneOfCustomers);
+        // Return non-empty results on any storage read call.
+        final EntityRecord someRecord = EntityRecord.getDefaultInstance();
+        final ImmutableList<EntityRecord> nonEmptyList =
+                ImmutableList.<EntityRecord>builder().add(someRecord)
+                                                     .build();
+        when(standStorageMock.readAllByType(any(TypeUrl.class)))
+                .thenReturn(nonEmptyList);
+        when(standStorageMock.read(any(AggregateStateId.class)))
+                .thenReturn(Optional.of(someRecord));
+        when(standStorageMock.readAll())
+                .thenReturn(Maps.<AggregateStateId, EntityRecord>newHashMap());
+        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+                .thenReturn(nonEmptyList);
+
+        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
+
+        final Query noneOfCustomersQuery = requestFactory.query()
+                                          .byIds(Customer.class, Collections.<Message>emptySet());
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(noneOfCustomersQuery, responseObserver);
+
+        verifyObserver(responseObserver);
+
+        final List<Any> messageList = checkAndGetMessageList(responseObserver);
+        assertTrue("Query returned a non-empty response message list " +
+                           "though the filter was not set", messageList.isEmpty());
     }
 
     @Test
@@ -915,39 +940,6 @@ public class StandShould extends TenantAwareTest {
             assertTrue(allCustomers.contains(unpackedSingleResult));
         }
         return stand;
-    }
-
-    private void checkEmptyResultOnNonEmptyStorageForQueryTarget(Target customerTarget) {
-        final StandStorage standStorageMock = mock(StandStorage.class);
-
-        // Return non-empty results on any storage read call.
-        final EntityRecord someRecord = EntityRecord.getDefaultInstance();
-        final ImmutableList<EntityRecord> nonEmptyList =
-                ImmutableList.<EntityRecord>builder().add(someRecord)
-                                                     .build();
-        when(standStorageMock.readAllByType(any(TypeUrl.class)))
-                .thenReturn(nonEmptyList);
-        when(standStorageMock.read(any(AggregateStateId.class)))
-                .thenReturn(Optional.of(someRecord));
-        when(standStorageMock.readAll())
-                .thenReturn(Maps.<AggregateStateId, EntityRecord>newHashMap());
-        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
-                .thenReturn(nonEmptyList);
-
-        final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
-
-        final Query queryWithNoFilters = Query.newBuilder()
-                                              .setTarget(customerTarget)
-                                              .build();
-
-        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
-        stand.execute(queryWithNoFilters, responseObserver);
-
-        verifyObserver(responseObserver);
-
-        final List<Any> messageList = checkAndGetMessageList(responseObserver);
-        assertTrue("Query returned a non-empty response message list " +
-                           "though the filter was not set", messageList.isEmpty());
     }
 
     private StandStorage setupStandStorageWithCustomers(Map<CustomerId, Customer> sampleCustomers,

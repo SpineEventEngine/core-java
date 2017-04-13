@@ -20,14 +20,12 @@
 package org.spine3.server.stand;
 
 import org.spine3.base.Error;
-import org.spine3.client.Topic;
+import org.spine3.client.Query;
 
 /**
- * An exception thrown in case an invalid {@link Topic} has been submitted to {@linkplain Stand}.
- *
  * @author Alex Tymchenko
  */
-public class InvalidTopicException extends InvalidRequestException {
+public class InvalidQueryException extends InvalidRequestException {
 
     private static final long serialVersionUID = 0L;
 
@@ -35,15 +33,17 @@ public class InvalidTopicException extends InvalidRequestException {
      * Creates a new instance.
      *
      * @param messageText an error message text
-     * @param topic       a related topic
+     * @param query       a related query
      * @param error       an error occurred
      */
-    protected InvalidTopicException(String messageText, Topic topic, Error error) {
-        super(messageText, topic, error);
+    protected InvalidQueryException(String messageText,
+                                    Query query,
+                                    Error error) {
+        super(messageText, query, error);
     }
 
     @Override
-    public Topic getRequest() {
-        return (Topic) super.getRequest();
+    public Query getRequest() {
+        return (Query) super.getRequest();
     }
 }

@@ -147,6 +147,11 @@ public class ActorRequestFactory {
      */
     public final class ForQuery {
 
+        /**
+         * The prefix of all {@linkplain QueryId query identifiers}.
+         */
+        private static final String QUERY_ID_PREFIX = "query-";
+
         private ForQuery() {
             // Prevent instantiation from the outside.
         }
@@ -254,8 +259,16 @@ public class ActorRequestFactory {
             checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 
             final Query.Builder builder = queryBuilderFor(entityClass, ids, fieldMask);
+
+            builder.setId(newQueryId());
             builder.setContext(actorContext());
             return builder.build();
+        }
+
+        private QueryId newQueryId() {
+            return QueryId.newBuilder()
+                          .setUuid(QUERY_ID_PREFIX + Identifiers.newUuid())
+                          .build();
         }
     }
 

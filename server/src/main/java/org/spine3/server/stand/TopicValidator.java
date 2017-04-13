@@ -23,6 +23,8 @@ import org.spine3.base.Error;
 import org.spine3.client.Topic;
 import org.spine3.client.TopicValidationError;
 
+import static org.spine3.client.TopicValidationError.INVALID_TOPIC;
+
 /**
  * Validates the {@linkplain Topic} instances submitted to {@linkplain Stand}.
  *
@@ -37,7 +39,7 @@ class TopicValidator extends RequestValidator<Topic, TopicValidationError, Inval
 
     @Override
     protected TopicValidationError getErrorCode() {
-        return TopicValidationError.INVALID_TOPIC;
+        return INVALID_TOPIC;
     }
 
     @Override

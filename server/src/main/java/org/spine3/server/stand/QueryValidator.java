@@ -20,30 +20,32 @@
 package org.spine3.server.stand;
 
 import org.spine3.base.Error;
-import org.spine3.client.Topic;
+import org.spine3.client.Query;
+import org.spine3.client.QueryValidationError;
+
+import static org.spine3.client.QueryValidationError.INVALID_QUERY;
 
 /**
- * An exception thrown in case an invalid {@link Topic} has been submitted to {@linkplain Stand}.
+ * Validates the {@linkplain Query} instances submitted to {@linkplain Stand}.
  *
  * @author Alex Tymchenko
  */
-public class InvalidTopicException extends InvalidRequestException {
-
-    private static final long serialVersionUID = 0L;
-
-    /**
-     * Creates a new instance.
-     *
-     * @param messageText an error message text
-     * @param topic       a related topic
-     * @param error       an error occurred
-     */
-    protected InvalidTopicException(String messageText, Topic topic, Error error) {
-        super(messageText, topic, error);
+class QueryValidator extends RequestValidator<Query,
+                                              QueryValidationError,
+                                              InvalidQueryException> {
+    @Override
+    protected String getErrorText() {
+        return "Query message does not satisfy the validation constraints";
     }
 
     @Override
-    public Topic getRequest() {
-        return (Topic) super.getRequest();
+    protected QueryValidationError getErrorCode() {
+        return INVALID_QUERY;
+    }
+
+    @Override
+    protected InvalidQueryException createException(String exceptionMsg, Query request,
+                                                    Error error) {
+        return new InvalidQueryException(exceptionMsg, request, error);
     }
 }

@@ -53,13 +53,15 @@ message Query {
     QueryId id = 1 [(required) = true];
 
     // Defines the entity of interest, e.g. entity type URL and a set of fetch criteria.
-    Target target = 2 [(required) = true];
+    Target target = 2 [(required) = true, (valid) = true,
+                       (if_invalid).msg_format = "Invalid query target"];
 
     // Field mask to be applied to the items of the query result.
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the query was created.
-    ActorContext context = 4 [(required) = true]    ;
+    ActorContext context = 4 [(required) = true, (valid) = true,
+                              (if_invalid).msg_format = "Invalid actor context"];
 
     // Reserved for utility fields required response timeframe etc.
     reserved 5 to 10;
@@ -83,4 +85,17 @@ message QueryResponse {
     //TODO:2017-02-20:alexander.yevsyukov: Use EntityRecord instead of Any.
     // Entity states (each packed as `Any`) returned to the API user as a result of Query execution.
     repeated google.protobuf.Any messages = 5;
+}
+
+// Enumeration of possible technical error reasons occurred in query validation.
+enum QueryValidationError {
+
+    // Reserved value.
+    QVE_UNKNOWN_REASON = 0;
+
+    // The query target is not supported by the server.
+    UNSUPPORTED_QUERY_TARGET = 1;
+
+    // The query message is invalid according to custom Protobuf options set.
+    INVALID_QUERY = 2;
 }

@@ -124,6 +124,7 @@ public class Stand implements AutoCloseable {
     private final boolean multitenant;
 
     private final TopicValidator topicValidator;
+    private final QueryValidator queryValidator;
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
@@ -131,6 +132,7 @@ public class Stand implements AutoCloseable {
         multitenant = builder.isMultitenant();
         subscriptionRegistry = builder.getSubscriptionRegistry();
         topicValidator = builder.getTopicValidator();
+        queryValidator = builder.getQueryValidator();
     }
 
     public static Builder newBuilder() {
@@ -233,6 +235,10 @@ public class Stand implements AutoCloseable {
         topicValidator.validate(topic);
     }
 
+    private void validate(Query query) {
+        queryValidator.validate(query);
+    }
+
     /**
      * Activates the subscription created via {@link #subscribe(Topic)}.
      *
@@ -328,6 +334,7 @@ public class Stand implements AutoCloseable {
      */
     public void execute(final Query query,
                         final StreamObserver<QueryResponse> responseObserver) {
+        validate(query);
 
         final TypeUrl type = Queries.typeOf(query);
         final QueryProcessor queryProcessor = processorFor(type);
@@ -461,6 +468,7 @@ public class Stand implements AutoCloseable {
         private SubscriptionRegistry subscriptionRegistry;
         private boolean multitenant;
         private TopicValidator topicValidator;
+        private QueryValidator queryValidator;
 
         /**
          * Sets an instance of {@link StandStorage} to be used to persist
@@ -517,6 +525,10 @@ public class Stand implements AutoCloseable {
             return topicValidator;
         }
 
+        private QueryValidator getQueryValidator() {
+            return queryValidator;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -534,6 +546,7 @@ public class Stand implements AutoCloseable {
             subscriptionRegistry = new MultitenantSubscriptionRegistry(multitenant);
 
             topicValidator = new TopicValidator();
+            queryValidator = new QueryValidator();
 
             final Stand result = new Stand(this);
             return result;
