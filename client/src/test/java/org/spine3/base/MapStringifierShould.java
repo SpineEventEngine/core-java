@@ -24,9 +24,7 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.spine3.test.types.Task;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -117,7 +115,6 @@ public class MapStringifierShould {
     }
 
     @Test
-    @Ignore
     public void convert_string_which_contains_delimiter_in_content_to_map_and_backward() {
         final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\",\"2\\:\":\"two\"";
         final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
@@ -159,7 +156,7 @@ public class MapStringifierShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_when_key_is_null(){
+    public void throw_exception_when_key_is_null() {
         final Stringifier<Map<String, String>> stringifier =
                 mapStringifier(String.class, String.class);
         final Map<String, String> mapWithNulls = newHashMap();
