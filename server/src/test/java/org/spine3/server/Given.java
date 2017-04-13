@@ -114,8 +114,8 @@ public class Given {
         private ACommand() {}
 
         /**
-         * Creates a new {@link ACommand} with the given command message, userId and timestamp using default
-         * {@link ACommand} instance.
+         * Creates a new {@link ACommand} with the given command message, userId and
+         * timestamp using default {@link ACommand} instance.
          */
         static Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context = createCommandContext(userId,
@@ -149,15 +149,18 @@ public class Given {
                                                     .setNumber(customerNumber)
                                                     .build();
             customerNumber++;
-            final Message msg = CreateCustomer.newBuilder()
-                                              .setCustomerId(customerId)
-                                              .setCustomer(Customer.newBuilder()
-                                                                   .setId(customerId)
-                                                                   .setName(PersonName.newBuilder()
-                                                                                      .setGivenName("Kreat")
-                                                                                      .setFamilyName("C'Ustomer")
-                                                                                      .setHonorificSuffix("Cmd")))
-                                              .build();
+            final Message msg =
+                    CreateCustomer.newBuilder()
+                                  .setCustomerId(customerId)
+                                  .setCustomer(Customer.newBuilder()
+                                                       .setId(customerId)
+                                                       .setName(PersonName.newBuilder()
+                                                                          .setGivenName("Kreat")
+                                                                          .setFamilyName(
+                                                                                  "C'Ustomer")
+                                                                          .setHonorificSuffix(
+                                                                                  "Cmd")))
+                                  .build();
             final UserId userId = newUserId(Identifiers.newUuid());
             final Command result = create(msg, userId, getCurrentTime());
 
@@ -170,7 +173,7 @@ public class Given {
         private AQuery() {}
 
         static Query readAllProjects() {
-
+            // DO NOT replace the type name with another Project class.
             final String typeName = TypeName.of(org.spine3.test.projection.Project.class)
                                             .value();
             final Target queryTarget = Target.newBuilder()
