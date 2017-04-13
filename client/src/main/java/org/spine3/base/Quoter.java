@@ -22,9 +22,11 @@ package org.spine3.base;
 
 import com.google.common.base.Converter;
 
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.regex.Pattern.compile;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -33,19 +35,12 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Illia Shepilov
  * @author Alexander Yevsyukov
  */
-class Quoter extends Converter<String, String> {
+abstract class Quoter extends Converter<String, String> {
 
-    private static final char QUOTE_CHAR = '"';
-    private static final String QUOTE = String.valueOf(QUOTE_CHAR);
     private static final String BACKSLASH_QUOTE = "\\\"";
-    private static final String DOUBLE_BACKSLASH = "\\\\";
-    private static final String ESCAPED_QUOTE = DOUBLE_BACKSLASH + QUOTE_CHAR;
-    private static final Pattern BACKSLASH_MAP_PATTERN = Pattern.compile(DOUBLE_BACKSLASH);
-    private static final Pattern BACKSLASH_LIST_PATTERN = Pattern.compile("\\\\\\\\");
-    private static final Pattern QUOTE_PATTERN = Pattern.compile(QUOTE);
-    private static final String DELIMITER_PATTERN_PREFIX = "(?<!" + DOUBLE_BACKSLASH + ')'
-            + DOUBLE_BACKSLASH;
-    private static Pattern backslashPattern;
+    private static final String BACKSLASH = "\\\\";
+    private static final char QUOTE_CHAR = '"';
+    private static final String DELIMITER_PATTERN_PREFIX = "(?<!" + BACKSLASH + ')' + BACKSLASH;
 
     @Override
     protected String doForward(String s) {
@@ -62,23 +57,106 @@ class Quoter extends Converter<String, String> {
      * Prepends quote characters in the passed string with two leading backslashes,
      * and then wraps the string into quotes.
      */
-    private static String quote(String stringToQuote) {
-        checkNotNull(stringToQuote);
-        final String escapedString = QUOTE_PATTERN.matcher(stringToQuote)
-                                                  .replaceAll(ESCAPED_QUOTE);
-        final String result = QUOTE_CHAR + escapedString + QUOTE_CHAR;
-        return result;
-    }
+    abstract String quote(String stringToQuote);
 
     /**
      * Unquotes the passed string and removes double backslash prefixes for quote symbols
      * found inside the passed value.
      */
-    private static String unquote(String value) {
+    abstract String unquote(String value);
+
+    /**
+     * Creates the pattern to match the escaped delimiters.
+     *
+     * @param delimiter the character to match
+     * @return the created pattern
+     */
+    static String createDelimiterPattern(char delimiter) {
+        final String quotedDelimiter = Pattern.quote(String.valueOf(delimiter));
+        final String result = compile(DELIMITER_PATTERN_PREFIX + quotedDelimiter)
+                .pattern();
+        return result;
+    }
+
+    @SuppressWarnings("NonSerializableFieldInSerializableClass")
+    private enum Singleton {
+        INSTANCE;
+
+        private final Quoter mapQuoter = new MapQuoter();
+        private final Quoter listQuoter = new ListQuoter();
+    }
+
+    /**
+     * Returns the {@code MapQuoter} instance.
+     */
+    static Quoter mapQuoterInstance() {
+        return Singleton.INSTANCE.mapQuoter;
+    }
+
+    /**
+     * Returns the {@code ListQuoter} instance.
+     */
+    static Quoter listQuoterInstance() {
+        return Singleton.INSTANCE.listQuoter;
+    }
+
+    /**
+     * The {@code Quoter} for the {@code Map}.
+     */
+    private static class MapQuoter extends Quoter {
+
+        private static final String QUOTE_PATTERN = "((?=[^\\\\])[^\\w])";
+        private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(BACKSLASH);
+
+        @Override
+        String quote(String stringToQuote) {
+            checkNotNull(stringToQuote);
+            final Matcher matcher = Pattern.compile(QUOTE_PATTERN)
+                                           .matcher(stringToQuote);
+            final String unslashed = matcher.find() ?
+                                     matcher.replaceAll(BACKSLASH + matcher.group()) :
+                                     stringToQuote;
+            final String result = QUOTE_CHAR + unslashed + QUOTE_CHAR;
+            return result;
+        }
+
+        @Override
+        String unquote(String value) {
+            return unquoteValue(value, DOUBLE_BACKSLASH_PATTERN);
+        }
+    }
+
+    /**
+     * The {@code Quoter} for the {@code List}.
+     */
+    private static class ListQuoter extends Quoter {
+
+        private static final String BACKSLASH_PATTERN_VALUE = "\\\\\\\\";
+        private static final Pattern BACKSLASH_LIST_PATTERN = compile(BACKSLASH_PATTERN_VALUE);
+        private static final String ESCAPED_QUOTE = BACKSLASH + QUOTE_CHAR;
+        private static final String QUOTE = String.valueOf(QUOTE_CHAR);
+        private static final Pattern QUOTE_PATTERN = compile(QUOTE);
+
+        @Override
+        String quote(String stringToQuote) {
+            checkNotNull(stringToQuote);
+            final String escapedString = QUOTE_PATTERN.matcher(stringToQuote)
+                                                      .replaceAll(ESCAPED_QUOTE);
+            final String result = QUOTE_CHAR + escapedString + QUOTE_CHAR;
+            return result;
+        }
+
+        @Override
+        String unquote(String value) {
+            return unquoteValue(value, BACKSLASH_LIST_PATTERN);
+        }
+    }
+
+    private static String unquoteValue(String value, Pattern pattern) {
         checkQuoted(value);
         final String unquoted = value.substring(2, value.length() - 2);
-        final String unescaped = backslashPattern.matcher(unquoted)
-                                                 .replaceAll("");
+        final String unescaped = pattern.matcher(unquoted)
+                                        .replaceAll("");
         return unescaped;
     }
 
@@ -90,35 +168,5 @@ class Quoter extends Converter<String, String> {
                 && str.endsWith(BACKSLASH_QUOTE))) {
             throw newIllegalArgumentException("The passed string is not quoted: %s", str);
         }
-    }
-
-    /**
-     * Creates the pattern to match the escaped delimiters.
-     *
-     * @param delimiter the character to match
-     * @return the created pattern
-     */
-    static String createDelimiterPattern(char delimiter) {
-        final String quotedDelimiter = Pattern.quote(String.valueOf(delimiter));
-        final String result = Pattern.compile(DELIMITER_PATTERN_PREFIX + quotedDelimiter)
-                                     .pattern();
-        return result;
-    }
-
-    private enum Singleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Quoter value = new Quoter();
-    }
-
-    static Quoter listQuoterInstance() {
-        backslashPattern = BACKSLASH_LIST_PATTERN;
-        return Singleton.INSTANCE.value;
-    }
-
-    static Quoter mapQuoterInstance() {
-        backslashPattern = BACKSLASH_MAP_PATTERN;
-        return Singleton.INSTANCE.value;
     }
 }

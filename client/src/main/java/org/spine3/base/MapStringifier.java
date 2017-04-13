@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.newLinkedHashMap;
 import static org.spine3.base.Quoter.createDelimiterPattern;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
@@ -135,7 +136,7 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         final Converter<K, String> keyConverter = keyStringifier.andThen(quoter);
         final Converter<V, String> valueConverter = valueStringifier.andThen(quoter);
 
-        final Map<String, String> resultMap = newHashMap();
+        final Map<String, String> resultMap = newLinkedHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
             final String convertedKey = keyConverter.convert(entry.getKey());
             final String convertedValue = valueConverter.convert(entry.getValue());
