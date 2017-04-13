@@ -180,11 +180,8 @@ public class Stand implements AutoCloseable {
 
                     @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked above.
                     final Version versionValue = entityVersion.get();
-
-
                     final AggregateStateId aggregateStateId = AggregateStateId.of(id,
                                                                                   entityTypeUrl);
-
 
                     final EntityRecord record = EntityRecord.newBuilder()
                                                             .setState(packedState)
