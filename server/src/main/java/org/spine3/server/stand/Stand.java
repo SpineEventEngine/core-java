@@ -123,11 +123,14 @@ public class Stand implements AutoCloseable {
 
     private final boolean multitenant;
 
+    private final TopicValidator topicValidator;
+
     private Stand(Builder builder) {
         storage = builder.getStorage();
         callbackExecutor = builder.getCallbackExecutor();
         multitenant = builder.isMultitenant();
         subscriptionRegistry = builder.getSubscriptionRegistry();
+        topicValidator = builder.getTopicValidator();
     }
 
     public static Builder newBuilder() {
@@ -210,6 +213,8 @@ public class Stand implements AutoCloseable {
      */
     @CheckReturnValue
     public Subscription subscribe(final Topic topic) {
+        validate(topic);
+
         final TenantAwareFunction<Topic, Subscription> fn =
                 new TenantAwareFunction<Topic, Subscription>(topic.getContext().getTenantId()) {
 
@@ -222,6 +227,10 @@ public class Stand implements AutoCloseable {
                 };
         final Subscription result = fn.execute(topic);
         return result;
+    }
+
+    private void validate(Topic topic) {
+        topicValidator.validate(topic);
     }
 
     /**
@@ -451,6 +460,7 @@ public class Stand implements AutoCloseable {
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private boolean multitenant;
+        private TopicValidator topicValidator;
 
         /**
          * Sets an instance of {@link StandStorage} to be used to persist
@@ -503,6 +513,10 @@ public class Stand implements AutoCloseable {
             return subscriptionRegistry;
         }
 
+        private TopicValidator getTopicValidator() {
+            return topicValidator;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -518,6 +532,8 @@ public class Stand implements AutoCloseable {
             }
 
             subscriptionRegistry = new MultitenantSubscriptionRegistry(multitenant);
+
+            topicValidator = new TopicValidator();
 
             final Stand result = new Stand(this);
             return result;

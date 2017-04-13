@@ -110,3 +110,16 @@ message Subscription {
     // Reserved for subscription attributes.
     reserved 3 to 10;
 }
+
+// Enumeration of possible technical error reasons occurred in topic validation.
+enum TopicValidationError {
+
+    // Reserved value.
+    UNKNOWN_REASON = 0;
+
+    // The topic target is not supported by the server.
+    UNSUPPORTED_TARGET = 1;
+
+    // The topic message is invalid according to custom Protobuf options set.
+    INVALID_TOPIC = 2;
+}
