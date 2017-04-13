@@ -21,6 +21,7 @@ package org.spine3.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -37,6 +38,7 @@ import static org.spine3.client.Targets.someOf;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
+@Internal
 public class Queries {
 
     private Queries() {
