@@ -37,7 +37,6 @@ import org.spine3.base.Subscribe;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.EventFactory;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
@@ -46,6 +45,7 @@ import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
@@ -259,9 +259,8 @@ public class ProjectionRepositoryShould
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
-        final Event event = EventFactory.createEvent(unknownEventMessage,
-                                                     EventContext.getDefaultInstance());
-
+        final Event event = EventTests.createContextlessEvent(unknownEventMessage);
+        
         repository().dispatch(event);
     }
 
@@ -384,7 +383,8 @@ public class ProjectionRepositoryShould
         verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // because the test checks that the function is present.
+    @SuppressWarnings("OptionalGetWithoutIsPresent")
+        // because the test checks that the function is present.
     @Test
     public void obtain_id_set_function_after_put() {
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);

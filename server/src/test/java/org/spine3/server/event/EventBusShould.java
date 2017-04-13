@@ -30,10 +30,10 @@ import org.spine3.base.EventContext;
 import org.spine3.base.Responses;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.server.command.EventFactory;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.EventTests;
 import org.spine3.test.Tests;
 import org.spine3.test.Tests.MemoizingObserver;
 import org.spine3.test.event.ProjectCreated;
@@ -459,8 +459,8 @@ public class EventBusShould {
         private Event eventHandled;
 
         @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            this.eventHandled = EventFactory.createEvent(event, context);
+        public void on(ProjectCreated eventMsg, EventContext context) {
+            this.eventHandled = EventTests.createEvent(eventMsg, context);
         }
 
         private Event getEventHandled() {
