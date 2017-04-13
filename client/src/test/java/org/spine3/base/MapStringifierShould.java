@@ -116,7 +116,7 @@ public class MapStringifierShould {
 
     @Test
     public void convert_string_which_contains_delimiter_in_content_to_map_and_backward() {
-        final String stringToConvert = "\"1\\\"\\\"\":\"one\\";
+        final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\"";
         final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
                                                                             String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
