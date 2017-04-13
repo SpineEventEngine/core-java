@@ -22,14 +22,10 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.Values;
 import org.spine3.server.command.EventFactory;
 import org.spine3.server.integration.IntegrationEventContext;
-import org.spine3.test.TestActorRequestFactory;
-import org.spine3.users.TenantId;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
@@ -49,20 +45,6 @@ public class TestEventContextFactory {
     private static final String TEST_BC_NAME = "Test BC";
 
     private TestEventContextFactory() {}
-
-    public static EventContext createEventContext(Message aggregateId,
-                                                  TenantId tenantId) {
-        final EventId eventId = EventFactory.generateId();
-        final CommandContext commandContext =
-                TestActorRequestFactory.newInstance(TestEventContextFactory.class, tenantId)
-                                       .createCommandContext();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setProducerId(pack(aggregateId))
-                                                         .setCommandContext(commandContext)
-                                                         .setTimestamp(getCurrentTime());
-        return builder.build();
-    }
 
     /** Creates a new {@link IntegrationEventContext} with default properties. */
     public static IntegrationEventContext createIntegrationEventContext() {
