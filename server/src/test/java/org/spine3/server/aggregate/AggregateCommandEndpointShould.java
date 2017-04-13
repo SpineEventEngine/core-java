@@ -59,9 +59,9 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.server.aggregate.Given.Command.addTask;
-import static org.spine3.server.aggregate.Given.Command.createProject;
-import static org.spine3.server.aggregate.Given.Command.startProject;
+import static org.spine3.server.aggregate.Given.ACommand.addTask;
+import static org.spine3.server.aggregate.Given.ACommand.createProject;
+import static org.spine3.server.aggregate.Given.ACommand.startProject;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 public class AggregateCommandEndpointShould {
