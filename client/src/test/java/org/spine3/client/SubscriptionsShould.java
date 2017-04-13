@@ -21,51 +21,22 @@ package org.spine3.client;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.test.client.TestEntity;
-import org.spine3.type.TypeUrl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko
  */
-public class QueriesShould {
-
-    private static final String TARGET_ENTITY_TYPE_URL =
-            "type.spine3.org/spine.test.queries.TestEntity";
+public class SubscriptionsShould {
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Queries.class);
+        assertHasPrivateParameterlessCtor(Subscriptions.class);
     }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(Queries.class);
-    }
-
-    @Test
-    public void return_proper_type_for_known_target() {
-        final Target target = Targets.allOf(TestEntity.class);
-        final Query query = Query.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-        final TypeUrl type = Queries.typeOf(query);
-        assertNotNull(type);
-        assertEquals(TARGET_ENTITY_TYPE_URL, type.toString());
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_for_unknown_type() {
-        final Target target = Target.newBuilder()
-                                    .setType("Inexistent Message Type")
-                                    .build();
-        final Query query = Query.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-        Queries.typeOf(query);
+                .testAllPublicStaticMethods(Subscriptions.class);
     }
 }

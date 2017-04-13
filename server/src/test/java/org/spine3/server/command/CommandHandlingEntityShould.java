@@ -24,8 +24,8 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.client.CommandFactory;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.util.Environment;
 
 import static org.junit.Assert.assertEquals;
@@ -36,7 +36,8 @@ import static org.spine3.test.Tests.newUuidValue;
  */
 public class CommandHandlingEntityShould {
 
-    private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+    private final ActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
 
     /** The object we test. */
     private HandlingEntity entity;
@@ -67,9 +68,9 @@ public class CommandHandlingEntityShould {
             // Simulate the production mode.
             environment.setToProduction();
 
-            final Command cmd = commandFactory.createCommand(msg());
+            final Command cmd = requestFactory.command().create(msg());
             entity.dispatchForTest(cmd.getMessage(), cmd.getContext());
-            
+
         } finally {
             environment.setToTests();
         }

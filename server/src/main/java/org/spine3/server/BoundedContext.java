@@ -519,8 +519,17 @@ public final class BoundedContext
             if (eventBus == null) {
                 eventBus = createEventBus(storageFactory);
             }
+
             if (stand == null) {
                 stand = createStand(storageFactory);
+            } else {
+                // Check that both either multi-tenant or single-tenant.
+                checkState(multitenant == stand.isMultitenant(),
+                           "Stand must match multitenancy of BoundedContext. " +
+                                   "Status in BoundedContext.Builder: %s Stand: %s",
+                           String.valueOf(multitenant), String.valueOf(stand.isMultitenant())
+                );
+
             }
 
             standFunnel = createStandFunnel(standUpdateDelivery);

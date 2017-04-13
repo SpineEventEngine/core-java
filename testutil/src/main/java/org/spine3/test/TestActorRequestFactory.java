@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -42,34 +42,34 @@ import static org.spine3.test.Tests.newUserId;
  */
 @Internal
 @VisibleForTesting
-public class TestCommandFactory extends CommandFactory {
+public class TestActorRequestFactory extends ActorRequestFactory {
 
-    protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset) {
+    protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset) {
         super(newBuilder().setActor(actor)
                           .setZoneOffset(zoneOffset));
     }
 
-    protected TestCommandFactory(UserId actor, ZoneOffset zoneOffset, TenantId tenantId) {
+    protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset, TenantId tenantId) {
         super(newBuilder().setActor(actor)
                           .setZoneOffset(zoneOffset)
                           .setTenantId(tenantId));
     }
 
-    public static TestCommandFactory newInstance(String actor, ZoneOffset zoneOffset) {
-        return new TestCommandFactory(newUserId(actor), zoneOffset);
+    public static TestActorRequestFactory newInstance(String actor, ZoneOffset zoneOffset) {
+        return new TestActorRequestFactory(newUserId(actor), zoneOffset);
     }
 
-    public static TestCommandFactory newInstance(Class<?> testClass) {
+    public static TestActorRequestFactory newInstance(Class<?> testClass) {
         return newInstance(testClass.getName(), ZoneOffsets.UTC);
     }
 
-    public static TestCommandFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestCommandFactory(newUserId(testClass.getName()), ZoneOffsets.UTC, tenantId);
+    public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
+        return new TestActorRequestFactory(newUserId(testClass.getName()), ZoneOffsets.UTC, tenantId);
     }
 
     /** Creates new command with the passed timestamp. */
     public Command createCommand(Message message, Timestamp timestamp) {
-        final Command command = createCommand(message);
+        final Command command = command().create(message);
         return TimeTests.adjustTimestamp(command, timestamp);
 
     }
@@ -80,7 +80,7 @@ public class TestCommandFactory extends CommandFactory {
      * <p>Overrides to open access to creating command contexts in tests.
      */
     @Override
-    public CommandContext createContext() {
-        return super.createContext();
+    public CommandContext createCommandContext() {
+        return super.createCommandContext();
     }
 }

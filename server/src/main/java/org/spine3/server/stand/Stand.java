@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Sets;
@@ -32,21 +33,31 @@ import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
-import org.spine3.client.Target;
+import org.spine3.client.Topic;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.tenant.EntityUpdateOperation;
+import org.spine3.server.tenant.QueryOperation;
+import org.spine3.server.tenant.SubscriptionOperation;
+import org.spine3.server.tenant.TenantAwareFunction;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A container for storing the latest {@link org.spine3.server.aggregate.Aggregate Aggregate}
@@ -69,6 +80,11 @@ import java.util.concurrent.Executor;
 public class Stand implements AutoCloseable {
 
     /**
+     * Used to return an empty result collection for {@link Query}.
+     */
+    private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
+
+    /**
      * Persistent storage for the latest {@code Aggregate} states.
      *
      * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is
@@ -79,7 +95,7 @@ public class Stand implements AutoCloseable {
     /**
      * Manages the subscriptions for this instance of {@code Stand}.
      */
-    private final SubscriptionRegistry subscriptionRegistry = new SubscriptionRegistry();
+    private final SubscriptionRegistry subscriptionRegistry;
 
     /**
      * An instance of executor used to invoke callbacks
@@ -105,14 +121,13 @@ public class Stand implements AutoCloseable {
      */
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
-    /**
-     * Used to return an empty result collection for {@link Query}.
-     */
-    private static final QueryProcessor NOOP_PROCESSOR = new NoopQueryProcessor();
+    private final boolean multitenant;
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
         callbackExecutor = builder.getCallbackExecutor();
+        multitenant = builder.isMultitenant();
+        subscriptionRegistry = builder.getSubscriptionRegistry();
     }
 
     public static Builder newBuilder() {
@@ -120,7 +135,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Update the state of an entity inside of the current instance of {@code Stand}.
+     * Updates the state of an entity inside of the current instance of {@code Stand}.
      *
      * <p>In case the entity update represents the new
      * {@link org.spine3.server.aggregate.Aggregate Aggregate} state,
@@ -142,47 +157,78 @@ public class Stand implements AutoCloseable {
      *
      * <p>The matching callbacks are executed with the {@link #callbackExecutor}.
      *
-     * @param id            the entity identifier
-     * @param entityState   the entity state
-     * @param entityVersion the version of the entity
+     * @param envelope the updated entity state,
+     *                 packed as {@linkplain EntityStateEnvelope envelope}
      */
-    void update(Object id, Any entityState, Version entityVersion) {
-        final String typeUrlString = entityState.getTypeUrl();
-        final TypeUrl typeUrl = TypeUrl.parse(typeUrlString);
+    void update(final EntityStateEnvelope<?, ?> envelope) {
+        final EntityUpdateOperation op = new EntityUpdateOperation(envelope) {
 
-        final boolean isAggregateUpdate = knownAggregateTypes.contains(typeUrl);
+            @Override
+            public void run() {
+                final Object id = envelope.getEntityId();
+                final Message entityState = envelope.getMessage();
+                final Any packedState = AnyPacker.pack(entityState);
 
-        if (isAggregateUpdate) {
-            final AggregateStateId aggregateStateId = AggregateStateId.of(id, typeUrl);
+                final TypeUrl entityTypeUrl = TypeUrl.of(entityState);
+                final boolean isAggregateUpdate = knownAggregateTypes.contains(entityTypeUrl);
 
-            final EntityRecord record =
-                    EntityRecord.newBuilder()
-                                .setState(entityState)
-                                .setVersion(entityVersion)
-                                .build();
-            storage.write(aggregateStateId, record);
-        }
+                if (isAggregateUpdate) {
+                    final Optional<Version> entityVersion = envelope.getEntityVersion();
+                    checkState(entityVersion.isPresent(),
+                               "The aggregate version must be set in order to update Stand. " +
+                                       "Actual envelope: {}", envelope);
 
-        notifyMatchingSubscriptions(id, entityState, typeUrl);
+                    @SuppressWarnings("OptionalGetWithoutIsPresent")    // checked above.
+                    final Version versionValue = entityVersion.get();
+
+
+                    final AggregateStateId aggregateStateId = AggregateStateId.of(id,
+                                                                                  entityTypeUrl);
+
+
+                    final EntityRecord record = EntityRecord.newBuilder()
+                                                            .setState(packedState)
+                                                            .setVersion(versionValue)
+                                                            .build();
+                    storage.write(aggregateStateId, record);
+                }
+                notifyMatchingSubscriptions(id, packedState, entityTypeUrl);
+            }
+        };
+        op.execute();
+    }
+
+    public boolean isMultitenant() {
+        return multitenant;
     }
 
     /**
-     * Subscribe for all further changes of an entity state, which satisfies the {@link Target}.
+     * Subscribes for all further changes of an entity state, which satisfies the {@link Topic}.
      *
      * <p>Once this instance of {@code Stand} receives an update of an entity
      * with the given {@code TypeUrl}, all such callbacks are executed.
      *
-     * @param target an instance {@link Target}, defining the entity and criteria,
-     *               which changes should be propagated to the {@code callback}
+     * @param topic an instance {@link Topic}, defining the entity and criteria,
+     *              which changes should be propagated to the {@code callback}
      */
     @CheckReturnValue
-    public Subscription subscribe(Target target) {
-        final Subscription subscription = subscriptionRegistry.addSubscription(target);
-        return subscription;
+    public Subscription subscribe(final Topic topic) {
+        final TenantAwareFunction<Topic, Subscription> fn =
+                new TenantAwareFunction<Topic, Subscription>(topic.getContext().getTenantId()) {
+
+                    @Nullable
+                    @Override
+                    public Subscription apply(@Nullable Topic input) {
+                        checkNotNull(input);
+                        return subscriptionRegistry.addSubscription(topic);
+                    }
+                };
+        final Subscription result = fn.execute(topic);
+        return result;
     }
 
     /**
-     * Activate the subscription created via {@link #subscribe(Target)}.
+     * Activates the subscription created via {@link #subscribe(Topic)}.
      *
      * <p>After the activation, the clients will start receiving the updates via
      * {@code EntityUpdateCallback} upon the changes in the entities, defined by
@@ -190,14 +236,24 @@ public class Stand implements AutoCloseable {
      *
      * @param subscription the subscription to activate.
      * @param callback     an instance of {@link EntityUpdateCallback} executed upon entity update.
-     * @see #subscribe(Target)
+     * @see #subscribe(Topic)
      */
-    public void activate(Subscription subscription, EntityUpdateCallback callback) {
-        subscriptionRegistry.activate(subscription, callback);
+    public void activate(final Subscription subscription, final EntityUpdateCallback callback) {
+        checkNotNull(subscription);
+        checkNotNull(callback);
+
+        final SubscriptionOperation op = new SubscriptionOperation(subscription) {
+            @Override
+            public void run() {
+                subscriptionRegistry.activate(subscription, callback);
+            }
+        };
+
+        op.execute();
     }
 
     /**
-     * Cancel the {@link Subscription}.
+     * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
      * {@link #activate(Subscription, EntityUpdateCallback) activate()} call.
@@ -207,12 +263,21 @@ public class Stand implements AutoCloseable {
      *
      * @param subscription a subscription to cancel.
      */
-    public void cancel(Subscription subscription) {
-        subscriptionRegistry.removeSubscription(subscription);
+    public void cancel(final Subscription subscription) {
+        checkNotNull(subscription);
+
+        final SubscriptionOperation op = new SubscriptionOperation(subscription) {
+
+            @Override
+            public void run() {
+                subscriptionRegistry.removeSubscription(subscription);
+            }
+        };
+        op.execute();
     }
 
     /**
-     * Read all {@link Entity} types exposed for reading by this instance of {@code Stand}.
+     * Reads all {@link Entity} types exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose a type.
      *
@@ -245,7 +310,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read a particular set of items from the read-side of the application and
+     * Reads a particular set of items from the read-side of the application and
      * feed the result into an instance.
      *
      * <p>{@link Query} defines the query target and the expected detail level for response.
@@ -255,18 +320,25 @@ public class Stand implements AutoCloseable {
      * @param query            an instance of query
      * @param responseObserver an observer to feed the query results to.
      */
-    public void execute(Query query, StreamObserver<QueryResponse> responseObserver) {
+    public void execute(final Query query,
+                        final StreamObserver<QueryResponse> responseObserver) {
 
         final TypeUrl type = Queries.typeOf(query);
         final QueryProcessor queryProcessor = processorFor(type);
 
-        final ImmutableCollection<Any> readResult = queryProcessor.process(query);
-        final QueryResponse response = QueryResponse.newBuilder()
-                                                    .addAllMessages(readResult)
-                                                    .setResponse(Responses.ok())
-                                                    .build();
-        responseObserver.onNext(response);
-        responseObserver.onCompleted();
+        final QueryOperation op = new QueryOperation(query) {
+            @Override
+            public void run() {
+                final ImmutableCollection<Any> readResult = queryProcessor.process(query());
+                final QueryResponse response = QueryResponse.newBuilder()
+                                                            .addAllMessages(readResult)
+                                                            .setResponse(Responses.ok())
+                                                            .build();
+                responseObserver.onNext(response);
+                responseObserver.onCompleted();
+            }
+        };
+        op.execute();
     }
 
     private void notifyMatchingSubscriptions(Object id, final Any entityState, TypeUrl typeUrl) {
@@ -291,7 +363,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Register a supplier for the objects of a certain {@link TypeUrl} to be able
+     * Registers a supplier for the objects of a certain {@link TypeUrl} to be able
      * to read them in response to a {@link org.spine3.client.Query Query}.
      *
      * <p>In case the supplier is an instance of {@link AggregateRepository}, the {@code Repository}
@@ -301,7 +373,7 @@ public class Stand implements AutoCloseable {
      * <p>However, the type of the {@code AggregateRepository} instance is recorded for
      * the postponed processing of updates.
      *
-     * @see #update
+     * @see #update(EntityStateEnvelope)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends VersionableEntity<I, ?>>
@@ -380,9 +452,11 @@ public class Stand implements AutoCloseable {
     public static class Builder {
         private StandStorage storage;
         private Executor callbackExecutor;
+        private SubscriptionRegistry subscriptionRegistry;
         private boolean multitenant;
+
         /**
-         * Set an instance of {@link StandStorage} to be used to persist
+         * Sets an instance of {@link StandStorage} to be used to persist
          * the latest aggregate states.
          *
          * <p>If no {@code storage} is assigned,
@@ -402,7 +476,7 @@ public class Stand implements AutoCloseable {
         }
 
         /**
-         * Set an {@code Executor} to be used for executing callback methods.
+         * Sets an {@code Executor} to be used for executing callback methods.
          *
          * <p>If the {@code Executor} is not set,
          * {@link MoreExecutors#directExecutor() directExecutor()} will be used.
@@ -428,8 +502,12 @@ public class Stand implements AutoCloseable {
             return multitenant;
         }
 
+        private SubscriptionRegistry getSubscriptionRegistry() {
+            return subscriptionRegistry;
+        }
+
         /**
-         * Build an instance of {@code Stand}.
+         * Builds an instance of {@code Stand}.
          *
          * @return the instance of Stand
          */
@@ -441,6 +519,8 @@ public class Stand implements AutoCloseable {
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();
             }
+
+            subscriptionRegistry = new MultitenantSubscriptionRegistry(multitenant);
 
             final Stand result = new Stand(this);
             return result;

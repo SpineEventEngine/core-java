@@ -26,10 +26,9 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
 
@@ -87,8 +86,9 @@ public class EventsShould {
 
     @Before
     public void setUp() {
-        final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
-        final Command cmd = commandFactory.createCommand(Timestamps2.getCurrentTime());
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(getClass());
+        final Command cmd = requestFactory.command().create(Timestamps2.getCurrentTime());
         final StringValue producerId = newStringValue(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
                                                 .setProducerId(producerId)

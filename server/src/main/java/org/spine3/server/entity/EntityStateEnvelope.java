@@ -19,13 +19,16 @@
  */
 package org.spine3.server.entity;
 
+import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
+import org.spine3.base.Stringifiers;
 import org.spine3.base.Version;
 import org.spine3.envelope.MessageEnvelope;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 
@@ -53,6 +56,11 @@ public final class EntityStateEnvelope<I, S extends Message>
     private final EntityStateClass entityStateClass;
 
     /**
+     * The ID of tenant, in scope of which the entity exists.
+     */
+    private final TenantId tenantId;
+
+    /**
      * The optional version of an entity.
      *
      * <p>The value is only present If the entity used for the envelope construction
@@ -61,17 +69,32 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Nullable
     private final Version entityVersion;
 
-    private EntityStateEnvelope(Entity<I, S> entity) {
-        this.entityState = entity.getState();
-        this.entityId = Identifiers.idToAny(entity.getId());
-        this.entityStateClass = EntityStateClass.of(entity);
-        this.entityVersion = entity instanceof VersionableEntity
-                             ? ((VersionableEntity) entity).getVersion()
-                             : null;
+    private EntityStateEnvelope(Entity<I, S> entity, TenantId tenantId) {
+        this(entity.getId(), entity.getState(),
+             tenantId,
+             entity instanceof VersionableEntity
+                     ? ((VersionableEntity) entity).getVersion()
+                     : null);
     }
 
-    public static  <I, S extends Message> EntityStateEnvelope of(Entity<I, S> entity) {
-        return new EntityStateEnvelope<>(entity);
+    private EntityStateEnvelope(I entityId, S entityState,
+                                TenantId tenantId, @Nullable Version entityVersion) {
+        this.entityState = entityState;
+        this.entityId = Identifiers.idToAny(entityId);
+        this.entityStateClass = EntityStateClass.of(entityState);
+        this.entityVersion = entityVersion;
+        this.tenantId = tenantId;
+    }
+
+    public static <I, S extends Message> EntityStateEnvelope of(Entity<I, S> entity,
+                                                                TenantId tenantId) {
+        return new EntityStateEnvelope<>(entity, tenantId);
+    }
+
+    public static <I, S extends Message> EntityStateEnvelope of(I entityId, S entityState,
+                                                                @Nullable Version entityVersion,
+                                                                TenantId tenantId) {
+        return new EntityStateEnvelope<>(entityId, entityState, tenantId, entityVersion);
     }
 
     /**
@@ -111,6 +134,10 @@ public final class EntityStateEnvelope<I, S extends Message>
         return Optional.fromNullable(entityVersion);
     }
 
+    public TenantId getTenantId() {
+        return tenantId;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -121,12 +148,23 @@ public final class EntityStateEnvelope<I, S extends Message>
         }
         EntityStateEnvelope<?, ?> that = (EntityStateEnvelope<?, ?>) o;
         return Objects.equal(entityState, that.entityState) &&
-               Objects.equal(entityId, that.entityId) &&
-               Objects.equal(entityVersion, that.entityVersion);
+                Objects.equal(entityId, that.entityId) &&
+                Objects.equal(entityVersion, that.entityVersion);
     }
 
     @Override
     public int hashCode() {
         return Objects.hashCode(entityState, entityId, entityVersion);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("entityState", Stringifiers.toString(entityState))
+                          .add("entityId", Stringifiers.toString(entityId))
+                          .add("entityStateClass", entityStateClass)
+                          .add("tenantId", Stringifiers.toString(tenantId))
+                          .add("entityVersion", entityVersion)
+                          .toString();
     }
 }

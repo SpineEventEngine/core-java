@@ -23,9 +23,11 @@ package org.spine3.server.stand;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.client.Queries;
 import org.spine3.client.Subscription;
+import org.spine3.client.SubscriptionId;
+import org.spine3.client.Subscriptions;
 import org.spine3.client.Target;
+import org.spine3.client.Targets;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -87,8 +89,9 @@ public class SubscriptionRecordShould {
     @Test
     public void be_equal_if_has_same_subscription() {
         final Subscription oneSubscription = Given.subscription();
+        final SubscriptionId breakingId = Subscriptions.newId("breaking-id");
         final Subscription otherSubscription = Subscription.newBuilder()
-                                                           .setId("breaking-id")
+                                                           .setId(breakingId)
                                                            .build();
         @SuppressWarnings("QuestionableName")
         final SubscriptionRecord one = new SubscriptionRecord(oneSubscription,
@@ -111,12 +114,12 @@ public class SubscriptionRecordShould {
         private static final TypeUrl OTHER_TYPE = TypeUrl.of(Customer.class);
 
         private static Target target() {
-            final Target target = Queries.Targets.allOf(Project.class);
+            final Target target = Targets.allOf(Project.class);
             return target;
         }
 
         private static Target target(Message targetId) {
-            final Target target = Queries.Targets.someOf(Project.class, Collections.singleton(targetId));
+            final Target target = Targets.someOf(Project.class, Collections.singleton(targetId));
             return target;
         }
 

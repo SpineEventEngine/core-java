@@ -17,44 +17,27 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.client;
 
-package org.spine3.server.tenant;
+import com.google.common.testing.NullPointerTester;
+import org.junit.Test;
 
-import org.spine3.annotations.Internal;
-import org.spine3.client.Query;
-import org.spine3.client.QueryId;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * A tenant-aware operation performed in response to a query.
- *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-@Internal
-public abstract class QueryOperation extends ActorRequestOperation {
+public class TargetsShould {
 
-    private final Query query;
-
-    /**
-     * Creates new instance of the operation.
-     *
-     * @param query the query in response to which the operation is performed.
-     */
-    protected QueryOperation(Query query) {
-        super(query.getContext());
-        this.query = query;
+    @Test
+    public void have_private_constructor_of_targets_class() {
+        assertHasPrivateParameterlessCtor(Targets.class);
     }
 
-    /**
-     * Obtains the ID of the query.
-     */
-    protected QueryId queryId() {
-        return query.getId();
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(Targets.class);
     }
 
-    /**
-     * Obtains the query in response to which the operation is performed.
-     */
-    protected Query query() {
-        return query;
-    }
 }

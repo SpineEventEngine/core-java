@@ -17,44 +17,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.server.tenant;
+package org.spine3.client;
 
 import org.spine3.annotations.Internal;
-import org.spine3.client.Query;
-import org.spine3.client.QueryId;
+import org.spine3.base.Identifiers;
 
 /**
- * A tenant-aware operation performed in response to a query.
+ * Utility class for working with {@linkplain Subscription subscriptions}.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-@Internal
-public abstract class QueryOperation extends ActorRequestOperation {
+public class Subscriptions {
 
-    private final Query query;
+    private Subscriptions() {
+        // prevent instantiation.
+    }
 
     /**
-     * Creates new instance of the operation.
+     * Generates a new subscription identifier.
      *
-     * @param query the query in response to which the operation is performed.
+     * <p>The result is based upon UUID generation.
+     *
+     * @return new subscription identifier.
      */
-    protected QueryOperation(Query query) {
-        super(query.getContext());
-        this.query = query;
+    public static SubscriptionId newId() {
+        return newId(Identifiers.newUuid());
     }
 
     /**
-     * Obtains the ID of the query.
+     * Wraps a given {@code String} as a subscription identifier
+     *
+     * <p>Not recommended for a production usage. Use {@linkplain #newId() automatic generation}
+     * instead.
+     *
+     * @return new subscription identifier.
      */
-    protected QueryId queryId() {
-        return query.getId();
-    }
-
-    /**
-     * Obtains the query in response to which the operation is performed.
-     */
-    protected Query query() {
-        return query;
+    @Internal
+    public static SubscriptionId newId(String value) {
+        return SubscriptionId.newBuilder()
+                             .setUuid(value)
+                             .build();
     }
 }

@@ -22,7 +22,7 @@ package org.spine3.test;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.aggregate.Aggregate;
 
 import javax.annotation.Nullable;
@@ -44,8 +44,8 @@ public abstract class AggregateCommandTest<C extends Message, A extends Aggregat
     /**
      * {@inheritDoc}
      */
-    protected AggregateCommandTest(CommandFactory commandFactory) {
-        super(commandFactory);
+    protected AggregateCommandTest(ActorRequestFactory requestFactory) {
+        super(requestFactory);
     }
 
     /**

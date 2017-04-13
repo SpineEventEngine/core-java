@@ -21,6 +21,7 @@ package org.spine3.server.stand;
 
 import com.google.common.base.Optional;
 import org.spine3.annotations.Internal;
+import org.spine3.base.CommandContext;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 
@@ -57,24 +58,24 @@ public class StandFunnel {
     private final StandUpdateDelivery delivery;
 
     private StandFunnel(Builder builder) {
-        this.delivery = builder.getDelivery()
-                               .get();
-        this.delivery.setStand(builder.getStand()
-                                      .get());
+        this.delivery = builder.delivery;
+        this.delivery.setStand(builder.stand);
     }
 
     /**
-     * Post the state of an {@link VersionableEntity} to an instance of {@link Stand}.
+     * Posts the state of an {@link VersionableEntity} to an instance of {@link Stand}.
      *
-     * @param entity the entity which state should be delivered to the {@code Stand}
+     * @param entity         the entity which state should be delivered to the {@code Stand}
+     * @param commandContext the context of the command, which triggered the entity state update.
      */
-    public void post(VersionableEntity entity) {
-        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity);
+    public void post(final VersionableEntity entity, CommandContext commandContext) {
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
+                                                                    commandContext.getTenantId());
         delivery.deliver(envelope);
     }
 
     /**
-     * Create a new {@code Builder} for {@link StandFunnel}.
+     * Creates a new {@code Builder} for {@link StandFunnel}.
      *
      * @return a new {@code Builder} instance.
      */
@@ -102,7 +103,7 @@ public class StandFunnel {
         }
 
         /**
-         * Set the {@link Stand} instance for this {@code StandFunnel}.
+         * Sets the {@link Stand} instance for this {@code StandFunnel}.
          *
          * <p> The value must not be null.
          *
@@ -119,7 +120,7 @@ public class StandFunnel {
         }
 
         /**
-         * Set the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
+         * Sets the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
          *
          * <p>The value must not be {@code null}.
          *

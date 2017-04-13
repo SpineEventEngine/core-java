@@ -36,7 +36,7 @@ import java.util.concurrent.Executor;
 @SPI
 @SuppressWarnings("WeakerAccess")   // Part of API.
 public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<FailureEnvelope,
-        FailureClass,
+                                                                              FailureClass,
                                                                               FailureDispatcher> {
 
     /**

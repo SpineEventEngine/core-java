@@ -129,7 +129,7 @@ public class AggregateCommandEndpointShould {
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1)
                 .when(storage).readEventCountAfterLastSnapshot(projectId);
-        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance()))
+        doReturn(Optional.absent())
                 .when(storage).read(projectId);
         doReturn(storage)
                 .when(repositorySpy).aggregateStorage();

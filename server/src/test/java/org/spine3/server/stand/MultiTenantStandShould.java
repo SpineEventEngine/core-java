@@ -20,9 +20,31 @@
 
 package org.spine3.server.stand;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.spine3.base.Responses;
+import org.spine3.base.Version;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.client.Query;
+import org.spine3.client.QueryResponse;
+import org.spine3.client.Subscription;
+import org.spine3.client.Topic;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.Tests;
+import org.spine3.test.commandservice.customer.Customer;
+import org.spine3.test.commandservice.customer.CustomerId;
+import org.spine3.users.TenantId;
 
+import java.util.Map;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.newTenantUuid;
 
 /**
@@ -33,12 +55,78 @@ public class MultiTenantStandShould extends StandShould {
     @Override
     @Before
     public void setUp() {
-        setCurrentTenant(newTenantUuid());
+        final TenantId tenantId = newTenantUuid();
+
+        setCurrentTenant(tenantId);
         setMultitenant(true);
+        setRequestFactory(createRequestFactory(tenantId));
     }
 
     @After
     public void tearDown() {
         clearCurrentTenant();
+    }
+
+    @Test
+    public void not_allow_reading_aggregate_records_for_another_tenant() {
+        final Stand stand = doCheckReadingCustomersById(15);
+
+        final TenantId anotherTenant = newTenantUuid();
+        final ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
+
+        final Query readAllCustomers = requestFactory.query().all(Customer.class);
+
+        final MemoizeQueryResponseObserver responseObserver = new MemoizeQueryResponseObserver();
+        stand.execute(readAllCustomers, responseObserver);
+        final QueryResponse response = responseObserver.getResponseHandled();
+        assertTrue(Responses.isOk(response.getResponse()));
+        assertEquals(0, response.getMessagesCount());
+    }
+
+    @Test
+    public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
+        final StandStorage standStorage = InMemoryStorageFactory.getInstance(isMultitenant())
+                                                                .createStandStorage();
+        final Stand stand = prepareStandWithAggregateRepo(standStorage);
+
+        // --- Default Tenant
+        final ActorRequestFactory requestFactory = getRequestFactory();
+        final MemoizeEntityUpdateCallback defaultTenantCallback = subscribeToAllOf(stand,
+                                                                                   requestFactory,
+                                                                                   Customer.class);
+
+        // --- Another Tenant
+        final TenantId anotherTenant = newTenantUuid();
+        final ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
+        final MemoizeEntityUpdateCallback anotherCallback = subscribeToAllOf(stand,
+                                                                             anotherFactory,
+                                                                             Customer.class);
+
+        // Trigger updates in Default Tenant.
+        final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
+                                                                                 .iterator()
+                                                                                 .next();
+        final CustomerId customerId = sampleData.getKey();
+        final Customer customer = sampleData.getValue();
+        final Version stateVersion = Tests.newVersionWithNumber(1);
+        stand.update(asEnvelope(customerId, customer, stateVersion));
+
+        final Any packedState = AnyPacker.pack(customer);
+        // Verify that Default Tenant callback has got the update.
+        assertEquals(packedState, defaultTenantCallback.getNewEntityState());
+
+        // And Another Tenant callback has not been called.
+        assertEquals(null, anotherCallback.getNewEntityState());
+    }
+
+    protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand, ActorRequestFactory requestFactory,
+                                                           Class<? extends Message> entityClass) {
+        final Topic allCustomers = requestFactory.topic().allOf(entityClass);
+        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
+        final Subscription subscription = stand.subscribe(allCustomers);
+        stand.activate(subscription, memoizeCallback);
+        assertNotNull(subscription);
+        assertNull(memoizeCallback.getNewEntityState());
+        return memoizeCallback;
     }
 }
