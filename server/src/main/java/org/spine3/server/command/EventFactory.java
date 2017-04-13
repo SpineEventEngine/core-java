@@ -88,7 +88,7 @@ public class EventFactory {
      * @param context      the event context
      * @return created event instance
      */
-    public static Event createEvent(Message messageOrAny, EventContext context) {
+    private static Event createEvent(Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
         final Any packed = toAny(messageOrAny);
