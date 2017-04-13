@@ -29,7 +29,8 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static org.spine3.base.ItemQuoter.converter;
+import static com.google.common.collect.Maps.newLinkedHashMap;
+import static org.spine3.base.Quoter.createDelimiterPattern;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
@@ -41,32 +42,32 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * for the correct usage of {@code MapStringifier}.
  *
  * <h3>Example</h3>
+ * <pre>    {@code
+ *   // The registration of the stringifier.
+ *   final Type type = Types.mapTypeOf(String.class, Long.class);
+ *   StringifierRegistry.getInstance().register(stringifier, type);
  *
- * {@code
- *  // The registration of the stringifier.
- *  final Type type = Types.mapTypeOf(String.class, Long.class);
- *  StringifierRegistry.getInstance().register(stringifier, type);
+ *   // Obtain already registered `MapStringifier`.
+ *   final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
+ *                                                                            .getStringifier(type);
  *
- *  // Obtain already registered `MapStringifier`.
- *  final Stringifier<Map<String, Long>> mapStringifier = StringifierRegistry.getInstance()
- *                                                                           .getStringifier(type);
+ *   // Convert to string.
+ *   final Map<String, Long> mapToConvert = newHashMap();
+ *   mapToConvert.put("first", 1);
+ *   mapToConvert.put("second", 2);
  *
- *  // Convert to string.
- *  final Map<String, Long> mapToConvert = newHashMap();
- *  mapToConvert.put("first", 1);
- *  mapToConvert.put("second", 2);
- *
- *  // The result is: \"first\":\"1\",\"second\":\"2\".
- *  final String convertedString = mapStringifier.toString(mapToConvert);
+ *   // The result is: \"first\":\"1\",\"second\":\"2\".
+ *   final String convertedString = mapStringifier.toString(mapToConvert);
  *
  *
- *  // Convert from string.
- *  final String stringToConvert = ...
- *  final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert);
- * }
+ *   // Convert from string.
+ *   final String stringToConvert = ...
+ *   final Map<String, Long> convertedMap = mapStringifier.fromString(stringToConvert); }
+ * </pre>
  *
  * @param <K> the type of the keys in the map
  * @param <V> the type of the values in the map
+ * @author Illia Shepilov
  */
 class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
@@ -86,24 +87,6 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     /**
      * Creates a {@code MapStringifier}.
      *
-     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for key-value
-     * separation in {@code String} representation of the {@code Map}.
-     *
-     * @param keyClass   the class of the key elements
-     * @param valueClass the class of the value elements
-     */
-    MapStringifier(Class<K> keyClass, Class<V> valueClass) {
-        super();
-        this.keyStringifier = getStringifier(keyClass);
-        this.valueStringifier = getStringifier(valueClass);
-        this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
-    }
-
-    /**
-     * Creates a {@code MapStringifier}.
-     *
      * <p>The specified delimiter is used for key-value separation
      * in {@code String} representation of the {@code Map}.
      *
@@ -117,20 +100,29 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
         this.valueStringifier = getStringifier(valueClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = getMapSplitter(createBucketPattern(delimiter), createKeyValuePattern());
+        this.splitter = createMapSplitter(createDelimiterPattern(delimiter),
+                                          createKeyValuePattern());
     }
 
-    private static Splitter.MapSplitter getMapSplitter(String bucketPattern,
-                                                       String keyValuePattern) {
+    /**
+     * Creates a {@code MapStringifier}.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for key-value
+     * separation in {@code String} representation of the {@code Map}.
+     *
+     * @param keyClass   the class of the key elements
+     * @param valueClass the class of the value elements
+     */
+    MapStringifier(Class<K> keyClass, Class<V> valueClass) {
+        this(keyClass, valueClass, DEFAULT_ELEMENT_DELIMITER);
+    }
+
+    private static Splitter.MapSplitter createMapSplitter(String bucketPattern,
+                                                          String keyValuePattern) {
         final Splitter.MapSplitter result =
                 Splitter.onPattern(bucketPattern)
                         .withKeyValueSeparator(Splitter.onPattern(keyValuePattern));
         return result;
-    }
-
-    private static String createBucketPattern(char delimiter) {
-        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
-                      .pattern();
     }
 
     private static String createKeyValuePattern() {
@@ -140,13 +132,14 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     @Override
     protected String toString(Map<K, V> obj) {
-        final Converter<String, String> quoteConverter = converter();
-        final Map<String, String> resultMap = newHashMap();
+        final Converter<String, String> quoter = Quoter.mapQuoterInstance();
+        final Converter<K, String> keyConverter = keyStringifier.andThen(quoter);
+        final Converter<V, String> valueConverter = valueStringifier.andThen(quoter);
+
+        final Map<String, String> resultMap = newLinkedHashMap();
         for (Map.Entry<K, V> entry : obj.entrySet()) {
-            final String convertedKey = keyStringifier.andThen(quoteConverter)
-                                                      .convert(entry.getKey());
-            final String convertedValue = valueStringifier.andThen(quoteConverter)
-                                                          .convert(entry.getValue());
+            final String convertedKey = keyConverter.convert(entry.getKey());
+            final String convertedValue = valueConverter.convert(entry.getValue());
             resultMap.put(convertedKey, convertedValue);
         }
         final String result = Joiner.on(delimiter)
@@ -164,16 +157,16 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
     }
 
     private Map<K, V> convert(Map<String, String> buckets) {
-        final Converter<String, String> quoteConverter = converter();
+        final Converter<String, String> quoter = Quoter.mapQuoterInstance();
+        final Converter<String, K> keyConverter = quoter.reverse()
+                                                        .andThen(keyStringifier.reverse());
+        final Converter<String, V> valueConverter = quoter.reverse()
+                                                          .andThen(valueStringifier.reverse());
         final Map<K, V> resultMap = newHashMap();
         try {
             for (Map.Entry<String, String> bucket : buckets.entrySet()) {
-                final K convertedKey = quoteConverter.reverse()
-                                                     .andThen(keyStringifier.reverse())
-                                                     .convert(bucket.getKey());
-                final V convertedValue = quoteConverter.reverse()
-                                                       .andThen(valueStringifier.reverse())
-                                                       .convert(bucket.getValue());
+                final K convertedKey = keyConverter.convert(bucket.getKey());
+                final V convertedValue = valueConverter.convert(bucket.getValue());
                 resultMap.put(convertedKey, convertedValue);
             }
             return resultMap;

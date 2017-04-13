@@ -20,12 +20,11 @@
 
 package org.spine3.testdata;
 
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.Tests;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 
 /**
  * Creates {@link EntityRecord}s for tests.
@@ -41,7 +40,7 @@ public class TestEntityStorageRecordFactory {
     public static EntityRecord newEntityStorageRecord() {
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
-                         .setState(AnyPacker.pack(newStringValue(newUuid())))
+                         .setState(pack(newUuid()))
                          .setVersion(Tests.newVersionWithNumber(5));
                             // set any non-default (non-zero) value
         return builder.build();

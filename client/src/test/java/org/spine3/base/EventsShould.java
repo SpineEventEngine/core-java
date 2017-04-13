@@ -19,7 +19,6 @@
  */
 package org.spine3.base;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
@@ -27,45 +26,63 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestActorRequestFactory;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
-import org.spine3.type.TypeName;
 
 import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Events.checkValid;
 import static org.spine3.base.Events.getActor;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.getProducer;
 import static org.spine3.base.Events.getTimestamp;
-import static org.spine3.base.Events.isEnrichmentEnabled;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 import static org.spine3.server.command.EventFactory.createEvent;
-import static org.spine3.test.EventTests.createEventOccurredMinutesAgo;
-import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newUuidValue;
+import static org.spine3.test.TimeTests.Past.minutesAgo;
 
+/**
+ * @author Alexander Litus
+ * @author Alexander Yevsyukov
+ */
 public class EventsShould {
 
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(pack(EventsShould.class.getSimpleName()),
+                                         EventsShould.class);
     private EventContext context;
 
     private final StringValue stringValue = newStringValue(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = newDoubleValue(10.1);
+
+    public static EventContext newEventContext() {
+        final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
+                                                     Tests.<Version>nullRef());
+        return event.getContext();
+    }
+
+    public static Event createEventOccurredMinutesAgo(int minutesAgo) {
+        final Event result = eventFactory.createEvent(newUuidValue(),
+                                                      null,
+                                                      minutesAgo(minutesAgo));
+        return result;
+    }
 
     @Before
     public void setUp() {
@@ -145,75 +162,6 @@ public class EventsShould {
         assertEquals(msg.getValue(), id);
     }
 
-    @Test
-    public void return_true_if_event_enrichment_is_enabled() {
-        final Event event = createEvent(stringValue, context);
-
-        assertTrue(isEnrichmentEnabled(event));
-    }
-
-    @Test
-    public void return_false_if_event_enrichment_is_disabled() {
-        final EventContext withDisabledEnrichment =
-                context.toBuilder()
-                       .setEnrichment(Enrichment.newBuilder()
-                                                .setDoNotEnrich(true))
-                       .build();
-        final Event event = createEvent(stringValue, withDisabledEnrichment);
-
-        assertFalse(isEnrichmentEnabled(event));
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // We're sure the optional is populated in this method.
-    @Test
-    public void return_all_event_enrichments() {
-        final EventContext context = newEventContextWithEnrichment(
-                TypeName.of(stringValue).value(),
-                stringValue);
-
-        final Optional<Enrichment.Container> enrichments = Events.getEnrichments(context);
-
-        assertTrue(enrichments.isPresent());
-        assertEquals(context.getEnrichment()
-                            .getContainer(), enrichments.get());
-    }
-
-    @Test
-    public void return_optional_absent_if_no_event_enrichments() {
-        assertFalse(Events.getEnrichments(context)
-                          .isPresent());
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // We're sure the optional is populated in this method.
-    @Test
-    public void return_specific_event_enrichment() {
-        final EventContext context = newEventContextWithEnrichment(
-                TypeName.of(stringValue).value(),
-                stringValue);
-
-        final Optional<? extends StringValue> enrichment =
-                Events.getEnrichment(stringValue.getClass(), context);
-
-        assertTrue(enrichment.isPresent());
-        assertEquals(stringValue, enrichment.get());
-    }
-
-    @Test
-    public void return_optional_absent_if_no_event_enrichments_when_getting_one() {
-        assertFalse(Events.getEnrichment(StringValue.class, context)
-                          .isPresent());
-    }
-
-    @Test
-    public void return_optional_absent_if_no_needed_event_enrichment_when_getting_one() {
-        final EventContext context = newEventContextWithEnrichment(
-                TypeName.of(boolValue).value(),
-                boolValue);
-        assertFalse(Events.getEnrichment(StringValue.class, context)
-                          .isPresent());
-    }
 
     @Test
     public void pass_the_null_tolerance_check() {
@@ -221,20 +169,6 @@ public class EventsShould {
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
                 .setDefault(EventContext.class, newEventContext())
                 .testAllPublicStaticMethods(Events.class);
-    }
-
-    private static EventContext newEventContextWithEnrichment(String enrichmentKey,
-                                                              Message enrichment) {
-        final Enrichment.Builder enrichments =
-                Enrichment.newBuilder()
-                          .setContainer(Enrichment.Container.newBuilder()
-                                                            .putItems(enrichmentKey,
-                                                                      AnyPacker.pack(enrichment)));
-        final EventContext context = newEventContext()
-                                               .toBuilder()
-                                               .setEnrichment(enrichments.build())
-                                               .build();
-        return context;
     }
 
     @Test

@@ -23,18 +23,17 @@ package org.spine3.server.projection;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
@@ -48,12 +47,13 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.Given;
+import org.spine3.test.TestActorRequestFactory;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
-import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.type.EventClass;
@@ -76,6 +76,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static org.spine3.server.projection.ProjectionRepository.Status.CLOSED;
 import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
@@ -83,17 +84,21 @@ import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 /**
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
                                             ProjectId,
                                             Project> {
 
-    private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
+    private static final ProjectId ID = ProjectId.newBuilder()
+                                                 .setId("p-123")
+                                                 .build();
+    private static final Any PRODUCER_ID = pack(ID);
 
     private BoundedContext boundedContext;
 
@@ -155,6 +160,21 @@ public class ProjectionRepositoryShould
         TestProjection.clearMessageDeliveryHistory();
     }
 
+    private TestEventFactory newEventFactory(Any producerId) {
+        final TestActorRequestFactory requestFactory =
+                TestActorRequestFactory.newInstance(getClass(), tenantId());
+        return TestEventFactory.newInstance(producerId, requestFactory);
+    }
+
+    private Event createEvent(Any producerId, Message eventMessage) {
+        return newEventFactory(producerId).createEvent(eventMessage);
+    }
+
+    private void appendEvent(EventStore eventStore, Event event) {
+        eventStore.append(event);
+        keepTenantIdFromEvent(event);
+    }
+
     // Tests
     //-------------------------
 
@@ -203,7 +223,8 @@ public class ProjectionRepositoryShould
     }
 
     private void checkDispatchesEvent(Message eventMessage) {
-        final Event event = EventFactory.createEvent(eventMessage, createEventContext(ID, tenantId()));
+        final TestEventFactory eventFactory = newEventFactory(PRODUCER_ID);
+        final Event event = eventFactory.createEvent(eventMessage);
 
         keepTenantIdFromEvent(event);
 
@@ -227,7 +248,7 @@ public class ProjectionRepositoryShould
     private void checkDoesNotDispatchEventWith(Status status) {
         repository().setStatus(status);
         final ProjectCreated eventMsg = projectCreated();
-        final Event event = EventFactory.createEvent(eventMsg, createEventContext(ID, tenantId()));
+        final Event event = createEvent(PRODUCER_ID, eventMsg);
 
         repository().dispatch(event);
 
@@ -314,26 +335,32 @@ public class ProjectionRepositoryShould
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
 
+        final TestEventFactory eventFactory = newEventFactory(PRODUCER_ID);
+
         // Put events into the EventStore.
-        final Event projectCreatedEvent = Sample.eventBy(ID, ProjectCreated.class, tenantId());
+        final ProjectCreated projectCreated = ProjectCreated.newBuilder()
+                                                            .setProjectId(ID)
+                                                            .build();
+        final Event projectCreatedEvent = eventFactory.createEvent(projectCreated);
         appendEvent(eventStore, projectCreatedEvent);
 
-        final Event taskAddedEvent = Sample.eventBy(ID, TaskAdded.class, tenantId());
+        final TaskAdded taskAdded = TaskAdded.newBuilder()
+                                             .setProjectId(ID)
+                                             .build();
+        final Event taskAddedEvent = eventFactory.createEvent(taskAdded);
         appendEvent(eventStore, taskAddedEvent);
 
-        final Event projectStartedEvent = Sample.eventBy(ID, ProjectStarted.class, tenantId());
+        final ProjectStarted projectStarted = ProjectStarted.newBuilder()
+                                                            .setProjectId(ID)
+                                                            .build();
+        final Event projectStartedEvent = eventFactory.createEvent(projectStarted);
         appendEvent(eventStore, projectStartedEvent);
 
         repo.catchUp();
 
-        assertTrue(TestProjection.processed(Events.getMessage(projectCreatedEvent)));
-        assertTrue(TestProjection.processed(Events.getMessage(taskAddedEvent)));
-        assertTrue(TestProjection.processed(Events.getMessage(projectStartedEvent)));
-    }
-
-    private void appendEvent(EventStore eventStore, Event event) {
-        eventStore.append(event);
-        keepTenantIdFromEvent(event);
+        assertTrue(TestProjection.processed(projectCreated));
+        assertTrue(TestProjection.processed(taskAdded));
+        assertTrue(TestProjection.processed(projectStarted));
     }
 
     @Test
@@ -349,7 +376,7 @@ public class ProjectionRepositoryShould
         final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
         repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
 
-        final Event event = Sample.eventBy(ID, projectCreated(), tenantId());
+        final Event event = createEvent(PRODUCER_ID, projectCreated());
         repository().dispatch(event);
 
         final ProjectCreated expectedEventMessage = Events.getMessage(event);
@@ -378,15 +405,8 @@ public class ProjectionRepositoryShould
         final Message eventMessage = ProjectCreated.newBuilder()
                                                    .setProjectId(projectId)
                                                    .build();
-        final EventContext context =
-                EventContext.newBuilder()
-                            .setEventId(EventFactory.generateId())
-                            .setProducerId(AnyPacker.pack(projectId))
-                            .setCommandContext(CommandContext.newBuilder()
-                                                             .setTenantId(tenantId()))
-                            .setTimestamp(Timestamps2.getCurrentTime())
-                            .build();
-        final Event event = EventFactory.createEvent(eventMessage, context);
+        final Event event = createEvent(pack(projectId), eventMessage);
+
         appendEvent(boundedContext.getEventBus()
                                   .getEventStore(), event);
         // Set up repository
@@ -405,8 +425,9 @@ public class ProjectionRepositoryShould
     @Test
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
         // Set up bounded context
-        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(
-                TestEventBusFactory.create());
+        final BoundedContext boundedContext =
+                TestBoundedContextFactory.MultiTenant.newBoundedContext(
+                        TestEventBusFactory.create());
         final int eventsCount = 10;
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
@@ -417,12 +438,7 @@ public class ProjectionRepositoryShould
             final Message eventMessage = ProjectCreated.newBuilder()
                                                        .setProjectId(projectId)
                                                        .build();
-            final EventContext context = EventContext.newBuilder()
-                                                     .setEventId(EventFactory.generateId())
-                                                     .setProducerId(AnyPacker.pack(projectId))
-                                                     .setTimestamp(Timestamps2.getCurrentTime())
-                                                     .build();
-            final Event event = EventFactory.createEvent(eventMessage, context);
+            final Event event = createEvent(pack(projectId), eventMessage);
             appendEvent(eventStore, event);
         }
         // Set up repository
@@ -526,21 +542,21 @@ public class ProjectionRepositoryShould
     }
 
     private static ProjectStarted projectStarted() {
-        return ((ProjectStarted.Builder) Sample.builderForType(ProjectStarted.class))
-                .setProjectId(ID)
-                .build();
+        return ProjectStarted.newBuilder()
+                             .setProjectId(ID)
+                             .build();
     }
 
     private static ProjectCreated projectCreated() {
-        return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
-                .setProjectId(ID)
-                .build();
+        return ProjectCreated.newBuilder()
+                             .setProjectId(ID)
+                             .build();
     }
 
     private static TaskAdded taskAdded() {
-        return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
-                .setProjectId(ID)
-                .build();
+        return TaskAdded.newBuilder()
+                        .setProjectId(ID)
+                        .build();
     }
 
     /** Stub projection repository. */

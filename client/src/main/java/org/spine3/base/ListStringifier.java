@@ -26,9 +26,9 @@ import com.google.common.base.Splitter;
 import com.google.common.escape.Escaper;
 
 import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.spine3.base.Quoter.createDelimiterPattern;
 import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
@@ -39,32 +39,32 @@ import static org.spine3.base.StringifierRegistry.getStringifier;
  * for the correct usage of the {@code ListStringifier}.
  *
  * <h3>Example</h3>
+ * <pre>    {@code
+ *   // Stringifier creation.
+ *   final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
  *
- * {@code
- *    // Stringifier creation.
- *    final Stringifier<List<Integer>> listStringifier = Stringifiers.listStringifier();
+ *   // The registration of the stringifier.
+ *   final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
+ *   final Type type = Types.listTypeOf(Integer.class);
+ *   StringifierRegistry.getInstance().register(listStringifier, type);
  *
- *    // The registration of the stringifier.
- *    final Stringifier<List<Integer>> listStringifer = Stringifiers.listStringifier();
- *    final Type type = Types.listTypeOf(Integer.class);
- *    StringifierRegistry.getInstance().register(listStringifier, type);
+ *   // Obtain already registered stringifier.
+ *   final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
+ *                                                                         .getStringifier(type);
  *
- *    // Obtain already registered stringifier.
- *    final Stringifier<List<Integer>> listStringifier = StringifierRegistry.getInstance()
- *                                                                          .getStringifier(type);
+ *   // Convert to string.
+ *   final List<Integer> listToConvert = newArrayList(1, 2, 3);
  *
- *    // Convert to string.
- *    final List<Integer> listToConvert = newArrayList(1, 2, 3);
+ *   // The result is: \"1\",\"2\",\"3\".
+ *   final String convertedString = listStringifer.toString(listToConvert);
  *
- *    // The result is: \"1\",\"2\",\"3\".
- *    final String convertedString = listStringifer.toString(listToConvert);
- *
- *    // Convert from string.
- *    final String stringToConvert = ...
- *    final List<Integer> convertedList = listStringifier.fromString(stringToConvert);
- * }
+ *   // Convert from string.
+ *   final String stringToConvert = ...
+ *   final List<Integer> convertedList = listStringifier.fromString(stringToConvert);}
+ * </pre>
  *
  * @param <T> the type of the elements in the list.
+ * @author Illia Shepilov
  */
 class ListStringifier<T> extends Stringifier<List<T>> {
 
@@ -82,22 +82,6 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     /**
      * Creates a {@code ListStringifier}.
      *
-     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for element
-     * separation in the {@code String} representation of the {@code List}.
-     *
-     * @param listGenericClass the class of the list elements
-     */
-    ListStringifier(Class<T> listGenericClass) {
-        super();
-        this.elementStringifier = getStringifier(listGenericClass);
-        this.delimiter = DEFAULT_ELEMENT_DELIMITER;
-        this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
-    }
-
-    /**
-     * Creates a {@code ListStringifier}.
-     *
      * <p>The specified delimiter is used for element separation
      * in the {@code String} representation of the {@code List}.
      *
@@ -109,20 +93,27 @@ class ListStringifier<T> extends Stringifier<List<T>> {
         this.elementStringifier = getStringifier(listGenericClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = Splitter.onPattern(createElementDelimiterPattern(delimiter));
+        this.splitter = Splitter.onPattern(createDelimiterPattern(delimiter));
     }
 
-    private static String createElementDelimiterPattern(char delimiter) {
-        return Pattern.compile("(?<!\\\\)\\\\\\" + delimiter)
-                      .pattern();
+    /**
+     * Creates a {@code ListStringifier}.
+     *
+     * <p>The {@code DEFAULT_ELEMENT_DELIMITER} is used for element
+     * separation in the {@code String} representation of the {@code List}.
+     *
+     * @param listGenericClass the class of the list elements
+     */
+    ListStringifier(Class<T> listGenericClass) {
+        this(listGenericClass, DEFAULT_ELEMENT_DELIMITER);
     }
 
     @Override
     protected String toString(List<T> list) {
-        final Converter<String, String> quoteConverter = ItemQuoter.converter();
+        final Converter<String, String> quoter = Quoter.listQuoterInstance();
         final List<String> convertedItems = newArrayList();
         for (T item : list) {
-            final String convertedItem = elementStringifier.andThen(quoteConverter)
+            final String convertedItem = elementStringifier.andThen(quoter)
                                                            .convert(item);
             convertedItems.add(convertedItem);
         }
@@ -135,12 +126,12 @@ class ListStringifier<T> extends Stringifier<List<T>> {
     protected List<T> fromString(String s) {
         final String escapedString = escaper.escape(s);
         final List<String> items = newArrayList(splitter.split(escapedString));
-        final Converter<String, String> quoteConverter = ItemQuoter.converter();
+        final Converter<String, String> quoter = Quoter.listQuoterInstance();
+        final Converter<String, T> converter = quoter.reverse()
+                                                     .andThen(elementStringifier.reverse());
         final List<T> result = newArrayList();
         for (String item : items) {
-            final T convertedItem = quoteConverter.reverse()
-                                                  .andThen(elementStringifier.reverse())
-                                                  .convert(item);
+            final T convertedItem = converter.convert(item);
             result.add(convertedItem);
         }
         return result;

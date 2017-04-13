@@ -19,12 +19,10 @@
  */
 package org.spine3.base;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
-import org.spine3.type.TypeName;
 import org.spine3.users.UserId;
 
 import java.util.Collections;
@@ -130,62 +128,6 @@ public class Events {
         final I id = (I) aggregateId;
         return id;
 
-    }
-
-    /**
-     * Verifies if the enrichment is not disabled in the passed event.
-     */
-    public static boolean isEnrichmentEnabled(Event event) {
-        checkNotNull(event);
-        final EventContext context = event.getContext();
-        final boolean isEnabled =
-                context.getEnrichment()
-                       .getModeCase() != Enrichment.ModeCase.DO_NOT_ENRICH;
-        return isEnabled;
-    }
-
-    /**
-     * Returns all enrichments from the context.
-     *
-     * @param context a context to get enrichments from
-     * @return an optional of enrichments
-     */
-    public static Optional<Enrichment.Container> getEnrichments(EventContext context) {
-        checkNotNull(context);
-        if (context.getEnrichment()
-                   .getModeCase() == Enrichment.ModeCase.CONTAINER) {
-            return Optional.of(context.getEnrichment()
-                                      .getContainer());
-        }
-        return Optional.absent();
-    }
-
-    /**
-     * Return a specific enrichment from the context.
-     *
-     * @param enrichmentClass a class of the event enrichment
-     * @param context         a context to get an enrichment from
-     * @param <E>             a type of the event enrichment
-     * @return an optional of the enrichment
-     */
-    public static <E extends Message> Optional<E> getEnrichment(Class<E> enrichmentClass,
-                                                                EventContext context) {
-        checkNotNull(enrichmentClass);
-        checkNotNull(context);
-        final Optional<Enrichment.Container> value = getEnrichments(context);
-        if (!value.isPresent()) {
-            return Optional.absent();
-        }
-        final Enrichment.Container enrichments = value.get();
-        final String typeName = TypeName.of(enrichmentClass)
-                                        .value();
-        final Any any = enrichments.getItemsMap()
-                                   .get(typeName);
-        if (any == null) {
-            return Optional.absent();
-        }
-        final E result = unpack(any);
-        return Optional.fromNullable(result);
     }
 
     /**

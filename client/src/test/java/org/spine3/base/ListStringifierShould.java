@@ -39,6 +39,15 @@ import static org.spine3.base.Stringifiers.listStringifier;
 public class ListStringifierShould {
 
     @Test
+    public void convert_string_with_backslashes_to_list_and_backward() {
+        final String stringToConvert = "\"\\\"\\1\\\"\\\"";
+        Stringifier<List<String>> stringifier = listStringifier(String.class);
+        final List<String> convertedList = stringifier.fromString(stringToConvert);
+        final String convertedString = stringifier.toString(convertedList);
+        assertEquals(stringToConvert, convertedString);
+    }
+
+    @Test
     public void convert_string_to_list_of_strings() {
         final String stringToConvert = "\"1\\\"\",\"2\",\"3\\\"\",\"4\",\"5\"";
         final List<String> actualList = listStringifier(String.class).reverse()
@@ -47,6 +56,16 @@ public class ListStringifierShould {
 
         final List<String> expectedList = newArrayList("1\"", "2", "3\"", "4", "5");
         assertThat(actualList, is(expectedList));
+    }
+
+    @Test
+    public void convert_string_to_list_of_strings_and_backward() {
+        final String stringToConvert = "\"1\\\"\",\"2\",\"3\\\"\",\"4\",\"5\"";
+        final Stringifier<List<String>> stringifier = listStringifier(String.class);
+        final List<String> actualList = stringifier.reverse()
+                                                   .convert(stringToConvert);
+        final String convertedList = stringifier.convert(actualList);
+        assertEquals(stringToConvert, convertedList);
     }
 
     @Test
@@ -83,7 +102,7 @@ public class ListStringifierShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_when_element_is_null(){
+    public void throw_exception_when_element_is_null() {
         final List<String> listToConvert = newArrayList("1", "2", null, "4");
         listStringifier(String.class).toString(listToConvert);
     }

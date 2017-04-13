@@ -37,7 +37,7 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
@@ -51,7 +51,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 @Deprecated
 public class TestEventContextFactory {
 
-    private static final Any AGGREGATE_ID = pack(newStringValue(newUuid()));
+    private static final Any AGGREGATE_ID = pack(newUuid());
 
     private static final String TEST_BC_NAME = "Test BC";
 

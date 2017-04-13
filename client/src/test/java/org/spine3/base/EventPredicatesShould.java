@@ -24,7 +24,6 @@ import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.EventTests;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -68,8 +67,8 @@ public class EventPredicatesShould {
     @Test
     public void verify_if_an_event_is_after_another() {
         final Predicate<Event> predicate = isAfter(minutesAgo(100));
-        assertTrue(predicate.apply(EventTests.createEventOccurredMinutesAgo(20)));
-        assertFalse(predicate.apply(EventTests.createEventOccurredMinutesAgo(360)));
+        assertTrue(predicate.apply(EventsShould.createEventOccurredMinutesAgo(20)));
+        assertFalse(predicate.apply(EventsShould.createEventOccurredMinutesAgo(360)));
     }
 
     @Test
@@ -84,8 +83,8 @@ public class EventPredicatesShould {
     @Test
     public void verify_if_an_event_is_before_another() {
         final Predicate<Event> predicate = isBefore(minutesAgo(100));
-        assertFalse(predicate.apply(EventTests.createEventOccurredMinutesAgo(20)));
-        assertTrue(predicate.apply(EventTests.createEventOccurredMinutesAgo(360)));
+        assertFalse(predicate.apply(EventsShould.createEventOccurredMinutesAgo(20)));
+        assertTrue(predicate.apply(EventsShould.createEventOccurredMinutesAgo(360)));
     }
 
     @Test
@@ -106,7 +105,7 @@ public class EventPredicatesShould {
 
     @Test
     public void verify_if_an_event_is_within_time_range() {
-        final Event event = EventTests.createEventOccurredMinutesAgo(5);
+        final Event event = EventsShould.createEventOccurredMinutesAgo(5);
 
         assertTrue(isBetween(minutesAgo(10), minutesAgo(1))
                            .apply(event));
