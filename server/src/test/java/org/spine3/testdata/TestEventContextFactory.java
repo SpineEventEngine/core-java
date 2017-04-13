@@ -22,24 +22,18 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Enrichment;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
+import org.spine3.protobuf.Values;
 import org.spine3.server.command.EventFactory;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
 
-import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Values.pack;
-import static org.spine3.test.Tests.newUserId;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * Creates event contexts for tests.
@@ -51,25 +45,10 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 @Deprecated
 public class TestEventContextFactory {
 
-    private static final Any AGGREGATE_ID = pack(newUuid());
-
+    public static final Any AGGREGATE_ID = Values.pack(newUuid());
     private static final String TEST_BC_NAME = "Test BC";
 
     private TestEventContextFactory() {}
-
-    /** Creates a new {@link EventContext} with default properties. */
-    public static EventContext createEventContext() {
-        final Timestamp now = getCurrentTime();
-        final UserId userId = newUserId(newUuid());
-        final CommandContext commandContext = createCommandContext(userId, generateId(), now);
-        final EventId eventId = EventFactory.generateId();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setCommandContext(commandContext)
-                                                         .setProducerId(AGGREGATE_ID)
-                                                         .setTimestamp(now);
-        return builder.build();
-    }
 
     public static EventContext createEventContext(Message aggregateId,
                                                   TenantId tenantId) {
@@ -83,15 +62,6 @@ public class TestEventContextFactory {
                                                          .setCommandContext(commandContext)
                                                          .setTimestamp(getCurrentTime());
         return builder.build();
-    }
-
-    public static EventContext createEventContext(boolean doNotEnrich) {
-        final EventContext context = createEventContext()
-                .toBuilder()
-                .setEnrichment(Enrichment.newBuilder()
-                                         .setDoNotEnrich(doNotEnrich))
-                .build();
-        return context;
     }
 
     /** Creates a new {@link IntegrationEventContext} with default properties. */
@@ -114,24 +84,6 @@ public class TestEventContextFactory {
                                        .setTimestamp(getCurrentTime())
                                        .setBoundedContextName(TEST_BC_NAME)
                                        .setProducerId(pack(aggregateId));
-        return builder.build();
-    }
-
-    public static EventContext createEventContext(Timestamp timestamp) {
-        final EventId eventId = EventFactory.generateId();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setTimestamp(timestamp)
-                                                         .setProducerId(AGGREGATE_ID);
-        return builder.build();
-    }
-
-    public static EventContext createEventContext(Message aggregateId, Timestamp timestamp) {
-        final EventId eventId = EventFactory.generateId();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setTimestamp(timestamp)
-                                                         .setProducerId(pack(aggregateId));
         return builder.build();
     }
 }
