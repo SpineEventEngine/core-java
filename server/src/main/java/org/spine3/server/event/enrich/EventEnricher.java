@@ -59,7 +59,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 /**
  * {@code EventEnricher} extends information of an event basing on its type and content.
  *
- * <p>The interface implements
+ * <p>The class implements the
  * <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html">ContentEnricher</a>
  * Enterprise Integration pattern.
  *
