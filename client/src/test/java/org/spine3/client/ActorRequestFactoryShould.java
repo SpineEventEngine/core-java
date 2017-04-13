@@ -36,7 +36,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.protobuf.Timestamps2.isLaterThan;
 import static org.spine3.test.Tests.newUserId;
 
 /**
@@ -131,5 +133,22 @@ public abstract class ActorRequestFactoryShould {
                             }).getRawType(),
                             newHashSet(Tests.newUuidValue()))
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
+    }
+
+    void verifyContext(ActorContext actualContext) {
+        final ActorContext expectedContext = actorContext();
+
+        assertEquals(expectedContext.getTenantId(), actualContext.getTenantId());
+        assertEquals(expectedContext.getActor(), actualContext.getActor());
+        assertEquals(expectedContext.getLanguage(), actualContext.getLanguage());
+        assertEquals(expectedContext.getZoneOffset(), actualContext.getZoneOffset());
+
+        // It's impossible to get the same creation time for the `expected` value,
+        //    so checking that the `actual` value is not later than `expected`.
+        assertTrue(actualContext.getTimestamp()
+                                .equals(expectedContext.getTimestamp())
+                           ||
+                           isLaterThan(expectedContext.getTimestamp(),
+                                       actualContext.getTimestamp()));
     }
 }
