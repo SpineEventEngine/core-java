@@ -106,13 +106,12 @@ abstract class Quoter extends Converter<String, String> {
     private static class MapQuoter extends Quoter {
 
         private static final String QUOTE_PATTERN = "((?=[^\\\\])[^\\w])";
-        private static final Pattern DOUBLE_BACKSLASH_PATTERN = Pattern.compile(BACKSLASH);
+        private static final Pattern DOUBLE_BACKSLASH_PATTERN = compile(BACKSLASH);
 
         @Override
         String quote(String stringToQuote) {
             checkNotNull(stringToQuote);
-            final Matcher matcher = Pattern.compile(QUOTE_PATTERN)
-                                           .matcher(stringToQuote);
+            final Matcher matcher = compile(QUOTE_PATTERN).matcher(stringToQuote);
             final String unslashed = matcher.find() ?
                                      matcher.replaceAll(BACKSLASH + matcher.group()) :
                                      stringToQuote;
