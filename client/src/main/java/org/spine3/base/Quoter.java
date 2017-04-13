@@ -139,9 +139,9 @@ abstract class Quoter extends Converter<String, String> {
         @Override
         String quote(String stringToQuote) {
             checkNotNull(stringToQuote);
-            final String escapedString = QUOTE_PATTERN.matcher(stringToQuote)
-                                                      .replaceAll(ESCAPED_QUOTE);
-            final String result = QUOTE_CHAR + escapedString + QUOTE_CHAR;
+            final String escaped = QUOTE_PATTERN.matcher(stringToQuote)
+                                                .replaceAll(ESCAPED_QUOTE);
+            final String result = QUOTE_CHAR + escaped + QUOTE_CHAR;
             return result;
         }
 
