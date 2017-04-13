@@ -39,6 +39,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.client.Queries.queryBuilderFor;
 import static org.spine3.client.Targets.composeTarget;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
@@ -150,7 +151,7 @@ public class ActorRequestFactory {
         /**
          * The prefix of all {@linkplain QueryId query identifiers}.
          */
-        private static final String QUERY_ID_PREFIX = "query-";
+        private static final String QUERY_ID_FORMAT = "query-%s";
 
         private ForQuery() {
             // Prevent instantiation from the outside.
@@ -266,8 +267,9 @@ public class ActorRequestFactory {
         }
 
         private QueryId newQueryId() {
+            final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
             return QueryId.newBuilder()
-                          .setUuid(QUERY_ID_PREFIX + Identifiers.newUuid())
+                          .setUuid(formattedId)
                           .build();
         }
     }
@@ -281,7 +283,7 @@ public class ActorRequestFactory {
         /**
          * The prefix of all {@linkplain TopicId topic identifiers}.
          */
-        private static final String TOPIC_ID_PREFIX = "topic-";
+        private static final String TOPIC_ID_FORMAT = "topic-%s";
 
         private ForTopic() {
             // Prevent instantiation from the outside.
@@ -339,8 +341,9 @@ public class ActorRequestFactory {
         }
 
         private TopicId newTopicId() {
+            final String formattedId = format(TOPIC_ID_FORMAT, Identifiers.newUuid());
             return TopicId.newBuilder()
-                          .setUuid(TOPIC_ID_PREFIX + Identifiers.newUuid())
+                          .setUuid(formattedId)
                           .build();
         }
     }

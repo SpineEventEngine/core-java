@@ -125,6 +125,7 @@ public class Stand implements AutoCloseable {
 
     private final TopicValidator topicValidator;
     private final QueryValidator queryValidator;
+    private final SubscriptionValidator subscriptionValidator;
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
@@ -133,6 +134,7 @@ public class Stand implements AutoCloseable {
         subscriptionRegistry = builder.getSubscriptionRegistry();
         topicValidator = builder.getTopicValidator();
         queryValidator = builder.getQueryValidator();
+        subscriptionValidator = builder.getSubscriptionValidator();
     }
 
     public static Builder newBuilder() {
@@ -237,6 +239,10 @@ public class Stand implements AutoCloseable {
 
     private void validate(Query query) {
         queryValidator.validate(query);
+    }
+
+    private void validate(Subscription subscription) {
+        subscriptionValidator.validate(subscription);
     }
 
     /**
@@ -469,6 +475,7 @@ public class Stand implements AutoCloseable {
         private boolean multitenant;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
+        private SubscriptionValidator subscriptionValidator;
 
         /**
          * Sets an instance of {@link StandStorage} to be used to persist
@@ -529,6 +536,10 @@ public class Stand implements AutoCloseable {
             return queryValidator;
         }
 
+        private SubscriptionValidator getSubscriptionValidator() {
+            return subscriptionValidator;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -547,6 +558,7 @@ public class Stand implements AutoCloseable {
 
             topicValidator = new TopicValidator();
             queryValidator = new QueryValidator();
+            subscriptionValidator = new SubscriptionValidator();
 
             final Stand result = new Stand(this);
             return result;
