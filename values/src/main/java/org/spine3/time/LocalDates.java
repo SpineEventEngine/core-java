@@ -20,7 +20,15 @@
 
 package org.spine3.time;
 
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
+
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
@@ -29,18 +37,44 @@ import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
+import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
- * Routines for working with {@link LocalDate}.
+ * Utilities for working with {@link LocalDate}.
  *
  * @author Alexander Yevsyukov
  * @author Alexander Aleksandrov
  */
 public class LocalDates {
 
+    static {
+        registerStringifier();
+    }
+
+    private static final ThreadLocal<DateFormat> dateFormat =
+            new ThreadLocal<DateFormat>() {
+                @Override
+                protected DateFormat initialValue() {
+                    return createDateFormat();
+                }
+            };
+
     private LocalDates() {
         // Prevent instantiation of this utility class.
+    }
+
+    /**
+     * Creates format for local date representation based on digits.
+     *
+     * <p>Since the created format is based on digits it is not associated with any locale.
+     */
+    @SuppressWarnings("SimpleDateFormatWithoutLocale") // See Javadoc.
+    private static DateFormat createDateFormat() {
+        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
+        sdf.setCalendar(calendar);
+        return sdf;
     }
 
     /**
@@ -170,5 +204,89 @@ public class LocalDates {
         final Calendar cal = toCalendar(localDate);
         cal.add(calendarField, delta);
         return toLocalDate(cal);
+    }
+
+    /**
+     * Parse from ISO 8601:2004 date representation of the format {@code yyyy-MM-dd}.
+     *
+     * @return a LocalDate parsed from the string
+     * @throws ParseException if parsing fails.
+     */
+    public static LocalDate parse(String str) throws ParseException {
+        final Date date;
+        date = format().parse(str);
+
+        final Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        final LocalDate result = Calendars.toLocalDate(calendar);
+        return result;
+    }
+
+    /**
+     * Converts a local date into ISO 8601:2004 string with the format {@code yyyy-MM-dd}.
+     */
+    public static String toString(LocalDate date) {
+        checkNotNull(date);
+        final Date classicDate = toCalendar(date).getTime();
+        final String result = format().format(classicDate);
+        return result;
+    }
+
+    private static DateFormat format() {
+        return dateFormat.get();
+    }
+
+    /**
+     * Obtains default stringifier for local dates.
+     *
+     * <p>The stringifier uses {@code yyyy-MM-dd} format for dates.
+     * @see #parse(String)
+     */
+    public static Stringifier<LocalDate> stringifier() {
+        return LocalDateStringifier.instance();
+    }
+
+    /**
+     * Register the default {@linkplain #stringifier() stringifier} for {@code LocalDate}s in
+     * the {@link StringifierRegistry}.
+     */
+    public static void registerStringifier() {
+        StringifierRegistry.getInstance().register(stringifier(), LocalDate.class);
+    }
+
+    /**
+     * The default stringifier for {@link LocalDate} instances.
+     */
+    private static final class LocalDateStringifier extends Stringifier<LocalDate> {
+
+        @Override
+        protected String toString(LocalDate date) {
+            final String result = LocalDates.toString(date);
+            return result;
+        }
+
+        @Override
+        protected LocalDate fromString(String str) {
+            checkNotNull(str);
+            final LocalDate date;
+            try {
+                date = parse(str);
+            } catch (ParseException e) {
+                throw wrappedCause(e);
+            }
+            return date;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final LocalDateStringifier value = new LocalDateStringifier();
+        }
+
+        private static LocalDateStringifier instance() {
+            return Singleton.INSTANCE.value;
+        }
     }
 }

@@ -20,8 +20,12 @@
 
 package org.spine3.time;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import static java.util.Calendar.getInstance;
@@ -129,48 +133,14 @@ public class LocalDatesShould {
         assertTrue(day + daysToAdd == plusDays.getDay());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalDate_value_with_yearsToAdd() {
-        final int yearsToAdd = -5;
-        final LocalDate now = null;
-        LocalDates.plusYears(now, yearsToAdd);
+    @Test
+    public void pass_null_tolerance_test() {
+        new NullPointerTester()
+                .setDefault(LocalDate.class, LocalDates.now())
+                .setDefault(int.class, 1)
+                .testAllPublicStaticMethods(LocalDates.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalDate_value_with_monthsToAdd() {
-        final int monthsToAdd = 7;
-        final LocalDate now = null;
-        LocalDates.plusMonths(now, monthsToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalDate_value_with_daysToAdd() {
-        final int daysToAdd = 25;
-        final LocalDate now = null;
-        LocalDates.plusDays(now, daysToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalDate_value_with_yearsToSubtract() {
-        final int yearsToSubtract = 6;
-        final LocalDate now = null;
-        LocalDates.minusYears(now, yearsToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalDate_value_with_monthsToSubtract() {
-        final int monthsToSubtract = 8;
-        final LocalDate now = null;
-        LocalDates.minusMonths(now, monthsToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalDate_value_with_daysToSubtract() {
-        final int daysToSubtract = 27;
-        final LocalDate now = null;
-        LocalDates.minusDays(now, daysToSubtract);
-    }
-    
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_years() {
         final int year = -1987;
@@ -225,5 +195,40 @@ public class LocalDatesShould {
         final int daysToSubtract = -27;
         final LocalDate now = LocalDates.now();
         LocalDates.minusDays(now, daysToSubtract);
+    }
+
+    @Test
+    public void convert_to_string() throws ParseException {
+        final LocalDate today = LocalDates.now();
+
+        final String str = LocalDates.toString(today);
+
+        assertEquals(today, LocalDates.parse(str));
+    }
+
+    @Test
+    public void provide_stringifier() {
+        final LocalDate today = LocalDates.now();
+
+        final Stringifier<LocalDate> stringifier = LocalDates.stringifier();
+
+        assertEquals(today, stringifier.reverse()
+                                       .convert(stringifier.convert(today)));
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_on_invalid_stringifier_input() {
+        LocalDates.stringifier()
+                  .reverse()
+                  .convert("");
+    }
+
+    @Test
+    public void register_stringifier() {
+        LocalDates.registerStringifier();
+
+        assertEquals(LocalDates.stringifier(), StringifierRegistry.getInstance()
+                                                                  .get(LocalDate.class)
+                                                                  .get());
     }
 }

@@ -22,6 +22,7 @@ package org.spine3.time;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
@@ -330,5 +331,16 @@ class Calendars {
                 time.getSeconds());
         cal.set(MILLISECOND, time.getMillis());
         return cal;
+    }
+
+    /**
+     * Creates a new instance of Proleptic Gregorian Calendar.
+     *
+     * <p>The created instance is Gregorial calendar which extends to year one.
+     */
+    static GregorianCalendar newProlepticGregorianCalendar() {
+        GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        calendar.setGregorianChange(new Date(Long.MIN_VALUE));
+        return calendar;
     }
 }
