@@ -56,7 +56,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final CommandException unsupported = new UnsupportedCommandException(command);
             commandBus.commandStore()
                       .storeWithError(command, unsupported);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+            responseObserver.onError(Statuses.invalidArgumentWithMetadata(unsupported.getError()));
             return false;
         }
         return true;

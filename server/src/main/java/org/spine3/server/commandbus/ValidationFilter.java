@@ -25,12 +25,12 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.Statuses;
 import org.spine3.users.TenantId;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
+import static org.spine3.server.Statuses.invalidArgumentWithMetadata;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -88,7 +88,7 @@ class ValidationFilter implements CommandBusFilter {
                     InvalidCommandException.onConstraintViolations(command, violations);
             commandBus.commandStore()
                       .storeWithError(command, invalidCommand);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(invalidCommand));
+            responseObserver.onError(invalidArgumentWithMetadata(invalidCommand.getError()));
             return false;
         }
         return true;
@@ -104,7 +104,8 @@ class ValidationFilter implements CommandBusFilter {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
-        final StatusRuntimeException exception = Statuses.invalidArgumentWithCause(noTenantDefined);
+        final StatusRuntimeException exception =
+                invalidArgumentWithMetadata(noTenantDefined.getError());
         responseObserver.onError(exception);
     }
 
@@ -114,8 +115,8 @@ class ValidationFilter implements CommandBusFilter {
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, tenantIdInapplicable);
-        final StatusRuntimeException exception = Statuses.invalidArgumentWithCause(
-                tenantIdInapplicable);
+        final StatusRuntimeException exception =
+                invalidArgumentWithMetadata(tenantIdInapplicable.getError());
         responseObserver.onError(exception);
     }
 }

@@ -80,7 +80,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
                                           StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+        responseObserver.onError(Statuses.invalidArgumentWithMetadata(unsupported.getError()));
     }
 
     public static class Builder {

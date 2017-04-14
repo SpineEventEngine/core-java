@@ -23,6 +23,7 @@ package org.spine3.server;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.spine3.annotations.Internal;
+import org.spine3.base.Error;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -39,13 +40,17 @@ public class Statuses {
 
     /**
      * Creates an instance of {@code StatusRuntimeException} of status
-     * {@code Status.INVALID_ARGUMENT} with the passed exception.
+     * {@code Status.INVALID_ARGUMENT}.
+     *
+     * <p>Resulting {@code StatusRuntimeException} will contain the passed {@link Error}
+     * transformed to the {@linkplain StatusRuntimeException#getTrailers() metadata}.
+     *
+     * @param error the error representing metadata
+     * @return the constructed {@code StatusRuntimeException}
      */
-    public static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
-        checkNotNull(exception);
-        final StatusRuntimeException result = Status.INVALID_ARGUMENT
-                .withCause(exception)
-                .asRuntimeException();
+    public static StatusRuntimeException invalidArgumentWithMetadata(Error error) {
+        checkNotNull(error);
+        final StatusRuntimeException result = Status.INVALID_ARGUMENT.asRuntimeException();
         return result;
     }
 }
