@@ -47,7 +47,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.io.StreamObservers.emptyObserver;
+import static org.spine3.io.StreamObservers.noopObserver;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -185,7 +185,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * @see #CommandOutputBus#post(Message, StreamObserver)
      */
     public void post(Event event) {
-        post(event, emptyObserver());
+        post(event, noopObserver());
     }
 
     @Override

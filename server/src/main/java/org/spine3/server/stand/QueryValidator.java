@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Optional;
 import org.spine3.base.Error;
 import org.spine3.client.Query;
 import org.spine3.client.QueryValidationError;
@@ -30,22 +31,20 @@ import static org.spine3.client.QueryValidationError.INVALID_QUERY;
  *
  * @author Alex Tymchenko
  */
-class QueryValidator extends RequestValidator<Query,
-                                              QueryValidationError,
-                                              InvalidQueryException> {
+class QueryValidator extends RequestValidator<Query> {
     @Override
-    protected String getErrorText() {
-        return "Query message does not satisfy the validation constraints";
-    }
-
-    @Override
-    protected QueryValidationError getErrorCode() {
+    protected QueryValidationError getInvalidMessageErrorCode() {
         return INVALID_QUERY;
     }
 
     @Override
-    protected InvalidQueryException createException(String exceptionMsg, Query request,
-                                                    Error error) {
+    protected InvalidQueryException onInvalidRequest(String exceptionMsg, Query request,
+                                                     Error error) {
         return new InvalidQueryException(exceptionMsg, request, error);
+    }
+
+    @Override
+    protected Optional<RequestNotSupported<Query>> isSupported(Query request) {
+        return Optional.absent();
     }
 }

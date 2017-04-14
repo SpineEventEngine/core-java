@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Optional;
 import org.spine3.base.Error;
 import org.spine3.client.Topic;
 import org.spine3.client.TopicValidationError;
@@ -30,22 +31,22 @@ import static org.spine3.client.TopicValidationError.INVALID_TOPIC;
  *
  * @author Alex Tymchenko
  */
-class TopicValidator extends RequestValidator<Topic, TopicValidationError, InvalidTopicException> {
+class TopicValidator extends RequestValidator<Topic> {
 
     @Override
-    protected String getErrorText() {
-        return "Topic message does not satisfy the validation constraints";
-    }
-
-    @Override
-    protected TopicValidationError getErrorCode() {
+    protected TopicValidationError getInvalidMessageErrorCode() {
         return INVALID_TOPIC;
     }
 
     @Override
-    protected InvalidTopicException createException(String exceptionMsg,
-                                                    Topic topic,
-                                                    Error error) {
+    protected InvalidTopicException onInvalidRequest(String exceptionMsg,
+                                                     Topic topic,
+                                                     Error error) {
         return new InvalidTopicException(exceptionMsg, topic, error);
+    }
+
+    @Override
+    protected Optional<RequestNotSupported<Topic>> isSupported(Topic request) {
+        return Optional.absent();
     }
 }

@@ -19,9 +19,13 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
+import io.grpc.StatusRuntimeException;
+import io.grpc.stub.StreamObserver;
 import org.spine3.base.Error;
+import org.spine3.type.TypeName;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.MessageValidator;
 import org.spine3.validate.ValidationError;
@@ -29,38 +33,112 @@ import org.spine3.validate.ValidationError;
 import java.util.List;
 
 import static java.lang.String.format;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 import static org.spine3.validate.ConstraintViolations.toText;
 
 /**
  * An abstract base of validators for the incoming requests to {@linkplain Stand}.
  *
+ * TODO:4/14/17:alex.tymchenko: add more docs
+ *
+ * @param <M> the type of request
  * @author Alex Tymchenko
  */
-abstract class RequestValidator<R extends Message,
-        C extends ProtocolMessageEnum,
-        E extends InvalidRequestException> {
+abstract class RequestValidator<M extends Message> {
 
-    void validate(R request) throws E {
-        validateMessage(request);
+    /**
+     * Returns the error code to use in the {@linkplain Error validation error}, in case
+     * the validated request message does not satisfy the validation constraints.
+     */
+    protected abstract ProtocolMessageEnum getInvalidMessageErrorCode();
+
+    /**
+     * Creates the exception to be thrown if the request {@code Message} is invalid.
+     *
+     * <p>Allows the descendants to create exceptions of custom types.
+     */
+    protected abstract InvalidRequestException onInvalidRequest(String exceptionMsg,
+                                                                M request,
+                                                                Error error);
+
+    /**
+     * Determines if this request is supported by the system.
+     *
+     * @param request the request to test
+       @return a {@linkplain RequestNotSupported value object} holding
+               the details of support absense,
+               or {@code Optional.absent()} if the request is supported
+     */
+    protected abstract Optional<RequestNotSupported<M>> isSupported(M request);
+
+    void validate(M request, StreamObserver<?> responseObserver) {
+
+        final Optional<InvalidRequestException> messageInvalid = validateMessage(request);
+        if (messageInvalid.isPresent()) {
+            feedToResponse(messageInvalid.get(), responseObserver);
+            return;
+        }
+
+        final Optional<InvalidRequestException> notSupported = checkSupported(request);
+        if (notSupported.isPresent()) {
+            feedToResponse(notSupported.get(), responseObserver);
+        }
 
     }
 
-    private void validateMessage(R request) {
+    /**
+     * Checks whether this request is supported, forms the proper {@link Error error}
+     * and packs it into an exception.
+     *
+     * @param request the request to check for support
+     * @return an instance of exception or {@code Optional.absent()} if the request is supported.
+     */
+    private Optional<InvalidRequestException> checkSupported(M request) {
+        final Optional<RequestNotSupported<M>> supported = isSupported(request);
+        if (!supported.isPresent()) {
+            return Optional.absent();
+        }
+
+        final RequestNotSupported<M> result = supported.get();
+
+        final ProtocolMessageEnum unsupportedErrorCode = result.getErrorCode();
+        final String errorMessage = result.getErrorMessage();
+        final String errorTypeName = unsupportedErrorCode.getDescriptorForType()
+                                                         .getFullName();
+        final Error.Builder errorBuilder = Error.newBuilder()
+                                                .setType(errorTypeName)
+                                                .setCode(unsupportedErrorCode.getNumber())
+                                                .setMessage(errorMessage);
+        final Error error = errorBuilder.build();
+
+        final InvalidRequestException exception = result.createException(errorMessage,
+                                                                         request,
+                                                                         error);
+        return Optional.of(exception);
+    }
+
+    /**
+     * Checks whether the {@code Message} of the given request conforms the constraints
+     *
+     * @param request the request message to validate.
+     * @return an instance of exception,
+     *         or {@code Optional.absent()} if the request message is valid.
+     */
+    private Optional<InvalidRequestException> validateMessage(M request) {
         final List<ConstraintViolation> violations = MessageValidator.newInstance()
                                                                      .validate(request);
-
         if (violations.isEmpty()) {
-            return;
+            return Optional.absent();
         }
 
         final ValidationError validationError =
                 ValidationError.newBuilder()
                                .addAllConstraintViolation(violations)
                                .build();
-        final C errorCode = getErrorCode();
+        final ProtocolMessageEnum errorCode = getInvalidMessageErrorCode();
         final String typeName = errorCode.getDescriptorForType()
                                          .getFullName();
-        final String errorTextTemplate = getErrorText();
+        final String errorTextTemplate = getErrorText(request);
         final String errorText = format("%s %s",
                                         errorTextTemplate,
                                         toText(violations));
@@ -71,17 +149,57 @@ abstract class RequestValidator<R extends Message,
                                                 .setValidationError(validationError)
                                                 .setMessage(errorText);
         final Error error = errorBuilder.build();
-        throw createException(formatExceptionMessage(), request, error);
+        return Optional.of(onInvalidRequest(formatExceptionMessage(request), request, error));
     }
 
-    private String formatExceptionMessage() {
+    private String formatExceptionMessage(M request) {
         return format("%s. See Error.getValidationError() for details.",
-                      getErrorText());
+                      getErrorText(request));
     }
 
-    protected abstract String getErrorText();
+    protected String getErrorText(M request) {
+        return format("%s message does not satisfy the validation constraints.",
+                      TypeName.of(request)
+                              .getSimpleName());
+    }
 
-    protected abstract C getErrorCode();
+    private static void feedToResponse(InvalidRequestException cause,
+                                       StreamObserver<?> responseObserver) {
+        final StatusRuntimeException validationException = invalidArgumentWithCause(cause);
+        responseObserver.onError(validationException);
+    }
 
-    protected abstract E createException(String exceptionMsg, R request, Error error);
+    /**
+     * Value object holding the unsuccessful result of request validation upon its current support.
+     *
+     * @param <M> the type of request
+     */
+    protected abstract static class RequestNotSupported<M extends Message> {
+
+        private final ProtocolMessageEnum errorCode;
+
+        private final String errorMessage;
+
+        RequestNotSupported(ProtocolMessageEnum errorCode, String errorMessage) {
+            this.errorCode = errorCode;
+            this.errorMessage = errorMessage;
+        }
+
+        /**
+         * Creates an exception, signalizing that the request is not supported.
+         *
+         * <p>Allows the descendants to create exceptions of custom types.
+         */
+        protected abstract InvalidRequestException createException(String errorMessage,
+                                                                   M request,
+                                                                   Error error);
+
+        private ProtocolMessageEnum getErrorCode() {
+            return errorCode;
+        }
+
+        private String getErrorMessage() {
+            return errorMessage;
+        }
+    }
 }

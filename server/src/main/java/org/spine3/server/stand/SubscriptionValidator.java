@@ -19,35 +19,89 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.base.Optional;
 import org.spine3.base.Error;
 import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionValidationError;
+import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.client.SubscriptionValidationError.INVALID_SUBSCRIPTION;
+import static org.spine3.client.SubscriptionValidationError.UNKNOWN_SUBSCRIPTION;
 
 /**
  * Validates the {@linkplain Subscription} instances submitted to {@linkplain Stand}.
  *
  * @author Alex Tymchenko
  */
-class SubscriptionValidator extends RequestValidator<Subscription,
-                                                     SubscriptionValidationError,
-                                                     InvalidSubscriptionException> {
+class SubscriptionValidator extends RequestValidator<Subscription> {
 
-    @Override
-    protected String getErrorText() {
-        return "Subscription message does not satisfy the validation constraints";
+    private final SubscriptionRegistry registry;
+
+    /**
+     * Creates an instance of {@code SubscriptionValidator} based on the subscription registry.
+     *
+     * @param registry the registry to validate the subscription against.
+     */
+    SubscriptionValidator(SubscriptionRegistry registry) {
+        this.registry = registry;
     }
 
     @Override
-    protected SubscriptionValidationError getErrorCode() {
+    protected SubscriptionValidationError getInvalidMessageErrorCode() {
         return INVALID_SUBSCRIPTION;
     }
 
     @Override
-    protected InvalidSubscriptionException createException(String exceptionMsg,
-                                                           Subscription subscription,
-                                                           Error error) {
+    protected InvalidSubscriptionException onInvalidRequest(String exceptionMsg,
+                                                            Subscription subscription,
+                                                            Error error) {
         return new InvalidSubscriptionException(exceptionMsg, subscription, error);
+    }
+
+    @Override
+    protected Optional<RequestNotSupported<Subscription>> isSupported(Subscription request) {
+        final boolean includedInRegistry = checkInRegistry(request);
+
+        if (includedInRegistry) {
+            return Optional.absent();
+        }
+
+        return Optional.of(missingInRegistry());
+    }
+
+    private static RequestNotSupported<Subscription> missingInRegistry() {
+        return new RequestNotSupported<Subscription>(
+                UNKNOWN_SUBSCRIPTION, "Cannot find the subscription in the registry") {
+
+            @Override
+            protected InvalidRequestException createException(String errorMessage,
+                                                              Subscription request,
+                                                              Error error) {
+                return new InvalidRequestException(errorMessage, request, error);
+            }
+        };
+    }
+
+    private boolean checkInRegistry(Subscription request) {
+        final TenantId tenantId = request.getTopic()
+                                         .getContext()
+                                         .getTenantId();
+        final Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
+
+            @Nullable
+            @Override
+            public Boolean apply(@Nullable Subscription input) {
+                checkNotNull(input);
+                final boolean result = registry.contains(input.getId());
+                return result;
+            }
+        }.apply(request);
+
+        checkNotNull(result);
+        return result;
     }
 }

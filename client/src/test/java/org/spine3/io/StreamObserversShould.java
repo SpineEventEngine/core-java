@@ -36,6 +36,6 @@ public class StreamObserversShould {
 
     @Test
     public void return_non_null_empty_observer() {
-        assertNotNull(StreamObservers.emptyObserver());
+        assertNotNull(StreamObservers.noopObserver());
     }
 }

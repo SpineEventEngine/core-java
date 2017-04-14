@@ -27,7 +27,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Responses;
+import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.client.Queries;
 import org.spine3.client.Query;
@@ -46,11 +46,11 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.tenant.EntityUpdateOperation;
 import org.spine3.server.tenant.QueryOperation;
 import org.spine3.server.tenant.SubscriptionOperation;
-import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -58,6 +58,8 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.base.Responses.ok;
+import static org.spine3.io.StreamObservers.ack;
 
 /**
  * A container for storing the latest {@link org.spine3.server.aggregate.Aggregate Aggregate}
@@ -215,38 +217,27 @@ public class Stand implements AutoCloseable {
      * @param topic an instance {@link Topic}, defining the entity and criteria,
      *              which changes should be propagated to the {@code callback}
      */
-    @CheckReturnValue
-    public Subscription subscribe(final Topic topic) {
-        validate(topic);
+    public void subscribe(final Topic topic, final StreamObserver<Subscription> responseObserver) {
+        topicValidator.validate(topic, responseObserver);
 
-        final TenantAwareFunction<Topic, Subscription> fn =
-                new TenantAwareFunction<Topic, Subscription>(topic.getContext().getTenantId()) {
 
-                    @Nullable
-                    @Override
-                    public Subscription apply(@Nullable Topic input) {
-                        checkNotNull(input);
-                        return subscriptionRegistry.addSubscription(topic);
-                    }
-                };
-        final Subscription result = fn.execute(topic);
-        return result;
-    }
+        final TenantId tenantId = topic.getContext()
+                                       .getTenantId();
+        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
 
-    private void validate(Topic topic) {
-        topicValidator.validate(topic);
-    }
-
-    private void validate(Query query) {
-        queryValidator.validate(query);
-    }
-
-    private void validate(Subscription subscription) {
-        subscriptionValidator.validate(subscription);
+            @Override
+            public void run() {
+                final Subscription subscription = subscriptionRegistry.add(topic);
+                responseObserver.onNext(subscription);
+                responseObserver.onCompleted();
+            }
+        };
+        op.execute();
     }
 
     /**
-     * Activates the subscription created via {@link #subscribe(Topic)}.
+     * Activates the subscription created via {@link #subscribe(Topic, StreamObserver)
+     * subscribe() method call}.
      *
      * <p>After the activation, the clients will start receiving the updates via
      * {@code EntityUpdateCallback} upon the changes in the entities, defined by
@@ -254,16 +245,21 @@ public class Stand implements AutoCloseable {
      *
      * @param subscription the subscription to activate.
      * @param callback     an instance of {@link EntityUpdateCallback} executed upon entity update.
-     * @see #subscribe(Topic)
+     * @see #subscribe(Topic, StreamObserver)
      */
-    public void activate(final Subscription subscription, final EntityUpdateCallback callback) {
+    public void activate(final Subscription subscription,
+                         final EntityUpdateCallback callback,
+                         final StreamObserver<Response> responseObserver) {
         checkNotNull(subscription);
         checkNotNull(callback);
+
+        subscriptionValidator.validate(subscription, responseObserver);
 
         final SubscriptionOperation op = new SubscriptionOperation(subscription) {
             @Override
             public void run() {
                 subscriptionRegistry.activate(subscription, callback);
+                ack(responseObserver);
             }
         };
 
@@ -274,21 +270,24 @@ public class Stand implements AutoCloseable {
      * Cancels the {@link Subscription}.
      *
      * <p>Typically invoked to cancel the previous
-     * {@link #activate(Subscription, EntityUpdateCallback) activate()} call.
+     * {@link #activate(Subscription, EntityUpdateCallback, StreamObserver) activate()} call.
      *
      * <p>After this method is called, the subscribers stop receiving the updates,
      * related to the given {@code Subscription}.
      *
      * @param subscription a subscription to cancel.
      */
-    public void cancel(final Subscription subscription) {
-        checkNotNull(subscription);
+    public void cancel(final Subscription subscription,
+                       final StreamObserver<Response> responseObserver) {
+        subscriptionValidator.validate(subscription, responseObserver);
 
         final SubscriptionOperation op = new SubscriptionOperation(subscription) {
 
             @Override
             public void run() {
-                subscriptionRegistry.removeSubscription(subscription);
+
+                subscriptionRegistry.remove(subscription);
+                ack(responseObserver);
             }
         };
         op.execute();
@@ -314,7 +313,7 @@ public class Stand implements AutoCloseable {
     }
 
     /**
-     * Read all {@link org.spine3.server.aggregate.Aggregate Aggregate} entity types
+     * Reads all {@link org.spine3.server.aggregate.Aggregate Aggregate} entity types
      * exposed for reading by this instance of {@code Stand}.
      *
      * <p>Use {@link Stand#registerTypeSupplier(Repository)} to expose an {@code Aggregate} type.
@@ -340,7 +339,7 @@ public class Stand implements AutoCloseable {
      */
     public void execute(final Query query,
                         final StreamObserver<QueryResponse> responseObserver) {
-        validate(query);
+        queryValidator.validate(query, responseObserver);
 
         final TypeUrl type = Queries.typeOf(query);
         final QueryProcessor queryProcessor = processorFor(type);
@@ -351,7 +350,7 @@ public class Stand implements AutoCloseable {
                 final ImmutableCollection<Any> readResult = queryProcessor.process(query());
                 final QueryResponse response = QueryResponse.newBuilder()
                                                             .addAllMessages(readResult)
-                                                            .setResponse(Responses.ok())
+                                                            .setResponse(ok())
                                                             .build();
                 responseObserver.onNext(response);
                 responseObserver.onCompleted();
@@ -420,7 +419,7 @@ public class Stand implements AutoCloseable {
     /**
      * A contract for the callbacks to be executed upon entity state change.
      *
-     * @see #activate(Subscription, EntityUpdateCallback)
+     * @see #activate(Subscription, EntityUpdateCallback, StreamObserver)
      * @see #cancel(Subscription)
      */
     public interface EntityUpdateCallback {
@@ -558,7 +557,7 @@ public class Stand implements AutoCloseable {
 
             topicValidator = new TopicValidator();
             queryValidator = new QueryValidator();
-            subscriptionValidator = new SubscriptionValidator();
+            subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
             final Stand result = new Stand(this);
             return result;

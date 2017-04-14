@@ -37,7 +37,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.io.StreamObservers.emptyObserver;
+import static org.spine3.io.StreamObservers.noopObserver;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -145,7 +145,7 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
      * @see #post(Message, StreamObserver)
      */
     public void post(Failure failure) {
-        post(failure, emptyObserver());
+        post(failure, noopObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

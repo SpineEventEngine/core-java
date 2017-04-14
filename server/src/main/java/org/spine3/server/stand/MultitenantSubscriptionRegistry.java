@@ -68,16 +68,16 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
      * {@inheritDoc}
      */
     @Override
-    public synchronized Subscription addSubscription(Topic topic) {
-        return registrySlice().addSubscription(topic);
+    public synchronized Subscription add(Topic topic) {
+        return registrySlice().add(topic);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public synchronized void removeSubscription(Subscription subscription) {
-        registrySlice().removeSubscription(subscription);
+    public synchronized void remove(Subscription subscription) {
+        registrySlice().remove(subscription);
     }
 
     /**
@@ -86,6 +86,11 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     @Override
     public synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
         return registrySlice().byType(type);
+    }
+
+    @Override
+    public boolean contains(SubscriptionId subscriptionId) {
+        return registrySlice().contains(subscriptionId);
     }
 
     /**
@@ -140,7 +145,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
          * {@inheritDoc}
          */
         @Override
-        public synchronized Subscription addSubscription(Topic topic) {
+        public synchronized Subscription add(Topic topic) {
             final SubscriptionId subscriptionId = Subscriptions.newId();
             final Target target = topic.getTarget();
             final String typeAsString = target
@@ -167,7 +172,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
          * {@inheritDoc}
          */
         @Override
-        public synchronized void removeSubscription(Subscription subscription) {
+        public synchronized void remove(Subscription subscription) {
             if (!subscriptionToAttrs.containsKey(subscription)) {
                 return;
             }
@@ -196,6 +201,17 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         public synchronized boolean hasType(TypeUrl type) {
             final boolean result = typeToRecord.containsKey(type);
             return result;
+        }
+
+        @Override
+        public boolean contains(SubscriptionId subscriptionId) {
+            for (Subscription existingItem : subscriptionToAttrs.keySet()) {
+                if (existingItem.getId()
+                                .equals(subscriptionId)) {
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
