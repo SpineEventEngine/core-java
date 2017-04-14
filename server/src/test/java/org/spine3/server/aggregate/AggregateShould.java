@@ -578,7 +578,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, true, false);
 
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
@@ -594,7 +594,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
 
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {

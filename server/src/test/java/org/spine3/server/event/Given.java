@@ -26,13 +26,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Identifiers;
 import org.spine3.people.PersonName;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.command.EventFactory;
 import org.spine3.server.event.enrich.EventEnricher;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
@@ -43,15 +41,13 @@ import org.spine3.test.event.user.permission.PermissionGrantedEvent;
 import org.spine3.test.event.user.permission.PermissionRevokedEvent;
 import org.spine3.test.event.user.sharing.SharingRequestApproved;
 import org.spine3.time.ZoneOffset;
-import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.server.command.EventFactory.createEvent;
-import static org.spine3.test.Tests.newTenantUuid;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.test.TestEventFactory.newInstance;
 
 /**
  * Is for usage only in tests under the `event` package.
@@ -69,11 +65,11 @@ public class Given {
 
     public static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
-        private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
-        private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(DUMMY_PROJECT_ID);
-        private static final ProjectStarred PROJECT_STARRED = projectStarred(DUMMY_PROJECT_ID);
+        private static final ProjectId PROJECT_ID = newProjectId();
+        private static final ProjectCreated PROJECT_CREATED = projectCreated(PROJECT_ID);
+        private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
+        private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(PROJECT_ID);
+        private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
         private EventMessage() {}
 
@@ -141,10 +137,14 @@ public class Given {
 
     public static class AnEvent {
 
-        private static final ProjectId PROJECT_ID = newProjectId();
-        private static final TenantId TENANT_ID = newTenantUuid();
+        private static final ProjectId PROJECT_ID = EventMessage.PROJECT_ID;
 
         private AnEvent() {}
+
+        private static TestEventFactory eventFactory() {
+            final TestEventFactory result = newInstance(pack(PROJECT_ID), AnEvent.class);
+            return result;
+        }
 
         public static Event projectCreated() {
             return projectCreated(PROJECT_ID);
@@ -152,17 +152,13 @@ public class Given {
 
         public static Event projectStarted() {
             final ProjectStarted msg = EventMessage.projectStarted();
-            final Event event = createEvent(msg, createEventContext(msg.getProjectId(), TENANT_ID));
+            final Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            return projectCreated(projectId, createEventContext(projectId, TENANT_ID));
-        }
-
-        public static Event projectCreated(ProjectId projectId, EventContext eventContext) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
-            final Event event = createEvent(msg, eventContext);
+            final Event event = eventFactory().createEvent(msg);
             return event;
         }
 
@@ -185,9 +181,8 @@ public class Given {
         }
 
         private static Event createGenericEvent(Message eventMessage) {
-            final Any wrappedMessage = AnyPacker.pack(eventMessage);
-            final EventContext eventContext = createEventContext();
-            final Event permissionRevoked = EventFactory.createEvent(wrappedMessage, eventContext);
+            final Any wrappedMessage = pack(eventMessage);
+            final Event permissionRevoked = eventFactory().createEvent(wrappedMessage);
             return permissionRevoked;
         }
     }

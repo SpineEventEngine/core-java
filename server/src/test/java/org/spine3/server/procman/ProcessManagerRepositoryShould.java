@@ -43,6 +43,7 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
@@ -77,6 +78,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould
         extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager,
                                             ProjectId,
@@ -164,6 +166,24 @@ public class ProcessManagerRepositoryShould
         super.tearDown();
     }
 
+    /**
+     * Creates an instance of {@link Event} for the passed message.
+     *
+     * <p>Under normal circumstances an event is produced via {@link EventFactory}.
+     * Processing of events in a {@link ProcessManagerRepository} is based on event messages
+     * and does not need a properly configured {@link EventContext}. That's why this factory method
+     * is sufficient for the purpose of this test suite.
+     */
+    private static Event createEvent(Message eventMessage) {
+        return EventTests.createContextlessEvent(eventMessage);
+    }
+
+    private void testDispatchEvent(Message eventMessage) {
+        final Event event = createEvent(eventMessage);
+        repository.dispatch(event);
+        assertTrue(TestProcessManager.processed(eventMessage));
+    }
+
     // Tests
     //----------------------------
 
@@ -177,12 +197,6 @@ public class ProcessManagerRepositoryShould
         testDispatchEvent(projectCreated());
         testDispatchEvent(taskAdded());
         testDispatchEvent(projectStarted());
-    }
-
-    private void testDispatchEvent(Message eventMessage) {
-        final Event event = EventFactory.createEvent(eventMessage, EventContext.getDefaultInstance());
-        repository.dispatch(event);
-        assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     @Test
@@ -230,7 +244,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = EventFactory.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
+        final Event event = createEvent(unknownEventMessage);
         repository.dispatch(event);
     }
 

@@ -20,7 +20,10 @@
 
 package org.spine3.server.bc;
 
+import com.google.protobuf.Message;
+import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.event.ProjectCreated;
@@ -28,9 +31,12 @@ import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestEventContextFactory.createIntegrationEventContext;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 
 class Given {
+
+    private Given() {}
 
     static class AggregateId {
 
@@ -69,30 +75,46 @@ class Given {
         }
     }
 
-    static class IntegrationEvent {
+    static class AnIntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
+        private static final String TEST_BC_NAME = "Test BC";
 
-        private IntegrationEvent() {
+        private AnIntegrationEvent() {
         }
 
-        public static org.spine3.server.integration.IntegrationEvent projectCreated() {
+        public static IntegrationEvent projectCreated() {
             return projectCreated(PROJECT_ID);
         }
 
-        public static org.spine3.server.integration.IntegrationEvent projectCreated(ProjectId projectId) {
+        public static IntegrationEvent projectCreated(ProjectId projectId) {
             final IntegrationEventContext context = createIntegrationEventContext(projectId);
             return projectCreated(projectId, context);
         }
 
-        public static org.spine3.server.integration.IntegrationEvent projectCreated(
-                ProjectId projectId,
-                IntegrationEventContext eventContext) {
+        public static IntegrationEvent projectCreated(ProjectId projectId,
+                                                      IntegrationEventContext eventContext) {
             final ProjectCreated event = EventMessage.projectCreated(projectId);
-            final org.spine3.server.integration.IntegrationEvent.Builder builder =
-                    org.spine3.server.integration.IntegrationEvent.newBuilder()
-                                                                  .setContext(eventContext)
-                                                                  .setMessage(AnyPacker.pack(event));
+            final IntegrationEvent.Builder builder =
+                    IntegrationEvent.newBuilder()
+                                    .setContext(eventContext)
+                                    .setMessage(AnyPacker.pack(event));
+            return builder.build();
+        }
+
+        public static IntegrationEventContext createIntegrationEventContext(Message aggregateId) {
+            // An integration event ID may have a value which does not follow our internal
+            // conventions. We simulate this in the initialization below
+            final EventId eventId = EventId.newBuilder()
+                                           .setValue("ieid-" + newUuid())
+                                           .build();
+
+            final IntegrationEventContext.Builder builder =
+                    IntegrationEventContext.newBuilder()
+                                           .setEventId(eventId)
+                                           .setTimestamp(getCurrentTime())
+                                           .setBoundedContextName(TEST_BC_NAME)
+                                           .setProducerId(pack(aggregateId));
             return builder.build();
         }
     }
