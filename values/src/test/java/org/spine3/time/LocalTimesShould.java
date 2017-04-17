@@ -20,17 +20,21 @@
 
 package org.spine3.time;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
 
+/**
+ * @author Alexander Aleksandrov
+ * @author Alexander Yevsyukov
+ */
 public class LocalTimesShould {
 
     private static final int hours = 9;
@@ -59,38 +63,38 @@ public class LocalTimesShould {
     public void obtain_LocalTime_using_hours_minutes() {
         final LocalTime localTime = LocalTimes.of(hours, minutes);
 
-        assertTrue(hours == localTime.getHours());
-        assertTrue(minutes == localTime.getMinutes());
+        assertEquals(hours, localTime.getHours());
+        assertEquals(minutes, localTime.getMinutes());
     }
 
     @Test
     public void obtain_LocalTime_using_hours_minutes_seconds() {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds);
 
-        assertTrue(hours == localTime.getHours());
-        assertTrue(minutes == localTime.getMinutes());
-        assertTrue(seconds == localTime.getSeconds());
+        assertEquals(hours, localTime.getHours());
+        assertEquals(minutes, localTime.getMinutes());
+        assertEquals(seconds, localTime.getSeconds());
     }
 
     @Test
     public void obtain_LocalTime_using_hours_minutes_seconds_millis() {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis);
 
-        assertTrue(hours == localTime.getHours());
-        assertTrue(minutes == localTime.getMinutes());
-        assertTrue(seconds == localTime.getSeconds());
-        assertTrue(millis == localTime.getMillis());
+        assertEquals(hours, localTime.getHours());
+        assertEquals(minutes, localTime.getMinutes());
+        assertEquals(seconds, localTime.getSeconds());
+        assertEquals(millis, localTime.getMillis());
     }
 
     @Test
     public void obtain_LocalTime_using_hours_minutes_seconds_millis_nanos() {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
 
-        assertTrue(hours == localTime.getHours());
-        assertTrue(minutes == localTime.getMinutes());
-        assertTrue(seconds == localTime.getSeconds());
-        assertTrue(millis == localTime.getMillis());
-        assertTrue(nanos == localTime.getNanos());
+        assertEquals(hours, localTime.getHours());
+        assertEquals(minutes, localTime.getMinutes());
+        assertEquals(seconds, localTime.getSeconds());
+        assertEquals(millis, localTime.getMillis());
+        assertEquals(nanos, localTime.getNanos());
     }
 
     @Test
@@ -99,11 +103,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewHours = LocalTimes.plusHours(localTime, hoursToAdd);
 
-        assertTrue(hours + hoursToAdd == inFewHours.getHours());
-        assertTrue(minutes == inFewHours.getMinutes());
-        assertTrue(seconds == inFewHours.getSeconds());
-        assertTrue(millis == inFewHours.getMillis());
-        assertTrue(nanos == inFewHours.getNanos());
+        assertEquals(hours + hoursToAdd, inFewHours.getHours());
+        assertEquals(minutes, inFewHours.getMinutes());
+        assertEquals(seconds, inFewHours.getSeconds());
+        assertEquals(millis, inFewHours.getMillis());
+        assertEquals(nanos, inFewHours.getNanos());
     }
 
     @Test
@@ -112,11 +116,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewMinutes = LocalTimes.plusMinutes(localTime, minutesToAdd);
 
-        assertTrue(hours == inFewMinutes.getHours());
-        assertTrue(minutes + minutesToAdd == inFewMinutes.getMinutes());
-        assertTrue(seconds == inFewMinutes.getSeconds());
-        assertTrue(millis == inFewMinutes.getMillis());
-        assertTrue(nanos == inFewMinutes.getNanos());
+        assertEquals(hours, inFewMinutes.getHours());
+        assertEquals(minutes + minutesToAdd, inFewMinutes.getMinutes());
+        assertEquals(seconds, inFewMinutes.getSeconds());
+        assertEquals(millis, inFewMinutes.getMillis());
+        assertEquals(nanos, inFewMinutes.getNanos());
     }
 
     @Test
@@ -125,11 +129,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewSeconds = LocalTimes.plusSeconds(localTime, secondsToAdd);
 
-        assertTrue(hours == inFewSeconds.getHours());
-        assertTrue(minutes == inFewSeconds.getMinutes());
-        assertTrue(seconds + secondsToAdd == inFewSeconds.getSeconds());
-        assertTrue(millis == inFewSeconds.getMillis());
-        assertTrue(nanos == inFewSeconds.getNanos());
+        assertEquals(hours, inFewSeconds.getHours());
+        assertEquals(minutes, inFewSeconds.getMinutes());
+        assertEquals(seconds + secondsToAdd, inFewSeconds.getSeconds());
+        assertEquals(millis, inFewSeconds.getMillis());
+        assertEquals(nanos, inFewSeconds.getNanos());
     }
 
     @Test
@@ -138,11 +142,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewMillis = LocalTimes.plusMillis(localTime, millisToAdd);
 
-        assertTrue(hours == inFewMillis.getHours());
-        assertTrue(minutes == inFewMillis.getMinutes());
-        assertTrue(seconds == inFewMillis.getSeconds());
-        assertTrue(millis + millisToAdd == inFewMillis.getMillis());
-        assertTrue(nanos == inFewMillis.getNanos());
+        assertEquals(hours, inFewMillis.getHours());
+        assertEquals(minutes, inFewMillis.getMinutes());
+        assertEquals(seconds, inFewMillis.getSeconds());
+        assertEquals(millis + millisToAdd, inFewMillis.getMillis());
+        assertEquals(nanos, inFewMillis.getNanos());
     }
 
     @Test
@@ -151,11 +155,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewHours = LocalTimes.minusHours(localTime, hoursToSubtract);
 
-        assertTrue(hours - hoursToSubtract == beforeFewHours.getHours());
-        assertTrue(minutes == beforeFewHours.getMinutes());
-        assertTrue(seconds == beforeFewHours.getSeconds());
-        assertTrue(millis == beforeFewHours.getMillis());
-        assertTrue(nanos == beforeFewHours.getNanos());
+        assertEquals(hours - hoursToSubtract, beforeFewHours.getHours());
+        assertEquals(minutes, beforeFewHours.getMinutes());
+        assertEquals(seconds, beforeFewHours.getSeconds());
+        assertEquals(millis, beforeFewHours.getMillis());
+        assertEquals(nanos, beforeFewHours.getNanos());
     }
 
     @Test
@@ -164,11 +168,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewMinutes = LocalTimes.minusMinutes(localTime, minutesToSubtract);
 
-        assertTrue(hours == beforeFewMinutes.getHours());
-        assertTrue(minutes - minutesToSubtract == beforeFewMinutes.getMinutes());
-        assertTrue(seconds == beforeFewMinutes.getSeconds());
-        assertTrue(millis == beforeFewMinutes.getMillis());
-        assertTrue(nanos == beforeFewMinutes.getNanos());
+        assertEquals(hours, beforeFewMinutes.getHours());
+        assertEquals(minutes - minutesToSubtract, beforeFewMinutes.getMinutes());
+        assertEquals(seconds, beforeFewMinutes.getSeconds());
+        assertEquals(millis, beforeFewMinutes.getMillis());
+        assertEquals(nanos, beforeFewMinutes.getNanos());
     }
 
     @Test
@@ -177,11 +181,11 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewSeconds = LocalTimes.minusSeconds(localTime, secondsToSubtract);
 
-        assertTrue(hours == beforeFewSeconds.getHours());
-        assertTrue(minutes == beforeFewSeconds.getMinutes());
-        assertTrue(seconds - secondsToSubtract == beforeFewSeconds.getSeconds());
-        assertTrue(millis == beforeFewSeconds.getMillis());
-        assertTrue(nanos == beforeFewSeconds.getNanos());
+        assertEquals(hours, beforeFewSeconds.getHours());
+        assertEquals(minutes, beforeFewSeconds.getMinutes());
+        assertEquals(seconds - secondsToSubtract, beforeFewSeconds.getSeconds());
+        assertEquals(millis, beforeFewSeconds.getMillis());
+        assertEquals(nanos, beforeFewSeconds.getNanos());
     }
 
     @Test
@@ -190,69 +194,19 @@ public class LocalTimesShould {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewMillis = LocalTimes.minusMillis(localTime, millisToSubtract);
 
-        assertTrue(hours == beforeFewMillis.getHours());
-        assertTrue(minutes == beforeFewMillis.getMinutes());
-        assertTrue(seconds == beforeFewMillis.getSeconds());
-        assertTrue(millis - millisToSubtract == beforeFewMillis.getMillis());
-        assertTrue(nanos == beforeFewMillis.getNanos());
+        assertEquals(hours, beforeFewMillis.getHours());
+        assertEquals(minutes, beforeFewMillis.getMinutes());
+        assertEquals(seconds, beforeFewMillis.getSeconds());
+        assertEquals(millis - millisToSubtract, beforeFewMillis.getMillis());
+        assertEquals(nanos, beforeFewMillis.getNanos());
     }
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_hoursToAdd() {
-        final int hoursToAdd = -5;
-        final LocalTime now = null;
-        LocalTimes.plusHours(now, hoursToAdd);
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester().setDefault(LocalTime.class, LocalTimes.now())
+                               .testAllPublicStaticMethods(LocalTimes.class);
     }
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_minutesToAdd() {
-        final int minutesToAdd = 7;
-        final LocalTime now = null;
-        LocalTimes.plusMinutes(now, minutesToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_secondsToAdd() {
-        final int secondsToAdd = 25;
-        final LocalTime now = null;
-        LocalTimes.plusSeconds(now, secondsToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_millisToAdd() {
-        final int millisToAdd = 205;
-        final LocalTime now = null;
-        LocalTimes.plusMillis(now, millisToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_hoursToSubtract() {
-        final int hoursToSubtract = 6;
-        final LocalTime now = null;
-        LocalTimes.minusHours(now, hoursToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_minutesToSubtract() {
-        final int minutesToSubtract = 8;
-        final LocalTime now = null;
-        LocalTimes.minusMinutes(now, minutesToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_secondsToSubtract() {
-        final int secondsToSubtract = 27;
-        final LocalTime now = null;
-        LocalTimes.minusSeconds(now, secondsToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_LocalTime_value_with_millisToSubtract() {
-        final int millisToSubtract = 245;
-        final LocalTime now = null;
-        LocalTimes.minusMillis(now, millisToSubtract);
-    }
-    
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_hours() {
         final int hours = -2;

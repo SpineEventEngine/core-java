@@ -48,6 +48,8 @@ import static org.spine3.validate.Validate.checkPositive;
  */
 public class LocalDates {
 
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+
     static {
         registerStringifier();
     }
@@ -71,7 +73,7 @@ public class LocalDates {
      */
     @SuppressWarnings("SimpleDateFormatWithoutLocale") // See Javadoc.
     private static DateFormat createDateFormat() {
-        final SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+        final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
         GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
         sdf.setCalendar(calendar);
         return sdf;
