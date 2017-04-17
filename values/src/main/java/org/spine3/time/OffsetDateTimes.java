@@ -19,6 +19,7 @@
  */
 package org.spine3.time;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -193,7 +194,7 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of minutes subtracted.
      */
     public static OffsetDateTime minusMinutes(OffsetDateTime offsetDateTime,
-                                              int minutesToSubtract) {
+            int minutesToSubtract) {
         checkNotNull(offsetDateTime);
         checkPositive(minutesToSubtract);
 
@@ -204,7 +205,7 @@ public class OffsetDateTimes {
      * Obtains a copy of this offset date and time with the specified number of seconds subtracted.
      */
     public static OffsetDateTime minusSeconds(OffsetDateTime offsetDateTime,
-                                              int secondsToSubtract) {
+            int secondsToSubtract) {
         checkNotNull(offsetDateTime);
         checkPositive(secondsToSubtract);
 
@@ -334,11 +335,20 @@ public class OffsetDateTimes {
      * @return new {@code OffsetDateTime} instance with changed parameter
      */
     private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime,
-                                               LocalDate date,
-                                               LocalTime time) {
+            LocalDate date,
+            LocalTime time) {
         return offsetDateTime.toBuilder()
                              .setDate(date)
                              .setTime(time)
                              .build();
+    }
+
+    /**
+     * Parse from RFC 3339 date string to {@code OffsetDateTime}.
+     *
+     * @throws ParseException if the passed string is not a valid date-time value
+     */
+    public static OffsetDateTime parse(String value) throws ParseException {
+        return Parser.parserOffsetDateTime(value);
     }
 }

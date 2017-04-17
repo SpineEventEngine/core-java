@@ -25,10 +25,8 @@ import org.spine3.base.StringifierRegistry;
 
 import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
@@ -48,8 +46,6 @@ import static org.spine3.validate.Validate.checkPositive;
  */
 public class LocalDates {
 
-    private static final String DATE_FORMAT = "yyyy-MM-dd";
-
     static {
         registerStringifier();
     }
@@ -58,25 +54,12 @@ public class LocalDates {
             new ThreadLocal<DateFormat>() {
                 @Override
                 protected DateFormat initialValue() {
-                    return createDateFormat();
+                    return Formats.createDateFormat();
                 }
             };
 
     private LocalDates() {
         // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Creates format for local date representation based on digits.
-     *
-     * <p>Since the created format is based on digits it is not associated with any locale.
-     */
-    @SuppressWarnings("SimpleDateFormatWithoutLocale") // See Javadoc.
-    private static DateFormat createDateFormat() {
-        final SimpleDateFormat sdf = new SimpleDateFormat(DATE_FORMAT);
-        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
-        sdf.setCalendar(calendar);
-        return sdf;
     }
 
     /**
@@ -209,7 +192,7 @@ public class LocalDates {
     }
 
     /**
-     * Parse from ISO 8601:2004 date representation of the format {@code yyyy-MM-dd}.
+     * Parse from ISO 8601 date representation of the format {@code yyyy-MM-dd}.
      *
      * @return a LocalDate parsed from the string
      * @throws ParseException if parsing fails.
@@ -226,7 +209,7 @@ public class LocalDates {
     }
 
     /**
-     * Converts a local date into ISO 8601:2004 string with the format {@code yyyy-MM-dd}.
+     * Converts a local date into ISO 8601 string with the format {@code yyyy-MM-dd}.
      */
     public static String toString(LocalDate date) {
         checkNotNull(date);

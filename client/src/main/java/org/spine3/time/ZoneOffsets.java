@@ -95,6 +95,10 @@ public class ZoneOffsets {
 
         final Duration hourDuration = Durations2.fromHours(hours);
         final int seconds = toSeconds(hourDuration);
+        return ofSeconds(seconds);
+    }
+
+    public static ZoneOffset ofSeconds(int seconds) {
         return ZoneOffset.newBuilder()
                          .setAmountSeconds(seconds)
                          .build();
@@ -110,9 +114,7 @@ public class ZoneOffsets {
         final int secondsInHours = toSeconds(hours(hours));
         final int secondsInMinutes = toSeconds(minutes(minutes));
         final int seconds = secondsInHours + secondsInMinutes;
-        return ZoneOffset.newBuilder()
-                         .setAmountSeconds(seconds)
-                         .build();
+        return ofSeconds(seconds);
     }
 
     @SuppressWarnings("NumericCastThatLosesPrecision")
@@ -131,4 +133,5 @@ public class ZoneOffsets {
     private static void checkMinuteOffset(int minutes) {
         checkBounds(minutes, "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
     }
+
 }
