@@ -334,12 +334,23 @@ class Calendars {
     }
 
     /**
-     * Creates a new instance of Proleptic Gregorian Calendar.
+     * Creates a new instance of Proleptic Gregorian Calendar in the default time zone.
      *
      * <p>The created instance is Gregorial calendar which extends to year one.
      */
     static GregorianCalendar newProlepticGregorianCalendar() {
-        GregorianCalendar calendar = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+        return newProlepticGregorianCalendar(TimeZone.getDefault());
+    }
+
+    /**
+     * Creates a new instance of Proleptic Gregorian Calendar.
+     *
+     * <p>The created instance is Gregorial calendar which extends to year one.
+     *
+     * @param timeZone the time zone in which the calendar is created
+     */
+    static GregorianCalendar newProlepticGregorianCalendar(TimeZone timeZone) {
+        GregorianCalendar calendar = new GregorianCalendar(timeZone);
         calendar.setGregorianChange(new Date(Long.MIN_VALUE));
         return calendar;
     }
