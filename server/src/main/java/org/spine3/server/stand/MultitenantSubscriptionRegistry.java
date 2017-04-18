@@ -51,8 +51,12 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
 
     private final boolean multitenant;
 
-    MultitenantSubscriptionRegistry(boolean multitenant) {
+    private MultitenantSubscriptionRegistry(boolean multitenant) {
         this.multitenant = multitenant;
+    }
+
+    static MultitenantSubscriptionRegistry newInstance(boolean multitenant) {
+        return new MultitenantSubscriptionRegistry(multitenant);
     }
 
     /**

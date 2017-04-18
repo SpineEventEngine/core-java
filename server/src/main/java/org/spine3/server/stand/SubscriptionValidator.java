@@ -99,7 +99,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
                 final boolean result = registry.containsId(input.getId());
                 return result;
             }
-        }.apply(request);
+        }.execute(request);
 
         checkNotNull(result);
         return result;

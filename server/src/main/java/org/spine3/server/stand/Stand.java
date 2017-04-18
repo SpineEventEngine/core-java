@@ -22,7 +22,6 @@ package org.spine3.server.stand;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Sets;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -52,8 +51,6 @@ import org.spine3.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -100,28 +97,14 @@ public class Stand implements AutoCloseable {
     private final SubscriptionRegistry subscriptionRegistry;
 
     /**
+     * Manages the {@linkplain TypeUrl types}, exposed via this instance of {@code Stand}.
+     */
+    private final TypeRegistry typeRegistry;
+
+    /**
      * An instance of executor used to invoke callbacks
      */
     private final Executor callbackExecutor;
-
-    /**
-     * The mapping between {@code TypeUrl} instances and repositories providing
-     * the entities of this type.
-     */
-    private final ConcurrentMap<TypeUrl,
-            RecordBasedRepository<?, ? extends Entity, ? extends Message>> typeToRepositoryMap =
-            new ConcurrentHashMap<>();
-
-    /**
-     * Stores  known {@code Aggregate} types in order to distinguish
-     * them among all instances of {@code TypeUrl}.
-     *
-     * <p>Once this instance of {@code Stand} receives an update as {@link Any},
-     * the {@code Aggregate} states are persisted for further usage.
-     * The entities that are not {@code Aggregate} are not persisted,
-     * and only propagated to the registered callbacks.
-     */
-    private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
     private final boolean multitenant;
 
@@ -134,6 +117,7 @@ public class Stand implements AutoCloseable {
         callbackExecutor = builder.getCallbackExecutor();
         multitenant = builder.isMultitenant();
         subscriptionRegistry = builder.getSubscriptionRegistry();
+        typeRegistry = builder.getTypeRegistry();
         topicValidator = builder.getTopicValidator();
         queryValidator = builder.getQueryValidator();
         subscriptionValidator = builder.getSubscriptionValidator();
@@ -179,9 +163,9 @@ public class Stand implements AutoCloseable {
                 final Any packedState = AnyPacker.pack(entityState);
 
                 final TypeUrl entityTypeUrl = TypeUrl.of(entityState);
-                final boolean isAggregateUpdate = knownAggregateTypes.contains(entityTypeUrl);
+                final boolean aggregateUpdate = typeRegistry.hasAggregateType(entityTypeUrl);
 
-                if (isAggregateUpdate) {
+                if (aggregateUpdate) {
                     final Optional<Version> entityVersion = envelope.getEntityVersion();
                     checkState(entityVersion.isPresent(),
                                "The aggregate version must be set in order to update Stand. " +
@@ -304,12 +288,7 @@ public class Stand implements AutoCloseable {
      */
     @CheckReturnValue
     public ImmutableSet<TypeUrl> getExposedTypes() {
-        final ImmutableSet.Builder<TypeUrl> resultBuilder = ImmutableSet.builder();
-        final Set<TypeUrl> projectionTypes = typeToRepositoryMap.keySet();
-        resultBuilder.addAll(projectionTypes)
-                     .addAll(knownAggregateTypes);
-        final ImmutableSet<TypeUrl> result = resultBuilder.build();
-        return result;
+        return typeRegistry.getTypes();
     }
 
     /**
@@ -322,8 +301,7 @@ public class Stand implements AutoCloseable {
      */
     @CheckReturnValue
     public ImmutableSet<TypeUrl> getExposedAggregateTypes() {
-        final ImmutableSet<TypeUrl> result = ImmutableSet.copyOf(knownAggregateTypes);
-        return result;
+        return typeRegistry.getAggregateTypes();
     }
 
     /**
@@ -393,18 +371,9 @@ public class Stand implements AutoCloseable {
      *
      * @see #update(EntityStateEnvelope)
      */
-    @SuppressWarnings("ChainOfInstanceofChecks")
     public <I, E extends VersionableEntity<I, ?>>
            void registerTypeSupplier(Repository<I, E> repository) {
-        final TypeUrl entityType = repository.getEntityStateType();
-
-        if (repository instanceof RecordBasedRepository) {
-            typeToRepositoryMap.put(entityType,
-                                    (RecordBasedRepository<I, E, ? extends Message>) repository);
-        }
-        if (repository instanceof AggregateRepository) {
-            knownAggregateTypes.add(entityType);
-        }
+        typeRegistry.register(repository);
     }
 
     /**
@@ -412,7 +381,7 @@ public class Stand implements AutoCloseable {
      */
     @Override
     public void close() throws Exception {
-        typeToRepositoryMap.clear();
+        typeRegistry.close();
         storage.close();
     }
 
@@ -420,7 +389,7 @@ public class Stand implements AutoCloseable {
      * A contract for the callbacks to be executed upon entity state change.
      *
      * @see #activate(Subscription, EntityUpdateCallback, StreamObserver)
-     * @see #cancel(Subscription)
+     * @see #cancel(Subscription, StreamObserver)
      */
     public interface EntityUpdateCallback {
 
@@ -447,20 +416,20 @@ public class Stand implements AutoCloseable {
     private QueryProcessor processorFor(TypeUrl type) {
         final QueryProcessor result;
 
-        final RecordBasedRepository<?, ? extends Entity, ? extends Message> repository =
-                typeToRepositoryMap.get(type);
+        final Optional<? extends RecordBasedRepository<?, ?, ?>> repository =
+                typeRegistry.getRecordRepository(type);
 
-        if (repository != null) {
+        if (repository.isPresent()) {
 
             // The query target is an {@code Entity}.
-            result = new EntityQueryProcessor(repository);
+            result = new EntityQueryProcessor(repository.get());
         } else if (getExposedAggregateTypes().contains(type)) {
 
             // The query target is an {@code Aggregate} state.
             result = new AggregateQueryProcessor(storage, type);
         } else {
 
-            // This type points to an objects, that are not exposed via the current
+            // This type points to an object, that are not exposed via the current
             // instance of {@code Stand}.
             result = NOOP_PROCESSOR;
         }
@@ -471,6 +440,7 @@ public class Stand implements AutoCloseable {
         private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
+        private TypeRegistry typeRegistry;
         private boolean multitenant;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
@@ -539,6 +509,10 @@ public class Stand implements AutoCloseable {
             return subscriptionValidator;
         }
 
+        private TypeRegistry getTypeRegistry() {
+            return typeRegistry;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
@@ -553,7 +527,9 @@ public class Stand implements AutoCloseable {
                 callbackExecutor = MoreExecutors.directExecutor();
             }
 
-            subscriptionRegistry = new MultitenantSubscriptionRegistry(multitenant);
+            subscriptionRegistry = MultitenantSubscriptionRegistry.newInstance(multitenant);
+
+            typeRegistry = InMemoryTypeRegistry.newInstance();
 
             topicValidator = new TopicValidator();
             queryValidator = new QueryValidator();

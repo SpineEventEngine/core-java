@@ -458,8 +458,8 @@ public class StandShould extends TenantAwareTest {
         assertNull(memoizeCallback.newEntityState);
     }
 
-    @Test
-    public void do_not_fail_if_cancelling_inexistent_subscription() {
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_if_cancelling_inexistent_subscription() {
         final Stand stand = Stand.newBuilder()
                                  .build();
         final Subscription inexistentSubscription = Subscription.newBuilder()
