@@ -46,10 +46,6 @@ import static org.spine3.validate.Validate.checkPositive;
  */
 public class LocalDates {
 
-    static {
-        registerStringifier();
-    }
-
     private static final ThreadLocal<DateFormat> dateFormat =
             new ThreadLocal<DateFormat>() {
                 @Override
