@@ -20,10 +20,12 @@
 
 package org.spine3.string;
 
+import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.test.Tests;
 import org.spine3.time.LocalDate;
+import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -40,22 +42,29 @@ public class TimeStringifiersShould {
         Tests.assertHasPrivateParameterlessCtor(TimeStringifiers.class);
     }
 
-    @Test
-    public void register_all_stringifiers() {
+    private static boolean hasStringifierFor(Class<?> cls) {
+        return StringifierRegistry.getInstance()
+                                  .get(cls)
+                                  .isPresent();
+    }
 
+    private static Stringifier<Object> getStringifier(Class<?> cls) {
+        return StringifierRegistry.getInstance().get(cls).get();
     }
 
     @Test
-    public void register_stringifier() {
-        assertFalse(StringifierRegistry.getInstance()
-                                       .get(LocalDate.class)
-                                       .isPresent());
+    public void register_stringifiers() {
+        assertFalse(hasStringifierFor(ZoneOffset.class));
+        assertFalse(hasStringifierFor(Duration.class));
+        assertFalse(hasStringifierFor(Timestamp.class));
+        assertFalse(hasStringifierFor(LocalDate.class));
 
         TimeStringifiers.registerAll();
 
-        assertEquals(TimeStringifiers.forLocalDate(), StringifierRegistry.getInstance()
-                                                                         .get(LocalDate.class)
-                                                                         .get());
+        assertEquals(TimeStringifiers.forZoneOffset(), getStringifier(ZoneOffset.class));
+        assertEquals(TimeStringifiers.forDuration(), getStringifier(Duration.class));
+        assertEquals(TimeStringifiers.forTimestamp(), getStringifier(Timestamp.class));
+        assertEquals(TimeStringifiers.forLocalDate(), getStringifier(LocalDate.class));
     }
 
     @Test
@@ -77,5 +86,4 @@ public class TimeStringifiersShould {
 
         assertEquals(timestamp, convertedBack);
     }
-
 }

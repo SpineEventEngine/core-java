@@ -22,13 +22,11 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import org.junit.Test;
-import org.spine3.string.StringifierRegistry;
 
 import java.text.ParseException;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
@@ -119,18 +117,5 @@ public class ZoneOffsetsShould {
 
         assertEquals(ofHoursMinutes(-2, -45), parse("-2:45"));
         assertEquals(ofHoursMinutes(-2, -45), parse("-02:45"));
-    }
-
-    @Test
-    public void register_stringifier() {
-        assertFalse(StringifierRegistry.getInstance()
-                                       .get(ZoneOffset.class)
-                                       .isPresent());
-
-        ZoneOffsets.registerStringifier();
-
-        assertEquals(ZoneOffsets.stringifier(), StringifierRegistry.getInstance()
-                                                                   .get(ZoneOffset.class)
-                                                                   .get());
     }
 }

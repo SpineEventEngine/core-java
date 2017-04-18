@@ -21,7 +21,6 @@
 package org.spine3.string;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
@@ -87,9 +86,6 @@ public class StringifiersShould {
     public void handle_null_in_standard_converters() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
-        assertNull(registry.get(Timestamp.class)
-                           .get()
-                           .convert(null));
         assertNull(registry.get(EventId.class)
                            .get()
                            .convert(null));

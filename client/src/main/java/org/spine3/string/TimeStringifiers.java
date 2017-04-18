@@ -26,6 +26,8 @@ import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
+import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -44,11 +46,6 @@ import static org.spine3.util.Exceptions.wrappedCause;
  */
 public class TimeStringifiers {
 
-    private static final Stringifier<Timestamp> stringifier =
-            new TimestampStringifier();
-    private static final Stringifier<Timestamp> webSafeStringifier =
-            new WebSafeTimestampStringifer();
-
     private TimeStringifiers() {
         // Prevent instantiation of this utility class.
     }
@@ -59,6 +56,9 @@ public class TimeStringifiers {
     public static void registerAll() {
         final StringifierRegistry registry = StringifierRegistry.getInstance();
 
+        registry.register(forZoneOffset(), ZoneOffset.class);
+        registry.register(forDuration(), Duration.class);
+        registry.register(forTimestamp(), Timestamp.class);
         registry.register(forLocalDate(), LocalDate.class);
 
         //TODO:2017-04-18:alexander.yevsyukov: Register other stringifiers
@@ -104,7 +104,7 @@ public class TimeStringifiers {
      * <p>This stringifier can be convenient for storing IDs based on {@code Timestamp}s.
      */
     public static Stringifier<Timestamp> forTimestampWebSafe() {
-        return webSafeStringifier;
+        return WebSafeTimestampStringifer.INSTANCE;
     }
 
     /**
@@ -113,7 +113,22 @@ public class TimeStringifiers {
      * @see Timestamps#toString(Timestamp)
      */
     public static Stringifier<Timestamp> forTimestamp() {
-        return stringifier;
+        return TimestampStringifier.INSTANCE;
+    }
+
+    /**
+     * Obtains default stringifier for {@code ZoneOffset}s.
+     */
+    public static Stringifier<ZoneOffset> forZoneOffset() {
+        return ZoneOffsetStringifier.instance();
+    }
+
+    /**
+     * Register the default {@linkplain #forZoneOffset() stringifier} for {@code ZoneOffset}s in
+     * the {@link StringifierRegistry}.
+     */
+    public static void registerStringifier() {
+        StringifierRegistry.getInstance().register(forZoneOffset(), ZoneOffset.class);
     }
 
     /**
@@ -155,10 +170,14 @@ public class TimeStringifiers {
         }
     }
 
+    //TODO:2017-04-18:alexander.yevsyukov: make all singletons looks the same
+
     /**
      * The default stringifier for {@code Duration}s.
      */
     private static class DurationStringifier extends Stringifier<Duration> {
+
+        private static final DurationStringifier INSTANCE = new DurationStringifier();
 
         @Override
         protected String toString(Duration duration) {
@@ -179,15 +198,8 @@ public class TimeStringifiers {
             return result;
         }
 
-        private enum Singleton {
-            INSTANCE;
-
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final DurationStringifier value = new DurationStringifier();
-        }
-
         private static DurationStringifier instance() {
-            return Singleton.INSTANCE.value;
+            return INSTANCE;
         }
     }
 
@@ -195,6 +207,8 @@ public class TimeStringifiers {
      * The stringifier of timestamps into RFC 3339 date string format.
      */
     private static class TimestampStringifier extends Stringifier<Timestamp> {
+
+        static final TimestampStringifier INSTANCE = new TimestampStringifier();
 
         @Override
         protected String toString(Timestamp obj) {
@@ -221,6 +235,8 @@ public class TimeStringifiers {
      * back during the backward conversion.
      */
     static class WebSafeTimestampStringifer extends Stringifier<Timestamp> {
+
+        static final WebSafeTimestampStringifer INSTANCE = new WebSafeTimestampStringifer();
 
         private static final char COLON = ':';
         private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
@@ -271,6 +287,42 @@ public class TimeStringifiers {
             chars[HOUR_SEPARATOR_INDEX] = COLON;
             chars[MINUTE_SEPARATOR_INDEX] = COLON;
             return String.valueOf(chars);
+        }
+    }
+
+    /**
+     * The default stringifier for {@code ZoneOffset} values.
+     */
+    private static class ZoneOffsetStringifier extends Stringifier<ZoneOffset> {
+
+        @Override
+        protected String toString(ZoneOffset offset) {
+            checkNotNull(offset);
+            final String result = ZoneOffsets.toString(offset);
+            return result;
+        }
+
+        @Override
+        protected ZoneOffset fromString(String str) {
+            checkNotNull(str);
+            final ZoneOffset result;
+            try {
+                result = ZoneOffsets.parse(str);
+            } catch (ParseException e) {
+                throw wrappedCause(e);
+            }
+            return result;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final ZoneOffsetStringifier value = new ZoneOffsetStringifier();
+        }
+
+        private static ZoneOffsetStringifier instance() {
+            return Singleton.INSTANCE.value;
         }
     }
 }

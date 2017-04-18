@@ -291,7 +291,6 @@ public class Timestamps2Should {
         assertNotEquals(0, systemTime());
     }
 
-
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
         // This uses TextFormat printing, for the output won't be parsable.

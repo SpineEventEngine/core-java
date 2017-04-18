@@ -24,6 +24,7 @@ import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -39,6 +40,11 @@ import static org.spine3.string.Stringifiers.newForMapOf;
  * @author Illia Shepilov
  */
 public class MapStringifierShould {
+
+    @BeforeClass
+    public static void registerTimeStringifiers() {
+        TimeStringifiers.registerAll();
+    }
 
     @Test
     public void convert_string_to_map() throws ParseException {

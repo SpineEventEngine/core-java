@@ -22,9 +22,7 @@ package org.spine3.string;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
@@ -54,8 +52,6 @@ public class StringifierRegistry {
                             .put(Integer.class, Stringifiers.forInteger())
                             .put(Long.class, Stringifiers.forLong())
                             .put(String.class, Stringifiers.noOpStringifier())
-                            .put(Timestamp.class, TimeStringifiers.forTimestamp())
-                            .put(Duration.class, TimeStringifiers.forDuration())
                             .put(EventId.class, Events.idStringifier())
                             .put(CommandId.class, Commands.idStringifier())
                             .build()
