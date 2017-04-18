@@ -22,12 +22,8 @@ package org.spine3.string;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
-import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
 import com.google.protobuf.Message;
-import org.spine3.json.Json;
 
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -143,21 +139,21 @@ public final class Stringifiers {
      * Obtains {@code Stringifier} for {@code Boolean} values.
      */
     public static Stringifier<Boolean> forBoolean() {
-        return BooleanStringifier.INSTANCE;
+        return BooleanStringifier.instance();
     }
 
     /**
      * Obtains {@code Stringifier} for {@code Integer} values.
      */
     public static Stringifier<Integer> forInteger() {
-        return IntegerStringifier.INSTANCE;
+        return IntegerStringifier.instance();
     }
 
     /**
      * Obtains {@code Stringifier} for {@code Long} values.
      */
     public static Stringifier<Long> forLong() {
-        return LongStringifier.INSTANCE;
+        return LongStringifier.instance();
     }
 
     /**
@@ -166,7 +162,7 @@ public final class Stringifiers {
      * <p>Simply returns passed strings.
      */
     static Stringifier<String> forString() {
-        return NoOpStringifier.INSTANCE;
+        return NoOpStringifier.instance();
     }
 
     /**
@@ -225,193 +221,5 @@ public final class Stringifiers {
                                        .addEscape(charToEscape, escapedChar)
                                        .build();
         return result;
-    }
-
-    /**
-     * The {@code Stringifier} for the {@code String} values.
-     *
-     * <p>Always returns the original {@code String} passed as an argument.
-     */
-    private static class NoOpStringifier extends Stringifier<String> implements Serializable {
-
-        private static final long serialVersionUID = 1;
-
-        static final NoOpStringifier INSTANCE = new NoOpStringifier();
-
-        @Override
-        protected String toString(String obj) {
-            return obj;
-        }
-
-        @Override
-        protected String fromString(String s) {
-            return s;
-        }
-
-        @Override
-        public String toString() {
-            return "Stringifiers.forString()";
-        }
-
-        private Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    /**
-     * The {@code Stringifier} for the long values.
-     */
-    private static class LongStringifier extends Stringifier<Long> implements Serializable {
-
-        private static final long serialVersionUID = 1;
-
-        static final LongStringifier INSTANCE = new LongStringifier();
-
-        @Override
-        protected String toString(Long obj) {
-            return Longs.stringConverter()
-                        .reverse()
-                        .convert(obj);
-        }
-
-        @Override
-        protected Long fromString(String s) {
-            return Longs.stringConverter()
-                        .convert(s);
-        }
-
-        @Override
-        public String toString() {
-            return "Stringifiers.forLong()";
-        }
-
-        private Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    /**
-     * The {@code Stringifier} for the integer values.
-     */
-    private static class IntegerStringifier extends Stringifier<Integer> implements Serializable {
-
-        private static final long serialVersionUID = 1;
-
-        static final IntegerStringifier INSTANCE = new IntegerStringifier();
-
-        @Override
-        protected String toString(Integer obj) {
-            return Ints.stringConverter()
-                       .reverse()
-                       .convert(obj);
-        }
-
-        @Override
-        protected Integer fromString(String s) {
-            return Ints.stringConverter()
-                       .convert(s);
-        }
-
-        @Override
-        public String toString() {
-            return "Stringifiers.forInteger()";
-        }
-
-        private Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    /**
-     * The {@code Stringifier} for boolean values.
-     */
-    private static class BooleanStringifier extends Stringifier<Boolean> implements Serializable {
-
-        private static final long serialVersionUID = 1;
-
-        static final BooleanStringifier INSTANCE = new BooleanStringifier();
-
-        @Override
-        protected String toString(Boolean value) {
-            checkNotNull(value);
-            return value.toString();
-        }
-
-        @Override
-        protected Boolean fromString(String s) {
-            checkNotNull(s);
-            final Boolean result = Boolean.parseBoolean(s);
-            return result;
-        }
-
-        @Override
-        public String toString() {
-            return "Stringifiers.forBoolean()";
-        }
-
-        private Object readResolve() {
-            return INSTANCE;
-        }
-    }
-
-    /**
-     * The default {@code Stringifier} for the {@code Message} classes.
-     *
-     * <p>The sample of the usage:
-     * <pre>      {@code
-     * // The `TaskId` Protobuf message definition.
-     * message TaskId {
-     *     string value = 1;
-     * }}</pre>
-     *
-     * <pre>      {@code
-     * // The `TaskName` Protobuf message definition.
-     * message TaskName {
-     *     string value = 1;
-     * }}</pre>
-     *
-     * <pre>      {@code
-     * // The `Task` Protobuf message definition.
-     * message Task {
-     *     TaskId id = 1;
-     *     TaskName name = 2;
-     * }}</pre>
-     *
-     * <pre>      {@code
-     * // Construct the message.
-     * final TaskId taskId = TaskId.newBuilder().setValue("task-id").build();
-     * final TaskName taskName = TaskName.newBuilder().setValue("task-name").build();
-     * final Task task = Task.newBuilder().setId(taskId).setTaskName(taskName).build();
-     *
-     * // Obtain the default Stringifier.
-     * final Stringifier<Task> taskStringifier = StringifierRegistry.getStringifier(Task.class);
-     *
-     * // The result is {"id":{"value":"task-id"},"name":{"value":"task-name"}}.
-     * final String json = taskStringifier.reverse().convert(task);
-     *
-     * // task.equals(taskFromJson) == true.
-     * final Task taskFromJson = taskStringifier.convert(json);
-     * }</pre>
-     *
-     * @param <T> the message type
-     */
-    private static class DefaultMessageStringifier<T extends Message> extends Stringifier<T> {
-
-        private final Class<T> messageClass;
-
-        private DefaultMessageStringifier(Class<T> messageType) {
-            super();
-            this.messageClass = messageType;
-        }
-
-        @Override
-        protected String toString(T obj) {
-            return Json.toCompactJson(obj);
-        }
-
-        @Override
-        protected T fromString(String s) {
-            return Json.fromJson(s, messageClass);
-        }
     }
 }
