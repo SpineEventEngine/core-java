@@ -28,8 +28,11 @@ import org.spine3.time.LocalDate;
 import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.spine3.string.TimeStringifiers.forDuration;
+import static org.spine3.string.TimeStringifiers.forLocalDate;
+import static org.spine3.string.TimeStringifiers.forTimestamp;
 import static org.spine3.string.TimeStringifiers.forTimestampWebSafe;
+import static org.spine3.string.TimeStringifiers.forZoneOffset;
 import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
@@ -42,29 +45,16 @@ public class TimeStringifiersShould {
         Tests.assertHasPrivateParameterlessCtor(TimeStringifiers.class);
     }
 
-    private static boolean hasStringifierFor(Class<?> cls) {
-        return StringifierRegistry.getInstance()
-                                  .get(cls)
-                                  .isPresent();
-    }
-
     private static Stringifier<Object> getStringifier(Class<?> cls) {
         return StringifierRegistry.getInstance().get(cls).get();
     }
 
     @Test
     public void register_stringifiers() {
-        assertFalse(hasStringifierFor(ZoneOffset.class));
-        assertFalse(hasStringifierFor(Duration.class));
-        assertFalse(hasStringifierFor(Timestamp.class));
-        assertFalse(hasStringifierFor(LocalDate.class));
-
-        TimeStringifiers.registerAll();
-
-        assertEquals(TimeStringifiers.forZoneOffset(), getStringifier(ZoneOffset.class));
-        assertEquals(TimeStringifiers.forDuration(), getStringifier(Duration.class));
-        assertEquals(TimeStringifiers.forTimestamp(), getStringifier(Timestamp.class));
-        assertEquals(TimeStringifiers.forLocalDate(), getStringifier(LocalDate.class));
+        assertEquals(forZoneOffset(), getStringifier(ZoneOffset.class));
+        assertEquals(forDuration(), getStringifier(Duration.class));
+        assertEquals(forTimestamp(), getStringifier(Timestamp.class));
+        assertEquals(forLocalDate(), getStringifier(LocalDate.class));
     }
 
     @Test

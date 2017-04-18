@@ -20,6 +20,7 @@
 
 package org.spine3.string;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
@@ -30,7 +31,9 @@ import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 
 import java.io.Serializable;
+import java.lang.reflect.Type;
 import java.text.ParseException;
+import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -50,28 +53,22 @@ public class TimeStringifiers {
         // Prevent instantiation of this utility class.
     }
 
-    /**
-     * Register all stringifiers exposed by this class with the {@link StringifierRegistry}.
-     */
-    public static void registerAll() {
-        final StringifierRegistry registry = StringifierRegistry.getInstance();
+    static Map<Type, Stringifier<?>> getAll() {
+        final ImmutableMap.Builder<Type, Stringifier<?>> builder =
+                ImmutableMap.<Type, Stringifier<?>>builder()
+                        .put(ZoneOffset.class, forZoneOffset())
+                        .put(Duration.class, forDuration())
+                        .put(Timestamp.class, forTimestamp())
+                        .put(LocalDate.class, forLocalDate());
 
-        registry.register(forZoneOffset(), ZoneOffset.class);
-        registry.register(forDuration(), Duration.class);
-        registry.register(forTimestamp(), Timestamp.class);
-        registry.register(forLocalDate(), LocalDate.class);
-
-        //TODO:2017-04-18:alexander.yevsyukov: Register other stringifiers
+        return builder.build();
     }
 
     /**
-     * Obtains default stringifier for local dates.
-     *
-     * <p>The stringifier uses {@code yyyy-MM-dd} format for dates.
-     * @see LocalDates#parse(String)
+     * Obtains default stringifier for {@code ZoneOffset}s.
      */
-    public static Stringifier<LocalDate> forLocalDate() {
-        return LocalDateStringifier.INSTANCE;
+    public static Stringifier<ZoneOffset> forZoneOffset() {
+        return ZoneOffsetStringifier.INSTANCE;
     }
 
     /**
@@ -84,7 +81,16 @@ public class TimeStringifiers {
      * @see Durations#parse(String)
      */
     public static Stringifier<Duration> forDuration() {
-        return DurationStringifier.instance();
+        return DurationStringifier.INSTANCE;
+    }
+
+    /**
+     * Obtains a stringifier that coverts a Timestamp into to RFC 3339 date string format.
+     *
+     * @see Timestamps#toString(Timestamp)
+     */
+    public static Stringifier<Timestamp> forTimestamp() {
+        return TimestampStringifier.INSTANCE;
     }
 
     /**
@@ -108,37 +114,201 @@ public class TimeStringifiers {
     }
 
     /**
-     * Obtains a stringifier that coverts a Timestamp into to RFC 3339 date string format.
+     * Obtains default stringifier for local dates.
      *
-     * @see Timestamps#toString(Timestamp)
+     * <p>The stringifier uses {@code yyyy-MM-dd} format for dates.
+     *
+     * @see LocalDates#parse(String)
      */
-    public static Stringifier<Timestamp> forTimestamp() {
-        return TimestampStringifier.INSTANCE;
+    public static Stringifier<LocalDate> forLocalDate() {
+        return LocalDateStringifier.INSTANCE;
     }
 
     /**
-     * Obtains default stringifier for {@code ZoneOffset}s.
+     * The default stringifier for {@code ZoneOffset} values.
      */
-    public static Stringifier<ZoneOffset> forZoneOffset() {
-        return ZoneOffsetStringifier.instance();
+    private static class ZoneOffsetStringifier extends Stringifier<ZoneOffset>
+                                               implements Serializable {
+        private static final long serialVersionUID = 1;
+        static final ZoneOffsetStringifier INSTANCE = new ZoneOffsetStringifier();
+
+        @Override
+        protected String toString(ZoneOffset offset) {
+            checkNotNull(offset);
+            final String result = ZoneOffsets.toString(offset);
+            return result;
+        }
+
+        @Override
+        protected ZoneOffset fromString(String str) {
+            checkNotNull(str);
+            final ZoneOffset result;
+            try {
+                result = ZoneOffsets.parse(str);
+            } catch (ParseException e) {
+                throw wrappedCause(e);
+            }
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "TimeStringifiers.forZoneOffset()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
     }
 
     /**
-     * Register the default {@linkplain #forZoneOffset() stringifier} for {@code ZoneOffset}s in
-     * the {@link StringifierRegistry}.
+     * The default stringifier for {@code Duration}s.
      */
-    public static void registerStringifier() {
-        StringifierRegistry.getInstance().register(forZoneOffset(), ZoneOffset.class);
+    private static class DurationStringifier extends Stringifier<Duration>
+                                             implements Serializable {
+        private static final long serialVersionUID = 1;
+        static final DurationStringifier INSTANCE = new DurationStringifier();
+
+        @Override
+        protected String toString(Duration duration) {
+            checkNotNull(duration);
+            final String result = Durations.toString(duration);
+            return result;
+        }
+
+        @Override
+        protected Duration fromString(String str) {
+            checkNotNull(str);
+            final Duration result;
+            try {
+                result = Durations.parse(str);
+            } catch (ParseException e) {
+                throw wrappedCause(e);
+            }
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "TimeStringifiers.forDuration()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
+    }
+
+    /**
+     * The stringifier of timestamps into RFC 3339 date string format.
+     */
+    private static class TimestampStringifier extends Stringifier<Timestamp>
+                                              implements Serializable {
+        private static final long serialVersionUID = 1;
+        static final TimestampStringifier INSTANCE = new TimestampStringifier();
+
+        @Override
+        protected String toString(Timestamp obj) {
+            return Timestamps.toString(obj);
+        }
+
+        @Override
+        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+        // It is OK because all necessary information from caught exception is passed.
+        protected Timestamp fromString(String str) {
+            try {
+                return Timestamps.parse(str);
+            } catch (ParseException e) {
+                throw newIllegalArgumentException(e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "TimeStringifiers.forTimestamp()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
+    }
+
+    /**
+     * The stringifier for web-safe representation of timestamps.
+     *
+     * <p>The stringifier replaces colons in the time part of a a RFC 3339 date string
+     * with dashes when converting a timestamp to a string. It also restores the colons
+     * back during the backward conversion.
+     */
+    static class WebSafeTimestampStringifer extends Stringifier<Timestamp>
+                                            implements Serializable {
+        private static final long serialVersionUID = 1;
+        static final WebSafeTimestampStringifer INSTANCE = new WebSafeTimestampStringifer();
+
+        private static final char COLON = ':';
+        private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
+        private static final String DASH = "-";
+
+        /**
+         * The index of a character separating hours and minutes.
+         */
+        private static final int HOUR_SEPARATOR_INDEX = 13;
+        /**
+         * The index of a character separating minutes and seconds.
+         */
+        private static final int MINUTE_SEPARATOR_INDEX = 16;
+
+        /**
+         * Converts the passed timestamp string into a web-safe string, replacing colons to dashes.
+         */
+        private static String toWebSafe(String str) {
+            final String result = PATTERN_COLON.matcher(str)
+                                               .replaceAll(DASH);
+            return result;
+        }
+
+        /**
+         * Converts the passed web-safe timestamp representation to the RFC 3339 date string format.
+         */
+        private static String fromWebSafe(String webSafe) {
+            char[] chars = webSafe.toCharArray();
+            chars[HOUR_SEPARATOR_INDEX] = COLON;
+            chars[MINUTE_SEPARATOR_INDEX] = COLON;
+            return String.valueOf(chars);
+        }        @Override
+        protected String toString(Timestamp timestamp) {
+            String result = Timestamps.toString(timestamp);
+            result = toWebSafe(result);
+            return result;
+        }
+
+        @Override
+        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+        // It is OK because all necessary information from caught exception is passed.
+        protected Timestamp fromString(String webSafe) {
+            try {
+                final String rfcStr = fromWebSafe(webSafe);
+                return Timestamps.parse(rfcStr);
+            } catch (ParseException e) {
+                throw newIllegalArgumentException(e.getMessage(), e);
+            }
+        }
+
+        @Override
+        public String toString() {
+            return "TimeStringifiers.forTimestampWebSafe()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
     }
 
     /**
      * The default stringifier for {@link LocalDate} instances.
      */
     private static final class LocalDateStringifier extends Stringifier<LocalDate>
-            implements Serializable {
-
+                                                    implements Serializable {
         private static final long serialVersionUID = 1;
-
         static final LocalDateStringifier INSTANCE = new LocalDateStringifier();
 
         @Override
@@ -167,162 +337,6 @@ public class TimeStringifiers {
 
         private Object readResolve() {
             return INSTANCE;
-        }
-    }
-
-    //TODO:2017-04-18:alexander.yevsyukov: make all singletons looks the same
-
-    /**
-     * The default stringifier for {@code Duration}s.
-     */
-    private static class DurationStringifier extends Stringifier<Duration> {
-
-        private static final DurationStringifier INSTANCE = new DurationStringifier();
-
-        @Override
-        protected String toString(Duration duration) {
-            checkNotNull(duration);
-            final String result = Durations.toString(duration);
-            return result;
-        }
-
-        @Override
-        protected Duration fromString(String str) {
-            checkNotNull(str);
-            final Duration result;
-            try {
-                result = Durations.parse(str);
-            } catch (ParseException e) {
-                throw wrappedCause(e);
-            }
-            return result;
-        }
-
-        private static DurationStringifier instance() {
-            return INSTANCE;
-        }
-    }
-
-    /**
-     * The stringifier of timestamps into RFC 3339 date string format.
-     */
-    private static class TimestampStringifier extends Stringifier<Timestamp> {
-
-        static final TimestampStringifier INSTANCE = new TimestampStringifier();
-
-        @Override
-        protected String toString(Timestamp obj) {
-            return Timestamps.toString(obj);
-        }
-
-        @Override
-        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
-        // It is OK because all necessary information from caught exception is passed.
-        protected Timestamp fromString(String str) {
-            try {
-                return Timestamps.parse(str);
-            } catch (ParseException e) {
-                throw newIllegalArgumentException(e.getMessage(), e);
-            }
-        }
-    }
-
-    /**
-     * The stringifier for web-safe representation of timestamps.
-     *
-     * <p>The stringifier replaces colons in the time part of a a RFC 3339 date string
-     * with dashes when converting a timestamp to a string. It also restores the colons
-     * back during the backward conversion.
-     */
-    static class WebSafeTimestampStringifer extends Stringifier<Timestamp> {
-
-        static final WebSafeTimestampStringifer INSTANCE = new WebSafeTimestampStringifer();
-
-        private static final char COLON = ':';
-        private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
-        private static final String DASH = "-";
-
-        /**
-         * The index of a character separating hours and minutes.
-         */
-        private static final int HOUR_SEPARATOR_INDEX = 13;
-        /**
-         * The index of a character separating minutes and seconds.
-         */
-        private static final int MINUTE_SEPARATOR_INDEX = 16;
-
-        @Override
-        protected String toString(Timestamp timestamp) {
-            String result = Timestamps.toString(timestamp);
-            result = toWebSafe(result);
-            return result;
-        }
-
-        @Override
-        @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
-        // It is OK because all necessary information from caught exception is passed.
-        protected Timestamp fromString(String webSafe) {
-            try {
-                final String rfcStr = fromWebSafe(webSafe);
-                return Timestamps.parse(rfcStr);
-            } catch (ParseException e) {
-                throw newIllegalArgumentException(e.getMessage(), e);
-            }
-        }
-
-        /**
-         * Converts the passed timestamp string into a web-safe string, replacing colons to dashes.
-         */
-        private static String toWebSafe(String str) {
-            final String result = PATTERN_COLON.matcher(str)
-                                               .replaceAll(DASH);
-            return result;
-        }
-
-        /**
-         * Converts the passed web-safe timestamp representation to the RFC 3339 date string format.
-         */
-        private static String fromWebSafe(String webSafe) {
-            char[] chars = webSafe.toCharArray();
-            chars[HOUR_SEPARATOR_INDEX] = COLON;
-            chars[MINUTE_SEPARATOR_INDEX] = COLON;
-            return String.valueOf(chars);
-        }
-    }
-
-    /**
-     * The default stringifier for {@code ZoneOffset} values.
-     */
-    private static class ZoneOffsetStringifier extends Stringifier<ZoneOffset> {
-
-        @Override
-        protected String toString(ZoneOffset offset) {
-            checkNotNull(offset);
-            final String result = ZoneOffsets.toString(offset);
-            return result;
-        }
-
-        @Override
-        protected ZoneOffset fromString(String str) {
-            checkNotNull(str);
-            final ZoneOffset result;
-            try {
-                result = ZoneOffsets.parse(str);
-            } catch (ParseException e) {
-                throw wrappedCause(e);
-            }
-            return result;
-        }
-
-        private enum Singleton {
-            INSTANCE;
-
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final ZoneOffsetStringifier value = new ZoneOffsetStringifier();
-        }
-
-        private static ZoneOffsetStringifier instance() {
-            return Singleton.INSTANCE.value;
         }
     }
 }

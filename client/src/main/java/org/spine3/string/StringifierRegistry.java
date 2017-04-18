@@ -54,6 +54,7 @@ public class StringifierRegistry {
                             .put(String.class, Stringifiers.noOpStringifier())
                             .put(EventId.class, Events.idStringifier())
                             .put(CommandId.class, Commands.idStringifier())
+                            .putAll(TimeStringifiers.getAll())
                             .build()
             )
     );
