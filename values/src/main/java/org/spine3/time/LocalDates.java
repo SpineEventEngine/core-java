@@ -243,6 +243,7 @@ public class LocalDates {
 
         @Override
         protected String toString(LocalDate date) {
+            checkNotNull(date);
             final String result = LocalDates.toString(date);
             return result;
         }

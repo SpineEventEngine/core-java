@@ -21,6 +21,8 @@
 package org.spine3.time;
 
 import com.google.protobuf.Duration;
+import org.spine3.base.Stringifier;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.protobuf.Durations2;
 
 import java.text.ParseException;
@@ -35,10 +37,11 @@ import static org.spine3.protobuf.Durations2.minutes;
 import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
+import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
- * Utilities for working with ZoneOffset objects.
+ * Utilities for working with {@code ZoneOffset}s.
  *
  * @author Alexander Yevsyukov
  * @author Alexander Aleksandrov
@@ -190,8 +193,59 @@ public class ZoneOffsets {
         final long hours = totalMinutes / MINUTES_PER_HOUR;
         final long minutes = totalMinutes % MINUTES_PER_HOUR;
         final StringBuilder builder = new StringBuilder(6)
-            .append(seconds > 0 ? '+' : '-')
-            .append(format("%02d:%02d", hours, minutes));
+            .append(seconds >= 0 ? '+' : '-')
+            .append(format("%02d:%02d", Math.abs(hours), Math.abs(minutes)));
         return builder.toString();
+    }
+
+    /**
+     * Obtains default stringifier for {@code ZoneOffset}s.
+     */
+    public static Stringifier<ZoneOffset> stringifier() {
+        return ZoneOffsetStringifier.instance();
+    }
+
+    /**
+     * Register the default {@linkplain #stringifier() stringifier} for {@code ZoneOffset}s in
+     * the {@link StringifierRegistry}.
+     */
+    public static void registerStringifier() {
+        StringifierRegistry.getInstance().register(stringifier(), ZoneOffset.class);
+    }
+
+    /**
+     * The default stringifier for {@code ZoneOffset} values.
+     */
+    private static class ZoneOffsetStringifier extends Stringifier<ZoneOffset> {
+
+        @Override
+        protected String toString(ZoneOffset offset) {
+            checkNotNull(offset);
+            final String result = ZoneOffsets.toString(offset);
+            return result;
+        }
+
+        @Override
+        protected ZoneOffset fromString(String str) {
+            checkNotNull(str);
+            final ZoneOffset result;
+            try {
+                result = parse(str);
+            } catch (ParseException e) {
+                throw wrappedCause(e);
+            }
+            return result;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final ZoneOffsetStringifier value = new ZoneOffsetStringifier();
+        }
+
+        private static ZoneOffsetStringifier instance() {
+            return Singleton.INSTANCE.value;
+        }
     }
 }

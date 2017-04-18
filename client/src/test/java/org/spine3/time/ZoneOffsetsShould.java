@@ -22,12 +22,14 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import org.junit.Test;
+import org.spine3.base.StringifierRegistry;
 import org.spine3.protobuf.Durations2;
 
 import java.text.ParseException;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
@@ -103,11 +105,33 @@ public class ZoneOffsetsShould {
     }
 
     @Test
+    public void convert_to_string() throws ParseException {
+        final ZoneOffset positive = ofHoursMinutes(5, 48);
+        final ZoneOffset negative = ofHoursMinutes(-3, -36);
+
+        assertEquals(positive, parse(ZoneOffsets.toString(positive)));
+        assertEquals(negative, parse(ZoneOffsets.toString(negative)));
+    }
+
+    @Test
     public void parse_string() throws ParseException {
         assertEquals(ofHoursMinutes(4, 30), parse("+4:30"));
         assertEquals(ofHoursMinutes(4, 30), parse("+04:30"));
 
         assertEquals(ofHoursMinutes(-2, -45), parse("-2:45"));
         assertEquals(ofHoursMinutes(-2, -45), parse("-02:45"));
+    }
+
+    @Test
+    public void register_stringifier() {
+        assertFalse(StringifierRegistry.getInstance()
+                                       .get(ZoneOffset.class)
+                                       .isPresent());
+
+        ZoneOffsets.registerStringifier();
+
+        assertEquals(ZoneOffsets.stringifier(), StringifierRegistry.getInstance()
+                                                                   .get(ZoneOffset.class)
+                                                                   .get());
     }
 }

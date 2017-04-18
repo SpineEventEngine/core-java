@@ -30,6 +30,7 @@ import java.util.Calendar;
 
 import static java.util.Calendar.getInstance;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getDay;
@@ -225,6 +226,10 @@ public class LocalDatesShould {
 
     @Test
     public void register_stringifier() {
+        assertFalse(StringifierRegistry.getInstance()
+                                       .get(LocalDate.class)
+                                       .isPresent());
+
         LocalDates.registerStringifier();
 
         assertEquals(LocalDates.stringifier(), StringifierRegistry.getInstance()
