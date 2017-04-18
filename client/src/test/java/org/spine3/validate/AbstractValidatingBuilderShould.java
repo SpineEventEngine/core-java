@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.spine3.base.ConversionException;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
+import org.spine3.base.Stringifiers;
 import org.spine3.test.types.Task;
 import org.spine3.test.validate.msg.PatternStringFieldValue;
 import org.spine3.test.validate.msg.ProjectId;
@@ -40,7 +41,6 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Stringifiers.listStringifier;
 import static org.spine3.base.Types.listTypeOf;
 
 /**
@@ -58,7 +58,7 @@ public class AbstractValidatingBuilderShould {
     @Test
     public void return_converted_value() throws ConversionException {
         final Type type = listTypeOf(Integer.class);
-        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class);
+        final Stringifier<List<Integer>> stringifier = Stringifiers.newForListOf(Integer.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         final List<Integer> convertedValue =
@@ -81,7 +81,7 @@ public class AbstractValidatingBuilderShould {
     public void throw_exception_when_string_cannot_be_converted() throws ConversionException {
         final String stringToConvert = "";
         final Type type = listTypeOf(Timestamp.class);
-        final Stringifier<List<Timestamp>> stringifier = listStringifier(Timestamp.class);
+        final Stringifier<List<Timestamp>> stringifier = Stringifiers.newForListOf(Timestamp.class);
         StringifierRegistry.getInstance()
                            .register(stringifier, type);
         validatingBuilder.convert(stringToConvert, type);

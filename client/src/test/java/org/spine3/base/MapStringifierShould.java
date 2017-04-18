@@ -33,7 +33,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Stringifiers.mapStringifier;
+import static org.spine3.base.Stringifiers.newForMapOf;
 
 /**
  * @author Illia Shepilov
@@ -45,7 +45,7 @@ public class MapStringifierShould {
         final String rawMap = "\"1\":\"1972-01-01T10\\:00\\:20.021-05\\:00\"," +
                               "\"2\":\"1972-01-01T10\\:00\\:20.021-05\\:00\"";
         final Stringifier<Map<Long, Timestamp>> stringifier =
-                mapStringifier(Long.class, Timestamp.class);
+                Stringifiers.newForMapOf(Long.class, Timestamp.class);
         final Map<Long, Timestamp> actualMap = stringifier.fromString(rawMap);
         final Map<Long, Timestamp> expectedMap = newHashMap();
 
@@ -59,7 +59,7 @@ public class MapStringifierShould {
     public void convert_map_to_string() {
         final Map<String, Integer> mapToConvert = createTestMap();
         final Stringifier<Map<String, Integer>> stringifier =
-                mapStringifier(String.class, Integer.class);
+                Stringifiers.newForMapOf(String.class, Integer.class);
         final String convertedMap = stringifier.toString(mapToConvert);
         assertEquals(convertMapToString(mapToConvert).length(), convertedMap.length());
     }
@@ -68,19 +68,19 @@ public class MapStringifierShould {
     public void throw_exception_when_passed_parameter_does_not_match_expected_format() {
         final String incorrectRawMap = "\"first\":\"1\",\"second\":\"2\"";
         final Stringifier<Map<Integer, Integer>> stringifier =
-                mapStringifier(Integer.class, Integer.class);
+                Stringifiers.newForMapOf(Integer.class, Integer.class);
         stringifier.fromString(incorrectRawMap);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_occurred_exception_during_conversion() {
-        final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
+        final Stringifier<Map<Long, Long>> stringifier = Stringifiers.newForMapOf(Long.class, Long.class);
         stringifier.fromString("first\":\"first\":\"first\"");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_key_value_delimiter_is_wrong() {
-        final Stringifier<Map<Long, Long>> stringifier = mapStringifier(Long.class, Long.class);
+        final Stringifier<Map<Long, Long>> stringifier = Stringifiers.newForMapOf(Long.class, Long.class);
         stringifier.fromString("1\\-1");
     }
 
@@ -88,7 +88,7 @@ public class MapStringifierShould {
     public void convert_map_with_custom_delimiter() {
         final String rawMap = "\"first\":\"1\"|\"second\":\"2\"|\"third\":\"3\"";
         final Stringifier<Map<String, Integer>> stringifier =
-                mapStringifier(String.class, Integer.class, '|');
+                newForMapOf(String.class, Integer.class, '|');
         final Map<String, Integer> convertedMap = stringifier.fromString(rawMap);
         assertThat(convertedMap, is(createTestMap()));
     }
@@ -97,7 +97,7 @@ public class MapStringifierShould {
     public void convert_from_map_to_string_and_backward() {
         final Map<String, Integer> mapToConvert = createTestMap();
         final Stringifier<Map<String, Integer>> stringifier =
-                mapStringifier(String.class, Integer.class);
+                Stringifiers.newForMapOf(String.class, Integer.class);
         final String convertedString = stringifier.toString(mapToConvert);
         final Map<String, Integer> actualMap = stringifier.fromString(convertedString);
         assertEquals(mapToConvert, actualMap);
@@ -106,8 +106,8 @@ public class MapStringifierShould {
     @Test
     public void convert_string_which_contains_delimiter_in_content_to_map() {
         final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\",\"2\\:\":\"two\"";
-        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
-                                                                            String.class);
+        final Stringifier<Map<String, String>> stringifier = Stringifiers.newForMapOf(String.class,
+                                                                                      String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
 
         assertEquals("one,", actualMap.get("1\"\""));
@@ -117,8 +117,8 @@ public class MapStringifierShould {
     @Test
     public void convert_string_which_contains_delimiter_in_content_to_map_and_backward() {
         final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\"";
-        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
-                                                                            String.class);
+        final Stringifier<Map<String, String>> stringifier = Stringifiers.newForMapOf(String.class,
+                                                                                      String.class);
         final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
         final String convertedMap = stringifier.toString(actualMap);
 
@@ -158,7 +158,7 @@ public class MapStringifierShould {
     @Test(expected = NullPointerException.class)
     public void throw_exception_when_key_is_null() {
         final Stringifier<Map<String, String>> stringifier =
-                mapStringifier(String.class, String.class);
+                Stringifiers.newForMapOf(String.class, String.class);
         final Map<String, String> mapWithNulls = newHashMap();
         mapWithNulls.put("1", "2");
         mapWithNulls.put(null, "2");
@@ -166,8 +166,8 @@ public class MapStringifierShould {
     }
 
     private static void tryToConvert(String stringToConvert) {
-        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
-                                                                            String.class);
+        final Stringifier<Map<String, String>> stringifier = Stringifiers.newForMapOf(String.class,
+                                                                                      String.class);
         stringifier.fromString(stringToConvert);
     }
 

@@ -35,9 +35,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Stringifiers.booleanStringifier;
-import static org.spine3.base.Stringifiers.integerStringifier;
-import static org.spine3.base.Stringifiers.longStringifier;
+import static org.spine3.base.Stringifiers.forBoolean;
+import static org.spine3.base.Stringifiers.forInteger;
+import static org.spine3.base.Stringifiers.forLong;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -110,13 +110,13 @@ public class StringifiersShould {
 
     @Test
     public void convert_long_to_string() {
-        final String convertedLong = longStringifier().toString(1L);
+        final String convertedLong = forLong().toString(1L);
         assertEquals("1", convertedLong);
     }
 
     @Test
     public void convert_int_to_string() {
-        final String convertedInt = integerStringifier().toString(2);
+        final String convertedInt = forInteger().toString(2);
         assertEquals("2", convertedInt);
     }
 
@@ -154,7 +154,7 @@ public class StringifiersShould {
     @SuppressWarnings("ConstantConditions") // Nulls are not possible for boolean stringifier
     @Test
     public void provide_boolean_stringifier() {
-        final Stringifier<Boolean> stringifier = booleanStringifier();
+        final Stringifier<Boolean> stringifier = forBoolean();
 
         assertTrue(stringifier.reverse()
                               .convert(stringifier.convert(true)));

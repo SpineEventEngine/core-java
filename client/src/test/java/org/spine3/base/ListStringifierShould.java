@@ -31,7 +31,6 @@ import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static org.spine3.base.Stringifiers.listStringifier;
 
 /**
  * @author Illia Shepilov
@@ -41,7 +40,7 @@ public class ListStringifierShould {
     @Test
     public void convert_string_with_backslashes_to_list_and_backward() {
         final String stringToConvert = "\"\\\"\\1\\\"\\\"";
-        Stringifier<List<String>> stringifier = listStringifier(String.class);
+        Stringifier<List<String>> stringifier = Stringifiers.newForListOf(String.class);
         final List<String> convertedList = stringifier.fromString(stringToConvert);
         final String convertedString = stringifier.toString(convertedList);
         assertEquals(stringToConvert, convertedString);
@@ -50,8 +49,8 @@ public class ListStringifierShould {
     @Test
     public void convert_string_to_list_of_strings() {
         final String stringToConvert = "\"1\\\"\",\"2\",\"3\\\"\",\"4\",\"5\"";
-        final List<String> actualList = listStringifier(String.class).reverse()
-                                                                     .convert(stringToConvert);
+        final List<String> actualList = Stringifiers.newForListOf(String.class).reverse()
+                                                    .convert(stringToConvert);
         assertNotNull(actualList);
 
         final List<String> expectedList = newArrayList("1\"", "2", "3\"", "4", "5");
@@ -61,7 +60,7 @@ public class ListStringifierShould {
     @Test
     public void convert_string_to_list_of_strings_and_backward() {
         final String stringToConvert = "\"1\\\"\",\"2\",\"3\\\"\",\"4\",\"5\"";
-        final Stringifier<List<String>> stringifier = listStringifier(String.class);
+        final Stringifier<List<String>> stringifier = Stringifiers.newForListOf(String.class);
         final List<String> actualList = stringifier.reverse()
                                                    .convert(stringToConvert);
         final String convertedList = stringifier.convert(actualList);
@@ -71,7 +70,7 @@ public class ListStringifierShould {
     @Test
     public void convert_list_of_strings_to_string() {
         final List<String> listToConvert = newArrayList("1", "2", "3", "4", "5");
-        final String actual = listStringifier(String.class).convert(listToConvert);
+        final String actual = Stringifiers.newForListOf(String.class).convert(listToConvert);
 
         assertEquals(escapeString(listToConvert.toString()), actual);
     }
@@ -79,14 +78,14 @@ public class ListStringifierShould {
     @Test
     public void convert_list_of_integers_to_string() {
         final List<Integer> listToConvert = newArrayList(1, 2, 3, 4, 5);
-        final String actual = listStringifier(Integer.class).convert(listToConvert);
+        final String actual = Stringifiers.newForListOf(Integer.class).convert(listToConvert);
         assertEquals(escapeString(listToConvert.toString()), actual);
     }
 
     @Test
     public void convert_string_to_list_of_integers() {
         final String stringToConvert = "\"1\"|\"2\"|\"3\"|\"4\"|\"5\"";
-        final Stringifier<List<Integer>> stringifier = listStringifier(Integer.class, '|');
+        final Stringifier<List<Integer>> stringifier = Stringifiers.newForListOf(Integer.class, '|');
         final List<Integer> actualList = stringifier.fromString(stringToConvert);
         assertNotNull(actualList);
 
@@ -97,14 +96,14 @@ public class ListStringifierShould {
     @Test(expected = MissingStringifierException.class)
     public void emit_exception_when_list_type_does_not_have_appropriate_stringifier() {
         final String stringToConvert = "\"{value:123456}\"";
-        final Stringifier<List<Object>> stringifier = listStringifier(Object.class);
+        final Stringifier<List<Object>> stringifier = Stringifiers.newForListOf(Object.class);
         stringifier.fromString(stringToConvert);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_when_element_is_null() {
         final List<String> listToConvert = newArrayList("1", "2", null, "4");
-        listStringifier(String.class).toString(listToConvert);
+        Stringifiers.newForListOf(String.class).toString(listToConvert);
     }
 
     private static String escapeString(String stringToEscape) {

@@ -23,6 +23,7 @@ package org.spine3.time;
 import org.spine3.base.Stringifier;
 import org.spine3.base.StringifierRegistry;
 
+import java.io.Serializable;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -225,7 +226,7 @@ public class LocalDates {
      * @see #parse(String)
      */
     public static Stringifier<LocalDate> stringifier() {
-        return LocalDateStringifier.instance();
+        return LocalDateStringifier.INSTANCE;
     }
 
     /**
@@ -239,7 +240,12 @@ public class LocalDates {
     /**
      * The default stringifier for {@link LocalDate} instances.
      */
-    private static final class LocalDateStringifier extends Stringifier<LocalDate> {
+    private static final class LocalDateStringifier extends Stringifier<LocalDate>
+                                                    implements Serializable {
+
+        private static final long serialVersionUID = 1;
+
+        static final LocalDateStringifier INSTANCE = new LocalDateStringifier();
 
         @Override
         protected String toString(LocalDate date) {
@@ -260,15 +266,13 @@ public class LocalDates {
             return date;
         }
 
-        private enum Singleton {
-            INSTANCE;
-
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final LocalDateStringifier value = new LocalDateStringifier();
+        @Override
+        public String toString() {
+            return "TimeStringifiers.forLocalDate()";
         }
 
-        private static LocalDateStringifier instance() {
-            return Singleton.INSTANCE.value;
+        private Object readResolve() {
+            return INSTANCE;
         }
     }
 }
