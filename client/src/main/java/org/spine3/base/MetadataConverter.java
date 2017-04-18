@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
@@ -37,7 +38,9 @@ import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
 public class MetadataConverter {
 
     private static final String ERROR_KEY_NAME = "Spine-Error-bin";
-    private static final Key<byte[]> KEY = Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
+
+    @VisibleForTesting
+    static final Key<byte[]> KEY = Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
 
     // Prevent instantiation of this utility class.
     private MetadataConverter() {
