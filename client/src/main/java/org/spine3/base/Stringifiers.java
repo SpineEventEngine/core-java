@@ -27,6 +27,7 @@ import com.google.common.primitives.Longs;
 import com.google.protobuf.Message;
 import org.spine3.json.Json;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Map;
@@ -140,9 +141,14 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for the integers values.
-     *
-     * @return the stringifier for the integer values
+     * Obtains {@code Stringifier} for {@code Boolean} values.
+     */
+    public static Stringifier<Boolean> booleanStringifier() {
+        return BooleanStringifier.INSTANCE;
+    }
+
+    /**
+     * Obtains {@code Stringifier} for integers values.
      */
     public static Stringifier<Integer> integerStringifier() {
         final Stringifier<Integer> integerStringifier = new IntegerStringifier();
@@ -150,9 +156,7 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for the long values
-     *
-     * @return the stringifier for the long values
+     * Obtains {@code Stringifier} for long values.
      */
     public static Stringifier<Long> longStringifier() {
         final Stringifier<Long> integerStringifier = new LongStringifier();
@@ -160,11 +164,9 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for the string values.
+     * Obtains {@code Stringifier} for string values.
      *
      * <p>It does not make any modifications to {@code String}.
-     *
-     * @return the stringifier for the string values
      */
     static Stringifier<String> noopStringifier() {
         final Stringifier<String> stringStringifier = new NoopStringifier();
@@ -280,6 +282,38 @@ public class Stringifiers {
         protected Integer fromString(String s) {
             return Ints.stringConverter()
                        .convert(s);
+        }
+    }
+
+    /**
+     * The {@code Stringifier} for boolean values.
+     */
+    private static class BooleanStringifier extends Stringifier<Boolean> implements Serializable {
+
+        private static final long serialVersionUID = 1;
+
+        static final BooleanStringifier INSTANCE = new BooleanStringifier();
+
+        @Override
+        protected String toString(Boolean value) {
+            checkNotNull(value);
+            return value.toString();
+        }
+
+        @Override
+        protected Boolean fromString(String s) {
+            checkNotNull(s);
+            final Boolean result = Boolean.parseBoolean(s);
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "Stringifiers.booleanStringifier()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
         }
     }
 

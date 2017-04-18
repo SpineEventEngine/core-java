@@ -48,6 +48,7 @@ public class StringifierRegistry {
     private final Map<Type, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(
                     ImmutableMap.<Type, Stringifier<?>>builder()
+                            .put(Boolean.class, Stringifiers.booleanStringifier())
                             .put(Integer.class, Stringifiers.integerStringifier())
                             .put(Long.class, Stringifiers.longStringifier())
                             .put(String.class, Stringifiers.noopStringifier())
