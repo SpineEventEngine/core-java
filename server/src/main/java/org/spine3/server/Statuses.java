@@ -20,21 +20,15 @@
 
 package org.spine3.server;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Converter;
-import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
-import io.grpc.Metadata.Key;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Error;
-import org.spine3.util.Exceptions;
+import org.spine3.base.MetadataConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
 import static io.grpc.Status.INVALID_ARGUMENT;
-import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Utility class for working with {@link Status}es.
@@ -43,8 +37,6 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  */
 @Internal
 public class Statuses {
-
-    private static final MetadataConverter METADATA_CONVERTER = new MetadataConverter();
 
     private Statuses() {
     }
@@ -61,52 +53,8 @@ public class Statuses {
      */
     public static StatusRuntimeException invalidArgumentWithMetadata(Error error) {
         checkNotNull(error);
-        final Metadata metadata = METADATA_CONVERTER.doForward(error);
+        final Metadata metadata = MetadataConverter.toMetadata(error);
         final StatusRuntimeException result = INVALID_ARGUMENT.asRuntimeException(metadata);
         return result;
-    }
-
-    /**
-     * Serves as converter from {@link Error} to {@link Metadata} and vice versa.
-     */
-    @VisibleForTesting
-    static class MetadataConverter extends Converter<Error, Metadata> {
-
-        private static final String ERROR_KEY_NAME = "Spine-Error-bin";
-        private static final Key<byte[]> KEY = Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
-
-        /**
-         * Returns the {@link Metadata}, containing the {@link Error} as a byte array.
-         *
-         * @param error the error to convert
-         * @return the metadata containing error
-         */
-        @Override
-        protected Metadata doForward(Error error) {
-            final Metadata metadata = new Metadata();
-            metadata.put(KEY, error.toByteArray());
-            return metadata;
-        }
-
-        /**
-         * Returns the {@link Error} extracted from the {@link Metadata}.
-         *
-         * @param metadata the metadata to convert
-         * @return the error extracted from the metadata
-         */
-        @Override
-        protected Error doBackward(Metadata metadata) {
-            final byte[] bytes = metadata.get(KEY);
-
-            if (bytes == null) {
-                throw newIllegalStateException("Specified metadata do not contain the $s", KEY);
-            }
-
-            try {
-                return Error.parseFrom(bytes);
-            } catch (InvalidProtocolBufferException e) {
-                throw Exceptions.wrappedCause(e);
-            }
-        }
     }
 }
