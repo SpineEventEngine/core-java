@@ -20,7 +20,10 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
+import io.grpc.Metadata;
+import io.grpc.Status;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -53,6 +56,31 @@ public class ErrorsShould {
         assertEquals(msg, error.getMessage());
         assertEquals(throwable.getClass()
                               .getName(), error.getType());
+    }
+
+    @Test
+    public void return_Error_extracted_from_StatusRuntimeException_metadata() {
+        final Error expectedError = Error.getDefaultInstance();
+        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        final Throwable statusRuntimeEx = Status.INVALID_ARGUMENT.asRuntimeException(metadata);
+
+        assertEquals(expectedError, Errors.fromStatusRuntimeException(statusRuntimeEx)
+                                          .get());
+    }
+
+    @Test
+    public void return_absent_if_there_is_no_error_in_metadata() {
+        final Metadata emptyMetadata = new Metadata();
+        final Throwable statusRuntimeEx = Status.INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
+
+        assertEquals(Optional.absent(), Errors.fromStatusRuntimeException(statusRuntimeEx));
+    }
+
+    @Test
+    public void return_absent_if_passed_Throwable_is_not_StatusRuntimeException() {
+        final Exception exception = new Exception("An exception");
+
+        assertEquals(Optional.absent(), Errors.fromStatusRuntimeException(exception));
     }
 
     @Test
