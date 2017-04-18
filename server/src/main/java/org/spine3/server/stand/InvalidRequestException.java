@@ -43,9 +43,9 @@ public class InvalidRequestException extends RuntimeException {
      * @param request     a related actor request
      * @param error       an error occurred
      */
-    protected InvalidRequestException(String messageText,
-                                      GeneratedMessageV3 request,
-                                      Error error) {
+    InvalidRequestException(String messageText,
+                            GeneratedMessageV3 request,
+                            Error error) {
         super(messageText);
         this.request = request;
         this.error = error;

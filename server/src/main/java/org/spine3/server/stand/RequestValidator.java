@@ -30,16 +30,16 @@ import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.MessageValidator;
 import org.spine3.validate.ValidationError;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static java.lang.String.format;
 import static org.spine3.server.Statuses.invalidArgumentWithCause;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.validate.ConstraintViolations.toText;
 
 /**
  * An abstract base of validators for the incoming requests to {@linkplain Stand}.
- *
- * TODO:4/14/17:alex.tymchenko: add more docs
  *
  * @param <M> the type of request
  * @author Alex Tymchenko
@@ -66,24 +66,46 @@ abstract class RequestValidator<M extends Message> {
      *
      * @param request the request to test
        @return a {@linkplain RequestNotSupported value object} holding
-               the details of support absense,
+               the details of support absence,
                or {@code Optional.absent()} if the request is supported
      */
     protected abstract Optional<RequestNotSupported<M>> isSupported(M request);
 
-    void validate(M request, StreamObserver<?> responseObserver) {
+    /**
+     * Checks whether the passed {@code request} is valid:
+     *
+     * <ol>
+     *      <li>as a {@code Message}, according to the constraints set in its Protobuf definition;
+     *      <li>meaning it is supported by a target {@code Stand}
+     *          and may be passed for the further processing.
+     * </ol>
+     *
+     * <p>In case the validation is not successful, the provide {@code responseObserver}
+     * is {@linkplain StreamObserver#onError(Throwable) notified of an error}.
+     * Also, an {@code IllegalArgumentException} is thrown exposing the validation failure.
+     *
+     * @param request          the request {@code Message} to validate
+     * @param responseObserver the observer to notify of a potenital validation error.
+     * @throws IllegalArgumentException if the passed request is not valid
+     */
+    void validate(M request, StreamObserver<?> responseObserver) throws IllegalArgumentException {
+        handleValidationResult(validateMessage(request).orNull(), responseObserver);
+        handleValidationResult(checkSupported(request).orNull(), responseObserver);
+    }
 
-        final Optional<InvalidRequestException> messageInvalid = validateMessage(request);
-        if (messageInvalid.isPresent()) {
-            feedToResponse(messageInvalid.get(), responseObserver);
-            return;
+    /**
+     * Handles the {@linkplain InvalidRequestException request validation exception},
+     * if it is present.
+     *
+     * <p>The given {@code responseObserver} is fed with the exception details.
+     * Also, the {@code exception} is thrown, wrapped as an {@code IllegalStateException}.
+     */
+    private static void handleValidationResult(@Nullable InvalidRequestException exception,
+                                               StreamObserver<?> responseObserver) {
+        if (exception != null) {
+            feedToResponse(exception, responseObserver);
+            throw newIllegalArgumentException(exception, exception.getMessage());
         }
-
-        final Optional<InvalidRequestException> notSupported = checkSupported(request);
-        if (notSupported.isPresent()) {
-            feedToResponse(notSupported.get(), responseObserver);
-        }
-
     }
 
     /**
