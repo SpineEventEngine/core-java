@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 /**
  * Thrown when a string conversion operation encounters a type for which
- * there is no registered {@link org.spine3.base.Stringifier Stringifier}.
+ * there is no registered {@link Stringifier Stringifier}.
  *
  * @author Alexander Yevsyukov
- * @see org.spine3.base.StringifierRegistry#register(org.spine3.base.Stringifier,
+ * @see StringifierRegistry#register(Stringifier,
  *      java.lang.reflect.Type) StringifierRegistry.register()
  */
 public class MissingStringifierException extends RuntimeException {

@@ -8,7 +8,8 @@ package org.spine3.protobuf;
 import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
 import com.google.protobuf.util.Durations;
-import org.spine3.base.Stringifier;
+import org.spine3.string.Stringifier;
+import org.spine3.string.StringifierRegistry;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;
@@ -268,7 +269,7 @@ public class Durations2 {
      * Obtains the default stringifier for {@code Duration} instances.
      *
      * <p>This stringifier is automatically registered in the
-     * {@link org.spine3.base.StringifierRegistry StringifierRegistry}.
+     * {@link StringifierRegistry StringifierRegistry}.
      *
      * @see Durations#toString(Duration)
      * @see Durations#parse(String)

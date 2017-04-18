@@ -33,6 +33,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Durations2;
+import org.spine3.string.Stringifiers;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;

@@ -22,7 +22,7 @@ package org.spine3.protobuf;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import org.junit.Test;
-import org.spine3.base.Stringifier;
+import org.spine3.string.Stringifier;
 
 import static com.google.protobuf.util.Durations.subtract;
 import static org.junit.Assert.assertEquals;

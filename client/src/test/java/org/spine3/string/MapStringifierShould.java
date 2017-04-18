@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
@@ -33,7 +33,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Stringifiers.newForMapOf;
+import static org.spine3.string.Stringifiers.newForMapOf;
 
 /**
  * @author Illia Shepilov

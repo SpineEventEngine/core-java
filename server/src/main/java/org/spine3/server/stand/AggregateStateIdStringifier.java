@@ -21,8 +21,8 @@
 package org.spine3.server.stand;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifier;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifier;
+import org.spine3.string.Stringifiers;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 

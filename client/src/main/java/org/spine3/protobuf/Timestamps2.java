@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.TimestampOrBuilder;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.annotations.Internal;
-import org.spine3.base.Stringifier;
+import org.spine3.string.Stringifier;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;

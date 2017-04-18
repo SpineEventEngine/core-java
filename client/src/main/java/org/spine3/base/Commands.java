@@ -31,6 +31,7 @@ import org.spine3.annotations.Internal;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
+import org.spine3.string.Stringifier;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;

@@ -20,8 +20,8 @@
 
 package org.spine3.time;
 
-import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
+import org.spine3.string.Stringifier;
+import org.spine3.string.StringifierRegistry;
 
 import java.io.Serializable;
 import java.text.DateFormat;

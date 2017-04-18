@@ -21,9 +21,9 @@
 package org.spine3.time;
 
 import com.google.protobuf.Duration;
-import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
 import org.spine3.protobuf.Durations2;
+import org.spine3.string.Stringifier;
+import org.spine3.string.StringifierRegistry;
 
 import java.text.ParseException;
 import java.util.TimeZone;

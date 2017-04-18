@@ -23,6 +23,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.Timestamps2;
+import org.spine3.string.Stringifier;
 import org.spine3.users.UserId;
 
 import java.util.Collections;

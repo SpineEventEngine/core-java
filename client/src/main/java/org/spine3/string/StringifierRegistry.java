@@ -18,13 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
+import org.spine3.base.EventId;
+import org.spine3.base.Events;
 import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 

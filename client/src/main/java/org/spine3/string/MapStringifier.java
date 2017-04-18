@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
@@ -30,8 +30,6 @@ import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static org.spine3.base.Quoter.createDelimiterPattern;
-import static org.spine3.base.StringifierRegistry.getStringifier;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -96,11 +94,11 @@ class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
      */
     MapStringifier(Class<K> keyClass, Class<V> valueClass, char delimiter) {
         super();
-        this.keyStringifier = getStringifier(keyClass);
-        this.valueStringifier = getStringifier(valueClass);
+        this.keyStringifier = StringifierRegistry.getStringifier(keyClass);
+        this.valueStringifier = StringifierRegistry.getStringifier(valueClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = createMapSplitter(createDelimiterPattern(delimiter),
+        this.splitter = createMapSplitter(Quoter.createDelimiterPattern(delimiter),
                                           createKeyValuePattern());
     }
 

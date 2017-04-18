@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
@@ -33,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
  * Utility class for working with {@code Stringifier}s.
@@ -78,7 +77,7 @@ public class Stringifiers {
         checkNotNull(object);
         checkNotNull(typeOfT);
 
-        final Stringifier<T> stringifier = getStringifier(typeOfT);
+        final Stringifier<T> stringifier = StringifierRegistry.getStringifier(typeOfT);
         final String result = stringifier.convert(object);
         return result;
     }
@@ -96,7 +95,7 @@ public class Stringifiers {
         checkNotNull(str);
         checkNotNull(typeOfT);
 
-        final Stringifier<T> stringifier = getStringifier(typeOfT);
+        final Stringifier<T> stringifier = StringifierRegistry.getStringifier(typeOfT);
         final T result = stringifier.reverse()
                                     .convert(str);
         return result;

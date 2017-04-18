@@ -25,9 +25,9 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.base.Stringifiers;
 import org.spine3.base.Version;
 import org.spine3.envelope.MessageEnvelope;
+import org.spine3.string.Stringifiers;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;

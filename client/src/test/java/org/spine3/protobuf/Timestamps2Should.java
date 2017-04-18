@@ -24,8 +24,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.base.Stringifier;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifier;
+import org.spine3.string.Stringifiers;
 import org.spine3.test.TimeTests;
 
 import java.util.Date;

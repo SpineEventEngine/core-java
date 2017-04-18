@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
@@ -28,8 +28,6 @@ import com.google.common.escape.Escaper;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.Quoter.createDelimiterPattern;
-import static org.spine3.base.StringifierRegistry.getStringifier;
 
 /**
  * The stringifier for the {@code List} classes.
@@ -90,10 +88,10 @@ class ListStringifier<T> extends Stringifier<List<T>> {
      */
     ListStringifier(Class<T> listGenericClass, char delimiter) {
         super();
-        this.elementStringifier = getStringifier(listGenericClass);
+        this.elementStringifier = StringifierRegistry.getStringifier(listGenericClass);
         this.delimiter = delimiter;
         this.escaper = Stringifiers.createEscaper(delimiter);
-        this.splitter = Splitter.onPattern(createDelimiterPattern(delimiter));
+        this.splitter = Splitter.onPattern(Quoter.createDelimiterPattern(delimiter));
     }
 
     /**

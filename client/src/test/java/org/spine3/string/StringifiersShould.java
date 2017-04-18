@@ -18,11 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.string;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.base.CommandId;
+import org.spine3.base.EventId;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.users.UserId;
 
@@ -35,9 +37,9 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Stringifiers.forBoolean;
-import static org.spine3.base.Stringifiers.forInteger;
-import static org.spine3.base.Stringifiers.forLong;
+import static org.spine3.string.Stringifiers.forBoolean;
+import static org.spine3.string.Stringifiers.forInteger;
+import static org.spine3.string.Stringifiers.forLong;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
