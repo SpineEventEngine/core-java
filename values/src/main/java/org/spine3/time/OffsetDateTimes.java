@@ -19,8 +19,10 @@
  */
 package org.spine3.time;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
@@ -30,9 +32,12 @@ import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
+import static org.spine3.protobuf.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.time.Calendars.nowAt;
+import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
+import static org.spine3.time.Formats.formatNanos;
 import static org.spine3.time.Parser.parserOffsetDateTime;
 import static org.spine3.validate.Validate.checkPositive;
 
@@ -44,6 +49,14 @@ import static org.spine3.validate.Validate.checkPositive;
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public class OffsetDateTimes {
+
+    private static final ThreadLocal<DateFormat> dateTimeFormat =
+            new ThreadLocal<DateFormat>() {
+                @Override
+                protected DateFormat initialValue() {
+                    return Formats.createDateTimeFormat();
+                }
+            };
 
     private OffsetDateTimes() {
         // Prevent instantiation of this utility class.
@@ -332,7 +345,7 @@ public class OffsetDateTimes {
 
         final LocalDate date = toLocalDate(calendar);
         final LocalTime time = toLocalTime(calendar);
-        final long nanos = value.getTime()
+        final int nanos = value.getTime()
                                 .getNanos();
         final LocalTime timeWithNanos = time.toBuilder()
                                             .setNanos(nanos)
@@ -353,7 +366,38 @@ public class OffsetDateTimes {
     }
 
     /**
-     * Parse from RFC 3339 date string to {@code OffsetDateTime}.
+     * Returns a RFC 3339 date/time string representation of the passed value.
+     */
+    public static String toString(OffsetDateTime value) {
+        final Calendar calendar = toCalendar(value);
+        final Date date = calendar.getTime();
+        final LocalTime time = value.getTime();
+        final long nanos = time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
+        final ZoneOffset offset = value.getOffset();
+
+        final StringBuilder result = new StringBuilder();
+
+        // Format the date/time part.
+        result.append(dateTimeFormat.get().format(date));
+
+        // Format the fractional second part.
+        if (nanos != 0) {
+            result.append('.');
+            result.append(formatNanos(nanos));
+        }
+
+        // Add time zone.
+        if (offset.getAmountSeconds() == 0) {
+            result.append('Z');
+        } else {
+            result.append(ZoneOffsets.toString(offset));
+        }
+
+        return result.toString();
+    }
+
+    /**
+     * Parse from RFC 3339 date/time string to {@code OffsetDateTime}.
      *
      * @throws ParseException if the passed string is not a valid date-time value
      */

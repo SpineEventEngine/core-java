@@ -65,7 +65,8 @@ class Parser {
 
     static OffsetDateTime parserOffsetDateTime(String value) throws ParseException {
         final Parser parser = new Parser(value);
-        return parser.parseOffsetDateTime();
+        final OffsetDateTime result = parser.parseOffsetDateTime();
+        return result;
     }
 
     OffsetDateTime parseOffsetDateTime() throws ParseException {
@@ -100,14 +101,16 @@ class Parser {
                 );
                 throw new ParseException(errMsg, 0);
             }
+            zoneOffset = ZoneOffsets.UTC;
         } else {
             final String offsetValue = value.substring(timezoneOffsetPosition);
-            final int zoneOffset = ZoneOffsets.parse(offsetValue)
-                                              .getAmountSeconds();
+            zoneOffset = ZoneOffsets.parse(offsetValue);
+            final int offsetSeconds = ZoneOffsets.parse(offsetValue)
+                                                 .getAmountSeconds();
             if (value.charAt(timezoneOffsetPosition) == '+') {
-                seconds -= zoneOffset;
+                seconds -= offsetSeconds;
             } else {
-                seconds += zoneOffset;
+                seconds += offsetSeconds;
             }
         }
     }

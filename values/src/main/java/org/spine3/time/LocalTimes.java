@@ -69,7 +69,7 @@ public class LocalTimes {
     /**
      * Obtains local time from an hours, minutes, seconds, milliseconds, and nanoseconds.
      */
-    public static LocalTime of(int hours, int minutes, int seconds, int millis, long nanos) {
+    public static LocalTime of(int hours, int minutes, int seconds, int millis, int nanos) {
         checkClockTime(hours, minutes, seconds);
         checkPositiveOrZero(millis);
         checkPositiveOrZero(nanos);

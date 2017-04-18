@@ -41,7 +41,7 @@ public class LocalTimesShould {
     private static final int minutes = 25;
     private static final int seconds = 30;
     private static final int millis = 124;
-    private static final long nanos = 122L;
+    private static final int nanos = 122;
 
     @Test
     public void have_private_constructor() {

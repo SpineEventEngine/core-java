@@ -77,7 +77,7 @@ class Formats {
     }
 
     /** Format the nano part of a timestamp or a duration. */
-    static String formatNanos(int nanos) {
+    static String formatNanos(long nanos) {
         // Determine whether to use 3, 6, or 9 digits for the nano part.
         if (nanos % NANOS_PER_MILLISECOND == 0) {
             return format("%1$03d", nanos / NANOS_PER_MILLISECOND);

@@ -22,9 +22,11 @@ package org.spine3.time;
 
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getHours;
@@ -45,7 +47,7 @@ public class OffsetDateTimesShould {
     private static final int minutes = 30;
     private static final int seconds = 23;
     private static final int millis = 124;
-    private static final long nanos = 122L;
+    private static final int nanos = 122;
     private static final LocalDate localDate = LocalDates.of(year, month, day);
     private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds,
                                                              millis, nanos);
@@ -415,5 +417,15 @@ public class OffsetDateTimesShould {
 
         final ZoneOffset offset = plusMillis.getOffset();
         assertEquals(ZONE_OFFSET.getAmountSeconds(), offset.getAmountSeconds());
+    }
+
+    @Test
+    public void convert_values_at_UTC_to_string() throws ParseException {
+        final OffsetDateTime nowAtUTC = OffsetDateTimes.now(ZoneOffsets.UTC);
+
+        final String value = OffsetDateTimes.toString(nowAtUTC);
+        assertTrue(value.contains("Z"));
+        final OffsetDateTime parsed = OffsetDateTimes.parse(value);
+        assertEquals(nowAtUTC, parsed);
     }
 }

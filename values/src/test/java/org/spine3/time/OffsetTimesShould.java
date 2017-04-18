@@ -20,6 +20,7 @@
 
 package org.spine3.time;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
 import java.util.Calendar;
@@ -37,8 +38,8 @@ public class OffsetTimesShould {
     private static final int minutes = 25;
     private static final int seconds = 30;
     private static final int millis = 124;
-    private static final long nanos = 122L;
-    private static final ZoneOffset ZONE_OFFSET = ZoneOffsets.ofHoursMinutes(3, 30);
+    private static final int nanos = 122;
+    private static final ZoneOffset zoneOffset = ZoneOffsets.ofHoursMinutes(3, 30);
     private static final LocalTime localTime = LocalTimes.of(hours, minutes, seconds,
                                                              millis, nanos);
 
@@ -49,8 +50,8 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_current_OffsetTime_using_ZoneOffset() {
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
-        final Calendar cal = Calendars.nowAt(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
+        final Calendar cal = Calendars.nowAt(zoneOffset);
 
         final LocalTime time = now.getTime();
         assertEquals(getHours(cal), time.getHours());
@@ -62,7 +63,7 @@ public class OffsetTimesShould {
 
     @Test
     public void obtain_current_OffsetTime_using_LocalTime_and_ZoneOffset() {
-        final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime localTimeInDelhi = OffsetTimes.of(localTime, zoneOffset);
 
         final LocalTime time = localTimeInDelhi.getTime();
         assertEquals(hours, time.getHours());
@@ -70,14 +71,14 @@ public class OffsetTimesShould {
         assertEquals(seconds, time.getSeconds());
         assertEquals(millis, time.getMillis());
         assertEquals(nanos, time.getNanos());
-        assertEquals(ZONE_OFFSET.getAmountSeconds(),
+        assertEquals(zoneOffset.getAmountSeconds(),
                      localTimeInDelhi.getOffset().getAmountSeconds());
     }
 
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_hours() {
         final int hoursToAdd = 2;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.plusHours(offsetTime, hoursToAdd);
 
         final LocalTime time = inFewHours.getTime();
@@ -91,7 +92,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_minutes() {
         final int minutesToAdd = 15;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.plusMinutes(offsetTime, minutesToAdd);
 
         assertEquals(hours, inFewHours.getTime().getHours());
@@ -104,7 +105,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_seconds() {
         final int secondsToAdd = 17;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.plusSeconds(offsetTime, secondsToAdd);
 
         assertEquals(hours, inFewHours.getTime().getHours());
@@ -117,7 +118,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_future_after_specified_number_of_millis() {
         final int millisToAdd = 271;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.plusMillis(offsetTime, millisToAdd);
 
         assertEquals(hours, inFewHours.getTime().getHours());
@@ -130,7 +131,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_hours() {
         final int hoursToSubtract = 2;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.minusHours(offsetTime, hoursToSubtract);
 
         assertEquals(hours - hoursToSubtract, inFewHours.getTime().getHours());
@@ -143,7 +144,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_minutes() {
         final int minutesToSubtract = 11;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.minusMinutes(offsetTime, minutesToSubtract);
 
         assertEquals(hours, inFewHours.getTime().getHours());
@@ -156,7 +157,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_seconds() {
         final int secondsToSubtract = 28;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.minusSeconds(offsetTime, secondsToSubtract);
 
         assertEquals(hours, inFewHours.getTime().getHours());
@@ -170,7 +171,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_OffsetTime_in_past_before_specified_number_of_millis() {
         final int millisToSubtract = 99;
-        final OffsetTime offsetTime = OffsetTimes.of(localTime, ZONE_OFFSET);
+        final OffsetTime offsetTime = OffsetTimes.of(localTime, zoneOffset);
         final OffsetTime inFewHours = OffsetTimes.minusMillis(offsetTime, millisToSubtract);
 
         assertEquals(hours, inFewHours.getTime().getHours());
@@ -179,102 +180,55 @@ public class OffsetTimesShould {
         assertEquals(millis - millisToSubtract, inFewHours.getTime().getMillis());
         assertEquals(nanos, inFewHours.getTime().getNanos());
     }
-    
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_hoursToAdd() {
-        final int hoursToAdd = -5;
-        final OffsetTime now = null;
-        OffsetTimes.plusHours(now, hoursToAdd);
-    }
 
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_minutesToAdd() {
-        final int minutesToAdd = 7;
-        final OffsetTime now = null;
-        OffsetTimes.plusMinutes(now, minutesToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_secondsToAdd() {
-        final int secondsToAdd = 25;
-        final OffsetTime now = null;
-        OffsetTimes.plusSeconds(now, secondsToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_millisToAdd() {
-        final int millisToAdd = 205;
-        final OffsetTime now = null;
-        OffsetTimes.plusMillis(now, millisToAdd);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_hoursToSubtract() {
-        final int hoursToSubtract = 6;
-        final OffsetTime now = null;
-        OffsetTimes.minusHours(now, hoursToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_minutesToSubtract() {
-        final int minutesToSubtract = 8;
-        final OffsetTime now = null;
-        OffsetTimes.minusMinutes(now, minutesToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_secondsToSubtract() {
-        final int secondsToSubtract = 27;
-        final OffsetTime now = null;
-        OffsetTimes.minusSeconds(now, secondsToSubtract);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void not_accept_null_OffsetTime_value_with_millisToSubtract() {
-        final int millisToSubtract = 245;
-        final OffsetTime now = null;
-        OffsetTimes.minusMillis(now, millisToSubtract);
+    @Test
+    public void pass_null_tolerance_test() {
+        new NullPointerTester()
+                .setDefault(OffsetTime.class, OffsetTimes.now(zoneOffset))
+                .setDefault(ZoneOffset.class, zoneOffset)
+                .setDefault(LocalTime.class, LocalTimes.now())
+                .testAllPublicStaticMethods(OffsetTimes.class);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_hoursToAdd() {
         final int hoursToAdd = -5;
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
         OffsetTimes.plusHours(now, hoursToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_minutesToAdd() {
         final int minutesToAdd = -7;
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
         OffsetTimes.plusMinutes(now, minutesToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_secondsToAdd() {
         final int secondsToAdd = -25;
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
         OffsetTimes.plusSeconds(now, secondsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_hoursToSubtract() {
         final int hoursToSubtract = -6;
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
         OffsetTimes.minusHours(now, hoursToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_minutesToSubtract() {
         final int minutesToSubtract = -8;
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
         OffsetTimes.minusMinutes(now, minutesToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_secondsToSubtract() {
         final int secondsToSubtract = -27;
-        final OffsetTime now = OffsetTimes.now(ZONE_OFFSET);
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
         OffsetTimes.minusSeconds(now, secondsToSubtract);
     }
 }

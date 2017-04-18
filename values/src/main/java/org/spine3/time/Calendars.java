@@ -264,12 +264,19 @@ class Calendars {
      * Obtains local time using calendar.
      */
     static LocalTime toLocalTime(Calendar calendar) {
+        final int nanos = 0;
+        return toLocalTime(calendar, nanos);
+    }
+
+    /**
+     * Obtains local time from calendar with nanosecond precision.
+     */
+    static LocalTime toLocalTime(Calendar calendar, int nanos) {
         final int hours = getHours(calendar);
         final int minutes = getMinutes(calendar);
         final int seconds = getSeconds(calendar);
         final int millis = getMillis(calendar);
-
-        return LocalTimes.of(hours, minutes, seconds, millis);
+        return LocalTimes.of(hours, minutes, seconds, millis, nanos);
     }
 
     /**

@@ -68,7 +68,7 @@ message LocalTime {
     int32 minutes = 2 [(required) = true];
     int32 seconds = 3;
     int32 millis = 4;
-    int64 nanos = 5;
+    int32 nanos = 5;
 }
 
 // A time with an offset from UTC.

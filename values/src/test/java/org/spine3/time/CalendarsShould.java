@@ -25,18 +25,21 @@ import org.junit.Test;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Calendars.createWithTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
+import static org.spine3.time.Calendars.getMonthOfYear;
 import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.time.Calendars.getZoneOffset;
 import static org.spine3.time.Calendars.nowAt;
+import static org.spine3.time.Calendars.toCalendar;
+import static org.spine3.time.Calendars.toLocalTime;
 
 public class CalendarsShould {
 
     @Test
-    public void have_private_constructor() {
+    public void have_utility_constructor() {
         assertHasPrivateParameterlessCtor(Calendars.class);
     }
 
@@ -46,7 +49,7 @@ public class CalendarsShould {
         final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
         final Calendar cal = nowAt(zoneOffset);
 
-        assertTrue(amountOfSeconds == getZoneOffset(cal));
+        assertEquals(amountOfSeconds, getZoneOffset(cal));
     }
 
     @Test
@@ -54,21 +57,21 @@ public class CalendarsShould {
         final int hours = 3;
         final int minutes = 23;
         final int seconds = 12;
-        final Calendar cal = Calendars.createWithTime(hours, minutes, seconds);
+        final Calendar cal = createWithTime(hours, minutes, seconds);
 
-        assertTrue(hours == getHours(cal));
-        assertTrue(minutes == getMinutes(cal));
-        assertTrue(seconds == getSeconds(cal));
+        assertEquals(hours, getHours(cal));
+        assertEquals(minutes, getMinutes(cal));
+        assertEquals(seconds, getSeconds(cal));
     }
 
     @Test
     public void obtain_calendar_using_hours_minutes() {
         final int hours = 3;
         final int minutes = 23;
-        final Calendar cal = Calendars.createWithTime(hours, minutes);
+        final Calendar cal = createWithTime(hours, minutes);
 
-        assertTrue(hours == getHours(cal));
-        assertTrue(minutes == getMinutes(cal));
+        assertEquals(hours, getHours(cal));
+        assertEquals(minutes, getMinutes(cal));
     }
 
     @Test
@@ -77,7 +80,13 @@ public class CalendarsShould {
         int april = 3;
         calendar.set(Calendar.MONTH, april);
         // The Calendar class assumes JANUARY is zero. Therefore add 1 to expected result.
-        assertEquals(calendar.get(Calendar.MONTH) + 1,
-                     Calendars.getMonthOfYear(calendar).getNumber());
+        assertEquals(calendar.get(Calendar.MONTH) + 1, getMonthOfYear(calendar).getNumber());
+    }
+
+    @Test
+    public void convert_from_local_time_and_back() {
+        final LocalTime time = LocalTimes.now();
+
+        assertEquals(time, toLocalTime(toCalendar(time), time.getNanos()));
     }
 }
