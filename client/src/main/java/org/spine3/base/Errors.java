@@ -65,11 +65,10 @@ public class Errors {
     }
 
     /**
-     * Creates new instance of {@link Error} from
-     * {@linkplain StatusRuntimeException#getTrailers() metadata} using
-     * {@linkplain MetadataConverter#toError(Metadata) MetadataConverter}.
+     * Extracts an {@link Error} from the {@link StatusRuntimeException} metadata
+     * using {@linkplain MetadataConverter#toError(Metadata) MetadataConverter}.
      *
-     * <p>If any other exception was passed, {@code Optional.absent() is returned}.
+     * <p>If any other exception was passed, {@code Optional.absent()} is returned.
      *
      * @param throwable the {@link StatusRuntimeException} to extract an {@link Error}
      * @return the extracted error or {@code Optional.absent()} if the extraction failed
