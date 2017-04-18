@@ -148,29 +148,26 @@ public class Stringifiers {
     }
 
     /**
-     * Obtains {@code Stringifier} for integers values.
+     * Obtains {@code Stringifier} for {@code Integer} values.
      */
     public static Stringifier<Integer> integerStringifier() {
-        final Stringifier<Integer> integerStringifier = new IntegerStringifier();
-        return integerStringifier;
+        return IntegerStringifier.INSTANCE;
     }
 
     /**
-     * Obtains {@code Stringifier} for long values.
+     * Obtains {@code Stringifier} for {@code Long} values.
      */
     public static Stringifier<Long> longStringifier() {
-        final Stringifier<Long> integerStringifier = new LongStringifier();
-        return integerStringifier;
+        return LongStringifier.INSTANCE;
     }
 
     /**
-     * Obtains {@code Stringifier} for string values.
+     * Obtains {@code Stringifier} for {@code String} values.
      *
-     * <p>It does not make any modifications to {@code String}.
+     * <p>Simply returns passed strings.
      */
-    static Stringifier<String> noopStringifier() {
-        final Stringifier<String> stringStringifier = new NoopStringifier();
-        return stringStringifier;
+    static Stringifier<String> noOpStringifier() {
+        return NoOpStringifier.INSTANCE;
     }
 
     /**
@@ -237,7 +234,12 @@ public class Stringifiers {
      *
      * <p>Always returns the original {@code String} passed as an argument.
      */
-    private static class NoopStringifier extends Stringifier<String> {
+    private static class NoOpStringifier extends Stringifier<String> implements Serializable {
+
+        private static final long serialVersionUID = 1;
+
+        static final NoOpStringifier INSTANCE = new NoOpStringifier();
+
         @Override
         protected String toString(String obj) {
             return obj;
@@ -247,12 +249,26 @@ public class Stringifiers {
         protected String fromString(String s) {
             return s;
         }
+
+        @Override
+        public String toString() {
+            return "Stringifiers.noOpStringifier()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
     }
 
     /**
      * The {@code Stringifier} for the long values.
      */
-    private static class LongStringifier extends Stringifier<Long> {
+    private static class LongStringifier extends Stringifier<Long> implements Serializable {
+
+        private static final long serialVersionUID = 1;
+
+        static final LongStringifier INSTANCE = new LongStringifier();
+
         @Override
         protected String toString(Long obj) {
             return Longs.stringConverter()
@@ -265,12 +281,26 @@ public class Stringifiers {
             return Longs.stringConverter()
                         .convert(s);
         }
+
+        @Override
+        public String toString() {
+            return "Stringifiers.longStringifier()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
     }
 
     /**
      * The {@code Stringifier} for the integer values.
      */
-    private static class IntegerStringifier extends Stringifier<Integer> {
+    private static class IntegerStringifier extends Stringifier<Integer> implements Serializable {
+
+        private static final long serialVersionUID = 1;
+
+        static final IntegerStringifier INSTANCE = new IntegerStringifier();
+
         @Override
         protected String toString(Integer obj) {
             return Ints.stringConverter()
@@ -282,6 +312,15 @@ public class Stringifiers {
         protected Integer fromString(String s) {
             return Ints.stringConverter()
                        .convert(s);
+        }
+
+        @Override
+        public String toString() {
+            return "Stringifiers.integerStringifier()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
         }
     }
 

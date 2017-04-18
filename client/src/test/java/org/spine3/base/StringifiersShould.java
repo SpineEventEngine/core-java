@@ -40,10 +40,14 @@ import static org.spine3.base.Stringifiers.integerStringifier;
 import static org.spine3.base.Stringifiers.longStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
+/**
+ * @author Illia Shepilov
+ * @author Alexander Yevsyukov
+ */
 public class StringifiersShould {
 
     @Test
-    public void have_private_constructor() {
+    public void have_utility_constructor() {
         assertHasPrivateParameterlessCtor(Stringifiers.class);
     }
 
