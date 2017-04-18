@@ -25,11 +25,15 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.Test;
 import org.spine3.base.Error;
+import org.spine3.server.Statuses.MetadataConverter;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.server.Statuses.invalidArgumentWithMetadata;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StatusesShould {
+
+    private static final MetadataConverter METADATA_CONVERTER = new MetadataConverter();
 
     @Test
     public void have_private_constructor() {
@@ -39,11 +43,14 @@ public class StatusesShould {
     @Test
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void create_invalid_argument_status_exception() {
-        final StatusRuntimeException statusRuntimeException =
-                Statuses.invalidArgumentWithMetadata(Error.getDefaultInstance());
+        final Error expectedError = Error.getDefaultInstance();
+        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithMetadata(expectedError);
 
-        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeException.getStatus()
-                                                                              .getCode());
+        final Error actualError = METADATA_CONVERTER.doBackward(statusRuntimeEx.getTrailers());
+
+        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
+                                                                       .getCode());
+        assertEquals(expectedError, actualError);
     }
 
     @Test
