@@ -27,6 +27,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
+import org.spine3.string.time.TimeStringifiers;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -43,7 +44,7 @@ import static org.spine3.protobuf.Messages.isMessage;
  * @author Alexander Yevsyukov
  * @author Illia Shepilov
  */
-public class StringifierRegistry {
+public final class StringifierRegistry {
 
     private final Map<Type, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(

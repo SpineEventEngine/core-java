@@ -43,7 +43,7 @@ import static org.spine3.validate.Validate.checkBounds;
  * @author Alexander Aleksandrov
  * @see ZoneOffset
  */
-public class ZoneOffsets {
+public final class ZoneOffsets {
 
     public static final int MIN_HOURS_OFFSET = -11;
     public static final int MAX_HOURS_OFFSET = 14;

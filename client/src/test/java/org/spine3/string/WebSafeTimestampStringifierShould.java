@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.string.TimeStringifiers.forTimestampWebSafe;
+import static org.spine3.string.time.TimeStringifiers.forTimestampWebSafe;
 import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**

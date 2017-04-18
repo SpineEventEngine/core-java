@@ -67,7 +67,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @param <V> the type of the values in the map
  * @author Illia Shepilov
  */
-class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
+final class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
 
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
     private static final char KEY_VALUE_DELIMITER = ':';

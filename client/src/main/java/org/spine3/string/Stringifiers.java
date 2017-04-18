@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Illia Shepilov
  */
-public class Stringifiers {
+public final class Stringifiers {
 
     private Stringifiers() {
         // Disable instantiation of this utility class.

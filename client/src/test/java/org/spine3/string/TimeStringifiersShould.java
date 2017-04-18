@@ -23,15 +23,16 @@ package org.spine3.string;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.string.time.TimeStringifiers;
 import org.spine3.test.Tests;
 import org.spine3.time.LocalDate;
 import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.string.TimeStringifiers.forDuration;
-import static org.spine3.string.TimeStringifiers.forLocalDate;
-import static org.spine3.string.TimeStringifiers.forTimestamp;
-import static org.spine3.string.TimeStringifiers.forZoneOffset;
+import static org.spine3.string.time.TimeStringifiers.forDuration;
+import static org.spine3.string.time.TimeStringifiers.forLocalDate;
+import static org.spine3.string.time.TimeStringifiers.forTimestamp;
+import static org.spine3.string.time.TimeStringifiers.forZoneOffset;
 
 /**
  * @author Alexander Yevsyukov

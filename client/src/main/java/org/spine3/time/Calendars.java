@@ -49,7 +49,7 @@ import static java.util.Calendar.getInstance;
  */
 @SuppressWarnings({"ClassWithTooManyMethods" /* OK for this utility class. */,
                    "MagicConstant" /* We use conversion methods instead. */})
-class Calendars {
+final class Calendars {
 
     private static final String TIME_ZONE_GMT = "GMT";
 

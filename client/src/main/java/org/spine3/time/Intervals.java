@@ -33,7 +33,7 @@ import static org.spine3.time.Timestamps2.isLaterThan;
  *
  * @author Alexander Litus
  */
-public class Intervals {
+public final class Intervals {
 
     private Intervals() {
         // Prevent instantiation of this utility class.

@@ -50,7 +50,7 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public class OffsetDateTimes {
+public final class OffsetDateTimes {
 
     private static final ThreadLocal<DateFormat> dateTimeFormat =
             new ThreadLocal<DateFormat>() {

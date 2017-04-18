@@ -18,33 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.string;
-
-import org.junit.Test;
-import org.spine3.string.time.TimeStringifiers;
-import org.spine3.time.LocalDate;
-import org.spine3.time.LocalDates;
-
-import static org.junit.Assert.assertEquals;
-
 /**
- * @author Alexander Yevsyukov
+ * This package provides stringifiers for date/time objects.
  */
-public class LocalDateStringifierShould {
 
-    private final Stringifier<LocalDate> stringifier = TimeStringifiers.forLocalDate();
+@ParametersAreNonnullByDefault
+package org.spine3.string.time;
 
-    @Test
-    public void convert() {
-        final LocalDate today = LocalDates.now();
-
-        assertEquals(today, stringifier.reverse()
-                                       .convert(stringifier.convert(today)));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_on_invalid_stringifier_input() {
-        stringifier.reverse()
-                   .convert("");
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

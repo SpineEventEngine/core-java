@@ -34,7 +34,7 @@ import static org.spine3.validate.Validate.checkPositive;
  *
  * @author Alexander Aleksandrov
  */
-public class OffsetTimes {
+public final class OffsetTimes {
 
     private OffsetTimes() {
         // Prevent instantiation of this utility class.

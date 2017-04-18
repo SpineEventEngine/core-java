@@ -33,7 +33,7 @@ import static org.spine3.util.Math.safeMultiply;
  * @see com.google.protobuf.util.Durations Durations
  */
 @SuppressWarnings({"UtilityClass", "ClassWithTooManyMethods"})
-public class Durations2 {
+public final class Durations2 {
 
     public static final Duration ZERO = fromMillis(0L);
 

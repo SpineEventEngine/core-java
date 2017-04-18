@@ -37,7 +37,7 @@ import static com.google.protobuf.util.Timestamps.fromMillis;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class Timestamps2 {
+public final class Timestamps2 {
 
     /**
      * The following constants are taken from the

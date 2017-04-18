@@ -22,6 +22,7 @@ package org.spine3.string;
 
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.string.time.TimeStringifiers;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.time.Timestamps2.getCurrentTime;

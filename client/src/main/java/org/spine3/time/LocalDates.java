@@ -40,7 +40,7 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Yevsyukov
  * @author Alexander Aleksandrov
  */
-public class LocalDates {
+public final class LocalDates {
 
     private static final ThreadLocal<DateFormat> dateFormat =
             new ThreadLocal<DateFormat>() {

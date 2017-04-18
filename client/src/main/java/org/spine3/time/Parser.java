@@ -42,7 +42,7 @@ import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
  *
  * @author Alexander Yevsyukov
  */
-class Parser {
+final class Parser {
 
     private final String value;
 

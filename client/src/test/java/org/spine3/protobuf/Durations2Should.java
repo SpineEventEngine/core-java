@@ -23,7 +23,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import org.junit.Test;
 import org.spine3.string.Stringifier;
-import org.spine3.string.TimeStringifiers;
+import org.spine3.string.time.TimeStringifiers;
 import org.spine3.time.Durations2;
 
 import static com.google.protobuf.util.Durations.subtract;

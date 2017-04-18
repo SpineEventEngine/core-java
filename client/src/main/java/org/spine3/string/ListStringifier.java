@@ -64,7 +64,7 @@ import static com.google.common.collect.Lists.newArrayList;
  * @param <T> the type of the elements in the list.
  * @author Illia Shepilov
  */
-class ListStringifier<T> extends Stringifier<List<T>> {
+final class ListStringifier<T> extends Stringifier<List<T>> {
 
     private static final char DEFAULT_ELEMENT_DELIMITER = ',';
 
