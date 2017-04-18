@@ -38,7 +38,7 @@ class QueryValidator extends RequestValidator<Query> {
     }
 
     @Override
-    protected InvalidQueryException onInvalidRequest(String exceptionMsg, Query request,
+    protected InvalidQueryException onInvalidMessage(String exceptionMsg, Query request,
                                                      Error error) {
         return new InvalidQueryException(exceptionMsg, request, error);
     }

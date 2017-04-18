@@ -56,7 +56,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
     }
 
     @Override
-    protected InvalidSubscriptionException onInvalidRequest(String exceptionMsg,
+    protected InvalidSubscriptionException onInvalidMessage(String exceptionMsg,
                                                             Subscription subscription,
                                                             Error error) {
         return new InvalidSubscriptionException(exceptionMsg, subscription, error);
@@ -81,7 +81,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
             protected InvalidRequestException createException(String errorMessage,
                                                               Subscription request,
                                                               Error error) {
-                return new InvalidRequestException(errorMessage, request, error);
+                return new InvalidSubscriptionException(errorMessage, request, error);
             }
         };
     }

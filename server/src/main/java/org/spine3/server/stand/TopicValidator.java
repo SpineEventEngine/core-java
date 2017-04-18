@@ -39,7 +39,7 @@ class TopicValidator extends RequestValidator<Topic> {
     }
 
     @Override
-    protected InvalidTopicException onInvalidRequest(String exceptionMsg,
+    protected InvalidTopicException onInvalidMessage(String exceptionMsg,
                                                      Topic topic,
                                                      Error error) {
         return new InvalidTopicException(exceptionMsg, topic, error);

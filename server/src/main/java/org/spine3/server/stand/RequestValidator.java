@@ -57,7 +57,7 @@ abstract class RequestValidator<M extends Message> {
      *
      * <p>Allows the descendants to create exceptions of custom types.
      */
-    protected abstract InvalidRequestException onInvalidRequest(String exceptionMsg,
+    protected abstract InvalidRequestException onInvalidMessage(String exceptionMsg,
                                                                 M request,
                                                                 Error error);
 
@@ -171,7 +171,7 @@ abstract class RequestValidator<M extends Message> {
                                                 .setValidationError(validationError)
                                                 .setMessage(errorText);
         final Error error = errorBuilder.build();
-        return Optional.of(onInvalidRequest(formatExceptionMessage(request), request, error));
+        return Optional.of(onInvalidMessage(formatExceptionMessage(request), request, error));
     }
 
     private String formatExceptionMessage(M request) {
