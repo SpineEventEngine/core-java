@@ -89,8 +89,8 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
     }
 
     @Override
-    public boolean contains(SubscriptionId subscriptionId) {
-        return registrySlice().contains(subscriptionId);
+    public boolean containsId(SubscriptionId subscriptionId) {
+        return registrySlice().containsId(subscriptionId);
     }
 
     /**
@@ -204,7 +204,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
         }
 
         @Override
-        public boolean contains(SubscriptionId subscriptionId) {
+        public boolean containsId(SubscriptionId subscriptionId) {
             for (Subscription existingItem : subscriptionToAttrs.keySet()) {
                 if (existingItem.getId()
                                 .equals(subscriptionId)) {

@@ -71,7 +71,7 @@ interface SubscriptionRegistry {
      * @return {@code true}, if this registry has a Subscription with the given ID,
      *         {@code false} otherwise.
      */
-    boolean contains(SubscriptionId subscriptionId);
+    boolean containsId(SubscriptionId subscriptionId);
 
     /**
      * Filter the registered {@link SubscriptionRecord}s by their type.

@@ -96,7 +96,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
             @Override
             public Boolean apply(@Nullable Subscription input) {
                 checkNotNull(input);
-                final boolean result = registry.contains(input.getId());
+                final boolean result = registry.containsId(input.getId());
                 return result;
             }
         }.apply(request);
