@@ -39,6 +39,9 @@ public class MetadataConverter {
 
     private static final String ERROR_KEY_NAME = "Spine-Error-bin";
 
+    /**
+     * The {@link Metadata.Key} to store and get an {@link Error} from a {@link Metadata}.
+     */
     @VisibleForTesting
     static final Key<byte[]> KEY = Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
 
