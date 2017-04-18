@@ -287,43 +287,40 @@ public class Stringifiers {
      * The default {@code Stringifier} for the {@code Message} classes.
      *
      * <p>The sample of the usage:
+     * <pre>      {@code
      * // The `TaskId` Protobuf message definition.
-     * {@code
      * message TaskId {
-     * string value = 1;
-     * }
-     * }
+     *     string value = 1;
+     * }}</pre>
      *
+     * <pre>      {@code
      * // The `TaskName` Protobuf message definition.
-     * {@code
      * message TaskName {
-     * string value = 1;
-     * }
-     * }
+     *     string value = 1;
+     * }}</pre>
      *
+     * <pre>      {@code
      * // The `Task` Protobuf message definition.
-     * {@code
      * message Task {
-     * TaskId id = 1;
-     * TaskName name = 2;
-     * }
-     * }
+     *     TaskId id = 1;
+     *     TaskName name = 2;
+     * }}</pre>
      *
-     * {@code
+     * <pre>      {@code
      * // Construct the message.
      * final TaskId taskId = TaskId.newBuilder().setValue("task-id").build();
      * final TaskName taskName = TaskName.newBuilder().setValue("task-name").build();
      * final Task task = Task.newBuilder().setId(taskId).setTaskName(taskName).build();
      *
-     * // Obtain the default `Stringifier`.
+     * // Obtain the default Stringifier.
      * final Stringifier<Task> taskStringifier = StringifierRegistry.getStringifier(Task.class);
      *
      * // The result is {"id":{"value":"task-id"},"name":{"value":"task-name"}}.
      * final String json = taskStringifier.reverse().convert(task);
      *
-     * // human.equals(taskFromJson) == true.
+     * // task.equals(taskFromJson) == true.
      * final Task taskFromJson = taskStringifier.convert(json);
-     * }
+     * }</pre>
      *
      * @param <T> the message type
      */
