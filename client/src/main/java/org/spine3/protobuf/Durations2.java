@@ -8,8 +8,10 @@ package org.spine3.protobuf;
 import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
 import com.google.protobuf.util.Durations;
+import org.spine3.base.Stringifier;
 
 import javax.annotation.Nullable;
+import java.text.ParseException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Durations.fromMillis;
@@ -19,6 +21,7 @@ import static com.google.protobuf.util.Durations.toMillis;
 import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
+import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
 
@@ -259,5 +262,54 @@ public class Durations2 {
         final long nanos = toNanos(value);
         final boolean isNegative = nanos < 0;
         return isNegative;
+    }
+
+    /**
+     * Obtains the default stringifier for {@code Duration} instances.
+     *
+     * <p>This stringifier is automatically registered in the
+     * {@link org.spine3.base.StringifierRegistry StringifierRegistry}.
+     *
+     * @see Durations#toString(Duration)
+     * @see Durations#parse(String)
+     */
+    public static Stringifier<Duration> stringifier() {
+        return DurationStringifier.instance();
+    }
+
+    /**
+     * The default stringifier for {@code Duration}s.
+     */
+    private static class DurationStringifier extends Stringifier<Duration> {
+
+        @Override
+        protected String toString(Duration duration) {
+            checkNotNull(duration);
+            final String result = Durations.toString(duration);
+            return result;
+        }
+
+        @Override
+        protected Duration fromString(String str) {
+            checkNotNull(str);
+            final Duration result;
+            try {
+                result = Durations.parse(str);
+            } catch (ParseException e) {
+                throw wrappedCause(e);
+            }
+            return result;
+        }
+
+        private enum Singleton {
+            INSTANCE;
+
+            @SuppressWarnings("NonSerializableFieldInSerializableClass")
+            private final DurationStringifier value = new DurationStringifier();
+        }
+
+        private static DurationStringifier instance() {
+            return Singleton.INSTANCE.value;
+        }
     }
 }

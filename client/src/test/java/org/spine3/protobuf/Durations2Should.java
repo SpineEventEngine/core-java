@@ -22,6 +22,7 @@ package org.spine3.protobuf;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import org.junit.Test;
+import org.spine3.base.Stringifier;
 
 import static com.google.protobuf.util.Durations.subtract;
 import static org.junit.Assert.assertEquals;
@@ -240,4 +241,11 @@ public class Durations2Should {
         return minutes * 60L;
     }
 
+    @Test
+    public void provide_stringifier() {
+        final Stringifier<Duration> stringifier = Durations2.stringifier();
+        final Duration duration = hoursAndMinutes(10, 20);
+        assertEquals(duration, stringifier.reverse()
+                                          .convert(stringifier.convert(duration)));
+    }
 }

@@ -22,8 +22,10 @@ package org.spine3.base;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Timestamps2;
 
 import java.lang.reflect.Type;
@@ -46,12 +48,13 @@ public class StringifierRegistry {
     private final Map<Type, Stringifier<?>> stringifiers = synchronizedMap(
             newHashMap(
                     ImmutableMap.<Type, Stringifier<?>>builder()
-                            .put(Timestamp.class, Timestamps2.stringifier())
-                            .put(EventId.class, Events.idStringifier())
-                            .put(CommandId.class, Commands.idStringifier())
                             .put(Integer.class, Stringifiers.integerStringifier())
                             .put(Long.class, Stringifiers.longStringifier())
                             .put(String.class, Stringifiers.noopStringifier())
+                            .put(Timestamp.class, Timestamps2.stringifier())
+                            .put(Duration.class, Durations2.stringifier())
+                            .put(EventId.class, Events.idStringifier())
+                            .put(CommandId.class, Commands.idStringifier())
                             .build()
             )
     );
