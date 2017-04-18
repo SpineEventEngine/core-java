@@ -23,15 +23,24 @@ import com.google.common.base.Optional;
 import org.spine3.base.Error;
 import org.spine3.client.Query;
 import org.spine3.client.QueryValidationError;
+import org.spine3.client.Target;
+import org.spine3.type.TypeUrl;
 
+import static java.lang.String.format;
 import static org.spine3.client.QueryValidationError.INVALID_QUERY;
+import static org.spine3.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 
 /**
  * Validates the {@linkplain Query} instances submitted to {@linkplain Stand}.
  *
  * @author Alex Tymchenko
  */
-class QueryValidator extends RequestValidator<Query> {
+class QueryValidator extends AbstractTargetValidator<Query> {
+
+    protected QueryValidator(TypeRegistry typeRegistry) {
+        super(typeRegistry);
+    }
+
     @Override
     protected QueryValidationError getInvalidMessageErrorCode() {
         return INVALID_QUERY;
@@ -45,6 +54,28 @@ class QueryValidator extends RequestValidator<Query> {
 
     @Override
     protected Optional<RequestNotSupported<Query>> isSupported(Query request) {
-        return Optional.absent();
+        final Target target = request.getTarget();
+        final boolean targetSupported = checkTargetSupported(target);
+
+        if (targetSupported) {
+            return Optional.absent();
+        }
+
+        return Optional.of(missingInRegistry(getTypeOf(target)));
+    }
+
+    private static RequestNotSupported<Query> missingInRegistry(TypeUrl topicTargetType) {
+        final String errorMessage = format("The query target type is not supported: %s",
+                                           topicTargetType.getTypeName());
+        return new RequestNotSupported<Query>(
+                UNSUPPORTED_QUERY_TARGET, errorMessage) {
+
+            @Override
+            protected InvalidRequestException createException(String message,
+                                                              Query request,
+                                                              Error error) {
+                return new InvalidQueryException(message, request, error);
+            }
+        };
     }
 }

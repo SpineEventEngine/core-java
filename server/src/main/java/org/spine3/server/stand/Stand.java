@@ -532,7 +532,7 @@ public class Stand implements AutoCloseable {
             typeRegistry = InMemoryTypeRegistry.newInstance();
 
             topicValidator = new TopicValidator(typeRegistry);
-            queryValidator = new QueryValidator();
+            queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
             final Stand result = new Stand(this);

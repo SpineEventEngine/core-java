@@ -24,7 +24,6 @@ import org.spine3.base.Error;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.client.TopicValidationError;
-import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import static java.lang.String.format;
@@ -36,12 +35,10 @@ import static org.spine3.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
  *
  * @author Alex Tymchenko
  */
-class TopicValidator extends RequestValidator<Topic> {
-
-    private final TypeRegistry typeRegistry;
+class TopicValidator extends AbstractTargetValidator<Topic> {
 
     TopicValidator(TypeRegistry typeRegistry) {
-        this.typeRegistry = typeRegistry;
+        super(typeRegistry);
     }
 
     @Override
@@ -58,22 +55,13 @@ class TopicValidator extends RequestValidator<Topic> {
 
     @Override
     protected Optional<RequestNotSupported<Topic>> isSupported(Topic request) {
-        final TypeUrl type = getTopicTargetType(request);
-        final boolean containsTopicType = typeRegistry.getTypes()
-                                                      .contains(type);
-        if (containsTopicType) {
+        final Target target = request.getTarget();
+        final boolean targetSupported = checkTargetSupported(target);
+        if (targetSupported) {
             return Optional.absent();
         }
 
-        return Optional.of(missingInRegistry(type));
-    }
-
-    private static TypeUrl getTopicTargetType(Topic request) {
-        final Target target = request.getTarget();
-        final String typeAsString = target
-                .getType();
-        return TypeName.of(typeAsString)
-                       .toUrl();
+        return Optional.of(missingInRegistry(getTypeOf(target)));
     }
 
     private static RequestNotSupported<Topic> missingInRegistry(TypeUrl topicTargetType) {
