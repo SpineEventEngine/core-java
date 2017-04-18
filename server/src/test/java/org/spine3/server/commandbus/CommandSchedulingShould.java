@@ -27,9 +27,9 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.protobuf.Durations2;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
+import org.spine3.time.Durations2;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -45,14 +45,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations2.minutes;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.commandbus.CommandScheduler.setSchedule;
 import static org.spine3.server.commandbus.Given.Command.addTask;
 import static org.spine3.server.commandbus.Given.Command.createProject;
 import static org.spine3.server.commandbus.Given.Command.startProject;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static org.spine3.time.Durations2.minutes;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 
 public class CommandSchedulingShould extends AbstractCommandBusTestSuite {

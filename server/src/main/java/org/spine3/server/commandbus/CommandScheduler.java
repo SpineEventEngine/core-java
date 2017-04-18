@@ -41,7 +41,7 @@ import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.isScheduled;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
  * Schedules commands delivering them to the target according to the scheduling options.

@@ -26,8 +26,8 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static java.lang.String.format;
-import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 
 /**
  * The parser for date/time values.

@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
  * Utilities for working with {@link Version}.

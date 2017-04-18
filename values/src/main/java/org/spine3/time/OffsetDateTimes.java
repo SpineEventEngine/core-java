@@ -32,13 +32,13 @@ import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.time.Calendars.nowAt;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.time.Formats.formatNanos;
 import static org.spine3.time.Parser.parserOffsetDateTime;
+import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**

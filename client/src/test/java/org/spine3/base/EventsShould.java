@@ -26,13 +26,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.EventTests;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
+import org.spine3.time.Timestamps2;
 
 import java.util.Comparator;
 import java.util.List;

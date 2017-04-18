@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.time.Timestamps2;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;

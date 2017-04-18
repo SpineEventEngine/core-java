@@ -29,9 +29,9 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.time.Timestamps2;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 

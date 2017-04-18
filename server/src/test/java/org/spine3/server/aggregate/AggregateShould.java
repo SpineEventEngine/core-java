@@ -32,7 +32,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TestActorRequestFactory;
@@ -49,6 +48,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
+import org.spine3.time.Timestamps2;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
 

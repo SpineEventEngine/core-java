@@ -24,16 +24,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.base.Command;
-import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Durations2;
+import org.spine3.time.Timestamps2;
 
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static org.spine3.protobuf.Durations2.hours;
-import static org.spine3.protobuf.Durations2.seconds;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Timestamps2.systemTime;
+import static org.spine3.time.Durations2.hours;
+import static org.spine3.time.Durations2.seconds;
+import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Timestamps2.systemTime;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**

@@ -41,9 +41,9 @@ import org.spine3.time.ZoneOffsets;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Durations2.minutes;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Durations2.minutes;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check
                                            handling of preconditions */,

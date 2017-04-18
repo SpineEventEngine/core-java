@@ -30,7 +30,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.Tests;
 import org.spine3.test.TimeTests;
 import org.spine3.test.entity.Project;
@@ -38,6 +37,7 @@ import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
+import org.spine3.time.Timestamps2;
 
 import java.lang.reflect.Constructor;
 
@@ -52,13 +52,13 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.assertSecondsEqual;
 import static org.spine3.test.TimeTests.currentTimeSeconds;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
  * @author Alexander Litus

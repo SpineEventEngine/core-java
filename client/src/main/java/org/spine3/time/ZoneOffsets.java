@@ -21,7 +21,6 @@
 package org.spine3.time;
 
 import com.google.protobuf.Duration;
-import org.spine3.protobuf.Durations2;
 import org.spine3.string.Stringifier;
 import org.spine3.string.StringifierRegistry;
 
@@ -32,11 +31,11 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
 import static java.lang.String.format;
-import static org.spine3.protobuf.Durations2.hours;
-import static org.spine3.protobuf.Durations2.minutes;
-import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
+import static org.spine3.time.Durations2.hours;
+import static org.spine3.time.Durations2.minutes;
+import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
+import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.checkBounds;
 

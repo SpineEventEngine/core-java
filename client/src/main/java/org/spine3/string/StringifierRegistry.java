@@ -29,8 +29,8 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Durations2;
+import org.spine3.time.Timestamps2;
 
 import java.lang.reflect.Type;
 import java.util.Map;

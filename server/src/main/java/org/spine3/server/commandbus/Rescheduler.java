@@ -41,12 +41,12 @@ import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Timestamps2.isLaterThan;
 import static org.spine3.server.commandbus.CommandExpiredException.commandExpiredError;
 import static org.spine3.server.commandbus.CommandScheduler.setSchedule;
 import static org.spine3.time.Intervals.between;
 import static org.spine3.time.Intervals.toDuration;
+import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
  * Helper class for rescheduling commands.

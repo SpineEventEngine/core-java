@@ -46,12 +46,12 @@ import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
  * Projection storage tests.

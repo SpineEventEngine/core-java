@@ -22,7 +22,6 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import org.junit.Test;
-import org.spine3.protobuf.Durations2;
 import org.spine3.string.StringifierRegistry;
 
 import java.text.ParseException;

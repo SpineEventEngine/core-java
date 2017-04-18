@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Timestamps2;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.protobuf.Values.newStringValue;

@@ -29,7 +29,6 @@ import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Targets;
 import org.spine3.client.Topic;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
@@ -37,6 +36,7 @@ import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
+import org.spine3.time.Timestamps2;
 
 import java.util.List;
 

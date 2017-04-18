@@ -20,7 +20,6 @@
 package org.spine3.time;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
 
 import java.util.Calendar;
 

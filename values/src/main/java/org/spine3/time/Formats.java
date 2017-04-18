@@ -25,8 +25,8 @@ import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 
 import static java.lang.String.format;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_MICROSECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 
 /**
  * Utilities and constants for working with date/time formats.

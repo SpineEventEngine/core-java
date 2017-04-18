@@ -31,7 +31,6 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
@@ -42,6 +41,7 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
+import org.spine3.time.Timestamps2;
 
 import java.util.Set;
 import java.util.concurrent.Executor;

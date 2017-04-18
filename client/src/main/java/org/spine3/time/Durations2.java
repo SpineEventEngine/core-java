@@ -3,7 +3,7 @@
  * TeamDev PROPRIETARY and CONFIDENTIAL.
  * Use is subject to license terms.
  */
-package org.spine3.protobuf;
+package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.DurationOrBuilder;
@@ -19,9 +19,6 @@ import static com.google.protobuf.util.Durations.fromMillis;
 import static com.google.protobuf.util.Durations.fromNanos;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Durations.toMillis;
-import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.util.Math.floorDiv;
 import static org.spine3.util.Math.safeMultiply;
@@ -55,7 +52,7 @@ public class Durations2 {
      * @return a non-null {@code Duration}
      */
     public static Duration fromMinutes(long minutes) {
-        final Duration duration = fromSeconds(safeMultiply(minutes, SECONDS_PER_MINUTE));
+        final Duration duration = fromSeconds(safeMultiply(minutes, Timestamps2.SECONDS_PER_MINUTE));
         return duration;
     }
 
@@ -66,7 +63,7 @@ public class Durations2 {
      * @return a non-null {@code Duration}
      */
     public static Duration fromHours(long hours) {
-        final Duration duration = fromMinutes(safeMultiply(hours, MINUTES_PER_HOUR));
+        final Duration duration = fromMinutes(safeMultiply(hours, Timestamps2.MINUTES_PER_HOUR));
         return duration;
     }
 
@@ -163,7 +160,7 @@ public class Durations2 {
     public static long toSeconds(Duration duration) {
         checkNotNull(duration);
         final long millis = toMillis(duration);
-        final long seconds = floorDiv(millis, MILLIS_PER_SECOND);
+        final long seconds = floorDiv(millis, Timestamps2.MILLIS_PER_SECOND);
         return seconds;
     }
 
@@ -176,7 +173,7 @@ public class Durations2 {
     public static long toMinutes(Duration duration) {
         checkNotNull(duration);
         final long millis = toMillis(duration);
-        final long result = (millis / MILLIS_PER_SECOND) / SECONDS_PER_MINUTE;
+        final long result = (millis / Timestamps2.MILLIS_PER_SECOND) / Timestamps2.SECONDS_PER_MINUTE;
         return result;
     }
 
@@ -189,7 +186,7 @@ public class Durations2 {
     public static long getHours(Duration value) {
         checkNotNull(value);
         final long hours = toMinutes(value);
-        final long result = hours / MINUTES_PER_HOUR;
+        final long result = hours / Timestamps2.MINUTES_PER_HOUR;
         return result;
     }
 
@@ -203,7 +200,7 @@ public class Durations2 {
     public static int getMinutes(Duration value) {
         checkNotNull(value);
         final long allMinutes = toMinutes(value);
-        final long remainder = allMinutes % MINUTES_PER_HOUR;
+        final long remainder = allMinutes % Timestamps2.MINUTES_PER_HOUR;
         final int result = Long.valueOf(remainder)
                                .intValue();
         return result;

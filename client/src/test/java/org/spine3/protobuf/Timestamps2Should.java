@@ -27,6 +27,7 @@ import org.junit.Test;
 import org.spine3.string.Stringifier;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.TimeTests;
+import org.spine3.time.Timestamps2;
 
 import java.util.Date;
 
@@ -38,23 +39,23 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Durations2.fromMinutes;
-import static org.spine3.protobuf.Timestamps2.HOURS_PER_DAY;
-import static org.spine3.protobuf.Timestamps2.MICROS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_HOUR;
-import static org.spine3.protobuf.Timestamps2.compare;
-import static org.spine3.protobuf.Timestamps2.convertToDate;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Timestamps2.isBetween;
-import static org.spine3.protobuf.Timestamps2.isLaterThan;
-import static org.spine3.protobuf.Timestamps2.resetProvider;
-import static org.spine3.protobuf.Timestamps2.setProvider;
-import static org.spine3.protobuf.Timestamps2.systemTime;
-import static org.spine3.protobuf.Timestamps2.webSafeTimestampStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Durations2.fromMinutes;
+import static org.spine3.time.Timestamps2.HOURS_PER_DAY;
+import static org.spine3.time.Timestamps2.MICROS_PER_SECOND;
+import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_MICROSECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_SECOND;
+import static org.spine3.time.Timestamps2.SECONDS_PER_HOUR;
+import static org.spine3.time.Timestamps2.compare;
+import static org.spine3.time.Timestamps2.convertToDate;
+import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Timestamps2.isBetween;
+import static org.spine3.time.Timestamps2.isLaterThan;
+import static org.spine3.time.Timestamps2.resetProvider;
+import static org.spine3.time.Timestamps2.setProvider;
+import static org.spine3.time.Timestamps2.systemTime;
+import static org.spine3.time.Timestamps2.webSafeTimestampStringifier;
 
 public class Timestamps2Should {
 

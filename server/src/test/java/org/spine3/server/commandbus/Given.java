@@ -32,9 +32,9 @@ import org.spine3.test.command.StartProject;
 import org.spine3.users.UserId;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 public class Given {
 

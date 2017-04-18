@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.client.ActorRequestFactory;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Timestamps2;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
 
