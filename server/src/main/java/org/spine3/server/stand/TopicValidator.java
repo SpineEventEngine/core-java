@@ -21,10 +21,15 @@ package org.spine3.server.stand;
 
 import com.google.common.base.Optional;
 import org.spine3.base.Error;
+import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.client.TopicValidationError;
+import org.spine3.type.TypeName;
+import org.spine3.type.TypeUrl;
 
+import static java.lang.String.format;
 import static org.spine3.client.TopicValidationError.INVALID_TOPIC;
+import static org.spine3.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 
 /**
  * Validates the {@linkplain Topic} instances submitted to {@linkplain Stand}.
@@ -32,6 +37,12 @@ import static org.spine3.client.TopicValidationError.INVALID_TOPIC;
  * @author Alex Tymchenko
  */
 class TopicValidator extends RequestValidator<Topic> {
+
+    private final TypeRegistry typeRegistry;
+
+    TopicValidator(TypeRegistry typeRegistry) {
+        this.typeRegistry = typeRegistry;
+    }
 
     @Override
     protected TopicValidationError getInvalidMessageErrorCode() {
@@ -47,6 +58,36 @@ class TopicValidator extends RequestValidator<Topic> {
 
     @Override
     protected Optional<RequestNotSupported<Topic>> isSupported(Topic request) {
-        return Optional.absent();
+        final TypeUrl type = getTopicTargetType(request);
+        final boolean containsTopicType = typeRegistry.getTypes()
+                                                      .contains(type);
+        if (containsTopicType) {
+            return Optional.absent();
+        }
+
+        return Optional.of(missingInRegistry(type));
+    }
+
+    private static TypeUrl getTopicTargetType(Topic request) {
+        final Target target = request.getTarget();
+        final String typeAsString = target
+                .getType();
+        return TypeName.of(typeAsString)
+                       .toUrl();
+    }
+
+    private static RequestNotSupported<Topic> missingInRegistry(TypeUrl topicTargetType) {
+        final String errorMessage = format("The topic target type is not supported: %s",
+                                           topicTargetType.getTypeName());
+        return new RequestNotSupported<Topic>(
+                UNSUPPORTED_TOPIC_TARGET, errorMessage) {
+
+            @Override
+            protected InvalidRequestException createException(String errorMessage1,
+                                                              Topic request,
+                                                              Error error) {
+                return new InvalidTopicException(errorMessage1, request, error);
+            }
+        };
     }
 }
