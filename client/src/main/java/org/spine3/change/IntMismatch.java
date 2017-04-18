@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class IntMismatch {
+public final class IntMismatch {
 
     private IntMismatch() {
         // Prevent instantiation.

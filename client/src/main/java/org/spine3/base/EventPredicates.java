@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class EventPredicates {
+public final class EventPredicates {
 
     private EventPredicates() {
         // Prevent instantiation of this utility class.

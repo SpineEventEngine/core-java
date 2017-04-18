@@ -45,7 +45,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public class Identifiers {
+public final class Identifiers {
 
     /** The suffix of ID fields. */
     public static final String ID_PROPERTY_SUFFIX = "id";

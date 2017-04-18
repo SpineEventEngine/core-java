@@ -40,7 +40,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class Events {
+public final class Events {
 
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = new Comparator<Event>() {

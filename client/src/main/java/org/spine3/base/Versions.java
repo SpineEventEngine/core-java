@@ -31,7 +31,7 @@ import static org.spine3.time.Timestamps2.getCurrentTime;
  *
  * @author Alexander Yevsyukov
  */
-public class Versions {
+public final class Versions {
 
     private Versions() {
         // Prevent instantiation of this utility class.

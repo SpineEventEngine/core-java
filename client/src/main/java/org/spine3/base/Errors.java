@@ -30,9 +30,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class Errors {
+public final class Errors {
 
-    private Errors() {}
+    private Errors() {
+        // Prevent instantiation of this utility class.
+    }
 
     /** Creates new instance of {@link Error} by the passed exception. */
     public static Error fromException(Exception exception) {

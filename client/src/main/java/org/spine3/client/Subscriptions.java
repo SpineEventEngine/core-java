@@ -28,7 +28,7 @@ import org.spine3.base.Identifiers;
  * @author Alex Tymchenko
  */
 @Internal
-public class Subscriptions {
+public final class Subscriptions {
 
     private Subscriptions() {
         // prevent instantiation.

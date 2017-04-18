@@ -56,7 +56,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  *
  * @author Alexander Yevsyukov
  */
-public class Commands {
+public final class Commands {
 
     /** A suffix which the {@code .proto} file containing commands must have in its name. */
     public static final String FILE_NAME_SUFFIX = "commands";

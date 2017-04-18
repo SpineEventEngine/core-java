@@ -33,7 +33,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  *
  * @author Alexander Yevsyukov
  */
-public class Enrichments {
+public final class Enrichments {
 
     private Enrichments() {
         // Prevent instantiation of this utility class.
