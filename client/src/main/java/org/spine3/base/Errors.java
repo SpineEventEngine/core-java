@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import io.grpc.Metadata;
+import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -66,18 +67,24 @@ public class Errors {
     }
 
     /**
-     * Extracts an {@link Error} from the {@link StatusRuntimeException} metadata
-     * using {@linkplain MetadataConverter#toError(Metadata) MetadataConverter}.
+     * Extracts an {@link Error} either from the {@link StatusRuntimeException}
+     * or from the {@linkplain io.grpc.StatusException StatusException} metadata using
+     * {@linkplain MetadataConverter#toError(Metadata) MetadataConverter}.
      *
      * <p>If any other exception was passed, {@code Optional.absent()} is returned.
      *
-     * @param throwable the {@link StatusRuntimeException} to extract an {@link Error}
+     * @param throwable the {@code Throwable} to extract an {@link Error}
      * @return the extracted error or {@code Optional.absent()} if the extraction failed
      */
-    public static Optional<Error> fromStatusRuntimeException(Throwable throwable) {
+    @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
+    public static Optional<Error> fromStatus(Throwable throwable) {
         checkNotNull(throwable);
         if (throwable instanceof StatusRuntimeException) {
             final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
+            return MetadataConverter.toError(metadata);
+        }
+        if (throwable instanceof StatusException) {
+            final Metadata metadata = ((StatusException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);
         }
 

@@ -24,6 +24,8 @@ import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import io.grpc.Metadata;
 import io.grpc.Status;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -62,10 +64,29 @@ public class ErrorsShould {
     public void return_Error_extracted_from_StatusRuntimeException_metadata() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
-        final Throwable statusRuntimeEx = Status.INVALID_ARGUMENT.asRuntimeException(metadata);
+        final StatusRuntimeException statusRuntimeException =
+                Status.INVALID_ARGUMENT.asRuntimeException(metadata);
 
-        assertEquals(expectedError, Errors.fromStatusRuntimeException(statusRuntimeEx)
+        assertEquals(expectedError, Errors.fromStatus(statusRuntimeException)
                                           .get());
+    }
+
+    @Test
+    public void return_Error_extracted_form_StatusException_metadata() {
+        final Error expectedError = Error.getDefaultInstance();
+        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        final StatusException statusException = Status.INVALID_ARGUMENT.asException(metadata);
+
+        assertEquals(expectedError, Errors.fromStatus(statusException)
+                                          .get());
+    }
+
+    @Test
+    public void return_absent_if_passed_Throwable_is_not_status_exception() {
+        final String msg = "Neither a StatusException nor a StatusRuntimeException.";
+        final Exception exception = new Exception(msg);
+
+        assertEquals(Optional.absent(), Errors.fromStatus(exception));
     }
 
     @Test
@@ -73,14 +94,7 @@ public class ErrorsShould {
         final Metadata emptyMetadata = new Metadata();
         final Throwable statusRuntimeEx = Status.INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
-        assertEquals(Optional.absent(), Errors.fromStatusRuntimeException(statusRuntimeEx));
-    }
-
-    @Test
-    public void return_absent_if_passed_Throwable_is_not_StatusRuntimeException() {
-        final Exception exception = new Exception("An exception");
-
-        assertEquals(Optional.absent(), Errors.fromStatusRuntimeException(exception));
+        assertEquals(Optional.absent(), Errors.fromStatus(statusRuntimeEx));
     }
 
     @Test
