@@ -30,7 +30,7 @@ import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
-import static org.spine3.server.Statuses.invalidArgumentWithMetadata;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -88,7 +88,8 @@ class ValidationFilter implements CommandBusFilter {
                     InvalidCommandException.onConstraintViolations(command, violations);
             commandBus.commandStore()
                       .storeWithError(command, invalidCommand);
-            responseObserver.onError(invalidArgumentWithMetadata(invalidCommand.getError()));
+            responseObserver.onError(invalidArgumentWithCause(invalidCommand,
+                                                              invalidCommand.getError()));
             return false;
         }
         return true;
@@ -105,7 +106,7 @@ class ValidationFilter implements CommandBusFilter {
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
         final StatusRuntimeException exception =
-                invalidArgumentWithMetadata(noTenantDefined.getError());
+                invalidArgumentWithCause(noTenantDefined, noTenantDefined.getError());
         responseObserver.onError(exception);
     }
 
@@ -116,7 +117,7 @@ class ValidationFilter implements CommandBusFilter {
         commandBus.commandStore()
                   .storeWithError(command, tenantIdInapplicable);
         final StatusRuntimeException exception =
-                invalidArgumentWithMetadata(tenantIdInapplicable.getError());
+                invalidArgumentWithCause(tenantIdInapplicable, tenantIdInapplicable.getError());
         responseObserver.onError(exception);
     }
 }

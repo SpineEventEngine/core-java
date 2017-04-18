@@ -28,7 +28,7 @@ import org.spine3.base.Error;
 import org.spine3.base.MetadataConverter;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.server.Statuses.invalidArgumentWithMetadata;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StatusesShould {
@@ -41,13 +41,16 @@ public class StatusesShould {
     @Test
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void create_invalid_argument_status_exception() {
+        final IllegalArgumentException exception = new IllegalArgumentException("");
         final Error expectedError = Error.getDefaultInstance();
-        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithMetadata(expectedError);
+        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(exception,
+                                                                                expectedError);
 
         final Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
                                                    .get();
         assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
                                                                        .getCode());
+        assertEquals(exception, statusRuntimeEx.getCause());
         assertEquals(expectedError, actualError);
     }
 
@@ -55,6 +58,7 @@ public class StatusesShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(Exception.class, new RuntimeException("Statuses test"))
+                .setDefault(Error.class, Error.getDefaultInstance())
                 .testAllPublicStaticMethods(Statuses.class);
     }
 }

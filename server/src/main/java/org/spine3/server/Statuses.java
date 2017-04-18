@@ -43,18 +43,23 @@ public class Statuses {
 
     /**
      * Creates an instance of {@code StatusRuntimeException} of status
-     * {@code Status.INVALID_ARGUMENT}.
+     * {@code Status.INVALID_ARGUMENT} with the passed cause and the {@link Error}.
      *
      * <p>Resulting {@code StatusRuntimeException} will contain the passed {@link Error}
      * transformed to the {@linkplain StatusRuntimeException#getTrailers() metadata}.
      *
-     * @param error the error representing metadata
+     * <p>NOTE: The cause is not transmitted from server co client.
+     *
+     * @param cause the exception cause
+     * @param error the error to be passed to a client
      * @return the constructed {@code StatusRuntimeException}
      */
-    public static StatusRuntimeException invalidArgumentWithMetadata(Error error) {
+    public static StatusRuntimeException invalidArgumentWithCause(Exception cause, Error error) {
+        checkNotNull(cause);
         checkNotNull(error);
         final Metadata metadata = MetadataConverter.toMetadata(error);
-        final StatusRuntimeException result = INVALID_ARGUMENT.asRuntimeException(metadata);
+        final StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
+                                                              .asRuntimeException(metadata);
         return result;
     }
 }

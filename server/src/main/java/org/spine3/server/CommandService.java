@@ -36,6 +36,8 @@ import org.spine3.type.CommandClass;
 import java.util.Map;
 import java.util.Set;
 
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
+
 /**
  * The {@code CommandService} allows client applications to post commands and
  * receive updates from the application backend.
@@ -80,7 +82,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
                                           StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithMetadata(unsupported.getError()));
+        responseObserver.onError(invalidArgumentWithCause(unsupported, unsupported.getError()));
     }
 
     public static class Builder {

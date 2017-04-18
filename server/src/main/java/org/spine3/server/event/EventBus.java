@@ -47,7 +47,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.io.StreamObservers.emptyObserver;
-import static org.spine3.server.Statuses.invalidArgumentWithMetadata;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -207,14 +207,16 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            responseObserver.onError(invalidArgumentWithMetadata(unsupportedEvent.getError()));
+            responseObserver.onError(
+                    invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError()));
             return false;
         }
         final List<ConstraintViolation> violations = eventValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent =
                     InvalidEventException.onConstraintViolations(event, violations);
-            responseObserver.onError(invalidArgumentWithMetadata(invalidEvent.getError()));
+            responseObserver.onError(invalidArgumentWithCause(invalidEvent,
+                                                              invalidEvent.getError()));
             return false;
         }
         return true;
