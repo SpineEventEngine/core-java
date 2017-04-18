@@ -51,7 +51,7 @@ public class StringifierRegistry {
                             .put(Boolean.class, Stringifiers.forBoolean())
                             .put(Integer.class, Stringifiers.forInteger())
                             .put(Long.class, Stringifiers.forLong())
-                            .put(String.class, Stringifiers.noOpStringifier())
+                            .put(String.class, Stringifiers.forString())
                             .put(EventId.class, Events.idStringifier())
                             .put(CommandId.class, Commands.idStringifier())
                             .putAll(TimeStringifiers.getAll())

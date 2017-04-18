@@ -165,7 +165,7 @@ public class Stringifiers {
      *
      * <p>Simply returns passed strings.
      */
-    static Stringifier<String> noOpStringifier() {
+    static Stringifier<String> forString() {
         return NoOpStringifier.INSTANCE;
     }
 
@@ -250,7 +250,7 @@ public class Stringifiers {
 
         @Override
         public String toString() {
-            return "Stringifiers.noOpStringifier()";
+            return "Stringifiers.forString()";
         }
 
         private Object readResolve() {
@@ -282,7 +282,7 @@ public class Stringifiers {
 
         @Override
         public String toString() {
-            return "Stringifiers.longStringifier()";
+            return "Stringifiers.forLong()";
         }
 
         private Object readResolve() {
@@ -314,7 +314,7 @@ public class Stringifiers {
 
         @Override
         public String toString() {
-            return "Stringifiers.integerStringifier()";
+            return "Stringifiers.forInteger()";
         }
 
         private Object readResolve() {
@@ -346,7 +346,7 @@ public class Stringifiers {
 
         @Override
         public String toString() {
-            return "Stringifiers.booleanStringifier()";
+            return "Stringifiers.forBoolean()";
         }
 
         private Object readResolve() {
