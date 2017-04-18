@@ -50,11 +50,11 @@ import static org.spine3.time.Timestamps2.getCurrentTime;
                    "ResultOfMethodCallIgnored" /* ...when methods throw exceptions */,
                    "ClassWithTooManyMethods",
                    "OverlyCoupledClass" /* we test many data types and utility methods */})
-public class ChangesShould {
+public class TimeChangesShould {
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Changes.class);
+        assertHasPrivateParameterlessCtor(TimeChanges.class);
     }
 
     @Test(expected = NullPointerException.class)
@@ -62,7 +62,7 @@ public class ChangesShould {
         final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
         final Timestamp now = getCurrentTime();
         final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-        Changes.of(null, fourMinutes);
+        TimeChanges.of(null, fourMinutes);
     }
 
     @Test(expected = NullPointerException.class)
@@ -70,7 +70,7 @@ public class ChangesShould {
         final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
         final Timestamp now = getCurrentTime();
         final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
-        Changes.of(fourMinutes, null);
+        TimeChanges.of(fourMinutes, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -78,7 +78,7 @@ public class ChangesShould {
         final Timestamp fourMinutesAgo = TimeTests.Past.minutesAgo(4);
         final Timestamp now = getCurrentTime();
         final Interval fourMinutes = Intervals.between(now, fourMinutesAgo);
-        Changes.of(fourMinutes, fourMinutes);
+        TimeChanges.of(fourMinutes, fourMinutes);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class ChangesShould {
         final Interval fourMinutes = Intervals.between(fourMinutesAgo, now);
         final Interval fiveMinutes = Intervals.between(fiveMinutesAgo, now);
 
-        final IntervalChange result = Changes.of(fourMinutes, fiveMinutes);
+        final IntervalChange result = TimeChanges.of(fourMinutes, fiveMinutes);
 
         assertEquals(fourMinutes, result.getPreviousValue());
         assertEquals(fiveMinutes, result.getNewValue());
@@ -98,19 +98,19 @@ public class ChangesShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalDate_previousValue() {
         final LocalDate today = LocalDates.now();
-        Changes.of(null, today);
+        TimeChanges.of(null, today);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalDate_newValue() {
         final LocalDate today = LocalDates.now();
-        Changes.of(today, null);
+        TimeChanges.of(today, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_LocalDate_values() {
         final LocalDate today = LocalDates.now();
-        Changes.of(today, today);
+        TimeChanges.of(today, today);
     }
 
     @Test
@@ -118,7 +118,7 @@ public class ChangesShould {
         final LocalDate today = LocalDates.now();
         final LocalDate tomorrow = LocalDates.plusDays(today, 1);
 
-        final LocalDateChange result = Changes.of(today, tomorrow);
+        final LocalDateChange result = TimeChanges.of(today, tomorrow);
 
         assertEquals(today, result.getPreviousValue());
         assertEquals(tomorrow, result.getNewValue());
@@ -127,19 +127,19 @@ public class ChangesShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalTime_previousValue() {
         final LocalTime now = LocalTimes.now();
-        Changes.of(null, now);
+        TimeChanges.of(null, now);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_LocalTime_newValue() {
         final LocalTime now = LocalTimes.now();
-        Changes.of(now, null);
+        TimeChanges.of(now, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_LocalTime_values() {
         final LocalTime now = LocalTimes.now();
-        Changes.of(now, now);
+        TimeChanges.of(now, now);
     }
 
     @Test
@@ -147,7 +147,7 @@ public class ChangesShould {
         final LocalTime now = LocalTimes.now();
         final LocalTime inFiveHours = LocalTimes.plusHours(now, 5);
 
-        final LocalTimeChange result = Changes.of(now, inFiveHours);
+        final LocalTimeChange result = TimeChanges.of(now, inFiveHours);
 
         assertEquals(now, result.getPreviousValue());
         assertEquals(inFiveHours, result.getNewValue());
@@ -157,21 +157,21 @@ public class ChangesShould {
     public void do_not_accept_null_OffsetDate_previousValue() {
         final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
         final OffsetDate date = OffsetDates.now(inLassVegas);
-        Changes.of(null, date);
+        TimeChanges.of(null, date);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_OffsetDate_newValue() {
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetDate date = OffsetDates.now(inKiev);
-        Changes.of(date, null);
+        TimeChanges.of(date, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_OffsetDate_values() {
         final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
         final OffsetDate date = OffsetDates.now(inLuxembourg);
-        Changes.of(date, date);
+        TimeChanges.of(date, date);
     }
 
     @Test
@@ -181,7 +181,7 @@ public class ChangesShould {
         final OffsetDate previousDate = OffsetDates.now(inKiev);
         final OffsetDate newDate = OffsetDates.now(inLuxembourg);
 
-        final OffsetDateChange result = Changes.of(previousDate, newDate);
+        final OffsetDateChange result = TimeChanges.of(previousDate, newDate);
 
         assertEquals(previousDate, result.getPreviousValue());
         assertEquals(newDate, result.getNewValue());
@@ -191,21 +191,21 @@ public class ChangesShould {
     public void do_not_accept_null_OffsetTime_previousValue() {
         final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
         final OffsetTime now = OffsetTimes.now(inLassVegas);
-        Changes.of(null, now);
+        TimeChanges.of(null, now);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_OffsetTime_newValue() {
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetTime now = OffsetTimes.now(inKiev);
-        Changes.of(now, null);
+        TimeChanges.of(now, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_OffsetTime_values() {
         final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
         final OffsetTime now = OffsetTimes.now(inLuxembourg);
-        Changes.of(now, now);
+        TimeChanges.of(now, now);
     }
 
     @Test
@@ -215,7 +215,7 @@ public class ChangesShould {
         final OffsetTime previousTime = OffsetTimes.now(inKiev);
         final OffsetTime newTime = OffsetTimes.now(inLuxembourg);
 
-        final OffsetTimeChange result = Changes.of(previousTime, newTime);
+        final OffsetTimeChange result = TimeChanges.of(previousTime, newTime);
 
         assertEquals(previousTime, result.getPreviousValue());
         assertEquals(newTime, result.getNewValue());
@@ -225,21 +225,21 @@ public class ChangesShould {
     public void do_not_accept_null_OffsetDateTime_previousValue() {
         final ZoneOffset inLassVegas = ZoneOffsets.ofHours(8);
         final OffsetDateTime now = OffsetDateTimes.now(inLassVegas);
-        Changes.of(null, now);
+        TimeChanges.of(null, now);
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_OffsetDateTime_newValue() {
         final ZoneOffset inKiev = ZoneOffsets.ofHours(3);
         final OffsetDateTime now = OffsetDateTimes.now(inKiev);
-        Changes.of(now, null);
+        TimeChanges.of(now, null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_OffsetDateTime_values() {
         final ZoneOffset inLuxembourg = ZoneOffsets.ofHours(1);
         final OffsetDateTime now = OffsetDateTimes.now(inLuxembourg);
-        Changes.of(now, now);
+        TimeChanges.of(now, now);
     }
 
     @Test
@@ -249,7 +249,7 @@ public class ChangesShould {
         final OffsetDateTime previousDateTime = OffsetDateTimes.now(inKiev);
         final OffsetDateTime newDateTime = OffsetDateTimes.now(inLuxembourg);
 
-        final OffsetDateTimeChange result = Changes.of(previousDateTime, newDateTime);
+        final OffsetDateTimeChange result = TimeChanges.of(previousDateTime, newDateTime);
 
         assertEquals(previousDateTime, result.getPreviousValue());
         assertEquals(newDateTime, result.getNewValue());
@@ -266,6 +266,6 @@ public class ChangesShould {
                 .setDefault(Interval.class,
                             Intervals.between(subtract(getCurrentTime(), minutes(1)),
                                               getCurrentTime()))
-                .testAllPublicStaticMethods(Changes.class);
+                .testAllPublicStaticMethods(TimeChanges.class);
     }
 }

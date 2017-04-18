@@ -24,7 +24,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.string.Stringifier;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.TimeTests;
 import org.spine3.time.Timestamps2;
@@ -55,7 +54,6 @@ import static org.spine3.time.Timestamps2.isLaterThan;
 import static org.spine3.time.Timestamps2.resetProvider;
 import static org.spine3.time.Timestamps2.setProvider;
 import static org.spine3.time.Timestamps2.systemTime;
-import static org.spine3.time.Timestamps2.webSafeTimestampStringifier;
 
 public class Timestamps2Should {
 
@@ -293,25 +291,6 @@ public class Timestamps2Should {
         assertNotEquals(0, systemTime());
     }
 
-    @Test
-    public void provide_webSafe_timestamp_stringifier() {
-        final Timestamp timestamp = getCurrentTime();
-        final Stringifier<Timestamp> stringifier = webSafeTimestampStringifier();
-
-        final String str = stringifier.convert(timestamp);
-        assertEquals(timestamp, stringifier.reverse()
-                                           .convert(str));
-    }
-
-    @Test
-    public void provide_stringifier_for_Timestamp() {
-        final Timestamp timestamp = getCurrentTime();
-
-        final String str = Stringifiers.toString(timestamp);
-        final Timestamp convertedBack = Stringifiers.fromString(str, Timestamp.class);
-
-        assertEquals(timestamp, convertedBack);
-    }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {

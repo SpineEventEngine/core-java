@@ -34,9 +34,9 @@ import static org.spine3.change.Preconditions.checkNotEqual;
  *
  * @author Alexander Aleksandrov
  */
-public class Changes {
+public class TimeChanges {
 
-    private Changes() {
+    private TimeChanges() {
         // Prevent instantiation of this utility class.
     }
 

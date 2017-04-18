@@ -29,8 +29,6 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
-import org.spine3.time.Durations2;
-import org.spine3.time.Timestamps2;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -56,8 +54,8 @@ public class StringifierRegistry {
                             .put(Integer.class, Stringifiers.forInteger())
                             .put(Long.class, Stringifiers.forLong())
                             .put(String.class, Stringifiers.noOpStringifier())
-                            .put(Timestamp.class, Timestamps2.stringifier())
-                            .put(Duration.class, Durations2.stringifier())
+                            .put(Timestamp.class, TimeStringifiers.forTimestamp())
+                            .put(Duration.class, TimeStringifiers.forDuration())
                             .put(EventId.class, Events.idStringifier())
                             .put(CommandId.class, Commands.idStringifier())
                             .build()

@@ -22,15 +22,12 @@ package org.spine3.time;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.string.Stringifier;
-import org.spine3.string.StringifierRegistry;
 
 import java.text.ParseException;
 import java.util.Calendar;
 
 import static java.util.Calendar.getInstance;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getDay;
@@ -205,35 +202,5 @@ public class LocalDatesShould {
         final String str = LocalDates.toString(today);
 
         assertEquals(today, LocalDates.parse(str));
-    }
-
-    @Test
-    public void provide_stringifier() {
-        final LocalDate today = LocalDates.now();
-
-        final Stringifier<LocalDate> stringifier = LocalDates.stringifier();
-
-        assertEquals(today, stringifier.reverse()
-                                       .convert(stringifier.convert(today)));
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_on_invalid_stringifier_input() {
-        LocalDates.stringifier()
-                  .reverse()
-                  .convert("");
-    }
-
-    @Test
-    public void register_stringifier() {
-        assertFalse(StringifierRegistry.getInstance()
-                                       .get(LocalDate.class)
-                                       .isPresent());
-
-        LocalDates.registerStringifier();
-
-        assertEquals(LocalDates.stringifier(), StringifierRegistry.getInstance()
-                                                                  .get(LocalDate.class)
-                                                                  .get());
     }
 }

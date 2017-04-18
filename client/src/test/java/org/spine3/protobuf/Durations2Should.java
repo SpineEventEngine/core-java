@@ -23,6 +23,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import org.junit.Test;
 import org.spine3.string.Stringifier;
+import org.spine3.string.TimeStringifiers;
 import org.spine3.time.Durations2;
 
 import static com.google.protobuf.util.Durations.subtract;
@@ -244,7 +245,7 @@ public class Durations2Should {
 
     @Test
     public void provide_stringifier() {
-        final Stringifier<Duration> stringifier = Durations2.stringifier();
+        final Stringifier<Duration> stringifier = TimeStringifiers.forDuration();
         final Duration duration = hoursAndMinutes(10, 20);
         assertEquals(duration, stringifier.reverse()
                                           .convert(stringifier.convert(duration)));
