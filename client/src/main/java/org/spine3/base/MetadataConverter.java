@@ -26,6 +26,7 @@ import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
 import org.spine3.util.Exceptions;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
 
 /**
@@ -49,6 +50,7 @@ public class MetadataConverter {
      * @return the metadata containing error
      */
     public static Metadata toMetadata(Error error) {
+        checkNotNull(error);
         final Metadata metadata = new Metadata();
         metadata.put(KEY, error.toByteArray());
         return metadata;
@@ -62,6 +64,7 @@ public class MetadataConverter {
      *         if there is no error.
      */
     public static Optional<Error> toError(Metadata metadata) {
+        checkNotNull(metadata);
         final byte[] bytes = metadata.get(KEY);
 
         if (bytes == null) {
