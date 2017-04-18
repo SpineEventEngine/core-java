@@ -26,6 +26,10 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static java.lang.String.format;
+import static org.spine3.time.Formats.MINUS;
+import static org.spine3.time.Formats.PLUS;
+import static org.spine3.time.Formats.SUB_SECOND_SEPARATOR;
+import static org.spine3.time.Formats.UTC_ZONE_SIGN;
 import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 
@@ -120,7 +124,7 @@ class Parser {
         String timeValue = value.substring(0, timezoneOffsetPosition);
         secondValue = timeValue;
         nanoValue = "";
-        int pointPosition = timeValue.indexOf('.');
+        int pointPosition = timeValue.indexOf(SUB_SECOND_SEPARATOR);
         if (pointPosition != -1) {
             secondValue = timeValue.substring(0, pointPosition);
             nanoValue = timeValue.substring(pointPosition + 1);
@@ -139,12 +143,12 @@ class Parser {
     }
 
     private void initTimezoneOffsetPosition() throws ParseException {
-        timezoneOffsetPosition = value.indexOf(Formats.TIME_ZONE_SEPARATOR, dayOffset);
+        timezoneOffsetPosition = value.indexOf(UTC_ZONE_SIGN, dayOffset);
         if (timezoneOffsetPosition == -1) {
-            timezoneOffsetPosition = value.indexOf('+', dayOffset);
+            timezoneOffsetPosition = value.indexOf(PLUS, dayOffset);
         }
         if (timezoneOffsetPosition == -1) {
-            timezoneOffsetPosition = value.indexOf('-', dayOffset);
+            timezoneOffsetPosition = value.indexOf(MINUS, dayOffset);
         }
         if (timezoneOffsetPosition == -1) {
             final String errMsg = format(
@@ -156,7 +160,7 @@ class Parser {
 
     private void parseTime() throws ParseException {
         Date date = dateTimeFormat.get()
-                                   .parse(secondValue);
+                                  .parse(secondValue);
         seconds = date.getTime() / MILLIS_PER_SECOND;
         nanos = nanoValue.isEmpty() ? 0 : parseNanos(nanoValue);
     }

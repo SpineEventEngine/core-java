@@ -36,6 +36,8 @@ import static org.spine3.time.Calendars.nowAt;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
+import static org.spine3.time.Formats.SUB_SECOND_SEPARATOR;
+import static org.spine3.time.Formats.UTC_ZONE_SIGN;
 import static org.spine3.time.Formats.formatNanos;
 import static org.spine3.time.Parser.parserOffsetDateTime;
 import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
@@ -382,13 +384,13 @@ public class OffsetDateTimes {
 
         // Format the fractional second part.
         if (nanos != 0) {
-            result.append('.');
+            result.append(SUB_SECOND_SEPARATOR);
             result.append(formatNanos(nanos));
         }
 
         // Add time zone.
         if (offset.getAmountSeconds() == 0) {
-            result.append('Z');
+            result.append(UTC_ZONE_SIGN);
         } else {
             result.append(ZoneOffsets.toString(offset));
         }

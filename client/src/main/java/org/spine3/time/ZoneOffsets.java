@@ -155,8 +155,8 @@ public class ZoneOffsets {
             final String errMsg = format("Invalid offset value: \"%s\"", value);
             throw new ParseException(errMsg, 0);
         }
-        final boolean positive = value.charAt(0) == '+';
-        final boolean negative = value.charAt(0) == '-';
+        final boolean positive = value.charAt(0) == Formats.PLUS;
+        final boolean negative = value.charAt(0) == Formats.MINUS;
 
         if (!(positive || negative)) {
             final String errMsg = format("Missing sign char in offset value: \"%s\"", value);
@@ -189,7 +189,7 @@ public class ZoneOffsets {
         final long hours = totalMinutes / MINUTES_PER_HOUR;
         final long minutes = totalMinutes % MINUTES_PER_HOUR;
         final StringBuilder builder = new StringBuilder(6)
-            .append(seconds >= 0 ? '+' : '-')
+            .append(seconds >= 0 ? Formats.PLUS : Formats.MINUS)
             .append(format("%02d:%02d", Math.abs(hours), Math.abs(minutes)));
         return builder.toString();
     }
