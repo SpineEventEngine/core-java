@@ -20,24 +20,28 @@
 
 package org.spine3.time;
 
+import com.google.protobuf.Duration;
 import org.junit.Test;
+import org.spine3.protobuf.Durations2;
 
+import java.text.ParseException;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
+import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
+import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
+import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
 import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
+import static org.spine3.time.ZoneOffsets.ofHours;
+import static org.spine3.time.ZoneOffsets.ofHoursMinutes;
+import static org.spine3.time.ZoneOffsets.parse;
 import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 public class ZoneOffsetsShould {
 
-    private static final int MIN_HOURS_OFFSET = -11;
-    private static final int MAX_HOURS_OFFSET = 14;
-    private static final int MIN_MINUTES_OFFSET = 0;
-    private static final int MAX_MINUTES_OFFSET = 60;
-    public static final TimeZone timeZone = TimeZone.getDefault();
+    private static final TimeZone timeZone = TimeZone.getDefault();
 
     @Test
     public void has_private_constructor() {
@@ -54,44 +58,56 @@ public class ZoneOffsetsShould {
 
     @Test
     public void create_instance_by_hours_offset() {
-        final int secondsInTwoHours = secondsInHours(2);
-        assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
-                                                   .getAmountSeconds());
+        final Duration twoHours = Durations2.hours(2);
+        assertEquals(twoHours.getSeconds(), ofHours(2).getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        final int secondsIn8Hours45Minutes = secondsInHoursAndMinutes(8, 45);
-        final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
-                                                    .getAmountSeconds();
-        assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
+        assertEquals(Durations2.hoursAndMinutes(8, 45)
+                               .getSeconds(),
+                     ofHoursMinutes(8, 45).getAmountSeconds());
+
+        assertEquals(Durations2.hoursAndMinutes(-4, -50).getSeconds(),
+                     ofHoursMinutes(-4, -50).getAmountSeconds());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void require_same_sign_for_hours_and_minutes_negative_hours() {
+        ofHoursMinutes(-1, 10);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void require_same_sign_for_hours_and_minutes_positive_hours() {
+        ofHoursMinutes(1, -10);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_14_hours() {
-        ZoneOffsets.ofHours(MAX_HOURS_OFFSET + 1);
+        ofHours(MAX_HOURS_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_11_hours_by_abs() {
-        ZoneOffsets.ofHours(MIN_HOURS_OFFSET - 1);
+        ofHours(MIN_HOURS_OFFSET - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(10, MAX_MINUTES_OFFSET + 1);
+        ofHoursMinutes(10, MAX_MINUTES_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_17_hours_and_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
+        ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
     }
 
-    private static int secondsInHours(int hours) {
-        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours;
-    }
+    @Test
+    public void parse_string() throws ParseException {
+        assertEquals(ofHoursMinutes(4, 30), parse("+4:30"));
+        assertEquals(ofHoursMinutes(4, 30), parse("+04:30"));
 
-    private static int secondsInHoursAndMinutes(int hours, int minutes) {
-        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours + SECONDS_PER_MINUTE * minutes;
+        assertEquals(ofHoursMinutes(-2, -45), parse("-2:45"));
+        assertEquals(ofHoursMinutes(-2, -45), parse("-02:45"));
     }
 }

@@ -24,6 +24,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 
+import static java.lang.String.format;
 import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
 import static org.spine3.protobuf.Timestamps2.NANOS_PER_MILLISECOND;
 
@@ -79,11 +80,11 @@ class Formats {
     static String formatNanos(int nanos) {
         // Determine whether to use 3, 6, or 9 digits for the nano part.
         if (nanos % NANOS_PER_MILLISECOND == 0) {
-            return String.format("%1$03d", nanos / NANOS_PER_MILLISECOND);
+            return format("%1$03d", nanos / NANOS_PER_MILLISECOND);
         } else if (nanos % NANOS_PER_MICROSECOND == 0) {
-            return String.format("%1$06d", nanos / NANOS_PER_MICROSECOND);
+            return format("%1$06d", nanos / NANOS_PER_MICROSECOND);
         } else {
-            return String.format("%1$09d", nanos);
+            return format("%1$09d", nanos);
         }
     }
 }

@@ -27,9 +27,7 @@ import java.util.Date;
 
 import static java.lang.String.format;
 import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.protobuf.Timestamps2.NANOS_PER_MILLISECOND;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 
 /**
  * The parser for date/time values.
@@ -51,7 +49,7 @@ class Parser {
 
     private long seconds;
     private long nanos;
-    private long zoneOffset;
+    private ZoneOffset zoneOffset;
 
     private static final ThreadLocal<SimpleDateFormat> dateTimeFormat =
             new ThreadLocal<SimpleDateFormat>() {
@@ -78,12 +76,10 @@ class Parser {
         parseTime();
         parseZoneOffset();
 
-        @SuppressWarnings("NumericCastThatLosesPrecision") // OK since the value cannot grow larger.
-        final ZoneOffset offset = ZoneOffsets.ofSeconds((int) zoneOffset);
-        Calendar calendar = createCalendar(seconds, nanos, offset);
+        Calendar calendar = createCalendar(seconds, nanos, zoneOffset);
         final LocalDate localDate = Calendars.toLocalDate(calendar);
         final LocalTime localTime = Calendars.toLocalTime(calendar);
-        final OffsetDateTime result = OffsetDateTimes.of(localDate, localTime, offset);
+        final OffsetDateTime result = OffsetDateTimes.of(localDate, localTime, zoneOffset);
         return result;
     }
 
@@ -105,8 +101,9 @@ class Parser {
                 throw new ParseException(errMsg, 0);
             }
         } else {
-            final String offsetValue = value.substring(timezoneOffsetPosition + 1);
-            zoneOffset = parseTimezoneOffset(offsetValue);
+            final String offsetValue = value.substring(timezoneOffsetPosition);
+            final int zoneOffset = ZoneOffsets.parse(offsetValue)
+                                              .getAmountSeconds();
             if (value.charAt(timezoneOffsetPosition) == '+') {
                 seconds -= zoneOffset;
             } else {
@@ -175,20 +172,5 @@ class Parser {
             }
         }
         return result;
-    }
-
-    private static long parseTimezoneOffset(String value) throws ParseException {
-        int pos = value.indexOf(':');
-        if (pos == -1) {
-            final String errMsg = format("Invalid offset value: \"%s\"", value);
-            throw new ParseException(errMsg, 0);
-        }
-        final String hoursStr = value.substring(0, pos);
-        final String minutesStr = value.substring(pos + 1);
-        final long hours = Long.parseLong(hoursStr);
-        final long minutes = Long.parseLong(minutesStr);
-        final long totalMinutes = hours * MINUTES_PER_HOUR + minutes;
-        final long seconds = totalMinutes * SECONDS_PER_MINUTE;
-        return seconds;
     }
 }

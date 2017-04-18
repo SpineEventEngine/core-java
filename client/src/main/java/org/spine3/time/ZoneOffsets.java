@@ -23,12 +23,18 @@ package org.spine3.time;
 import com.google.protobuf.Duration;
 import org.spine3.protobuf.Durations2;
 
+import java.text.ParseException;
 import java.util.TimeZone;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
+import static java.lang.String.format;
 import static org.spine3.protobuf.Durations2.hours;
 import static org.spine3.protobuf.Durations2.minutes;
 import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
+import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -106,10 +112,14 @@ public class ZoneOffsets {
 
     /**
      * Obtains the ZoneOffset instance using an offset in hours and minutes.
+     *
+     * <p>If a negative zone offset is created both passed values must be negative.
      */
     public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
         checkHourOffset(hours, true);
         checkMinuteOffset(minutes);
+        checkArgument((hours < 0) == (minutes < 0),
+                      "Hours (%s) and minutes (%s) must have the same sign.", hours, minutes);
 
         final int secondsInHours = toSeconds(hours(hours));
         final int secondsInMinutes = toSeconds(minutes(minutes));
@@ -126,12 +136,62 @@ public class ZoneOffsets {
     private static void checkHourOffset(int hours, boolean assumingMinutes) {
         // If the offset contains minutes too, we make the range smaller by one hour from each end.
         final int shift = (assumingMinutes ? 1 : 0);
-        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift,
-                    MAX_HOURS_OFFSET - shift);
+        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift, MAX_HOURS_OFFSET - shift);
     }
 
     private static void checkMinuteOffset(int minutes) {
-        checkBounds(minutes, "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
+        checkBounds(Math.abs(minutes), "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
     }
 
+    /**
+     * Parses the time zone offset value formatted as a signed value of hours and minutes.
+     *
+     * <p>Examples of accepted values: {@code +3:00}, {@code -04:30}.
+     *
+     * @throws ParseException if the passed value has invalid format
+     */
+    public static ZoneOffset parse(String value) throws ParseException {
+        int pos = value.indexOf(':');
+        if (pos == -1) {
+            final String errMsg = format("Invalid offset value: \"%s\"", value);
+            throw new ParseException(errMsg, 0);
+        }
+        final boolean positive = value.charAt(0) == '+';
+        final boolean negative = value.charAt(0) == '-';
+
+        if (!(positive || negative)) {
+            final String errMsg = format("Missing sign char in offset value: \"%s\"", value);
+            throw new ParseException(errMsg, 0);
+        }
+
+        final String hoursStr = value.substring(1, pos);
+        final String minutesStr = value.substring(pos + 1);
+        final long hours = Long.parseLong(hoursStr);
+        final long minutes = Long.parseLong(minutesStr);
+        final long totalMinutes = hours * MINUTES_PER_HOUR + minutes;
+        long seconds = totalMinutes * SECONDS_PER_MINUTE;
+
+        if (negative) {
+            seconds = -seconds;
+        }
+
+        @SuppressWarnings("NumericCastThatLosesPrecision") // OK since the value cannot grow larger.
+        final ZoneOffset result = ofSeconds((int) seconds);
+        return result;
+    }
+
+    /**
+     * Converts the passed zone offset into a string with a signed amount of hours and minutes.
+     */
+    public static String toString(ZoneOffset zoneOffset) {
+        checkNotNull(zoneOffset);
+        final long seconds = zoneOffset.getAmountSeconds();
+        final long totalMinutes = seconds / SECONDS_PER_MINUTE;
+        final long hours = totalMinutes / MINUTES_PER_HOUR;
+        final long minutes = totalMinutes % MINUTES_PER_HOUR;
+        final StringBuilder builder = new StringBuilder(6)
+            .append(seconds > 0 ? '+' : '-')
+            .append(format("%02d:%02d", hours, minutes));
+        return builder.toString();
+    }
 }
