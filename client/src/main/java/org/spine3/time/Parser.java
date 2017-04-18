@@ -97,7 +97,7 @@ class Parser {
     }
 
     private void parseZoneOffset() throws ParseException {
-        if (value.charAt(timezoneOffsetPosition) == 'Z') {
+        if (value.charAt(timezoneOffsetPosition) == UTC_ZONE_SIGN) {
             if (value.length() != timezoneOffsetPosition + 1) {
                 final String errMsg = format(
                         "Failed to parse date/time value: missing zone offset info \"%s\"",
