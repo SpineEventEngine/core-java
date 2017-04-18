@@ -190,7 +190,7 @@ public class ZoneOffsets {
         final long minutes = totalMinutes % MINUTES_PER_HOUR;
         final StringBuilder builder = new StringBuilder(6)
             .append(seconds >= 0 ? Formats.PLUS : Formats.MINUS)
-            .append(format("%02d:%02d", Math.abs(hours), Math.abs(minutes)));
+            .append(format(Formats.HOURS_AND_MINUTES_FORMAT, Math.abs(hours), Math.abs(minutes)));
         return builder.toString();
     }
 }

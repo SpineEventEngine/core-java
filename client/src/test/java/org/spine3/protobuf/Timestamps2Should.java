@@ -24,7 +24,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.string.Stringifiers;
 import org.spine3.test.TimeTests;
 import org.spine3.time.Timestamps2;
 
@@ -289,13 +288,5 @@ public class Timestamps2Should {
     @Test
     public void obtain_system_time_millis() {
         assertNotEquals(0, systemTime());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
-        // This uses TextFormat printing, for the output won't be parsable.
-        final String time = Timestamps2.getCurrentTime()
-                                       .toString();
-        Stringifiers.fromString(time, Timestamp.class);
     }
 }

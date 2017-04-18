@@ -37,12 +37,13 @@ class Formats {
 
     static final String DATE_FORMAT = "yyyy-MM-dd";
     static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    static final String HOURS_AND_MINUTES_FORMAT = "%02d:%02d";
 
     static final char TIME_SEPARATOR = 'T';
-    static final char UTC_ZONE_SIGN = 'Z';
     static final char SUB_SECOND_SEPARATOR = '.';
     static final char PLUS = '+';
     static final char MINUS = '-';
+    static final char UTC_ZONE_SIGN = 'Z';
 
     private Formats() {
         // Prevent instantiation of this utility class.

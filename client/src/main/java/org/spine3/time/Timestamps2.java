@@ -51,6 +51,8 @@ public class Timestamps2 {
      *   <li>{@link #MICROS_PER_SECOND}
      * </ul>
      * Consider removing these constants if they become public in the Protobuf utils API.
+     * These constants may also become obsolete when date/time routine are migrated to
+     * classes from the java.time package available since Java 8.
      **/
 
     /** The count of nanoseconds in one second. */

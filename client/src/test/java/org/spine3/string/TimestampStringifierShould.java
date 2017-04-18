@@ -20,38 +20,34 @@
 
 package org.spine3.string;
 
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.Tests;
-import org.spine3.time.LocalDate;
-import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.string.TimeStringifiers.forDuration;
-import static org.spine3.string.TimeStringifiers.forLocalDate;
-import static org.spine3.string.TimeStringifiers.forTimestamp;
-import static org.spine3.string.TimeStringifiers.forZoneOffset;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TimeStringifiersShould {
+public class TimestampStringifierShould {
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TimeStringifiers.class);
+    private static final Stringifier<Timestamp> stringifier = TimeStringifiers.forTimestamp();
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
+        // This uses TextFormat printing, for the output won't be parsable.
+        final String time = getCurrentTime().toString();
+        stringifier.fromString(time);
     }
 
-    private static Stringifier<Object> getStringifier(Class<?> cls) {
-        return StringifierRegistry.getInstance().get(cls).get();
-    }
-
     @Test
-    public void register_stringifiers() {
-        assertEquals(forZoneOffset(), getStringifier(ZoneOffset.class));
-        assertEquals(forDuration(), getStringifier(Duration.class));
-        assertEquals(forTimestamp(), getStringifier(Timestamp.class));
-        assertEquals(forLocalDate(), getStringifier(LocalDate.class));
+    public void convert_back_and_forth() {
+        final Timestamp timestamp = getCurrentTime();
+
+        final String str = stringifier.convert(timestamp);
+        final Timestamp convertedBack = stringifier.reverse()
+                                                   .convert(str);
+
+        assertEquals(timestamp, convertedBack);
     }
 }

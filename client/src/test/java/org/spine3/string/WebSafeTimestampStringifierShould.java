@@ -20,38 +20,25 @@
 
 package org.spine3.string;
 
-import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.Tests;
-import org.spine3.time.LocalDate;
-import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.string.TimeStringifiers.forDuration;
-import static org.spine3.string.TimeStringifiers.forLocalDate;
-import static org.spine3.string.TimeStringifiers.forTimestamp;
-import static org.spine3.string.TimeStringifiers.forZoneOffset;
+import static org.spine3.string.TimeStringifiers.forTimestampWebSafe;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TimeStringifiersShould {
+public class WebSafeTimestampStringifierShould {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TimeStringifiers.class);
-    }
+    public void convert_back_and_forth() {
+        final Timestamp timestamp = getCurrentTime();
+        final Stringifier<Timestamp> stringifier = forTimestampWebSafe();
 
-    private static Stringifier<Object> getStringifier(Class<?> cls) {
-        return StringifierRegistry.getInstance().get(cls).get();
-    }
-
-    @Test
-    public void register_stringifiers() {
-        assertEquals(forZoneOffset(), getStringifier(ZoneOffset.class));
-        assertEquals(forDuration(), getStringifier(Duration.class));
-        assertEquals(forTimestamp(), getStringifier(Timestamp.class));
-        assertEquals(forLocalDate(), getStringifier(LocalDate.class));
+        final String str = stringifier.convert(timestamp);
+        assertEquals(timestamp, stringifier.reverse()
+                                           .convert(str));
     }
 }
