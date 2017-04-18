@@ -36,7 +36,7 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-public class Validate {
+public final class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
 

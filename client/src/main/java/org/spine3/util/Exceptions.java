@@ -32,7 +32,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-public class Exceptions {
+public final class Exceptions {
 
     private Exceptions() {
         // Prevent instantiation of this utility class.
