@@ -33,12 +33,14 @@ import static java.util.Calendar.YEAR;
 import static org.spine3.time.Calendars.nowAt;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
+import static org.spine3.time.Parser.parserOffsetDateTime;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Routines for working with {@link OffsetDateTime}.
  *
  * @author Alexander Aleksandrov
+ * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public class OffsetDateTimes {
@@ -48,7 +50,7 @@ public class OffsetDateTimes {
     }
 
     /**
-     * Obtains current OffsetDateTime instance using {@code ZoneOffset}.
+     * Obtains current date/time at the passed time zone.
      */
     public static OffsetDateTime now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset);
@@ -57,290 +59,297 @@ public class OffsetDateTimes {
         final LocalTime localTime = toLocalTime(now);
         final LocalDate localDate = toLocalDate(now);
 
-        final OffsetDateTime result = OffsetDateTime.newBuilder()
-                                                    .setDate(localDate)
-                                                    .setTime(localTime)
-                                                    .setOffset(zoneOffset)
-                                                    .build();
-        return result;
+        return create(localDate, localTime, zoneOffset);
     }
 
     /**
-     * Obtains OffsetDateTime instance using {@code LocalDate}, {@code LocalTime}
-     * and {@code ZoneOffset}.
+     * Creates a new {@code OffsetDateTime} instance with the passed values.
      */
-    public static OffsetDateTime of(LocalDate localDate,
-                                    LocalTime localTime,
-                                    ZoneOffset zoneOffset) {
-        final OffsetDateTime result = OffsetDateTime.newBuilder()
-                                                    .setDate(localDate)
-                                                    .setTime(localTime)
-                                                    .setOffset(zoneOffset)
-                                                    .build();
-        return result;
+    public static OffsetDateTime of(LocalDate date, LocalTime time, ZoneOffset offset) {
+        return create(date, time, offset);
+    }
+
+    private static OffsetDateTime create(LocalDate date, LocalTime time, ZoneOffset offset) {
+        return OffsetDateTime.newBuilder()
+                             .setDate(date)
+                             .setTime(time)
+                             .setOffset(offset)
+                             .build();
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of years added.
+     * Ensures that the passed value is not null and the delta value is positive.
      */
-    public static OffsetDateTime plusYears(OffsetDateTime offsetDateTime, int yearsToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(yearsToAdd);
-
-        return changeYear(offsetDateTime, yearsToAdd);
+    private static void checkArguments(OffsetDateTime value, int delta) {
+        checkNotNull(value);
+        checkPositive(delta);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of months added.
+     * Obtains a copy of the passed value with added number of years.
+     *
+     * @param value      the value to update
+     * @param yearsToAdd a positive number of years to add
      */
-    public static OffsetDateTime plusMonths(OffsetDateTime offsetDateTime, int monthsToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(monthsToAdd);
-
-        return changeMonth(offsetDateTime, monthsToAdd);
+    public static OffsetDateTime plusYears(OffsetDateTime value, int yearsToAdd) {
+        checkArguments(value, yearsToAdd);
+        return changeYear(value, yearsToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of days added.
+     * Obtains a copy of the passed value with the specified number of months added.
+     *
+     * @param value       the value to update
+     * @param monthsToAdd a positive number of months to add
      */
-    public static OffsetDateTime plusDays(OffsetDateTime offsetDateTime, int daysToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(daysToAdd);
-
-        return changeDays(offsetDateTime, daysToAdd);
+    public static OffsetDateTime plusMonths(OffsetDateTime value, int monthsToAdd) {
+        checkArguments(value, monthsToAdd);
+        return changeMonth(value, monthsToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of hours added.
+     * Obtains a copy of the passed value with the specified number of days added.
+     *
+     * @param value     the value to update
+     * @param daysToAdd a positive number of days to add
      */
-    public static OffsetDateTime plusHours(OffsetDateTime offsetDateTime, int hoursToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(hoursToAdd);
-
-        return changeHours(offsetDateTime, hoursToAdd);
+    public static OffsetDateTime plusDays(OffsetDateTime value, int daysToAdd) {
+        checkArguments(value, daysToAdd);
+        return changeDays(value, daysToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of minutes added.
+     * Obtains a copy of the passed value with the specified number of hours added.
+     *
+     * @param value      the value to update
+     * @param hoursToAdd a positive number of hours to add
      */
-    public static OffsetDateTime plusMinutes(OffsetDateTime offsetDateTime, int minutesToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(minutesToAdd);
-
-        return changeMinutes(offsetDateTime, minutesToAdd);
+    public static OffsetDateTime plusHours(OffsetDateTime value, int hoursToAdd) {
+        checkArguments(value, hoursToAdd);
+        return changeHours(value, hoursToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of seconds added.
+     * Obtains a copy of the passed value with the specified number of minutes added.
+     *
+     * @param value        the value to update
+     * @param minutesToAdd a positive number of minutes to add
      */
-    public static OffsetDateTime plusSeconds(OffsetDateTime offsetDateTime, int secondsToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(secondsToAdd);
-
-        return changeSeconds(offsetDateTime, secondsToAdd);
+    public static OffsetDateTime plusMinutes(OffsetDateTime value, int minutesToAdd) {
+        checkArguments(value, minutesToAdd);
+        return changeMinutes(value, minutesToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of milliseconds added.
+     * Obtains a copy of the passed value with the specified number of seconds added.
+     *
+     * @param value        the value to update
+     * @param secondsToAdd a positive number of seconds to add
      */
-    public static OffsetDateTime plusMillis(OffsetDateTime offsetDateTime, int millisToAdd) {
-        checkNotNull(offsetDateTime);
-        checkPositive(millisToAdd);
-
-        return changeMillis(offsetDateTime, millisToAdd);
+    public static OffsetDateTime plusSeconds(OffsetDateTime value, int secondsToAdd) {
+        checkArguments(value, secondsToAdd);
+        return changeSeconds(value, secondsToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of years subtracted.
+     * Obtains a copy of the passed value with the specified number of milliseconds added.
+     *
+     * @param value       the value to update
+     * @param millisToAdd a positive number of milliseconds to add
      */
-    public static OffsetDateTime minusYears(OffsetDateTime offsetDateTime, int yearsToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(yearsToSubtract);
-
-        return changeYear(offsetDateTime, -yearsToSubtract);
+    public static OffsetDateTime plusMillis(OffsetDateTime value, int millisToAdd) {
+        checkArguments(value, millisToAdd);
+        return changeMillis(value, millisToAdd);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of months subtracted.
+     * Obtains a copy of the passed value with the specified number of years subtracted.
+     *
+     * @param value           the value to update
+     * @param yearsToSubtract a positive number of years to subtract
      */
-    public static OffsetDateTime minusMonths(OffsetDateTime offsetDateTime, int monthsToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(monthsToSubtract);
-
-        return changeMonth(offsetDateTime, -monthsToSubtract);
+    public static OffsetDateTime minusYears(OffsetDateTime value, int yearsToSubtract) {
+        checkArguments(value, yearsToSubtract);
+        return changeYear(value, -yearsToSubtract);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of days subtracted.
+     * Obtains a copy of the passed value with the specified number of months subtracted.
+     *
+     * @param value            the value to update
+     * @param monthsToSubtract a positive number of months to subtract
      */
-    public static OffsetDateTime minusDays(OffsetDateTime offsetDateTime, int daysToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(daysToSubtract);
-
-        return changeDays(offsetDateTime, -daysToSubtract);
+    public static OffsetDateTime minusMonths(OffsetDateTime value, int monthsToSubtract) {
+        checkArguments(value, monthsToSubtract);
+        return changeMonth(value, -monthsToSubtract);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of hours subtracted.
+     * Obtains a copy of the passed value with the specified number of days subtracted.
+     *
+     * @param value          the value to update
+     * @param daysToSubtract a positive number of days to subtract
      */
-    public static OffsetDateTime minusHours(OffsetDateTime offsetDateTime, int hoursToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(hoursToSubtract);
-
-        return changeHours(offsetDateTime, -hoursToSubtract);
+    public static OffsetDateTime minusDays(OffsetDateTime value, int daysToSubtract) {
+        checkArguments(value, daysToSubtract);
+        return changeDays(value, -daysToSubtract);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of minutes subtracted.
+     * Obtains a copy of the passed value with the specified number of hours subtracted.
+     *
+     * @param value           the value to update
+     * @param hoursToSubtract a positive number of hours to subtract
      */
-    public static OffsetDateTime minusMinutes(OffsetDateTime offsetDateTime,
-            int minutesToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(minutesToSubtract);
-
-        return changeMinutes(offsetDateTime, -minutesToSubtract);
+    public static OffsetDateTime minusHours(OffsetDateTime value, int hoursToSubtract) {
+        checkArguments(value, hoursToSubtract);
+        return changeHours(value, -hoursToSubtract);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of seconds subtracted.
+     * Obtains a copy of the passed value with the specified number of minutes subtracted.
+     *
+     * @param value             the value to update
+     * @param minutesToSubtract a positive number of minutes to subtract
      */
-    public static OffsetDateTime minusSeconds(OffsetDateTime offsetDateTime,
-            int secondsToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(secondsToSubtract);
-
-        return changeSeconds(offsetDateTime, -secondsToSubtract);
+    public static OffsetDateTime minusMinutes(OffsetDateTime value, int minutesToSubtract) {
+        checkArguments(value, minutesToSubtract);
+        return changeMinutes(value, -minutesToSubtract);
     }
 
     /**
-     * Obtains a copy of this offset date and time with the specified number of
-     * milliseconds subtracted.
+     * Obtains a copy of the passed value with the specified number of seconds subtracted.
+     *
+     * @param value             the value to update
+     * @param secondsToSubtract a positive number of seconds to subtract
      */
-    public static OffsetDateTime minusMillis(OffsetDateTime offsetDateTime, int millisToSubtract) {
-        checkNotNull(offsetDateTime);
-        checkPositive(millisToSubtract);
+    public static OffsetDateTime minusSeconds(OffsetDateTime value, int secondsToSubtract) {
+        checkArguments(value, secondsToSubtract);
+        return changeSeconds(value, -secondsToSubtract);
+    }
 
-        return changeMillis(offsetDateTime, -millisToSubtract);
+    /**
+     * Obtains a copy of the passed value with the specified number of milliseconds subtracted.
+     *
+     * @param value            the value to update
+     * @param millisToSubtract a positive number of milliseconds to subtract
+     */
+    public static OffsetDateTime minusMillis(OffsetDateTime value, int millisToSubtract) {
+        checkArguments(value, millisToSubtract);
+        return changeMillis(value, -millisToSubtract);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of years.
      *
-     * @param offsetDateTime offset date and time that will be changed
-     * @param yearsDelta     a number of years that needs to be added or subtracted that can be
-     *                       either positive or negative
-     * @return copy of this offset date and time with new years value
+     * @param value      the value to update
+     * @param yearsDelta a number of years that needs to be added or subtracted that can be
+     *                   either positive or negative
+     * @return copy of the passed value with new years value
      */
-    private static OffsetDateTime changeYear(OffsetDateTime offsetDateTime, int yearsDelta) {
-        return add(offsetDateTime, YEAR, yearsDelta);
+    private static OffsetDateTime changeYear(OffsetDateTime value, int yearsDelta) {
+        return add(value, YEAR, yearsDelta);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of months.
      *
-     * @param offsetDateTime offset date that will be changed
-     * @param monthDelta     a number of months that needs to be added or subtracted that can be
-     *                       either positive or negative
-     * @return copy of this offset date and time with new months value
+     * @param value      the value to update
+     * @param monthDelta a number of months that needs to be added or subtracted that can be
+     *                   either positive or negative
+     * @return copy of the passed value with new months value
      */
-    private static OffsetDateTime changeMonth(OffsetDateTime offsetDateTime, int monthDelta) {
-        return add(offsetDateTime, MONTH, monthDelta);
+    private static OffsetDateTime changeMonth(OffsetDateTime value, int monthDelta) {
+        return add(value, MONTH, monthDelta);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of days.
      *
-     * @param offsetDateTime offset date that will be changed
-     * @param daysDelta      a number of days that needs to be added or subtracted that can be
-     *                       either positive or negative
-     * @return copy of this offset date and time with new days value
+     * @param value     the value to update
+     * @param daysDelta a number of days that needs to be added or subtracted that can be
+     *                  either positive or negative
+     * @return copy of the passed value with new days value
      */
-    private static OffsetDateTime changeDays(OffsetDateTime offsetDateTime, int daysDelta) {
-        return add(offsetDateTime, DAY_OF_MONTH, daysDelta);
+    private static OffsetDateTime changeDays(OffsetDateTime value, int daysDelta) {
+        return add(value, DAY_OF_MONTH, daysDelta);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of hours.
      *
-     * @param offsetDateTime offset date and time that will be changed
-     * @param hoursDelta     a number of hours that needs to be added or subtracted that can be
-     *                       either positive or negative
-     * @return copy of this offset date and time with new hours value
+     * @param value      the value to update
+     * @param hoursDelta a number of hours that needs to be added or subtracted that can be
+     *                   either positive or negative
+     * @return copy of the passed value with new hours value
      */
-    private static OffsetDateTime changeHours(OffsetDateTime offsetDateTime, int hoursDelta) {
-        return add(offsetDateTime, HOUR, hoursDelta);
+    private static OffsetDateTime changeHours(OffsetDateTime value, int hoursDelta) {
+        return add(value, HOUR, hoursDelta);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of minutes.
      *
-     * @param offsetDateTime offset date and time that will be changed
-     * @param minutesDelta   a number of minutes that needs to be added or subtracted that can be
-     *                       either positive or negative
-     * @return copy of this offset date and time with new minutes value
+     * @param value        offset date and time that will be changed
+     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be
+     *                     either positive or negative
+     * @return copy of the passed value with new minutes value
      */
-    private static OffsetDateTime changeMinutes(OffsetDateTime offsetDateTime, int minutesDelta) {
-        return add(offsetDateTime, MINUTE, minutesDelta);
+    private static OffsetDateTime changeMinutes(OffsetDateTime value, int minutesDelta) {
+        return add(value, MINUTE, minutesDelta);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of seconds.
      *
-     * @param offsetDateTime offset date and time that will be changed
-     * @param secondsDelta   a number of seconds that needs to be added or subtracted that can be
-     *                       either positive or negative
-     * @return copy of this offset date and time with new seconds value
+     * @param value        offset date and time that will be changed
+     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be
+     *                     either positive or negative
+     * @return copy of the passed value with new seconds value
      */
-    private static OffsetDateTime changeSeconds(OffsetDateTime offsetDateTime, int secondsDelta) {
-        return add(offsetDateTime, SECOND, secondsDelta);
+    private static OffsetDateTime changeSeconds(OffsetDateTime value, int secondsDelta) {
+        return add(value, SECOND, secondsDelta);
     }
 
     /**
      * Obtains offset date and time changed on specified amount of milliseconds.
      *
-     * @param dateTime    offset date and time that will be changed
+     * @param value       offset date and time that will be changed
      * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be
      *                    either positive or negative
-     * @return copy of this offset date and time with new milliseconds value
+     * @return copy of the passed value with new milliseconds value
      */
-    private static OffsetDateTime changeMillis(OffsetDateTime dateTime, int millisDelta) {
-        return add(dateTime, MILLISECOND, millisDelta);
+    private static OffsetDateTime changeMillis(OffsetDateTime value, int millisDelta) {
+        return add(value, MILLISECOND, millisDelta);
     }
 
     /**
      * Performs date and time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetDateTime add(OffsetDateTime dateTime, int calendarField, int delta) {
-        final Calendar calendar = Calendars.toCalendar(dateTime);
+    private static OffsetDateTime add(OffsetDateTime value, int calendarField, int delta) {
+        final Calendar calendar = Calendars.toCalendar(value);
         calendar.add(calendarField, delta);
 
-        final LocalDate localDate = toLocalDate(calendar);
-        final LocalTime localTime = toLocalTime(calendar);
-        final long nanos = dateTime.getTime()
-                                   .getNanos();
-        final LocalTime localTimeWithNanos = localTime.toBuilder()
-                                                      .setNanos(nanos)
-                                                      .build();
-
-        return withDateTime(dateTime, localDate, localTimeWithNanos);
+        final LocalDate date = toLocalDate(calendar);
+        final LocalTime time = toLocalTime(calendar);
+        final long nanos = value.getTime()
+                                .getNanos();
+        final LocalTime timeWithNanos = time.toBuilder()
+                                            .setNanos(nanos)
+                                            .build();
+        return withDateTime(value, date, timeWithNanos);
     }
 
     /**
-     * Returns a new instance of offset date and time with changed local date or
-     * local time parameter.
-     *
-     * @param offsetDateTime offset date and time that will be changed
-     * @param date           new local date for this offset date and time
-     * @param time           new local time for this offset date and time
-     * @return new {@code OffsetDateTime} instance with changed parameter
+     * Returns a new instance of with new local date and time values.
      */
-    private static OffsetDateTime withDateTime(OffsetDateTime offsetDateTime,
-            LocalDate date,
-            LocalTime time) {
-        return offsetDateTime.toBuilder()
-                             .setDate(date)
-                             .setTime(time)
-                             .build();
+    private static OffsetDateTime withDateTime(OffsetDateTime value,
+                                               LocalDate date,
+                                               LocalTime time) {
+        return value.toBuilder()
+                    .setDate(date)
+                    .setTime(time)
+                    .build();
     }
 
     /**
@@ -349,6 +358,6 @@ public class OffsetDateTimes {
      * @throws ParseException if the passed string is not a valid date-time value
      */
     public static OffsetDateTime parse(String value) throws ParseException {
-        return Parser.parserOffsetDateTime(value);
+        return parserOffsetDateTime(value);
     }
 }
