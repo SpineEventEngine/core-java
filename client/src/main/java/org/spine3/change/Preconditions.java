@@ -43,6 +43,7 @@ public final class Preconditions {
             "`expected` and `actual` cannot be equal in ValueMismatch";
 
     private Preconditions() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
