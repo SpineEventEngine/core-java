@@ -71,6 +71,11 @@ public class StreamObservers {
         };
     }
 
+    /**
+     * A utility method which sends {@linkplain org.spine3.base.Responses#ok() acknowledgement}
+     * to the client via the {@code responseObserver} provided and
+     * {@linkplain StreamObserver#onCompleted() completes} the response.
+     */
     public static void ack(StreamObserver<Response> responseObserver) {
         responseObserver.onNext(ok());
         responseObserver.onCompleted();
