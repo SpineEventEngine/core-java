@@ -61,13 +61,28 @@ final class Parser {
         this.value = value;
     }
 
-    static OffsetDateTime parserOffsetDateTime(String value) throws ParseException {
+    static OffsetDateTime parseOffsetDateTime(String value) throws ParseException {
         final Parser parser = new Parser(value);
         final OffsetDateTime result = parser.parseOffsetDateTime();
         return result;
     }
 
-    OffsetDateTime parseOffsetDateTime() throws ParseException {
+    static LocalTime parseLocalTime(String str) throws ParseException {
+        final Parser parser = new Parser(str);
+        final LocalTime result = parser.parseLocalTime();
+        return result;
+    }
+
+    static OffsetTime parseOffsetTime(String str) throws ParseException {
+        final Parser parser = new Parser(str);
+        final OffsetTime result = parser.parseOffsetTime();
+        return result;
+    }
+
+    // Implementation
+    //-------------------
+
+    private OffsetDateTime parseOffsetDateTime() throws ParseException {
         initDayOffset();
         initTimezoneOffsetPosition();
         initTimeValues();
@@ -82,7 +97,20 @@ final class Parser {
         return result;
     }
 
-    LocalTime parseLocalTime() throws ParseException {
+    private OffsetTime parseOffsetTime() throws ParseException {
+        initTimezoneOffsetPosition();
+        initTimeValues();
+
+        parseTime(timeFormat());
+        parseZoneOffset();
+
+        final Calendar calendar = createCalendar();
+        final LocalTime localTime = Calendars.toLocalTime(calendar);
+        final OffsetTime result = OffsetTimes.of(localTime, zoneOffset);
+        return result;
+    }
+
+    private LocalTime parseLocalTime() throws ParseException {
         // The input string for local time does not have zone offset.
         timezoneOffsetPosition = value.length();
         initTimeValues();
@@ -165,7 +193,7 @@ final class Parser {
     }
 
     @SuppressWarnings("CharUsedInArithmeticContext") // OK for this parsing method.
-    static int parseNanos(String value) throws ParseException {
+    private static int parseNanos(String value) throws ParseException {
         int result = 0;
         for (int i = 0; i < 9; ++i) {
             result = result * 10;

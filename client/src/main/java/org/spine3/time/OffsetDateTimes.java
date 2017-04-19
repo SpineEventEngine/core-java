@@ -38,7 +38,6 @@ import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.time.Formats.appendSubSecond;
 import static org.spine3.time.Formats.appendZoneOffset;
 import static org.spine3.time.Formats.dateTimeFormat;
-import static org.spine3.time.Parser.parserOffsetDateTime;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -349,7 +348,7 @@ public final class OffsetDateTimes {
     }
 
     /**
-     * Returns a ISO 8601 date/time string representation of the passed value.
+     * Returns a ISO 8601 date/time string corresponding to the passed value.
      */
     public static String toString(OffsetDateTime value) {
         final Calendar calendar = toCalendar(value);
@@ -377,6 +376,6 @@ public final class OffsetDateTimes {
      * @throws ParseException if the passed string is not a valid date-time value
      */
     public static OffsetDateTime parse(String value) throws ParseException {
-        return parserOffsetDateTime(value);
+        return Parser.parseOffsetDateTime(value);
     }
 }

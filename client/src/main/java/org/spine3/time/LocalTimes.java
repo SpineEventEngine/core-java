@@ -324,8 +324,7 @@ public final class LocalTimes {
      * Parses the passed string into local time value.
      */
     public static LocalTime parse(String str) throws ParseException {
-        final Parser parser = new Parser(str);
-        final LocalTime result = parser.parseLocalTime();
-        return result;
+        return Parser.parseLocalTime(str);
     }
+
 }

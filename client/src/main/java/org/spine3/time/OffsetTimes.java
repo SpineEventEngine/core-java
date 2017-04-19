@@ -21,7 +21,9 @@ package org.spine3.time;
 
 import com.google.protobuf.Timestamp;
 
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.HOUR;
@@ -31,6 +33,9 @@ import static java.util.Calendar.SECOND;
 import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalTime;
+import static org.spine3.time.Formats.appendSubSecond;
+import static org.spine3.time.Formats.appendZoneOffset;
+import static org.spine3.time.Formats.timeFormat;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -226,5 +231,35 @@ public final class OffsetTimes {
                          .setTime(localTime)
                          .setOffset(zoneOffset)
                          .build();
+    }
+
+    /**
+     * Returns a ISO 8601 time string corresponding to the passed value.
+     */
+    public static String toString(OffsetTime value) {
+        final Calendar calendar = toCalendar(value);
+        final StringBuilder result = new StringBuilder();
+
+        // Format the date/time part.
+        final Date date = calendar.getTime();
+        final String dateTime = timeFormat().format(date);
+        result.append(dateTime);
+
+        // Format the fractional second part.
+        final LocalTime time = value.getTime();
+        appendSubSecond(result, time);
+
+        // Add time zone.
+        final ZoneOffset offset = value.getOffset();
+        appendZoneOffset(result, offset);
+
+        return result.toString();
+    }
+
+    /**
+     * Parse from ISO 8601 string to {@code OffsetTime}.
+     */
+    public static OffsetTime parse(String str) throws ParseException {
+        return Parser.parseOffsetTime(str);
     }
 }

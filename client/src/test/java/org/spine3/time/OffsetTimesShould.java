@@ -28,10 +28,12 @@ import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.random;
 import static org.spine3.time.Calendars.at;
@@ -329,5 +331,33 @@ public class OffsetTimesShould {
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_millis_to_subtract() {
         subtractMillis(now, 0);
+    }
+
+    //
+    // Stringification
+    //-------------------------
+
+    @Test
+    public void convert_values_at_UTC_to_string() throws ParseException {
+        final OffsetTime nowAtUTC = OffsetTimes.now(ZoneOffsets.UTC);
+
+        final String value = OffsetTimes.toString(nowAtUTC);
+        assertTrue(value.contains("Z"));
+        final OffsetTime parsed = OffsetTimes.parse(value);
+        assertEquals(nowAtUTC, parsed);
+    }
+
+    @Test
+    public void convert_values_at_current_time_zone() throws ParseException {
+        // Get current zone offset and strip ID value because it's not stored into date/time.
+        final ZoneOffset zoneOffset = ZoneOffsets.getDefault()
+                                                 .toBuilder()
+                                                 .clearId()
+                                                 .build();
+        final OffsetTime now = OffsetTimes.now(zoneOffset);
+
+        final String value = OffsetTimes.toString(now);
+        final OffsetTime parsed = OffsetTimes.parse(value);
+        assertEquals(now, parsed);
     }
 }
