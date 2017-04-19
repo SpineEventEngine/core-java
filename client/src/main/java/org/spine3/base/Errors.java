@@ -73,11 +73,14 @@ public class Errors {
      *
      * <p>If any other exception was passed, {@code Optional.absent()} is returned.
      *
+     * <p>The typical place where this method must be used is
+     * {@link io.grpc.stub.StreamObserver#onError(Throwable) StreamObserver.onError(Throwable)}.
+     *
      * @param throwable the {@code Throwable} to extract an {@link Error}
      * @return the extracted error or {@code Optional.absent()} if the extraction failed
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
-    public static Optional<Error> fromStatus(Throwable throwable) {
+    public static Optional<Error> fromResponseError(Throwable throwable) {
         checkNotNull(throwable);
         if (throwable instanceof StatusRuntimeException) {
             final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
