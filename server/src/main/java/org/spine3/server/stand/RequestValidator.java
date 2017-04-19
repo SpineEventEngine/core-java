@@ -202,6 +202,10 @@ abstract class RequestValidator<M extends Message> {
 
         private final String errorMessage;
 
+        /**
+         * Creates an instance of {@code RequestNotSupported} value object
+         * by the specific error code and the error message.
+         */
         RequestNotSupported(ProtocolMessageEnum errorCode, String errorMessage) {
             this.errorCode = errorCode;
             this.errorMessage = errorMessage;
