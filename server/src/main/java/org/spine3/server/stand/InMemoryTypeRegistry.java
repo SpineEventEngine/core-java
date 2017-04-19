@@ -37,6 +37,9 @@ import java.util.concurrent.ConcurrentMap;
 import static com.google.common.base.Optional.fromNullable;
 
 /**
+ * The in-memory concurrency-friendly implementation of {
+ * @linkplain TypeRegistry Stand type registry}.
+ *
  * @author Alex Tymchenko
  */
 public class InMemoryTypeRegistry implements TypeRegistry {
