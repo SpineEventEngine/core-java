@@ -204,7 +204,6 @@ public class Stand implements AutoCloseable {
     public void subscribe(final Topic topic, final StreamObserver<Subscription> responseObserver) {
         topicValidator.validate(topic, responseObserver);
 
-
         final TenantId tenantId = topic.getContext()
                                        .getTenantId();
         final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
