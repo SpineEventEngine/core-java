@@ -36,8 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class Errors {
 
-    // Prevent instantiation of this utility class.
     private Errors() {
+        // Prevent instantiation of this utility class.
     }
 
     /** Creates new instance of {@link Error} by the passed exception. */

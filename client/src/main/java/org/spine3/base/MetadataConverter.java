@@ -47,8 +47,8 @@ public class MetadataConverter {
     @VisibleForTesting
     static final Key<byte[]> KEY = Key.of(ERROR_KEY_NAME, BINARY_BYTE_MARSHALLER);
 
-    // Prevent instantiation of this utility class.
     private MetadataConverter() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
