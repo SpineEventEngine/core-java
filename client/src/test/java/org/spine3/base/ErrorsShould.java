@@ -23,11 +23,11 @@ package org.spine3.base;
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import io.grpc.Metadata;
-import io.grpc.Status;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import org.junit.Test;
 
+import static io.grpc.Status.INVALID_ARGUMENT;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
@@ -65,7 +65,7 @@ public class ErrorsShould {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
         final StatusRuntimeException statusRuntimeException =
-                Status.INVALID_ARGUMENT.asRuntimeException(metadata);
+                INVALID_ARGUMENT.asRuntimeException(metadata);
 
         assertEquals(expectedError, Errors.fromStreamError(statusRuntimeException)
                                           .get());
@@ -75,7 +75,7 @@ public class ErrorsShould {
     public void return_Error_extracted_form_StatusException_metadata() {
         final Error expectedError = Error.getDefaultInstance();
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
-        final StatusException statusException = Status.INVALID_ARGUMENT.asException(metadata);
+        final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
 
         assertEquals(expectedError, Errors.fromStreamError(statusException)
                                           .get());
@@ -92,7 +92,7 @@ public class ErrorsShould {
     @Test
     public void return_absent_if_there_is_no_error_in_metadata() {
         final Metadata emptyMetadata = new Metadata();
-        final Throwable statusRuntimeEx = Status.INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
+        final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
         assertEquals(Optional.absent(), Errors.fromStreamError(statusRuntimeEx));
     }
