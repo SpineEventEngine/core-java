@@ -67,14 +67,14 @@ public class Errors {
     }
 
     /**
-     * Extracts an {@link Error} either from the {@link StatusRuntimeException}
-     * or from the {@linkplain io.grpc.StatusException StatusException} metadata using
-     * {@linkplain MetadataConverter#toError(Metadata) MetadataConverter}.
+     * Extracts a {@linkplain Error system error} from the
+     * {@linkplain io.grpc.stub.StreamObserver#onError(Throwable) Throwable},
+     * received on a client-side as a result of a failed gRPC call to server-side routines.
      *
-     * <p>If any other exception was passed, {@code Optional.absent()} is returned.
+     * <p>The {@code Error} is extracted from the trailer metadata of
+     * either {@link StatusRuntimeException} or {@link StatusException} only.
      *
-     * <p>The typical place where this method must be used is
-     * {@link io.grpc.stub.StreamObserver#onError(Throwable) StreamObserver.onError(Throwable)}.
+     * <p>If any other exception is passed, {@code Optional.absent()} is returned.
      *
      * @param throwable the {@code Throwable} to extract an {@link Error}
      * @return the extracted error or {@code Optional.absent()} if the extraction failed
