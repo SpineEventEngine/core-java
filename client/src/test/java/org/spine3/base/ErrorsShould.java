@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
@@ -29,6 +28,7 @@ import org.junit.Test;
 
 import static io.grpc.Status.INVALID_ARGUMENT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ErrorsShould {
@@ -86,7 +86,8 @@ public class ErrorsShould {
         final String msg = "Neither a StatusException nor a StatusRuntimeException.";
         final Exception exception = new Exception(msg);
 
-        assertEquals(Optional.absent(), Errors.fromStreamError(exception));
+        assertFalse(Errors.fromStreamError(exception)
+                          .isPresent());
     }
 
     @Test
@@ -94,7 +95,8 @@ public class ErrorsShould {
         final Metadata emptyMetadata = new Metadata();
         final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
-        assertEquals(Optional.absent(), Errors.fromStreamError(statusRuntimeEx));
+        assertFalse(Errors.fromStreamError(statusRuntimeEx)
+                          .isPresent());
     }
 
     @Test

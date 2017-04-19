@@ -20,7 +20,6 @@
 
 package org.spine3.base;
 
-import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
@@ -28,6 +27,7 @@ import org.junit.Test;
 
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -62,7 +62,8 @@ public class MetadataConverterShould {
     public void return_absent_if_metadata_is_empty() {
         final Metadata metadata = new Metadata();
 
-        assertEquals(Optional.absent(), MetadataConverter.toError(metadata));
+        assertFalse(MetadataConverter.toError(metadata)
+                                     .isPresent());
     }
 
     @Test
