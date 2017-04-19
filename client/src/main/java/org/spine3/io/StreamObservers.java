@@ -159,7 +159,7 @@ public class StreamObservers {
         public T firstResponse() {
             final boolean noResponses = responses.isEmpty();
             if (noResponses) {
-                throw new IllegalStateException("No responses has been received yet");
+                throw new IllegalStateException("No responses have been received yet");
             }
             return responses.get(0);
         }
