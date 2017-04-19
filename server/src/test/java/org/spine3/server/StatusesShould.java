@@ -24,8 +24,11 @@ import com.google.common.testing.NullPointerTester;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.junit.Test;
+import org.spine3.base.Error;
+import org.spine3.base.MetadataConverter;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class StatusesShould {
@@ -39,18 +42,23 @@ public class StatusesShould {
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void create_invalid_argument_status_exception() {
         final IllegalArgumentException exception = new IllegalArgumentException("");
+        final Error expectedError = Error.getDefaultInstance();
+        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(exception,
+                                                                                expectedError);
 
-        final StatusRuntimeException statusRuntimeException = Statuses.invalidArgumentWithCause(exception);
-
-        assertEquals(exception, statusRuntimeException.getCause());
-        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeException.getStatus()
-                                                                              .getCode());
+        final Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
+                                                   .get();
+        assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
+                                                                       .getCode());
+        assertEquals(exception, statusRuntimeEx.getCause());
+        assertEquals(expectedError, actualError);
     }
 
     @Test
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(Exception.class, new RuntimeException("Statuses test"))
+                .setDefault(Error.class, Error.getDefaultInstance())
                 .testAllPublicStaticMethods(Statuses.class);
     }
 }
