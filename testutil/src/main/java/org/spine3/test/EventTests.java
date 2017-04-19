@@ -20,40 +20,40 @@
 
 package org.spine3.test;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Version;
-import org.spine3.protobuf.Timestamps2;
 
-import static org.spine3.test.Tests.newUuidValue;
-import static org.spine3.test.TimeTests.Past.minutesAgo;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
- * Utility class for producing events for tests.
+ * Test utilities for creating events used in tests.
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
 public class EventTests {
-
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(EventTests.class);
 
     private EventTests() {
         // Prevent instantiation of this utility class.
     }
 
-    public static EventContext newEventContext() {
-        final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
-                                                     Tests.<Version>nullRef());
-        return event.getContext();
+    private static Event.Builder newBuilderWith(Message eventMessage) {
+        return Event.newBuilder()
+                    .setMessage(pack(eventMessage));
     }
 
-    public static Event createEventOccurredMinutesAgo(int minutesAgo) {
-        final Event result = eventFactory.createEvent(newUuidValue(),
-                                                      null,
-                                                      minutesAgo(minutesAgo));
-        return result;
+    public static Event createContextlessEvent(Message eventMessage) {
+        checkNotNull(eventMessage);
+        return newBuilderWith(eventMessage)
+                .build();
+    }
+
+    public static Event createEvent(Message eventMsg, EventContext context) {
+        checkNotNull(eventMsg);
+        checkNotNull(context);
+        return newBuilderWith(eventMsg)
+                .setContext(context)
+                .build();
     }
 }

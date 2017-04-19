@@ -173,7 +173,7 @@ public class BoundedContextShould {
     public void notify_integration_event_subscriber() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
-        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
+        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
         final Message msg = unpack(event.getMessage());
 
         boundedContext.notify(event, observer);
@@ -188,7 +188,7 @@ public class BoundedContextShould {
         doReturn(false).when(eventBus)
                        .validate(any(Message.class), anyResponseObserver());
         final BoundedContext boundedContext = MultiTenant.newBoundedContext(eventBus);
-        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
+        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
 
         boundedContext.notify(event, new TestResponseObserver());
 

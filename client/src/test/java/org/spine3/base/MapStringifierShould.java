@@ -25,7 +25,6 @@ import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.test.types.Task;
 
 import java.text.ParseException;
 import java.util.Map;
@@ -115,6 +114,17 @@ public class MapStringifierShould {
         assertEquals("two", actualMap.get("2:"));
     }
 
+    @Test
+    public void convert_string_which_contains_delimiter_in_content_to_map_and_backward() {
+        final String stringToConvert = "\"1\\\"\\\"\":\"one\\,\"";
+        final Stringifier<Map<String, String>> stringifier = mapStringifier(String.class,
+                                                                            String.class);
+        final Map<String, String> actualMap = stringifier.fromString(stringToConvert);
+        final String convertedMap = stringifier.toString(actualMap);
+
+        assertEquals(stringToConvert, convertedMap);
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_when_value_has_not_prior_quote() {
         final String stringToConvert = "\"1\":2\"";
@@ -146,7 +156,7 @@ public class MapStringifierShould {
     }
 
     @Test(expected = NullPointerException.class)
-    public void throw_exception_when_key_is_null(){
+    public void throw_exception_when_key_is_null() {
         final Stringifier<Map<String, String>> stringifier =
                 mapStringifier(String.class, String.class);
         final Map<String, String> mapWithNulls = newHashMap();

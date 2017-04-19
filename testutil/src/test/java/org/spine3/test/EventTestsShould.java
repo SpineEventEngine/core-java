@@ -21,10 +21,11 @@
 package org.spine3.test;
 
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Timestamp;
+import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.base.EventContext;
 
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -36,11 +37,12 @@ public class EventTestsShould {
     public void have_utility_ctor() {
         assertHasPrivateParameterlessCtor(EventTests.class);
     }
-
+    
     @Test
-    public void pass_null_tolerance_check() {
+    public void pass_null_tolerance_test() {
         new NullPointerTester()
-                .setDefault(Timestamp.class, getCurrentTime())
+                .setDefault(Message.class, Empty.getDefaultInstance())
+                .setDefault(EventContext.class, EventContext.getDefaultInstance())
                 .testAllPublicStaticMethods(EventTests.class);
     }
 }

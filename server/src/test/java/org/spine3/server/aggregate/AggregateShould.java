@@ -65,6 +65,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
 import static org.spine3.server.aggregate.Given.EventMessage.projectStarted;
@@ -84,12 +85,13 @@ public class AggregateShould {
 
     private static final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(AggregateShould.class);
-    private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(requestFactory);
-
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("prj-01")
                                                  .build();
+
+    private static final TestEventFactory eventFactory =
+            TestEventFactory.newInstance(pack(ID), requestFactory);
+
     private static final CreateProject createProject = Given.CommandMessage.createProject(ID);
     private static final AddTask addTask = Given.CommandMessage.addTask(ID);
     private static final StartProject startProject = Given.CommandMessage.startProject(ID);
@@ -576,7 +578,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, true, false);
 
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {
@@ -592,7 +594,7 @@ public class AggregateShould {
         final FaultyAggregate faultyAggregate =
                 new FaultyAggregate(ID, false, true);
 
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         try {
             faultyAggregate.dispatchForTest(command.getMessage(), command.getContext());
         } catch (RuntimeException e) {

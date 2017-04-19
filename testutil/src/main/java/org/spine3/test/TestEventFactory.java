@@ -20,6 +20,7 @@
 
 package org.spine3.test;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -32,6 +33,7 @@ import org.spine3.server.command.EventFactory;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -59,9 +61,15 @@ public class TestEventFactory extends EventFactory {
         return result;
     }
 
-    public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
+    public static TestEventFactory newInstance(Any producerId, Class<?> testSuiteClass) {
+        final TestActorRequestFactory commandFactory =
+                TestActorRequestFactory.newInstance(testSuiteClass);
+        return newInstance(producerId, commandFactory);
+    }
+
+    public static TestEventFactory newInstance(Any producerId,
+                                               TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
-        final Message producerId = requestFactory.getActor();
         final CommandContext commandContext = requestFactory.createCommandContext();
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
@@ -70,17 +78,30 @@ public class TestEventFactory extends EventFactory {
         return result;
     }
 
+    public static TestEventFactory newInstance(TestActorRequestFactory requestFactory) {
+        final Message producerId = requestFactory.getActor();
+        return newInstance(pack(producerId), requestFactory);
+    }
+
     public static TestEventFactory newInstance(Class<?> testSuiteClass) {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(testSuiteClass);
         return newInstance(requestFactory);
     }
+
+    /**
+     * Creates an event without version information.
+     */
+    public Event createEvent(Message messageOrAny) {
+        return createEvent(messageOrAny, Tests.<Version>nullRef());
+    }
+
     /**
      * Creates an event produced at the passed time.
      */
     public Event createEvent(Message messageOrAny,
-            @Nullable Version version,
-            Timestamp atTime) {
+                             @Nullable Version version,
+                             Timestamp atTime) {
         final Event event = createEvent(messageOrAny, version);
         final EventContext context = event.getContext()
                                           .toBuilder()

@@ -61,10 +61,9 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.server.commandstore.Records.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
@@ -365,7 +364,7 @@ public class StorageShould extends TenantAwareTest {
     }
 
     private static Failure newFailure() {
-        final Any packedFailureMessage = pack(newStringValue("newFailure"));
+        final Any packedFailureMessage = pack("newFailure");
         return Failure.newBuilder()
                       .setMessage(packedFailureMessage)
                       .setContext(FailureContext.newBuilder()

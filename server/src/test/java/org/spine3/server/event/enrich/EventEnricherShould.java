@@ -30,10 +30,11 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.EventFactory;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.event.Given;
+import org.spine3.server.event.Given.Enrichment.GetProjectMaxMemberCount;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
@@ -49,11 +50,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Events.getEnrichment;
+import static org.spine3.base.Enrichments.getEnrichment;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.server.event.Given.AnEvent.projectStarted;
+import static org.spine3.server.event.Given.EventMessage.projectCreated;
+import static org.spine3.test.TestEventFactory.newInstance;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
 
 public class EventEnricherShould {
 
@@ -61,8 +64,16 @@ public class EventEnricherShould {
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
     private EventEnricher enricher;
-    private final Function<ProjectId, String> getProjectName = new Given.Enrichment.GetProjectName();
-    private final Function<ProjectId, UserId> getProjectOwnerId = new Given.Enrichment.GetProjectOwnerId();
+    private final Function<ProjectId, String> getProjectName =
+            new Given.Enrichment.GetProjectName();
+    private final Function<ProjectId, UserId> getProjectOwnerId =
+            new Given.Enrichment.GetProjectOwnerId();
+
+    private static Event createEvent(Message msg) {
+        final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);
+        final Event event = eventFactory.createEvent(msg);
+        return event;
+    }
 
     @Before
     public void setUp() {
@@ -95,7 +106,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event_same_package() {
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
 
         eventBus.post(createEvent(msg));
 
@@ -105,7 +116,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_in_another_package() {
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
 
         eventBus.post(createEvent(msg));
 
@@ -115,13 +126,15 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_with_several_fields_by_same_source_id() {
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
 
-        assertEquals(getProjectName.apply(projectId), subscriber.projectCreatedEnrichment.getProjectName());
-        assertEquals(getProjectOwnerId.apply(projectId), subscriber.projectCreatedEnrichment.getOwnerId());
+        assertEquals(getProjectName.apply(projectId),
+                     subscriber.projectCreatedEnrichment.getProjectName());
+        assertEquals(getProjectOwnerId.apply(projectId),
+                     subscriber.projectCreatedEnrichment.getOwnerId());
     }
 
     @Test
@@ -134,8 +147,10 @@ public class EventEnricherShould {
         eventBus.post(createEvent(completed));
         eventBus.post(createEvent(starred));
 
-        assertEquals(getProjectName.apply(completedProjectId), subscriber.projectCompletedEnrichment.getProjectName());
-        assertEquals(getProjectName.apply(starredProjectId), subscriber.projectStarredEnrichment.getProjectName());
+        assertEquals(getProjectName.apply(completedProjectId),
+                     subscriber.projectCompletedEnrichment.getProjectName());
+        assertEquals(getProjectName.apply(starredProjectId),
+                     subscriber.projectStarredEnrichment.getProjectName());
     }
 
     @Test
@@ -151,10 +166,10 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_function_added_at_runtime() {
-        final Given.Enrichment.GetProjectMaxMemberCount function = new Given.Enrichment.GetProjectMaxMemberCount();
+        final GetProjectMaxMemberCount function = new GetProjectMaxMemberCount();
         enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
 
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
@@ -166,7 +181,7 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
-        assertTrue(enricher.canBeEnriched(Given.AnEvent.projectStarted()));
+        assertTrue(enricher.canBeEnriched(projectStarted()));
     }
 
     @Test
@@ -178,24 +193,31 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
-        final Event event = EventFactory.createEvent(newStringValue(newUuid()), createEventContext(/*doNotEnrich=*/true));
+        final Event event = createEvent(newStringValue(newUuid()));
+        final Event notEnrichableEvent =
+                event.toBuilder()
+                     .setContext(event.getContext()
+                                      .toBuilder()
+                                      .setEnrichment(event.getContext()
+                                                          .getEnrichment()
+                                                          .toBuilder()
+                                                          .setDoNotEnrich(true)))
+                     .build();
 
-        assertFalse(enricher.canBeEnriched(event));
+        assertFalse(enricher.canBeEnriched(notEnrichableEvent));
     }
 
     @Test
     public void return_false_if_pass_null_to_function_checking_predicate() {
-        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class, String.class)
+        final boolean result = EventEnricher.SupportsFieldConversion.of(StringValue.class,
+                                                                        String.class)
                                                                     .apply(null);
         assertFalse(result);
     }
 
-    private static Event createEvent(Message msg) {
-        final Event event = EventFactory.createEvent(msg, createEventContext());
-        return event;
-    }
-
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
+    @SuppressWarnings({"OptionalGetWithoutIsPresent",
+                       "UnusedParameters",
+                       "InstanceVariableNamingConvention"})
     private static class TestEventSubscriber extends EventSubscriber {
 
         private ProjectCreated.Enrichment projectCreatedEnrichment;
@@ -204,11 +226,8 @@ public class EventEnricherShould {
         private ProjectCreatedDynamicallyConfiguredEnrichment projectCreatedDynamicEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectCompletedEnrichment;
         private SeparateEnrichmentForMultipleProjectEvents projectStarredEnrichment;
-
-        @SuppressWarnings("InstanceVariableNamingConvention")
         private ProjectCreatedEnrichmentAnotherPackage projectCreatedAnotherPackEnrichment;
 
-        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             this.projectCreatedEnrichment =
@@ -218,23 +237,22 @@ public class EventEnricherShould {
             this.projectCreatedAnotherPackEnrichment =
                     getEnrichment(ProjectCreatedEnrichmentAnotherPackage.class, context).get();
             this.projectCreatedDynamicEnrichment =
-                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class, context).get();
+                    getEnrichment(ProjectCreatedDynamicallyConfiguredEnrichment.class,
+                                  context).get();
         }
 
-        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
-            this.projectStartedEnrichment = getEnrichment(ProjectStarted.Enrichment.class, context).get();
+            this.projectStartedEnrichment = getEnrichment(ProjectStarted.Enrichment.class,
+                                                          context).get();
         }
 
-        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectCompleted event, EventContext context) {
             this.projectCompletedEnrichment =
                     getEnrichment(SeparateEnrichmentForMultipleProjectEvents.class, context).get();
         }
 
-        @SuppressWarnings("UnusedParameters")
         @Subscribe
         public void on(ProjectStarred event, EventContext context) {
             this.projectStarredEnrichment =

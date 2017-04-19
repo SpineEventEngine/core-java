@@ -34,7 +34,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.builderFor;
 import static org.spine3.protobuf.Messages.isMessage;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Values.pack;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {
@@ -46,7 +46,7 @@ public class MessagesShould {
 
     @Test
     public void return_the_same_any_from_toAny() {
-        final Any any = Any.pack(newStringValue(getClass().getSimpleName()));
+        final Any any = pack(getClass().getSimpleName());
         assertSame(any, Messages.toAny(any));
     }
 

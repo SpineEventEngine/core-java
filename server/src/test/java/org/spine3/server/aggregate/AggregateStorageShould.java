@@ -30,7 +30,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.server.event.Given.EventMessage;
 import org.spine3.server.storage.AbstractStorageShould;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -50,7 +52,8 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Durations2.seconds;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.server.storage.Given.AnEvent.projectCreated;
+import static org.spine3.server.aggregate.Given.StorageRecords.sequenceFor;
+import static org.spine3.test.TestEventFactory.newInstance;
 
 /**
  * @author Alexander Litus
@@ -79,19 +82,22 @@ public abstract class AggregateStorageShould
      *
      * <p>NOTE: the storage is closed after each test.
      *
-     * @param <Id> the type of aggregate IDs
+     * @param <I> the type of aggregate IDs
      * @return an empty storage instance
      */
-    protected abstract <Id> AggregateStorage<Id> getStorage(
-            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass);
+    protected abstract <I> AggregateStorage<I> getStorage(
+            Class<? extends Aggregate<I,
+                                      ? extends Message,
+                                      ? extends Message.Builder>> aggregateClass);
 
     @Override
     protected AggregateStateRecord newStorageRecord() {
-        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
+        final List<AggregateEventRecord> records = sequenceFor(id);
         final List<Event> expectedEvents = transform(records, TO_EVENT);
-        final AggregateStateRecord aggregateStateRecord = AggregateStateRecord.newBuilder()
-                                                                              .addAllEvent(expectedEvents)
-                                                                              .build();
+        final AggregateStateRecord aggregateStateRecord =
+                AggregateStateRecord.newBuilder()
+                                    .addAllEvent(expectedEvents)
+                                    .build();
         return aggregateStateRecord;
     }
 
@@ -180,7 +186,7 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_records_and_return_sorted_by_timestamp_descending() {
-        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id);
+        final List<AggregateEventRecord> records = sequenceFor(id);
 
         writeAll(id, records);
 
@@ -262,9 +268,15 @@ public abstract class AggregateStorageShould
         storage.readEventCountAfterLastSnapshot(id);
     }
 
+    private static Event generateEvent() {
+        final TestEventFactory eventFactory = newInstance(AggregateStorageShould.class);
+        final Event result = eventFactory.createEvent(EventMessage.projectCreated());
+        return result;
+    }
+
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we write right before we get.
-    protected <Id> void writeAndReadEventTest(Id id, AggregateStorage<Id> storage) {
-        final Event expectedEvent = projectCreated();
+    private <I> void writeAndReadEventTest(I id, AggregateStorage<I> storage) {
+        final Event expectedEvent = generateEvent();
 
         storage.writeEvent(id, expectedEvent);
 
@@ -286,7 +298,7 @@ public abstract class AggregateStorageShould
     @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
     // OK as we write right before we get.
     protected void testWriteRecordsAndLoadHistory(Timestamp firstRecordTime) {
-        final List<AggregateEventRecord> records = Given.StorageRecords.sequenceFor(id, firstRecordTime);
+        final List<AggregateEventRecord> records = sequenceFor(id, firstRecordTime);
 
         writeAll(id, records);
 
