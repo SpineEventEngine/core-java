@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
+import org.spine3.annotations.Internal;
 import org.spine3.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -35,6 +36,7 @@ import static io.grpc.Metadata.BINARY_BYTE_MARSHALLER;
  *
  * @author Dmytro Grankin
  */
+@Internal
 public class MetadataConverter {
 
     private static final String ERROR_KEY_NAME = "Spine-Error-bin";
