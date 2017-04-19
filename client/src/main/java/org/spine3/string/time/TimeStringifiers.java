@@ -31,6 +31,7 @@ import org.spine3.string.StringifierRegistry;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.time.LocalTime;
+import org.spine3.time.OffsetDateTime;
 import org.spine3.time.ZoneOffset;
 
 import java.lang.reflect.Type;
@@ -57,7 +58,8 @@ public final class TimeStringifiers {
                         .put(Duration.class, forDuration())
                         .put(Timestamp.class, forTimestamp())
                         .put(LocalDate.class, forLocalDate())
-                        .put(LocalTime.class, forLocalTime());
+                        .put(LocalTime.class, forLocalTime())
+                        .put(OffsetDateTime.class, forOffsetDateTime());
 
         return builder.build();
     }
@@ -129,5 +131,14 @@ public final class TimeStringifiers {
      */
     public static Stringifier<LocalTime> forLocalTime() {
         return LocalTimeStringifier.instance();
+    }
+
+    /**
+     * Obtains a stringifier for {@code OffsetDateTime} values.
+     *
+     * @see org.spine3.time.OffsetDateTimes#parse(String) OffsetDateTimes.parse(String)
+     */
+    public static Stringifier<OffsetDateTime> forOffsetDateTime() {
+        return OffsetDateTimeStringifier.instance();
     }
 }
