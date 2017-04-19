@@ -21,7 +21,9 @@ package org.spine3.time;
 
 import com.google.protobuf.Timestamp;
 
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.HOUR;
@@ -34,6 +36,9 @@ import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalTime;
+import static org.spine3.time.Formats.appendSubSecond;
+import static org.spine3.time.Formats.timeFormat;
+import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.validate.Validate.checkPositive;
 import static org.spine3.validate.Validate.checkPositiveOrZero;
 
@@ -41,7 +46,9 @@ import static org.spine3.validate.Validate.checkPositiveOrZero;
  * Routines for working with {@link LocalTime}.
  *
  * @author Alexander Aleksandrov
+ * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods") // OK for this utility class.
 public final class LocalTimes {
 
     private LocalTimes() {
@@ -55,12 +62,13 @@ public final class LocalTimes {
         final Timestamp time = Timestamps2.getCurrentTime();
         final Calendar cal = Calendars.now();
 
+        final int remainingNanos = time.getNanos() % (int)NANOS_PER_MILLISECOND;
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
                                           .setMinutes(getMinutes(cal))
                                           .setSeconds(getSeconds(cal))
                                           .setMillis(getMillis(cal))
-                                          .setNanos(time.getNanos())
+                                          .setNanos(remainingNanos)
                                           .build();
         return result;
     }
@@ -269,6 +277,46 @@ public final class LocalTimes {
         final LocalTime result = toLocalTime(cal).toBuilder()
                                                  .setNanos(value.getNanos())
                                                  .build();
+        return result;
+    }
+
+    /**
+     * Obtains a fraction part of a second as total number of nanoseconds.
+     *
+     * <p>{@code LocalTime} stores a fractional part of a second as a number of milliseconds and
+     * nanoseconds. This method computes the total in nanoseconds.
+     */
+    public static long getTotalNanos(LocalTime time) {
+        checkNotNull(time);
+        return time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
+    }
+
+    /**
+     * Converts the passed time to string with optional part representing a fraction of a second.
+     *
+     * <p>Examples of results: {@code "13:45:30.123456789"}, {@code "09:37:00"}.
+     */
+    public static String toString(LocalTime time) {
+        final Calendar calendar = toCalendar(time);
+        final StringBuilder result = new StringBuilder();
+
+        // Format the time part.
+        final Date date = calendar.getTime();
+        final String timePart = timeFormat().format(date);
+        result.append(timePart);
+
+        // Add the fractional second part.
+        appendSubSecond(result, time);
+
+        return result.toString();
+    }
+
+    /**
+     * Parses the passed string into local time value.
+     */
+    public static LocalTime parse(String str) throws ParseException {
+        final Parser parser = new Parser(str);
+        final LocalTime result = parser.parseLocalTime();
         return result;
     }
 }

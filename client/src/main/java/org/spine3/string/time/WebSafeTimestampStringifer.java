@@ -48,10 +48,6 @@ final class WebSafeTimestampStringifer extends Stringifier<Timestamp> implements
     private static final Pattern PATTERN_COLON = Pattern.compile(String.valueOf(COLON));
     private static final String DASH = "-";
 
-    static WebSafeTimestampStringifer instance() {
-        return INSTANCE;
-    }
-
     /**
      * The index of a character separating hours and minutes.
      */
@@ -60,6 +56,10 @@ final class WebSafeTimestampStringifer extends Stringifier<Timestamp> implements
      * The index of a character separating minutes and seconds.
      */
     private static final int MINUTE_SEPARATOR_INDEX = 16;
+
+    static WebSafeTimestampStringifer instance() {
+        return INSTANCE;
+    }
 
     /**
      * Converts the passed timestamp string into a web-safe string, replacing colons to dashes.
@@ -78,7 +78,9 @@ final class WebSafeTimestampStringifer extends Stringifier<Timestamp> implements
         chars[HOUR_SEPARATOR_INDEX] = COLON;
         chars[MINUTE_SEPARATOR_INDEX] = COLON;
         return String.valueOf(chars);
-    }        @Override
+    }
+
+    @Override
     protected String toString(Timestamp timestamp) {
         String result = Timestamps.toString(timestamp);
         result = toWebSafe(result);

@@ -19,7 +19,6 @@
  */
 package org.spine3.time;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -36,11 +35,10 @@ import static org.spine3.time.Calendars.nowAt;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
-import static org.spine3.time.Formats.SUB_SECOND_SEPARATOR;
-import static org.spine3.time.Formats.UTC_ZONE_SIGN;
-import static org.spine3.time.Formats.formatNanos;
+import static org.spine3.time.Formats.appendSubSecond;
+import static org.spine3.time.Formats.appendZoneOffset;
+import static org.spine3.time.Formats.dateTimeFormat;
 import static org.spine3.time.Parser.parserOffsetDateTime;
-import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -51,14 +49,6 @@ import static org.spine3.validate.Validate.checkPositive;
  */
 @SuppressWarnings("ClassWithTooManyMethods")
 public final class OffsetDateTimes {
-
-    private static final ThreadLocal<DateFormat> dateTimeFormat =
-            new ThreadLocal<DateFormat>() {
-                @Override
-                protected DateFormat initialValue() {
-                    return Formats.createDateTimeFormat();
-                }
-            };
 
     private OffsetDateTimes() {
         // Prevent instantiation of this utility class.
@@ -342,28 +332,19 @@ public final class OffsetDateTimes {
      * Performs date and time calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static OffsetDateTime add(OffsetDateTime value, int calendarField, int delta) {
-        final Calendar calendar = Calendars.toCalendar(value);
+        final Calendar calendar = toCalendar(value);
         calendar.add(calendarField, delta);
 
         final LocalDate date = toLocalDate(calendar);
         final LocalTime time = toLocalTime(calendar);
         final int nanos = value.getTime()
-                                .getNanos();
+                               .getNanos();
         final LocalTime timeWithNanos = time.toBuilder()
                                             .setNanos(nanos)
                                             .build();
-        return withDateTime(value, date, timeWithNanos);
-    }
-
-    /**
-     * Returns a new instance of with new local date and time values.
-     */
-    private static OffsetDateTime withDateTime(OffsetDateTime value,
-                                               LocalDate date,
-                                               LocalTime time) {
         return value.toBuilder()
                     .setDate(date)
-                    .setTime(time)
+                    .setTime(timeWithNanos)
                     .build();
     }
 
@@ -372,28 +353,20 @@ public final class OffsetDateTimes {
      */
     public static String toString(OffsetDateTime value) {
         final Calendar calendar = toCalendar(value);
-        final Date date = calendar.getTime();
-        final LocalTime time = value.getTime();
-        final long nanos = time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
-        final ZoneOffset offset = value.getOffset();
-
         final StringBuilder result = new StringBuilder();
 
         // Format the date/time part.
-        result.append(dateTimeFormat.get().format(date));
+        final Date date = calendar.getTime();
+        final String dateTime = dateTimeFormat().format(date);
+        result.append(dateTime);
 
         // Format the fractional second part.
-        if (nanos != 0) {
-            result.append(SUB_SECOND_SEPARATOR);
-            result.append(formatNanos(nanos));
-        }
+        final LocalTime time = value.getTime();
+        appendSubSecond(result, time);
 
         // Add time zone.
-        if (offset.getAmountSeconds() == 0) {
-            result.append(UTC_ZONE_SIGN);
-        } else {
-            result.append(ZoneOffsets.toString(offset));
-        }
+        final ZoneOffset offset = value.getOffset();
+        appendZoneOffset(result, offset);
 
         return result.toString();
     }

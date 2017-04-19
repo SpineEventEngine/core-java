@@ -20,8 +20,8 @@
 
 package org.spine3.time;
 
+import java.text.DateFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -30,6 +30,8 @@ import static org.spine3.time.Formats.MINUS;
 import static org.spine3.time.Formats.PLUS;
 import static org.spine3.time.Formats.SUB_SECOND_SEPARATOR;
 import static org.spine3.time.Formats.UTC_ZONE_SIGN;
+import static org.spine3.time.Formats.dateTimeFormat;
+import static org.spine3.time.Formats.timeFormat;
 import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 
@@ -55,14 +57,6 @@ final class Parser {
     private long nanos;
     private ZoneOffset zoneOffset;
 
-    private static final ThreadLocal<SimpleDateFormat> dateTimeFormat =
-            new ThreadLocal<SimpleDateFormat>() {
-                @Override
-                protected SimpleDateFormat initialValue() {
-                    return Formats.createDateTimeFormat();
-                }
-            };
-
     Parser(String value) {
         this.value = value;
     }
@@ -78,17 +72,29 @@ final class Parser {
         initTimezoneOffsetPosition();
         initTimeValues();
 
-        parseTime();
+        parseTime(dateTimeFormat());
         parseZoneOffset();
 
-        Calendar calendar = createCalendar(seconds, nanos, zoneOffset);
+        final Calendar calendar = createCalendar();
         final LocalDate localDate = Calendars.toLocalDate(calendar);
         final LocalTime localTime = Calendars.toLocalTime(calendar);
         final OffsetDateTime result = OffsetDateTimes.of(localDate, localTime, zoneOffset);
         return result;
     }
 
-    private static Calendar createCalendar(long seconds, long nanos, ZoneOffset zoneOffset) {
+    LocalTime parseLocalTime() throws ParseException {
+        // The input string for local time does not have zone offset.
+        timezoneOffsetPosition = value.length() - 1;
+        initTimeValues();
+        parseTime(timeFormat());
+        zoneOffset = ZoneOffsets.getDefault();
+        Calendar calendar = createCalendar();
+        final LocalTime localTime = Calendars.toLocalTime(calendar);
+        //TODO:2017-04-19:alexander.yevsyukov: Set nanos.
+        return localTime;
+    }
+
+    private Calendar createCalendar() {
         final Calendar calendar = Calendars.at(zoneOffset);
         final long millis = seconds * MILLIS_PER_SECOND + nanos / NANOS_PER_MILLISECOND;
         final Date date = new Date(millis);
@@ -121,13 +127,13 @@ final class Parser {
 
     private void initTimeValues() {
         // Parse seconds and nanos.
-        String timeValue = value.substring(0, timezoneOffsetPosition);
-        secondValue = timeValue;
+        final String timeSubstring = value.substring(0, timezoneOffsetPosition);
+        secondValue = timeSubstring;
         nanoValue = "";
-        int pointPosition = timeValue.indexOf(SUB_SECOND_SEPARATOR);
+        int pointPosition = timeSubstring.indexOf(SUB_SECOND_SEPARATOR);
         if (pointPosition != -1) {
-            secondValue = timeValue.substring(0, pointPosition);
-            nanoValue = timeValue.substring(pointPosition + 1);
+            secondValue = timeSubstring.substring(0, pointPosition);
+            nanoValue = timeSubstring.substring(pointPosition + 1);
         }
     }
 
@@ -158,9 +164,8 @@ final class Parser {
         }
     }
 
-    private void parseTime() throws ParseException {
-        Date date = dateTimeFormat.get()
-                                  .parse(secondValue);
+    private void parseTime(DateFormat format) throws ParseException {
+        final Date date = format.parse(secondValue);
         seconds = date.getTime() / MILLIS_PER_SECOND;
         nanos = nanoValue.isEmpty() ? 0 : parseNanos(nanoValue);
     }

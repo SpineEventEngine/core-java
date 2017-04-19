@@ -38,12 +38,29 @@ final class Formats {
     static final String DATE_FORMAT = "yyyy-MM-dd";
     static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     static final String HOURS_AND_MINUTES_FORMAT = "%02d:%02d";
+    static final String TIME_FORMAT = "HH:mm:ss";
 
     static final char TIME_SEPARATOR = 'T';
     static final char SUB_SECOND_SEPARATOR = '.';
     static final char PLUS = '+';
     static final char MINUS = '-';
     static final char UTC_ZONE_SIGN = 'Z';
+
+    private static final ThreadLocal<DateFormat> dateTimeFormat =
+            new ThreadLocal<DateFormat>() {
+                @Override
+                protected DateFormat initialValue() {
+                    return createDateTimeFormat();
+                }
+            };
+
+    private static final ThreadLocal<DateFormat> timeFormat =
+            new ThreadLocal<DateFormat>() {
+                @Override
+                protected DateFormat initialValue() {
+                    return createTimeFormat();
+                }
+            };
 
     private Formats() {
         // Prevent instantiation of this utility class.
@@ -70,6 +87,16 @@ final class Formats {
     }
 
     /**
+     * Creates RFC 3339 time string format.
+     */
+    static SimpleDateFormat createTimeFormat() {
+        final SimpleDateFormat sdf = createDigitOnlyFormat(TIME_FORMAT);
+        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
+        sdf.setCalendar(calendar);
+        return sdf;
+    }
+
+    /**
      * Creates a format instance for a format that uses only digits.
      *
      * <p>The digit-only format does not require a locale.
@@ -80,8 +107,27 @@ final class Formats {
         return result;
     }
 
+    static DateFormat dateTimeFormat() {
+        return dateTimeFormat.get();
+    }
+
+    static DateFormat timeFormat() {
+        return timeFormat.get();
+    }
+
+    /**
+     * Appends the fractional second part of the time to the passed string builder.
+     */
+    static void appendSubSecond(StringBuilder builder, LocalTime time) {
+        final long nanos = LocalTimes.getTotalNanos(time);
+        if (nanos != 0) {
+            builder.append(SUB_SECOND_SEPARATOR);
+            builder.append(formatNanos(nanos));
+        }
+    }
+
     /** Format the nano part of a timestamp or a duration. */
-    static String formatNanos(long nanos) {
+    private static String formatNanos(long nanos) {
         // Determine whether to use 3, 6, or 9 digits for the nano part.
         if (nanos % NANOS_PER_MILLISECOND == 0) {
             return format("%1$03d", nanos / NANOS_PER_MILLISECOND);
@@ -89,6 +135,17 @@ final class Formats {
             return format("%1$06d", nanos / NANOS_PER_MICROSECOND);
         } else {
             return format("%1$09d", nanos);
+        }
+    }
+
+    /**
+     * Appends the string with zone offset info to the passed string builder.
+     */
+    static void appendZoneOffset(StringBuilder builder, ZoneOffset offset) {
+        if (offset.getAmountSeconds() == 0) {
+            builder.append(UTC_ZONE_SIGN);
+        } else {
+            builder.append(ZoneOffsets.toString(offset));
         }
     }
 }

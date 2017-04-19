@@ -193,10 +193,10 @@ public final class LocalDates {
         final Date date;
         date = format().parse(str);
 
-        final Calendar calendar = Calendar.getInstance();
+        final Calendar calendar = getInstance();
         calendar.setTime(date);
 
-        final LocalDate result = Calendars.toLocalDate(calendar);
+        final LocalDate result = toLocalDate(calendar);
         return result;
     }
 

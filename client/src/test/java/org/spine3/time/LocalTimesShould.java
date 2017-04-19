@@ -23,6 +23,7 @@ package org.spine3.time;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
@@ -30,6 +31,7 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.LocalTimes.parse;
 
 /**
  * @author Alexander Aleksandrov
@@ -246,5 +248,12 @@ public class LocalTimesShould {
         final int millis = 150;
         final int nanos = -1501;
         LocalTimes.of(hours, minutes, seconds, millis, nanos);
+    }
+
+    @Test
+    public void convert_to_string_and_back() throws ParseException {
+        final LocalTime localTime = LocalTimes.now();
+        
+        assertEquals(localTime, parse(LocalTimes.toString(localTime)));
     }
 }

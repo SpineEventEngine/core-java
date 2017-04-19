@@ -428,4 +428,18 @@ public class OffsetDateTimesShould {
         final OffsetDateTime parsed = OffsetDateTimes.parse(value);
         assertEquals(nowAtUTC, parsed);
     }
+
+    @Test
+    public void convert_values_at_current_time_zone() throws ParseException {
+        // Get current zone offset and strip ID value because it's not stored into date/time.
+        final ZoneOffset zoneOffset = ZoneOffsets.getDefault()
+                                                 .toBuilder()
+                                                 .clearId()
+                                                 .build();
+        final OffsetDateTime now = OffsetDateTimes.now(zoneOffset);
+
+        final String value = OffsetDateTimes.toString(now);
+        final OffsetDateTime parsed = OffsetDateTimes.parse(value);
+        assertEquals(now, parsed);
+    }
 }
