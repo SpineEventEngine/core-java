@@ -46,7 +46,7 @@ import java.util.Set;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.time.Timestamps2.getCurrentTime;
-import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -232,7 +232,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         try {
             apply(eventMessages, context);
         } catch (InvocationTargetException e) {
-            throw wrappedCause(e);
+            throw illegalStateWithCauseOf(e);
         }
         return eventMessages;
     }
@@ -278,7 +278,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
                     final Version newVersion = context.getVersion();
                     advanceVersion(newVersion);
                 } catch (InvocationTargetException e) {
-                    throw wrappedCause(e);
+                    throw illegalStateWithCauseOf(e);
                 }
             }
         } finally {

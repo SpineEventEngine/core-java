@@ -30,17 +30,21 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Yevsyukov
  */
-public class DurationStringifierShould {
+public class DurationStringifierShould extends AbstractStringifierTest<Duration> {
 
-    private static final Stringifier<Duration> stringifier = TimeStringifiers.forDuration();
+    public DurationStringifierShould() {
+        super(TimeStringifiers.forDuration());
+    }
+
+    @Override
+    protected Duration createObject() {
+        return Durations2.hoursAndMinutes(5, 37);
+    }
 
     @Test
-    public void convert_back_and_forth() {
-        final Duration positive = Durations2.hoursAndMinutes(5, 37);
+    public void convert_negative_duration() {
+        final Stringifier<Duration> stringifier = getStringifier();
         final Duration negative = Durations2.hoursAndMinutes(-4, -31);
-
-        assertEquals(positive, stringifier.reverse()
-                                          .convert(stringifier.convert(positive)));
         assertEquals(negative, stringifier.reverse()
                                           .convert(stringifier.convert(negative)));
     }

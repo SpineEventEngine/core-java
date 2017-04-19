@@ -39,7 +39,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
-import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * A central processing unit used to maintain the state of the business process and determine
@@ -132,7 +132,7 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
         try {
             method.invoke(this, eventMessage, context);
         } catch (InvocationTargetException e) {
-            throw wrappedCause(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 

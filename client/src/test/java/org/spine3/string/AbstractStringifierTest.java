@@ -21,32 +21,43 @@
 package org.spine3.string;
 
 import org.junit.Test;
-import org.spine3.string.time.TimeStringifiers;
-import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.time.ZoneOffsets.ofHoursMinutes;
 
 /**
+ * The abstract base for stringifier tests.
+ *
  * @author Alexander Yevsyukov
+ * @param <T> the type of stringifier objects
  */
-public class ZoneOffsetStringifierShould extends AbstractStringifierTest<ZoneOffset> {
+public abstract class AbstractStringifierTest<T> {
 
-    public ZoneOffsetStringifierShould() {
-        super(TimeStringifiers.forZoneOffset());
+    private final Stringifier<T> stringifier;
+
+    protected AbstractStringifierTest(Stringifier<T> stringifier) {
+        this.stringifier = stringifier;
     }
 
-    @Override
-    protected ZoneOffset createObject() {
-        return ofHoursMinutes(7, 40);
+    protected abstract T createObject();
+
+    protected Stringifier<T> getStringifier() {
+        return stringifier;
     }
 
     @Test
-    public void convert_negative_zone_offset() {
-        final Stringifier<ZoneOffset> stringifier = getStringifier();
-        final ZoneOffset negative = ofHoursMinutes(-3, -45);
+    public void convert() {
+        T obj = createObject();
 
-        assertEquals(negative, stringifier.reverse()
-                                          .convert(stringifier.convert(negative)));
+        final String str = stringifier.convert(obj);
+        final T convertedBack = stringifier.reverse()
+                                           .convert(str);
+
+        assertEquals(obj, convertedBack);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_IAE_on_empty_string() {
+        stringifier.reverse()
+                   .convert("");
     }
 }

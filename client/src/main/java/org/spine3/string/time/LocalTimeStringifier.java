@@ -21,48 +21,49 @@
 package org.spine3.string.time;
 
 import org.spine3.string.Stringifier;
-import org.spine3.time.LocalDate;
-import org.spine3.time.LocalDates;
+import org.spine3.time.LocalTime;
+import org.spine3.time.LocalTimes;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
- * The default stringifier for {@link LocalDate} instances.
- *
- * @author Alexander Yevsyukov
+ * The default stringifier for {@link LocalTime} values.
  */
-final class LocalDateStringifier extends Stringifier<LocalDate> implements Serializable {
+final class LocalTimeStringifier extends Stringifier<LocalTime> implements Serializable {
 
     private static final long serialVersionUID = 1;
-    private static final LocalDateStringifier INSTANCE = new LocalDateStringifier();
+    private static final LocalTimeStringifier INSTANCE = new LocalTimeStringifier();
 
-    static LocalDateStringifier instance() {
+    static LocalTimeStringifier instance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(LocalDate date) {
-        final String result = LocalDates.toString(date);
+    protected String toString(LocalTime time) {
+        checkNotNull(time);
+        final String result = LocalTimes.toString(time);
         return result;
     }
 
     @Override
-    protected LocalDate fromString(String str) {
-        final LocalDate date;
+    protected LocalTime fromString(String str) {
+        checkNotNull(str);
+        final LocalTime time;
         try {
-            date = LocalDates.parse(str);
+          time = LocalTimes.parse(str);
         } catch (ParseException e) {
             throw illegalArgumentWithCauseOf(e);
         }
-        return date;
+        return time;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forLocalDate()";
+        return "TimeStringifiers.forLocalTime()";
     }
 
     private Object readResolve() {

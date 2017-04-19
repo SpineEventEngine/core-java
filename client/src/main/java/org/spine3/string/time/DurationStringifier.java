@@ -27,8 +27,7 @@ import org.spine3.string.Stringifier;
 import java.io.Serializable;
 import java.text.ParseException;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
  * The default stringifier for {@code Duration}s.
@@ -46,19 +45,17 @@ final class DurationStringifier extends Stringifier<Duration> implements Seriali
 
     @Override
     protected String toString(Duration duration) {
-        checkNotNull(duration);
         final String result = Durations.toString(duration);
         return result;
     }
 
     @Override
     protected Duration fromString(String str) {
-        checkNotNull(str);
         final Duration result;
         try {
             result = Durations.parse(str);
         } catch (ParseException e) {
-            throw wrappedCause(e);
+            throw illegalArgumentWithCauseOf(e);
         }
         return result;
     }

@@ -20,31 +20,21 @@
 
 package org.spine3.string;
 
-import org.junit.Test;
 import org.spine3.string.time.TimeStringifiers;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 
-import static org.junit.Assert.assertEquals;
-
 /**
  * @author Alexander Yevsyukov
  */
-public class LocalDateStringifierShould {
+public class LocalDateStringifierShould extends AbstractStringifierTest<LocalDate> {
 
-    private final Stringifier<LocalDate> stringifier = TimeStringifiers.forLocalDate();
-
-    @Test
-    public void convert() {
-        final LocalDate today = LocalDates.now();
-
-        assertEquals(today, stringifier.reverse()
-                                       .convert(stringifier.convert(today)));
+    public LocalDateStringifierShould() {
+        super(TimeStringifiers.forLocalDate());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_on_invalid_stringifier_input() {
-        stringifier.reverse()
-                   .convert("");
+    @Override
+    protected LocalDate createObject() {
+        return LocalDates.now();
     }
 }

@@ -20,33 +20,21 @@
 
 package org.spine3.string;
 
-import org.junit.Test;
 import org.spine3.string.time.TimeStringifiers;
-import org.spine3.time.ZoneOffset;
-
-import static org.junit.Assert.assertEquals;
-import static org.spine3.time.ZoneOffsets.ofHoursMinutes;
+import org.spine3.time.LocalTime;
+import org.spine3.time.LocalTimes;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ZoneOffsetStringifierShould extends AbstractStringifierTest<ZoneOffset> {
+public class LocalTimeStringifierShould extends AbstractStringifierTest<LocalTime> {
 
-    public ZoneOffsetStringifierShould() {
-        super(TimeStringifiers.forZoneOffset());
+    public LocalTimeStringifierShould() {
+        super(TimeStringifiers.forLocalTime());
     }
 
     @Override
-    protected ZoneOffset createObject() {
-        return ofHoursMinutes(7, 40);
-    }
-
-    @Test
-    public void convert_negative_zone_offset() {
-        final Stringifier<ZoneOffset> stringifier = getStringifier();
-        final ZoneOffset negative = ofHoursMinutes(-3, -45);
-
-        assertEquals(negative, stringifier.reverse()
-                                          .convert(stringifier.convert(negative)));
+    protected LocalTime createObject() {
+        return LocalTimes.now();
     }
 }

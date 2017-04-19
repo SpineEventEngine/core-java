@@ -21,6 +21,7 @@
 package org.spine3.time;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -51,7 +52,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_current_LocalTime() {
+    public void obtain_current_time() {
         final LocalTime now = LocalTimes.now();
         final Calendar cal = Calendars.now();
 
@@ -66,7 +67,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_using_hours_minutes() {
+    public void create_by_hours_and_minutes() {
         final LocalTime localTime = LocalTimes.of(hours, minutes);
 
         assertEquals(hours, localTime.getHours());
@@ -74,7 +75,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_using_hours_minutes_seconds() {
+    public void create_by_hours_minutes_seconds() {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds);
 
         assertEquals(hours, localTime.getHours());
@@ -83,7 +84,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_using_hours_minutes_seconds_millis() {
+    public void create_by_hours_minutes_seconds_millis() {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis);
 
         assertEquals(hours, localTime.getHours());
@@ -93,7 +94,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_using_hours_minutes_seconds_millis_nanos() {
+    public void create_with_nano_precision() {
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
 
         assertEquals(hours, localTime.getHours());
@@ -104,7 +105,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_future_after_specified_number_of_hours() {
+    public void add_hours() {
         final int hoursToAdd = 2;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewHours = LocalTimes.addHours(localTime, hoursToAdd);
@@ -117,7 +118,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_future_after_specified_number_of_minutes() {
+    public void add_minutes() {
         final int minutesToAdd = 15;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewMinutes = LocalTimes.addMinutes(localTime, minutesToAdd);
@@ -130,7 +131,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_future_after_specified_number_of_seconds() {
+    public void add_seconds() {
         final int secondsToAdd = 18;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewSeconds = LocalTimes.addSeconds(localTime, secondsToAdd);
@@ -143,7 +144,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_future_after_specified_number_of_millis() {
+    public void add_millis() {
         final int millisToAdd = 288;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime inFewMillis = LocalTimes.addMillis(localTime, millisToAdd);
@@ -156,7 +157,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_past_before_specified_number_of_hours() {
+    public void subtract_hours() {
         final int hoursToSubtract = 2;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewHours = LocalTimes.subtractHours(localTime, hoursToSubtract);
@@ -169,7 +170,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_past_before_specified_number_of_minutes() {
+    public void subtract_minutes() {
         final int minutesToSubtract = 15;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewMinutes = LocalTimes.subtractMinutes(localTime, minutesToSubtract);
@@ -182,7 +183,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_past_before_specified_number_of_seconds() {
+    public void subtract_seconds() {
         final int secondsToSubtract = 12;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewSeconds = LocalTimes.subtractSeconds(localTime, secondsToSubtract);
@@ -195,7 +196,7 @@ public class LocalTimesShould {
     }
 
     @Test
-    public void obtain_LocalTime_in_past_before_specified_number_of_millis() {
+    public void subtract_millis() {
         final int millisToSubtract = 28;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
         final LocalTime beforeFewMillis = LocalTimes.subtractMillis(localTime, millisToSubtract);
@@ -209,8 +210,11 @@ public class LocalTimesShould {
 
     @Test
     public void pass_null_tolerance_check() {
-        new NullPointerTester().setDefault(LocalTime.class, LocalTimes.now())
-                               .testAllPublicStaticMethods(LocalTimes.class);
+        new NullPointerTester()
+                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
+                .setDefault(LocalTime.class, LocalTimes.now())
+                .testAllPublicStaticMethods(LocalTimes.class);
     }
 
     @Test(expected = IllegalArgumentException.class)

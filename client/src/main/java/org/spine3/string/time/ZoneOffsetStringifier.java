@@ -28,7 +28,7 @@ import java.io.Serializable;
 import java.text.ParseException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
  * The default stringifier for {@code ZoneOffset} values.
@@ -58,7 +58,7 @@ final class ZoneOffsetStringifier extends Stringifier<ZoneOffset> implements Ser
         try {
             result = ZoneOffsets.parse(str);
         } catch (ParseException e) {
-            throw wrappedCause(e);
+            throw illegalArgumentWithCauseOf(e);
         }
         return result;
     }
