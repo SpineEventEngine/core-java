@@ -42,7 +42,7 @@ import static com.google.common.base.Optional.fromNullable;
  *
  * @author Alex Tymchenko
  */
-public class InMemoryTypeRegistry implements TypeRegistry {
+class InMemoryTypeRegistry implements TypeRegistry {
 
     /**
      * The mapping between {@code TypeUrl} instances and repositories providing
