@@ -39,6 +39,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.abs;
@@ -258,6 +259,21 @@ public class Tests {
     public static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {
         final long diffSec = abs(expectedSec - actualSec);
         assertTrue(diffSec <= maxDiffSec);
+    }
+
+    /**
+     * Generates a random integer in the range [0, max).
+     */
+    public static int random(int max) {
+        return random(0, max);
+    }
+
+    /**
+     * Generates a random integer in the range [min, max).
+     */
+    public static int random(int min, int max) {
+        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
+        return randomNum;
     }
 
     /**

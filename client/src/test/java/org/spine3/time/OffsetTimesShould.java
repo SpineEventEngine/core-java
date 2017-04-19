@@ -29,11 +29,11 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Calendar;
-import java.util.concurrent.ThreadLocalRandom;
 
 import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.random;
 import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
@@ -68,30 +68,11 @@ public class OffsetTimesShould {
     private OffsetTime now;
     private ZoneOffset zoneOffset;
 
-    private static int random(int max) {
-        return random(0, max);
-    }
-
-    private static int random(int min, int max) {
-        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
-        return randomNum;
-    }
-
     @Before
     public void setUp() {
         gmtNow = getCurrentTime();
         zoneOffset = generateOffset();
         now = OffsetTimes.timeAt(gmtNow, zoneOffset);
-    }
-
-    private static LocalTime generateLocalTime() {
-        int hours = random(HOURS_PER_DAY);
-        int minutes = random(MINUTES_PER_HOUR);
-        int seconds = random(SECONDS_PER_MINUTE);
-        int millis = random(MILLIS_PER_SECOND);
-        int nanos = random(NANOS_PER_SECOND);
-
-        return LocalTimes.of(hours, minutes, seconds, millis, nanos);
     }
 
     private static ZoneOffset generateOffset() {
@@ -129,6 +110,15 @@ public class OffsetTimesShould {
 
         assertEquals(localTime, delhiTime.getTime());
         assertEquals(delhiOffset, delhiTime.getOffset());
+    }
+
+    private static LocalTime generateLocalTime() {
+        int hours = random(HOURS_PER_DAY);
+        int minutes = random(MINUTES_PER_HOUR);
+        int seconds = random(SECONDS_PER_MINUTE);
+        int millis = random(MILLIS_PER_SECOND);
+        int nanos = random(NANOS_PER_SECOND);
+        return LocalTimes.of(hours, minutes, seconds, millis, nanos);
     }
 
     @Test
