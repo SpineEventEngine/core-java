@@ -49,5 +49,4 @@ public class InvalidSubscriptionException extends InvalidRequestException {
     public Subscription getRequest() {
         return (Subscription) super.getRequest();
     }
-
 }
