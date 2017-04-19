@@ -41,15 +41,6 @@ import static com.google.common.base.Optional.fromNullable;
  */
 public class InMemoryTypeRegistry implements TypeRegistry {
 
-    private InMemoryTypeRegistry() {
-        // Prevent instantiation from the outside.
-    }
-
-
-    static TypeRegistry newInstance() {
-        return new InMemoryTypeRegistry();
-    }
-
     /**
      * The mapping between {@code TypeUrl} instances and repositories providing
      * the entities of this type.
@@ -63,6 +54,13 @@ public class InMemoryTypeRegistry implements TypeRegistry {
      */
     private final Set<TypeUrl> knownAggregateTypes = Sets.newConcurrentHashSet();
 
+    private InMemoryTypeRegistry() {
+        // Prevent instantiation from the outside.
+    }
+
+    static TypeRegistry newInstance() {
+        return new InMemoryTypeRegistry();
+    }
 
     @SuppressWarnings("ChainOfInstanceofChecks")
     @Override
