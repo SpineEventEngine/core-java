@@ -92,6 +92,8 @@ message OffsetDateTime {
 
 // An interval between two points in time.
 message Interval {
+    option (experimental_type) = true;
+
     // A start of the interval.
     google.protobuf.Timestamp start = 1;
 
