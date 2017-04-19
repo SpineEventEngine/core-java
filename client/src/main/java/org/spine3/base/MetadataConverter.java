@@ -83,7 +83,7 @@ public class MetadataConverter {
             final Error error = Error.parseFrom(bytes);
             return Optional.of(error);
         } catch (InvalidProtocolBufferException e) {
-            throw Exceptions.wrappedCause(e);
+            throw Exceptions.illegalStateWithCauseOf(e);
         }
     }
 }
