@@ -25,7 +25,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
-import static org.spine3.time.Calendars.nowAt;
+import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.validate.Validate.checkPositive;
@@ -47,7 +47,7 @@ public final class OffsetDates {
     public static OffsetDate now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset);
 
-        final Calendar cal = nowAt(zoneOffset);
+        final Calendar cal = at(zoneOffset);
         final LocalDate localDate = toLocalDate(cal);
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)

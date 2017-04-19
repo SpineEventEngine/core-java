@@ -26,11 +26,11 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
 import static org.spine3.time.Calendars.getZoneOffset;
-import static org.spine3.time.Calendars.nowAt;
 
 public class OffsetDatesShould {
 
@@ -48,7 +48,7 @@ public class OffsetDatesShould {
     @Test
     public void obtain_current_OffsetDate_using_ZoneOffset() {
         final OffsetDate today = OffsetDates.now(ZONE_OFFSET);
-        final Calendar cal = nowAt(ZONE_OFFSET);
+        final Calendar cal = at(ZONE_OFFSET);
 
         final LocalDate date = today.getDate();
         assertEquals(getYear(cal), date.getYear());

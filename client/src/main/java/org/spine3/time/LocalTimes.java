@@ -60,6 +60,7 @@ public final class LocalTimes {
      */
     public static LocalTime now() {
         final Timestamp time = Timestamps2.getCurrentTime();
+        //TODO:2017-04-19:alexander.yevsyukov: Convert Timestamp to Calendar
         final Calendar cal = Calendars.now();
 
         final int remainingNanos = time.getNanos() % (int)NANOS_PER_MILLISECOND;

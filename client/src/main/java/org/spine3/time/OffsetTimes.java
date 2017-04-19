@@ -26,6 +26,7 @@ import static java.util.Calendar.HOUR;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
+import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
 
@@ -45,8 +46,7 @@ public final class OffsetTimes {
      */
     public static OffsetTime now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset);
-        final Calendar cal = Calendars.nowAt(zoneOffset);
-
+        final Calendar cal = at(zoneOffset);
         final LocalTime localTime = toLocalTime(cal);
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)

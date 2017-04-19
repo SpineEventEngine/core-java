@@ -26,13 +26,13 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.createWithTime;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getMonthOfYear;
 import static org.spine3.time.Calendars.getSeconds;
 import static org.spine3.time.Calendars.getZoneOffset;
-import static org.spine3.time.Calendars.nowAt;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalTime;
 
@@ -47,7 +47,7 @@ public class CalendarsShould {
     public void obtain_zoneOffset() {
         final int amountOfSeconds = 3*3600;
         final ZoneOffset zoneOffset = ZoneOffsets.ofHours(3);
-        final Calendar cal = nowAt(zoneOffset);
+        final Calendar cal = at(zoneOffset);
 
         assertEquals(amountOfSeconds, getZoneOffset(cal));
     }

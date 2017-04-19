@@ -27,6 +27,7 @@ import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
@@ -51,7 +52,7 @@ public class OffsetTimesShould {
     @Test
     public void obtain_current_OffsetTime_using_ZoneOffset() {
         final OffsetTime now = OffsetTimes.now(zoneOffset);
-        final Calendar cal = Calendars.nowAt(zoneOffset);
+        final Calendar cal = at(zoneOffset);
 
         final LocalTime time = now.getTime();
         assertEquals(getHours(cal), time.getHours());

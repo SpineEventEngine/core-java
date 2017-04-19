@@ -51,8 +51,6 @@ import static java.util.Calendar.getInstance;
                    "MagicConstant" /* We use conversion methods instead. */})
 final class Calendars {
 
-    private static final String TIME_ZONE_GMT = "GMT";
-
     private Calendars() {
         // Prevent instantiation of this utility class.
     }
@@ -189,43 +187,14 @@ final class Calendars {
     }
 
     /**
-     * Obtains a {@code Calendar} with GMT time zone.
-     *
-     * @return new {@code Calendar} instance
-     */
-    private static Calendar nowAtGmt() {
-        Calendar gmtCal = getInstance(TimeZone.getTimeZone(TIME_ZONE_GMT));
-        return gmtCal;
-    }
-
-    /**
-     * Obtains current time calendar for the passed zone offset.
-     */
-    static Calendar nowAt(ZoneOffset zoneOffset) {
-        final Calendar utc = nowAtGmt();
-        final Date timeAtGmt = utc.getTime();
-        long msFromEpoch = timeAtGmt.getTime();
-
-        final Calendar calendar = at(zoneOffset);
-
-        // Gives you the current offset in ms from UTC at the current date
-        int offsetFromGmt = calendar.getTimeZone()
-                                    .getOffset(msFromEpoch);
-        calendar.setTime(timeAtGmt);
-        calendar.add(MILLISECOND, offsetFromGmt);
-
-        return calendar;
-    }
-
-    /**
      * Obtains calendar at the specified zone offset
      *
      * @param zoneOffset time offset for specified zone
      * @return new {@code Calendar} instance at specific zone offset
      */
     static Calendar at(ZoneOffset zoneOffset) {
-        @SuppressWarnings("NumericCastThatLosesPrecision") // OK as a valid zoneOffset
-                                                           // isn't that big.
+        @SuppressWarnings("NumericCastThatLosesPrecision")
+            // OK as a valid zoneOffset isn't that big.
         final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
         final SimpleTimeZone timeZone = new SimpleTimeZone(offsetMillis, "temp");
         final Calendar result = getInstance(timeZone);

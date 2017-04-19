@@ -31,7 +31,7 @@ import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
-import static org.spine3.time.Calendars.nowAt;
+import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
@@ -60,7 +60,7 @@ public final class OffsetDateTimes {
     public static OffsetDateTime now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset);
 
-        final Calendar now = nowAt(zoneOffset);
+        final Calendar now = at(zoneOffset);
         final LocalTime localTime = toLocalTime(now);
         final LocalDate localDate = toLocalDate(now);
 
