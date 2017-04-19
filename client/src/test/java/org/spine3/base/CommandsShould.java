@@ -279,7 +279,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void not_throw_exception_if_checked_command_id_is_valid() {
-        Commands.checkValid(Commands.generateId());
+    public void return_value_id_when_checked() {
+        final CommandId id = Commands.generateId();
+        assertEquals(id, Commands.checkValid(id));
     }
 }

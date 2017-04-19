@@ -286,9 +286,10 @@ public final class LocalTimes {
      * <p>{@code LocalTime} stores a fractional part of a second as a number of milliseconds and
      * nanoseconds. This method computes the total in nanoseconds.
      */
-    public static long getTotalNanos(LocalTime time) {
+    static long getTotalNanos(LocalTime time) {
         checkNotNull(time);
-        return time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
+        final long result = time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
+        return result;
     }
 
     /**
