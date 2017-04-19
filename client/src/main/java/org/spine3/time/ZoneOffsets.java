@@ -84,7 +84,7 @@ public final class ZoneOffsets {
      * Obtains offset of the passed {@code TimeZone} in seconds.
      */
     private static int getOffsetInSeconds(TimeZone timeZone, long date) {
-        final int seconds = timeZone.getOffset(date) / (int) MILLIS_PER_SECOND;
+        final int seconds = timeZone.getOffset(date) / MILLIS_PER_SECOND;
         return seconds;
     }
 
@@ -124,7 +124,7 @@ public final class ZoneOffsets {
     public static ZoneOffset ofHoursMinutes(int hours, int minutes) {
         checkHourOffset(hours, true);
         checkMinuteOffset(minutes);
-        checkArgument((hours < 0) == (minutes < 0),
+        checkArgument(((hours < 0) == (minutes < 0)) || (minutes == 0),
                       "Hours (%s) and minutes (%s) must have the same sign.", hours, minutes);
 
         final int secondsInHours = toSeconds(hours(hours));

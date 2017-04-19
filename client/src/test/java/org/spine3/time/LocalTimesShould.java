@@ -107,7 +107,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_future_after_specified_number_of_hours() {
         final int hoursToAdd = 2;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewHours = LocalTimes.plusHours(localTime, hoursToAdd);
+        final LocalTime inFewHours = LocalTimes.addHours(localTime, hoursToAdd);
 
         assertEquals(hours + hoursToAdd, inFewHours.getHours());
         assertEquals(minutes, inFewHours.getMinutes());
@@ -120,7 +120,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_future_after_specified_number_of_minutes() {
         final int minutesToAdd = 15;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewMinutes = LocalTimes.plusMinutes(localTime, minutesToAdd);
+        final LocalTime inFewMinutes = LocalTimes.addMinutes(localTime, minutesToAdd);
 
         assertEquals(hours, inFewMinutes.getHours());
         assertEquals(minutes + minutesToAdd, inFewMinutes.getMinutes());
@@ -133,7 +133,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_future_after_specified_number_of_seconds() {
         final int secondsToAdd = 18;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewSeconds = LocalTimes.plusSeconds(localTime, secondsToAdd);
+        final LocalTime inFewSeconds = LocalTimes.addSeconds(localTime, secondsToAdd);
 
         assertEquals(hours, inFewSeconds.getHours());
         assertEquals(minutes, inFewSeconds.getMinutes());
@@ -146,7 +146,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_future_after_specified_number_of_millis() {
         final int millisToAdd = 288;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewMillis = LocalTimes.plusMillis(localTime, millisToAdd);
+        final LocalTime inFewMillis = LocalTimes.addMillis(localTime, millisToAdd);
 
         assertEquals(hours, inFewMillis.getHours());
         assertEquals(minutes, inFewMillis.getMinutes());
@@ -159,7 +159,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_past_before_specified_number_of_hours() {
         final int hoursToSubtract = 2;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewHours = LocalTimes.minusHours(localTime, hoursToSubtract);
+        final LocalTime beforeFewHours = LocalTimes.subtractHours(localTime, hoursToSubtract);
 
         assertEquals(hours - hoursToSubtract, beforeFewHours.getHours());
         assertEquals(minutes, beforeFewHours.getMinutes());
@@ -172,7 +172,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_past_before_specified_number_of_minutes() {
         final int minutesToSubtract = 15;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewMinutes = LocalTimes.minusMinutes(localTime, minutesToSubtract);
+        final LocalTime beforeFewMinutes = LocalTimes.subtractMinutes(localTime, minutesToSubtract);
 
         assertEquals(hours, beforeFewMinutes.getHours());
         assertEquals(minutes - minutesToSubtract, beforeFewMinutes.getMinutes());
@@ -185,7 +185,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_past_before_specified_number_of_seconds() {
         final int secondsToSubtract = 12;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewSeconds = LocalTimes.minusSeconds(localTime, secondsToSubtract);
+        final LocalTime beforeFewSeconds = LocalTimes.subtractSeconds(localTime, secondsToSubtract);
 
         assertEquals(hours, beforeFewSeconds.getHours());
         assertEquals(minutes, beforeFewSeconds.getMinutes());
@@ -198,7 +198,7 @@ public class LocalTimesShould {
     public void obtain_LocalTime_in_past_before_specified_number_of_millis() {
         final int millisToSubtract = 28;
         final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewMillis = LocalTimes.minusMillis(localTime, millisToSubtract);
+        final LocalTime beforeFewMillis = LocalTimes.subtractMillis(localTime, millisToSubtract);
 
         assertEquals(hours, beforeFewMillis.getHours());
         assertEquals(minutes, beforeFewMillis.getMinutes());

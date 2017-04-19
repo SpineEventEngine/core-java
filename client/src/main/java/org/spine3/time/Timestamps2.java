@@ -56,19 +56,19 @@ public final class Timestamps2 {
      **/
 
     /** The count of nanoseconds in one second. */
-    public static final long NANOS_PER_SECOND = 1_000_000_000L;
+    public static final int NANOS_PER_SECOND = 1_000_000_000;
 
     /** The count of nanoseconds in one millisecond. */
-    public static final long NANOS_PER_MILLISECOND = 1_000_000L;
+    public static final int NANOS_PER_MILLISECOND = 1_000_000;
 
     /** The count of milliseconds in one second. */
-    public static final long MILLIS_PER_SECOND = 1000L;
+    public static final int MILLIS_PER_SECOND = 1000;
 
     /** The count of nanoseconds in a microsecond. */
-    public static final long NANOS_PER_MICROSECOND = 1000L;
+    public static final int NANOS_PER_MICROSECOND = 1000;
 
     /** The count of microseconds in one second. */
-    public static final long MICROS_PER_SECOND = 1_000_000L;
+    public static final int MICROS_PER_SECOND = 1_000_000;
 
     /** The count of seconds in one minute. */
     public static final int SECONDS_PER_MINUTE = 60;

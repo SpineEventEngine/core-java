@@ -145,7 +145,7 @@ public class TimeChangesShould {
     @Test
     public void create_LocalTimeChange_instance() {
         final LocalTime now = LocalTimes.now();
-        final LocalTime inFiveHours = LocalTimes.plusHours(now, 5);
+        final LocalTime inFiveHours = LocalTimes.addHours(now, 5);
 
         final LocalTimeChange result = TimeChanges.of(now, inFiveHours);
 

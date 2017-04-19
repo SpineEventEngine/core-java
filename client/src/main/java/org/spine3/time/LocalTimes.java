@@ -59,10 +59,18 @@ public final class LocalTimes {
      * Obtains current local time.
      */
     public static LocalTime now() {
-        final Timestamp now = Timestamps2.getCurrentTime();
-        final Calendar cal = toCalendar(now, ZoneOffsets.getDefault());
+        final Timestamp time = Timestamps2.getCurrentTime();
+        final ZoneOffset zoneOffset = ZoneOffsets.getDefault();
+        return timeAt(time, zoneOffset);
+    }
 
-        final int remainingNanos = now.getNanos() % (int)NANOS_PER_MILLISECOND;
+    /**
+     * Obtains local time at the passed time zone.
+     */
+    public static LocalTime timeAt(Timestamp time, ZoneOffset zoneOffset) {
+        final Calendar cal = toCalendar(time, zoneOffset);
+
+        final int remainingNanos = time.getNanos() % NANOS_PER_MILLISECOND;
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
                                           .setMinutes(getMinutes(cal))
@@ -143,7 +151,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of hours added.
      */
-    public static LocalTime plusHours(LocalTime localTime, int hoursToAdd) {
+    public static LocalTime addHours(LocalTime localTime, int hoursToAdd) {
         checkNotNull(localTime);
         checkPositive(hoursToAdd);
 
@@ -153,7 +161,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of minutes added.
      */
-    public static LocalTime plusMinutes(LocalTime localTime, int minutesToAdd) {
+    public static LocalTime addMinutes(LocalTime localTime, int minutesToAdd) {
         checkNotNull(localTime);
         checkPositive(minutesToAdd);
 
@@ -163,7 +171,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of seconds added.
      */
-    public static LocalTime plusSeconds(LocalTime localTime, int secondsToAdd) {
+    public static LocalTime addSeconds(LocalTime localTime, int secondsToAdd) {
         checkNotNull(localTime);
         checkPositive(secondsToAdd);
 
@@ -173,7 +181,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of milliseconds added.
      */
-    public static LocalTime plusMillis(LocalTime localTime, int millisToAdd) {
+    public static LocalTime addMillis(LocalTime localTime, int millisToAdd) {
         checkNotNull(localTime);
         checkPositive(millisToAdd);
 
@@ -183,7 +191,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of hours subtracted.
      */
-    public static LocalTime minusHours(LocalTime localTime, int hoursToSubtract) {
+    public static LocalTime subtractHours(LocalTime localTime, int hoursToSubtract) {
         checkNotNull(localTime);
         checkPositive(hoursToSubtract);
 
@@ -193,7 +201,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of minutes subtracted.
      */
-    public static LocalTime minusMinutes(LocalTime localTime, int minutesToSubtract) {
+    public static LocalTime subtractMinutes(LocalTime localTime, int minutesToSubtract) {
         checkNotNull(localTime);
         checkPositive(minutesToSubtract);
 
@@ -203,7 +211,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of seconds subtracted.
      */
-    public static LocalTime minusSeconds(LocalTime localTime, int secondsToSubtract) {
+    public static LocalTime subtractSeconds(LocalTime localTime, int secondsToSubtract) {
         checkNotNull(localTime);
         checkPositive(secondsToSubtract);
 
@@ -213,7 +221,7 @@ public final class LocalTimes {
     /**
      * Obtains a copy of this local time with the specified number of milliseconds subtracted.
      */
-    public static LocalTime minusMillis(LocalTime localTime, int millisToSubtract) {
+    public static LocalTime subtractMillis(LocalTime localTime, int millisToSubtract) {
         checkNotNull(localTime);
         checkPositive(millisToSubtract);
 
@@ -288,7 +296,7 @@ public final class LocalTimes {
      */
     static long getTotalNanos(LocalTime time) {
         checkNotNull(time);
-        final long result = time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
+        final long result = (long)time.getMillis() * NANOS_PER_MILLISECOND + time.getNanos();
         return result;
     }
 

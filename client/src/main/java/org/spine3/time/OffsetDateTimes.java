@@ -96,7 +96,7 @@ public final class OffsetDateTimes {
      * @param value      the value to update
      * @param yearsToAdd a positive number of years to add
      */
-    public static OffsetDateTime plusYears(OffsetDateTime value, int yearsToAdd) {
+    public static OffsetDateTime addYears(OffsetDateTime value, int yearsToAdd) {
         checkArguments(value, yearsToAdd);
         return changeYear(value, yearsToAdd);
     }
@@ -107,7 +107,7 @@ public final class OffsetDateTimes {
      * @param value       the value to update
      * @param monthsToAdd a positive number of months to add
      */
-    public static OffsetDateTime plusMonths(OffsetDateTime value, int monthsToAdd) {
+    public static OffsetDateTime addMonths(OffsetDateTime value, int monthsToAdd) {
         checkArguments(value, monthsToAdd);
         return changeMonth(value, monthsToAdd);
     }
@@ -118,7 +118,7 @@ public final class OffsetDateTimes {
      * @param value     the value to update
      * @param daysToAdd a positive number of days to add
      */
-    public static OffsetDateTime plusDays(OffsetDateTime value, int daysToAdd) {
+    public static OffsetDateTime addDays(OffsetDateTime value, int daysToAdd) {
         checkArguments(value, daysToAdd);
         return changeDays(value, daysToAdd);
     }
@@ -129,7 +129,7 @@ public final class OffsetDateTimes {
      * @param value      the value to update
      * @param hoursToAdd a positive number of hours to add
      */
-    public static OffsetDateTime plusHours(OffsetDateTime value, int hoursToAdd) {
+    public static OffsetDateTime addHours(OffsetDateTime value, int hoursToAdd) {
         checkArguments(value, hoursToAdd);
         return changeHours(value, hoursToAdd);
     }
@@ -140,7 +140,7 @@ public final class OffsetDateTimes {
      * @param value        the value to update
      * @param minutesToAdd a positive number of minutes to add
      */
-    public static OffsetDateTime plusMinutes(OffsetDateTime value, int minutesToAdd) {
+    public static OffsetDateTime addMinutes(OffsetDateTime value, int minutesToAdd) {
         checkArguments(value, minutesToAdd);
         return changeMinutes(value, minutesToAdd);
     }
@@ -151,7 +151,7 @@ public final class OffsetDateTimes {
      * @param value        the value to update
      * @param secondsToAdd a positive number of seconds to add
      */
-    public static OffsetDateTime plusSeconds(OffsetDateTime value, int secondsToAdd) {
+    public static OffsetDateTime addSeconds(OffsetDateTime value, int secondsToAdd) {
         checkArguments(value, secondsToAdd);
         return changeSeconds(value, secondsToAdd);
     }
@@ -162,7 +162,7 @@ public final class OffsetDateTimes {
      * @param value       the value to update
      * @param millisToAdd a positive number of milliseconds to add
      */
-    public static OffsetDateTime plusMillis(OffsetDateTime value, int millisToAdd) {
+    public static OffsetDateTime addMillis(OffsetDateTime value, int millisToAdd) {
         checkArguments(value, millisToAdd);
         return changeMillis(value, millisToAdd);
     }
@@ -173,7 +173,7 @@ public final class OffsetDateTimes {
      * @param value           the value to update
      * @param yearsToSubtract a positive number of years to subtract
      */
-    public static OffsetDateTime minusYears(OffsetDateTime value, int yearsToSubtract) {
+    public static OffsetDateTime subtractYears(OffsetDateTime value, int yearsToSubtract) {
         checkArguments(value, yearsToSubtract);
         return changeYear(value, -yearsToSubtract);
     }
@@ -184,7 +184,7 @@ public final class OffsetDateTimes {
      * @param value            the value to update
      * @param monthsToSubtract a positive number of months to subtract
      */
-    public static OffsetDateTime minusMonths(OffsetDateTime value, int monthsToSubtract) {
+    public static OffsetDateTime subtractMonths(OffsetDateTime value, int monthsToSubtract) {
         checkArguments(value, monthsToSubtract);
         return changeMonth(value, -monthsToSubtract);
     }
@@ -195,7 +195,7 @@ public final class OffsetDateTimes {
      * @param value          the value to update
      * @param daysToSubtract a positive number of days to subtract
      */
-    public static OffsetDateTime minusDays(OffsetDateTime value, int daysToSubtract) {
+    public static OffsetDateTime subtractDays(OffsetDateTime value, int daysToSubtract) {
         checkArguments(value, daysToSubtract);
         return changeDays(value, -daysToSubtract);
     }
@@ -206,7 +206,7 @@ public final class OffsetDateTimes {
      * @param value           the value to update
      * @param hoursToSubtract a positive number of hours to subtract
      */
-    public static OffsetDateTime minusHours(OffsetDateTime value, int hoursToSubtract) {
+    public static OffsetDateTime subtractHours(OffsetDateTime value, int hoursToSubtract) {
         checkArguments(value, hoursToSubtract);
         return changeHours(value, -hoursToSubtract);
     }
@@ -217,7 +217,7 @@ public final class OffsetDateTimes {
      * @param value             the value to update
      * @param minutesToSubtract a positive number of minutes to subtract
      */
-    public static OffsetDateTime minusMinutes(OffsetDateTime value, int minutesToSubtract) {
+    public static OffsetDateTime subtractMinutes(OffsetDateTime value, int minutesToSubtract) {
         checkArguments(value, minutesToSubtract);
         return changeMinutes(value, -minutesToSubtract);
     }
@@ -228,7 +228,7 @@ public final class OffsetDateTimes {
      * @param value             the value to update
      * @param secondsToSubtract a positive number of seconds to subtract
      */
-    public static OffsetDateTime minusSeconds(OffsetDateTime value, int secondsToSubtract) {
+    public static OffsetDateTime subtractSeconds(OffsetDateTime value, int secondsToSubtract) {
         checkArguments(value, secondsToSubtract);
         return changeSeconds(value, -secondsToSubtract);
     }
@@ -239,7 +239,7 @@ public final class OffsetDateTimes {
      * @param value            the value to update
      * @param millisToSubtract a positive number of milliseconds to subtract
      */
-    public static OffsetDateTime minusMillis(OffsetDateTime value, int millisToSubtract) {
+    public static OffsetDateTime subtractMillis(OffsetDateTime value, int millisToSubtract) {
         checkArguments(value, millisToSubtract);
         return changeMillis(value, -millisToSubtract);
     }

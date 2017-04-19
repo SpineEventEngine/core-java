@@ -64,7 +64,7 @@ final class Calendars {
      * @return zone offset in seconds
      */
     static int getZoneOffset(Calendar cal) {
-        final int zoneOffset = cal.get(ZONE_OFFSET) / (int)MILLIS_PER_SECOND;
+        final int zoneOffset = cal.get(ZONE_OFFSET) / MILLIS_PER_SECOND;
         return zoneOffset;
     }
 
@@ -206,6 +206,7 @@ final class Calendars {
         return result;
     }
 
+    //TODO:2017-04-19:alexander.yevsyukov: obtain current time using Timestamps2.
     /**
      * Obtains current calendar.
      */

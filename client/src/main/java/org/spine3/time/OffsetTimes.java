@@ -19,6 +19,8 @@
  */
 package org.spine3.time;
 
+import com.google.protobuf.Timestamp;
+
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -27,6 +29,7 @@ import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
 import static java.util.Calendar.SECOND;
 import static org.spine3.time.Calendars.at;
+import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.validate.Validate.checkPositive;
 
@@ -56,6 +59,14 @@ public final class OffsetTimes {
     }
 
     /**
+     * Converts the passed timestamp to offset time at the passed time zone.
+     */
+    public static OffsetTime timeAt(Timestamp time, ZoneOffset zoneOffset) {
+        final LocalTime localTime = LocalTimes.timeAt(time, zoneOffset);
+        return of(localTime, zoneOffset);
+    }
+
+    /**
      * Obtains offset time using {@code LocalTime} and {@code ZoneOffset}.
      */
     public static OffsetTime of(LocalTime localTime, ZoneOffset zoneOffset) {
@@ -72,7 +83,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of hours added.
      */
-    public static OffsetTime plusHours(OffsetTime offsetTime, int hoursToAdd) {
+    public static OffsetTime addHours(OffsetTime offsetTime, int hoursToAdd) {
         checkNotNull(offsetTime);
         checkPositive(hoursToAdd);
 
@@ -82,7 +93,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of minutes added.
      */
-    public static OffsetTime plusMinutes(OffsetTime offsetTime, int minutesToAdd) {
+    public static OffsetTime addMinutes(OffsetTime offsetTime, int minutesToAdd) {
         checkNotNull(offsetTime);
         checkPositive(minutesToAdd);
 
@@ -92,7 +103,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of seconds added.
      */
-    public static OffsetTime plusSeconds(OffsetTime offsetTime, int secondsToAdd) {
+    public static OffsetTime addSeconds(OffsetTime offsetTime, int secondsToAdd) {
         checkNotNull(offsetTime);
         checkPositive(secondsToAdd);
 
@@ -102,7 +113,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of milliseconds added.
      */
-    public static OffsetTime plusMillis(OffsetTime offsetTime, int millisToAdd) {
+    public static OffsetTime addMillis(OffsetTime offsetTime, int millisToAdd) {
         checkNotNull(offsetTime);
         checkPositive(millisToAdd);
 
@@ -112,7 +123,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of hours subtracted.
      */
-    public static OffsetTime minusHours(OffsetTime offsetTime, int hoursToSubtract) {
+    public static OffsetTime subtractHours(OffsetTime offsetTime, int hoursToSubtract) {
         checkNotNull(offsetTime);
         checkPositive(hoursToSubtract);
 
@@ -122,7 +133,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of minutes subtracted.
      */
-    public static OffsetTime minusMinutes(OffsetTime offsetTime, int minutesToSubtract) {
+    public static OffsetTime subtractMinutes(OffsetTime offsetTime, int minutesToSubtract) {
         checkNotNull(offsetTime);
         checkPositive(minutesToSubtract);
 
@@ -132,7 +143,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of seconds subtracted.
      */
-    public static OffsetTime minusSeconds(OffsetTime offsetTime, int secondsToSubtract) {
+    public static OffsetTime subtractSeconds(OffsetTime offsetTime, int secondsToSubtract) {
         checkNotNull(offsetTime);
         checkPositive(secondsToSubtract);
 
@@ -142,7 +153,7 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of milliseconds subtracted.
      */
-    public static OffsetTime minusMillis(OffsetTime offsetTime, int millisToSubtract) {
+    public static OffsetTime subtractMillis(OffsetTime offsetTime, int millisToSubtract) {
         checkNotNull(offsetTime);
         checkPositive(millisToSubtract);
 
@@ -205,7 +216,7 @@ public final class OffsetTimes {
      * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static OffsetTime add(OffsetTime offsetTime, int calendarField, int delta) {
-        final Calendar cal = Calendars.toCalendar(offsetTime);
+        final Calendar cal = toCalendar(offsetTime);
         cal.add(calendarField, delta);
         final LocalTime localTime = toLocalTime(cal).toBuilder()
                                                     .setNanos(offsetTime.getTime().getNanos())
@@ -216,5 +227,4 @@ public final class OffsetTimes {
                          .setOffset(zoneOffset)
                          .build();
     }
-
 }

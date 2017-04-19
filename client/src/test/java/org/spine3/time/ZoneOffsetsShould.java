@@ -57,7 +57,7 @@ public class ZoneOffsetsShould {
 
         final Timestamp now = getCurrentTime();
         final long date = Timestamps.toMillis(now);
-        final int offsetSeconds = timeZone.getOffset(date) / (int)MILLIS_PER_SECOND;
+        final int offsetSeconds = timeZone.getOffset(date) / MILLIS_PER_SECOND;
 
         final String zoneId = timeZone.getID();
         assertEquals(zoneId, zoneOffset.getId());
