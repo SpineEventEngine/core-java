@@ -20,7 +20,6 @@
 
 package org.spine3.time;
 
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -431,7 +430,6 @@ public class OffsetDateTimesShould {
         assertEquals(nowAtUTC, parsed);
     }
 
-    @Ignore //TODO:2017-04-20:alexander.yevsyukov: Enable back when OffsetDateTime fixed
     @Test
     public void convert_values_at_current_time_zone() throws ParseException {
         // Get current zone offset and strip ID value because it's not stored into date/time.

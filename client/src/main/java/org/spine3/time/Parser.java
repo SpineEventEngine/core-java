@@ -116,13 +116,6 @@ final class Parser {
         } else {
             final String offsetValue = value.substring(timezoneOffsetPosition);
             zoneOffset = ZoneOffsets.parse(offsetValue);
-            final int offsetSeconds = ZoneOffsets.parse(offsetValue)
-                                                 .getAmountSeconds();
-            if (value.charAt(timezoneOffsetPosition) == '+') {
-                seconds -= offsetSeconds;
-            } else {
-                seconds += offsetSeconds;
-            }
         }
     }
 
