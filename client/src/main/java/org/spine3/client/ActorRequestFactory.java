@@ -149,7 +149,7 @@ public class ActorRequestFactory {
     public final class ForQuery {
 
         /**
-         * The prefix of all {@linkplain QueryId query identifiers}.
+         * The format of all {@linkplain QueryId query identifiers}.
          */
         private static final String QUERY_ID_FORMAT = "query-%s";
 
@@ -281,7 +281,7 @@ public class ActorRequestFactory {
     public final class ForTopic {
 
         /**
-         * The prefix of all {@linkplain TopicId topic identifiers}.
+         * The format of all {@linkplain TopicId topic identifiers}.
          */
         private static final String TOPIC_ID_FORMAT = "topic-%s";
 

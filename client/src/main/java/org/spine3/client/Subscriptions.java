@@ -32,6 +32,9 @@ import static java.lang.String.format;
 @Internal
 public class Subscriptions {
 
+    /**
+     * The format of all {@linkplain SubscriptionId Subscription identifiers}.
+     */
     private static final String SUBSCRIPTION_ID_FORMAT = "subscription-%s";
 
     private Subscriptions() {
