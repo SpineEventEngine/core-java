@@ -59,11 +59,10 @@ public final class LocalTimes {
      * Obtains current local time.
      */
     public static LocalTime now() {
-        final Timestamp time = Timestamps2.getCurrentTime();
-        //TODO:2017-04-19:alexander.yevsyukov: Convert Timestamp to Calendar
-        final Calendar cal = Calendars.now();
+        final Timestamp now = Timestamps2.getCurrentTime();
+        final Calendar cal = toCalendar(now, ZoneOffsets.getDefault());
 
-        final int remainingNanos = time.getNanos() % (int)NANOS_PER_MILLISECOND;
+        final int remainingNanos = now.getNanos() % (int)NANOS_PER_MILLISECOND;
         final LocalTime result = LocalTime.newBuilder()
                                           .setHours(getHours(cal))
                                           .setMinutes(getMinutes(cal))

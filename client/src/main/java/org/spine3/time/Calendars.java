@@ -20,6 +20,9 @@
 
 package org.spine3.time;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
+
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
@@ -93,7 +96,7 @@ final class Calendars {
      * Obtains hours using {@code Calendar}.
      */
     static int getHours(Calendar cal) {
-        final int hours = cal.get(HOUR);
+        final int hours = cal.get(HOUR_OF_DAY);
         return hours;
     }
 
@@ -224,9 +227,11 @@ final class Calendars {
      * Obtains local date using calendar.
      */
     static LocalDate toLocalDate(Calendar cal) {
-        return LocalDates.of(getYear(cal),
-                             getMonthOfYear(cal),
-                             getDay(cal));
+        final int year = getYear(cal);
+        final MonthOfYear month = getMonthOfYear(cal);
+        final int day = getDay(cal);
+        final LocalDate result = LocalDates.of(year, month, day);
+        return result;
     }
 
     /**
@@ -238,7 +243,7 @@ final class Calendars {
     }
 
     /**
-     * Obtains local time from calendar with nanosecond precision.
+     * Obtains local time from Calendar with nanosecond precision.
      */
     static LocalTime toLocalTime(Calendar calendar, int nanos) {
         final int hours = getHours(calendar);
@@ -246,6 +251,16 @@ final class Calendars {
         final int seconds = getSeconds(calendar);
         final int millis = getMillis(calendar);
         return LocalTimes.of(hours, minutes, seconds, millis, nanos);
+    }
+
+    /**
+     * Converts the passed Timestamp into Calendar at the passed time zone.
+     */
+    static Calendar toCalendar(Timestamp timestamp, ZoneOffset zoneOffset) {
+        final long millis = Timestamps.toMillis(timestamp);
+        final Calendar calendar = at(zoneOffset);
+        calendar.setTimeInMillis(millis);
+        return calendar;
     }
 
     /**

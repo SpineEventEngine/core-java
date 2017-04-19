@@ -21,6 +21,8 @@
 package org.spine3.time;
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -28,19 +30,20 @@ import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Durations2.hours;
+import static org.spine3.time.Durations2.hoursAndMinutes;
+import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
 import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
-import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
+import static org.spine3.time.ZoneOffsets.getDefault;
 import static org.spine3.time.ZoneOffsets.ofHours;
 import static org.spine3.time.ZoneOffsets.ofHoursMinutes;
 import static org.spine3.time.ZoneOffsets.parse;
-import static org.spine3.time.ZoneOffsets.toZoneOffset;
 
 public class ZoneOffsetsShould {
-
-    private static final TimeZone timeZone = TimeZone.getDefault();
 
     @Test
     public void has_private_constructor() {
@@ -48,26 +51,32 @@ public class ZoneOffsetsShould {
     }
 
     @Test
-    public void create_default_instance_according_to_place() {
-        final int currentOffset = getOffsetInSeconds(timeZone);
+    public void get_current_zone_offset() {
+        final TimeZone timeZone = TimeZone.getDefault();
+        final ZoneOffset zoneOffset = getDefault();
+
+        final Timestamp now = getCurrentTime();
+        final long date = Timestamps.toMillis(now);
+        final int offsetSeconds = timeZone.getOffset(date) / (int)MILLIS_PER_SECOND;
+
         final String zoneId = timeZone.getID();
-        assertEquals(currentOffset, toZoneOffset(timeZone).getAmountSeconds());
-        assertEquals(zoneId, toZoneOffset(timeZone).getId());
+        assertEquals(zoneId, zoneOffset.getId());
+
+        assertEquals(offsetSeconds, zoneOffset.getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_offset() {
-        final Duration twoHours = Durations2.hours(2);
+        final Duration twoHours = hours(2);
         assertEquals(twoHours.getSeconds(), ofHours(2).getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        assertEquals(Durations2.hoursAndMinutes(8, 45)
-                               .getSeconds(),
+        assertEquals(hoursAndMinutes(8, 45).getSeconds(),
                      ofHoursMinutes(8, 45).getAmountSeconds());
 
-        assertEquals(Durations2.hoursAndMinutes(-4, -50).getSeconds(),
+        assertEquals(hoursAndMinutes(-4, -50).getSeconds(),
                      ofHoursMinutes(-4, -50).getAmountSeconds());
     }
 

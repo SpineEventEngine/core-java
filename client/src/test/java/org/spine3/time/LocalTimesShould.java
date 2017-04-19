@@ -55,9 +55,13 @@ public class LocalTimesShould {
         final LocalTime now = LocalTimes.now();
         final Calendar cal = Calendars.now();
 
-        assertEquals(getHours(cal), now.getHours());
-        assertEquals(getMinutes(cal), now.getMinutes());
-        assertEquals(getSeconds(cal), now.getSeconds());
+        final int expectedHours = getHours(cal);
+        final int expectedMinutes = getMinutes(cal);
+        final int expectedSeconds = getSeconds(cal);
+
+        assertEquals(expectedHours, now.getHours());
+        assertEquals(expectedMinutes, now.getMinutes());
+        assertEquals(expectedSeconds, now.getSeconds());
         /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 

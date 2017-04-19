@@ -21,6 +21,8 @@
 package org.spine3.time;
 
 import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 
 import java.text.ParseException;
 import java.util.TimeZone;
@@ -34,6 +36,7 @@ import static org.spine3.time.Durations2.minutes;
 import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
+import static org.spine3.time.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -66,18 +69,22 @@ public final class ZoneOffsets {
      * @param timeZone target time zone
      * @return zone offset instance of specified timezone
      */
-    public static ZoneOffset toZoneOffset(TimeZone timeZone) {
+    static ZoneOffset toZoneOffset(TimeZone timeZone) {
+        final Timestamp now = getCurrentTime();
+        final long date = Timestamps.toMillis(now);
+        final int offsetInSeconds = getOffsetInSeconds(timeZone, date);
+        final String id = nullToEmpty(timeZone.getID());
         return ZoneOffset.newBuilder()
-                         .setAmountSeconds(getOffsetInSeconds(timeZone))
-                         .setId(nullToEmpty(timeZone.getID()))
+                         .setAmountSeconds(offsetInSeconds)
+                         .setId(id)
                          .build();
     }
 
     /**
      * Obtains offset of the passed {@code TimeZone} in seconds.
      */
-    public static int getOffsetInSeconds(TimeZone timeZone) {
-        final int seconds = timeZone.getRawOffset() / (int) MILLIS_PER_SECOND;
+    private static int getOffsetInSeconds(TimeZone timeZone, long date) {
+        final int seconds = timeZone.getOffset(date) / (int) MILLIS_PER_SECOND;
         return seconds;
     }
 
