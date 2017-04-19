@@ -39,6 +39,7 @@ import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.ZONE_OFFSET;
 import static java.util.Calendar.getInstance;
+import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
 
 /**
  * Utilities for working with {@link Calendar}.
@@ -58,10 +59,12 @@ final class Calendars {
     }
 
     /**
-     * Obtains zone offset using {@code Calendar}.
+     * Obtains a zone offset of the passed {@code Calendar}.
+     *
+     * @return zone offset in seconds
      */
     static int getZoneOffset(Calendar cal) {
-        final int zoneOffset = cal.get(ZONE_OFFSET) / 1000;
+        final int zoneOffset = cal.get(ZONE_OFFSET) / (int)MILLIS_PER_SECOND;
         return zoneOffset;
     }
 
