@@ -28,6 +28,7 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps2;
+import org.spine3.test.EventTests;
 import org.spine3.test.TestEventFactory;
 import org.spine3.type.TypeName;
 
@@ -40,7 +41,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.server.command.EventFactory.createEvent;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -48,7 +48,12 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
  */
 public class EnrichmentsShould {
 
+    private static final StringValue producerId = newStringValue(
+            EnrichmentsShould.class.getSimpleName());
+
+    private TestEventFactory eventFactory;
     private EventContext context;
+
     private final StringValue stringValue = newStringValue(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
 
@@ -68,9 +73,7 @@ public class EnrichmentsShould {
 
     @Before
     public void setUp() {
-        final StringValue producerId = newStringValue(getClass().getSimpleName());
-        final TestEventFactory eventFactory = TestEventFactory.newInstance(pack(producerId),
-                                                                           getClass());
+        eventFactory = TestEventFactory.newInstance(pack(producerId), getClass());
         context = eventFactory.createEvent(Timestamps2.getCurrentTime())
                               .getContext();
     }
@@ -90,7 +93,7 @@ public class EnrichmentsShould {
 
     @Test
     public void return_true_if_event_enrichment_is_enabled() {
-        final Event event = createEvent(stringValue, context);
+        final Event event = eventFactory.createEvent(stringValue);
 
         assertTrue(isEnrichmentEnabled(event));
     }
@@ -102,7 +105,7 @@ public class EnrichmentsShould {
                        .setEnrichment(Enrichment.newBuilder()
                                                 .setDoNotEnrich(true))
                        .build();
-        final Event event = createEvent(stringValue, withDisabledEnrichment);
+        final Event event = EventTests.createEvent(stringValue, withDisabledEnrichment);
 
         assertFalse(isEnrichmentEnabled(event));
     }
@@ -111,9 +114,9 @@ public class EnrichmentsShould {
     // We're sure the optional is populated in this method.
     @Test
     public void return_all_event_enrichments() {
-        final EventContext context = newEventContextWithEnrichment(
-                TypeName.of(stringValue).value(),
-                stringValue);
+        final EventContext context =
+                newEventContextWithEnrichment(TypeName.of(stringValue)
+                                                      .value(), stringValue);
 
         final Optional<Enrichment.Container> enrichments = Enrichments.getEnrichments(context);
 

@@ -28,9 +28,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 
@@ -38,6 +36,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Messages.toAny;
 import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
@@ -83,26 +82,13 @@ public class EventFactory {
     }
 
     /**
-     * Generates a new random UUID-based {@code EventId}.
-     *
-     * @deprecated use {@link EventFactory#createEvent(Message, Version)} which would generate proper IDs for you
-     */
-    @Deprecated
-    public static EventId generateId() {
-        final String value = Identifiers.newUuid();
-        return EventId.newBuilder()
-                      .setValue(value)
-                      .build();
-    }
-
-    /**
      * Creates a new {@code Event} instance.
      *
      * @param messageOrAny the event message or {@code Any} containing the message
      * @param context      the event context
      * @return created event instance
      */
-    public static Event createEvent(Message messageOrAny, EventContext context) {
+    private static Event createEvent(Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
         final Any packed = toAny(messageOrAny);
@@ -122,7 +108,7 @@ public class EventFactory {
         final EventContext context = EventContext.newBuilder()
                                                  .setEventId(sourceContext.getEventId())
                                                  .setTimestamp(sourceContext.getTimestamp())
-                                                 .setProducerId(AnyPacker.pack(producerId))
+                                                 .setProducerId(pack(producerId))
                                                  .build();
         final Event result = createEvent(integrationEvent.getMessage(), context);
         return result;

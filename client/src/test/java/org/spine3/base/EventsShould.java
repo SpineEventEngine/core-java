@@ -28,6 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
+import org.spine3.test.EventTests;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
@@ -50,7 +51,6 @@ import static org.spine3.protobuf.Values.newBoolValue;
 import static org.spine3.protobuf.Values.newDoubleValue;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.protobuf.Values.pack;
-import static org.spine3.server.command.EventFactory.createEvent;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -71,17 +71,21 @@ public class EventsShould {
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = newDoubleValue(10.1);
 
-    public static EventContext newEventContext() {
+    static EventContext newEventContext() {
         final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
                                                      Tests.<Version>nullRef());
         return event.getContext();
     }
 
-    public static Event createEventOccurredMinutesAgo(int minutesAgo) {
+    static Event createEventOccurredMinutesAgo(int minutesAgo) {
         final Event result = eventFactory.createEvent(newUuidValue(),
                                                       null,
                                                       minutesAgo(minutesAgo));
         return result;
+    }
+
+    private Event createEventWithContext(Message eventMessage) {
+        return EventTests.createEvent(eventMessage, context);
     }
 
     @Before
@@ -140,15 +144,15 @@ public class EventsShould {
         createEventAndAssertReturnedMessageFor(doubleValue);
     }
 
-    private void createEventAndAssertReturnedMessageFor(Message msg) {
-        final Event event = createEvent(msg, context);
+    private static void createEventAndAssertReturnedMessageFor(Message msg) {
+        final Event event = EventTests.createContextlessEvent(msg);
 
         assertEquals(msg, getMessage(event));
     }
 
     @Test
     public void get_timestamp_from_event() {
-        final Event event = createEvent(stringValue, context);
+        final Event event = createEventWithContext(stringValue);
 
         assertEquals(context.getTimestamp(), getTimestamp(event));
     }
