@@ -25,10 +25,10 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.Statuses;
 import org.spine3.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 
 /**
  * Filters out commands that do not have registered dispatchers.
@@ -56,7 +56,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final CommandException unsupported = new UnsupportedCommandException(command);
             commandBus.commandStore()
                       .storeWithError(command, unsupported);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+            responseObserver.onError(invalidArgumentWithCause(unsupported, unsupported.getError()));
             return false;
         }
         return true;

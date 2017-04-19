@@ -21,9 +21,14 @@
 package org.spine3.base;
 
 import com.google.common.testing.NullPointerTester;
+import io.grpc.Metadata;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import org.junit.Test;
 
+import static io.grpc.Status.INVALID_ARGUMENT;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ErrorsShould {
@@ -53,6 +58,45 @@ public class ErrorsShould {
         assertEquals(msg, error.getMessage());
         assertEquals(throwable.getClass()
                               .getName(), error.getType());
+    }
+
+    @Test
+    public void return_Error_extracted_from_StatusRuntimeException_metadata() {
+        final Error expectedError = Error.getDefaultInstance();
+        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        final StatusRuntimeException statusRuntimeException =
+                INVALID_ARGUMENT.asRuntimeException(metadata);
+
+        assertEquals(expectedError, Errors.fromStreamError(statusRuntimeException)
+                                          .get());
+    }
+
+    @Test
+    public void return_Error_extracted_form_StatusException_metadata() {
+        final Error expectedError = Error.getDefaultInstance();
+        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
+
+        assertEquals(expectedError, Errors.fromStreamError(statusException)
+                                          .get());
+    }
+
+    @Test
+    public void return_absent_if_passed_Throwable_is_not_status_exception() {
+        final String msg = "Neither a StatusException nor a StatusRuntimeException.";
+        final Exception exception = new Exception(msg);
+
+        assertFalse(Errors.fromStreamError(exception)
+                          .isPresent());
+    }
+
+    @Test
+    public void return_absent_if_there_is_no_error_in_metadata() {
+        final Metadata emptyMetadata = new Metadata();
+        final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
+
+        assertFalse(Errors.fromStreamError(statusRuntimeEx)
+                          .isPresent());
     }
 
     @Test
