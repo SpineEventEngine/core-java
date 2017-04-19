@@ -67,7 +67,7 @@ public class ErrorsShould {
         final StatusRuntimeException statusRuntimeException =
                 Status.INVALID_ARGUMENT.asRuntimeException(metadata);
 
-        assertEquals(expectedError, Errors.fromResponseError(statusRuntimeException)
+        assertEquals(expectedError, Errors.fromStreamError(statusRuntimeException)
                                           .get());
     }
 
@@ -77,7 +77,7 @@ public class ErrorsShould {
         final Metadata metadata = MetadataConverter.toMetadata(expectedError);
         final StatusException statusException = Status.INVALID_ARGUMENT.asException(metadata);
 
-        assertEquals(expectedError, Errors.fromResponseError(statusException)
+        assertEquals(expectedError, Errors.fromStreamError(statusException)
                                           .get());
     }
 
@@ -86,7 +86,7 @@ public class ErrorsShould {
         final String msg = "Neither a StatusException nor a StatusRuntimeException.";
         final Exception exception = new Exception(msg);
 
-        assertEquals(Optional.absent(), Errors.fromResponseError(exception));
+        assertEquals(Optional.absent(), Errors.fromStreamError(exception));
     }
 
     @Test
@@ -94,7 +94,7 @@ public class ErrorsShould {
         final Metadata emptyMetadata = new Metadata();
         final Throwable statusRuntimeEx = Status.INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
 
-        assertEquals(Optional.absent(), Errors.fromResponseError(statusRuntimeEx));
+        assertEquals(Optional.absent(), Errors.fromStreamError(statusRuntimeEx));
     }
 
     @Test

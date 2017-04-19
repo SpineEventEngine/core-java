@@ -80,7 +80,7 @@ public class Errors {
      * @return the extracted error or {@code Optional.absent()} if the extraction failed
      */
     @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
-    public static Optional<Error> fromResponseError(Throwable throwable) {
+    public static Optional<Error> fromStreamError(Throwable throwable) {
         checkNotNull(throwable);
         if (throwable instanceof StatusRuntimeException) {
             final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
