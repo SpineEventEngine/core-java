@@ -44,29 +44,7 @@ public class StreamObservers {
     }
 
     /**
-     * The {@code StreamObserver} which does nothing.
-     *
-     * @see #noopObserver()
-     */
-    private static final StreamObserver<Response> emptyObserver = new StreamObserver<Response>() {
-        @Override
-        public void onNext(Response value) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onError(Throwable t) {
-            // Do nothing.
-        }
-
-        @Override
-        public void onCompleted() {
-            // Do nothing.
-        }
-    };
-
-    /**
-     * Creates a {@linkplain StreamObserver<Response> observer} which does nothing upon
+     * Creates a {@linkplain StreamObserver observer} which does nothing upon
      * the invocation of its callback methods.
      *
      * <p>The callees which do not want to follow the responses should use this utility method
@@ -74,8 +52,23 @@ public class StreamObservers {
      *
      * @return an instance of {@code StreamObserver} which does nothing
      */
-    public static StreamObserver<Response> noopObserver() {
-        return emptyObserver;
+    public static <T> StreamObserver<T> noopObserver() {
+        return new StreamObserver<T>() {
+            @Override
+            public void onNext(T value) {
+                // Do nothing.
+            }
+
+            @Override
+            public void onError(Throwable t) {
+                // Do nothing.
+            }
+
+            @Override
+            public void onCompleted() {
+                // Do nothing.
+            }
+        };
     }
 
     public static void ack(StreamObserver<Response> responseObserver) {

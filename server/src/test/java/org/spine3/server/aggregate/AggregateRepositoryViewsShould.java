@@ -28,7 +28,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Response;
 import org.spine3.client.ActorRequestFactory;
+import org.spine3.io.StreamObservers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
@@ -36,7 +38,6 @@ import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.io.StreamObservers.noopObserver;
 import static org.spine3.protobuf.Values.newStringValue;
 
 /**
@@ -74,7 +75,7 @@ public class AggregateRepositoryViewsShould {
     private void postCommand(String cmd) {
         final Command command =
                 requestFactory.command().create(SHRepository.createCommandMessage(id, cmd));
-        boundedContext.getCommandBus().post(command, noopObserver());
+        boundedContext.getCommandBus().post(command, StreamObservers.<Response>noopObserver());
     }
 
     @Test

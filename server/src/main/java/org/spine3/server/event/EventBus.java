@@ -31,6 +31,7 @@ import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
+import org.spine3.io.StreamObservers;
 import org.spine3.server.Statuses;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.outbus.CommandOutputBus;
@@ -47,7 +48,6 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.io.StreamObservers.noopObserver;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -185,7 +185,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * @see #CommandOutputBus#post(Message, StreamObserver)
      */
     public void post(Event event) {
-        post(event, noopObserver());
+        post(event, StreamObservers.<Response>noopObserver());
     }
 
     @Override
