@@ -68,7 +68,7 @@ interface SubscriptionRegistry {
      * Allows to determine if this registry has an item with the specified ID.
      *
      * @param subscriptionId the subscription ID to look for.
-     * @return {@code true}, if this registry has a Subscription with the given ID,
+     * @return {@code true}, if this registry has a subscription with the given ID,
      *         {@code false} otherwise.
      */
     boolean containsId(SubscriptionId subscriptionId);
