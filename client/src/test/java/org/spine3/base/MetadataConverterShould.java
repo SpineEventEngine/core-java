@@ -28,6 +28,7 @@ import org.junit.Test;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.fail;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -73,6 +74,7 @@ public class MetadataConverterShould {
 
         try {
             MetadataConverter.toError(metadata);
+            fail("InvalidProtocolBufferException was not thrown.");
         } catch (IllegalStateException e) {
             assertTrue(e.getCause() instanceof InvalidProtocolBufferException);
         }
