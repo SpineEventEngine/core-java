@@ -349,7 +349,7 @@ public final class OffsetDateTimes {
     }
 
     /**
-     * Returns a RFC 3339 date/time string representation of the passed value.
+     * Returns a ISO 8601 date/time string representation of the passed value.
      */
     public static String toString(OffsetDateTime value) {
         final Calendar calendar = toCalendar(value);
@@ -372,7 +372,7 @@ public final class OffsetDateTimes {
     }
 
     /**
-     * Parse from RFC 3339 date/time string to {@code OffsetDateTime}.
+     * Parse from ISO 8601 date/time string to {@code OffsetDateTime}.
      *
      * @throws ParseException if the passed string is not a valid date-time value
      */

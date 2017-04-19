@@ -77,7 +77,7 @@ final class Formats {
     }
 
     /**
-     * Creates RFC 3339 date string format.
+     * Creates ISO 8601 date string format.
      */
     static SimpleDateFormat createDateTimeFormat() {
         final SimpleDateFormat sdf = createDigitOnlyFormat(DATE_TIME_FORMAT);
@@ -87,7 +87,7 @@ final class Formats {
     }
 
     /**
-     * Creates RFC 3339 time string format.
+     * Creates ISO 8601 time string format.
      */
     static SimpleDateFormat createTimeFormat() {
         final SimpleDateFormat sdf = createDigitOnlyFormat(TIME_FORMAT);
