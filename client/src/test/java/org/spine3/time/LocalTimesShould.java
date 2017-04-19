@@ -257,7 +257,9 @@ public class LocalTimesShould {
     @Test
     public void convert_to_string_and_back() throws ParseException {
         final LocalTime localTime = LocalTimes.now();
-        
-        assertEquals(localTime, parse(LocalTimes.toString(localTime)));
+
+        final String str = LocalTimes.toString(localTime);
+        final LocalTime convertedBack = parse(str);
+        assertEquals(localTime, convertedBack);
     }
 }

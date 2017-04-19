@@ -84,13 +84,14 @@ final class Parser {
 
     LocalTime parseLocalTime() throws ParseException {
         // The input string for local time does not have zone offset.
-        timezoneOffsetPosition = value.length() - 1;
+        timezoneOffsetPosition = value.length();
         initTimeValues();
         parseTime(timeFormat());
         zoneOffset = ZoneOffsets.getDefault();
         Calendar calendar = createCalendar();
-        final LocalTime localTime = Calendars.toLocalTime(calendar);
-        //TODO:2017-04-19:alexander.yevsyukov: Set nanos.
+        @SuppressWarnings("NumericCastThatLosesPrecision") // OK as we compute remainder
+        final int remainingNanos = (int) (nanos % NANOS_PER_MILLISECOND);
+        final LocalTime localTime = Calendars.toLocalTime(calendar, remainingNanos);
         return localTime;
     }
 

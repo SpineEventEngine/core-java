@@ -31,7 +31,6 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import static java.util.Calendar.DAY_OF_MONTH;
-import static java.util.Calendar.HOUR;
 import static java.util.Calendar.HOUR_OF_DAY;
 import static java.util.Calendar.MILLISECOND;
 import static java.util.Calendar.MINUTE;
@@ -161,7 +160,7 @@ final class Calendars {
      */
     private static Calendar createWithTime(int hours, int minutes, int seconds, int millis) {
         final Calendar calendar = getInstance();
-        calendar.set(HOUR, hours);
+        calendar.set(HOUR_OF_DAY, hours);
         calendar.set(MINUTE, minutes);
         calendar.set(SECOND, seconds);
         calendar.set(MILLISECOND, millis);
@@ -173,7 +172,7 @@ final class Calendars {
      */
     static Calendar createWithTime(int hours, int minutes, int seconds) {
         final Calendar calendar = getInstance();
-        calendar.set(HOUR, hours);
+        calendar.set(HOUR_OF_DAY, hours);
         calendar.set(MINUTE, minutes);
         calendar.set(SECOND, seconds);
         return calendar;
@@ -184,7 +183,7 @@ final class Calendars {
      */
     static Calendar createWithTime(int hours, int minutes) {
         final Calendar calendar = getInstance();
-        calendar.set(HOUR, hours);
+        calendar.set(HOUR_OF_DAY, hours);
         calendar.set(MINUTE, minutes);
         return calendar;
     }
