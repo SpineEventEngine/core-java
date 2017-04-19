@@ -35,6 +35,7 @@ abstract class AbstractTargetValidator<M extends Message> extends RequestValidat
     private final TypeRegistry typeRegistry;
 
     AbstractTargetValidator(TypeRegistry typeRegistry) {
+        super();
         this.typeRegistry = typeRegistry;
     }
 

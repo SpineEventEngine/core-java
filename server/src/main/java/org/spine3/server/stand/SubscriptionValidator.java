@@ -47,6 +47,7 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
      * @param registry the registry to validate the subscription against.
      */
     SubscriptionValidator(SubscriptionRegistry registry) {
+        super();
         this.registry = registry;
     }
 
