@@ -51,10 +51,16 @@ public class InvalidRequestException extends RuntimeException {
         this.error = error;
     }
 
+    /**
+     * Obtains an original request, which caused the {@code error}.
+     */
     public Message getRequest() {
         return request;
     }
 
+    /**
+     * Obtains the error occurred in response to the invalid request.
+     */
     public Error getError() {
         return error;
     }
