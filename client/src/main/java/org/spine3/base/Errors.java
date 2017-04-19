@@ -74,7 +74,7 @@ public class Errors {
      * <p>The {@code Error} is extracted from the trailer metadata of
      * either {@link StatusRuntimeException} or {@link StatusException} only.
      *
-     * <p>If any other exception is passed, {@code Optional.absent()} is returned.
+     * <p>If any other type of {@code Throwable} is passed, {@code Optional.absent()} is returned.
      *
      * @param throwable the {@code Throwable} to extract an {@link Error}
      * @return the extracted error or {@code Optional.absent()} if the extraction failed
