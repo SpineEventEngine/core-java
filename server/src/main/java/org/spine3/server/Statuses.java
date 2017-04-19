@@ -48,7 +48,7 @@ public class Statuses {
      * <p>Resulting {@code StatusRuntimeException} will contain the passed {@link Error}
      * transformed to the {@linkplain StatusRuntimeException#getTrailers() metadata}.
      *
-     * <p>NOTE: The cause is not transmitted from server co client.
+     * <p>NOTE: The cause is not transmitted from a server to a client.
      *
      * @param cause the exception cause
      * @param error the error to be passed to a client
