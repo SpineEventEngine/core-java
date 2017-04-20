@@ -31,7 +31,6 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -55,35 +54,22 @@ import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.time.Timestamps2.getCurrentTime;
-import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
-import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
-import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
-import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
 
 /**
  * @author Alexander Aleksandrov
  * @author Alexander Yevsyukov
  */
-public class OffsetTimesShould {
+public class OffsetTimesShould extends AbstractZonedTimeTest {
 
     private Timestamp gmtNow;
     private OffsetTime now;
-    private ZoneOffset zoneOffset;
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         gmtNow = getCurrentTime();
-        zoneOffset = generateOffset();
         now = OffsetTimes.timeAt(gmtNow, zoneOffset);
-    }
-
-    private static ZoneOffset generateOffset() {
-        // Reduce the hour range by one assuming minutes are also generated.
-        final int hours = random(MIN_HOURS_OFFSET + 1, MAX_HOURS_OFFSET - 1);
-        int minutes = random(MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
-        // Make minutes of the same sign with hours.
-        minutes = hours >= 0 ? abs(minutes) : -abs(minutes);
-        return ZoneOffsets.ofHoursMinutes(hours, minutes);
     }
 
     @Test
@@ -338,12 +324,13 @@ public class OffsetTimesShould {
     //-------------------------
 
     @Test
-    public void convert_values_at_UTC_to_string() throws ParseException {
+    public void convert_to_string_and_back_at_UTC() throws ParseException {
         final OffsetTime nowAtUTC = OffsetTimes.now(ZoneOffsets.UTC);
 
-        final String value = OffsetTimes.toString(nowAtUTC);
-        assertTrue(value.contains("Z"));
-        final OffsetTime parsed = OffsetTimes.parse(value);
+        final String str = OffsetTimes.toString(nowAtUTC);
+        assertTrue(str.contains("Z"));
+
+        final OffsetTime parsed = OffsetTimes.parse(str);
         assertEquals(nowAtUTC, parsed);
     }
 

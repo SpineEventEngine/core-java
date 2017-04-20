@@ -28,8 +28,8 @@ import java.text.ParseException;
 import java.util.Calendar;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.random;
 import static org.spine3.time.Calendars.at;
@@ -43,46 +43,33 @@ import static org.spine3.time.OffsetDates.addYears;
 import static org.spine3.time.OffsetDates.subtractDays;
 import static org.spine3.time.OffsetDates.subtractMonths;
 import static org.spine3.time.OffsetDates.subtractYears;
-import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
-import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
-import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
-import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
 
 /**
  * @author Alexander Aleksandrov
  * @author Alexander Yevsyukov
  */
-public class OffsetDatesShould {
+public class OffsetDatesShould extends AbstractZonedTimeTest {
 
     private static final int YEARS = 2017;
     private static final int MONTH_PER_YEAR = 12;
     private static final int DAY_PER_MONTH = 31;
 
     private LocalDate gmtToday;
-    private ZoneOffset zoneOffset;
-    private OffsetDate now;
+    private OffsetDate today;
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         gmtToday = getCurrentLocalDate();
-        zoneOffset = generateOffset();
-        now = OffsetDates.of(gmtToday, zoneOffset);
+        today = OffsetDates.of(gmtToday, zoneOffset);
     }
 
     private static LocalDate getCurrentLocalDate() {
-        int year = random(1, YEARS);
-        MonthOfYear month = checkNotNull(forNumber(random(MONTH_PER_YEAR)));
-        int day = random(1, DAY_PER_MONTH);
+        final int year = random(1, YEARS);
+        final MonthOfYear month = checkNotNull(forNumber(random(MONTH_PER_YEAR)));
+        final int day = random(1, DAY_PER_MONTH);
         return LocalDates.of(year, month, day);
-    }
-
-    private static ZoneOffset generateOffset() {
-        // Reduce the hour range by one assuming minutes are also generated.
-        final int hours = random(MIN_HOURS_OFFSET + 1, MAX_HOURS_OFFSET - 1);
-        int minutes = random(MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
-        // Make minutes of the same sign with hours.
-        minutes = hours >= 0 ? abs(minutes) : -abs(minutes);
-        return ZoneOffsets.ofHoursMinutes(hours, minutes);
     }
 
     @Test
@@ -91,7 +78,7 @@ public class OffsetDatesShould {
     }
 
     @Test
-    public void obtain_current_OffsetDate_using_ZoneOffset() {
+    public void obtain_current_date() {
         final OffsetDate today = OffsetDates.now(zoneOffset);
         final Calendar cal = at(zoneOffset);
 
@@ -103,11 +90,13 @@ public class OffsetDatesShould {
     }
 
     @Test
-    public void obtain_current_OffsetDate_using_LocalDate_and_ZoneOffset() {
-        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
+    public void create_instance_by_local_date_and_offset() {
+        final OffsetDate todayAtZone = OffsetDates.of(gmtToday, zoneOffset);
 
-        assertEquals(gmtToday, offsetDate.getDate());
-        assertEquals(zoneOffset, offsetDate.getOffset());
+        /* We cannot have `assertEquals(gmtToday, todayAtZone.getDate())` because
+           it would break at the day end at the time zone represented by `zoneOffset`. */
+
+        assertEquals(zoneOffset, todayAtZone.getOffset());
     }
 
     @Test
@@ -199,22 +188,22 @@ public class OffsetDatesShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_years_to_add() {
-        addYears(now, -5);
+        addYears(today, -5);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_years_to_subtract() {
-        subtractYears(now, -6);
+        subtractYears(today, -6);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_years_to_add() {
-        addYears(now, 0);
+        addYears(today, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_years_to_subtract() {
-        subtractYears(now, 0);
+        subtractYears(today, 0);
     }
 
     //
@@ -223,22 +212,22 @@ public class OffsetDatesShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_months_to_add() {
-        addMonths(now, -7);
+        addMonths(today, -7);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_months_to_subtract() {
-        subtractMonths(now, -8);
+        subtractMonths(today, -8);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_months_to_add() {
-        addMonths(now, 0);
+        addMonths(today, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_months_to_subtract() {
-        subtractMonths(now, 0);
+        subtractMonths(today, 0);
     }
 
     //
@@ -247,22 +236,22 @@ public class OffsetDatesShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_days_to_subtract() {
-        subtractDays(now, -27);
+        subtractDays(today, -27);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_days_to_add() {
-        addDays(now, -25);
+        addDays(today, -25);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_days_to_subtract() {
-        subtractDays(now, 0);
+        subtractDays(today, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_zero_days_to_add() {
-        addDays(now, 0);
+        addDays(today, 0);
     }
 
     //
@@ -274,6 +263,24 @@ public class OffsetDatesShould {
         final OffsetDate todayAtUTC = OffsetDates.now(ZoneOffsets.UTC);
 
         final String str = OffsetDates.toString(todayAtUTC);
+
+        assertTrue(str.contains("Z"));
+
         assertEquals(todayAtUTC, OffsetDates.parse(str));
     }
+
+    @Test
+    public void convert_values_at_current_time_zone() throws ParseException {
+        // Get current zone offset and strip ID value because it's not stored into date/time.
+        final ZoneOffset zoneOffset = ZoneOffsets.getDefault()
+                                                 .toBuilder()
+                                                 .clearId()
+                                                 .build();
+        final OffsetDate today = OffsetDates.now(zoneOffset);
+
+        final String value = OffsetDates.toString(today);
+        final OffsetDate parsed = OffsetDates.parse(value);
+        assertEquals(today, parsed);
+    }
+
 }
