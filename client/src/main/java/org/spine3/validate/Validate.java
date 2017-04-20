@@ -25,7 +25,6 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
@@ -227,16 +226,6 @@ public final class Validate {
     public static void checkPositive(long value, String argumentName) {
         checkNotNull(argumentName);
         checkParameter(value > 0L, MUST_BE_A_POSITIVE_VALUE, argumentName);
-    }
-
-    /**
-     * Ensures that the passed value is positive or zero.
-     *
-     * @param value the value to check
-     * @throws IllegalArgumentException if requirement is not met
-     */
-    public static void checkPositiveOrZero(long value) {
-        checkArgument(value >= 0);
     }
 
     /**
