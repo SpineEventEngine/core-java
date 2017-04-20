@@ -20,7 +20,6 @@
 
 package org.spine3.time;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
@@ -32,6 +31,7 @@ import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
+import static org.spine3.time.Formats.dateFormat;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -41,14 +41,6 @@ import static org.spine3.validate.Validate.checkPositive;
  * @author Alexander Aleksandrov
  */
 public final class LocalDates {
-
-    private static final ThreadLocal<DateFormat> dateFormat =
-            new ThreadLocal<DateFormat>() {
-                @Override
-                protected DateFormat initialValue() {
-                    return Formats.createDateFormat();
-                }
-            };
 
     private LocalDates() {
         // Prevent instantiation of this utility class.
@@ -191,7 +183,7 @@ public final class LocalDates {
      */
     public static LocalDate parse(String str) throws ParseException {
         final Date date;
-        date = format().parse(str);
+        date = dateFormat().parse(str);
 
         final Calendar calendar = getInstance();
         calendar.setTime(date);
@@ -206,11 +198,7 @@ public final class LocalDates {
     public static String toString(LocalDate date) {
         checkNotNull(date);
         final Date classicDate = toCalendar(date).getTime();
-        final String result = format().format(classicDate);
+        final String result = dateFormat().format(classicDate);
         return result;
-    }
-
-    private static DateFormat format() {
-        return dateFormat.get();
     }
 }

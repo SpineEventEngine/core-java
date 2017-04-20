@@ -62,6 +62,14 @@ final class Formats {
                 }
             };
 
+    private static final ThreadLocal<DateFormat> dateFormat =
+            new ThreadLocal<DateFormat>() {
+                @Override
+                protected DateFormat initialValue() {
+                    return createDateFormat();
+                }
+            };
+
     private Formats() {
         // Prevent instantiation of this utility class.
     }
@@ -69,7 +77,7 @@ final class Formats {
     /**
      * Creates format for local date.
      */
-    static DateFormat createDateFormat() {
+    private static DateFormat createDateFormat() {
         final SimpleDateFormat sdf = createDigitOnlyFormat(DATE_FORMAT);
         GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
         sdf.setCalendar(calendar);
@@ -79,7 +87,7 @@ final class Formats {
     /**
      * Creates ISO 8601 date string format.
      */
-    static SimpleDateFormat createDateTimeFormat() {
+    private static SimpleDateFormat createDateTimeFormat() {
         final SimpleDateFormat sdf = createDigitOnlyFormat(DATE_TIME_FORMAT);
         GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
         sdf.setCalendar(calendar);
@@ -89,7 +97,7 @@ final class Formats {
     /**
      * Creates ISO 8601 time string format.
      */
-    static SimpleDateFormat createTimeFormat() {
+    private static SimpleDateFormat createTimeFormat() {
         final SimpleDateFormat sdf = createDigitOnlyFormat(TIME_FORMAT);
         GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
         sdf.setCalendar(calendar);
@@ -109,6 +117,10 @@ final class Formats {
 
     static DateFormat dateTimeFormat() {
         return dateTimeFormat.get();
+    }
+
+    static DateFormat dateFormat() {
+        return dateFormat.get();
     }
 
     static DateFormat timeFormat() {
