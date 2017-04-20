@@ -26,9 +26,7 @@ import com.google.protobuf.util.Timestamps;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
-import java.util.SimpleTimeZone;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
@@ -200,10 +198,7 @@ final class Calendars {
      * @return new {@code Calendar} instance at specific zone offset
      */
     static Calendar at(ZoneOffset zoneOffset) {
-        @SuppressWarnings("NumericCastThatLosesPrecision")
-            // OK as a valid zoneOffset isn't that big.
-        final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
-        final SimpleTimeZone timeZone = new SimpleTimeZone(offsetMillis, "temp");
+        final TimeZone timeZone = ZoneOffsets.toTimeZone(zoneOffset);
         final Calendar result = getInstance(timeZone);
         return result;
     }

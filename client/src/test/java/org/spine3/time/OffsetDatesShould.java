@@ -22,7 +22,6 @@ package org.spine3.time;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -67,7 +66,7 @@ public class OffsetDatesShould {
     public void setUp() {
         gmtToday = getCurrentLocalDate();
         zoneOffset = generateOffset();
-        now = OffsetDates.dateAt(gmtToday, zoneOffset);
+        now = OffsetDates.of(gmtToday, zoneOffset);
     }
 
     private static LocalDate getCurrentLocalDate() {
@@ -105,7 +104,7 @@ public class OffsetDatesShould {
 
     @Test
     public void obtain_current_OffsetDate_using_LocalDate_and_ZoneOffset() {
-        final OffsetDate offsetDate = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
 
         assertEquals(gmtToday, offsetDate.getDate());
         assertEquals(zoneOffset, offsetDate.getOffset());
@@ -114,7 +113,7 @@ public class OffsetDatesShould {
     @Test
     public void add_years() {
         final int yearsDelta = random(1, 2015);
-        final OffsetDate offsetDate = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDatePlusYears = addYears(offsetDate, yearsDelta);
         final LocalDate date = offsetDatePlusYears.getDate();
 
@@ -125,7 +124,7 @@ public class OffsetDatesShould {
     @Test
     public void subtract_years() {
         final int yearsDelta = random(1, 1007);
-        final OffsetDate offsetDate = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDateMinusYears = subtractYears(offsetDate, yearsDelta);
 
         final LocalDate date = offsetDateMinusYears.getDate();
@@ -136,7 +135,7 @@ public class OffsetDatesShould {
     @Test
     public void add_month() {
         final int monthsDelta = random(1, 12);
-        final OffsetDate value = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate value = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDatePlusMonths = addMonths(value, monthsDelta);
         final int expectedMonth = (gmtToday.getMonth().getNumber() + monthsDelta) % 12;
 
@@ -148,7 +147,7 @@ public class OffsetDatesShould {
     @Test
     public void subtract_month() {
         final int monthsDelta = random(1, 12);
-        final OffsetDate offsetDate = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDateMinusMonths = subtractMonths(offsetDate, monthsDelta);
         final int expectedMonth = (gmtToday.getMonth().getNumber() - monthsDelta) % 12;
 
@@ -161,7 +160,7 @@ public class OffsetDatesShould {
     @Test
     public void add_days() {
         final int daysDelta = random(1, 31);
-        final OffsetDate offsetDate = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDatePlusMonths = addDays(offsetDate, daysDelta);
 
         final LocalDate date = offsetDatePlusMonths.getDate();
@@ -172,7 +171,7 @@ public class OffsetDatesShould {
     @Test
     public void subtract_days() {
         final int daysDelta = random(1, 31);
-        final OffsetDate offsetDate = OffsetDates.dateAt(gmtToday, zoneOffset);
+        final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDateMinusMonths = subtractDays(offsetDate, daysDelta);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
@@ -270,7 +269,6 @@ public class OffsetDatesShould {
     // Stringification
     //----------------------
 
-    @Ignore
     @Test
     public void convert_to_string_and_back_at_UTC() throws ParseException {
         final OffsetDate todayAtUTC = OffsetDates.now(ZoneOffsets.UTC);

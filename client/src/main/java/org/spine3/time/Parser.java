@@ -127,7 +127,7 @@ final class Parser {
 
         final Calendar calendar = createCalendar();
         final LocalDate localDate = Calendars.toLocalDate(calendar);
-        final OffsetDate result = OffsetDates.dateAt(localDate, zoneOffset);
+        final OffsetDate result = OffsetDates.of(localDate, zoneOffset);
         return result;
     }
 

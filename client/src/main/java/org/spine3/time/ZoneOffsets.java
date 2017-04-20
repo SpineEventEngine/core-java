@@ -20,13 +20,18 @@
 
 package org.spine3.time;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.Sets;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.spine3.time.Formats.Parameter;
 
 import java.text.ParseException;
+import java.util.Set;
+import java.util.SimpleTimeZone;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -203,5 +208,35 @@ public final class ZoneOffsets {
             .append(seconds >= 0 ? Formats.PLUS : Formats.MINUS)
             .append(format(Formats.HOURS_AND_MINUTES_FORMAT, Math.abs(hours), Math.abs(minutes)));
         return builder.toString();
+    }
+
+    static TimeZone toTimeZone(ZoneOffset zoneOffset) {
+        final Optional<String> optional = getId(zoneOffset);
+        if (optional.isPresent()) {
+            final String id = optional.get();
+            final Set<String> supportedIds = Sets.newHashSet(TimeZone.getAvailableIDs());
+            if (supportedIds.contains(id)) {
+                final TimeZone result = TimeZone.getTimeZone(id);
+                return result;
+            }
+            return toSimpleTimeZone(zoneOffset);
+        } else {
+            return toSimpleTimeZone(zoneOffset);
+        }
+    }
+
+    private static Optional<String> getId(ZoneOffset offset) {
+        final String id = offset.getId();
+        if (id.length() > 0) {
+            return Optional.of(id);
+        }
+        return Optional.absent();
+    }
+
+    private static TimeZone toSimpleTimeZone(ZoneOffset zoneOffset) {
+        @SuppressWarnings("NumericCastThatLosesPrecision")
+        // OK as a valid zoneOffset isn't that big.
+        final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
+        return new SimpleTimeZone(offsetMillis, "temp");
     }
 }
