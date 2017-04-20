@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Calendar;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.abs;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -36,17 +37,13 @@ import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
-import static org.spine3.time.Calendars.getZoneOffset;
-import static org.spine3.time.MonthOfYear.*;
+import static org.spine3.time.MonthOfYear.forNumber;
 import static org.spine3.time.OffsetDates.addDays;
 import static org.spine3.time.OffsetDates.addMonths;
 import static org.spine3.time.OffsetDates.addYears;
 import static org.spine3.time.OffsetDates.subtractDays;
 import static org.spine3.time.OffsetDates.subtractMonths;
 import static org.spine3.time.OffsetDates.subtractYears;
-import static org.spine3.time.Timestamps2.HOURS_PER_DAY;
-import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
 import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
@@ -58,9 +55,9 @@ import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
  */
 public class OffsetDatesShould {
 
-    public static final int YEARS = 2017;
-    public static final int MONTH_PER_YEAR = 12;
-    public static final int DAY_PER_MONTH = 31;
+    private static final int YEARS = 2017;
+    private static final int MONTH_PER_YEAR = 12;
+    private static final int DAY_PER_MONTH = 31;
 
     private LocalDate gmtToday;
     private ZoneOffset zoneOffset;
@@ -75,7 +72,7 @@ public class OffsetDatesShould {
 
     private static LocalDate getCurrentLocalDate() {
         int year = random(1, YEARS);
-        MonthOfYear month = forNumber(random(MONTH_PER_YEAR));
+        MonthOfYear month = checkNotNull(forNumber(random(MONTH_PER_YEAR)));
         int day = random(1, DAY_PER_MONTH);
         return LocalDates.of(year, month, day);
     }
