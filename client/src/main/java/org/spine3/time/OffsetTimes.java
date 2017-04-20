@@ -42,6 +42,7 @@ import static org.spine3.validate.Validate.checkPositive;
  * Routines for working with {@link OffsetTime}.
  *
  * @author Alexander Aleksandrov
+ * @author Alexander Yevsyukov
  */
 public final class OffsetTimes {
 
@@ -74,12 +75,12 @@ public final class OffsetTimes {
     /**
      * Obtains offset time using {@code LocalTime} and {@code ZoneOffset}.
      */
-    public static OffsetTime of(LocalTime localTime, ZoneOffset zoneOffset) {
-        checkNotNull(localTime);
+    public static OffsetTime of(LocalTime time, ZoneOffset zoneOffset) {
+        checkNotNull(time);
         checkNotNull(zoneOffset);
 
         final OffsetTime result = OffsetTime.newBuilder()
-                                            .setTime(localTime)
+                                            .setTime(time)
                                             .setOffset(zoneOffset)
                                             .build();
         return result;
@@ -88,145 +89,147 @@ public final class OffsetTimes {
     /**
      * Obtains a copy of this offset time with the specified number of hours added.
      */
-    public static OffsetTime addHours(OffsetTime offsetTime, int hoursToAdd) {
-        checkNotNull(offsetTime);
+    public static OffsetTime addHours(OffsetTime value, int hoursToAdd) {
+        checkNotNull(value);
         checkPositive(hoursToAdd);
 
-        return changeHours(offsetTime, hoursToAdd);
+        return changeHours(value, hoursToAdd);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of minutes added.
      */
-    public static OffsetTime addMinutes(OffsetTime offsetTime, int minutesToAdd) {
-        checkNotNull(offsetTime);
+    public static OffsetTime addMinutes(OffsetTime value, int minutesToAdd) {
+        checkNotNull(value);
         checkPositive(minutesToAdd);
 
-        return changeMinutes(offsetTime, minutesToAdd);
+        return changeMinutes(value, minutesToAdd);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of seconds added.
      */
-    public static OffsetTime addSeconds(OffsetTime offsetTime, int secondsToAdd) {
-        checkNotNull(offsetTime);
+    public static OffsetTime addSeconds(OffsetTime value, int secondsToAdd) {
+        checkNotNull(value);
         checkPositive(secondsToAdd);
 
-        return changeSeconds(offsetTime, secondsToAdd);
+        return changeSeconds(value, secondsToAdd);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of milliseconds added.
      */
-    public static OffsetTime addMillis(OffsetTime offsetTime, int millisToAdd) {
-        checkNotNull(offsetTime);
+    public static OffsetTime addMillis(OffsetTime value, int millisToAdd) {
+        checkNotNull(value);
         checkPositive(millisToAdd);
 
-        return changeMillis(offsetTime, millisToAdd);
+        return changeMillis(value, millisToAdd);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of hours subtracted.
      */
-    public static OffsetTime subtractHours(OffsetTime offsetTime, int hoursToSubtract) {
-        checkNotNull(offsetTime);
+    public static OffsetTime subtractHours(OffsetTime value, int hoursToSubtract) {
+        checkNotNull(value);
         checkPositive(hoursToSubtract);
 
-        return changeHours(offsetTime, -hoursToSubtract);
+        return changeHours(value, -hoursToSubtract);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of minutes subtracted.
      */
-    public static OffsetTime subtractMinutes(OffsetTime offsetTime, int minutesToSubtract) {
-        checkNotNull(offsetTime);
+    public static OffsetTime subtractMinutes(OffsetTime value, int minutesToSubtract) {
+        checkNotNull(value);
         checkPositive(minutesToSubtract);
 
-        return changeMinutes(offsetTime, -minutesToSubtract);
+        return changeMinutes(value, -minutesToSubtract);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of seconds subtracted.
      */
-    public static OffsetTime subtractSeconds(OffsetTime offsetTime, int secondsToSubtract) {
-        checkNotNull(offsetTime);
+    public static OffsetTime subtractSeconds(OffsetTime value, int secondsToSubtract) {
+        checkNotNull(value);
         checkPositive(secondsToSubtract);
 
-        return changeSeconds(offsetTime, -secondsToSubtract);
+        return changeSeconds(value, -secondsToSubtract);
     }
 
     /**
      * Obtains a copy of this offset time with the specified number of milliseconds subtracted.
      */
-    public static OffsetTime subtractMillis(OffsetTime offsetTime, int millisToSubtract) {
-        checkNotNull(offsetTime);
+    public static OffsetTime subtractMillis(OffsetTime value, int millisToSubtract) {
+        checkNotNull(value);
         checkPositive(millisToSubtract);
 
-        return changeMillis(offsetTime, -millisToSubtract);
+        return changeMillis(value, -millisToSubtract);
     }
 
     /**
      * Obtains offset time changed on specified amount of hours.
      *
-     * @param offsetTime offset time that will be changed
+     * @param value      offset time that will be changed
      * @param hoursDelta a number of hours that needs to be added or subtracted that can be
      *                   either positive or negative
      * @return copy of this offset time with new hours value
      */
-    private static OffsetTime changeHours(OffsetTime offsetTime, int hoursDelta) {
-        final OffsetTime result = add(offsetTime, HOUR, hoursDelta);
+    private static OffsetTime changeHours(OffsetTime value, int hoursDelta) {
+        final OffsetTime result = add(value, HOUR, hoursDelta);
         return result;
     }
 
     /**
      * Obtains offset time changed on specified amount of minutes.
      *
-     * @param offsetTime   offset time that will be changed
+     * @param value        offset time that will be changed
      * @param minutesDelta a number of minutes that needs to be added or subtracted that can be
      *                     either positive or negative
      * @return copy of this offset time with new minutes value
      */
-    private static OffsetTime changeMinutes(OffsetTime offsetTime, int minutesDelta) {
-        final OffsetTime result = add(offsetTime, MINUTE, minutesDelta);
+    private static OffsetTime changeMinutes(OffsetTime value, int minutesDelta) {
+        final OffsetTime result = add(value, MINUTE, minutesDelta);
         return result;
     }
 
     /**
      * Obtains offset time changed on specified amount of seconds.
      *
-     * @param offsetTime   offset time that will be changed
+     * @param value        offset time that will be changed
      * @param secondsDelta a number of seconds that needs to be added or subtracted that can be
      *                     either positive or negative
      * @return copy of this offset time with new seconds value
      */
-    private static OffsetTime changeSeconds(OffsetTime offsetTime, int secondsDelta) {
-        final OffsetTime result = add(offsetTime, SECOND, secondsDelta);
+    private static OffsetTime changeSeconds(OffsetTime value, int secondsDelta) {
+        final OffsetTime result = add(value, SECOND, secondsDelta);
         return result;
     }
 
     /**
      * Obtains offset time changed on specified amount of milliseconds.
      *
-     * @param offsetTime  offset time that will be changed
+     * @param value       offset time that will be changed
      * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be
      *                    either positive or negative
      * @return copy of this offset time with new milliseconds value
      */
-    private static OffsetTime changeMillis(OffsetTime offsetTime, int millisDelta) {
-        final OffsetTime result = add(offsetTime, MILLISECOND, millisDelta);
+    private static OffsetTime changeMillis(OffsetTime value, int millisDelta) {
+        final OffsetTime result = add(value, MILLISECOND, millisDelta);
         return result;
     }
 
     /**
      * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetTime add(OffsetTime offsetTime, int calendarField, int delta) {
-        final Calendar cal = toCalendar(offsetTime);
+    private static OffsetTime add(OffsetTime value, int calendarField, int delta) {
+        final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);
+        final int nanos = value.getTime()
+                               .getNanos();
         final LocalTime localTime = toLocalTime(cal).toBuilder()
-                                                    .setNanos(offsetTime.getTime().getNanos())
+                                                    .setNanos(nanos)
                                                     .build();
-        final ZoneOffset zoneOffset = offsetTime.getOffset();
+        final ZoneOffset zoneOffset = value.getOffset();
         return OffsetTime.newBuilder()
                          .setTime(localTime)
                          .setOffset(zoneOffset)
