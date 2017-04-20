@@ -22,6 +22,7 @@ package org.spine3.time;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -32,7 +33,18 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getHours;
 import static org.spine3.time.Calendars.getMinutes;
 import static org.spine3.time.Calendars.getSeconds;
+import static org.spine3.time.LocalTimes.addHours;
+import static org.spine3.time.LocalTimes.addMillis;
+import static org.spine3.time.LocalTimes.addMinutes;
+import static org.spine3.time.LocalTimes.addSeconds;
+import static org.spine3.time.LocalTimes.of;
 import static org.spine3.time.LocalTimes.parse;
+import static org.spine3.time.LocalTimes.subtractHours;
+import static org.spine3.time.LocalTimes.subtractMillis;
+import static org.spine3.time.LocalTimes.subtractMinutes;
+import static org.spine3.time.LocalTimes.subtractSeconds;
+import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 
 /**
  * @author Alexander Aleksandrov
@@ -46,9 +58,19 @@ public class LocalTimesShould {
     private static final int millis = 124;
     private static final int nanos = 122;
 
+    /**
+     * Local time value for computation tests.
+     */
+    private LocalTime value;
+
     @Test
-    public void have_private_constructor() {
+    public void have_utility_constructor() {
         assertHasPrivateParameterlessCtor(LocalTimes.class);
+    }
+
+    @Before
+    public void setUp() {
+        value = of(hours, minutes, seconds, millis, nanos);
     }
 
     @Test
@@ -68,7 +90,7 @@ public class LocalTimesShould {
 
     @Test
     public void create_by_hours_and_minutes() {
-        final LocalTime localTime = LocalTimes.of(hours, minutes);
+        final LocalTime localTime = of(hours, minutes);
 
         assertEquals(hours, localTime.getHours());
         assertEquals(minutes, localTime.getMinutes());
@@ -76,7 +98,7 @@ public class LocalTimesShould {
 
     @Test
     public void create_by_hours_minutes_seconds() {
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds);
+        final LocalTime localTime = of(hours, minutes, seconds);
 
         assertEquals(hours, localTime.getHours());
         assertEquals(minutes, localTime.getMinutes());
@@ -85,7 +107,7 @@ public class LocalTimesShould {
 
     @Test
     public void create_by_hours_minutes_seconds_millis() {
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis);
+        final LocalTime localTime = of(hours, minutes, seconds, millis);
 
         assertEquals(hours, localTime.getHours());
         assertEquals(minutes, localTime.getMinutes());
@@ -95,7 +117,7 @@ public class LocalTimesShould {
 
     @Test
     public void create_with_nano_precision() {
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        final LocalTime localTime = of(hours, minutes, seconds, millis, nanos);
 
         assertEquals(hours, localTime.getHours());
         assertEquals(minutes, localTime.getMinutes());
@@ -107,8 +129,8 @@ public class LocalTimesShould {
     @Test
     public void add_hours() {
         final int hoursToAdd = 2;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewHours = LocalTimes.addHours(localTime, hoursToAdd);
+        final LocalTime localTime = of(hours, minutes, seconds, millis, nanos);
+        final LocalTime inFewHours = addHours(localTime, hoursToAdd);
 
         assertEquals(hours + hoursToAdd, inFewHours.getHours());
         assertEquals(minutes, inFewHours.getMinutes());
@@ -120,8 +142,7 @@ public class LocalTimesShould {
     @Test
     public void add_minutes() {
         final int minutesToAdd = 15;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewMinutes = LocalTimes.addMinutes(localTime, minutesToAdd);
+        final LocalTime inFewMinutes = addMinutes(value, minutesToAdd);
 
         assertEquals(hours, inFewMinutes.getHours());
         assertEquals(minutes + minutesToAdd, inFewMinutes.getMinutes());
@@ -133,8 +154,7 @@ public class LocalTimesShould {
     @Test
     public void add_seconds() {
         final int secondsToAdd = 18;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewSeconds = LocalTimes.addSeconds(localTime, secondsToAdd);
+        final LocalTime inFewSeconds = addSeconds(value, secondsToAdd);
 
         assertEquals(hours, inFewSeconds.getHours());
         assertEquals(minutes, inFewSeconds.getMinutes());
@@ -146,8 +166,7 @@ public class LocalTimesShould {
     @Test
     public void add_millis() {
         final int millisToAdd = 288;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime inFewMillis = LocalTimes.addMillis(localTime, millisToAdd);
+        final LocalTime inFewMillis = addMillis(value, millisToAdd);
 
         assertEquals(hours, inFewMillis.getHours());
         assertEquals(minutes, inFewMillis.getMinutes());
@@ -159,8 +178,7 @@ public class LocalTimesShould {
     @Test
     public void subtract_hours() {
         final int hoursToSubtract = 2;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewHours = LocalTimes.subtractHours(localTime, hoursToSubtract);
+        final LocalTime beforeFewHours = subtractHours(value, hoursToSubtract);
 
         assertEquals(hours - hoursToSubtract, beforeFewHours.getHours());
         assertEquals(minutes, beforeFewHours.getMinutes());
@@ -172,8 +190,7 @@ public class LocalTimesShould {
     @Test
     public void subtract_minutes() {
         final int minutesToSubtract = 15;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewMinutes = LocalTimes.subtractMinutes(localTime, minutesToSubtract);
+        final LocalTime beforeFewMinutes = subtractMinutes(value, minutesToSubtract);
 
         assertEquals(hours, beforeFewMinutes.getHours());
         assertEquals(minutes - minutesToSubtract, beforeFewMinutes.getMinutes());
@@ -185,8 +202,7 @@ public class LocalTimesShould {
     @Test
     public void subtract_seconds() {
         final int secondsToSubtract = 12;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewSeconds = LocalTimes.subtractSeconds(localTime, secondsToSubtract);
+        final LocalTime beforeFewSeconds = subtractSeconds(value, secondsToSubtract);
 
         assertEquals(hours, beforeFewSeconds.getHours());
         assertEquals(minutes, beforeFewSeconds.getMinutes());
@@ -198,8 +214,7 @@ public class LocalTimesShould {
     @Test
     public void subtract_millis() {
         final int millisToSubtract = 28;
-        final LocalTime localTime = LocalTimes.of(hours, minutes, seconds, millis, nanos);
-        final LocalTime beforeFewMillis = LocalTimes.subtractMillis(localTime, millisToSubtract);
+        final LocalTime beforeFewMillis = subtractMillis(value, millisToSubtract);
 
         assertEquals(hours, beforeFewMillis.getHours());
         assertEquals(minutes, beforeFewMillis.getMinutes());
@@ -207,6 +222,10 @@ public class LocalTimesShould {
         assertEquals(millis - millisToSubtract, beforeFewMillis.getMillis());
         assertEquals(nanos, beforeFewMillis.getNanos());
     }
+
+    //
+    // Arguments check
+    //-------------------
 
     @Test
     public void pass_null_tolerance_check() {
@@ -218,49 +237,62 @@ public class LocalTimesShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_hours() {
-        final int hours = -2;
-        final int minutes = 20;
-        LocalTimes.of(hours, minutes);
+    public void not_accept_negative_hours() {
+        of(-2, 20);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_minutes() {
-        final int hours = 2;
-        final int minutes = -20;
-        LocalTimes.of(hours, minutes);
+    public void not_accept_oob_hours() {
+        of(24, 0);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_seconds() {
-        final int hours = 2;
-        final int minutes = 20;
-        final int seconds = -50;
-        LocalTimes.of(hours, minutes, seconds);
+    public void not_accept_negative_minutes() {
+        of(0, -20);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_millis() {
-        final int hours = 2;
-        final int minutes = 20;
-        final int seconds = 50;
-        final int millis = -150;
-        LocalTimes.of(hours, minutes, seconds, millis);
+    public void not_accept_oob_minutes() {
+        of(0, 60);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_nanos() {
-        final int hours = 2;
-        final int minutes = 20;
-        final int seconds = 50;
-        final int millis = 150;
-        final int nanos = -1501;
-        LocalTimes.of(hours, minutes, seconds, millis, nanos);
+    public void not_accept_negative_seconds() {
+        of(0, 0, -50);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_oob_seconds() {
+        of(0, 0, 60);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_millis() {
+        of(0, 0, 0, -1);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_oob_millis() {
+        of(0, 0, 0, MILLIS_PER_SECOND);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_nanos() {
+        of(0, 0, 0, 0, -1501);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_oob_nanos() {
+        of(0, 0, 0, 0, NANOS_PER_MILLISECOND);
+    }
+
+    //
+    // Stringification
+    //---------------------
 
     @Test
     public void convert_to_string_and_back() throws ParseException {
-        final LocalTime localTime = LocalTimes.of(10, 20, 30, 40, 50);
+        final LocalTime localTime = of(10, 20, 30, 40, 50);
 
         final String str = LocalTimes.toString(localTime);
         final LocalTime convertedBack = parse(str);
