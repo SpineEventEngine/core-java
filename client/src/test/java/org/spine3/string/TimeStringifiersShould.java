@@ -28,6 +28,7 @@ import org.spine3.test.Tests;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalTime;
 import org.spine3.time.OffsetDateTime;
+import org.spine3.time.OffsetTime;
 import org.spine3.time.ZoneOffset;
 
 import static org.junit.Assert.assertEquals;
@@ -35,6 +36,7 @@ import static org.spine3.string.time.TimeStringifiers.forDuration;
 import static org.spine3.string.time.TimeStringifiers.forLocalDate;
 import static org.spine3.string.time.TimeStringifiers.forLocalTime;
 import static org.spine3.string.time.TimeStringifiers.forOffsetDateTime;
+import static org.spine3.string.time.TimeStringifiers.forOffsetTime;
 import static org.spine3.string.time.TimeStringifiers.forTimestamp;
 import static org.spine3.string.time.TimeStringifiers.forZoneOffset;
 
@@ -60,5 +62,6 @@ public class TimeStringifiersShould {
         assertEquals(forLocalDate(), getStringifier(LocalDate.class));
         assertEquals(forLocalTime(), getStringifier(LocalTime.class));
         assertEquals(forOffsetDateTime(), getStringifier(OffsetDateTime.class));
+        assertEquals(forOffsetTime(), getStringifier(OffsetTime.class));
     }
 }
