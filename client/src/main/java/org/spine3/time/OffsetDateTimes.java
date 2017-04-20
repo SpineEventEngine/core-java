@@ -252,7 +252,7 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new years value
      */
     private static OffsetDateTime changeYear(OffsetDateTime value, int yearsDelta) {
-        return add(value, YEAR, yearsDelta);
+        return change(value, YEAR, yearsDelta);
     }
 
     /**
@@ -264,7 +264,7 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new months value
      */
     private static OffsetDateTime changeMonth(OffsetDateTime value, int monthDelta) {
-        return add(value, MONTH, monthDelta);
+        return change(value, MONTH, monthDelta);
     }
 
     /**
@@ -276,7 +276,7 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new days value
      */
     private static OffsetDateTime changeDays(OffsetDateTime value, int daysDelta) {
-        return add(value, DAY_OF_MONTH, daysDelta);
+        return change(value, DAY_OF_MONTH, daysDelta);
     }
 
     /**
@@ -288,7 +288,7 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new hours value
      */
     private static OffsetDateTime changeHours(OffsetDateTime value, int hoursDelta) {
-        return add(value, HOUR, hoursDelta);
+        return change(value, HOUR, hoursDelta);
     }
 
     /**
@@ -300,7 +300,7 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new minutes value
      */
     private static OffsetDateTime changeMinutes(OffsetDateTime value, int minutesDelta) {
-        return add(value, MINUTE, minutesDelta);
+        return change(value, MINUTE, minutesDelta);
     }
 
     /**
@@ -312,7 +312,7 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new seconds value
      */
     private static OffsetDateTime changeSeconds(OffsetDateTime value, int secondsDelta) {
-        return add(value, SECOND, secondsDelta);
+        return change(value, SECOND, secondsDelta);
     }
 
     /**
@@ -324,13 +324,13 @@ public final class OffsetDateTimes {
      * @return copy of the passed value with new milliseconds value
      */
     private static OffsetDateTime changeMillis(OffsetDateTime value, int millisDelta) {
-        return add(value, MILLISECOND, millisDelta);
+        return change(value, MILLISECOND, millisDelta);
     }
 
     /**
      * Performs date and time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetDateTime add(OffsetDateTime value, int calendarField, int delta) {
+    private static OffsetDateTime change(OffsetDateTime value, int calendarField, int delta) {
         final Calendar calendar = toCalendar(value);
         calendar.add(calendarField, delta);
 

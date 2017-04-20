@@ -88,6 +88,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of hours added.
+     *
+     * @param value      the value to update
+     * @param hoursToAdd a positive number of hours to add
      */
     public static OffsetTime addHours(OffsetTime value, int hoursToAdd) {
         checkNotNull(value);
@@ -98,6 +101,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of minutes added.
+     *
+     * @param value        the value to update
+     * @param minutesToAdd a positive number of minutes to add
      */
     public static OffsetTime addMinutes(OffsetTime value, int minutesToAdd) {
         checkNotNull(value);
@@ -108,6 +114,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of seconds added.
+     *
+     * @param value        the value to update
+     * @param secondsToAdd a positive number of seconds to add
      */
     public static OffsetTime addSeconds(OffsetTime value, int secondsToAdd) {
         checkNotNull(value);
@@ -118,6 +127,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of milliseconds added.
+     *
+     * @param value       the value to update
+     * @param millisToAdd a positive number of milliseconds to add
      */
     public static OffsetTime addMillis(OffsetTime value, int millisToAdd) {
         checkNotNull(value);
@@ -128,6 +140,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of hours subtracted.
+     *
+     * @param value           the value to update
+     * @param hoursToSubtract a positive number of hours to subtract
      */
     public static OffsetTime subtractHours(OffsetTime value, int hoursToSubtract) {
         checkNotNull(value);
@@ -138,6 +153,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of minutes subtracted.
+     *
+     * @param value             the value to update
+     * @param minutesToSubtract a positive number of minutes to subtract
      */
     public static OffsetTime subtractMinutes(OffsetTime value, int minutesToSubtract) {
         checkNotNull(value);
@@ -148,6 +166,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of seconds subtracted.
+     *
+     * @param value             the value to update
+     * @param secondsToSubtract a positive number of seconds to subtract
      */
     public static OffsetTime subtractSeconds(OffsetTime value, int secondsToSubtract) {
         checkNotNull(value);
@@ -158,6 +179,9 @@ public final class OffsetTimes {
 
     /**
      * Obtains a copy of this offset time with the specified number of milliseconds subtracted.
+     *
+     * @param value            the value to update
+     * @param millisToSubtract a positive number of milliseconds to subtract
      */
     public static OffsetTime subtractMillis(OffsetTime value, int millisToSubtract) {
         checkNotNull(value);
@@ -168,60 +192,40 @@ public final class OffsetTimes {
 
     /**
      * Obtains offset time changed on specified amount of hours.
-     *
-     * @param value      offset time that will be changed
-     * @param hoursDelta a number of hours that needs to be added or subtracted that can be
-     *                   either positive or negative
-     * @return copy of this offset time with new hours value
      */
     private static OffsetTime changeHours(OffsetTime value, int hoursDelta) {
-        final OffsetTime result = add(value, HOUR, hoursDelta);
+        final OffsetTime result = change(value, HOUR, hoursDelta);
         return result;
     }
 
     /**
      * Obtains offset time changed on specified amount of minutes.
-     *
-     * @param value        offset time that will be changed
-     * @param minutesDelta a number of minutes that needs to be added or subtracted that can be
-     *                     either positive or negative
-     * @return copy of this offset time with new minutes value
      */
     private static OffsetTime changeMinutes(OffsetTime value, int minutesDelta) {
-        final OffsetTime result = add(value, MINUTE, minutesDelta);
+        final OffsetTime result = change(value, MINUTE, minutesDelta);
         return result;
     }
 
     /**
      * Obtains offset time changed on specified amount of seconds.
-     *
-     * @param value        offset time that will be changed
-     * @param secondsDelta a number of seconds that needs to be added or subtracted that can be
-     *                     either positive or negative
-     * @return copy of this offset time with new seconds value
      */
     private static OffsetTime changeSeconds(OffsetTime value, int secondsDelta) {
-        final OffsetTime result = add(value, SECOND, secondsDelta);
+        final OffsetTime result = change(value, SECOND, secondsDelta);
         return result;
     }
 
     /**
      * Obtains offset time changed on specified amount of milliseconds.
-     *
-     * @param value       offset time that will be changed
-     * @param millisDelta a number of milliseconds that needs to be added or subtracted that can be
-     *                    either positive or negative
-     * @return copy of this offset time with new milliseconds value
      */
     private static OffsetTime changeMillis(OffsetTime value, int millisDelta) {
-        final OffsetTime result = add(value, MILLISECOND, millisDelta);
+        final OffsetTime result = change(value, MILLISECOND, millisDelta);
         return result;
     }
 
     /**
      * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetTime add(OffsetTime value, int calendarField, int delta) {
+    private static OffsetTime change(OffsetTime value, int calendarField, int delta) {
         final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);
         final int nanos = value.getTime()

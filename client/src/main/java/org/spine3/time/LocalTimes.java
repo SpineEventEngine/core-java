@@ -237,7 +237,7 @@ public final class LocalTimes {
      * @return copy of this local time with new hours value
      */
     private static LocalTime changeHours(LocalTime localTime, int hoursDelta) {
-        return add(localTime, HOUR, hoursDelta);
+        return change(localTime, HOUR, hoursDelta);
     }
 
     /**
@@ -249,7 +249,7 @@ public final class LocalTimes {
      * @return copy of this local time with new minutes value
      */
     private static LocalTime changeMinutes(LocalTime localTime, int minutesDelta) {
-        return add(localTime, MINUTE, minutesDelta);
+        return change(localTime, MINUTE, minutesDelta);
     }
 
     /**
@@ -261,7 +261,7 @@ public final class LocalTimes {
      * @return copy of this local time with new seconds value
      */
     private static LocalTime changeSeconds(LocalTime localTime, int secondsDelta) {
-        return add(localTime, SECOND, secondsDelta);
+        return change(localTime, SECOND, secondsDelta);
     }
 
     /**
@@ -273,13 +273,13 @@ public final class LocalTimes {
      * @return copy of this local time with new milliseconds value
      */
     private static LocalTime changeMillis(LocalTime localTime, int millisDelta) {
-        return add(localTime, MILLISECOND, millisDelta);
+        return change(localTime, MILLISECOND, millisDelta);
     }
 
     /**
      * Performs time calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static LocalTime add(LocalTime value, int calendarField, int delta) {
+    private static LocalTime change(LocalTime value, int calendarField, int delta) {
         final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);
         final LocalTime result = toLocalTime(cal).toBuilder()

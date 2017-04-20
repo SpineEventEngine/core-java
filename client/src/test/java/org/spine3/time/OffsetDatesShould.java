@@ -76,8 +76,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_years() {
         final int yearsToSubstract = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusYears = OffsetDates.minusYears(offsetDate,
-                                                                       yearsToSubstract);
+        final OffsetDate offsetDateMinusYears = OffsetDates.subtractYears(offsetDate,
+                                                                          yearsToSubstract);
 
         final LocalDate date = offsetDateMinusYears.getDate();
         assertEquals(year - yearsToSubstract, date.getYear());
@@ -92,8 +92,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_months() {
         final int monthsToSubstract = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusMonths = OffsetDates.minusMonths(offsetDate,
-                                                                         monthsToSubstract);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.subtractMonths(offsetDate,
+                                                                            monthsToSubstract);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
         assertEquals(year, date.getYear());
@@ -109,8 +109,8 @@ public class OffsetDatesShould {
     public void obtain_date_in_past_before_specified_number_of_days() {
         final int daysToSubstract = 5;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDateMinusMonths = OffsetDates.minusDays(offsetDate,
-                                                                       daysToSubstract);
+        final OffsetDate offsetDateMinusMonths = OffsetDates.subtractDays(offsetDate,
+                                                                          daysToSubstract);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
         assertEquals(year, date.getYear());
@@ -125,7 +125,7 @@ public class OffsetDatesShould {
     public void obtain_date_in_future_after_specified_number_of_years() {
         final int yearsToAdd = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDatePlusYears = OffsetDates.plusYears(offsetDate, yearsToAdd);
+        final OffsetDate offsetDatePlusYears = OffsetDates.addYears(offsetDate, yearsToAdd);
 
         final LocalDate date = offsetDatePlusYears.getDate();
         assertEquals(year + yearsToAdd, date.getYear());
@@ -140,7 +140,7 @@ public class OffsetDatesShould {
     public void obtain_date_in_future_after_specified_number_of_months() {
         final int monthsToAdd = 2;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDatePlusMonths = OffsetDates.plusMonths(offsetDate, monthsToAdd);
+        final OffsetDate offsetDatePlusMonths = OffsetDates.addMonths(offsetDate, monthsToAdd);
 
         final LocalDate date = offsetDatePlusMonths.getDate();
         assertEquals(year, date.getYear());
@@ -156,7 +156,7 @@ public class OffsetDatesShould {
     public void obtain_date_in_future_after_specified_number_of_days() {
         final int daysToAdd = 15;
         final OffsetDate offsetDate = OffsetDates.of(localDate, ZONE_OFFSET);
-        final OffsetDate offsetDatePlusMonths = OffsetDates.plusDays(offsetDate, daysToAdd);
+        final OffsetDate offsetDatePlusMonths = OffsetDates.addDays(offsetDate, daysToAdd);
 
         final LocalDate date = offsetDatePlusMonths.getDate();
         assertEquals(year, date.getYear());
@@ -190,83 +190,83 @@ public class OffsetDatesShould {
     public void not_accept_null_OffsetDate_value_with_yearsToAdd() {
         final int yearsToAdd = -5;
         final OffsetDate now = null;
-        OffsetDates.plusYears(now, yearsToAdd);
+        OffsetDates.addYears(now, yearsToAdd);
     }
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_OffsetDate_value_with_monthsToAdd() {
         final int monthsToAdd = 7;
         final OffsetDate now = null;
-        OffsetDates.plusMonths(now, monthsToAdd);
+        OffsetDates.addMonths(now, monthsToAdd);
     }
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_OffsetDate_value_with_daysToAdd() {
         final int daysToAdd = 25;
         final OffsetDate now = null;
-        OffsetDates.plusDays(now, daysToAdd);
+        OffsetDates.addDays(now, daysToAdd);
     }
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_OffsetDate_value_with_yearsToSubtract() {
         final int yearsToSubtract = 6;
         final OffsetDate now = null;
-        OffsetDates.minusYears(now, yearsToSubtract);
+        OffsetDates.subtractYears(now, yearsToSubtract);
     }
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_OffsetDate_value_with_monthsToSubtract() {
         final int monthsToSubtract = 8;
         final OffsetDate now = null;
-        OffsetDates.minusMonths(now, monthsToSubtract);
+        OffsetDates.subtractMonths(now, monthsToSubtract);
     }
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_OffsetDate_value_with_daysToSubtract() {
         final int daysToSubtract = 27;
         final OffsetDate now = null;
-        OffsetDates.minusDays(now, daysToSubtract);
+        OffsetDates.subtractDays(now, daysToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_yearsToAdd() {
         final int yearsToAdd = -5;
         final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
-        OffsetDates.plusYears(now, yearsToAdd);
+        OffsetDates.addYears(now, yearsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_monthsToAdd() {
         final int monthsToAdd = -7;
         final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
-        OffsetDates.plusMonths(now, monthsToAdd);
+        OffsetDates.addMonths(now, monthsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_daysToAdd() {
         final int daysToAdd = -25;
         final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
-        OffsetDates.plusDays(now, daysToAdd);
+        OffsetDates.addDays(now, daysToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_yearsToSubtract() {
         final int yearsToSubtract = -6;
         final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
-        OffsetDates.minusYears(now, yearsToSubtract);
+        OffsetDates.subtractYears(now, yearsToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_monthsToSubtract() {
         final int monthsToSubtract = -8;
         final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
-        OffsetDates.minusMonths(now, monthsToSubtract);
+        OffsetDates.subtractMonths(now, monthsToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_daysToSubtract() {
         final int daysToSubtract = -27;
         final OffsetDate now = OffsetDates.now(ZONE_OFFSET);
-        OffsetDates.minusDays(now, daysToSubtract);
+        OffsetDates.subtractDays(now, daysToSubtract);
     }
 }

@@ -147,7 +147,7 @@ public final class LocalDates {
      * @return copy of this local date with new years value
      */
     private static LocalDate changeYear(LocalDate localDate, int yearsDelta) {
-        return add(localDate, YEAR, yearsDelta);
+        return change(localDate, YEAR, yearsDelta);
     }
 
     /**
@@ -159,7 +159,7 @@ public final class LocalDates {
      * @return copy of this local date with new months value
      */
     private static LocalDate changeMonth(LocalDate localDate, int monthDelta) {
-        return add(localDate, MONTH, monthDelta);
+        return change(localDate, MONTH, monthDelta);
     }
 
     /**
@@ -171,13 +171,13 @@ public final class LocalDates {
      * @return copy of this local date with new days value
      */
     private static LocalDate changeDays(LocalDate localDate, int daysDelta) {
-        return add(localDate, DAY_OF_MONTH, daysDelta);
+        return change(localDate, DAY_OF_MONTH, daysDelta);
     }
 
     /**
      * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static LocalDate add(LocalDate localDate, int calendarField, int delta) {
+    private static LocalDate change(LocalDate localDate, int calendarField, int delta) {
         final Calendar cal = toCalendar(localDate);
         cal.add(calendarField, delta);
         return toLocalDate(cal);

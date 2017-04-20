@@ -34,6 +34,7 @@ import static org.spine3.validate.Validate.checkPositive;
  * Routines for working with {@link OffsetDate}.
  *
  * @author Alexander Aleksandrov
+ * @author Alexander Yevsyukov
  */
 public final class OffsetDates {
 
@@ -59,12 +60,12 @@ public final class OffsetDates {
     /**
      * Obtains offset date using {@code LocalDate} and {@code ZoneOffset}.
      */
-    public static OffsetDate of(LocalDate localDate, ZoneOffset zoneOffset) {
-        checkNotNull(localDate);
+    public static OffsetDate of(LocalDate value, ZoneOffset zoneOffset) {
+        checkNotNull(value);
         checkNotNull(zoneOffset);
 
         final OffsetDate result = OffsetDate.newBuilder()
-                                            .setDate(localDate)
+                                            .setDate(value)
                                             .setOffset(zoneOffset)
                                             .build();
         return result;
@@ -72,124 +73,116 @@ public final class OffsetDates {
 
     /**
      * Obtains a copy of this offset date with the specified number of years added.
+     *
+     * @param value      the value to update
+     * @param yearsToAdd a positive number of years to add
      */
-    public static OffsetDate plusYears(OffsetDate offsetDate, int yearsToAdd) {
-        checkNotNull(offsetDate);
+    public static OffsetDate addYears(OffsetDate value, int yearsToAdd) {
+        checkNotNull(value);
         checkPositive(yearsToAdd);
 
-        return changeYear(offsetDate, yearsToAdd);
+        return changeYear(value, yearsToAdd);
     }
 
     /**
      * Obtains a copy of this offset date with the specified number of months added.
+     *
+     * @param value       the value to update
+     * @param monthsToAdd a positive number of months to add
      */
-    public static OffsetDate plusMonths(OffsetDate offsetDate, int monthsToAdd) {
-        checkNotNull(offsetDate);
+    public static OffsetDate addMonths(OffsetDate value, int monthsToAdd) {
+        checkNotNull(value);
         checkPositive(monthsToAdd);
 
-        return changeMonth(offsetDate, monthsToAdd);
+        return changeMonth(value, monthsToAdd);
     }
 
     /**
      * Obtains a copy of this offset date with the specified number of days added.
+     *
+     * @param value     the value to update
+     * @param daysToAdd a positive number of days to add
      */
-    public static OffsetDate plusDays(OffsetDate offsetDate, int daysToAdd) {
-        checkNotNull(offsetDate);
+    public static OffsetDate addDays(OffsetDate value, int daysToAdd) {
+        checkNotNull(value);
         checkPositive(daysToAdd);
 
-        return changeDays(offsetDate, daysToAdd);
+        return changeDays(value, daysToAdd);
     }
 
     /**
      * Obtains a copy of this offset date with the specified number of years subtracted.
+     *
+     * @param value           the value to update
+     * @param yearsToSubtract a positive number of years to subtract
      */
-    public static OffsetDate minusYears(OffsetDate offsetDate, int yearsToSubtract) {
-        checkNotNull(offsetDate);
+    public static OffsetDate subtractYears(OffsetDate value, int yearsToSubtract) {
+        checkNotNull(value);
         checkPositive(yearsToSubtract);
 
-        return changeYear(offsetDate, -yearsToSubtract);
+        return changeYear(value, -yearsToSubtract);
     }
 
     /**
      * Obtains a copy of this offset date with the specified number of months subtracted.
+     *
+     * @param value            the value to update
+     * @param monthsToSubtract a positive number of months to subtract
      */
-    public static OffsetDate minusMonths(OffsetDate offsetDate, int monthsToSubtract) {
-        checkNotNull(offsetDate);
+    public static OffsetDate subtractMonths(OffsetDate value, int monthsToSubtract) {
+        checkNotNull(value);
         checkPositive(monthsToSubtract);
 
-        return changeMonth(offsetDate, -monthsToSubtract);
+        return changeMonth(value, -monthsToSubtract);
     }
 
     /**
      * Obtains a copy of this offset date with the specified number of days subtracted.
+     *
+     * @param value          the value to update
+     * @param daysToSubtract a positive number of days to subtract
      */
-    public static OffsetDate minusDays(OffsetDate offsetDate, int daysToSubtract) {
-        checkNotNull(offsetDate);
+    public static OffsetDate subtractDays(OffsetDate value, int daysToSubtract) {
+        checkNotNull(value);
         checkPositive(daysToSubtract);
 
-        return changeDays(offsetDate, -daysToSubtract);
+        return changeDays(value, -daysToSubtract);
     }
 
     /**
      * Obtains offset date changed on specified amount of years.
-     *
-     * @param offsetDate offset date that will be changed
-     * @param yearsDelta a number of years that needs to be added or subtracted that can be
-     *                   either positive or negative
-     * @return copy of this offset date with new years value
      */
-    private static OffsetDate changeYear(OffsetDate offsetDate, int yearsDelta) {
-        final OffsetDate result = add(offsetDate, YEAR, yearsDelta);
+    private static OffsetDate changeYear(OffsetDate value, int yearsDelta) {
+        final OffsetDate result = add(value, YEAR, yearsDelta);
         return result;
     }
 
     /**
      * Obtains offset date changed on specified amount of months.
-     *
-     * @param offsetDate offset date that will be changed
-     * @param monthDelta a number of months that needs to be added or subtracted that can be
-     *                   either positive or negative
-     * @return copy of this offset date with new months value
      */
-    private static OffsetDate changeMonth(OffsetDate offsetDate, int monthDelta) {
-        final OffsetDate result = add(offsetDate, MONTH, monthDelta);
+    private static OffsetDate changeMonth(OffsetDate value, int monthDelta) {
+        final OffsetDate result = add(value, MONTH, monthDelta);
         return result;
     }
 
     /**
      * Obtains offset date changed on specified amount of days.
-     *
-     * @param offsetDate offset date that will be changed
-     * @param daysDelta  a number of days that needs to be added or subtracted that can be
-     *                   either positive or negative
-     * @return copy of this offset date with new days value
      */
-    private static OffsetDate changeDays(OffsetDate offsetDate, int daysDelta) {
-        final OffsetDate result = add(offsetDate, DAY_OF_MONTH, daysDelta);
+    private static OffsetDate changeDays(OffsetDate value, int daysDelta) {
+        final OffsetDate result = add(value, DAY_OF_MONTH, daysDelta);
         return result;
-    }
-
-    /**
-     * Returns a new instance of offset date with changed local time parameter.
-     *
-     * @param offsetDate offset date that will be changed
-     * @param localDate  new local date for this offset date
-     * @return new {@code OffsetDate} instance with changed parameter
-     */
-    private static OffsetDate withDate(OffsetDate offsetDate, LocalDate localDate) {
-        return offsetDate.toBuilder()
-                         .setDate(localDate)
-                         .build();
     }
 
     /**
      * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
      */
-    private static OffsetDate add(OffsetDate offsetDate, int calendarField, int delta) {
-        final Calendar cal = toCalendar(offsetDate);
+    private static OffsetDate add(OffsetDate value, int calendarField, int delta) {
+        final Calendar cal = toCalendar(value);
         cal.add(calendarField, delta);
         final LocalDate localDate = toLocalDate(cal);
-        final OffsetDate result = withDate(offsetDate, localDate);
+        final OffsetDate result = value.toBuilder()
+                                       .setDate(localDate)
+                                       .build();
         return result;
     }
 }
