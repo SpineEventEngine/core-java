@@ -61,6 +61,8 @@ message Url {
 
         // Most often used application layer protocols.
         enum Schema {
+            // TODO:2017-04-20:dmytro.dashenkov: Fix this according the common knowlage of humanity.
+
             UNDEFINED = 0;
             HTTP = 1;
             HTTPS = 2;
