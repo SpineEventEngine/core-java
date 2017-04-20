@@ -63,7 +63,7 @@ public final class OffsetDates {
     /**
      * Obtains offset date using {@code LocalDate} and {@code ZoneOffset}.
      */
-    public static OffsetDate of(LocalDate value, ZoneOffset zoneOffset) {
+    public static OffsetDate dateAt(LocalDate value, ZoneOffset zoneOffset) {
         checkNotNull(value);
         checkNotNull(zoneOffset);
         final OffsetDate result = OffsetDate.newBuilder()
