@@ -116,7 +116,7 @@ public class TimeChangesShould {
     @Test
     public void create_LocalDateChange_instance() {
         final LocalDate today = LocalDates.now();
-        final LocalDate tomorrow = LocalDates.plusDays(today, 1);
+        final LocalDate tomorrow = LocalDates.addDays(today, 1);
 
         final LocalDateChange result = TimeChanges.of(today, tomorrow);
 

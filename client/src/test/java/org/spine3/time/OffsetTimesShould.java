@@ -52,7 +52,7 @@ import static org.spine3.time.OffsetTimes.subtractSeconds;
 import static org.spine3.time.Timestamps2.HOURS_PER_DAY;
 import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.time.Timestamps2.NANOS_PER_SECOND;
+import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
 import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.time.Timestamps2.getCurrentTime;
 import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
@@ -119,7 +119,7 @@ public class OffsetTimesShould {
         int minutes = random(MINUTES_PER_HOUR);
         int seconds = random(SECONDS_PER_MINUTE);
         int millis = random(MILLIS_PER_SECOND);
-        int nanos = random(NANOS_PER_SECOND);
+        int nanos = random(NANOS_PER_MILLISECOND);
         return LocalTimes.of(hours, minutes, seconds, millis, nanos);
     }
 

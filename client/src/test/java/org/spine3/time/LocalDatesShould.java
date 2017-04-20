@@ -68,7 +68,7 @@ public class LocalDatesShould {
     public void obtain_date_in_past_before_specified_number_of_years() {
         final int yearsToSubstract = 2;
         final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate fewYearsAgo = LocalDates.minusYears(localDate, yearsToSubstract);
+        final LocalDate fewYearsAgo = LocalDates.subtractYears(localDate, yearsToSubstract);
 
         assertTrue(year - yearsToSubstract == fewYearsAgo.getYear());
         assertTrue(month == fewYearsAgo.getMonth());
@@ -79,7 +79,7 @@ public class LocalDatesShould {
     public void obtain_date_in_past_before_specified_number_of_months() {
         final int monthsToSubstract = 2;
         final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate fewMonthsAgo = LocalDates.minusMonths(localDate, monthsToSubstract);
+        final LocalDate fewMonthsAgo = LocalDates.subtractMonths(localDate, monthsToSubstract);
 
         assertTrue(year == fewMonthsAgo.getYear());
         assertTrue(month.getNumber() - monthsToSubstract ==
@@ -91,7 +91,7 @@ public class LocalDatesShould {
     public void obtain_date_in_past_before_specified_number_of_days() {
         final int daysToSubstract = 15;
         final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate fewDaysAgo = LocalDates.minusDays(localDate, daysToSubstract);
+        final LocalDate fewDaysAgo = LocalDates.subtractDays(localDate, daysToSubstract);
 
         assertTrue(year == fewDaysAgo.getYear());
         assertTrue(month == fewDaysAgo.getMonth());
@@ -102,7 +102,7 @@ public class LocalDatesShould {
     public void obtain_date_in_future_after_specified_number_of_years() {
         final int yearsToAdd = 2;
         final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate plusYears = LocalDates.plusYears(localDate, yearsToAdd);
+        final LocalDate plusYears = LocalDates.addYears(localDate, yearsToAdd);
 
         assertTrue(year + yearsToAdd == plusYears.getYear());
         assertTrue(month == plusYears.getMonth());
@@ -113,7 +113,7 @@ public class LocalDatesShould {
     public void obtain_date_in_future_after_specified_number_of_months() {
         final int monthsToAdd = 2;
         final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate plusMonths = LocalDates.plusMonths(localDate, monthsToAdd);
+        final LocalDate plusMonths = LocalDates.addMonths(localDate, monthsToAdd);
 
         assertTrue(year == plusMonths.getYear());
         assertTrue(month.getNumber() + monthsToAdd == plusMonths.getMonth().getNumber());
@@ -124,7 +124,7 @@ public class LocalDatesShould {
     public void obtain_date_in_future_after_specified_number_of_days() {
         final int daysToAdd = 8;
         final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate plusDays = LocalDates.plusDays(localDate, daysToAdd);
+        final LocalDate plusDays = LocalDates.addDays(localDate, daysToAdd);
 
         assertTrue(year == plusDays.getYear());
         assertTrue(month == plusDays.getMonth());
@@ -157,42 +157,42 @@ public class LocalDatesShould {
     public void not_accept_negative_amount_of_yearsToAdd() {
         final int yearsToAdd = -5;
         final LocalDate now = LocalDates.now();
-        LocalDates.plusYears(now, yearsToAdd);
+        LocalDates.addYears(now, yearsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_monthsToAdd() {
         final int monthsToAdd = -7;
         final LocalDate now = LocalDates.now();
-        LocalDates.plusMonths(now, monthsToAdd);
+        LocalDates.addMonths(now, monthsToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_daysToAdd() {
         final int daysToAdd = -25;
         final LocalDate now = LocalDates.now();
-        LocalDates.plusDays(now, daysToAdd);
+        LocalDates.addDays(now, daysToAdd);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_yearsToSubtract() {
         final int yearsToSubtract = -6;
         final LocalDate now = LocalDates.now();
-        LocalDates.minusYears(now, yearsToSubtract);
+        LocalDates.subtractYears(now, yearsToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_monthsToSubtract() {
         final int monthsToSubtract = -8;
         final LocalDate now = LocalDates.now();
-        LocalDates.minusMonths(now, monthsToSubtract);
+        LocalDates.subtractMonths(now, monthsToSubtract);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_amount_of_daysToSubtract() {
         final int daysToSubtract = -27;
         final LocalDate now = LocalDates.now();
-        LocalDates.minusDays(now, daysToSubtract);
+        LocalDates.subtractDays(now, daysToSubtract);
     }
 
     @Test

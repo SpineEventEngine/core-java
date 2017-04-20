@@ -22,8 +22,10 @@ package org.spine3.time;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
@@ -180,6 +182,10 @@ public class OffsetDatesShould {
         assertEquals(zoneOffset.getAmountSeconds(), offset.getAmountSeconds());
     }
 
+    //
+    // Arguments check
+    //-------------------
+
     @Test
     public void pass_null_tolerance_check() {
         final ZoneOffset zoneOffset = ZoneOffsets.getDefault();
@@ -191,32 +197,45 @@ public class OffsetDatesShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_yearsToAdd() {
+    public void not_accept_negative_years_to_add() {
         addYears(now, -5);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_monthsToAdd() {
+    public void not_accept_negative_months_to_add() {
         addMonths(now, -7);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_daysToAdd() {
+    public void not_accept_negative_days_to_add() {
         addDays(now, -25);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_yearsToSubtract() {
+    public void not_accept_negative_years_to_subtract() {
         subtractYears(now, -6);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_monthsToSubtract() {
+    public void not_accept_negative_months_to_subtract() {
         subtractMonths(now, -8);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_accept_negative_amount_of_daysToSubtract() {
+    public void not_accept_negative_days_to_subtract() {
         subtractDays(now, -27);
+    }
+
+    //
+    // Stringification
+    //----------------------
+
+    @Ignore
+    @Test
+    public void convert_to_string_and_back_at_UTC() throws ParseException {
+        final OffsetDate todayAtUTC = OffsetDates.now(ZoneOffsets.UTC);
+
+        final String str = OffsetDates.toString(todayAtUTC);
+        assertEquals(todayAtUTC, OffsetDates.parse(str));
     }
 }

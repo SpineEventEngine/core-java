@@ -30,6 +30,7 @@ import static org.spine3.time.Formats.MINUS;
 import static org.spine3.time.Formats.PLUS;
 import static org.spine3.time.Formats.SUB_SECOND_SEPARATOR;
 import static org.spine3.time.Formats.UTC_ZONE_SIGN;
+import static org.spine3.time.Formats.dateFormat;
 import static org.spine3.time.Formats.dateTimeFormat;
 import static org.spine3.time.Formats.timeFormat;
 import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
@@ -67,9 +68,9 @@ final class Parser {
         return result;
     }
 
-    static LocalTime parseLocalTime(String str) throws ParseException {
-        final Parser parser = new Parser(str);
-        final LocalTime result = parser.parseLocalTime();
+    static OffsetDate parseOffsetDate(String value) throws ParseException {
+        final Parser parser = new Parser(value);
+        final OffsetDate result = parser.parseOffsetDate();
         return result;
     }
 
@@ -79,6 +80,13 @@ final class Parser {
         return result;
     }
 
+    static LocalTime parseLocalTime(String str) throws ParseException {
+        final Parser parser = new Parser(str);
+        final LocalTime result = parser.parseLocalTime();
+        return result;
+    }
+
+    //
     // Implementation
     //-------------------
 
@@ -107,6 +115,19 @@ final class Parser {
         final Calendar calendar = createCalendar();
         final LocalTime localTime = Calendars.toLocalTime(calendar);
         final OffsetTime result = OffsetTimes.of(localTime, zoneOffset);
+        return result;
+    }
+
+    private OffsetDate parseOffsetDate() throws ParseException {
+        initTimezoneOffsetPosition();
+        initTimeValues();
+
+        parseTime(dateFormat());
+        parseZoneOffset();
+
+        final Calendar calendar = createCalendar();
+        final LocalDate localDate = Calendars.toLocalDate(calendar);
+        final OffsetDate result = OffsetDates.of(localDate, zoneOffset);
         return result;
     }
 

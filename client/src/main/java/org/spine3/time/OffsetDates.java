@@ -19,7 +19,9 @@
  */
 package org.spine3.time;
 
+import java.text.ParseException;
 import java.util.Calendar;
+import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
@@ -29,6 +31,8 @@ import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.checkArguments;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
+import static org.spine3.time.Formats.appendZoneOffset;
+import static org.spine3.time.Formats.dateFormat;
 
 /**
  * Routines for working with {@link OffsetDate}.
@@ -167,5 +171,33 @@ public final class OffsetDates {
                                        .setDate(localDate)
                                        .build();
         return result;
+    }
+
+    /**
+     * Returns a ISO 8601 date string corresponding to the passed value.
+     */
+    public static String toString(OffsetDate value) {
+        final Calendar calendar = toCalendar(value);
+        final StringBuilder result = new StringBuilder();
+
+        // Format the date/time part.
+        final Date date = calendar.getTime();
+        final String dateTime = dateFormat().format(date);
+        result.append(dateTime);
+
+        // Add time zone.
+        final ZoneOffset offset = value.getOffset();
+        appendZoneOffset(result, offset);
+
+        return result.toString();
+    }
+
+    /**
+     * Parse from ISO 8601 date/time string to {@code OffsetDate}.
+     *
+     * @throws ParseException if the passed string is not a valid date value
+     */
+    public static OffsetDate parse(String value) throws ParseException {
+        return Parser.parseOffsetDate(value);
     }
 }

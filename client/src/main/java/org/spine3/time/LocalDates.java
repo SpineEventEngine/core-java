@@ -29,6 +29,7 @@ import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
+import static org.spine3.time.Calendars.checkArguments;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Formats.dateFormat;
@@ -60,8 +61,7 @@ public final class LocalDates {
      */
     public static LocalDate of(int year, MonthOfYear month, int day) {
         checkPositive(year);
-        checkPositive(day);
-
+        checkPositive(day); //TODO:2017-04-20:alexander.yevsyukov: This must be checked against months and leap years.
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(year)
                                           .setMonth(month)
@@ -73,60 +73,48 @@ public final class LocalDates {
     /**
      * Obtains a copy of this local date with the specified number of years added.
      */
-    public static LocalDate plusYears(LocalDate localDate, int yearsToAdd) {
-        checkNotNull(localDate);
-        checkPositive(yearsToAdd);
-
+    public static LocalDate addYears(LocalDate localDate, int yearsToAdd) {
+        checkArguments(localDate, yearsToAdd);
         return changeYear(localDate, yearsToAdd);
     }
 
     /**
      * Obtains a copy of this local date with the specified number of months added.
      */
-    public static LocalDate plusMonths(LocalDate localDate, int monthsToAdd) {
-        checkNotNull(localDate);
-        checkPositive(monthsToAdd);
-
+    public static LocalDate addMonths(LocalDate localDate, int monthsToAdd) {
+        checkArguments(localDate, monthsToAdd);
         return changeMonth(localDate, monthsToAdd);
     }
 
     /**
      * Obtains a copy of this local date with the specified number of days added.
      */
-    public static LocalDate plusDays(LocalDate localDate, int daysToAdd) {
-        checkNotNull(localDate);
-        checkPositive(daysToAdd);
-
+    public static LocalDate addDays(LocalDate localDate, int daysToAdd) {
+        checkArguments(localDate, daysToAdd);
         return changeDays(localDate, daysToAdd);
     }
 
     /**
      * Obtains a copy of this local date with the specified number of years subtracted.
      */
-    public static LocalDate minusYears(LocalDate localDate, int yearsToSubtract) {
-        checkNotNull(localDate);
-        checkPositive(yearsToSubtract);
-
+    public static LocalDate subtractYears(LocalDate localDate, int yearsToSubtract) {
+        checkArguments(localDate, yearsToSubtract);
         return changeYear(localDate, -yearsToSubtract);
     }
 
     /**
      * Obtains a copy of this local date with the specified number of months subtracted.
      */
-    public static LocalDate minusMonths(LocalDate localDate, int monthsToSubtract) {
-        checkNotNull(localDate);
-        checkPositive(monthsToSubtract);
-
+    public static LocalDate subtractMonths(LocalDate localDate, int monthsToSubtract) {
+        checkArguments(localDate, monthsToSubtract);
         return changeMonth(localDate, -monthsToSubtract);
     }
 
     /**
      * Obtains a copy of this local date with the specified number of days subtracted.
      */
-    public static LocalDate minusDays(LocalDate localDate, int daysToSubtract) {
-        checkNotNull(localDate);
-        checkPositive(daysToSubtract);
-
+    public static LocalDate subtractDays(LocalDate localDate, int daysToSubtract) {
+        checkArguments(localDate, daysToSubtract);
         return changeDays(localDate, -daysToSubtract);
     }
 
@@ -182,8 +170,7 @@ public final class LocalDates {
      * @throws ParseException if parsing fails.
      */
     public static LocalDate parse(String str) throws ParseException {
-        final Date date;
-        date = dateFormat().parse(str);
+        final Date date = dateFormat().parse(str);
 
         final Calendar calendar = getInstance();
         calendar.setTime(date);
