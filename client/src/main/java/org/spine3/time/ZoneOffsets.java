@@ -23,6 +23,7 @@ package org.spine3.time;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import org.spine3.time.Formats.Parameter;
 
 import java.text.ParseException;
 import java.util.TimeZone;
@@ -142,11 +143,14 @@ public final class ZoneOffsets {
     private static void checkHourOffset(int hours, boolean assumingMinutes) {
         // If the offset contains minutes too, we make the range smaller by one hour from each end.
         final int shift = (assumingMinutes ? 1 : 0);
-        checkBounds(hours, "hours", MIN_HOURS_OFFSET + shift, MAX_HOURS_OFFSET - shift);
+        checkBounds(hours, Parameter.hours.name(),
+                    MIN_HOURS_OFFSET + shift,
+                    MAX_HOURS_OFFSET - shift);
     }
 
     private static void checkMinuteOffset(int minutes) {
-        checkBounds(Math.abs(minutes), "minutes", MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
+        checkBounds(Math.abs(minutes), Parameter.minutes.name(),
+                    MIN_MINUTES_OFFSET, MAX_MINUTES_OFFSET);
     }
 
     /**

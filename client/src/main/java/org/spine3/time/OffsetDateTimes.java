@@ -32,13 +32,13 @@ import static java.util.Calendar.MONTH;
 import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 import static org.spine3.time.Calendars.at;
+import static org.spine3.time.Calendars.checkArguments;
 import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.time.Formats.appendSubSecond;
 import static org.spine3.time.Formats.appendZoneOffset;
 import static org.spine3.time.Formats.dateTimeFormat;
-import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Routines for working with {@link OffsetDateTime}.
@@ -58,7 +58,6 @@ public final class OffsetDateTimes {
      */
     public static OffsetDateTime now(ZoneOffset zoneOffset) {
         checkNotNull(zoneOffset);
-
         final Calendar now = at(zoneOffset);
         final LocalTime localTime = toLocalTime(now);
         final LocalDate localDate = toLocalDate(now);
@@ -79,14 +78,6 @@ public final class OffsetDateTimes {
                              .setTime(time)
                              .setOffset(offset)
                              .build();
-    }
-
-    /**
-     * Ensures that the passed value is not null and the delta value is positive.
-     */
-    private static void checkArguments(OffsetDateTime value, int delta) {
-        checkNotNull(value);
-        checkPositive(delta);
     }
 
     /**

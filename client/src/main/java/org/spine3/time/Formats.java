@@ -70,6 +70,17 @@ final class Formats {
                 }
             };
 
+    /**
+     * Names of arguments in preconditions checks.
+     */
+    enum Parameter {
+        hours,
+        minutes,
+        seconds,
+        millis,
+        nanos
+    }
+
     private Formats() {
         // Prevent instantiation of this utility class.
     }

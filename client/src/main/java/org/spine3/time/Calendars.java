@@ -30,6 +30,7 @@ import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.HOUR_OF_DAY;
 import static java.util.Calendar.MILLISECOND;
@@ -40,6 +41,7 @@ import static java.util.Calendar.YEAR;
 import static java.util.Calendar.ZONE_OFFSET;
 import static java.util.Calendar.getInstance;
 import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.validate.Validate.checkPositive;
 
 /**
  * Utilities for working with {@link Calendar}.
@@ -347,5 +349,13 @@ final class Calendars {
         GregorianCalendar calendar = new GregorianCalendar(timeZone);
         calendar.setGregorianChange(new Date(Long.MIN_VALUE));
         return calendar;
+    }
+
+    /**
+     * Ensures that the passed value is not null and the delta value is positive.
+     */
+    static void checkArguments(Object value, int delta) {
+        checkNotNull(value);
+        checkPositive(delta);
     }
 }
