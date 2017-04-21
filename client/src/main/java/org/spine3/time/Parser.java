@@ -175,7 +175,7 @@ final class Parser {
         if (value.charAt(timezoneOffsetPosition) == UTC_ZONE_SIGN) {
             if (value.length() != timezoneOffsetPosition + 1) {
                 final String errMsg = format(
-                        "Failed to parse date/time value: missing zone offset info \"%s\"",
+                        "Failed to parse date/time value. Missing zone offset in: \"%s\"",
                         value.substring(timezoneOffsetPosition)
                 );
                 throw new ParseException(errMsg, 0);
@@ -203,7 +203,7 @@ final class Parser {
         dayOffset = value.indexOf(TIME_SEPARATOR);
         if (dayOffset == -1) {
             final String errMsg = format(
-                    "Failed to parse date/time value: missing time separator in: \"%s\"",
+                    "Failed to parse date/time value. Missing time separator in: \"%s\"",
                     value
             );
             throw new ParseException(errMsg, 0);
@@ -228,7 +228,7 @@ final class Parser {
         }
         if (timezoneOffsetPosition == -1) {
             final String errMsg = format(
-                    "Failed to parse date/time value: missing timezone in: \"%s\"", value
+                    "Failed to parse date/time value. Missing timezone in: \"%s\"", value
             );
             throw new ParseException(errMsg, 0);
         }
