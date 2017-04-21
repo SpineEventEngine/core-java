@@ -22,8 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-
-import java.util.Map;
+import com.google.common.collect.Multimap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,14 +31,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityQuery {
 
-    private final Map<String, Column.MemoizedValue<?>> parameters;
+    private final Multimap<Column<?>, Object> parameters;
 
-    static EntityQuery of(Map<String, Column.MemoizedValue<?>> parameters) {
+    static EntityQuery of(Multimap<Column<?>, Object> parameters) {
         checkNotNull(parameters);
         return new EntityQuery(parameters);
     }
 
-    private EntityQuery(Map<String, Column.MemoizedValue<?>> parameters) {
+    private EntityQuery(Multimap<Column<?>, Object> parameters) {
         this.parameters = parameters;
     }
 

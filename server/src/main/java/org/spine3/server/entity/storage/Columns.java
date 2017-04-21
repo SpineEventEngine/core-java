@@ -26,7 +26,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityWithLifecycle;
-import org.spine3.server.entity.RecordBasedRepository;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -118,11 +117,9 @@ class Columns {
         return fields;
     }
 
-    static Column<?> metadata(RecordBasedRepository<?, ?, ?> repository, String columnName) {
-        checkNotNull(repository);
+    static Column<?> metadata(Class<? extends Entity> entityClass, String columnName) {
+        checkNotNull(entityClass);
         checkNotNull(columnName);
-        // TODO:2017-04-21:dmytro.dashenkov: Fix naming.
-        final Class<? extends Entity> entityClass = repository.getEntityClass();
         ensureRegistered(entityClass);
 
         final Collection<Column<?>> cachedColumns = knownEntityProperties.get(entityClass);

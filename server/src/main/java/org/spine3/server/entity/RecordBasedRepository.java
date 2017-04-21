@@ -33,6 +33,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
+import org.spine3.server.entity.storage.EntityQueries;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
@@ -263,8 +265,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @CheckReturnValue
     public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
-        final Collection<I> domainIds = unpackIds(filters);
-        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
+        checkNotNull(filters);
+        checkNotNull(fieldMask);
+
+        final EntityQuery entityQuery = EntityQueries.from(filters, getEntityClass());
+        final Map<I, EntityRecord> records = recordStorage().readAll(entityQuery, fieldMask);
+        final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
+                                                            .transform(storageRecordToEntity())
+                                                            .toList();
         return result;
     }
 
