@@ -127,4 +127,9 @@ public class ZoneOffsetsShould {
         assertEquals(ofHoursMinutes(-2, -45), parse("-2:45"));
         assertEquals(ofHoursMinutes(-2, -45), parse("-02:45"));
     }
+
+    @Test(expected = ParseException.class)
+    public void fail_when_sign_char_missing() throws ParseException {
+        ZoneOffsets.parse("x03:00");
+    }
 }
