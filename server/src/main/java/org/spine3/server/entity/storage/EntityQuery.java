@@ -22,6 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -40,6 +41,10 @@ public final class EntityQuery {
 
     private EntityQuery(Multimap<Column<?>, Object> parameters) {
         this.parameters = parameters;
+    }
+
+    public Multimap<Column<?>, Object> getParameters() {
+        return ImmutableMultimap.copyOf(parameters);
     }
 
     @Override

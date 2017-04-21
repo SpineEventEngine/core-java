@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.Function;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -39,6 +40,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
@@ -105,6 +107,10 @@ public class FieldMasks {
     Collection<M> applyMask(FieldMask mask,
                             Collection<M> messages,
                             TypeUrl type) {
+        checkNotNull(mask);
+        checkNotNull(messages);
+        checkNotNull(type);
+
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
@@ -158,6 +164,10 @@ public class FieldMasks {
     private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask,
                                                                             M message,
                                                                             TypeUrl type) {
+        checkNotNull(mask);
+        checkNotNull(message);
+        checkNotNull(type);
+
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
 
@@ -180,6 +190,23 @@ public class FieldMasks {
                        e);
             return message;
         }
+    }
+
+    public static <M extends Message> Function<M, M> maskApplier(final FieldMask mask,
+                                                                 final TypeUrl type) {
+        checkNotNull(mask);
+        checkNotNull(type);
+
+        return new Function<M, M>() {
+            @Nullable
+            @Override
+            public M apply(@Nullable M input) {
+                if (input == null) {
+                    return null;
+                }
+                return applyMask(mask, input, type);
+            }
+        };
     }
 
     private static <M extends Message, B extends Message.Builder> M messageForFilter(

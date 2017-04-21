@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
@@ -27,6 +28,7 @@ import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -65,7 +67,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
-                                                         FieldMask fieldMask) {
+            FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
@@ -96,7 +98,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
-        return null;
+        return getStorage().readAllRecords(query, fieldMask);
     }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
@@ -109,19 +111,31 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
-        return getStorage().get(id);
+        return getStorage().get(id)
+                           .transform(
+                                   new Function<EntityRecordWithColumns, EntityRecord>() {
+                                       @Nullable
+                                       @Override
+                                       public EntityRecord apply(
+                                               @Nullable EntityRecordWithColumns input) {
+                                           if (input == null) {
+                                               return null;
+                                           }
+                                           return input.getRecord();
+                                       }
+                                   });
     }
 
     @Override
     protected void writeRecord(I id, EntityRecordWithColumns record) {
-        getStorage().put(id, record.getRecord());
+        getStorage().put(id, record);
     }
 
     @Override
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         final TenantRecords<I> storage = getStorage();
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
-            storage.put(record.getKey(), record.getValue().getRecord());
+            storage.put(record.getKey(), record.getValue());
         }
     }
 }
