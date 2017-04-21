@@ -28,7 +28,6 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -37,7 +36,6 @@ import static org.spine3.time.Calendars.at;
 import static org.spine3.time.Calendars.getDay;
 import static org.spine3.time.Calendars.getMonth;
 import static org.spine3.time.Calendars.getYear;
-import static org.spine3.time.MonthOfYear.forNumber;
 import static org.spine3.time.OffsetDates.addDays;
 import static org.spine3.time.OffsetDates.addMonths;
 import static org.spine3.time.OffsetDates.addYears;
@@ -51,9 +49,11 @@ import static org.spine3.time.OffsetDates.subtractYears;
  */
 public class OffsetDatesShould extends AbstractZonedTimeTest {
 
-    private static final int YEARS = 2017;
-    private static final int MONTH_PER_YEAR = 12;
-    private static final int DAY_PER_MONTH = 31;
+    private static final int YEAR = 2017;
+    private static final MonthOfYear MONTH = MonthOfYear.OCTOBER;
+    private static final int DAY = 28;
+    private static final int DAYS_DELTA = 7;
+    private static final int MONTH_DELTA = 6;
 
     private LocalDate gmtToday;
     private OffsetDate today;
@@ -62,15 +62,8 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
     @Before
     public void setUp() {
         super.setUp();
-        gmtToday = getCurrentLocalDate();
+        gmtToday = LocalDates.of(YEAR, MONTH, DAY);
         today = OffsetDates.of(gmtToday, zoneOffset);
-    }
-
-    private static LocalDate getCurrentLocalDate() {
-        final int year = random(1, YEARS);
-        final MonthOfYear month = checkNotNull(forNumber(random(MONTH_PER_YEAR)));
-        final int day = random(1, DAY_PER_MONTH);
-        return LocalDates.of(year, month, day);
     }
 
     @Test
@@ -84,6 +77,7 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         final Calendar cal = at(zoneOffset);
 
         final LocalDate date = today.getDate();
+
         assertEquals(getYear(cal), date.getYear());
         assertEquals(getMonth(cal), date.getMonthValue());
         assertEquals(getDay(cal), date.getDay());
@@ -107,36 +101,43 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
     @Ignore
     @Test
     public void add_years() {
-        final int yearsDelta = random(1, 2015);
+        final int yearsDelta = random(1, 2017);
         final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDatePlusYears = addYears(offsetDate, yearsDelta);
         final LocalDate date = offsetDatePlusYears.getDate();
+        LocalDates.checkDate(date);
 
-        assertEquals(gmtToday.getYear() + yearsDelta, date.getYear());
+        assertEquals(YEAR + yearsDelta, date.getYear());
         assertEquals(zoneOffset, offsetDate.getOffset());
     }
 
     @Ignore
     @Test
     public void subtract_years() {
-        final int yearsDelta = random(1, 1007);
+        final int yearsDelta = random(10, 2016);
         final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
         final OffsetDate offsetDateMinusYears = subtractYears(offsetDate, yearsDelta);
-
         final LocalDate date = offsetDateMinusYears.getDate();
-        assertEquals(gmtToday.getYear() - yearsDelta, date.getYear());
+        LocalDates.checkDate(date);
+
+        assertEquals(YEAR - yearsDelta, date.getYear());
         assertEquals(zoneOffset, offsetDate.getOffset());
     }
 
     @Ignore
     @Test
     public void add_month() {
-        final int monthsDelta = random(1, 12);
+        final int monthDelta = random(1, 12);
         final OffsetDate value = OffsetDates.of(gmtToday, zoneOffset);
-        final OffsetDate offsetDatePlusMonths = addMonths(value, monthsDelta);
-        final int expectedMonth = (gmtToday.getMonth().getNumber() + monthsDelta) % 12;
+        final OffsetDate offsetDatePlusMonths = addMonths(value, monthDelta);
+        int expectedMonth = (gmtToday.getMonth().getNumber() + monthDelta) % 12;
+        if(expectedMonth<=0) {
+            expectedMonth = 12 - expectedMonth;
+        }
 
         final LocalDate date = offsetDatePlusMonths.getDate();
+        LocalDates.checkDate(date);
+
         assertEquals(expectedMonth, date.getMonth().getNumber());
         assertEquals(zoneOffset, value.getOffset());
     }
@@ -144,38 +145,39 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
     @Ignore
     @Test
     public void subtract_month() {
-        final int monthsDelta = random(1, 12);
         final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
-        final OffsetDate offsetDateMinusMonths = subtractMonths(offsetDate, monthsDelta);
-        final int expectedMonth = (gmtToday.getMonth().getNumber() - monthsDelta) % 12;
+        final OffsetDate offsetDateMinusMonths = subtractMonths(offsetDate, MONTH_DELTA);
 
         final LocalDate date = offsetDateMinusMonths.getDate();
+        LocalDates.checkDate(date);
 
-        assertEquals(expectedMonth, date.getMonth().getNumber());
+        assertEquals(4, date.getMonth().getNumber());
         assertEquals(zoneOffset, offsetDate.getOffset());
     }
 
     @Ignore
     @Test
     public void add_days() {
-        final int daysDelta = random(1, 31);
         final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
-        final OffsetDate offsetDatePlusMonths = addDays(offsetDate, daysDelta);
+        final OffsetDate offsetDatePlusMonths = addDays(offsetDate, DAYS_DELTA);
 
         final LocalDate date = offsetDatePlusMonths.getDate();
-        assertEquals(gmtToday.getDay() + daysDelta, date.getDay());
+        LocalDates.checkDate(date);
+
+        assertEquals(4, date.getDay());
         assertEquals(zoneOffset, offsetDate.getOffset());
     }
 
     @Ignore
     @Test
     public void subtract_days() {
-        final int daysDelta = random(1, 31);
         final OffsetDate offsetDate = OffsetDates.of(gmtToday, zoneOffset);
-        final OffsetDate offsetDateMinusMonths = subtractDays(offsetDate, daysDelta);
+        final OffsetDate offsetDateMinusDays = subtractDays(offsetDate, DAYS_DELTA);
 
-        final LocalDate date = offsetDateMinusMonths.getDate();
-        assertEquals(gmtToday.getDay() - daysDelta, date.getDay());
+        final LocalDate date = offsetDateMinusDays.getDate();
+        LocalDates.checkDate(date);
+
+        assertEquals(gmtToday.getDay() - DAYS_DELTA, date.getDay());
         assertEquals(zoneOffset, offsetDate.getOffset());
     }
 
