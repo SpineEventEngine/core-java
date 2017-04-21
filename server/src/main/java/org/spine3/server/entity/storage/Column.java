@@ -232,15 +232,6 @@ public class Column<T> {
         return result;
     }
 
-    public MemoizedValue<T> evaluate(T value) {
-        if (!nullable) {
-            checkNotNull(value);
-        }
-
-        final MemoizedValue<T> result = new MemoizedValue<>(this, value);
-        return result;
-    }
-
     /**
      * @return the type of the Column
      */
