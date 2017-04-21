@@ -37,7 +37,7 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * Utility class for working with {@link CommandRecord}s.

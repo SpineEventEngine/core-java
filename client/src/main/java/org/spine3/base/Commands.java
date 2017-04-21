@@ -48,7 +48,7 @@ import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**

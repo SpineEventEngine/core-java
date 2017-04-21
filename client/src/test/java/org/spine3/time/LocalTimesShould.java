@@ -43,8 +43,8 @@ import static org.spine3.time.LocalTimes.subtractHours;
 import static org.spine3.time.LocalTimes.subtractMillis;
 import static org.spine3.time.LocalTimes.subtractMinutes;
 import static org.spine3.time.LocalTimes.subtractSeconds;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.NANOS_PER_MILLISECOND;
 
 /**
  * @author Alexander Aleksandrov
@@ -230,7 +230,7 @@ public class LocalTimesShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(Timestamp.class, Time.getCurrentTime())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(LocalTime.class, LocalTimes.now())
                 .testAllPublicStaticMethods(LocalTimes.class);

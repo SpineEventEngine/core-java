@@ -27,8 +27,8 @@ import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.time.Timestamps2.NANOS_PER_MICROSECOND;
-import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Time.NANOS_PER_MICROSECOND;
+import static org.spine3.time.Time.NANOS_PER_MILLISECOND;
 
 /**
  * Utilities and constants for working with date/time formats.

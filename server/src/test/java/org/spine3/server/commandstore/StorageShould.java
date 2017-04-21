@@ -66,7 +66,7 @@ import static org.spine3.protobuf.Values.pack;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.server.commandstore.Records.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 

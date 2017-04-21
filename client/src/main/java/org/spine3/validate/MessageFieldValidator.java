@@ -35,7 +35,7 @@ import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.time.Timestamps2.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.internal.Time.FUTURE;

@@ -40,10 +40,10 @@ import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.time.Formats.appendSubSecond;
 import static org.spine3.time.Formats.timeFormat;
-import static org.spine3.time.Timestamps2.HOURS_PER_DAY;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Time.HOURS_PER_DAY;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.MINUTES_PER_HOUR;
+import static org.spine3.time.Time.NANOS_PER_MILLISECOND;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -63,7 +63,7 @@ public final class LocalTimes {
      * Obtains current local time.
      */
     public static LocalTime now() {
-        final Timestamp time = Timestamps2.getCurrentTime();
+        final Timestamp time = Time.getCurrentTime();
         final ZoneOffset zoneOffset = ZoneOffsets.getDefault();
         return timeAt(time, zoneOffset);
     }

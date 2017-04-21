@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.test.TestActorRequestFactory;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 import org.spine3.type.CommandClass;
 
 import static org.junit.Assert.assertEquals;
@@ -92,7 +92,7 @@ public class CommandEnvelopeShould {
     @Test
     public void have_equals() {
         final Command anotherCommand = requestFactory.command()
-                                                     .create(Timestamps2.getCurrentTime());
+                                                     .create(Time.getCurrentTime());
 
         new EqualsTester().addEqualityGroup(envelope)
                           .addEqualityGroup(CommandEnvelope.of(anotherCommand))

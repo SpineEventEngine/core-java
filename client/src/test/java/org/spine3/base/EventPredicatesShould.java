@@ -33,7 +33,7 @@ import static org.spine3.base.EventPredicates.isBetween;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov

@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.EventTests;
 import org.spine3.test.TestEventFactory;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 import org.spine3.type.TypeName;
 
 import static org.junit.Assert.assertEquals;
@@ -74,7 +74,7 @@ public class EnrichmentsShould {
     @Before
     public void setUp() {
         eventFactory = TestEventFactory.newInstance(pack(producerId), getClass());
-        context = eventFactory.createEvent(Timestamps2.getCurrentTime())
+        context = eventFactory.createEvent(Time.getCurrentTime())
                               .getContext();
     }
 

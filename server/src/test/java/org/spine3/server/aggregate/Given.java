@@ -48,7 +48,7 @@ import static org.spine3.server.aggregate.Given.EventMessage.taskAdded;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.time.Durations2.seconds;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 class Given {
 

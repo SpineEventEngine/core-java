@@ -33,8 +33,8 @@ import static org.spine3.time.Formats.UTC_ZONE_SIGN;
 import static org.spine3.time.Formats.dateFormat;
 import static org.spine3.time.Formats.dateTimeFormat;
 import static org.spine3.time.Formats.timeFormat;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.NANOS_PER_MILLISECOND;
 
 /**
  * The parser for date/time values.

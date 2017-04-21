@@ -39,20 +39,20 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Durations2.fromMinutes;
-import static org.spine3.time.Timestamps2.HOURS_PER_DAY;
-import static org.spine3.time.Timestamps2.MICROS_PER_SECOND;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.time.Timestamps2.NANOS_PER_MICROSECOND;
-import static org.spine3.time.Timestamps2.NANOS_PER_SECOND;
-import static org.spine3.time.Timestamps2.SECONDS_PER_HOUR;
+import static org.spine3.time.Time.HOURS_PER_DAY;
+import static org.spine3.time.Time.MICROS_PER_SECOND;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.NANOS_PER_MICROSECOND;
+import static org.spine3.time.Time.NANOS_PER_SECOND;
+import static org.spine3.time.Time.SECONDS_PER_HOUR;
+import static org.spine3.time.Time.getCurrentTime;
+import static org.spine3.time.Time.resetProvider;
+import static org.spine3.time.Time.setProvider;
+import static org.spine3.time.Time.systemTime;
 import static org.spine3.time.Timestamps2.compare;
 import static org.spine3.time.Timestamps2.convertToDate;
-import static org.spine3.time.Timestamps2.getCurrentTime;
 import static org.spine3.time.Timestamps2.isBetween;
 import static org.spine3.time.Timestamps2.isLaterThan;
-import static org.spine3.time.Timestamps2.resetProvider;
-import static org.spine3.time.Timestamps2.setProvider;
-import static org.spine3.time.Timestamps2.systemTime;
 
 public class Timestamps2Should {
 

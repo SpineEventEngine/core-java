@@ -38,7 +38,7 @@ import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.ZONE_OFFSET;
 import static java.util.Calendar.getInstance;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**

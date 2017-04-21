@@ -31,7 +31,7 @@ import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.protobuf.Values;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -240,7 +240,7 @@ public class Tests {
      * Factory method for creating versions from tests.
      */
     public static Version newVersionWithNumber(int number) {
-        return Versions.newVersion(number, Timestamps2.getCurrentTime());
+        return Versions.newVersion(number, Time.getCurrentTime());
     }
 
     /**

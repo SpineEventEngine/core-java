@@ -48,12 +48,12 @@ import static org.spine3.time.OffsetTimes.subtractHours;
 import static org.spine3.time.OffsetTimes.subtractMillis;
 import static org.spine3.time.OffsetTimes.subtractMinutes;
 import static org.spine3.time.OffsetTimes.subtractSeconds;
-import static org.spine3.time.Timestamps2.HOURS_PER_DAY;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
-import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.HOURS_PER_DAY;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.MINUTES_PER_HOUR;
+import static org.spine3.time.Time.NANOS_PER_MILLISECOND;
+import static org.spine3.time.Time.SECONDS_PER_MINUTE;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Aleksandrov

@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.string.time.TimeStringifiers;
 
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov

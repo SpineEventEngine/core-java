@@ -51,7 +51,7 @@ import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * Projection storage tests.

@@ -32,7 +32,7 @@ import org.spine3.test.bc.event.TaskAdded;
 
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 class Given {
 

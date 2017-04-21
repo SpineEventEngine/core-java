@@ -36,7 +36,7 @@ import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 
 import java.util.List;
 
@@ -236,7 +236,7 @@ public class SubscriptionServiceShould {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
-        when(entity.getVersion()).thenReturn(newVersion(version, Timestamps2.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(version, Time.getCurrentTime()));
         return entity;
     }
 

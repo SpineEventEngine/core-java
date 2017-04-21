@@ -24,6 +24,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.TimeTests.BackToTheFuture.THIRTY_YEARS_IN_HOURS;
 
@@ -32,36 +33,37 @@ import static org.spine3.test.TimeTests.BackToTheFuture.THIRTY_YEARS_IN_HOURS;
  */
 public class BackToTheFutureShould {
 
-    private TimeTests.BackToTheFuture timestampProvider;
+    private TimeTests.BackToTheFuture timeProvider;
 
     @Before
     public void setUp() {
-       timestampProvider = new TimeTests.BackToTheFuture();
+       timeProvider = new TimeTests.BackToTheFuture();
     }
     @Test
     public void create_with_start_in_the_future() {
-        assertTrue(TimeTests.Future.isFuture(timestampProvider.getCurrentTime()));
+        assertTrue(TimeTests.Future.isFuture(timeProvider.getCurrentTime()));
     }
 
     @Test
     public void rewind_backward() {
         // Rewind to somewhere around present.
-        timestampProvider.backward(THIRTY_YEARS_IN_HOURS);
+        assertNotEquals(timeProvider.getCurrentTime(),
+                        timeProvider.backward(THIRTY_YEARS_IN_HOURS));
 
         // ... and back to 30 years in the past.
-        timestampProvider.backward(THIRTY_YEARS_IN_HOURS);
+        timeProvider.backward(THIRTY_YEARS_IN_HOURS);
 
-        assertFalse(TimeTests.Future.isFuture(timestampProvider.getCurrentTime()));
+        assertFalse(TimeTests.Future.isFuture(timeProvider.getCurrentTime()));
     }
 
     @SuppressWarnings("MagicNumber")
     @Test
     public void rewind_forward() {
         // Rewind to somewhere around present.
-        timestampProvider.backward(THIRTY_YEARS_IN_HOURS);
+        timeProvider.backward(THIRTY_YEARS_IN_HOURS);
 
-        timestampProvider.forward(THIRTY_YEARS_IN_HOURS + 24L);
+        timeProvider.forward(THIRTY_YEARS_IN_HOURS + 24L);
 
-        assertTrue(TimeTests.Future.isFuture(timestampProvider.getCurrentTime()));
+        assertTrue(TimeTests.Future.isFuture(timeProvider.getCurrentTime()));
     }
 }

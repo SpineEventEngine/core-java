@@ -41,7 +41,7 @@ import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
 import org.spine3.testdata.Sample;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -401,7 +401,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
 
         public Timestamp getNow() {
-            return Timestamps2.getCurrentTime();
+            return Time.getCurrentTime();
         }
 
         public Project getCounterState() {

@@ -37,7 +37,7 @@ import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
 import org.spine3.time.Interval;
 import org.spine3.time.Intervals;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 
 import java.lang.reflect.Constructor;
 
@@ -58,7 +58,7 @@ import static org.spine3.server.entity.AbstractEntity.getConstructor;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.assertSecondsEqual;
 import static org.spine3.test.TimeTests.currentTimeSeconds;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Litus
@@ -287,7 +287,7 @@ public class EntityShould {
                 getConstructor(BareBonesEntity.class, Long.class);
         final AbstractVersionableEntity<Long, StringValue> entity = createEntity(ctor, id);
 
-        final Timestamp after = Timestamps2.getCurrentTime();
+        final Timestamp after = Time.getCurrentTime();
 
         // The interval with a much earlier start to allow non-zero interval on faster computers.
         final Interval whileWeCreate = Intervals.between(before, after);

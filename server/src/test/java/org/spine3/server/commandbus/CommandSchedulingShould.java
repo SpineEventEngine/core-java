@@ -52,7 +52,7 @@ import static org.spine3.server.commandbus.Given.Command.createProject;
 import static org.spine3.server.commandbus.Given.Command.startProject;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.time.Durations2.minutes;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 
 public class CommandSchedulingShould extends AbstractCommandBusTestSuite {

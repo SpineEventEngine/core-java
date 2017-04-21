@@ -25,7 +25,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
@@ -63,7 +62,7 @@ public final class LocalDates {
     public static LocalDate of(int year, MonthOfYear month, int day) {
         checkPositive(year);
         checkPositive(day);
-        checkDate(year, month, day);
+        Time.checkDate(year, month, day);
 
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(year)
@@ -191,34 +190,9 @@ public final class LocalDates {
         final String result = dateFormat().format(classicDate);
         return result;
     }
+
     public static void checkDate(LocalDate date){
-        checkDate(date.getYear(), date.getMonth(), date.getDay());
-    }
-    public static void checkDate(int year, MonthOfYear month, int days) {
-        checkPositive(year);
-        checkNotNull(month);
-        checkPositive(month.getNumber());
-        checkPositive(days);
-
-        final int daysInMonth = daysInMonth(month.getNumber(), year);
-
-        if (days > daysInMonth) {
-            final String errormsg = format(
-                    "A number of days cannot be more than %d, for this month and year.",
-                    daysInMonth);
-            throw new IllegalArgumentException(errormsg);
-        }
-    }
-    private static boolean yearIsLeap(int year) {
-        return year % 4 == 0 && year % 100 != 0 || year % 400 == 0;
+        Time.checkDate(date.getYear(), date.getMonth(), date.getDay());
     }
 
-    public static int daysInMonth(int month, int year) {
-        final int days;
-        if (yearIsLeap(year) && month==2){
-            return 28;
-        }
-        days = 28 + ((0x3bbeecc >> (month * 2)) & 3);
-        return days;
-    }
 }

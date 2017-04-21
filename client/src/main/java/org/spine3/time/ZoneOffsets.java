@@ -29,8 +29,8 @@ import java.util.TimeZone;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
+import static org.spine3.time.Time.MINUTES_PER_HOUR;
+import static org.spine3.time.Time.SECONDS_PER_MINUTE;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**

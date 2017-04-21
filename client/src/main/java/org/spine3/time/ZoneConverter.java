@@ -33,8 +33,8 @@ import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Strings.nullToEmpty;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * Converts from {@link TimeZone} to {@link ZoneOffset} using zone IDs and offsets.

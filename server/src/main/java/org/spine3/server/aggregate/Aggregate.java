@@ -45,7 +45,7 @@ import java.util.Set;
 
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
-import static org.spine3.time.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.validate.Validate.isNotDefault;
 

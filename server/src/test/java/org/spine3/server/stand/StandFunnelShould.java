@@ -41,7 +41,7 @@ import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
-import org.spine3.time.Timestamps2;
+import org.spine3.time.Time;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -164,7 +164,7 @@ public class StandFunnelShould {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
-        when(entity.getVersion()).thenReturn(newVersion(17, Timestamps2.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
 
         final CommandContext context = requestFactory.createCommandContext();
         standFunnel.post(entity, context);
