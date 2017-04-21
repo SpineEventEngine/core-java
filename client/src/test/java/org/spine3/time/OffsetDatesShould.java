@@ -92,9 +92,9 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         assertEquals(zoneOffset, todayAtZone.getOffset());
     }
 
-    //
-    // Math with date
-    //------------------
+    /*
+     * Math with date
+     */
 
     @Test
     public void add_years() {
@@ -173,9 +173,9 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         assertEquals(zoneOffset, offsetDate.getOffset());
     }
 
-    //
-    // Arguments check
-    //-------------------
+    /*
+     * Arguments check
+     */
 
     @Test
     public void pass_null_tolerance_check() {
@@ -187,9 +187,9 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
                 .testAllPublicStaticMethods(OffsetDates.class);
     }
 
-    //
-    // Illegal args. check for math with years.
-    //------------------------------------------
+    /*
+     * Illegal args. check for math with years.
+     */
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_years_to_add() {
@@ -211,9 +211,9 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         subtractYears(today, 0);
     }
 
-    //
-    // Illegal args. check for math with months.
-    //------------------------------------------
+    /*
+     * Illegal args. check for math with months.
+     */
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_months_to_add() {
@@ -235,9 +235,9 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         subtractMonths(today, 0);
     }
 
-    //
-    // Illegal args. check for math with days.
-    //------------------------------------------
+    /*
+     * Illegal args. check for math with days.
+     */
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_days_to_subtract() {
@@ -259,9 +259,9 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         addDays(today, 0);
     }
 
-    //
-    // Stringification
-    //----------------------
+    /*
+     * Stringification
+     */
 
     @Override
     protected void assertConversionAt(ZoneOffset zoneOffset) throws ParseException {

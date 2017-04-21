@@ -222,9 +222,9 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
                 .testAllPublicStaticMethods(OffsetTimes.class);
     }
 
-    //
-    // Illegal args. check for math with hours.
-    //------------------------------------------
+    /*
+     * Illegal args. check for math with hours.
+     */
     
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_hours_to_add() {
@@ -246,10 +246,10 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
         subtractHours(now, 0);
     }
 
-    //
-    // Illegal args. check for math with minutes.
-    //------------------------------------------
-    
+    /*
+     * Illegal args. check for math with minutes.
+     */
+
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_minutes_to_add() {
         addMinutes(now, -7);
@@ -270,9 +270,9 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
         subtractMinutes(now, 0);
     }
 
-    //
-    // Illegal args. check for math with seconds.
-    //-------------------------------------------
+    /*
+     * Illegal args. check for math with seconds.
+     */
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_seconds_to_add() {
@@ -294,9 +294,9 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
         subtractSeconds(now, 0);
     }
 
-    //
-    // Illegal args. check for math with millis.
-    //-------------------------------------------
+    /*
+     * Illegal args. check for math with millis.
+     */
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_negative_millis_to_add() {
@@ -318,9 +318,7 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
         subtractMillis(now, 0);
     }
 
-    //
     // Stringification
-    //-------------------------
 
     @Override
     protected void assertConversionAt(ZoneOffset zoneOffset) throws ParseException {

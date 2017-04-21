@@ -111,7 +111,9 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
         assertEquals(zoneOffset, offsetDateTime.getOffset());
     }
 
-    // Math with date
+    /*
+     * Math with date
+     */
 
     @Test
     public void add_years() {
@@ -215,7 +217,9 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
         assertEquals(zoneOffset, offset);
     }
 
-    // Math with time
+    /*
+     * Math with time
+     */
 
     @Test
     public void add_hours() {
@@ -368,7 +372,9 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
         assertEquals(zoneOffset, offset);
     }
 
-    // Stringification
+    /*
+     * Stringification
+     */
 
     @Override
     protected void assertConversionAt(ZoneOffset zoneOffset) throws ParseException {
