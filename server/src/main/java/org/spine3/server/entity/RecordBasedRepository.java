@@ -23,7 +23,6 @@ package org.spine3.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -44,7 +43,6 @@ import org.spine3.type.TypeUrl;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -273,20 +271,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
                                                             .transform(storageRecordToEntity())
                                                             .toList();
-        return result;
-    }
-
-    /**
-     * Extracts entity IDs from the passed filters.
-     */
-    private Collection<I> unpackIds(EntityFilters filters) {
-        final List<EntityId> idsList = filters.getIdFilter()
-                                              .getIdsList();
-        final Class<I> expectedIdClass = getIdClass();
-
-        final EntityIdFunction<I> func = new EntityIdFunction<>(expectedIdClass);
-        final Collection<I> result = Collections2.transform(idsList, func);
-
         return result;
     }
 
