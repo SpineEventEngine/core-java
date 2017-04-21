@@ -205,15 +205,6 @@ final class Calendars {
         return result;
     }
 
-    //TODO:2017-04-19:alexander.yevsyukov: obtain current time using Timestamps2.
-    /**
-     * Obtains current calendar.
-     */
-    static Calendar now() {
-        final Calendar calendar = getInstance();
-        return calendar;
-    }
-
     /**
      * Obtains month of year using calendar.
      */

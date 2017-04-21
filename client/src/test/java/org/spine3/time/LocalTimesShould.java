@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Calendar;
 
+import static java.util.Calendar.getInstance;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.getHours;
@@ -76,7 +77,7 @@ public class LocalTimesShould {
     @Test
     public void obtain_current_time() {
         final LocalTime now = LocalTimes.now();
-        final Calendar cal = Calendars.now();
+        final Calendar cal = getInstance();
 
         final int expectedHours = getHours(cal);
         final int expectedMinutes = getMinutes(cal);
