@@ -30,6 +30,7 @@ option java_package = "org.spine3.client";
 import "google/protobuf/any.proto";
 
 import "spine/annotations.proto";
+import "spine/base/field_filter.proto";
 
 // Represents an ID of an entity.
 //
@@ -69,8 +70,10 @@ message EntityFilters {
     // Match entities by IDs.
     EntityIdFilter id_filter = 1;
 
+    repeated spine.base.FieldFilter column_filter = 2;
+
     // Reserved for more filter types
-    reserved 2 to 40;
+    reserved 3 to 40;
 }
 
 // Allows to add an ID filter for the read operations.
