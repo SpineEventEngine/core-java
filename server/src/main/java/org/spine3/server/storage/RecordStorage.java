@@ -28,6 +28,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
@@ -220,6 +221,14 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return readAllRecords(fieldMask);
     }
 
+    public Map<I, EntityRecord> readAll(EntityQuery query, FieldMask fieldMask) {
+        checkNotClosed();
+        checkNotNull(query);
+        checkNotNull(fieldMask);
+
+        return readAllRecords(query, fieldMask);
+    }
+
     //
     // Internal storage methods
     //---------------------------
@@ -244,6 +253,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
+
+    protected abstract Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask);
 
     /**
      * Writes a record and the associated
