@@ -108,6 +108,10 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
         return LocalTimes.of(hours, minutes, seconds, millis, nanos);
     }
 
+    /*
+     * Math with time
+     */
+
     @Test
     public void add_hours() {
         final int hoursDelta = random(1, 100);
@@ -318,8 +322,10 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
         subtractMillis(now, 0);
     }
 
-    // Stringification
-
+    /*
+     * Stringification
+     */
+    
     @Override
     protected void assertConversionAt(ZoneOffset zoneOffset) throws ParseException {
         final OffsetTime now = OffsetTimes.now(zoneOffset);
