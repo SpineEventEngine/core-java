@@ -132,4 +132,14 @@ public class ZoneOffsetsShould {
     public void fail_when_sign_char_missing() throws ParseException {
         ZoneOffsets.parse("x03:00");
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_when_hours_and_minutes_have_different_sign_negative_hours() {
+        ZoneOffsets.ofHoursMinutes(-1, 10);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_when_hours_and_minutes_have_different_sign_negative_minutes() {
+        ZoneOffsets.ofHoursMinutes(1, -10);
+    }
 }
