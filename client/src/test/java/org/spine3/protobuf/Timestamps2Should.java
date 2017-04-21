@@ -50,9 +50,9 @@ import static org.spine3.time.Time.resetProvider;
 import static org.spine3.time.Time.setProvider;
 import static org.spine3.time.Time.systemTime;
 import static org.spine3.time.Timestamps2.compare;
-import static org.spine3.time.Timestamps2.convertToDate;
 import static org.spine3.time.Timestamps2.isBetween;
 import static org.spine3.time.Timestamps2.isLaterThan;
+import static org.spine3.time.Timestamps2.toDate;
 
 public class Timestamps2Should {
 
@@ -246,7 +246,7 @@ public class Timestamps2Should {
 
         final Timestamp expectedTime = getCurrentTime();
 
-        final Date actualDate = convertToDate(expectedTime);
+        final Date actualDate = toDate(expectedTime);
         final long actualSeconds = actualDate.getTime() / MILLIS_PER_SECOND;
 
         assertEquals(expectedTime.getSeconds(), actualSeconds);

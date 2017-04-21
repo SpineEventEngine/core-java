@@ -95,7 +95,7 @@ public final class Timestamps2 {
      *
      * @return a {@link Date} instance
      */
-    public static Date convertToDate(TimestampOrBuilder timestamp) {
+    public static Date toDate(TimestampOrBuilder timestamp) {
         final long millisecsFromNanos = timestamp.getNanos() / Time.NANOS_PER_MILLISECOND;
         final long millisecsFromSeconds = timestamp.getSeconds() * Time.MILLIS_PER_SECOND;
         final Date date = new Date(millisecsFromSeconds + millisecsFromNanos);
