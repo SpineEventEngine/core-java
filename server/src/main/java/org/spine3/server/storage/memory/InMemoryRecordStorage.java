@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 
@@ -91,6 +92,11 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return getStorage().readAllRecords(fieldMask);
+    }
+
+    @Override
+    protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+        return null;
     }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
