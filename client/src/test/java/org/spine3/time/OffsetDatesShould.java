@@ -22,7 +22,6 @@ package org.spine3.time;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.ParseException;

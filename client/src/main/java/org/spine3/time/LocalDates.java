@@ -25,7 +25,7 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.*;
+import static java.lang.String.format;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
@@ -62,9 +62,9 @@ public final class LocalDates {
      */
     public static LocalDate of(int year, MonthOfYear month, int day) {
         checkPositive(year);
-        checkPositive(
-                day); //TODO:2017-04-20:alexander.yevsyukov: This must be checked against months and leap years.
-        Date date = new Date(year, month.getNumber(), day);
+        checkPositive(day);
+        checkDate(year, month, day);
+
         final LocalDate result = LocalDate.newBuilder()
                                           .setYear(year)
                                           .setMonth(month)
