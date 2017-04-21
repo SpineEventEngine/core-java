@@ -264,9 +264,11 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
 
         final String str = OffsetDates.toString(todayAtUTC);
 
+        System.out.println(str);
         assertTrue(str.contains("Z"));
 
-        assertEquals(todayAtUTC, OffsetDates.parse(str));
+        final OffsetDate parsed = OffsetDates.parse(str);
+        assertEquals(todayAtUTC, parsed);
     }
 
     @Test
@@ -282,5 +284,4 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
         final OffsetDate parsed = OffsetDates.parse(value);
         assertEquals(today, parsed);
     }
-
 }

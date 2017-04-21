@@ -20,29 +20,19 @@
 
 package org.spine3.time;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Sets;
 import com.google.protobuf.Duration;
-import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import org.spine3.time.Formats.Parameter;
 
 import java.text.ParseException;
-import java.util.Set;
-import java.util.SimpleTimeZone;
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Strings.nullToEmpty;
 import static java.lang.String.format;
 import static org.spine3.time.Durations2.hours;
 import static org.spine3.time.Durations2.minutes;
-import static org.spine3.time.Timestamps2.MILLIS_PER_SECOND;
 import static org.spine3.time.Timestamps2.MINUTES_PER_HOUR;
 import static org.spine3.time.Timestamps2.SECONDS_PER_MINUTE;
-import static org.spine3.time.Timestamps2.getCurrentTime;
 import static org.spine3.validate.Validate.checkBounds;
 
 /**
@@ -70,31 +60,6 @@ public final class ZoneOffsets {
     }
 
     /**
-     * Obtains the {@code ZoneOffset} instance using {@code TimeZone}.
-     *
-     * @param timeZone target time zone
-     * @return zone offset instance of specified timezone
-     */
-    static ZoneOffset toZoneOffset(TimeZone timeZone) {
-        final Timestamp now = getCurrentTime();
-        final long date = Timestamps.toMillis(now);
-        final int offsetInSeconds = getOffsetInSeconds(timeZone, date);
-        final String id = nullToEmpty(timeZone.getID());
-        return ZoneOffset.newBuilder()
-                         .setAmountSeconds(offsetInSeconds)
-                         .setId(id)
-                         .build();
-    }
-
-    /**
-     * Obtains offset of the passed {@code TimeZone} in seconds.
-     */
-    private static int getOffsetInSeconds(TimeZone timeZone, long date) {
-        final int seconds = timeZone.getOffset(date) / MILLIS_PER_SECOND;
-        return seconds;
-    }
-
-    /**
      * Obtains a {@code ZoneOffset} instance using default {@code TimeZone} of the Java
      * virtual machine.
      *
@@ -102,7 +67,9 @@ public final class ZoneOffsets {
      */
     public static ZoneOffset getDefault() {
         final TimeZone timeZone = TimeZone.getDefault();
-        return toZoneOffset(timeZone);
+        final ZoneOffset result = ZoneConverter.instance()
+                                               .convert(timeZone);
+        return result;
     }
 
     /**
@@ -171,8 +138,9 @@ public final class ZoneOffsets {
             final String errMsg = format("Invalid offset value: \"%s\"", value);
             throw new ParseException(errMsg, 0);
         }
-        final boolean positive = value.charAt(0) == Formats.PLUS;
-        final boolean negative = value.charAt(0) == Formats.MINUS;
+        final char signChar = value.charAt(0);
+        final boolean positive = signChar == Formats.PLUS;
+        final boolean negative = signChar == Formats.MINUS;
 
         if (!(positive || negative)) {
             final String errMsg = format("Missing sign char in offset value: \"%s\"", value);
@@ -208,35 +176,5 @@ public final class ZoneOffsets {
             .append(seconds >= 0 ? Formats.PLUS : Formats.MINUS)
             .append(format(Formats.HOURS_AND_MINUTES_FORMAT, Math.abs(hours), Math.abs(minutes)));
         return builder.toString();
-    }
-
-    static TimeZone toTimeZone(ZoneOffset zoneOffset) {
-        final Optional<String> optional = getId(zoneOffset);
-        if (optional.isPresent()) {
-            final String id = optional.get();
-            final Set<String> supportedIds = Sets.newHashSet(TimeZone.getAvailableIDs());
-            if (supportedIds.contains(id)) {
-                final TimeZone result = TimeZone.getTimeZone(id);
-                return result;
-            }
-            return toSimpleTimeZone(zoneOffset);
-        } else {
-            return toSimpleTimeZone(zoneOffset);
-        }
-    }
-
-    private static Optional<String> getId(ZoneOffset offset) {
-        final String id = offset.getId();
-        if (id.length() > 0) {
-            return Optional.of(id);
-        }
-        return Optional.absent();
-    }
-
-    private static TimeZone toSimpleTimeZone(ZoneOffset zoneOffset) {
-        @SuppressWarnings("NumericCastThatLosesPrecision")
-        // OK as a valid zoneOffset isn't that big.
-        final int offsetMillis = (int) TimeUnit.SECONDS.toMillis(zoneOffset.getAmountSeconds());
-        return new SimpleTimeZone(offsetMillis, "temp");
     }
 }

@@ -198,7 +198,9 @@ final class Calendars {
      * @return new {@code Calendar} instance at specific zone offset
      */
     static Calendar at(ZoneOffset zoneOffset) {
-        final TimeZone timeZone = ZoneOffsets.toTimeZone(zoneOffset);
+        final TimeZone timeZone = ZoneConverter.instance()
+                                               .reverse()
+                                               .convert(zoneOffset);
         final Calendar result = getInstance(timeZone);
         return result;
     }
