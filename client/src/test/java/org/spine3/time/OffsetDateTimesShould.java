@@ -26,6 +26,7 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Calendar;
 
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Calendars.at;
@@ -379,8 +380,13 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
     @Override
     protected void assertConversionAt(ZoneOffset zoneOffset) throws ParseException {
         final OffsetDateTime now = OffsetDateTimes.now(zoneOffset);
-        final String value = OffsetDateTimes.toString(now);
-        final OffsetDateTime parsed = OffsetDateTimes.parse(value);
+        final String str = OffsetDateTimes.toString(now);
+        final OffsetDateTime parsed = OffsetDateTimes.parse(str);
+
+        System.err.format("Now is: %s %n", shortDebugString(now));
+        System.err.format("String is: %s %n", str);
+        System.err.format("Parsed is: %s %n", shortDebugString(parsed));
+
         assertEquals(now, parsed);
     }
 }
