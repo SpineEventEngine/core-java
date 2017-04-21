@@ -26,6 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityWithLifecycle;
+import org.spine3.server.entity.RecordBasedRepository;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;
@@ -46,8 +47,8 @@ import static java.lang.String.format;
  * A utility for generating the {@link Column Columns} {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
- * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean</a>
- *  getter spec are considered {@link Column Columns}.
+ * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
+ * the Java Bean</a> getter spec are considered {@link Column Columns}.
  *
  * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
  * from a cache and are not updated.
@@ -59,8 +60,8 @@ import static java.lang.String.format;
  *     <li>{@link Entity#getId()}
  *     <li>{@link Entity#getState()}
  *     <li>{@link Entity#getDefaultState()}
- *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags() EntityWithLifecycle#getLifecycleFlags()}
- *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate#getBuilder()}
+ *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags() EntityWithLifecycle.getLifecycleFlags()}
+ *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate.getBuilder()}
  * </ul>
  *
  * <p>Note: if creating a getter method with a name which intersects with one of these method
@@ -96,7 +97,7 @@ class Columns {
      * and use it in all the successive calls.
      *
      * @param entity an {@link Entity} to get the {@link Column Columns} from
-     * @param <E> the type of the {@link Entity}
+     * @param <E>    the type of the {@link Entity}
      * @return a {@link Map} of the {@link Column Column} names to their
      * {@linkplain Column.MemoizedValue memoized values}.
      * @see Column.MemoizedValue
@@ -117,12 +118,33 @@ class Columns {
         return fields;
     }
 
+    static Column<?> metadata(RecordBasedRepository<?, ?, ?> repository, String columnName) {
+        checkNotNull(repository);
+        checkNotNull(columnName);
+        // TODO:2017-04-21:dmytro.dashenkov: Fix naming.
+        final Class<? extends Entity> entityClass = repository.getEntityClass();
+        ensureRegistered(entityClass);
+
+        final Collection<Column<?>> cachedColumns = knownEntityProperties.get(entityClass);
+        for (Column<?> column : cachedColumns) {
+            if (column.getName()
+                      .equals(columnName)) {
+                return column;
+            }
+        }
+
+        throw new IllegalStateException(
+                format("Could not find a Column description for %s.%s.",
+                       entityClass.getCanonicalName(),
+                       columnName));
+    }
+
     /**
-     * Generates the {@link Column Column} values considering the passed {@linkplain Entity entity type}
-     * indexed.
+     * Generates the {@link Column Column} values considering the passed
+     * {@linkplain Entity entity type} indexed.
      *
      * @param entityType indexed type of the {@link Entity}
-     * @param entity the object which to take the values from
+     * @param entity     the object which to take the values from
      * @return a {@link Map} of the {@link Column Columns}
      */
     private static Map<String, Column.MemoizedValue<?>> getStorageFields(
