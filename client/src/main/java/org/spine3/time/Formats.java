@@ -23,7 +23,9 @@ package org.spine3.time;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import java.util.TimeZone;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.spine3.time.Timestamps2.NANOS_PER_MICROSECOND;
 import static org.spine3.time.Timestamps2.NANOS_PER_MILLISECOND;
@@ -50,7 +52,7 @@ final class Formats {
             new ThreadLocal<DateFormat>() {
                 @Override
                 protected DateFormat initialValue() {
-                    return createDateTimeFormat();
+                    return createDateTimeFormat(TimeZone.getDefault());
                 }
             };
 
@@ -58,7 +60,7 @@ final class Formats {
             new ThreadLocal<DateFormat>() {
                 @Override
                 protected DateFormat initialValue() {
-                    return createTimeFormat();
+                    return createTimeFormat(TimeZone.getDefault());
                 }
             };
 
@@ -66,7 +68,7 @@ final class Formats {
             new ThreadLocal<DateFormat>() {
                 @Override
                 protected DateFormat initialValue() {
-                    return createDateFormat();
+                    return createDateFormat(TimeZone.getDefault());
                 }
             };
 
@@ -88,9 +90,9 @@ final class Formats {
     /**
      * Creates format for local date.
      */
-    private static DateFormat createDateFormat() {
+    private static DateFormat createDateFormat(TimeZone timeZone) {
         final SimpleDateFormat sdf = createDigitOnlyFormat(DATE_FORMAT);
-        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
+        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar(timeZone);
         sdf.setCalendar(calendar);
         return sdf;
     }
@@ -98,9 +100,9 @@ final class Formats {
     /**
      * Creates ISO 8601 date string format.
      */
-    private static SimpleDateFormat createDateTimeFormat() {
+    private static SimpleDateFormat createDateTimeFormat(TimeZone timeZone) {
         final SimpleDateFormat sdf = createDigitOnlyFormat(DATE_TIME_FORMAT);
-        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
+        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar(timeZone);
         sdf.setCalendar(calendar);
         return sdf;
     }
@@ -108,9 +110,9 @@ final class Formats {
     /**
      * Creates ISO 8601 time string format.
      */
-    private static SimpleDateFormat createTimeFormat() {
+    private static SimpleDateFormat createTimeFormat(TimeZone timeZone) {
         final SimpleDateFormat sdf = createDigitOnlyFormat(TIME_FORMAT);
-        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar();
+        GregorianCalendar calendar = Calendars.newProlepticGregorianCalendar(timeZone);
         sdf.setCalendar(calendar);
         return sdf;
     }
@@ -126,6 +128,10 @@ final class Formats {
         return result;
     }
 
+    //
+    // Default time zone formats
+    //----------------------------
+
     static DateFormat dateTimeFormat() {
         return dateTimeFormat.get();
     }
@@ -137,6 +143,35 @@ final class Formats {
     static DateFormat timeFormat() {
         return timeFormat.get();
     }
+
+    // Zoned formats
+    //---------------------
+
+    static DateFormat dateTimeFormat(ZoneOffset offset) {
+        final TimeZone timeZone = toTimeZone(offset);
+        return createDateTimeFormat(timeZone);
+    }
+
+    private static TimeZone toTimeZone(ZoneOffset offset) {
+        final TimeZone timeZone = ZoneConverter.instance()
+                                               .reverse()
+                                               .convert(offset);
+        checkNotNull(timeZone);
+        return timeZone;
+    }
+
+    static DateFormat dateFormat(ZoneOffset offset) {
+        final TimeZone timeZone = toTimeZone(offset);
+        return createDateFormat(timeZone);
+    }
+
+    static DateFormat timeFormat(ZoneOffset offset) {
+        final TimeZone timeZone = toTimeZone(offset);
+        return createTimeFormat(timeZone);
+    }
+
+    // String generation
+    //----------------------
 
     /**
      * Appends the fractional second part of the time to the passed string builder.

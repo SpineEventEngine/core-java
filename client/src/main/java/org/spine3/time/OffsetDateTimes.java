@@ -343,11 +343,12 @@ public final class OffsetDateTimes {
      */
     public static String toString(OffsetDateTime value) {
         final Calendar calendar = toCalendar(value);
+        final ZoneOffset offset = value.getOffset();
         final StringBuilder result = new StringBuilder();
 
         // Format the date/time part.
         final Date date = calendar.getTime();
-        final String dateTime = dateTimeFormat().format(date);
+        final String dateTime = dateTimeFormat(offset).format(date);
         result.append(dateTime);
 
         // Format the fractional second part.
@@ -355,7 +356,6 @@ public final class OffsetDateTimes {
         appendSubSecond(result, time);
 
         // Add time zone.
-        final ZoneOffset offset = value.getOffset();
         appendZoneOffset(result, offset);
 
         return result.toString();

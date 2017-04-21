@@ -90,13 +90,29 @@ final class Parser {
     // Implementation
     //-------------------
 
+    @SuppressWarnings("CharUsedInArithmeticContext") // OK for this parsing method.
+    private static int parseNanos(String value) throws ParseException {
+        int result = 0;
+        for (int i = 0; i < 9; ++i) {
+            result = result * 10;
+            if (i < value.length()) {
+                if (value.charAt(i) < '0' || value.charAt(i) > '9') {
+                    final String errMsg = format("Invalid nanoseconds in: \"%s\"", value);
+                    throw new ParseException(errMsg, 0);
+                }
+                result += value.charAt(i) - '0';
+            }
+        }
+        return result;
+    }
+
     private OffsetDateTime parseOffsetDateTime() throws ParseException {
         initDayOffset();
-        initTimezoneOffsetPosition();
-        initTimeValues();
+        initZoneOffsetPosition();
+        initTimeParts();
 
-        parseTime(dateTimeFormat());
         parseZoneOffset();
+        parseTime(dateTimeFormat(zoneOffset));
 
         final Calendar calendar = createCalendar();
         final LocalDate localDate = Calendars.toLocalDate(calendar);
@@ -106,11 +122,11 @@ final class Parser {
     }
 
     private OffsetTime parseOffsetTime() throws ParseException {
-        initTimezoneOffsetPosition();
-        initTimeValues();
+        initZoneOffsetPosition();
+        initTimeParts();
 
-        parseTime(timeFormat());
         parseZoneOffset();
+        parseTime(timeFormat(zoneOffset));
 
         final Calendar calendar = createCalendar();
         final LocalTime localTime = Calendars.toLocalTime(calendar);
@@ -119,11 +135,11 @@ final class Parser {
     }
 
     private OffsetDate parseOffsetDate() throws ParseException {
-        initTimezoneOffsetPosition();
-        initTimeValues();
+        initZoneOffsetPosition();
+        initTimeParts();
 
-        parseTime(dateFormat());
         parseZoneOffset();
+        parseTime(dateFormat(zoneOffset));
 
         final Calendar calendar = createCalendar();
         final LocalDate localDate = Calendars.toLocalDate(calendar);
@@ -134,7 +150,7 @@ final class Parser {
     private LocalTime parseLocalTime() throws ParseException {
         // The input string for local time does not have zone offset.
         timezoneOffsetPosition = value.length();
-        initTimeValues();
+        initTimeParts();
         parseTime(timeFormat());
         zoneOffset = ZoneOffsets.getDefault();
         Calendar calendar = createCalendar();
@@ -169,7 +185,7 @@ final class Parser {
         }
     }
 
-    private void initTimeValues() {
+    private void initTimeParts() {
         // Parse seconds and nanos.
         final String timeSubstring = value.substring(0, timezoneOffsetPosition);
         secondValue = timeSubstring;
@@ -192,7 +208,7 @@ final class Parser {
         }
     }
 
-    private void initTimezoneOffsetPosition() throws ParseException {
+    private void initZoneOffsetPosition() throws ParseException {
         timezoneOffsetPosition = value.indexOf(UTC_ZONE_SIGN, dayOffset);
         if (timezoneOffsetPosition == -1) {
             timezoneOffsetPosition = value.indexOf(PLUS, dayOffset);
@@ -212,21 +228,5 @@ final class Parser {
         final Date date = format.parse(secondValue);
         seconds = date.getTime() / MILLIS_PER_SECOND;
         nanos = nanoValue.isEmpty() ? 0 : parseNanos(nanoValue);
-    }
-
-    @SuppressWarnings("CharUsedInArithmeticContext") // OK for this parsing method.
-    private static int parseNanos(String value) throws ParseException {
-        int result = 0;
-        for (int i = 0; i < 9; ++i) {
-            result = result * 10;
-            if (i < value.length()) {
-                if (value.charAt(i) < '0' || value.charAt(i) > '9') {
-                    final String errMsg = format("Invalid nanoseconds in: \"%s\"", value);
-                    throw new ParseException(errMsg, 0);
-                }
-                result += value.charAt(i) - '0';
-            }
-        }
-        return result;
     }
 }

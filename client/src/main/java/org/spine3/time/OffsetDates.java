@@ -177,16 +177,16 @@ public final class OffsetDates {
      * Returns a ISO 8601 date string corresponding to the passed value.
      */
     public static String toString(OffsetDate value) {
+        final ZoneOffset offset = value.getOffset();
         final Calendar calendar = toCalendar(value);
         final StringBuilder result = new StringBuilder();
 
         // Format the date/time part.
         final Date date = calendar.getTime();
-        final String dateTime = dateFormat().format(date);
+        final String dateTime = dateFormat(offset).format(date);
         result.append(dateTime);
 
         // Add time zone.
-        final ZoneOffset offset = value.getOffset();
         appendZoneOffset(result, offset);
 
         return result.toString();

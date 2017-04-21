@@ -244,12 +244,13 @@ public final class OffsetTimes {
      * Returns a ISO 8601 time string corresponding to the passed value.
      */
     public static String toString(OffsetTime value) {
+        final ZoneOffset offset = value.getOffset();
         final Calendar calendar = toCalendar(value);
         final StringBuilder result = new StringBuilder();
 
         // Format the date/time part.
         final Date date = calendar.getTime();
-        final String dateTime = timeFormat().format(date);
+        final String dateTime = timeFormat(offset).format(date);
         result.append(dateTime);
 
         // Format the fractional second part.
@@ -257,7 +258,6 @@ public final class OffsetTimes {
         appendSubSecond(result, time);
 
         // Add time zone.
-        final ZoneOffset offset = value.getOffset();
         appendZoneOffset(result, offset);
 
         return result.toString();
