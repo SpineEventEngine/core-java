@@ -29,7 +29,6 @@ import org.spine3.base.FieldFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.server.entity.Entity;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -38,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Dmytro Dashenkov
  */
-public class EntityQueries {
+public final class EntityQueries {
 
     private static final String FIELD_PATH_SEPARATOR = ".";
 
@@ -56,8 +55,9 @@ public class EntityQueries {
         for (FieldFilter filter : fieldFilters) {
             final String fieldName = getFieldName(filter);
             final Column<?> column = Columns.metadata(entityClass, fieldName);
-            final Collection<Object> filterValues = Collections2.transform(filter.getValueList(),
-                                                                           TypeCaster.INSTANCE);
+            final Function<Any, ?> typeTransformer = ProtoToJavaMapper.function(column.getType());
+            final Collection<?> filterValues = Collections2.transform(filter.getValueList(),
+                                                                           typeTransformer);
             queryParams.putAll(column, filterValues);
         }
         final EntityQuery query = EntityQuery.of(queryParams);
@@ -72,14 +72,5 @@ public class EntityQueries {
                       path);
         final String result = path.substring(fieldNameStartIndex);
         return result;
-    }
-
-    private enum TypeCaster implements Function<Any, Object> {
-        INSTANCE;
-
-        @Override
-        public Object apply(@Nullable Any input) {
-            return null;
-        }
     }
 }
