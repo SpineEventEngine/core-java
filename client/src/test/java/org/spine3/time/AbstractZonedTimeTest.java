@@ -21,6 +21,9 @@
 package org.spine3.time;
 
 import org.junit.Before;
+import org.junit.Test;
+
+import java.text.ParseException;
 
 import static java.lang.Math.abs;
 import static org.spine3.test.Tests.random;
@@ -34,10 +37,12 @@ import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
  *
  * @author Alexander Yevsyukov
  */
-public class AbstractZonedTimeTest {
+public abstract class AbstractZonedTimeTest {
 
     @SuppressWarnings("ProtectedField") // OK for brevity of test code.
     protected ZoneOffset zoneOffset;
+
+    protected abstract void assertConversionAt(ZoneOffset zoneOffset) throws ParseException;
 
     private static ZoneOffset generateOffset() {
         // Reduce the hour range by one assuming minutes are also generated.
@@ -51,5 +56,30 @@ public class AbstractZonedTimeTest {
     @Before
     public void setUp() {
         zoneOffset = generateOffset();
+    }
+
+    @Test
+    public void convert_UTC_value_to_string() throws ParseException {
+        assertConversionAt(ZoneOffsets.UTC);
+    }
+
+    @Test
+    public void convert_values_at_current_time_zone() throws ParseException {
+        // Get current zone offset and strip ID value because it's not stored into date/time.
+        final ZoneOffset zoneOffset = ZoneOffsets.getDefault()
+                                                 .toBuilder()
+                                                 .clearId()
+                                                 .build();
+        assertConversionAt(zoneOffset);
+    }
+
+    @Test
+    public void convert_value_at_negative_offset() throws ParseException {
+        assertConversionAt(ZoneOffsets.ofHoursMinutes(-5, -30));
+    }
+
+    @Test
+    public void convert_value_at_positive_offset() throws ParseException {
+        assertConversionAt(ZoneOffsets.ofHoursMinutes(7, 40));
     }
 }

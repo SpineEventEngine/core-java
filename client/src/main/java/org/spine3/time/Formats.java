@@ -44,6 +44,7 @@ final class Formats {
 
     static final char TIME_SEPARATOR = 'T';
     static final char SUB_SECOND_SEPARATOR = '.';
+    static final char TIME_VALUE_SEPARATOR = ':';
     static final char PLUS = '+';
     static final char MINUS = '-';
     static final char UTC_ZONE_SIGN = 'Z';
@@ -203,7 +204,8 @@ final class Formats {
         if (offset.getAmountSeconds() == 0) {
             builder.append(UTC_ZONE_SIGN);
         } else {
-            builder.append(ZoneOffsets.toString(offset));
+            final String offsetStr = ZoneOffsets.toString(offset);
+            builder.append(offsetStr);
         }
     }
 }

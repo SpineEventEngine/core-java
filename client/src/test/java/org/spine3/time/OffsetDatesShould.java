@@ -28,7 +28,6 @@ import java.text.ParseException;
 import java.util.Calendar;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.random;
 import static org.spine3.time.Calendars.at;
@@ -264,29 +263,11 @@ public class OffsetDatesShould extends AbstractZonedTimeTest {
     // Stringification
     //----------------------
 
-    @Test
-    public void convert_to_string_and_back_at_UTC() throws ParseException {
-        final OffsetDate todayAtUTC = OffsetDates.now(ZoneOffsets.UTC);
-
-        final String str = OffsetDates.toString(todayAtUTC);
-
-        assertTrue(str.contains("Z"));
-
-        final OffsetDate parsed = OffsetDates.parse(str);
-        assertEquals(todayAtUTC, parsed);
-    }
-
-    @Test
-    public void convert_values_at_current_time_zone() throws ParseException {
-        // Get current zone offset and strip ID value because it's not stored into date/time.
-        final ZoneOffset zoneOffset = ZoneOffsets.getDefault()
-                                                 .toBuilder()
-                                                 .clearId()
-                                                 .build();
+    @Override
+    protected void assertConversionAt(ZoneOffset zoneOffset) throws ParseException {
         final OffsetDate today = OffsetDates.now(zoneOffset);
-
-        final String value = OffsetDates.toString(today);
-        final OffsetDate parsed = OffsetDates.parse(value);
+        final String str = OffsetDates.toString(today);
+        final OffsetDate parsed = OffsetDates.parse(str);
         assertEquals(today, parsed);
     }
 }

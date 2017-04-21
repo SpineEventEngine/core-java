@@ -29,6 +29,8 @@ import static java.lang.String.format;
 import static org.spine3.time.Formats.MINUS;
 import static org.spine3.time.Formats.PLUS;
 import static org.spine3.time.Formats.SUB_SECOND_SEPARATOR;
+import static org.spine3.time.Formats.TIME_SEPARATOR;
+import static org.spine3.time.Formats.TIME_VALUE_SEPARATOR;
 import static org.spine3.time.Formats.UTC_ZONE_SIGN;
 import static org.spine3.time.Formats.dateFormat;
 import static org.spine3.time.Formats.dateTimeFormat;
@@ -198,7 +200,7 @@ final class Parser {
     }
 
     private void initDayOffset() throws ParseException {
-        dayOffset = value.indexOf(Formats.TIME_SEPARATOR);
+        dayOffset = value.indexOf(TIME_SEPARATOR);
         if (dayOffset == -1) {
             final String errMsg = format(
                     "Failed to parse date/time value: missing time separator in: \"%s\"",
@@ -214,7 +216,15 @@ final class Parser {
             timezoneOffsetPosition = value.indexOf(PLUS, dayOffset);
         }
         if (timezoneOffsetPosition == -1) {
-            timezoneOffsetPosition = value.indexOf(MINUS, dayOffset);
+            /* We have not found neither 'Z' nor '+' characters.
+               Chances are we have a negative offset. */
+            if (dayOffset == -1) {
+                if (value.contains(String.valueOf(TIME_VALUE_SEPARATOR))) {
+                    timezoneOffsetPosition = value.lastIndexOf(MINUS);
+                }
+            } else {
+                timezoneOffsetPosition = value.indexOf(MINUS, dayOffset);
+            }
         }
         if (timezoneOffsetPosition == -1) {
             final String errMsg = format(
