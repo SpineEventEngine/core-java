@@ -36,9 +36,9 @@ import static org.spine3.time.Calendars.getYear;
 
 public class LocalDatesShould {
 
-    private static final int year = 2014;
-    private static final MonthOfYear month = MonthOfYear.JULY;
-    private static final int day = 20;
+    private static final int YEAR = 2014;
+    private static final MonthOfYear MONTH = MonthOfYear.JULY;
+    private static final int DAY = 20;
 
     @Test
     public void have_private_constructor() {
@@ -57,78 +57,87 @@ public class LocalDatesShould {
 
     @Test
     public void obtain_date_from_year_month_day_values() {
-        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
 
-        assertTrue(year == localDate.getYear());
-        assertTrue(month == localDate.getMonth());
-        assertTrue(day == localDate.getDay());
+        assertTrue(YEAR == localDate.getYear());
+        assertTrue(MONTH == localDate.getMonth());
+        assertTrue(DAY == localDate.getDay());
     }
 
+    /*
+     * Math with years
+     */
     @Test
-    public void obtain_date_in_past_before_specified_number_of_years() {
+    public void subtract_years() {
         final int yearsToSubstract = 2;
-        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
         final LocalDate fewYearsAgo = LocalDates.subtractYears(localDate, yearsToSubstract);
 
-        assertTrue(year - yearsToSubstract == fewYearsAgo.getYear());
-        assertTrue(month == fewYearsAgo.getMonth());
-        assertTrue(day == fewYearsAgo.getDay());
+        assertTrue(YEAR - yearsToSubstract == fewYearsAgo.getYear());
+        assertTrue(MONTH == fewYearsAgo.getMonth());
+        assertTrue(DAY == fewYearsAgo.getDay());
     }
 
     @Test
-    public void obtain_date_in_past_before_specified_number_of_months() {
-        final int monthsToSubstract = 2;
-        final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate fewMonthsAgo = LocalDates.subtractMonths(localDate, monthsToSubstract);
-
-        assertTrue(year == fewMonthsAgo.getYear());
-        assertTrue(month.getNumber() - monthsToSubstract ==
-                   fewMonthsAgo.getMonth().getNumber());
-        assertTrue(day == fewMonthsAgo.getDay());
-    }
-
-    @Test
-    public void obtain_date_in_past_before_specified_number_of_days() {
-        final int daysToSubstract = 15;
-        final LocalDate localDate = LocalDates.of(year, month, day);
-        final LocalDate fewDaysAgo = LocalDates.subtractDays(localDate, daysToSubstract);
-
-        assertTrue(year == fewDaysAgo.getYear());
-        assertTrue(month == fewDaysAgo.getMonth());
-        assertTrue(day - daysToSubstract == fewDaysAgo.getDay());
-    }
-
-    @Test
-    public void obtain_date_in_future_after_specified_number_of_years() {
+    public void add_years() {
         final int yearsToAdd = 2;
-        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
         final LocalDate plusYears = LocalDates.addYears(localDate, yearsToAdd);
 
-        assertTrue(year + yearsToAdd == plusYears.getYear());
-        assertTrue(month == plusYears.getMonth());
-        assertTrue(day == plusYears.getDay());
+        assertTrue(YEAR + yearsToAdd == plusYears.getYear());
+        assertTrue(MONTH == plusYears.getMonth());
+        assertTrue(DAY == plusYears.getDay());
+    }
+
+    /*
+     * Math with months
+     */
+    @Test
+    public void subtract_months() {
+        final int monthsToSubstract = 2;
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
+        final LocalDate fewMonthsAgo = LocalDates.subtractMonths(localDate, monthsToSubstract);
+
+        assertTrue(YEAR == fewMonthsAgo.getYear());
+        assertTrue(MONTH.getNumber() - monthsToSubstract ==
+                   fewMonthsAgo.getMonth().getNumber());
+        assertTrue(DAY == fewMonthsAgo.getDay());
     }
 
     @Test
-    public void obtain_date_in_future_after_specified_number_of_months() {
+    public void add_months() {
         final int monthsToAdd = 2;
-        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
         final LocalDate plusMonths = LocalDates.addMonths(localDate, monthsToAdd);
 
-        assertTrue(year == plusMonths.getYear());
-        assertTrue(month.getNumber() + monthsToAdd == plusMonths.getMonth().getNumber());
-        assertTrue(day == plusMonths.getDay());
+        assertTrue(YEAR == plusMonths.getYear());
+        assertTrue(MONTH.getNumber() + monthsToAdd == plusMonths.getMonth().getNumber());
+        assertTrue(DAY == plusMonths.getDay());
+    }
+
+    /*
+     * Math with days
+     */
+    @Test
+    public void subtract_days() {
+        final int daysToSubstract = 15;
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
+        final LocalDate fewDaysAgo = LocalDates.subtractDays(localDate, daysToSubstract);
+
+        assertTrue(YEAR == fewDaysAgo.getYear());
+        assertTrue(MONTH == fewDaysAgo.getMonth());
+        assertTrue(DAY - daysToSubstract == fewDaysAgo.getDay());
     }
 
     @Test
-    public void obtain_date_in_future_after_specified_number_of_days() {
+    public void add_days() {
         final int daysToAdd = 8;
-        final LocalDate localDate = LocalDates.of(year, month, day);
+        final LocalDate localDate = LocalDates.of(YEAR, MONTH, DAY);
         final LocalDate plusDays = LocalDates.addDays(localDate, daysToAdd);
 
-        assertTrue(year == plusDays.getYear());
-        assertTrue(month == plusDays.getMonth());
-        assertTrue(day + daysToAdd == plusDays.getDay());
+        assertTrue(YEAR == plusDays.getYear());
+        assertTrue(MONTH == plusDays.getMonth());
+        assertTrue(DAY + daysToAdd == plusDays.getDay());
     }
 
     @Test
