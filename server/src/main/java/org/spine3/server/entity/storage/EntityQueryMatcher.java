@@ -83,10 +83,15 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
                 final String columnName = column.getName();
 
                 final Collection<Object> possibleValues = param.getValue();
-                final Column.MemoizedValue<?> actualValueWithMetadata = entityColumns.get(columnName);
-                final Object actualValue = actualValueWithMetadata != null
-                        ? actualValueWithMetadata.getValue()
-                        : null;
+                if (possibleValues.isEmpty()) {
+                    continue;
+                }
+                final Column.MemoizedValue<?> actualValueWithMetadata =
+                        entityColumns.get(columnName);
+                if (actualValueWithMetadata == null) {
+                    return false;
+                }
+                final Object actualValue = actualValueWithMetadata.getValue();
                 final boolean matches = possibleValues.contains(actualValue);
                 if (!matches) {
                     return false;
