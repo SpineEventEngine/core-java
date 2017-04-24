@@ -44,7 +44,7 @@ import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.transformValues;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecorordWithColumnsVisible;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
 
 /**
@@ -57,7 +57,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
     private final Map<I, EntityRecordWithColumns> records = newHashMap();
     private final Map<I, EntityRecordWithColumns> filtered =
-            filterValues(records, isRecorordWithColumnsVisible());
+            filterValues(records, isRecordWithColumnsVisible());
 
     @Override
     public Iterator<I> index() {

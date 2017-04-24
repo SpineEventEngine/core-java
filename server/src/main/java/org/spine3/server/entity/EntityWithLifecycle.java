@@ -123,7 +123,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
             return isRecordVisible;
         }
 
-        public static Predicate<EntityRecordWithColumns> isRecorordWithColumnsVisible() {
+        public static Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible() {
             return isRecorordWithColumnsVisible;
         }
     }
