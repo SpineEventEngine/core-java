@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 import static org.spine3.client.Queries.queryBuilderFor;
 import static org.spine3.client.Targets.composeTarget;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
@@ -128,7 +128,7 @@ public class ActorRequestFactory {
      * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
      *
      * <p>Sets the timestamp value to the
-     * {@linkplain org.spine3.protobuf.Timestamps2#getCurrentTime() current time}.
+     * {@linkplain org.spine3.time.Time#getCurrentTime() current time}.
      */
     @VisibleForTesting
     ActorContext actorContext() {
