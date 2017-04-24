@@ -29,6 +29,7 @@ import java.util.TimeZone;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.time.Formats.formatOffsetTime;
 import static org.spine3.time.Time.MINUTES_PER_HOUR;
 import static org.spine3.time.Time.SECONDS_PER_MINUTE;
 import static org.spine3.validate.Validate.checkBounds;
@@ -171,8 +172,7 @@ public final class ZoneOffsets {
         final long minutes = totalMinutes % MINUTES_PER_HOUR;
         final StringBuilder builder = new StringBuilder(6)
                 .append(seconds >= 0 ? Formats.PLUS : Formats.MINUS)
-                .append(format(Formats.HOURS_AND_MINUTES_FORMAT, Math.abs(hours),
-                               Math.abs(minutes)));
+                .append(formatOffsetTime(hours, minutes));
         return builder.toString();
     }
 }

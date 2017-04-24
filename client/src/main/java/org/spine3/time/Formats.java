@@ -37,10 +37,10 @@ import static org.spine3.time.Time.NANOS_PER_MILLISECOND;
  */
 final class Formats {
 
-    static final String DATE_FORMAT = "yyyy-MM-dd";
-    static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
-    static final String HOURS_AND_MINUTES_FORMAT = "%02d:%02d";
-    static final String TIME_FORMAT = "HH:mm:ss";
+    private static final String DATE_FORMAT = "yyyy-MM-dd";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    private static final String TIME_FORMAT = "HH:mm:ss";
+    private static final String HOURS_AND_MINUTES_FORMAT = "%02d:%02d";
 
     static final char TIME_SEPARATOR = 'T';
     static final char SUB_SECOND_SEPARATOR = '.';
@@ -72,6 +72,11 @@ final class Formats {
                     return createDateFormat(TimeZone.getDefault());
                 }
             };
+
+    static String formatOffsetTime(long hours, long minutes) {
+        return format(HOURS_AND_MINUTES_FORMAT, Math.abs(hours),
+                      Math.abs(minutes));
+    }
 
     /**
      * Names of arguments in preconditions checks.
