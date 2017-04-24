@@ -22,7 +22,7 @@ package org.spine3.server.tenant;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Time;
 import org.spine3.users.TenantId;
 
 /**
@@ -46,7 +46,7 @@ final class DefaultTenantRepository
 
         @Override
         public Timestamp getDefaultState() {
-            return Timestamps2.getCurrentTime();
+            return Time.getCurrentTime();
         }
     }
 }

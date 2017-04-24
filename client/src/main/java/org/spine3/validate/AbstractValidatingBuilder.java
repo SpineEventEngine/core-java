@@ -24,7 +24,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifiers;
 
 import java.lang.reflect.Type;
 import java.util.List;

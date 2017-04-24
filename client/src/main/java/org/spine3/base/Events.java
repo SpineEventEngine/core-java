@@ -22,7 +22,8 @@ package org.spine3.base;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.string.Stringifier;
+import org.spine3.time.Timestamps2;
 import org.spine3.users.UserId;
 
 import java.util.Collections;
@@ -39,7 +40,7 @@ import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class Events {
+public final class Events {
 
     /** Compares two events by their timestamps. */
     private static final Comparator<Event> eventComparator = new Comparator<Event>() {

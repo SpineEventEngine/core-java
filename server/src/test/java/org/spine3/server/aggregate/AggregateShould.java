@@ -32,7 +32,6 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TestActorRequestFactory;
@@ -49,6 +48,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
+import org.spine3.time.Time;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
 
@@ -238,14 +238,14 @@ public class AggregateShould {
     @Test
     public void record_modification_time_when_command_handled() {
         try {
-            final Timestamp frozenTime = Timestamps2.getCurrentTime();
-            Timestamps2.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
+            final Timestamp frozenTime = Time.getCurrentTime();
+            Time.setProvider(new TimeTests.FrozenMadHatterParty(frozenTime));
 
             aggregate.dispatchForTest(createProject, commandContext);
 
             assertEquals(frozenTime, aggregate.whenModified());
         } finally {
-            Timestamps2.resetProvider();
+            Time.resetProvider();
         }
     }
 
@@ -509,9 +509,9 @@ public class AggregateShould {
     public void record_modification_timestamp() throws InterruptedException {
         try {
             final TimeTests.BackToTheFuture provider = new TimeTests.BackToTheFuture();
-            Timestamps2.setProvider(provider);
+            Time.setProvider(provider);
 
-            Timestamp currentTime = Timestamps2.getCurrentTime();
+            Timestamp currentTime = Time.getCurrentTime();
 
             aggregate.dispatchCommands(command(createProject));
 
@@ -523,7 +523,7 @@ public class AggregateShould {
 
             assertEquals(currentTime, aggregate.whenModified());
         } finally {
-            Timestamps2.resetProvider();
+            Time.resetProvider();
         }
     }
 

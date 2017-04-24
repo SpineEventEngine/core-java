@@ -30,7 +30,7 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  */
 @Internal
-public class Subscriptions {
+public final class Subscriptions {
 
     /**
      * The format of all {@linkplain SubscriptionId Subscription identifiers}.

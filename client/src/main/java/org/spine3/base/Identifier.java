@@ -39,7 +39,7 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-class Identifier<I> {
+final class Identifier<I> {
 
     private final Type type;
     private final I value;

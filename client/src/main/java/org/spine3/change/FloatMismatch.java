@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class FloatMismatch {
+public final class FloatMismatch {
 
     private FloatMismatch() {
         // Prevent instantiation of this utility class.

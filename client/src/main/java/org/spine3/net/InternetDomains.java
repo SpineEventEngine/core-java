@@ -31,7 +31,7 @@ import static org.spine3.net.Patterns.HOST_NAME_PATTERN;
  *
  * @author Alexander Yevsyukov
  */
-public class InternetDomains {
+public final class InternetDomains {
 
     private InternetDomains() {
         // Prevent instantiation of this  utility class.

@@ -23,10 +23,10 @@ package org.spine3.server.projection;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Durations2;
 import org.spine3.server.projection.BulkWriteOperation.FlushCallback;
 import org.spine3.test.TimeTests;
 import org.spine3.test.projection.Project;
+import org.spine3.time.Durations2;
 
 import java.util.HashSet;
 import java.util.Set;
