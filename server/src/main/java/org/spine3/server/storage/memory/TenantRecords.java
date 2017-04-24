@@ -26,9 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityQueryMatcher;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
@@ -179,10 +177,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         public EntityRecord apply(@Nullable EntityRecord input) {
             checkNotNull(input);
             final Any packedState = input.getState();
-            final Message state = AnyPacker.unpack(packedState);
+            final Message state = unpack(packedState);
             final TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
-            final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
-            final Any repackedState = AnyPacker.pack(maskedState);
+            final Message maskedState = applyMask(fieldMask, state, typeUrl);
+            final Any repackedState = pack(maskedState);
             final EntityRecord result = EntityRecord.newBuilder(input)
                                                     .setState(repackedState)
                                                     .build();

@@ -98,16 +98,16 @@ final class ProtoToJavaMapper {
         private static final ImmutableMap<Class, Function<? extends Message, ?>>
                 PROTO_WRAPPER_TO_PRIMITIVE =
                 ImmutableMap.<Class, Function<? extends Message, ?>>builder()
-                        .put(Int32Value.class, new Int32Unboxer())
-                        .put(Int64Value.class, new Int64Unboxer())
-                        .put(UInt32Value.class, new UInt32Unboxer())
-                        .put(UInt64Value.class, new UInt64Unboxer())
-                        .put(FloatValue.class, new FloatUnboxer())
-                        .put(DoubleValue.class, new DoubleUnboxer())
-                        .put(BoolValue.class, new BoolUnboxer())
-                        .put(StringValue.class, new StringUnboxer())
-                        .put(BytesValue.class, new BytesUnboxer())
-                        .build();
+                            .put(Int32Value.class, new Int32Unboxer())
+                            .put(Int64Value.class, new Int64Unboxer())
+                            .put(UInt32Value.class, new UInt32Unboxer())
+                            .put(UInt64Value.class, new UInt64Unboxer())
+                            .put(FloatValue.class, new FloatUnboxer())
+                            .put(DoubleValue.class, new DoubleUnboxer())
+                            .put(BoolValue.class, new BoolUnboxer())
+                            .put(StringValue.class, new StringUnboxer())
+                            .put(BytesValue.class, new BytesUnboxer())
+                            .build();
 
         @Override
         protected T cast(Any input) {
