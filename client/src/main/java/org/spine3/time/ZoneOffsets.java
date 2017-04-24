@@ -203,11 +203,9 @@ public final class ZoneOffsets {
      * Otherwise returns the passed instance.
      */
     static ZoneOffset adjustZero(ZoneOffset offset) {
-        if (offset.getAmountSeconds() == 0) {
-            if (offset.getId()
-                      .isEmpty()) {
-                return UTC;
-            }
+        if (offset.getAmountSeconds() == 0 && offset.getId()
+                                                    .isEmpty()) {
+            return UTC;
         }
         return offset;
     }
