@@ -46,7 +46,6 @@ import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecorordWithColumnsVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
-import static org.spine3.type.TypeUrl.from;
 
 /**
  * The memory-based storage for {@code EntityStorageRecord} that represents
@@ -55,8 +54,6 @@ import static org.spine3.type.TypeUrl.from;
  * @author Alexander Yevsyukov
  */
 class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
-
-    private static final TypeUrl ENTITY_RECORD_TYPE_URL = from(EntityRecord.getDescriptor());
 
     private final Map<I, EntityRecordWithColumns> records = newHashMap();
     private final Map<I, EntityRecordWithColumns> filtered =
