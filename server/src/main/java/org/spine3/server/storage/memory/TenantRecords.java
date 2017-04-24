@@ -155,7 +155,6 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
             final EntityRecord resultingRecord = EntityRecord.newBuilder()
                                                              .setState(packedState)
                                                              .build();
-
             result.put(id, resultingRecord);
         }
 

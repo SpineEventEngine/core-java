@@ -43,6 +43,19 @@ import java.util.Map;
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
+    private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_UNWRAPPER =
+            new Function<EntityRecordWithColumns, EntityRecord>() {
+                // TODO:2017-04-24:dmytro.dashenkov: Extract as a standalone class reused in the project.
+                @Nullable
+                @Override
+                public EntityRecord apply(@Nullable EntityRecordWithColumns input) {
+                    if (input == null) {
+                        return null;
+                    }
+                    return input.getRecord();
+                }
+            };
+
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
     protected InMemoryRecordStorage(boolean multitenant) {
@@ -112,18 +125,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id)
-                           .transform(
-                                   new Function<EntityRecordWithColumns, EntityRecord>() {
-                                       @Nullable
-                                       @Override
-                                       public EntityRecord apply(
-                                               @Nullable EntityRecordWithColumns input) {
-                                           if (input == null) {
-                                               return null;
-                                           }
-                                           return input.getRecord();
-                                       }
-                                   });
+                           .transform(RECORD_UNWRAPPER);
     }
 
     @Override

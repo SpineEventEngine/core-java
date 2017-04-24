@@ -30,7 +30,6 @@ import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
@@ -43,7 +42,6 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Mockito.mock;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
@@ -64,7 +62,6 @@ public class ColumnsShould {
     @Test
     public void pass_null_check() {
         new NullPointerTester()
-                .setDefault(RecordBasedRepository.class, mock(RecordBasedRepository.class))
                 .testStaticMethods(Columns.class,
                                    NullPointerTester.Visibility.PACKAGE);
     }

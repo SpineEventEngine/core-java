@@ -56,10 +56,11 @@ import static org.spine3.test.Verify.assertSize;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ConstantConditions")
-public abstract class RecordBasedRepositoryShould<
-        E extends AbstractVersionableEntity<I, S> & TestEntityWithStringColumn,
-        I,
-        S extends Message> extends TenantAwareTest {
+public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>
+                                                          & TestEntityWithStringColumn,
+                                                  I,
+                                                  S extends Message>
+                                                  extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -123,8 +124,8 @@ public abstract class RecordBasedRepositoryShould<
         return repository.findOrCreate(id);
     }
 
-    private ImmutableCollection<E> find(final EntityFilters filters,
-            final FieldMask firstFieldOnly) {
+    private ImmutableCollection<E> find(EntityFilters filters,
+                                        FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }
 
@@ -331,5 +332,4 @@ public abstract class RecordBasedRepositoryShould<
 
         assertFalse(find(id).isPresent());
     }
-
 }
