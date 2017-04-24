@@ -117,7 +117,7 @@ import static org.spine3.client.SubscriptionValidationError.UNKNOWN_SUBSCRIPTION
 import static org.spine3.client.TopicValidationError.INVALID_TOPIC;
 import static org.spine3.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
 import static org.spine3.io.StreamObservers.memoizingObserver;
-import static org.spine3.io.StreamObservers.noopObserver;
+import static org.spine3.io.StreamObservers.noOpObserver;
 import static org.spine3.server.stand.Given.StandTestProjection;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.test.Verify.assertSize;
@@ -256,7 +256,7 @@ public class StandShould extends TenantAwareTest {
         stand.subscribe(projectProjections, observer);
         final Subscription subscription = observer.firstResponse();
 
-        final StreamObserver<Response> noopObserver = noopObserver();
+        final StreamObserver<Response> noopObserver = noOpObserver();
         stand.activate(subscription, emptyUpdateCallback(), noopObserver);
         assertNotNull(subscription);
 
@@ -435,7 +435,7 @@ public class StandShould extends TenantAwareTest {
         final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
         final Subscription subscription = subscribeAndActivate(stand, allCustomers, memoizeCallback);
 
-        stand.cancel(subscription, StreamObservers.<Response>noopObserver());
+        stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
 
         final Map.Entry<CustomerId, Customer> sampleData = fillSampleCustomers(1).entrySet()
                                                                                  .iterator()
@@ -455,7 +455,7 @@ public class StandShould extends TenantAwareTest {
         final Subscription inexistentSubscription = Subscription.newBuilder()
                                                                 .setId(Subscriptions.newId())
                                                                 .build();
-        stand.cancel(inexistentSubscription, StreamObservers.<Response>noopObserver());
+        stand.cancel(inexistentSubscription, StreamObservers.<Response>noOpObserver());
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
@@ -756,7 +756,7 @@ public class StandShould extends TenantAwareTest {
                                                      .all(Customer.class);
 
         try {
-            stand.execute(readAllCustomers, StreamObservers.<QueryResponse>noopObserver());
+            stand.execute(readAllCustomers, StreamObservers.<QueryResponse>noOpObserver());
             fail("Expected IllegalArgumentException upon executing query with unknown target," +
                          " but got nothing");
         } catch (IllegalArgumentException e) {
@@ -772,7 +772,7 @@ public class StandShould extends TenantAwareTest {
         final Query invalidQuery = Query.getDefaultInstance();
 
         try {
-            stand.execute(invalidQuery, StreamObservers.<QueryResponse>noopObserver());
+            stand.execute(invalidQuery, StreamObservers.<QueryResponse>noOpObserver());
             fail("Expected IllegalArgumentException due to invalid query message passed," +
                          " but got nothing");
         } catch (IllegalArgumentException e) {
@@ -793,7 +793,7 @@ public class StandShould extends TenantAwareTest {
                                                       .allOf(Customer.class);
 
         try {
-            stand.subscribe(allCustomersTopic, StreamObservers.<Subscription>noopObserver());
+            stand.subscribe(allCustomersTopic, StreamObservers.<Subscription>noOpObserver());
             fail("Expected IllegalArgumentException upon subscribing to a topic " +
                          "with unknown target, but got nothing");
         } catch (IllegalArgumentException e) {
@@ -810,7 +810,7 @@ public class StandShould extends TenantAwareTest {
         final Topic invalidTopic = Topic.getDefaultInstance();
 
         try {
-            stand.subscribe(invalidTopic, StreamObservers.<Subscription>noopObserver());
+            stand.subscribe(invalidTopic, StreamObservers.<Subscription>noOpObserver());
             fail("Expected IllegalArgumentException due to an invalid topic message, " +
                          "but got nothing");
         } catch (IllegalArgumentException e) {
@@ -828,7 +828,7 @@ public class StandShould extends TenantAwareTest {
         try {
             stand.activate(subscription,
                            emptyUpdateCallback(),
-                           StreamObservers.<Response>noopObserver());
+                           StreamObservers.<Response>noOpObserver());
             fail("Expected IllegalArgumentException upon activating an unknown subscription, " +
                          "but got nothing");
         } catch (IllegalArgumentException e) {
@@ -844,7 +844,7 @@ public class StandShould extends TenantAwareTest {
         final Subscription subscription = subscriptionWithUnknownTopic();
 
         try {
-            stand.cancel(subscription, StreamObservers.<Response>noopObserver());
+            stand.cancel(subscription, StreamObservers.<Response>noOpObserver());
             fail("Expected IllegalArgumentException upon cancelling an unknown subscription, " +
                          "but got nothing");
         } catch (IllegalArgumentException e) {
@@ -862,7 +862,7 @@ public class StandShould extends TenantAwareTest {
         try {
             stand.activate(invalidSubscription,
                            emptyUpdateCallback(),
-                           StreamObservers.<Response>noopObserver());
+                           StreamObservers.<Response>noOpObserver());
             fail("Expected IllegalArgumentException due to an invalid subscription message " +
                          "passed to `activate`, but got nothing");
         } catch (IllegalArgumentException e) {
@@ -878,7 +878,7 @@ public class StandShould extends TenantAwareTest {
         final Subscription invalidSubscription = Subscription.getDefaultInstance();
 
         try {
-            stand.cancel(invalidSubscription, StreamObservers.<Response>noopObserver());
+            stand.cancel(invalidSubscription, StreamObservers.<Response>noOpObserver());
             fail("Expected IllegalArgumentException due to an invalid subscription message " +
                          "passed to `cancel`, but got nothing");
         } catch (IllegalArgumentException e) {
@@ -991,7 +991,7 @@ public class StandShould extends TenantAwareTest {
         final MemoizingObserver<Subscription> observer = memoizingObserver();
         stand.subscribe(topic, observer);
         final Subscription subscription = observer.firstResponse();
-        stand.activate(subscription, callback, StreamObservers.<Response>noopObserver());
+        stand.activate(subscription, callback, StreamObservers.<Response>noOpObserver());
 
         assertNotNull(subscription);
         return subscription;

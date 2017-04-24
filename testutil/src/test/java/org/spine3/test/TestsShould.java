@@ -30,7 +30,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.io.StreamObservers.noopObserver;
+import static org.spine3.io.StreamObservers.noOpObserver;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.hasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUserId;
@@ -90,7 +90,7 @@ public class TestsShould {
 
     @Test
     public void return_empty_StreamObserver() {
-        final StreamObserver<Response> emptyObserver = noopObserver();
+        final StreamObserver<Response> emptyObserver = noOpObserver();
         assertNotNull(emptyObserver);
         // Call methods just to add to coverage.
         emptyObserver.onNext(Tests.<Response>nullRef());

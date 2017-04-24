@@ -185,7 +185,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * @see #CommandOutputBus#post(Message, StreamObserver)
      */
     public void post(Event event) {
-        post(event, StreamObservers.<Response>noopObserver());
+        post(event, StreamObservers.<Response>noOpObserver());
     }
 
     @Override

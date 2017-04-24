@@ -52,7 +52,7 @@ public class StreamObservers {
      *
      * @return an instance of {@code StreamObserver} which does nothing
      */
-    public static <T> StreamObserver<T> noopObserver() {
+    public static <T> StreamObserver<T> noOpObserver() {
         return new StreamObserver<T>() {
             @Override
             public void onNext(T value) {

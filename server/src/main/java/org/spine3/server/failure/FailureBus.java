@@ -145,7 +145,7 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
      * @see #post(Message, StreamObserver)
      */
     public void post(Failure failure) {
-        post(failure, StreamObservers.<Response>noopObserver());
+        post(failure, StreamObservers.<Response>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

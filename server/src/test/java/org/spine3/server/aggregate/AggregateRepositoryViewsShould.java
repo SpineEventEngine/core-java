@@ -75,7 +75,7 @@ public class AggregateRepositoryViewsShould {
     private void postCommand(String cmd) {
         final Command command =
                 requestFactory.command().create(SHRepository.createCommandMessage(id, cmd));
-        boundedContext.getCommandBus().post(command, StreamObservers.<Response>noopObserver());
+        boundedContext.getCommandBus().post(command, StreamObservers.<Response>noOpObserver());
     }
 
     @Test
