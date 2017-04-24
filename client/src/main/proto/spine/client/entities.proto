@@ -70,6 +70,7 @@ message EntityFilters {
     // Match entities by IDs.
     EntityIdFilter id_filter = 1;
 
+    // Match the entities by the value of the Entity Columns.
     repeated spine.base.FieldFilter column_filter = 2;
 
     // Reserved for more filter types
