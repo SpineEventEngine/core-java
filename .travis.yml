@@ -16,7 +16,7 @@ before_install:
 deploy:
   artifacts:
     paths:
-      - **/build/reports/*.*
+      - ../build/reports/*.*
 
   skip_cleaning: true
   provider: gcs
