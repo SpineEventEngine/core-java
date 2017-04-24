@@ -29,13 +29,37 @@ import org.spine3.client.EntityIdFilter;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A query to a {@link org.spine3.server.storage.RecordStorage RecordStorage} for the records
+ * matching the given parameters.
+ *
+ * <p>Acts like a DTO between the
+ * {@linkplain org.spine3.server.entity.RecordBasedRepository repository} and the
+ * {@link org.spine3.server.storage.RecordStorage RecordStorage}.
+ *
+ * <p>The query contains the acceptable values of the record IDs and the
+ * {@linkplain Column Entity Columns}.
+ *
+ * <p>A storage may ignore the query or throw an exception if it's specified (see
+ * {@link org.spine3.server.stand.StandStorage StandSotrage}). By default, a
+ * {@link org.spine3.server.storage.RecordStorage RecordStorage} supports the Entity queries.
+ *
  * @author Dmytro Dashenkov
+ * @see EntityRecordWithColumns
  */
 public final class EntityQuery {
 
     private final EntityIdFilter idFilter;
     private final ImmutableMultimap<Column<?>, Object> parameters;
 
+    /**
+     * Creates new instance of {@code EntityQuery}.
+     *
+     * @param idFilter   the {@link EntityIdFilter} to get the acceptable ID values from
+     * @param parameters the values of the {@link Column}s stored in a mapping of the
+     *                   {@link Column}'s metadata to the (multiple) acceptable values; if there are
+     *                   no values, all the values are matched upon such Column
+     * @return new instance of {@code EntityQuery}
+     */
     static EntityQuery of(EntityIdFilter idFilter, Multimap<Column<?>, Object> parameters) {
         checkNotNull(idFilter);
         checkNotNull(parameters);
@@ -47,12 +71,19 @@ public final class EntityQuery {
         this.parameters = ImmutableMultimap.copyOf(parameters);
     }
 
-    public Multimap<Column<?>, Object> getParameters() {
-        return parameters;
-    }
-
+    /**
+     * @return the ID filter containing the accepted ID values
+     */
     public EntityIdFilter getIdFilter() {
         return idFilter;
+    }
+
+    /**
+     * @return a {@linkplain Multimap map} of the {@linkplain Column Column metadata} to the
+     * accepted values of the column
+     */
+    public Multimap<Column<?>, Object> getParameters() {
+        return parameters;
     }
 
     @Override
