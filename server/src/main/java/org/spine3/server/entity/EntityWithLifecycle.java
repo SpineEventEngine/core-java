@@ -81,7 +81,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
                     }
                 };
 
-        private static final Predicate<EntityRecordWithColumns> isRecorordWithColumnsVisible =
+        private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible =
                 new Predicate<EntityRecordWithColumns>() {
                     @Override
                     public boolean apply(@Nullable EntityRecordWithColumns input) {
@@ -124,7 +124,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
         }
 
         public static Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible() {
-            return isRecorordWithColumnsVisible;
+            return isRecordWithColumnsVisible;
         }
     }
 }

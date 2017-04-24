@@ -48,10 +48,10 @@ public final class EntityQueries {
 
     /**
      * Creates a new instance of {@link EntityQuery} from the given {@link EntityFilters} targeting
-     * the given entity class.
+     * the given Entity class.
      *
      * @param entityFilters the filters for the Entities specifying the query predicate
-     * @param entityClass the Entity class specifying the query target
+     * @param entityClass   the Entity class specifying the query target
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static EntityQuery from(EntityFilters entityFilters,

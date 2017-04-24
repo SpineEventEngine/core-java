@@ -166,7 +166,7 @@ public final class Field {
      * <p>If the corresponding field is of type {@code Any} it will be unpacked.
      *
      * @return field value or unpacked field value, or
-     *         {@code Optional.absent()} if the field is a defaulf {@code Any}
+     *         {@code Optional.absent()} if the field is a default {@code Any}
      * @throws IllegalStateException if getting the field value caused an exception.
      *                               The root cause will be available from the thrown instance.
      */
