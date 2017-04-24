@@ -249,17 +249,17 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>At this point only {@link org.spine3.client.EntityIdFilter EntityIdFilter} is supported.
-     * All other filters are ignored.
+     * <p>The field paths in the Column field filters are specified to contain a single path
+     * member - the name of the Entity Column.
      *
-     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed
-     * in the same way as by {@link #loadAll(Iterable)}.
+     * <p>All the filtering is delegates to the underlying {@link RecordStorage}.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param filters   entity filters
      * @param fieldMask mask to apply to the entities
-     * @return all the entities in this repository passed the filters.
+     * @return all the entities in this repository passed the filters
+     * @see EntityQuery
      */
     @CheckReturnValue
     public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {

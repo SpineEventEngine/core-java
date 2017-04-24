@@ -42,6 +42,18 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A utility for converting the {@linkplain Message Protobuf Messages} (in form of {@link Any}) into
+ * arbitrary {@linkplain Object Java Objects}.
+ *
+ * <p>Currently, the supported types are:
+ * <ul>
+ *     <li>{@link Message} - converted via {@link AnyPacker};
+ *     <li>Java primitives - the passed {@link Any} is unpacked into one of types {@code Int32Value,
+ *     Int64Value, UInt32Value, UInt64Value, FloatValue, DoubleValue, BoolValue, StringValue,
+ *     BytesValue} and then into the corresponding Java type, either a primitive value, or
+ *     {@code String} of {@link ByteString}.
+ * </ul>
+ *
  * @author Dmytro Dashenkov
  */
 // TODO:2017-04-21:dmytro.dashenkov: Maybe we should move this to client code to make this util reusable.
@@ -51,18 +63,36 @@ final class ProtoToJavaMapper {
         // Prevent utility class initialization
     }
 
+    /**
+     * Performs the {@link Any} to {@link Object} mapping.
+     *
+     * @param message the {@link Any} value to convert
+     * @param target  the conversion target class
+     * @param <T>     the conversion target type
+     * @return te converted value
+     */
     public static <T> T map(Any message, Class<T> target) {
         final AnyCaster<T> caster = AnyCaster.forType(target);
         final T result = caster.apply(message);
         return result;
     }
 
+    /**
+     * Selects and retrieves a {@link Function} for performing the described conversion.
+     *
+     * @param target the conversion target class
+     * @param <T> the conversion target type
+     * @return the conversion target type
+     */
     public static <T> Function<Any, T> function(Class<T> target) {
         final AnyCaster<T> caster = AnyCaster.forType(target);
         return caster;
     }
 
-    abstract static class AnyCaster<T> implements Function<Any, T> {
+    /**
+     * The {@link Function} performing the described type convertion.
+     */
+    private abstract static class AnyCaster<T> implements Function<Any, T> {
 
         private static <T> AnyCaster<T> forType(Class<T> cls) {
             checkNotNull(cls);
@@ -87,8 +117,7 @@ final class ProtoToJavaMapper {
         @Override
         protected T cast(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
-            @SuppressWarnings("unchecked")
-            final T result = (T) unpacked;
+            @SuppressWarnings("unchecked") final T result = (T) unpacked;
             return result;
         }
     }
@@ -113,8 +142,7 @@ final class ProtoToJavaMapper {
         protected T cast(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
             final Class boxedType = unpacked.getClass();
-            @SuppressWarnings("unchecked")
-            final Function<Message, T> typeUnpacker =
+            @SuppressWarnings("unchecked") final Function<Message, T> typeUnpacker =
                     (Function<Message, T>) PROTO_WRAPPER_TO_PRIMITIVE.get(boxedType);
             checkArgument(typeUnpacker != null,
                           "Could not find a primitive type for %s.",

@@ -117,6 +117,19 @@ class Columns {
         return fields;
     }
 
+    /**
+     * Retrieves a {@link Column} instance of the given name and from the given Entity class.
+     *
+     * <p>If the given Entity class has not yet been added to the Column cache, it's added upon this
+     * operation.
+     *
+     * <p>If no column is found, an exception is thrown.
+     *
+     * @param entityClass the class containing the {@link Column} definition
+     * @param columnName  the name of the {@link Column}
+     * @return an instance of {@link Column} with the given name
+     * @throws IllegalStateException if the {@link Column} is not found
+     */
     static Column<?> metadata(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkNotNull(columnName);

@@ -24,6 +24,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
+import org.spine3.annotations.Internal;
 import org.spine3.client.EntityId;
 
 import javax.annotation.Nullable;
@@ -35,8 +36,14 @@ import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
+ * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
+ * {@link EntityQuery}.
+ *
+ * <p>See {@link EntityQuery} for the matching contract
+ *
  * @author Dmytro Dashenkov
  */
+@Internal
 public final class EntityQueryMatcher implements Predicate<EntityRecordWithColumns> {
 
     private static final Function<EntityId, Any> ENTITY_ID_UNWRAPPER =

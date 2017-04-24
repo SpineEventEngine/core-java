@@ -221,6 +221,14 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return readAllRecords(fieldMask);
     }
 
+    /**
+     * Reads all the records matching the given {@link EntityQuery} and applies the given
+     * {@link FieldMask} to the result records' states.
+     *
+     * @param query     the query to execute
+     * @param fieldMask the fields to retrieve
+     * @return the matching records mapped upon their IDs
+     */
     public Map<I, EntityRecord> readAll(EntityQuery query, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(query);
@@ -254,6 +262,9 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
 
+    /**
+     * @see #readAll(EntityQuery, FieldMask)
+     */
     protected abstract Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask);
 
     /**

@@ -35,7 +35,10 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A factory for generating the {@link EntityQuery} instances.
+ *
  * @author Dmytro Dashenkov
+ * @see EntityQuery
  */
 public final class EntityQueries {
 
@@ -43,6 +46,14 @@ public final class EntityQueries {
         // Prevent utility class initialization
     }
 
+    /**
+     * Creates a new instance of {@link EntityQuery} from the given {@link EntityFilters} targeting
+     * the given entity class.
+     *
+     * @param entityFilters the filters for the Entities specifying the query predicate
+     * @param entityClass the Entity class specifying the query target
+     * @return new instance of the {@code EntityQuery} with the specified attributes
+     */
     public static EntityQuery from(EntityFilters entityFilters,
                                    Class<? extends Entity> entityClass) {
         checkNotNull(entityFilters);

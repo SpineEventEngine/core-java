@@ -24,8 +24,11 @@ import com.google.protobuf.FieldMask;
 import org.spine3.annotations.SPI;
 import org.spine3.base.StringifierRegistry;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.type.TypeUrl;
+
+import java.util.Map;
 
 /**
  * Serves as a storage for the latest
@@ -69,4 +72,18 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      */
     public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type,
                                                                     FieldMask fieldMask);
+
+    /**
+     * The {@code StandStorage} is specified not to satisfy the {@link EntityQuery}.
+     *
+     * <p>Calling this method is equivalent to calling {@code readAll(fieldMask)}.
+     *
+     * @param query     ignored
+     * @param fieldMask the fields to retrieve
+     * @return all the records with the {@link FieldMask} applied
+     */
+    @Override
+    public Map<AggregateStateId, EntityRecord> readAll(EntityQuery query, FieldMask fieldMask) {
+        return readAll(fieldMask);
+    }
 }
