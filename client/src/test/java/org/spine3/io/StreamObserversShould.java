@@ -19,9 +19,15 @@
  */
 package org.spine3.io;
 
+import io.grpc.stub.StreamObserver;
 import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -37,5 +43,23 @@ public class StreamObserversShould {
     @Test
     public void return_non_null_empty_observer() {
         assertNotNull(StreamObservers.noOpObserver());
+    }
+
+    @Test
+    public void create_proper_error_forwarding_observer() {
+        @SuppressWarnings("unchecked")  // to make the mock creation look simpler.
+        final StreamObserver<Object> delegate = mock(StreamObserver.class);
+
+        final StreamObserver<Object> forwardingInstance = StreamObservers.forwardErrorsOnly(
+                delegate);
+
+        forwardingInstance.onNext(new Object());
+        forwardingInstance.onCompleted();
+        final RuntimeException errorToForward = new RuntimeException("Sample exception");
+        forwardingInstance.onError(errorToForward);
+
+        verify(delegate, times(1)).onError(ArgumentMatchers.eq(errorToForward));
+        verify(delegate, never()).onNext(ArgumentMatchers.any());
+        verify(delegate, never()).onCompleted();
     }
 }
