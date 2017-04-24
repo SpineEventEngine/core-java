@@ -363,6 +363,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEquals(record, readRecord.get());
     }
 
+    @SuppressWarnings("OverlyLongMethod") // Complex test case (still tests a single operation)
     @Test
     public void filter_records_by_columns() {
         final int requiredValue = 777;
