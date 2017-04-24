@@ -31,7 +31,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Given;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -371,7 +371,8 @@ public class AggregateRepositoryShould {
                    extends AggregateRepository<ProjectId, ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+            initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                            .get());
         }
     }
 }

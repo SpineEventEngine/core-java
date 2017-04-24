@@ -28,6 +28,7 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.TimeZone;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Durations2.hours;
@@ -38,6 +39,7 @@ import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
 import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
 import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
+import static org.spine3.time.ZoneOffsets.adjustZero;
 import static org.spine3.time.ZoneOffsets.getDefault;
 import static org.spine3.time.ZoneOffsets.ofHours;
 import static org.spine3.time.ZoneOffsets.ofHoursMinutes;
@@ -141,5 +143,18 @@ public class ZoneOffsetsShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_when_hours_and_minutes_have_different_sign_negative_minutes() {
         ZoneOffsets.ofHoursMinutes(1, -10);
+    }
+
+    @Test
+    public void adjust_zero_offset_without_zone() {
+        assertEquals(ZoneOffsets.UTC, adjustZero(ZoneOffsets.ofSeconds(0)));
+
+        final ZoneOffset offset = ZoneOffsets.getDefault();
+        assertEquals(offset, adjustZero(offset));
+
+        final ZoneOffset gmtOffset = ZoneConverter.instance()
+                                                  .convert(TimeZone.getTimeZone("GMT"));
+        checkNotNull(gmtOffset);
+        assertEquals(gmtOffset, adjustZero(gmtOffset));
     }
 }

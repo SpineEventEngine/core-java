@@ -39,7 +39,7 @@ import org.spine3.base.Failures;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.Given;
 import org.spine3.server.commandbus.ProcessingStatus;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
@@ -88,7 +88,8 @@ public class StorageShould extends TenantAwareTest {
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
         storage = new Storage();
-        storage.initStorage(InMemoryStorageFactory.getInstance(true));
+        storage.initStorage(StorageFactorySwitch.getInstance(true)
+                                                .get());
     }
 
     @After
