@@ -166,19 +166,6 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return filtered.isEmpty();
     }
 
-    private enum EntityRecordUnPacker implements Function<EntityRecordWithColumns, EntityRecord> {
-        INSTANCE;
-
-        @Nullable
-        @Override
-        public EntityRecord apply(@Nullable EntityRecordWithColumns input) {
-            if (input == null) {
-                return null;
-            }
-            return input.getRecord();
-        }
-    }
-
     private static class FieldMaskApplier implements Function<EntityRecord, EntityRecord> {
 
         private final FieldMask fieldMask;

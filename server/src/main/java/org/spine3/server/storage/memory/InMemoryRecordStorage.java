@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage.memory;
 
-import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
@@ -28,7 +27,6 @@ import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
@@ -42,19 +40,6 @@ import java.util.Map;
  * @author Alex Tymchenko
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
-
-    private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_UNWRAPPER =
-            new Function<EntityRecordWithColumns, EntityRecord>() {
-                // TODO:2017-04-24:dmytro.dashenkov: Extract as a standalone class reused in the project.
-                @Nullable
-                @Override
-                public EntityRecord apply(@Nullable EntityRecordWithColumns input) {
-                    if (input == null) {
-                        return null;
-                    }
-                    return input.getRecord();
-                }
-            };
 
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
@@ -84,7 +69,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
-        // since {@code null} may be present in it.
+        // since null may be present in it.
         final Collection<EntityRecord> result = new LinkedList<>();
 
         for (I givenId : givenIds) {
@@ -125,7 +110,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id)
-                           .transform(RECORD_UNWRAPPER);
+                           .transform(EntityRecordUnPacker.INSTANCE);
     }
 
     @Override
