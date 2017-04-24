@@ -39,9 +39,7 @@ class InvalidQueryException extends InvalidRequestException {
      * @param query       a related query
      * @param error       an error occurred
      */
-    protected InvalidQueryException(String messageText,
-                                    Query query,
-                                    Error error) {
+    protected InvalidQueryException(String messageText, Query query, Error error) {
         super(messageText, query, error);
     }
 
