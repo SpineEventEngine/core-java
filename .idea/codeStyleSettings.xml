@@ -16,7 +16,6 @@
           <option name="KEEP_BLANK_LINES_IN_CODE" value="1" />
           <option name="KEEP_BLANK_LINES_BEFORE_RBRACE" value="1" />
           <option name="ALIGN_MULTILINE_CHAINED_METHODS" value="true" />
-          <option name="ALIGN_MULTILINE_PARAMETERS" value="false" />
           <option name="ALIGN_MULTILINE_PARAMETERS_IN_CALLS" value="true" />
           <option name="ALIGN_MULTILINE_THROWS_LIST" value="true" />
           <option name="ALIGN_MULTILINE_EXTENDS_LIST" value="true" />

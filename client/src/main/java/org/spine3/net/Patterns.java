@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
         {"DuplicateStringLiteralInspection" /* OK as they are parts of patterns. */,
          "SingleCharacterStringConcatenation" /* ... will be concatenated during compilation*/,
          "unused" /* For future use of other value object classes in this package. */})
-class Patterns {
+final class Patterns {
 
     /**
      *  Regular expression to match all IANA top-level domains.

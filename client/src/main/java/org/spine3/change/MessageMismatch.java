@@ -33,7 +33,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  *
  * @author Alexander Yevsyukov
  */
-public class MessageMismatch {
+public final class MessageMismatch {
 
     private MessageMismatch() {
         // Prevent instantiation of this utility class.

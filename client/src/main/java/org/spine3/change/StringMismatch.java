@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class StringMismatch {
+public final class StringMismatch {
 
     private StringMismatch() {
         // Prevent instantiation of this utility class.

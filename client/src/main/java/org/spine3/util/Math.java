@@ -27,9 +27,10 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-public class Math {
+public final class Math {
 
     private Math() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

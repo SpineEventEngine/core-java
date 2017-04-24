@@ -34,8 +34,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
-import static org.spine3.util.Exceptions.wrappedCause;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -185,7 +185,7 @@ public final class Field {
                 result = fieldValue;
             }
         } catch (IllegalAccessException | InvocationTargetException e) {
-            throw wrappedCause(e);
+            throw illegalStateWithCauseOf(e);
         }
 
         return Optional.fromNullable(result);

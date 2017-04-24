@@ -20,11 +20,14 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Optional;
 import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.MessageOrBuilder;
 import org.spine3.annotations.Internal;
+import org.spine3.string.Stringifier;
+import org.spine3.string.StringifierRegistry;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -42,7 +45,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public class Identifiers {
+public final class Identifiers {
 
     /** The suffix of ID fields. */
     public static final String ID_PROPERTY_SUFFIX = "id";
@@ -194,10 +197,9 @@ public class Identifiers {
         final Class<? extends Message> msgClass = message.getClass();
         final TypeToken<? extends Message> msgToken = TypeToken.of(msgClass);
         final Type msgType = msgToken.getType();
-        if (registry.hasStringifierFor(msgType)) {
-            @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as we check for presence above.
-            final Stringifier converter = registry.get(msgType)
-                                                  .get();
+        final Optional<Stringifier<Object>> optional = registry.get(msgType);
+        if (optional.isPresent()) {
+            final Stringifier converter = optional.get();
             result = (String) converter.convert(message);
         } else {
             result = convert(message);

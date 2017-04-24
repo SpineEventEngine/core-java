@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class LongMismatch {
+public final class LongMismatch {
 
     private LongMismatch() {
         // Prevent instantiation.

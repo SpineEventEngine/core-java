@@ -30,10 +30,10 @@ import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
+import org.spine3.time.Time;
 import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
@@ -116,7 +116,7 @@ public class TypeNameShould {
                                             .setProducerId(producerId)
                                             .setCommandContext(command.getContext())
                                             .build();
-        final Event event = ef.createEvent(Timestamps2.getCurrentTime(), Tests.<Version>nullRef());
+        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
 
         final TypeName typeName = TypeName.ofEvent(event);
         assertNotNull(typeName);

@@ -26,12 +26,13 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.command.EventFactory;
+import org.spine3.string.Stringifiers;
 import org.spine3.test.EventTests;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
+import org.spine3.time.Time;
 
 import java.util.Comparator;
 import java.util.List;
@@ -72,7 +73,7 @@ public class EventsShould {
     private final DoubleValue doubleValue = newDoubleValue(10.1);
 
     static EventContext newEventContext() {
-        final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
+        final Event event = eventFactory.createEvent(Time.getCurrentTime(),
                                                      Tests.<Version>nullRef());
         return event.getContext();
     }
@@ -92,13 +93,13 @@ public class EventsShould {
     public void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
-        final Command cmd = requestFactory.command().create(Timestamps2.getCurrentTime());
+        final Command cmd = requestFactory.command().create(Time.getCurrentTime());
         final StringValue producerId = newStringValue(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
                                                 .setProducerId(producerId)
                                                 .setCommandContext(cmd.getContext())
                                                 .build();
-        context = eventFactory.createEvent(Timestamps2.getCurrentTime(), Tests.<Version>nullRef())
+        context = eventFactory.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef())
                               .getContext();
     }
 

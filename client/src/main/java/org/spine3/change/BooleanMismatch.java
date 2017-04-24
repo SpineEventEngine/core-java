@@ -32,7 +32,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class BooleanMismatch {
+public final class BooleanMismatch {
 
     private BooleanMismatch() {
         // Prevent instantiation of this utility class.

@@ -22,7 +22,7 @@ package org.spine3.base;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Timestamps2;
 
 import javax.annotation.Nullable;
 
@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class EventPredicates {
+public final class EventPredicates {
 
     private EventPredicates() {
         // Prevent instantiation of this utility class.

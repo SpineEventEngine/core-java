@@ -62,11 +62,11 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.pack;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.server.commandstore.Records.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 

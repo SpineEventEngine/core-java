@@ -29,7 +29,7 @@ import static org.spine3.base.Response.StatusCase.OK;
  *
  * @author Alexander Yevsyukov
  */
-public class Responses {
+public final class Responses {
 
     /** The response returned on successful acceptance of a message for processing. */
     private static final Response RESPONSE_OK = Response.newBuilder()

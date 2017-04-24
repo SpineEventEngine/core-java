@@ -34,8 +34,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
-import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -56,6 +54,8 @@ import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.time.Durations2;
+import org.spine3.time.Time;
 import org.spine3.type.EventClass;
 import org.spine3.users.TenantId;
 
@@ -465,7 +465,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void convert_null_timestamp_to_default() {
-        final Timestamp timestamp = Timestamps2.getCurrentTime();
+        final Timestamp timestamp = Time.getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
