@@ -26,7 +26,9 @@ import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityQueryMatcher;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
@@ -36,6 +38,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.transformValues;
@@ -43,7 +46,6 @@ import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecorordWithColumnsVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
-import static org.spine3.server.entity.FieldMasks.maskApplier;
 import static org.spine3.type.TypeUrl.from;
 
 /**
@@ -89,7 +91,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     Map<I, EntityRecord> readAllRecords() {
         final Map<I, EntityRecordWithColumns> filtered = filtered();
         final Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecodUnPacker.INSTANCE);
+                                                             EntityRecordUnPacker.INSTANCE);
         final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
         return result;
     }
@@ -99,9 +101,9 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                 filterValues(filtered(),
                              new EntityQueryMatcher(query));
         final Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecodUnPacker.INSTANCE);
+                                                             EntityRecordUnPacker.INSTANCE);
         final Function<EntityRecord, EntityRecord> fieldMaskApplier =
-                maskApplier(fieldMask, ENTITY_RECORD_TYPE_URL);
+                new FieldMaskApplier(fieldMask);
         final Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier);
         final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
         return result;
@@ -168,8 +170,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return filtered.isEmpty();
     }
 
-    private enum  EntityRecodUnPacker
-            implements Function<EntityRecordWithColumns, EntityRecord> {
+    private enum EntityRecordUnPacker implements Function<EntityRecordWithColumns, EntityRecord> {
         INSTANCE;
 
         @Nullable
@@ -179,6 +180,30 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                 return null;
             }
             return input.getRecord();
+        }
+    }
+
+    private static class FieldMaskApplier implements Function<EntityRecord, EntityRecord> {
+
+        private final FieldMask fieldMask;
+
+        private FieldMaskApplier(FieldMask fieldMask) {
+            this.fieldMask = fieldMask;
+        }
+
+        @Nullable
+        @Override
+        public EntityRecord apply(@Nullable EntityRecord input) {
+            checkNotNull(input);
+            final Any packedState = input.getState();
+            final Message state = AnyPacker.unpack(packedState);
+            final TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
+            final Message maskedState = FieldMasks.applyMask(fieldMask, state, typeUrl);
+            final Any repackedState = AnyPacker.pack(maskedState);
+            final EntityRecord result = EntityRecord.newBuilder(input)
+                                                    .setState(repackedState)
+                                                    .build();
+            return result;
         }
     }
 }

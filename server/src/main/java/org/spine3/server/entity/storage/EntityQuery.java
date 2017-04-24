@@ -24,6 +24,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
+import org.spine3.client.EntityIdFilter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,19 +33,26 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityQuery {
 
-    private final Multimap<Column<?>, Object> parameters;
+    private final EntityIdFilter idFilter;
+    private final ImmutableMultimap<Column<?>, Object> parameters;
 
-    static EntityQuery of(Multimap<Column<?>, Object> parameters) {
+    static EntityQuery of(EntityIdFilter idFilter, Multimap<Column<?>, Object> parameters) {
+        checkNotNull(idFilter);
         checkNotNull(parameters);
-        return new EntityQuery(parameters);
+        return new EntityQuery(idFilter, parameters);
     }
 
-    private EntityQuery(Multimap<Column<?>, Object> parameters) {
-        this.parameters = parameters;
+    private EntityQuery(EntityIdFilter idFilter, Multimap<Column<?>, Object> parameters) {
+        this.idFilter = idFilter;
+        this.parameters = ImmutableMultimap.copyOf(parameters);
     }
 
     public Multimap<Column<?>, Object> getParameters() {
-        return ImmutableMultimap.copyOf(parameters);
+        return parameters;
+    }
+
+    public EntityIdFilter getIdFilter() {
+        return idFilter;
     }
 
     @Override
@@ -56,17 +64,19 @@ public final class EntityQuery {
             return false;
         }
         EntityQuery that = (EntityQuery) o;
-        return Objects.equal(parameters, that.parameters);
+        return Objects.equal(idFilter, that.idFilter) &&
+                Objects.equal(getParameters(), that.getParameters());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(parameters);
+        return Objects.hashCode(idFilter, getParameters());
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
+                          .add("idFilter", idFilter)
                           .add("parameters", parameters)
                           .toString();
     }

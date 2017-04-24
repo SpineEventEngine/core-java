@@ -20,24 +20,43 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
+import com.google.protobuf.Any;
+import org.spine3.client.EntityId;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * @author Dmytro Dashenkov
  */
 public final class EntityQueryMatcher implements Predicate<EntityRecordWithColumns> {
 
-    private final EntityQuery entityQuery;
+    private static final Function<EntityId, Any> ENTITY_ID_UNWRAPPER =
+            new Function<EntityId, Any>() {
+                @Override
+                public Any apply(@Nullable EntityId input) {
+                    checkNotNull(input);
+                    return input.getId();
+                }
+            };
+
+    private final Collection<Any> acceptedIds;
+    private final Multimap<Column<?>, Object> queryParams;
 
     public EntityQueryMatcher(EntityQuery query) {
-        this.entityQuery = checkNotNull(query);
+        checkNotNull(query);
+        final Collection<EntityId> entityIds = query.getIdFilter()
+                                                    .getIdsList();
+        this.acceptedIds = newHashSet(transform(entityIds, ENTITY_ID_UNWRAPPER));
+        this.queryParams = query.getParameters();
     }
 
     @Override
@@ -46,10 +65,15 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
             return false;
         }
 
-        final Map<String, Column.MemoizedValue<?>> entityColumns = input.getColumnValues();
+        final Any entityId = input.getRecord()
+                                  .getEntityId();
+        final boolean idMatches = acceptedIds.contains(entityId);
+        if (!idMatches) {
+            return false;
+        }
 
-        final Multimap<Column<?>, Object> params = entityQuery.getParameters();
-        final Map<Column<?>, Collection<Object>> paramsMap = params.asMap();
+        final Map<String, Column.MemoizedValue<?>> entityColumns = input.getColumnValues();
+        final Map<Column<?>, Collection<Object>> paramsMap = queryParams.asMap();
 
         for (Map.Entry<Column<?>, Collection<Object>> param : paramsMap.entrySet()) {
             final Column<?> column = param.getKey();

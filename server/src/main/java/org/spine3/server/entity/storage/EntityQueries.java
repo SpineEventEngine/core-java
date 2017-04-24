@@ -27,6 +27,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.base.FieldFilter;
 import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
@@ -60,7 +61,8 @@ public final class EntityQueries {
                                                                            typeTransformer);
             queryParams.putAll(column, filterValues);
         }
-        final EntityQuery query = EntityQuery.of(queryParams);
+        final EntityIdFilter idFilter = entityFilters.getIdFilter();
+        final EntityQuery query = EntityQuery.of(idFilter, queryParams);
         return query;
     }
 

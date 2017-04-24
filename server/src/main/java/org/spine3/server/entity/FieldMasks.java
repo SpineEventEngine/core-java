@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Function;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.FieldMask;
@@ -190,23 +189,6 @@ public class FieldMasks {
                        e);
             return message;
         }
-    }
-
-    public static <M extends Message> Function<M, M> maskApplier(final FieldMask mask,
-                                                                 final TypeUrl type) {
-        checkNotNull(mask);
-        checkNotNull(type);
-
-        return new Function<M, M>() {
-            @Nullable
-            @Override
-            public M apply(@Nullable M input) {
-                if (input == null) {
-                    return null;
-                }
-                return applyMask(mask, input, type);
-            }
-        };
     }
 
     private static <M extends Message, B extends Message.Builder> M messageForFilter(
