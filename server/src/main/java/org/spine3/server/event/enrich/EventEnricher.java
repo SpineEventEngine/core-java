@@ -37,6 +37,7 @@ import org.spine3.base.Enrichment;
 import org.spine3.base.Enrichment.Container;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
@@ -52,15 +53,13 @@ import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.FluentIterable.from;
 import static com.google.common.collect.LinkedListMultimap.create;
 import static com.google.common.collect.Multimaps.synchronizedMultimap;
-import static org.spine3.base.Events.createEvent;
-import static org.spine3.base.Events.getMessage;
-import static org.spine3.base.Events.isEnrichmentEnabled;
+import static org.spine3.base.Enrichments.isEnrichmentEnabled;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * {@code EventEnricher} extends information of an event basing on its type and content.
  *
- * <p>The interface implements
+ * <p>The class implements the
  * <a href="http://www.enterpriseintegrationpatterns.com/patterns/messaging/DataEnricher.html">ContentEnricher</a>
  * Enterprise Integration pattern.
  *
@@ -165,10 +164,9 @@ public class EventEnricher {
         checkTypeRegistered(event);
         checkEnabled(event);
 
-        final Message eventMessage = getMessage(event);
-        final EventContext eventContext = event.getContext();
+        final EventEnvelope envelope = EventEnvelope.of(event);
 
-        final Action action = new Action(this, eventMessage, eventContext);
+        final Action action = new Action(this, envelope);
         final Event result = action.perform();
         return result;
     }
@@ -177,17 +175,15 @@ public class EventEnricher {
      * The method object class for enriching an event.
      */
     private static class Action {
-        private final Message eventMessage;
-        private final EventContext eventContext;
+        private final EventEnvelope envelope;
         private final Collection<EnrichmentFunction<?, ?>> availableFunctions;
 
         private final Map<String, Any> enrichments = Maps.newHashMap();
 
-        private Action(EventEnricher parent, Message eventMessage, EventContext eventContext) {
-            this.eventMessage = eventMessage;
-            this.eventContext = eventContext;
-            final Class<? extends Message> eventClass = EventClass.of(eventMessage)
-                                                                  .value();
+        private Action(EventEnricher parent, EventEnvelope envelope) {
+            this.envelope = envelope;
+            final Class<? extends Message> eventClass = envelope.getMessageClass()
+                                                                .value();
             final Collection<EnrichmentFunction<?, ?>> functionsPerClass =
                     parent.functions.get(eventClass);
             this.availableFunctions = filter(functionsPerClass, EnrichmentFunction.activeOnly());
@@ -196,11 +192,16 @@ public class EventEnricher {
         private Event perform() {
             createEnrichments();
             final EventContext enrichedContext = enrichContext();
-            final Event result = createEvent(eventMessage, enrichedContext);
+            final Event result = envelope.getOuterObject()
+                                         .toBuilder()
+                                         .setContext(enrichedContext)
+                                         .build();
             return result;
         }
 
         private void createEnrichments() {
+            final EventContext eventContext = envelope.getEventContext();
+            final Message eventMessage = envelope.getMessage();
             for (EnrichmentFunction function : availableFunctions) {
                 function.setContext(eventContext);
                 final Message enriched = apply(function, eventMessage);
@@ -230,7 +231,7 @@ public class EventEnricher {
             checkNotNull(
                 enriched,
                 "EnrichmentFunction %s produced `null` from event message %s",
-                function, eventMessage
+                function, envelope.getMessage()
             );
         }
 
@@ -239,9 +240,10 @@ public class EventEnricher {
                     Enrichment.newBuilder()
                               .setContainer(Container.newBuilder()
                                                      .putAllItems(enrichments));
-            return eventContext.toBuilder()
-                               .setEnrichment(enrichment)
-                               .build();
+            return envelope.getEventContext()
+                           .toBuilder()
+                           .setEnrichment(enrichment)
+                           .build();
         }
     }
 

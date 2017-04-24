@@ -24,14 +24,14 @@ import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * Utilities for working with {@link Version}.
  *
  * @author Alexander Yevsyukov
  */
-public class Versions {
+public final class Versions {
 
     private Versions() {
         // Prevent instantiation of this utility class.

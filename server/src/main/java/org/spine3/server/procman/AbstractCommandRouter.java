@@ -29,7 +29,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Response;
-import org.spine3.server.command.CommandBus;
+import org.spine3.server.commandbus.CommandBus;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -70,7 +70,9 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     private final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
 
-    AbstractCommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
+    AbstractCommandRouter(CommandBus commandBus,
+                          Message commandMessage,
+                          CommandContext commandContext) {
         this.commandBus = checkNotNull(commandBus);
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
@@ -84,7 +86,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * <p>This method provides return type covariance in fluent API methods.
      *
      * @see #add(Message)
-     * @see #addAll(Iterable) 
+     * @see #addAll(Iterable)
      */
     protected abstract T getThis();
 
@@ -165,7 +167,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<Response> newResponseObserver(final SettableFuture<Void> finishFuture) {
+    private static StreamObserver<Response> newResponseObserver(
+            final SettableFuture<Void> finishFuture) {
         return new StreamObserver<Response>() {
             @Override
             public void onNext(Response response) {

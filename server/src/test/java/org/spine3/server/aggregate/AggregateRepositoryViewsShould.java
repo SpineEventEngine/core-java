@@ -28,11 +28,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -45,7 +45,7 @@ import static org.spine3.protobuf.Values.newStringValue;
 @SuppressWarnings("OptionalGetWithoutIsPresent") // we do get() in assertions.
 public class AggregateRepositoryViewsShould {
 
-    private final CommandFactory commandFactory = TestCommandFactory.newInstance(getClass());
+    private final ActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(getClass());
     private BoundedContext boundedContext;
     /**
      * The default behaviour of an {@code AggregateRepository}.
@@ -69,15 +69,17 @@ public class AggregateRepositoryViewsShould {
         postCommand("createCommand");
     }
 
-    /** Creates a command and posts it to {@code CommandBus} for being processed by the repository. */
+    /** Creates a command and posts it to {@code CommandBus}
+     * for being processed by the repository. */
     private void postCommand(String cmd) {
-        final Command command = commandFactory.createCommand(SHRepository.createCommandMessage(id, cmd));
+        final Command command =
+                requestFactory.command().create(SHRepository.createCommandMessage(id, cmd));
         boundedContext.getCommandBus().post(command, emptyObserver());
     }
 
     @Test
     public void load_aggregate_if_no_status_flags_set() {
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertTrue(aggregate.isPresent());
         final SHAggregate agg = aggregate.get();
@@ -89,7 +91,7 @@ public class AggregateRepositoryViewsShould {
     public void not_load_aggregates_with_archived_status() {
         postCommand("archive");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertFalse(aggregate.isPresent());
     }
@@ -98,7 +100,7 @@ public class AggregateRepositoryViewsShould {
     public void not_load_aggregates_with_deleted_status() {
         postCommand("delete");
 
-        aggregate = repository.load(id);
+        aggregate = repository.find(id);
 
         assertFalse(aggregate.isPresent());
     }
@@ -133,16 +135,6 @@ public class AggregateRepositoryViewsShould {
             }
             getBuilder().setValue(msg);
         }
-
-        @Override
-        protected boolean isArchived() {
-            return super.isArchived();
-        }
-
-        @Override
-        protected boolean isDeleted() {
-            return super.isDeleted();
-        }
     }
 
     /**
@@ -174,7 +166,8 @@ public class AggregateRepositoryViewsShould {
         /**
          * Custom {@code IdCommandFunction} that parses an aggregate ID from {@code StringValue}.
          */
-        private static final IdCommandFunction<Long, Message> parsingFunc = new IdCommandFunction<Long, Message>() {
+        private static final IdCommandFunction<Long, Message> parsingFunc =
+                new IdCommandFunction<Long, Message>() {
             @Override
             public Long apply(Message message, CommandContext context) {
                 final Long result = getId((StringValue)message);

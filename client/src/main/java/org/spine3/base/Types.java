@@ -24,6 +24,7 @@ import com.google.common.reflect.TypeParameter;
 import com.google.common.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -33,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Illia Shepilov
  */
-public class Types {
+public final class Types {
 
     private Types() {
         // Disable instantiation of this utility class.
@@ -52,9 +53,25 @@ public class Types {
         checkNotNull(keyClass);
         checkNotNull(valueClass);
 
-        final Type type =  new TypeToken<Map<K, V>>() {}.where(new TypeParameter<K>() {}, keyClass)
-                                                        .where(new TypeParameter<V>() {}, valueClass)
-                                                        .getType();
+        final Type type = new TypeToken<Map<K, V>>() {}.where(new TypeParameter<K>() {}, keyClass)
+                                                       .where(new TypeParameter<V>() {}, valueClass)
+                                                       .getType();
+        return type;
+    }
+
+    /**
+     * Creates the parametrized {@code Type} of the list.
+     *
+     * @param elementClass the class of the list elements
+     * @param <T>          the type of the elements in this list
+     * @return the type of the list
+     */
+    public static <T> Type listTypeOf(Class<T> elementClass) {
+        checkNotNull(elementClass);
+
+        final Type type =
+                new TypeToken<List<T>>() {}.where(new TypeParameter<T>() {}, elementClass)
+                                                      .getType();
         return type;
     }
 }

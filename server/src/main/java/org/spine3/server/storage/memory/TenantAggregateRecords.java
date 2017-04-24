@@ -26,10 +26,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.entity.EntityWithLifecycle;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.time.Timestamps2;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;
@@ -67,7 +67,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
         }
     };
 
-    private final Multimap<I, AggregateEventRecord> filtered = Multimaps.filterKeys(records, isVisible);
+    private final Multimap<I, AggregateEventRecord> filtered =
+            Multimaps.filterKeys(records, isVisible);
 
     private final Map<I, Integer> eventCounts = newHashMap();
 
@@ -173,8 +174,8 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
     }
 
     /** Used for sorting by timestamp descending (from newer to older). */
-    private static class AggregateStorageRecordReverseComparator implements Comparator<AggregateEventRecord>,
-                                                                            Serializable {
+    private static class AggregateStorageRecordReverseComparator
+            implements Comparator<AggregateEventRecord>, Serializable {
         private static final long serialVersionUID = 0L;
 
         @Override

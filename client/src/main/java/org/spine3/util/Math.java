@@ -20,14 +20,17 @@
 
 package org.spine3.util;
 
+import static java.lang.String.format;
+
 /**
  * Math utilities.
  *
  * @author Alexander Yevsyukov
  */
-public class Math {
+public final class Math {
 
     private Math() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -60,7 +63,7 @@ public class Math {
     }
 
     private static long throwOverflow(long a, int b) {
-        throw new ArithmeticException(String.format("Multiplication overflows a long: %d * %d", a, b));
+        throw new ArithmeticException(format("Multiplication overflows a long: %d * %d", a, b));
     }
 
     /**

@@ -54,7 +54,9 @@ class FieldEnricher<S, T> extends EnrichmentFunction<S, T> {
     static <S, T> FieldEnricher<S, T> newInstance(Class<S> eventFieldClass,
                                                                 Class<T> enrichmentFieldClass,
                                                                 Function<S, T> translator) {
-        final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass, enrichmentFieldClass, translator);
+        final FieldEnricher<S, T> result = new FieldEnricher<>(eventFieldClass,
+                                                               enrichmentFieldClass,
+                                                               translator);
         return result;
     }
 

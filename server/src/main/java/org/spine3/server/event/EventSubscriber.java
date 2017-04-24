@@ -26,6 +26,7 @@ import org.spine3.base.EventContext;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.bus.MessageDispatcher;
 import org.spine3.server.reflect.EventSubscriberMethod;
+import org.spine3.server.tenant.EventOperation;
 import org.spine3.type.EventClass;
 
 import javax.annotation.Nullable;
@@ -50,8 +51,14 @@ public abstract class EventSubscriber implements EventDispatcher {
     private Set<EventClass> eventClasses;
 
     @Override
-    public void dispatch(EventEnvelope envelope) {
-        handle(envelope.getMessage(), envelope.getEventContext());
+    public void dispatch(final EventEnvelope envelope) {
+        final EventOperation op = new EventOperation(envelope.getOuterObject()) {
+            @Override
+            public void run() {
+                handle(envelope.getMessage(), envelope.getEventContext());
+            }
+        };
+        op.execute();
     }
 
     @Override

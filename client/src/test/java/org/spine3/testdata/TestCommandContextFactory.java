@@ -30,20 +30,19 @@ import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.newUserId;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.time.ZoneOffsets.UTC;
-
 
 /**
  * Creates Context for tests.
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
 public class TestCommandContextFactory {
 
-    private TestCommandContextFactory() {}
+    private TestCommandContextFactory() {
+    }
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext createCommandContext() {
@@ -54,13 +53,20 @@ public class TestCommandContextFactory {
     }
 
     /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext createCommandContext(UserId userId, CommandId commandId, Timestamp when) {
+    public static CommandContext createCommandContext(UserId userId,
+                                                      CommandId commandId,
+                                                      Timestamp when) {
+
+        //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestActorRequestFactory
+
+        final TenantId.Builder generatedTenantId = TenantId.newBuilder()
+                                                           .setValue(newUuid());
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setCommandId(commandId)
                                                              .setActor(userId)
                                                              .setTimestamp(when)
                                                              .setZoneOffset(UTC)
-                                                             .setTenantId(TenantId.newBuilder().setValue(newUuid()));
+                                                             .setTenantId(generatedTenantId);
         return builder.build();
     }
 

@@ -26,7 +26,8 @@ import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.storage.StorageField;
 
 /**
- * A container for the storage fields specific for the {@link AggregateStorage} and its implementations.
+ * A container for the storage fields specific for the {@link AggregateStorage}
+ * and its implementations.
  *
  * @author Dmytro Dashenkov
  * @see StorageField

@@ -24,12 +24,15 @@ import com.google.protobuf.FieldMask;
 import org.spine3.annotations.SPI;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.string.StringifierRegistry;
 import org.spine3.type.TypeUrl;
 
 /**
- * Serves as a storage for the latest {@link org.spine3.server.aggregate.Aggregate Aggregate} states.
+ * Serves as a storage for the latest
+ * {@link org.spine3.server.aggregate.Aggregate Aggregate} states.
  *
- * <p>Used by an instance of {@link Stand} to optimize the {@code Aggregate} state fetch performance.
+ * <p>Used by an instance of {@link Stand} to optimize
+ * the {@code Aggregate} state fetch performance.
  *
  * @author Alex Tymchenko
  * @see com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()
@@ -37,6 +40,12 @@ import org.spine3.type.TypeUrl;
  */
 @SPI
 public abstract class StandStorage extends RecordStorage<AggregateStateId> {
+
+    static {
+        StringifierRegistry.getInstance()
+                           .register(new AggregateStateIdStringifier(),
+                                     AggregateStateId.class);
+    }
 
     protected StandStorage(boolean multitenant) {
         super(multitenant);
@@ -47,7 +56,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      *
      * @param type a {@link TypeUrl} instance
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
-     *          equals the argument value
+     * equals the argument value
      */
     public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type);
 
@@ -56,7 +65,8 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      *
      * @param type a {@link TypeUrl} instance
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
-     *          equals the argument value
+     * equals the argument value
      */
-    public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type, FieldMask fieldMask);
+    public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type,
+                                                                    FieldMask fieldMask);
 }

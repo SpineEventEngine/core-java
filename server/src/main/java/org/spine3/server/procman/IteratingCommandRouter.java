@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.command.CommandBus;
+import org.spine3.server.commandbus.CommandBus;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -37,7 +37,9 @@ import java.util.NoSuchElementException;
  */
 public class IteratingCommandRouter extends AbstractCommandRouter<IteratingCommandRouter> {
 
-    IteratingCommandRouter(CommandBus commandBus, Message commandMessage, CommandContext commandContext) {
+    IteratingCommandRouter(CommandBus commandBus,
+                           Message commandMessage,
+                           CommandContext commandContext) {
         super(commandBus, commandMessage, commandContext);
     }
 

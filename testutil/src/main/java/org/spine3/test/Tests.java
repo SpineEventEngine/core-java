@@ -26,13 +26,12 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.time.Time;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -40,8 +39,12 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.Math.abs;
+import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
  * Utilities for testing.
@@ -49,6 +52,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public class Tests {
+
+    /**
+     * The prefix for generated tenant identifiers.
+     */
+    private static final String TENANT_PREFIX = "tenant-";
+
+    /**
+     * The prefix for generated user identifiers.
+     */
+    private static final String USER_PREFIX = "user-";
 
     private Tests() {
         // Prevent instantiation of this utility class.
@@ -167,7 +180,34 @@ public class Tests {
      * Generates a new UUID-based {@code UserId}.
      */
     public static UserId newUserUuid() {
-        return newUserId(Identifiers.newUuid());
+        return newUserId(USER_PREFIX + newUuid());
+    }
+
+    /**
+     * Generates a new UUID-based {@code TenantId}.
+     */
+    public static TenantId newTenantUuid() {
+        return newTenantId(TENANT_PREFIX + newUuid());
+    }
+
+    /**
+     * Creates a new {@code TenantId} with the passed value.
+     *
+     * @param value must be non-null, not empty, and not-blank
+     * @return new {@code TenantId}
+     */
+    public static TenantId newTenantId(String value) {
+        checkNotEmptyOrBlank(value, TenantId.class.getSimpleName());
+        return TenantId.newBuilder()
+                       .setValue(value)
+                       .build();
+    }
+
+    /**
+     * Creates a test instance of {@code TenantId} with the simple name of the passed test class.
+     */
+    public static TenantId newTenantId(Class<?> testClass) {
+        return newTenantId(testClass.getSimpleName());
     }
     /**
      * Generates a {@code StringValue} with generated UUID.
@@ -176,17 +216,7 @@ public class Tests {
      * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
      */
     public static StringValue newUuidValue() {
-        return Values.newStringValue(Identifiers.newUuid());
-    }
-
-    /**
-     * Generates a new UUID-based {@code TenantId}.
-     */
-    public static TenantId newTenantUuid() {
-        final TenantId result = TenantId.newBuilder()
-                                        .setValue(Identifiers.newUuid())
-                                        .build();
-        return result;
+        return Values.newStringValue(newUuid());
     }
 
     /**
@@ -210,20 +240,40 @@ public class Tests {
      * Factory method for creating versions from tests.
      */
     public static Version newVersionWithNumber(int number) {
-        return Versions.newVersion(number, Timestamps2.getCurrentTime());
+        return Versions.newVersion(number, Time.getCurrentTime());
     }
 
     /**
      * Returns {@code StreamObserver} that records the responses.
      *
      * <p>Use this method when you need to verify the responses of calls like
-     * {@link org.spine3.server.command.CommandBus#post(org.spine3.base.Command, StreamObserver)
+     * {@link org.spine3.server.commandbus.CommandBus#post(org.spine3.base.Command, StreamObserver)
      * CommandBus.post()} and similar methods.
      *
      * <p>Returns a fresh instance upon every call to avoid state clashes.
      */
     public static MemoizingObserver memoizingObserver() {
         return new MemoizingObserver();
+    }
+
+    public static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {
+        final long diffSec = abs(expectedSec - actualSec);
+        assertTrue(diffSec <= maxDiffSec);
+    }
+
+    /**
+     * Generates a random integer in the range [0, max).
+     */
+    public static int random(int max) {
+        return random(0, max);
+    }
+
+    /**
+     * Generates a random integer in the range [min, max).
+     */
+    public static int random(int min, int max) {
+        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
+        return randomNum;
     }
 
     /**

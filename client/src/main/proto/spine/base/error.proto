@@ -31,6 +31,7 @@ import "google/protobuf/struct.proto";
 
 import "spine/annotations.proto";
 import "spine/validate/constraint_violation.proto";
+import "spine/validate/validation_error.proto";
 
 // Information on a technical error occurred in the system.
 //
@@ -48,7 +49,7 @@ message Error {
     int32 code = 2;
 
     // An error indicating that a message did not pass validation.
-    ValidationError validation_error = 3;
+    validate.ValidationError validation_error = 3;
 
     reserved 4 to 9;
 
@@ -60,11 +61,4 @@ message Error {
 
     // A stacktrace of an exception (if available).
     string stacktrace = 12;
-}
-
-// An error indicating that a message did not pass validation.
-message ValidationError {
-
-    // Validation constraint violations found by validator.
-    repeated validate.ConstraintViolation constraint_violation = 1;
 }

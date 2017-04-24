@@ -24,17 +24,19 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.Test;
 import org.spine3.base.Response;
-import org.spine3.client.Queries;
 import org.spine3.client.Subscription;
 import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
+import org.spine3.client.Targets;
 import org.spine3.client.Topic;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.stand.Stand;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
+import org.spine3.time.Time;
 
 import java.util.List;
 
@@ -52,12 +54,15 @@ import static org.mockito.Mockito.when;
 import static org.spine3.base.Versions.newVersion;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class SubscriptionServiceShould {
+
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(SubscriptionServiceShould.class);
 
     /*
      * Creation tests
@@ -66,7 +71,8 @@ public class SubscriptionServiceShould {
 
     @Test
     public void initialize_properly_with_one_bounded_context() {
-        final BoundedContext singleBoundedContext = newBoundedContext("Single", newSimpleStand());
+        final BoundedContext singleBoundedContext = newBoundedContext("Single",
+                                                                      newMultitenantStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                        .add(singleBoundedContext);
@@ -81,9 +87,12 @@ public class SubscriptionServiceShould {
 
     @Test
     public void initialize_properly_with_several_bounded_contexts() {
-        final BoundedContext firstBoundedContext = newBoundedContext("First", newSimpleStand());
-        final BoundedContext secondBoundedContext = newBoundedContext("Second", newSimpleStand());
-        final BoundedContext thirdBoundedContext = newBoundedContext("Third", newSimpleStand());
+        final BoundedContext firstBoundedContext = newBoundedContext("First",
+                                                                     newMultitenantStand());
+        final BoundedContext secondBoundedContext = newBoundedContext("Second",
+                                                                      newMultitenantStand());
+        final BoundedContext thirdBoundedContext = newBoundedContext("Third",
+                                                                     newMultitenantStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                        .add(firstBoundedContext)
@@ -101,9 +110,12 @@ public class SubscriptionServiceShould {
 
     @Test
     public void be_able_to_remove_bounded_context_from_builder() {
-        final BoundedContext firstBoundedContext = newBoundedContext("Removed", newSimpleStand());
-        final BoundedContext secondBoundedContext = newBoundedContext("Also removed", newSimpleStand());
-        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay", newSimpleStand());
+        final BoundedContext firstBoundedContext = newBoundedContext("Removed",
+                                                                     newMultitenantStand());
+        final BoundedContext secondBoundedContext = newBoundedContext("Also removed",
+                                                                      newMultitenantStand());
+        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay",
+                                                                     newMultitenantStand());
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
                                                                        .add(firstBoundedContext)
@@ -148,9 +160,7 @@ public class SubscriptionServiceShould {
 
         assertEquals(type, target.getType());
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+        final Topic topic = requestFactory.topic().forTarget(target);
 
         final MemoizeStreamObserver<Subscription> observer = new MemoizeStreamObserver<>();
 
@@ -158,13 +168,16 @@ public class SubscriptionServiceShould {
 
         assertNotNull(observer.streamFlowValue);
         assertTrue(observer.streamFlowValue.isInitialized());
-        assertEquals(observer.streamFlowValue.getType(), type);
+        assertEquals(observer.streamFlowValue.getTopic()
+                                             .getTarget()
+                                             .getType(), type);
 
         assertNull(observer.throwable);
         assertTrue(observer.isCompleted);
     }
 
-    @SuppressWarnings("ConstantConditions")     // as `null` is intentionally passed as a method param.
+    @SuppressWarnings("ConstantConditions")
+    // as `null` is intentionally passed as a method param.
     @Test
     public void handle_subscription_process_exceptions_and_call_observer_error_callback() {
         final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
@@ -190,10 +203,9 @@ public class SubscriptionServiceShould {
                                                                            .build();
         final Target target = getProjectQueryTarget();
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
-        // Subscribe on the topic
+        final Topic topic = requestFactory.topic().forTarget(target);
+
+        // Subscribe to the topic
         final MemoizeStreamObserver<Subscription> subscriptionObserver = new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
         subscriptionObserver.verifyState();
@@ -213,21 +225,23 @@ public class SubscriptionServiceShould {
 
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
-                      .post(entity);
+                      .post(entity, requestFactory.createCommandContext());
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
         activationObserver.verifyState(false);
     }
 
-    private static VersionableEntity mockEntity(ProjectId projectId, Message projectState, int version) {
+    private static VersionableEntity mockEntity(ProjectId projectId, Message projectState,
+                                                int version) {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(projectState);
         when(entity.getId()).thenReturn(projectId);
-        when(entity.getVersion()).thenReturn(newVersion(version, Timestamps2.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(version, Time.getCurrentTime()));
         return entity;
     }
 
-    @SuppressWarnings("ConstantConditions")     // as `null` is intentionally passed as a method param.
+    @SuppressWarnings("ConstantConditions")
+    // as `null` is intentionally passed as a method param.
     @Test
     public void handle_activation_process_exceptions_and_call_observer_error_callback() {
         final BoundedContext boundedContext = setupBoundedContextWithProjectAggregateRepo();
@@ -254,9 +268,7 @@ public class SubscriptionServiceShould {
 
         final Target target = getProjectQueryTarget();
 
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+        final Topic topic = requestFactory.topic().forTarget(target);
 
         // Subscribe
         final MemoizeStreamObserver<Subscription> subscribeObserver = new MemoizeStreamObserver<>();
@@ -281,7 +293,7 @@ public class SubscriptionServiceShould {
         final int version = 1;
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
         boundedContext.getStandFunnel()
-                      .post(entity);
+                      .post(entity, requestFactory.createCommandContext());
 
         // The update must not be handled by the observer
         verify(activateSubscription, never()).onNext(any(SubscriptionUpdate.class));
@@ -296,9 +308,9 @@ public class SubscriptionServiceShould {
                                                                            .add(boundedContext)
                                                                            .build();
         final Target target = getProjectQueryTarget();
-        final Topic topic = Topic.newBuilder()
-                                 .setTarget(target)
-                                 .build();
+
+        final Topic topic = requestFactory.topic().forTarget(target);
+
         final MemoizeStreamObserver<Subscription> subscriptionObserver =
                 new MemoizeStreamObserver<>();
         subscriptionService.subscribe(topic, subscriptionObserver);
@@ -322,18 +334,19 @@ public class SubscriptionServiceShould {
     private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
         final Stand stand = Stand.newBuilder()
                                  .build();
-        final BoundedContext boundedContext = newBoundedContext(stand);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
         return boundedContext;
     }
 
     private static Target getProjectQueryTarget() {
-        return Queries.Targets.allOf(Project.class);
+        return Targets.allOf(Project.class);
     }
 
-    private static Stand newSimpleStand() {
+    private static Stand newMultitenantStand() {
         return Stand.newBuilder()
+                    .setMultitenant(true)
                     .build();
     }
 

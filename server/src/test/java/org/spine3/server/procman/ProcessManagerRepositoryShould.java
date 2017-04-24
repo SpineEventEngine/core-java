@@ -33,17 +33,18 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandDispatcher;
+import org.spine3.server.command.EventFactory;
+import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
@@ -64,6 +65,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -77,6 +79,7 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 /**
  * @author Alexander Litus
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould
         extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager,
                                             ProjectId,
@@ -93,21 +96,23 @@ public class ProcessManagerRepositoryShould
     // Configuration of the test suite
     //---------------------------------
 
-    private static StorageFactory storageFactory() {
-        return StorageFactorySwitch.getInstance().get();
+    private StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                   .get();
     }
 
     @Override
     protected ProjectId createId(int value) {
         return ProjectId.newBuilder()
-                        .setId(String.format("procman-number-%s", value))
+                        .setId(format("procman-number-%s", value))
                         .build();
     }
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository(
-                TestBoundedContextFactory.newBoundedContext());
+        final BoundedContext boundedContext =
+                TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
         repo.initStorage(storageFactory());
         return repo;
     }
@@ -135,10 +140,12 @@ public class ProcessManagerRepositoryShould
         return procmans;
     }
 
+    @Override
     @Before
     public void setUp() {
+        super.setUp();
         eventBus = spy(TestEventBusFactory.create());
-        boundedContext = TestBoundedContextFactory.newBoundedContext(eventBus);
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(eventBus);
 
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
@@ -159,9 +166,29 @@ public class ProcessManagerRepositoryShould
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         boundedContext.close();
+        super.tearDown();
+    }
+
+    /**
+     * Creates an instance of {@link Event} for the passed message.
+     *
+     * <p>Under normal circumstances an event is produced via {@link EventFactory}.
+     * Processing of events in a {@link ProcessManagerRepository} is based on event messages
+     * and does not need a properly configured {@link EventContext}. That's why this factory method
+     * is sufficient for the purpose of this test suite.
+     */
+    private static Event createEvent(Message eventMessage) {
+        return EventTests.createContextlessEvent(eventMessage);
+    }
+
+    private void testDispatchEvent(Message eventMessage) {
+        final Event event = createEvent(eventMessage);
+        repository.dispatch(event);
+        assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     // Tests
@@ -177,12 +204,6 @@ public class ProcessManagerRepositoryShould
         testDispatchEvent(projectCreated());
         testDispatchEvent(taskAdded());
         testDispatchEvent(projectStarted());
-    }
-
-    private void testDispatchEvent(Message eventMessage) {
-        final Event event = Events.createEvent(eventMessage, EventContext.getDefaultInstance());
-        repository.dispatch(event);
-        assertTrue(TestProcessManager.processed(eventMessage));
     }
 
     @Test
@@ -230,7 +251,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = Events.createEvent(unknownEventMessage, EventContext.getDefaultInstance());
+        final Event event = createEvent(unknownEventMessage);
         repository.dispatch(event);
     }
 

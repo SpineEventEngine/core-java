@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
@@ -46,6 +47,19 @@ public class InMemoryStorageFactory implements StorageFactory {
         return this.multitenant;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>In-memory implementation stores no values separately
+     * ({@link org.spine3.server.entity.storage.Column Columns}), therefore
+     * returns an empty ColumnTypeRegistry.
+     */
+    @Override
+    public ColumnTypeRegistry getTypeRegistry() {
+        return ColumnTypeRegistry.newBuilder()
+                                 .build();
+    }
+
     @Override
     public StandStorage createStandStorage() {
         final InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
@@ -64,15 +78,15 @@ public class InMemoryStorageFactory implements StorageFactory {
     /**
      * {@inheritDoc}
      *
-     * NOTE: the parameter is unused.
+     * @param unused the parameter is not used in this implementation
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I,?>> unused) {
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {
         return InMemoryRecordStorage.newInstance(isMultitenant());
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I,?>> unused) {
+    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(multitenant);
@@ -84,12 +98,18 @@ public class InMemoryStorageFactory implements StorageFactory {
         // NOP
     }
 
-    public static InMemoryStorageFactory getInstance() {
-        return Singleton.INSTANCE.singleTenantInstance;
+    @Override
+    public StorageFactory toSingleTenant() {
+        if (!isMultitenant()) {
+            return this;
+        }
+        return getInstance(false);
     }
 
-    public static InMemoryStorageFactory getMultitenantInstance() {
-        return Singleton.INSTANCE.multitenantInstance;
+    public static InMemoryStorageFactory getInstance(boolean multitenant) {
+        return multitenant
+                ? Singleton.INSTANCE.multiTenantInstance
+                : Singleton.INSTANCE.singleTenantInstance;
     }
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
@@ -97,8 +117,8 @@ public class InMemoryStorageFactory implements StorageFactory {
         INSTANCE;
         private final InMemoryStorageFactory singleTenantInstance =
                 new InMemoryStorageFactory(false);
-        
-        private final InMemoryStorageFactory multitenantInstance =
+
+        private final InMemoryStorageFactory multiTenantInstance =
                 new InMemoryStorageFactory(true);
     }
 }

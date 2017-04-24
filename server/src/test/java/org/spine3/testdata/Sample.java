@@ -33,13 +33,9 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeUrl;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.security.SecureRandom;
 import java.util.Collection;
 import java.util.List;
@@ -48,29 +44,17 @@ import java.util.Random;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.protobuf.Messages.builderFor;
 
 /**
- * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and {@link Command}),
- * storage objects and else.
+ * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and
+ * {@link Command}), storage objects and else.
  *
  * @author Dmytro Dashenkov
  */
 public class Sample {
 
     private Sample() {
-    }
-
-    public static Event eventBy(Message producerId, Class<? extends Message> eventClass) {
-        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
-        final Message eventMessage = messageOfType(eventClass);
-        final Event event = Events.createEvent(eventMessage, eventContext);
-        return event;
-    }
-
-    public static Event eventBy(Message producerId, Message eventMessage) {
-        final EventContext eventContext = TestEventContextFactory.createEventContext(producerId);
-        final Event event = Events.createEvent(eventMessage, eventContext);
-        return event;
     }
 
     public static Command command(Message commandMessage) {
@@ -80,10 +64,12 @@ public class Sample {
     }
 
     /**
-     * Generates a new stub {@link Message.Builder} with all the fields set to {@link Random random} values.
+     * Generates a new stub {@link Message.Builder} with all the fields set to
+     * {@link Random random} values.
      *
-     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
-     * may or may not have their default values ({@code 0} and {@code false}).
+     * <p> All the fields are guaranteed to be not {@code null} and not default.
+     * Number and {@code boolean} fields may or may not have their default values ({@code 0} and
+     * {@code false}).
      *
      * @param clazz Java class of the stub message
      * @param <M>   type of the required message
@@ -112,11 +98,12 @@ public class Sample {
     /**
      * Generates a new stub {@link Message} with all the fields set to {@link Random random} values.
      *
-     * <p> All the fields are guaranteed to be not {@code null} and not default. Number and {@code boolean} fields
+     * <p> All the fields are guaranteed to be not {@code null} and not default.
+     * Number and {@code boolean} fields
      * may or may not have their default values ({@code 0} and {@code false}).
      *
-     * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into another {@link Any}
-     * is returned. See {@link AnyPacker}.
+     * <p>If the required type is {@link Any}, an instance of an empty {@link Any} wrapped into
+     * another {@link Any} is returned. See {@link AnyPacker}.
      *
      * @param clazz Java class of the required stub message
      * @param <M>   type of the required message
@@ -150,7 +137,8 @@ public class Sample {
     /**
      * Generates a non-default value for the given message field.
      *
-     * <p>All the protobuf types are supported including nested {@link Message}s and the {@code enum}s.
+     * <p>All the protobuf types are supported including nested {@link Message}s and
+     * the {@code enum}s.
      *
      * @param field {@link FieldDescriptor} to take the type info from
      * @return a non-default generated value of type of the given field
@@ -213,19 +201,5 @@ public class Sample {
     private static <M extends Message> Class<M> classFor(TypeUrl url) {
         final Class<M> javaClass = url.getJavaClass();
         return javaClass;
-    }
-
-    private static <B extends Message.Builder> B builderFor(Class<? extends Message> clazz) {
-        try {
-            final Method factoryMethod = clazz.getDeclaredMethod("newBuilder");
-            @SuppressWarnings("unchecked")
-            final B result = (B) factoryMethod.invoke(null);
-            return result;
-        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            final String errMsg = format("Class %s must be a generated proto message",
-                                         clazz.getCanonicalName());
-            throw new IllegalArgumentException(errMsg, e);
-        }
-
     }
 }

@@ -32,11 +32,11 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.TestCommandFactory;
+import org.spine3.string.Stringifiers;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
+import org.spine3.time.Durations2;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -56,8 +56,6 @@ import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations2.seconds;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newTenantUuid;
@@ -65,13 +63,15 @@ import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.time.Durations2.seconds;
+import static org.spine3.time.Time.getCurrentTime;
 
 public class CommandsShould {
 
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
 
-    private final TestCommandFactory commandFactory = TestCommandFactory.newInstance(
+    private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
             CommandsShould.class);
     private final StringValue stringValue = newStringValue(newUuid());
 
@@ -82,11 +82,11 @@ public class CommandsShould {
 
     @Test
     public void sort_commands_by_timestamp() {
-        final Command cmd1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+        final Command cmd1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                           minutesAgo(1));
-        final Command cmd2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+        final Command cmd2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
                                                           secondsAgo(30));
-        final Command cmd3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command cmd3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                           secondsAgo(5));
         final List<Command> sortedCommands = newArrayList(cmd1, cmd2, cmd3);
         final List<Command> commandsToSort = newArrayList(cmd3, cmd1, cmd2);
@@ -108,7 +108,7 @@ public class CommandsShould {
                                                             userId,
                                                             zoneOffset,
                                                             targetVersion);
-        
+
         assertEquals(tenantId, commandContext.getTenantId());
         assertEquals(userId, commandContext.getActor());
         assertEquals(zoneOffset, commandContext.getZoneOffset());
@@ -138,12 +138,12 @@ public class CommandsShould {
     public void pass_null_tolerance_test() {
         new NullPointerTester()
                 .setDefault(FileDescriptor.class, DEFAULT_FILE_DESCRIPTOR)
-                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(Timestamp.class, getCurrentTime())
                 .setDefault(Duration.class, Durations2.ZERO)
                 .setDefault(Command.class,
-                            commandFactory.createCommand(StringValue.getDefaultInstance(),
+                            requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                          minutesAgo(1)))
-                .setDefault(CommandContext.class, commandFactory.createContext())
+                .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
                 .setDefault(UserId.class, Tests.newUserUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
@@ -185,7 +185,8 @@ public class CommandsShould {
 
     @Test
     public void extract_id_from_command() {
-        final Command command = commandFactory.createCommand(stringValue);
+        final Command command = requestFactory.command()
+                                              .create(stringValue);
 
         assertEquals(command.getContext()
                             .getCommandId(), getId(command));
@@ -193,30 +194,31 @@ public class CommandsShould {
 
     @Test
     public void create_wereAfter_predicate() {
-        final Command command = commandFactory.createCommand(BoolValue.getDefaultInstance());
+        final Command command = requestFactory.command()
+                                              .create(BoolValue.getDefaultInstance());
         assertTrue(Commands.wereAfter(secondsAgo(5))
                            .apply(command));
     }
 
     @Test
     public void create_wereBetween_predicate() {
-        final Command command1 = commandFactory.createCommand(StringValue.getDefaultInstance(),
+        final Command command1 = requestFactory.createCommand(StringValue.getDefaultInstance(),
                                                               minutesAgo(5));
-        final Command command2 = commandFactory.createCommand(Int64Value.getDefaultInstance(),
+        final Command command2 = requestFactory.createCommand(Int64Value.getDefaultInstance(),
                                                               minutesAgo(2));
-        final Command command3 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command command3 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(30));
-        final Command command4 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command command4 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(20));
-        final Command command5 = commandFactory.createCommand(BoolValue.getDefaultInstance(),
+        final Command command5 = requestFactory.createCommand(BoolValue.getDefaultInstance(),
                                                               secondsAgo(5));
 
-        final ImmutableList<Command> commands = ImmutableList.of(command1, command2, command3,
-                                                                 command4, command5);
-        final Iterable<Command> filter = Iterables.filter(commands,
-                                                          Commands.wereWithinPeriod(minutesAgo(3),
-                                                                                    secondsAgo(
-                                                                                            10)));
+        final ImmutableList<Command> commands =
+                ImmutableList.of(command1, command2, command3, command4, command5);
+        final Iterable<Command> filter = Iterables.filter(
+                commands,
+                Commands.wereWithinPeriod(minutesAgo(3), secondsAgo(10))
+        );
 
         assertEquals(3, FluentIterable.from(filter)
                                       .size());
@@ -263,37 +265,22 @@ public class CommandsShould {
     }
 
     @Test
-    public void update_schedule_options() {
-        final Command cmd = commandFactory.createCommand(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-        final Duration delay = Durations2.fromMinutes(5);
-
-        final Command cmdUpdated = Commands.setSchedule(cmd, delay, schedulingTime);
-
-        final CommandContext.Schedule schedule = cmdUpdated.getContext()
-                                                           .getSchedule();
-        assertEquals(delay, schedule.getDelay());
-        assertEquals(schedulingTime, schedule.getSchedulingTime());
-    }
-
-    @Test
-    public void update_scheduling_time() {
-        final Command cmd = commandFactory.createCommand(stringValue);
-        final Timestamp schedulingTime = getCurrentTime();
-
-        final Command cmdUpdated = Commands.setSchedulingTime(cmd, schedulingTime);
-
-        assertEquals(schedulingTime, cmdUpdated.getContext()
-                                               .getSchedule()
-                                               .getSchedulingTime());
-    }
-
-    @Test
     public void provide_stringifier_for_CommandId() {
         final CommandId id = Commands.generateId();
 
         final String str = Stringifiers.toString(id);
         final CommandId convertedBack = Stringifiers.fromString(str, CommandId.class);
         assertEquals(id, convertedBack);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void throw_exception_if_checked_command_id_is_empty() {
+        Commands.checkValid(CommandId.getDefaultInstance());
+    }
+
+    @Test
+    public void return_value_id_when_checked() {
+        final CommandId id = Commands.generateId();
+        assertEquals(id, Commands.checkValid(id));
     }
 }

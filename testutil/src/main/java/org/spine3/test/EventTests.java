@@ -20,61 +20,40 @@
 
 package org.spine3.test;
 
-import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.EventId;
-import org.spine3.base.Events;
-import org.spine3.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Events.generateId;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.test.Tests.newUuidValue;
+import static org.spine3.protobuf.AnyPacker.pack;
 
 /**
- * Utility class for producing events for tests.
+ * Test utilities for creating events used in tests.
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
 public class EventTests {
-
-    private static final TestCommandFactory factory =
-            TestCommandFactory.newInstance(EventTests.class);
 
     private EventTests() {
         // Prevent instantiation of this utility class.
     }
 
-    public static EventContext newEventContext() {
-        return newEventContext(getCurrentTime());
+    private static Event.Builder newBuilderWith(Message eventMessage) {
+        return Event.newBuilder()
+                    .setMessage(pack(eventMessage));
     }
 
-    public static EventContext newEventContext(Timestamp time) {
-        final EventId eventId = generateId();
-        final Any producerId = AnyPacker.pack(newUuidValue());
-        final CommandContext cmdContext = factory.createContext();
-        final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
-                                                         .setProducerId(producerId)
-                                                         .setTimestamp(time)
-                                                         .setCommandContext(cmdContext);
-        return builder.build();
-    }
-
-    public static Event newEvent(Message eventMessage) {
+    public static Event createContextlessEvent(Message eventMessage) {
         checkNotNull(eventMessage);
-        return Events.createEvent(eventMessage, newEventContext());
+        return newBuilderWith(eventMessage)
+                .build();
     }
 
-    public static Event newEvent(Message eventMessage, Timestamp when) {
-        checkNotNull(eventMessage);
-        checkNotNull(when);
-        return Events.createEvent(eventMessage, newEventContext(when));
+    public static Event createEvent(Message eventMsg, EventContext context) {
+        checkNotNull(eventMsg);
+        checkNotNull(context);
+        return newBuilderWith(eventMsg)
+                .setContext(context)
+                .build();
     }
 }

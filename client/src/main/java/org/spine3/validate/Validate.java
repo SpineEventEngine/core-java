@@ -21,17 +21,12 @@
 package org.spine3.validate;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandId;
-import org.spine3.base.EventId;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -40,7 +35,7 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-public class Validate {
+public final class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";
 
@@ -234,16 +229,6 @@ public class Validate {
     }
 
     /**
-     * Ensures that the passed value is positive or zero.
-     *
-     * @param value the value to check
-     * @throws IllegalArgumentException if requirement is not met
-     */
-    public static void checkPositiveOrZero(long value) {
-        checkArgument(value >= 0);
-    }
-
-    /**
      * Ensures that target value is in between passed bounds.
      *
      * @param value     target value
@@ -264,38 +249,13 @@ public class Validate {
     }
 
     /**
-     * Ensures that the passed ID is valid.
-     *
-     * @param id an ID to check
-     * @throws IllegalArgumentException if the ID string value is empty or blank
-     */
-    public static EventId checkValid(EventId id) {
-        checkNotNull(id);
-        checkNotEmptyOrBlank(id.getUuid(), "event ID");
-        return id;
-    }
-
-    /**
-     * Ensures that the passed ID is valid.
-     *
-     * @param id an ID to check
-     * @throws IllegalArgumentException if the ID string value is empty or blank
-     */
-    public static CommandId checkValid(CommandId id) {
-        checkNotNull(id);
-        final String idStr = idToString(id);
-        checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
-        return id;
-    }
-
-    /**
      * Ensures that the passed name is not empty or blank.
      *
      * @param name the name to check
      * @return the passed value
      * @throws IllegalArgumentException if the ID string value is empty or blank
      */
-    @SuppressWarnings("DuplicateStringLiteralInspection") // is OK for this popular field name value.
+    @SuppressWarnings("DuplicateStringLiteralInspection") // is OK for this popular field name value
     public static String checkNameNotEmptyOrBlank(String name) {
         return checkNotEmptyOrBlank(name, "name");
     }

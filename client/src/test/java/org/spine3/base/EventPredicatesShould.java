@@ -30,23 +30,15 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.EventPredicates.isAfter;
 import static org.spine3.base.EventPredicates.isBefore;
 import static org.spine3.base.EventPredicates.isBetween;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.test.EventTests.newEventContext;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov
  */
 public class EventPredicatesShould {
-
-    private static Event createEvent(int minutesAgo) {
-        final Event result = Events.createEvent(newUuidValue(),
-                                                newEventContext(minutesAgo(minutesAgo)));
-        return result;
-    }
 
     @Test
     public void have_private_utility_ctor() {
@@ -75,8 +67,8 @@ public class EventPredicatesShould {
     @Test
     public void verify_if_an_event_is_after_another() {
         final Predicate<Event> predicate = isAfter(minutesAgo(100));
-        assertTrue(predicate.apply(createEvent(20)));
-        assertFalse(predicate.apply(createEvent(360)));
+        assertTrue(predicate.apply(EventsShould.createEventOccurredMinutesAgo(20)));
+        assertFalse(predicate.apply(EventsShould.createEventOccurredMinutesAgo(360)));
     }
 
     @Test
@@ -91,8 +83,8 @@ public class EventPredicatesShould {
     @Test
     public void verify_if_an_event_is_before_another() {
         final Predicate<Event> predicate = isBefore(minutesAgo(100));
-        assertFalse(predicate.apply(createEvent(20)));
-        assertTrue(predicate.apply(createEvent(360)));
+        assertFalse(predicate.apply(EventsShould.createEventOccurredMinutesAgo(20)));
+        assertTrue(predicate.apply(EventsShould.createEventOccurredMinutesAgo(360)));
     }
 
     @Test
@@ -113,7 +105,7 @@ public class EventPredicatesShould {
 
     @Test
     public void verify_if_an_event_is_within_time_range() {
-        final Event event = createEvent(5);
+        final Event event = EventsShould.createEventOccurredMinutesAgo(5);
 
         assertTrue(isBetween(minutesAgo(10), minutesAgo(1))
                            .apply(event));

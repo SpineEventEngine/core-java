@@ -30,15 +30,17 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * Utility class for working with {@link com.google.protobuf.Message Message} value wrapper objects.
  *
  * @author Alexander Litus
  */
-public class Values {
+public final class Values {
 
     private Values() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -59,14 +61,14 @@ public class Values {
      * Creates a new {@code StringValue} wrapping the passed string.
      *
      * @param format a format string
-     * @param args arguments referenced by the format string
+     * @param args   arguments referenced by the format string
      * @return a new {@code StringValue} instance
      * @see String#format(String, Object...)
      */
     public static StringValue newStringValue(String format, Object... args) {
         checkNotNull(format);
         checkNotNull(args);
-        final String msg = String.format(format, args);
+        final String msg = format(format, args);
         return newStringValue(msg);
     }
 

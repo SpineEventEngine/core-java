@@ -25,7 +25,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -41,9 +40,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
-import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * Abstract base class for repositories.
@@ -58,7 +57,13 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
-    /** The data storage for this repository. */
+    /**
+     * The data storage for this repository.
+     *
+     * <p>This field is null if the storage was not {@linkplain #initStorage(StorageFactory)
+     * initialized} or the repository was {@linkplain #close() closed}.
+     */
+    @Nullable
     private Storage<I, ?> storage;
 
     /**
@@ -85,8 +90,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     private volatile Class<I> idClass;
 
     /**
-     * Creates the repository in the passed {@link BoundedContext}.
-     *
+     * Creates the repository.
      */
     protected Repository() {
     }
@@ -119,7 +123,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         try {
             Identifiers.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
-            throw wrappedCause(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 
@@ -137,14 +141,23 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
+     * Obtains the class of the entity state.
+     *
+     * <p>The default implementation uses generic type parameter from the entity class declaration.
+     */
+    protected Class<? extends Message> getEntityStateClass() {
+        final Class<E> entityClass = getEntityClass();
+        return Entity.TypeInfo.getStateClass(entityClass);
+    }
+
+    /**
      * Returns the {@link TypeUrl} for the state objects wrapped by entities
      * managed by this repository
      */
     @CheckReturnValue
     public TypeUrl getEntityStateType() {
         if (entityStateType == null) {
-            final Class<E> entityClass = getEntityClass();
-            final Class<Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
+            final Class<? extends Message> stateClass = getEntityStateClass();
             final ClassName stateClassName = ClassName.of(stateClass);
             entityStateType = KnownTypes.getTypeUrl(stateClassName);
         }
@@ -175,7 +188,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>The returned iterator does not support removal.
      *
-     * <p>Iteration through entities is performed by {@linkplain #load(Object) loading}
+     * <p>Iteration through entities is performed by {@linkplain #find(Object) loading}
      * them one by one.
      */
     @Override
@@ -191,7 +204,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     @CheckReturnValue
     @Nullable
-    protected AutoCloseable getStorage() {
+    protected Storage<I, ?> getStorage() {
         return this.storage;
     }
 
@@ -241,15 +254,31 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Closes the repository by closing the underlying storage.
      *
      * <p>The reference to the storage becomes null after this call.
-     *
-     * @throws Exception which occurred during closing of the storage
      */
     @Override
-    public void close() throws Exception {
+    public void close() {
         if (this.storage != null) {
             this.storage.close();
             this.storage = null;
         }
+    }
+
+    private boolean isOpen() {
+        return storage != null;
+    }
+
+    private Storage<I, ?> ensureStorage() {
+        checkState(storage != null, "No storage assigned in repository %s", this);
+        return storage;
+    }
+
+    /**
+     * Ensures that the repository {@linkplain #isOpen() is open}.
+     *
+     * <p>If not throws {@code IllegalStateException}
+     */
+    protected void checkNotClosed() {
+        checkState(isOpen(), "The repository (%s) is closed.", getClass().getName());
     }
 
     /**
@@ -290,15 +319,15 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      *
      * <p>This iterator does not allow removal.
      */
-    private static class EntityIterator<I, E extends Entity<I, ?>>
-            implements Iterator<E> {
+    private static class EntityIterator<I, E extends Entity<I, ?>> implements Iterator<E> {
 
         private final Repository<I, E> repository;
         private final Iterator<I> index;
 
         private EntityIterator(Repository<I, E> repository) {
             this.repository = repository;
-            this.index = repository.storage.index();
+            this.index = repository.ensureStorage()
+                                   .index();
         }
 
         @Override
@@ -310,7 +339,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         @Override
         public E next() {
             final I id = index.next();
-            final Optional<E> loaded = repository.load(id);
+            final Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
                 final String idStr = idToString(id);
                 throw newIllegalStateException("Unable to load entity with ID: %s", idStr);

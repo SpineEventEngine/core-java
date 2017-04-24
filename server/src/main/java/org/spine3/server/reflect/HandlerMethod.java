@@ -32,6 +32,7 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.throwIfUnchecked;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * An abstract base for wrappers over methods handling messages.
@@ -107,17 +108,19 @@ abstract class HandlerMethod<C extends Message> {
         try {
             final int paramCount = getParamCount();
             if (paramCount == 1) {
-                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                @SuppressWarnings("unchecked")
+                // it is assumed that the method returns the result of this type
                 final R result = (R) method.invoke(target, message);
                 return result;
             } else {
-                @SuppressWarnings("unchecked") // it is assumed that the method returns the result of this type
+                @SuppressWarnings("unchecked")
+                // it is assumed that the method returns the result of this type
                 final R result = (R) method.invoke(target, message, context);
                 return result;
             }
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throwIfUnchecked(e);
-            throw new IllegalStateException(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 
@@ -147,7 +150,8 @@ abstract class HandlerMethod<C extends Message> {
      * @return full method name
      */
     private static String getFullMethodName(Method method) {
-        return method.getDeclaringClass().getName() + '.' + method.getName() + "()";
+        return method.getDeclaringClass()
+                     .getName() + '.' + method.getName() + "()";
     }
 
     /**

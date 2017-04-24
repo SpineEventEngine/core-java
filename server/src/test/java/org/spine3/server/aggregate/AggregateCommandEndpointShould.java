@@ -28,15 +28,16 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
-import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandStore;
+import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -51,26 +52,26 @@ import org.spine3.testdata.Sample;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Events.getMessage;
-import static org.spine3.server.aggregate.Given.Command.addTask;
-import static org.spine3.server.aggregate.Given.Command.createProject;
-import static org.spine3.server.aggregate.Given.Command.startProject;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.server.aggregate.Given.ACommand.addTask;
+import static org.spine3.server.aggregate.Given.ACommand.createProject;
+import static org.spine3.server.aggregate.Given.ACommand.startProject;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 public class AggregateCommandEndpointShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
+    /**
+     * The spy to be used when it is required to avoid problems, make tests faster and easier.
+     */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
     private EventBus eventBus;
 
@@ -78,11 +79,11 @@ public class AggregateCommandEndpointShould {
 
     @Before
     public void setUp() {
+        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
         eventBus = mock(EventBus.class);
         final CommandStore commandStore = mock(CommandStore.class);
-        doReturn(emptyIterator()).when(commandStore)
-                                 .iterator(any(CommandStatus.class)); // to avoid NPE
         final CommandBus commandBus = CommandBus.newBuilder()
+                                                .setMultitenant(true)
                                                 .setCommandStore(commandStore)
                                                 .build();
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
@@ -127,18 +128,25 @@ public class AggregateCommandEndpointShould {
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
-        doReturn(0, 1).when(storage).readEventCountAfterLastSnapshot(projectId);
-        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance())).when(storage).read(projectId);
-        doReturn(storage).when(repositorySpy).aggregateStorage();
-        doReturn(Optional.absent()).when(storage).readLifecycleFlags(projectId);
+        doReturn(0, 1)
+                .when(storage).readEventCountAfterLastSnapshot(projectId);
+        doReturn(Optional.absent())
+                .when(storage).read(projectId);
+        doReturn(storage)
+                .when(repositorySpy).aggregateStorage();
+        doReturn(Optional.absent())
+                .when(storage).readLifecycleFlags(projectId);
 
         repositorySpy.dispatch(cmd);
 
         // Load should be executed twice due to repeated dispatching.
-        verify(repositorySpy, times(2)).loadOrCreate(projectId);
+        verify(repositorySpy, times(2))
+                .loadOrCreate(projectId);
 
-        // Reading event count is executed 2 times per dispatch (so 2 * 2) plus once upon storing the state.
-        verify(storage, times(2 * 2 + 1)).readEventCountAfterLastSnapshot(projectId);
+        // Reading event count is executed 2 times per dispatch (so 2 * 2)
+        // plus once upon storing the state.
+        verify(storage, times(2 * 2 + 1))
+                .readEventCountAfterLastSnapshot(projectId);
     }
 
     @Test
@@ -165,7 +173,8 @@ public class AggregateCommandEndpointShould {
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
             AggregateCommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor = ArgumentCaptor.forClass(ProjectAggregate.class);
+        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor =
+                ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
     }
@@ -251,7 +260,7 @@ public class AggregateCommandEndpointShould {
             extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(StorageFactorySwitch.getInstance()
+            initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
                                             .get());
         }
     }

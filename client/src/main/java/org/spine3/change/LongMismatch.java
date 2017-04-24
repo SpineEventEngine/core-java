@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class LongMismatch {
+public final class LongMismatch {
 
     private LongMismatch() {
         // Prevent instantiation.
@@ -66,7 +66,8 @@ public class LongMismatch {
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value
+     * different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected string
@@ -74,7 +75,8 @@ public class LongMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(long expected, long actual, long newValue, int version) {
+    public static ValueMismatch unexpectedValue(long expected, long actual,
+                                                long newValue, int version) {
         checkNotNullOrEqual(expected, actual);
         return of(expected, actual, newValue, version);
     }

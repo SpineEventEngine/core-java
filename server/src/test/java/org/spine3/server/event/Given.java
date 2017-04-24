@@ -26,20 +26,17 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
-import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
-import org.spine3.base.Events;
 import org.spine3.base.Identifiers;
 import org.spine3.people.PersonName;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.event.enrich.EventEnricher;
+import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.event.ProjectCompleted;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.test.event.ProjectStarred;
 import org.spine3.test.event.ProjectStarted;
-import org.spine3.test.event.TaskAdded;
 import org.spine3.test.event.user.permission.PermissionGrantedEvent;
 import org.spine3.test.event.user.permission.PermissionRevokedEvent;
 import org.spine3.test.event.user.sharing.SharingRequestApproved;
@@ -48,10 +45,9 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
-import static org.spine3.base.Events.createEvent;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.test.EventTests.newEvent;
-import static org.spine3.testdata.TestEventContextFactory.createEventContext;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.test.TestEventFactory.newInstance;
 
 /**
  * Is for usage only in tests under the `event` package.
@@ -69,11 +65,11 @@ public class Given {
 
     public static class EventMessage {
 
-        private static final ProjectId DUMMY_PROJECT_ID = newProjectId();
-        private static final ProjectCreated PROJECT_CREATED = projectCreated(DUMMY_PROJECT_ID);
-        private static final ProjectStarted PROJECT_STARTED = projectStarted(DUMMY_PROJECT_ID);
-        private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(DUMMY_PROJECT_ID);
-        private static final ProjectStarred PROJECT_STARRED = projectStarred(DUMMY_PROJECT_ID);
+        private static final ProjectId PROJECT_ID = newProjectId();
+        private static final ProjectCreated PROJECT_CREATED = projectCreated(PROJECT_ID);
+        private static final ProjectStarted PROJECT_STARTED = projectStarted(PROJECT_ID);
+        private static final ProjectCompleted PROJECT_COMPLETED = projectCompleted(PROJECT_ID);
+        private static final ProjectStarred PROJECT_STARRED = projectStarred(PROJECT_ID);
 
         private EventMessage() {}
 
@@ -83,12 +79,6 @@ public class Given {
 
         public static ProjectStarted projectStarted() {
             return PROJECT_STARTED;
-        }
-
-        public static TaskAdded taskAdded(ProjectId id) {
-            return TaskAdded.newBuilder()
-                            .setProjectId(id)
-                            .build();
         }
 
         public static ProjectCompleted projectCompleted() {
@@ -147,9 +137,14 @@ public class Given {
 
     public static class AnEvent {
 
-        private static final ProjectId PROJECT_ID = newProjectId();
+        private static final ProjectId PROJECT_ID = EventMessage.PROJECT_ID;
 
         private AnEvent() {}
+
+        private static TestEventFactory eventFactory() {
+            final TestEventFactory result = newInstance(pack(PROJECT_ID), AnEvent.class);
+            return result;
+        }
 
         public static Event projectCreated() {
             return projectCreated(PROJECT_ID);
@@ -157,17 +152,13 @@ public class Given {
 
         public static Event projectStarted() {
             final ProjectStarted msg = EventMessage.projectStarted();
-            final Event event = createEvent(msg, createEventContext(msg.getProjectId()));
+            final Event event = eventFactory().createEvent(msg);
             return event;
         }
 
         public static Event projectCreated(ProjectId projectId) {
-            return projectCreated(projectId, createEventContext(projectId));
-        }
-
-        public static Event projectCreated(ProjectId projectId, EventContext eventContext) {
             final ProjectCreated msg = EventMessage.projectCreated(projectId);
-            final Event event = createEvent(msg, eventContext);
+            final Event event = eventFactory().createEvent(msg);
             return event;
         }
 
@@ -190,9 +181,8 @@ public class Given {
         }
 
         private static Event createGenericEvent(Message eventMessage) {
-            final Any wrappedMessage = AnyPacker.pack(eventMessage);
-            final EventContext eventContext = createEventContext();
-            final Event permissionRevoked = Events.createEvent(wrappedMessage, eventContext);
+            final Any wrappedMessage = pack(eventMessage);
+            final Event permissionRevoked = eventFactory().createEvent(wrappedMessage);
             return permissionRevoked;
         }
     }
@@ -256,13 +246,12 @@ public class Given {
                     @Nullable
                     @Override
                     public String apply(@Nullable EventId input) {
-                        return input == null ? "" : input.getUuid();
+                        return input == null ? "" : input.getValue();
                     }
                 };
 
         private static final Function<Timestamp, String> TIMESTAMP_TO_STRING =
                 new Function<Timestamp, String>() {
-                    @Nullable
                     @Override
                     public String apply(@Nullable Timestamp input) {
                         return input == null ? "" : input.toString();
@@ -271,7 +260,6 @@ public class Given {
 
         private static final Function<CommandContext, String> CMD_CONTEXT_TO_STRING =
                 new Function<CommandContext, String>() {
-                    @Nullable
                     @Override
                     public String apply(@Nullable CommandContext input) {
                         return input == null ? "" : input.toString();
@@ -280,7 +268,6 @@ public class Given {
 
         private static final Function<Any, String> ANY_TO_STRING =
                 new Function<Any, String>() {
-                    @Nullable
                     @Override
                     public String apply(@Nullable Any input) {
                         return input == null ? "" : input.toString();
@@ -289,7 +276,6 @@ public class Given {
 
         private static final Function<Integer, String> VERSION_TO_STRING =
                 new Function<Integer, String>() {
-                    @Nullable
                     @Override
                     public String apply(@Nullable Integer input) {
                         return input == null ? "" : input.toString();
@@ -320,39 +306,10 @@ public class Given {
 
         private static final Function<String, Integer> STRING_TO_INT =
                 new Function<String, Integer>() {
-                    @Nullable
                     @Override
                     public Integer apply(@Nullable String input) {
                         return 0;
                     }
                 };
-    }
-
-    public static class AnEventRecord {
-
-        private AnEventRecord() {
-        }
-
-        public static Event projectCreated() {
-            final Event event = newEvent(EventMessage.projectCreated());
-            return event;
-        }
-
-        public static Event projectCreated(Timestamp when) {
-            final Event event = newEvent(EventMessage.projectCreated(), when);
-            return event;
-        }
-
-        public static Event taskAdded(Timestamp when) {
-            final ProjectId projectId = newProjectId();
-            final Event event = newEvent(EventMessage.taskAdded(projectId), when);
-            return event;
-        }
-
-        public static Event projectStarted(Timestamp when) {
-            final ProjectId projectId = newProjectId();
-            final Event event = newEvent(EventMessage.projectStarted(projectId), when);
-            return event;
-        }
     }
 }

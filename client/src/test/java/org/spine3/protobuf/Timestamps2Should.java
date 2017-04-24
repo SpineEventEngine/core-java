@@ -24,9 +24,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import org.spine3.base.Stringifier;
-import org.spine3.base.Stringifiers;
 import org.spine3.test.TimeTests;
+import org.spine3.time.Timestamps2;
 
 import java.util.Date;
 
@@ -38,23 +37,22 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Durations2.fromMinutes;
-import static org.spine3.protobuf.Timestamps2.HOURS_PER_DAY;
-import static org.spine3.protobuf.Timestamps2.MICROS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.MILLIS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_MICROSECOND;
-import static org.spine3.protobuf.Timestamps2.NANOS_PER_SECOND;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_HOUR;
-import static org.spine3.protobuf.Timestamps2.compare;
-import static org.spine3.protobuf.Timestamps2.convertToDate;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
-import static org.spine3.protobuf.Timestamps2.isBetween;
-import static org.spine3.protobuf.Timestamps2.isLaterThan;
-import static org.spine3.protobuf.Timestamps2.resetProvider;
-import static org.spine3.protobuf.Timestamps2.setProvider;
-import static org.spine3.protobuf.Timestamps2.systemTime;
-import static org.spine3.protobuf.Timestamps2.webSafeTimestampStringifier;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Durations2.fromMinutes;
+import static org.spine3.time.Time.HOURS_PER_DAY;
+import static org.spine3.time.Time.MICROS_PER_SECOND;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.NANOS_PER_MICROSECOND;
+import static org.spine3.time.Time.NANOS_PER_SECOND;
+import static org.spine3.time.Time.SECONDS_PER_HOUR;
+import static org.spine3.time.Time.getCurrentTime;
+import static org.spine3.time.Time.resetProvider;
+import static org.spine3.time.Time.setProvider;
+import static org.spine3.time.Time.systemTime;
+import static org.spine3.time.Timestamps2.compare;
+import static org.spine3.time.Timestamps2.isBetween;
+import static org.spine3.time.Timestamps2.isLaterThan;
+import static org.spine3.time.Timestamps2.toDate;
 
 public class Timestamps2Should {
 
@@ -203,7 +201,7 @@ public class Timestamps2Should {
     }
 
     @Test
-    public void compare_two_timestamps_using_comparator_return_negative_int_if_first_less_than_second_one() {
+    public void compare_timestamps_return_negative_int_if_first_less_than_second_one() {
         final Timestamp time1 = getCurrentTime();
         final Timestamp time2 = add(time1, TEN_SECONDS);
 
@@ -233,7 +231,7 @@ public class Timestamps2Should {
     }
 
     @Test
-    public void compare_two_timestamps_using_comparator_return_positive_int_if_first_greater_than_second_one() {
+    public void compare_timestamps_return_positive_int_if_first_greater_than_second_one() {
         final Timestamp currentTime = getCurrentTime();
         final Timestamp timeAfterCurrent = add(currentTime, TEN_SECONDS);
 
@@ -248,7 +246,7 @@ public class Timestamps2Should {
 
         final Timestamp expectedTime = getCurrentTime();
 
-        final Date actualDate = convertToDate(expectedTime);
+        final Date actualDate = toDate(expectedTime);
         final long actualSeconds = actualDate.getTime() / MILLIS_PER_SECOND;
 
         assertEquals(expectedTime.getSeconds(), actualSeconds);
@@ -290,33 +288,5 @@ public class Timestamps2Should {
     @Test
     public void obtain_system_time_millis() {
         assertNotEquals(0, systemTime());
-    }
-
-    @Test
-    public void provide_webSafe_timestamp_stringifier() {
-        final Timestamp timestamp = getCurrentTime();
-        final Stringifier<Timestamp> stringifier = webSafeTimestampStringifier();
-
-        final String str = stringifier.convert(timestamp);
-        assertEquals(timestamp, stringifier.reverse()
-                                           .convert(str));
-    }
-
-    @Test
-    public void provide_stringifier_for_Timestamp() {
-        final Timestamp timestamp = getCurrentTime();
-
-        final String str = Stringifiers.toString(timestamp);
-        final Timestamp convertedBack = Stringifiers.fromString(str, Timestamp.class);
-
-        assertEquals(timestamp, convertedBack);
-    }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_exception_when_try_to_convert_inappropriate_string_to_timestamp() {
-        // This uses TextFormat printing, for the output won't be parsable.
-        final String time = Timestamps2.getCurrentTime()
-                                       .toString();
-        Stringifiers.fromString(time, Timestamp.class);
     }
 }

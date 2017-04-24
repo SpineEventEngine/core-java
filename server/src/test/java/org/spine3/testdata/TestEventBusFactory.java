@@ -27,22 +27,22 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 
 /**
- * Creates {@link org.spine3.server.command.CommandBus CommandBus}s for tests.
+ * Creates {@link org.spine3.server.commandbus.CommandBus CommandBus}s for tests.
  *
  * @author Andrey Lavrov
  */
-@SuppressWarnings("UtilityClass")
 public class TestEventBusFactory {
 
     private TestEventBusFactory() {
     }
 
     public static EventBus create() {
-        final EventStore store = EventStore.newBuilder()
-                                           .setStreamExecutor(MoreExecutors.directExecutor())
-                                           .setStorageFactory(StorageFactorySwitch.getInstance()
-                                                                                  .get())
-                                           .build();
+        final EventStore store =
+                EventStore.newBuilder()
+                          .setStreamExecutor(MoreExecutors.directExecutor())
+                          .setStorageFactory(StorageFactorySwitch.getInstance(true)
+                                                                 .get())
+                          .build();
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(store)
                                           .build();

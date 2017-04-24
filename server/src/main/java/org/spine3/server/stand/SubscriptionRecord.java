@@ -27,6 +27,7 @@ import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.client.Subscription;
 import org.spine3.client.Target;
+import org.spine3.client.Topic;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -45,7 +46,7 @@ final class SubscriptionRecord {
     /**
      * The {@code callback} is null after the creation and until the subscription is activated.
      *
-     * @see SubscriptionRegistry#addSubscription(Target)
+     * @see SubscriptionRegistry#addSubscription(Topic)
      * @see SubscriptionRegistry#activate(Subscription, Stand.EntityUpdateCallback)
      */
     @Nullable
@@ -80,7 +81,8 @@ final class SubscriptionRecord {
      * @param type        the type to match
      * @param id          the ID to match
      * @param entityState the entity state to match
-     * @return {@code true} if this record matches all the given parameters, {@code false} otherwise.
+     * @return {@code true} if this record matches all the given parameters,
+     * {@code false} otherwise.
      */
     boolean matches(TypeUrl type,
                     Object id,

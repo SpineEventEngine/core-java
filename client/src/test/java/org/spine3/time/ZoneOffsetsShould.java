@@ -20,24 +20,30 @@
 
 package org.spine3.time;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 
+import java.text.ParseException;
 import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Timestamps2.MINUTES_PER_HOUR;
-import static org.spine3.protobuf.Timestamps2.SECONDS_PER_MINUTE;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.time.ZoneOffsets.getOffsetInSeconds;
-import static org.spine3.time.ZoneOffsets.toZoneOffset;
+import static org.spine3.time.Durations2.hours;
+import static org.spine3.time.Durations2.hoursAndMinutes;
+import static org.spine3.time.Time.MILLIS_PER_SECOND;
+import static org.spine3.time.Time.getCurrentTime;
+import static org.spine3.time.ZoneOffsets.MAX_HOURS_OFFSET;
+import static org.spine3.time.ZoneOffsets.MAX_MINUTES_OFFSET;
+import static org.spine3.time.ZoneOffsets.MIN_HOURS_OFFSET;
+import static org.spine3.time.ZoneOffsets.MIN_MINUTES_OFFSET;
+import static org.spine3.time.ZoneOffsets.getDefault;
+import static org.spine3.time.ZoneOffsets.ofHours;
+import static org.spine3.time.ZoneOffsets.ofHoursMinutes;
+import static org.spine3.time.ZoneOffsets.parse;
 
 public class ZoneOffsetsShould {
-
-    private static final int MIN_HOURS_OFFSET = -11;
-    private static final int MAX_HOURS_OFFSET = 14;
-    private static final int MIN_MINUTES_OFFSET = 0;
-    private static final int MAX_MINUTES_OFFSET = 60;
-    public static final TimeZone timeZone = TimeZone.getDefault();
 
     @Test
     public void has_private_constructor() {
@@ -45,53 +51,95 @@ public class ZoneOffsetsShould {
     }
 
     @Test
-    public void create_default_instance_according_to_place() {
-        final int currentOffset = getOffsetInSeconds(timeZone);
+    public void get_current_zone_offset() {
+        final TimeZone timeZone = TimeZone.getDefault();
+        final ZoneOffset zoneOffset = getDefault();
+
+        final Timestamp now = getCurrentTime();
+        final long date = Timestamps.toMillis(now);
+        final int offsetSeconds = timeZone.getOffset(date) / MILLIS_PER_SECOND;
+
         final String zoneId = timeZone.getID();
-        assertEquals(currentOffset, toZoneOffset(timeZone).getAmountSeconds());
-        assertEquals(zoneId, toZoneOffset(timeZone).getId());
+        assertEquals(zoneId, zoneOffset.getId());
+
+        assertEquals(offsetSeconds, zoneOffset.getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_offset() {
-        final int secondsInTwoHours = secondsInHours(2);
-        assertEquals(secondsInTwoHours, ZoneOffsets.ofHours(2)
-                                                   .getAmountSeconds());
+        final Duration twoHours = hours(2);
+        assertEquals(twoHours.getSeconds(), ofHours(2).getAmountSeconds());
     }
 
     @Test
     public void create_instance_by_hours_and_minutes_offset() {
-        final int secondsIn8Hours45Minutes = secondsInHoursAndMinutes(8, 45);
-        final int secondsInEuclaOffset = ZoneOffsets.ofHoursMinutes(8, 45)
-                                                    .getAmountSeconds();
-        assertEquals(secondsIn8Hours45Minutes, secondsInEuclaOffset);
+        assertEquals(hoursAndMinutes(8, 45).getSeconds(),
+                     ofHoursMinutes(8, 45).getAmountSeconds());
+
+        assertEquals(hoursAndMinutes(-4, -50).getSeconds(),
+                     ofHoursMinutes(-4, -50).getAmountSeconds());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void require_same_sign_for_hours_and_minutes_negative_hours() {
+        ofHoursMinutes(-1, 10);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void require_same_sign_for_hours_and_minutes_positive_hours() {
+        ofHoursMinutes(1, -10);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_14_hours() {
-        ZoneOffsets.ofHours(MAX_HOURS_OFFSET + 1);
+        ofHours(MAX_HOURS_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_11_hours_by_abs() {
-        ZoneOffsets.ofHours(MIN_HOURS_OFFSET - 1);
+        ofHours(MIN_HOURS_OFFSET - 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(10, MAX_MINUTES_OFFSET + 1);
+        ofHoursMinutes(10, MAX_MINUTES_OFFSET + 1);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_more_than_17_hours_and_60_minutes() {
-        ZoneOffsets.ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
+        ofHoursMinutes(3, MIN_MINUTES_OFFSET - 1);
     }
 
-    private static int secondsInHours(int hours) {
-        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours;
+    @Test
+    public void convert_to_string() throws ParseException {
+        final ZoneOffset positive = ofHoursMinutes(5, 48);
+        final ZoneOffset negative = ofHoursMinutes(-3, -36);
+
+        assertEquals(positive, parse(ZoneOffsets.toString(positive)));
+        assertEquals(negative, parse(ZoneOffsets.toString(negative)));
     }
 
-    private static int secondsInHoursAndMinutes(int hours, int minutes) {
-        return SECONDS_PER_MINUTE * MINUTES_PER_HOUR * hours + SECONDS_PER_MINUTE * minutes;
+    @Test
+    public void parse_string() throws ParseException {
+        assertEquals(ofHoursMinutes(4, 30), parse("+4:30"));
+        assertEquals(ofHoursMinutes(4, 30), parse("+04:30"));
+
+        assertEquals(ofHoursMinutes(-2, -45), parse("-2:45"));
+        assertEquals(ofHoursMinutes(-2, -45), parse("-02:45"));
+    }
+
+    @Test(expected = ParseException.class)
+    public void fail_when_sign_char_missing() throws ParseException {
+        ZoneOffsets.parse("x03:00");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_when_hours_and_minutes_have_different_sign_negative_hours() {
+        ZoneOffsets.ofHoursMinutes(-1, 10);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_when_hours_and_minutes_have_different_sign_negative_minutes() {
+        ZoneOffsets.ofHoursMinutes(1, -10);
     }
 }

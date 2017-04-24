@@ -28,6 +28,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.type.CommandClass;

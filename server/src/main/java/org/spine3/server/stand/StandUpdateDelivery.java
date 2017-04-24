@@ -22,11 +22,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.annotations.SPI;
-import org.spine3.base.Version;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.projection.ProjectionRepository;
@@ -70,13 +66,7 @@ public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope<?
         return new Runnable() {
             @Override
             public void run() {
-                final Message state = deliverable.getMessage();
-                final Any packedState = AnyPacker.pack(state);
-                final Version version = deliverable.getEntityVersion()
-                                                   .or(Version.getDefaultInstance());
-                consumer.update(deliverable.getEntityId(),
-                                packedState,
-                                version);
+                consumer.update(deliverable);
             }
         };
     }

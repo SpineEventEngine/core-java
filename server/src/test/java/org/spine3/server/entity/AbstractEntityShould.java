@@ -20,14 +20,19 @@
 
 package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.server.aggregate.AggregatePart;
-import org.spine3.test.Tests;
+import org.spine3.test.entity.number.NaturalNumber;
+
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
-import static org.spine3.test.Tests.newUuidValue;
+import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Illia Shepilov
@@ -42,23 +47,52 @@ public class AbstractEntityShould {
     }
 
     @Test
-    public void accept_anything_to_isValidate() {
-        final AnEntity entity = new AnEntity(0L);
-
-        assertTrue(entity.isValid(Tests.<StringValue>nullRef()));
-        assertTrue(entity.isValid(StringValue.getDefaultInstance()));
-        assertTrue(entity.isValid(newUuidValue()));
+    public void define_final_updateState_method() throws NoSuchMethodException {
+        final Method updateState = AbstractEntity.class.getDeclaredMethod(
+                "updateState", Message.class);
+        final int modifiers = updateState.getModifiers();
+        assertTrue(Modifier.isFinal(modifiers));
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void not_allow_invalid_state() {
-        final NonblankString entity = new NonblankString(1L);
+    @Test
+    public void prevent_validate_overriding() throws NoSuchMethodException {
+        final Method validate = AbstractEntity.class.getDeclaredMethod(
+                "validate", Message.class);
+        final int modifiers = validate.getModifiers();
+        assertTrue(Modifier.isPrivate(modifiers) || Modifier.isFinal(modifiers));
+    }
 
-        // This should pass.
-        entity.updateState(newUuidValue());
+    @Test
+    public void throw_InvalidEntityStateException_if_state_is_invalid() {
+        final NaturalNumberEntity entity = new NaturalNumberEntity(0L);
+        final NaturalNumber invalidNaturalNumber = newNaturalNumber(-1);
+        try {
+            // This should pass.
+            entity.updateState(newNaturalNumber(1));
 
-        // This should fail.
-        entity.updateState(StringValue.getDefaultInstance());
+            // This should fail.
+            entity.updateState(invalidNaturalNumber);
+
+            fail("Exception expected.");
+        } catch (InvalidEntityStateException e) {
+            assertSize(1, e.getError()
+                           .getValidationError()
+                           .getConstraintViolationList());
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions") // The goal of the test.
+    @Test(expected = NullPointerException.class)
+    public void not_accept_null_to_checkEntityState() {
+        final AnEntity entity = new AnEntity(0L);
+        entity.checkEntityState(null);
+    }
+
+    @Test
+    public void allow_valid_state() {
+        final AnEntity entity = new AnEntity(0L);
+        assertTrue(entity.checkEntityState(StringValue.getDefaultInstance())
+                         .isEmpty());
     }
 
     private static class AnEntity extends AbstractEntity<Long, StringValue> {
@@ -67,14 +101,15 @@ public class AbstractEntityShould {
         }
     }
 
-    private static class NonblankString extends AbstractEntity<Long, StringValue> {
-        protected NonblankString(Long id) {
+    private static class NaturalNumberEntity extends AbstractEntity<Long, NaturalNumber> {
+        private NaturalNumberEntity(Long id) {
             super(id);
         }
+    }
 
-        @Override
-        protected boolean isValid(StringValue newState) {
-            return !newState.getValue().isEmpty();
-        }
+    private static NaturalNumber newNaturalNumber(int value) {
+        return NaturalNumber.newBuilder()
+                            .setValue(value)
+                            .build();
     }
 }

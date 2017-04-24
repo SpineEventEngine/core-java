@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -90,7 +91,7 @@ public class GrpcContainerShould {
         for (int i = 0; i < count; i++) {
             final BindableService mockService = mock(BindableService.class);
             final ServerServiceDefinition mockDefinition = ServerServiceDefinition
-                    .builder(String.format("service-%s", i))
+                    .builder(format("service-%s", i))
                     .build();
             when(mockService.bindService()).thenReturn(mockDefinition);
             definitions.add(mockDefinition);
@@ -99,7 +100,8 @@ public class GrpcContainerShould {
         }
 
         count--;
-        builder.removeService(definitions.get(count));
+        // Perform removal and check that the return value is builder itself.
+        assertEquals(builder, builder.removeService(definitions.get(count)));
 
         final Set<ServerServiceDefinition> serviceSet = builder.getServices();
         assertSize(count, serviceSet);
@@ -109,7 +111,8 @@ public class GrpcContainerShould {
     }
 
     @Test
-    public void stop_properly_upon_application_shutdown() throws NoSuchFieldException, IllegalAccessException, IOException {
+    public void stop_properly_upon_application_shutdown()
+            throws NoSuchFieldException, IllegalAccessException, IOException {
         final Class<Runtime> runtimeClass = Runtime.class;
         // Field signature: private static Runtime currentRuntime
         // Origin class: {@code java.lang.Runtime}.
@@ -198,5 +201,4 @@ public class GrpcContainerShould {
         }
         fail("Expected an exception.");
     }
-
 }

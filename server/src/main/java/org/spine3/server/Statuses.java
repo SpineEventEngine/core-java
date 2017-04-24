@@ -20,11 +20,15 @@
 
 package org.spine3.server;
 
+import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import org.spine3.annotations.Internal;
+import org.spine3.base.Error;
+import org.spine3.base.MetadataConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.grpc.Status.INVALID_ARGUMENT;
 
 /**
  * Utility class for working with {@link Status}es.
@@ -38,14 +42,24 @@ public class Statuses {
     }
 
     /**
-     * Creates an instance of {@code StatusRuntimeException} of status {@code Status.INVALID_ARGUMENT}
-     * with the passed exception.
+     * Creates an instance of {@code StatusRuntimeException} of status
+     * {@code Status.INVALID_ARGUMENT} with the passed cause and the {@link Error}.
+     *
+     * <p>Resulting {@code StatusRuntimeException} will contain the passed {@link Error}
+     * transformed to the {@linkplain StatusRuntimeException#getTrailers() metadata}.
+     *
+     * <p>NOTE: The cause is not transmitted from a server to a client.
+     *
+     * @param cause the exception cause
+     * @param error the error to be passed to a client
+     * @return the constructed {@code StatusRuntimeException}
      */
-    public static StatusRuntimeException invalidArgumentWithCause(Exception exception) {
-        checkNotNull(exception);
-        final StatusRuntimeException result = Status.INVALID_ARGUMENT
-                .withCause(exception)
-                .asRuntimeException();
+    public static StatusRuntimeException invalidArgumentWithCause(Exception cause, Error error) {
+        checkNotNull(cause);
+        checkNotNull(error);
+        final Metadata metadata = MetadataConverter.toMetadata(error);
+        final StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
+                                                              .asRuntimeException(metadata);
         return result;
     }
 }

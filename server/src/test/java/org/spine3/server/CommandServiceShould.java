@@ -30,8 +30,8 @@ import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.UnsupportedCommandException;
+import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.commandbus.UnsupportedCommandException;
 import org.spine3.server.transport.GrpcContainer;
 import org.spine3.testdata.TestCommandBusFactory;
 
@@ -45,7 +45,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
+import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class CommandServiceShould {
@@ -62,13 +62,15 @@ public class CommandServiceShould {
     public void setUp() {
         // Create Projects Bounded Context with one repository.
         projectsContext = newBoundedContext(spy(TestCommandBusFactory.create()));
-        final Given.ProjectAggregateRepository projectRepo = new Given.ProjectAggregateRepository(projectsContext);
+        final Given.ProjectAggregateRepository projectRepo =
+                new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
         customersContext = newBoundedContext(spy(TestCommandBusFactory.create()));
-        final Given.CustomerAggregateRepository customerRepo = new Given.CustomerAggregateRepository(customersContext);
+        final Given.CustomerAggregateRepository customerRepo =
+                new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
@@ -118,7 +120,8 @@ public class CommandServiceShould {
 
     @Test
     public void return_error_if_command_is_unsupported() {
-        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(), createCommandContext());
+        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(),
+                                                              createCommandContext());
 
         service.post(unsupportedCmd, responseObserver);
 

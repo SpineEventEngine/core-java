@@ -24,6 +24,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
@@ -55,6 +56,8 @@ import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
+import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
+import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 
 import java.util.List;
 
@@ -71,7 +74,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.testdata.TestBoundedContextFactory.newBoundedContext;
 
 /**
  * @author Alexander Litus
@@ -80,11 +82,18 @@ public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private final StorageFactory storageFactory = StorageFactorySwitch.getInstance().get();
+    private StorageFactory storageFactory;
 
-    private final BoundedContext boundedContext = newBoundedContext();
+    private BoundedContext boundedContext;
 
     private boolean handlersRegistered = false;
+
+    @Before
+    public void setUp() {
+        boundedContext = MultiTenant.newBoundedContext();
+        storageFactory = StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                             .get();
+    }
 
     @After
     public void tearDown() throws Exception {
@@ -106,6 +115,11 @@ public class BoundedContextShould {
     @Test
     public void return_EventBus() {
         assertNotNull(boundedContext.getEventBus());
+    }
+
+    @Test
+    public void return_FailureBus() {
+        assertNotNull(boundedContext.getFailureBus());
     }
 
     @Test
@@ -165,7 +179,7 @@ public class BoundedContextShould {
     public void notify_integration_event_subscriber() {
         registerAll();
         final TestResponseObserver observer = new TestResponseObserver();
-        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
+        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
         final Message msg = unpack(event.getMessage());
 
         boundedContext.notify(event, observer);
@@ -179,8 +193,8 @@ public class BoundedContextShould {
         final EventBus eventBus = mock(EventBus.class);
         doReturn(false).when(eventBus)
                        .validate(any(Message.class), anyResponseObserver());
-        final BoundedContext boundedContext = newBoundedContext(eventBus);
-        final IntegrationEvent event = Given.IntegrationEvent.projectCreated();
+        final BoundedContext boundedContext = MultiTenant.newBoundedContext(eventBus);
+        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
 
         boundedContext.notify(event, new TestResponseObserver());
 
@@ -217,7 +231,7 @@ public class BoundedContextShould {
     @Test
     public void propagate_registered_repositories_to_stand() {
         final Stand stand = spy(mock(Stand.class));
-        final BoundedContext boundedContext = newBoundedContext(stand);
+        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 
         final ProjectAggregateRepository repository =

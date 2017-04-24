@@ -28,14 +28,17 @@ import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
-import org.spine3.client.CommandFactory;
-import org.spine3.protobuf.Timestamps2;
-import org.spine3.test.TestCommandFactory;
-import org.spine3.test.TestEventFactory;
+import org.spine3.base.Version;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.server.command.EventFactory;
+import org.spine3.test.TestActorRequestFactory;
+import org.spine3.test.Tests;
+import org.spine3.time.Time;
 import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.newUuidValue;
 
 /**
@@ -46,8 +49,8 @@ import static org.spine3.test.Tests.newUuidValue;
  */
 public class TypeNameShould {
 
-    private static final CommandFactory commandFactory =
-            TestCommandFactory.newInstance(TypeNameShould.class);
+    private static final ActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(TypeNameShould.class);
 
     @Test
     public void pass_the_null_tolerance_check() {
@@ -98,7 +101,7 @@ public class TypeNameShould {
 
     @Test
     public void obtain_type_of_command() {
-        final Command command = commandFactory.createCommand(newUuidValue());
+        final Command command = requestFactory.command().create(newUuidValue());
 
         final TypeName typeName = TypeName.ofCommand(command);
         assertNotNull(typeName);
@@ -107,11 +110,13 @@ public class TypeNameShould {
 
     @Test
     public void obtain_type_name_of_event() {
-        final Command command = commandFactory.createCommand(newUuidValue());
-        final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
-
-        final Event event = eventFactory.createEvent(Timestamps2.getCurrentTime(),
-                                                     command.getContext());
+        final Command command = requestFactory.command().create(newUuidValue());
+        final StringValue producerId = newStringValue(getClass().getSimpleName());
+        final EventFactory ef = EventFactory.newBuilder()
+                                            .setProducerId(producerId)
+                                            .setCommandContext(command.getContext())
+                                            .build();
+        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
 
         final TypeName typeName = TypeName.ofEvent(event);
         assertNotNull(typeName);

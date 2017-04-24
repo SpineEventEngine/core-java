@@ -31,14 +31,13 @@ import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.server.Statuses;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.MessageValidator;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -48,6 +47,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.io.StreamObservers.emptyObserver;
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -55,14 +55,14 @@ import static org.spine3.io.StreamObservers.emptyObserver;
  * <h2>Receiving Events</h2>
  * <p>To receive event messages a subscriber object should:
  * <ol>
- *    <li>Expose a {@code public} method that accepts an event message as the first parameter
- *        and an {@link org.spine3.base.EventContext EventContext} as the second
- *        (optional) parameter.
- *    <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
- *    <li>{@linkplain #register(org.spine3.server.bus.MessageDispatcher)} Register} with an
- *    instance of {@code EventBus} directly, or rely on message delivery
- *    from an {@link EventDispatcher}. An example of such a dispatcher is
- *    {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
+ * <li>Expose a {@code public} method that accepts an event message as the first parameter
+ * and an {@link org.spine3.base.EventContext EventContext} as the second
+ * (optional) parameter.
+ * <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
+ * <li>{@linkplain #register(org.spine3.server.bus.MessageDispatcher)} Register} with an
+ * instance of {@code EventBus} directly, or rely on message delivery
+ * from an {@link EventDispatcher}. An example of such a dispatcher is
+ * {@link org.spine3.server.projection.ProjectionRepository ProjectionRepository}
  * </ol>
  *
  * <p><strong>Note:</strong> A subscriber method cannot accept just {@link Message} as
@@ -190,8 +190,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
 
     @Override
     protected Event enrich(Event event) {
-        if (enricher == null ||
-                !enricher.canBeEnriched(event)) {
+        if (enricher == null || !enricher.canBeEnriched(event)) {
             return event;
         }
         final Event enriched = enricher.enrich(event);
@@ -208,14 +207,16 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(unsupportedEvent));
+            responseObserver.onError(
+                    invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError()));
             return false;
         }
         final List<ConstraintViolation> violations = eventValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent =
                     InvalidEventException.onConstraintViolations(event, violations);
-            responseObserver.onError(Statuses.invalidArgumentWithCause(invalidEvent));
+            responseObserver.onError(invalidArgumentWithCause(invalidEvent,
+                                                              invalidEvent.getError()));
             return false;
         }
         return true;
@@ -338,12 +339,14 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         /**
          * Optional enricher for events.
          *
-         * <p>If not set, the enrichments will NOT be supported in the {@code EventBus} instance built.
+         * <p>If not set, the enrichments will NOT be supported
+         * in the {@code EventBus} instance built.
          */
         @Nullable
         private EventEnricher enricher;
 
         private Builder() {
+            // Prevent instantiation from outside.
         }
 
         /**
@@ -398,8 +401,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
          * new {@code EventStore} instance when building {@code EventBus}, <em>if</em>
          * {@code EventStore} was not explicitly set in the builder.
          *
-         * <p>If an {@code Executor} is not set in the builder, {@link MoreExecutors#directExecutor()}
-         * will be used.
+         * <p>If an {@code Executor} is not set in the builder,
+         * {@link MoreExecutors#directExecutor()} will be used.
          *
          * @see #setEventStore(EventStore)
          */
@@ -459,12 +462,16 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         }
 
         public EventBus build() {
-            checkState(storageFactory != null || eventStore != null,
-                       "Either storageFactory or eventStore must be set to build the EventBus instance");
+            final String message = "Either storageFactory or eventStore must be " +
+                                   "set to build the EventBus instance";
+            checkState(storageFactory != null || eventStore != null, message);
 
             if (eventStoreStreamExecutor == null) {
-                this.eventStoreStreamExecutor = MoreExecutors.directExecutor();
+                eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
+            /* The assert below prevents false warning for possible `null` value passed
+               to EventStore.Builder.setStreamExecutor(). */
+            assert (eventStoreStreamExecutor != null);
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()

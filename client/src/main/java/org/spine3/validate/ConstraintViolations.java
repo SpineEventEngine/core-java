@@ -25,13 +25,13 @@ import com.google.protobuf.ProtocolMessageEnum;
 import com.google.protobuf.Value;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Error;
-import org.spine3.base.ValidationError;
 import org.spine3.type.MessageClass;
 
 import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static java.lang.System.lineSeparator;
 
 /**
@@ -42,7 +42,7 @@ import static java.lang.System.lineSeparator;
 public class ConstraintViolations {
 
     private ConstraintViolations() {
-        //prevent instantiation of this utility class
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -58,7 +58,7 @@ public class ConstraintViolations {
 
         final String format = violation.getMsgFormat();
         final List<String> params = violation.getParamList();
-        final String parentViolationFormatted = String.format(format, params.toArray());
+        final String parentViolationFormatted = format(format, params.toArray());
 
         final StringBuilder resultBuilder = new StringBuilder(parentViolationFormatted);
         if (violation.getViolationCount() > 0) {
@@ -104,7 +104,7 @@ public class ConstraintViolations {
         checkNotNull(violation);
 
         final List<String> params = violation.getParamList();
-        final String parentViolationFormatted = String.format(format, params.toArray());
+        final String parentViolationFormatted = format(format, params.toArray());
 
         final StringBuilder resultBuilder = new StringBuilder(parentViolationFormatted);
         if (violation.getViolationCount() > 0) {
@@ -149,9 +149,9 @@ public class ConstraintViolations {
      */
     @Internal
     public abstract static class ExceptionFactory<E extends Exception,
-                                                  M extends Message,
-                                                  C extends MessageClass,
-                                                  R extends ProtocolMessageEnum> {
+            M extends Message,
+            C extends MessageClass,
+            R extends ProtocolMessageEnum> {
 
         private final Iterable<ConstraintViolation> constraintViolations;
         private final M message;
@@ -164,7 +164,7 @@ public class ConstraintViolations {
          * @param constraintViolations constraint violations for the event message
          */
         protected ExceptionFactory(M message,
-                                   Iterable<ConstraintViolation> constraintViolations) {
+                Iterable<ConstraintViolation> constraintViolations) {
             this.constraintViolations = constraintViolations;
             this.message = message;
         }
@@ -198,9 +198,9 @@ public class ConstraintViolations {
         protected abstract E createException(String exceptionMsg, M message, Error error);
 
         private String formatExceptionMessage() {
-            return String.format("%s. Message class: %s. " +
-                                 "See Error.getValidationError() for details.",
-                                 getErrorText(), getMessageClass());
+            return format("%s. Message class: %s. " +
+                                  "See Error.getValidationError() for details.",
+                          getErrorText(), getMessageClass());
         }
 
         private Error createError() {
@@ -212,9 +212,9 @@ public class ConstraintViolations {
             final String typeName = errorCode.getDescriptorForType()
                                              .getFullName();
             final String errorTextTemplate = getErrorText();
-            final String errorText = String.format("%s %s",
-                                                   errorTextTemplate,
-                                                   toText(constraintViolations));
+            final String errorText = format("%s %s",
+                                            errorTextTemplate,
+                                            toText(constraintViolations));
 
             final Error.Builder error = Error.newBuilder()
                                              .setType(typeName)

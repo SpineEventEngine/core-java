@@ -37,13 +37,8 @@ public interface Storage<I, R extends Message> extends AutoCloseable {
     /**
      * Verifies whether the storage is multitenant.
      *
-     * <p>A multitenant storage should take into account a current tenant (obtained via
-     * {@link org.spine3.server.users.CurrentTenant#get() CurrentTenant.get() })
-     * when performing operations with the data it stores.
-     *
      * @return {@code true} if the storage was created with multitenancy support,
-     *          {@code false} otherwise
-     * @see org.spine3.server.users.CurrentTenant#get() CurrentTenant.get()
+     *         {@code false} otherwise
      */
     boolean isMultitenant();
 
@@ -71,4 +66,19 @@ public interface Storage<I, R extends Message> extends AutoCloseable {
      * @throws IllegalStateException if the storage is closed
      */
     void write(I id, R record);
+
+    /**
+     * Closes the storage.
+     *
+     * <p>Implementations may throw specific exceptions.
+     */
+    @Override
+    void close();
+
+    /**
+     * Verifies whether the storage is open.
+     *
+     * @return {@code true} if the storage is open, {@code false} otherwise
+     */
+    boolean isOpen();
 }

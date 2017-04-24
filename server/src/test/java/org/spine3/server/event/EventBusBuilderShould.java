@@ -26,8 +26,8 @@ import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
-import org.spine3.server.validate.MessageValidator;
 import org.spine3.test.Tests;
+import org.spine3.validate.MessageValidator;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
@@ -39,14 +39,15 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
-@SuppressWarnings("OptionalGetWithoutIsPresent")
+@SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class EventBusBuilderShould {
 
     private StorageFactory storageFactory;
 
     @Before
     public void setUp() {
-        this.storageFactory = StorageFactorySwitch.getInstance().get();
+        this.storageFactory = StorageFactorySwitch.getInstance(true)
+                                                  .get();
     }
 
     @Test(expected = NullPointerException.class)

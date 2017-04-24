@@ -20,18 +20,30 @@
 
 package org.spine3.server.storage;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.spine3.base.Version;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
+import org.spine3.test.storage.Project;
+import org.spine3.testdata.Sample;
+import org.spine3.time.Time;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -43,6 +55,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
@@ -55,7 +71,17 @@ import static org.spine3.validate.Validate.isDefault;
  * @author Dmytro Dashenkov
  */
 public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
-       extends AbstractStorageShould<I, EntityRecord, S> {
+        extends AbstractStorageShould<I, EntityRecord, S> {
+
+    private static final Function<EntityRecordWithColumns, EntityRecord> RECORD_EXTRACTOR_FUNCTION =
+            new Function<EntityRecordWithColumns, EntityRecord>() {
+                @Override
+                public EntityRecord apply(
+                        @Nullable EntityRecordWithColumns entityRecord) {
+                    assertNotNull(entityRecord);
+                    return entityRecord.getRecord();
+                }
+            };
 
     protected abstract Message newState(I id);
 
@@ -77,7 +103,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         return record;
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we write.
+    @SuppressWarnings("ConstantConditions")
+    // Converter nullability issues and Optional getting
     @Test
     public void write_and_read_record_by_Message_id() {
         final RecordStorage<I> storage = getStorage();
@@ -85,7 +112,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord expected = newStorageRecord(id);
         storage.write(id, expected);
 
-        final EntityRecord actual = storage.read(id).get();
+        final EntityRecord actual = storage.read(id)
+                                           .get();
 
         assertEquals(expected, actual);
         close(storage);
@@ -103,7 +131,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEmpty(empty);
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We check in assertion.
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     @Test
     public void read_single_record_with_mask() {
         final I id = newId();
@@ -122,7 +150,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertFalse(isDefault(unpacked));
     }
 
-    @SuppressWarnings("MethodWithMultipleLoops")
+    @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"})
+    // Converter nullability issues
     @Test
     public void read_multiple_records_with_field_mask() {
         final RecordStorage<I> storage = getStorage();
@@ -155,6 +184,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
     }
 
+    @SuppressWarnings("ConstantConditions") // converter nullability issues
     @Test
     public void delete_record() {
         final RecordStorage<I> storage = getStorage();
@@ -168,7 +198,22 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertTrue(storage.delete(id));
 
         // There's no record with such ID.
-        assertFalse(storage.read(id).isPresent());
+        assertFalse(storage.read(id)
+                           .isPresent());
+    }
+
+    @Test
+    public void write_none_storage_fields_is_none_passed() {
+        final RecordStorage<I> storage = spy(getStorage());
+        final I id = newId();
+        final Any state = AnyPacker.pack(
+                Sample.messageOfType(Project.class));
+        final EntityRecord record =
+                Sample.<EntityRecord, EntityRecord.Builder>builderForType(EntityRecord.class)
+                        .setState(state)
+                        .build();
+        storage.write(id, record);
+        verify(storage).write(eq(id), withRecordAndNoFields(record));
     }
 
     @Test
@@ -176,21 +221,23 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
         final int bulkSize = 5;
 
-        final Map<I, EntityRecord> expected = new HashMap<>(bulkSize);
+        final Map<I, EntityRecordWithColumns> initial = new HashMap<>(bulkSize);
 
         for (int i = 0; i < bulkSize; i++) {
             final I id = newId();
             final EntityRecord record = newStorageRecord(id);
-            expected.put(id, record);
+            initial.put(id, EntityRecordWithColumns.of(record));
         }
-        storage.write(expected);
+        storage.write(initial);
 
         final Collection<EntityRecord> actual = newLinkedList(
-                storage.readMultiple(expected.keySet())
+                storage.readMultiple(initial.keySet())
         );
+        final Collection<EntityRecord> expected = Collections2.transform(initial.values(),
+                                                                         RECORD_EXTRACTOR_FUNCTION);
 
         assertEquals(expected.size(), actual.size());
-        assertTrue(actual.containsAll(expected.values()));
+        assertTrue(actual.containsAll(expected));
 
         close(storage);
     }
@@ -199,6 +246,18 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void rewrite_records_in_bulk() {
         final int recordCount = 3;
         final RecordStorage<I> storage = getStorage();
+
+        final Function<EntityRecord, EntityRecordWithColumns> recordPacker =
+                new Function<EntityRecord, EntityRecordWithColumns>() {
+                    @Nullable
+                    @Override
+                    public EntityRecordWithColumns apply(@Nullable EntityRecord record) {
+                        if (record == null) {
+                            return null;
+                        }
+                        return EntityRecordWithColumns.of(record);
+                    }
+                };
         final Map<I, EntityRecord> v1Records = new HashMap<>(recordCount);
         final Map<I, EntityRecord> v2Records = new HashMap<>(recordCount);
 
@@ -208,17 +267,17 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
             // Some records are changed and some are not
             final EntityRecord alternateRecord = (i % 2 == 0)
-                                                 ? record
-                                                 : newStorageRecord(id);
+                    ? record
+                    : newStorageRecord(id);
             v1Records.put(id, record);
             v2Records.put(id, alternateRecord);
         }
 
-        storage.write(v1Records);
+        storage.write(Maps.transformValues(v1Records, recordPacker));
         final Map<I, EntityRecord> firstRevision = storage.readAll();
         assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
 
-        storage.write(v2Records);
+        storage.write(Maps.transformValues(v2Records, recordPacker));
         final Map<I, EntityRecord> secondRevision = storage.readAll();
         assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
     }
@@ -239,7 +298,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertFalse(optional.isPresent());
     }
 
-    @SuppressWarnings("OptionalGetWithoutIsPresent") // We verify in assertion.
+    @SuppressWarnings("ConstantConditions") // Converter nullability issues
     @Test
     public void return_default_visibility_for_new_record() {
         final I id = newId();
@@ -258,12 +317,95 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final I id = newId();
         final EntityRecord record = newStorageRecord(id);
         final RecordStorage<I> storage = getStorage();
-        storage.write(id, record);
+        storage.write(id, EntityRecordWithColumns.of(record));
 
         storage.writeLifecycleFlags(id, archived());
 
         final Optional<LifecycleFlags> optional = storage.readLifecycleFlags(id);
         assertTrue(optional.isPresent());
-        assertTrue(optional.get().getArchived());
+        assertTrue(optional.get()
+                           .getArchived());
+    }
+
+    @Test
+    public void accept_records_with_empty_storage_fields() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final EntityRecordWithColumns recordWithStorageFields =
+                EntityRecordWithColumns.of(record);
+        assertFalse(recordWithStorageFields.hasColumns());
+        final RecordStorage<I> storage = getStorage();
+
+        storage.write(id, recordWithStorageFields);
+        final Optional<EntityRecord> actualRecord = storage.read(id);
+        assertTrue(actualRecord.isPresent());
+        assertEquals(record, actualRecord.get());
+    }
+
+    @Test
+    public void write_record_with_columns() {
+        final I id = newId();
+        final EntityRecord record = newStorageRecord(id);
+        final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
+        final EntityRecordWithColumns recordWithColumns =
+                EntityRecordWithColumns.create(record, testEntity);
+        final S storage = getStorage();
+        storage.write(id, recordWithColumns);
+
+        final Optional<EntityRecord> readRecord = storage.read(id);
+        assertTrue(readRecord.isPresent());
+        assertEquals(record, readRecord.get());
+    }
+
+    private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
+        return argThat(new ArgumentMatcher<EntityRecordWithColumns>() {
+            @Override
+            public boolean matches(EntityRecordWithColumns argument) {
+                return argument.getRecord()
+                               .equals(record)
+                        && !argument.hasColumns();
+            }
+        });
+    }
+
+    @SuppressWarnings("unused") // Reflective access
+    public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
+
+        private int counter = 0;
+
+        protected TestCounterEntity(I id) {
+            super(id);
+        }
+
+        public int getCounter() {
+            counter++;
+            return counter;
+        }
+
+        public long getBigCounter() {
+            return getCounter();
+        }
+
+        public boolean isCounterEven() {
+            return counter % 2 == 0;
+        }
+
+        public String getCounterName() {
+            return getId().toString();
+        }
+
+        public Version getCounterVersion() {
+            return Version.newBuilder()
+                          .setNumber(counter)
+                          .build();
+        }
+
+        public Timestamp getNow() {
+            return Time.getCurrentTime();
+        }
+
+        public Project getCounterState() {
+            return getState();
+        }
     }
 }

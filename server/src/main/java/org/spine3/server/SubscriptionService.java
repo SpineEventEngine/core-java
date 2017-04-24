@@ -44,13 +44,15 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state from the server.
+ * The {@code SubscriptionService} provides an asynchronous way to fetch read-side state
+ * from the server.
  *
  * <p> For synchronous read-side updates please see {@link QueryService}.
  *
  * @author Alex Tymchenko
  */
-@SuppressWarnings("MethodDoesntCallSuperMethod") // as we override default implementation with `unimplemented` status.
+@SuppressWarnings("MethodDoesntCallSuperMethod")
+// as we override default implementation with `unimplemented` status.
 public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionServiceImplBase {
     private final ImmutableMap<TypeUrl, BoundedContext> typeToContextMap;
 
@@ -72,7 +74,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             final BoundedContext boundedContext = selectBoundedContext(target);
             final Stand stand = boundedContext.getStand();
 
-            final Subscription subscription = stand.subscribe(target);
+            final Subscription subscription = stand.subscribe(topic);
 
             responseObserver.onNext(subscription);
             responseObserver.onCompleted();
@@ -83,7 +85,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     @Override
-    public void activate(final Subscription subscription, final StreamObserver<SubscriptionUpdate> responseObserver) {
+    public void activate(final Subscription subscription,
+                         final StreamObserver<SubscriptionUpdate> responseObserver) {
         log().debug("Activating the subscription: {}", subscription);
 
         try {
@@ -93,11 +96,12 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                 @Override
                 public void onStateChanged(Any newEntityState) {
                     checkNotNull(subscription);
-                    final SubscriptionUpdate update = SubscriptionUpdate.newBuilder()
-                                                                        .setSubscription(subscription)
-                                                                        .setResponse(Responses.ok())
-                                                                        .addUpdates(newEntityState)
-                                                                        .build();
+                    final SubscriptionUpdate update =
+                            SubscriptionUpdate.newBuilder()
+                                              .setSubscription(subscription)
+                                              .setResponse(Responses.ok())
+                                              .addUpdates(newEntityState)
+                                              .build();
                     responseObserver.onNext(update);
                 }
             };
@@ -126,7 +130,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
     }
 
     private BoundedContext selectBoundedContext(Subscription subscription) {
-        final TypeName typeName = TypeName.of(subscription.getType());
+        final TypeName typeName = TypeName.of(subscription.getTopic()
+                                                          .getTarget()
+                                                          .getType());
         final TypeUrl type = typeName.toUrl();
         final BoundedContext result = typeToContextMap.get(type);
         return result;
@@ -165,7 +171,8 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
          */
         public SubscriptionService build() throws IllegalStateException {
             if (boundedContexts.isEmpty()) {
-                throw new IllegalStateException("Subscription service must have at least one bounded context.");
+                throw new IllegalStateException(
+                        "Subscription service must have at least one bounded context.");
             }
             final ImmutableMap<TypeUrl, BoundedContext> map = createMap();
             final SubscriptionService result = new SubscriptionService(map);

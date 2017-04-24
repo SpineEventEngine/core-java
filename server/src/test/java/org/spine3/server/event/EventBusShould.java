@@ -27,20 +27,20 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Events;
 import org.spine3.base.Responses;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
-import org.spine3.server.validate.MessageValidator;
+import org.spine3.test.EventTests;
 import org.spine3.test.Tests;
 import org.spine3.test.Tests.MemoizingObserver;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.ProjectId;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.MessageValidator;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -80,7 +80,7 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        this.storageFactory = StorageFactorySwitch.getInstance()
+        this.storageFactory = StorageFactorySwitch.getInstance(true)
                                                   .get();
         /**
          * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
@@ -391,7 +391,6 @@ public class EventBusShould {
         final Class<ProjectId> eventFieldClass = ProjectId.class;
         final Class<String> enrichmentFieldClass = String.class;
         final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Nullable
             @Override
             public String apply(@Nullable ProjectId input) {
                 checkNotNull(input);
@@ -411,7 +410,6 @@ public class EventBusShould {
         final Class<ProjectId> eventFieldClass = ProjectId.class;
         final Class<String> enrichmentFieldClass = String.class;
         final Function<ProjectId, String> function = new Function<ProjectId, String>() {
-            @Nullable
             @Override
             public String apply(@Nullable ProjectId input) {
                 checkNotNull(input);
@@ -462,8 +460,8 @@ public class EventBusShould {
         private Event eventHandled;
 
         @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            this.eventHandled = Events.createEvent(event, context);
+        public void on(ProjectCreated eventMsg, EventContext context) {
+            this.eventHandled = EventTests.createEvent(eventMsg, context);
         }
 
         private Event getEventHandled() {

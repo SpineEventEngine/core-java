@@ -23,10 +23,10 @@ package org.spine3.server.projection;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Durations2;
 import org.spine3.server.projection.BulkWriteOperation.FlushCallback;
 import org.spine3.test.TimeTests;
 import org.spine3.test.projection.Project;
+import org.spine3.time.Durations2;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -121,7 +121,8 @@ public class BulkWriteOperationShould {
             projections.add(new TestProjection(i));
         }
         final Timestamp whenHandled = Timestamp.getDefaultInstance();
-        final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, whenHandled);
+        final BulkWriteOperation<Object, TestProjection> operation =
+                newOperation(projections, whenHandled);
         assertTrue(operation.isInProgress());
         for (TestProjection projection : projections) {
             operation.storeProjection(projection);
@@ -134,7 +135,8 @@ public class BulkWriteOperationShould {
     public void store_given_timestamp_in_memory() {
         final Set<TestProjection> projections = emptySet();
         final Timestamp whenHandled = TimeTests.Past.secondsAgo(5L);
-        final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, whenHandled);
+        final BulkWriteOperation<Object, TestProjection> operation =
+                newOperation(projections, whenHandled);
         assertTrue(operation.isInProgress());
 
         operation.storeLastHandledEventTime(whenHandled);
@@ -150,7 +152,8 @@ public class BulkWriteOperationShould {
         final Timestamp secondEvent = TimeTests.Past.secondsAgo(5L);
         final Timestamp lastEvent = TimeTests.Past.secondsAgo(5L);
 
-        final BulkWriteOperation<Object, TestProjection> operation = newOperation(projections, lastEvent);
+        final BulkWriteOperation<Object, TestProjection> operation =
+                newOperation(projections, lastEvent);
         assertTrue(operation.isInProgress());
 
         operation.storeLastHandledEventTime(firstEvent);

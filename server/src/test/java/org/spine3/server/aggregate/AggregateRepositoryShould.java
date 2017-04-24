@@ -20,6 +20,7 @@
 
 package org.spine3.server.aggregate;
 
+import com.google.common.base.Optional;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -63,12 +64,13 @@ import static org.spine3.testdata.TestCommandContextFactory.createCommandContext
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "ConstantConditions"})
 public class AggregateRepositoryShould {
 
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
 
-    /** Use spy only when it is required to avoid problems, make tests faster and make it easier to debug. */
+    /** Use spy only when it is required to avoid problems,
+     * make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
     @Before
@@ -97,7 +99,7 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // OK as the aggregate is created if missing.
     @Test
     public void create_aggregate_with_default_state_if_no_aggregate_found() {
-        final ProjectAggregate aggregate = repository.load(Sample.messageOfType(ProjectId.class))
+        final ProjectAggregate aggregate = repository.find(Sample.messageOfType(ProjectId.class))
                                                      .get();
         final Project state = aggregate.getState();
 
@@ -111,12 +113,24 @@ public class AggregateRepositoryShould {
 
         repository.store(expected);
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregate actual = repository.load(id)
+        final ProjectAggregate actual = repository.find(id)
                                                   .get();
 
         assertTrue(isNotDefault(actual.getState()));
         assertEquals(expected.getId(), actual.getId());
         assertEquals(expected.getState(), actual.getState());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void reject_invalid_AggregateStateRecord_instance() {
+        final ProjectId id = Sample.messageOfType(ProjectId.class);
+        final AggregateStorage<ProjectId> storage = givenAggregateStorageMock();
+
+        doReturn(Optional.of(AggregateStateRecord.getDefaultInstance()))
+                .when(storage)
+                .read(id);
+
+        repositorySpy.loadOrCreate(id);
     }
 
     @Test
@@ -129,7 +143,7 @@ public class AggregateRepositoryShould {
         repository.store(expected);
 
         @SuppressWarnings("OptionalGetWithoutIsPresent")
-        final ProjectAggregate actual = repository.load(id)
+        final ProjectAggregate actual = repository.find(id)
                                                   .get();
 
         assertEquals(expected.getId(), actual.getId());
@@ -157,7 +171,8 @@ public class AggregateRepositoryShould {
         repositorySpy.store(aggregate);
 
         verify(storage, never()).writeSnapshot(any(ProjectId.class), any(Snapshot.class));
-        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class), intThat(new GreaterThan<>(0)));
+        verify(storage).writeEventCountAfterLastSnapshot(any(ProjectId.class),
+                                                         intThat(new GreaterThan<>(0)));
     }
 
     @Test
@@ -206,7 +221,7 @@ public class AggregateRepositoryShould {
         aggregate.setArchived(true);
         repository.store(aggregate);
 
-        assertFalse(repository.load(aggregate.getId())
+        assertFalse(repository.find(aggregate.getId())
                               .isPresent());
     }
 
@@ -217,7 +232,7 @@ public class AggregateRepositoryShould {
         aggregate.setDeleted(true);
         repository.store(aggregate);
 
-        assertFalse(repository.load(aggregate.getId())
+        assertFalse(repository.find(aggregate.getId())
                               .isPresent());
     }
 
@@ -352,10 +367,11 @@ public class AggregateRepositoryShould {
         }
     }
 
-    private static class ProjectAggregateRepository extends AggregateRepository<ProjectId, ProjectAggregate> {
+    private static class ProjectAggregateRepository
+                   extends AggregateRepository<ProjectId, ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(StorageFactorySwitch.getInstance()
+            initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
                                             .get());
         }
     }

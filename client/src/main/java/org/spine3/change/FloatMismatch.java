@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class FloatMismatch {
+public final class FloatMismatch {
 
     private FloatMismatch() {
         // Prevent instantiation of this utility class.
@@ -66,7 +66,8 @@ public class FloatMismatch {
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering a value different than by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a value
+     * different than by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected string
@@ -74,7 +75,8 @@ public class FloatMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(float expected, float actual, float newValue, int version) {
+    public static ValueMismatch unexpectedValue(float expected, float actual,
+                                                float newValue, int version) {
         checkNotNullOrEqual(expected, actual);
         return of(expected, actual, newValue, version);
     }

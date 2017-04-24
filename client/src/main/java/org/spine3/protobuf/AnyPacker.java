@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Any#pack(Message, String)
  * @see Any#unpack(Class)
  */
-public class AnyPacker {
+public final class AnyPacker {
 
     private static final Function<Any, Message> ANY_UNPACKER = new Function<Any, Message>() {
         @Nullable

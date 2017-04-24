@@ -21,9 +21,11 @@ package org.spine3.server.failure;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.envelope.FailureEnvelope;
 import org.spine3.server.reflect.FailureSubscriberMethod;
+import org.spine3.server.tenant.CommandOperation;
 import org.spine3.type.FailureClass;
 
 import javax.annotation.Nullable;
@@ -38,6 +40,7 @@ import java.util.Set;
  * @see org.spine3.server.failure.FailureBus#register(org.spine3.server.bus.MessageDispatcher)
  */
 public class FailureSubscriber implements FailureDispatcher {
+
     /**
      * Cached set of the failure classes this subscriber is subscribed to.
      */
@@ -45,8 +48,20 @@ public class FailureSubscriber implements FailureDispatcher {
     private Set<FailureClass> failureClasses;
 
     @Override
-    public void dispatch(FailureEnvelope envelope) {
-        handle(envelope.getMessage(), envelope.getCommandMessage(), envelope.getCommandContext());
+    public void dispatch(final FailureEnvelope envelope) {
+        final Command originCommand = envelope.getOuterObject()
+                                              .getContext()
+                                              .getCommand();
+        final CommandOperation op = new CommandOperation(originCommand) {
+
+            @Override
+            public void run() {
+                handle(envelope.getMessage(),
+                       envelope.getCommandMessage(),
+                       envelope.getCommandContext());
+            }
+        };
+        op.execute();
     }
 
     @Override

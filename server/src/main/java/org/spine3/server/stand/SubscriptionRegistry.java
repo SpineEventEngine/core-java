@@ -19,18 +19,11 @@
  */
 package org.spine3.server.stand;
 
-import org.spine3.base.Identifiers;
 import org.spine3.client.Subscription;
-import org.spine3.client.Target;
-import org.spine3.type.TypeName;
+import org.spine3.client.Topic;
 import org.spine3.type.TypeUrl;
 
-import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Maps.newHashMap;
 
 /**
  * Registry for subscription management.
@@ -41,10 +34,7 @@ import static com.google.common.collect.Maps.newHashMap;
  *
  * @author Alex Tymchenko
  */
-final class SubscriptionRegistry {
-    private final Map<TypeUrl, Set<SubscriptionRecord>> typeToAttrs = newHashMap();
-    private final Map<Subscription, SubscriptionRecord> subscriptionToAttrs = newHashMap();
-
+interface SubscriptionRegistry {
     /**
      * Activate the subscription with the passed callback.
      *
@@ -53,59 +43,25 @@ final class SubscriptionRegistry {
      * @param subscription the subscription to activate
      * @param callback     the callback to make active
      */
-    synchronized void activate(Subscription subscription, Stand.EntityUpdateCallback callback) {
-        checkState(subscriptionToAttrs.containsKey(subscription),
-                   "Cannot find the subscription in the registry.");
-        final SubscriptionRecord subscriptionRecord = subscriptionToAttrs.get(subscription);
-        subscriptionRecord.activate(callback);
-    }
+    void activate(Subscription subscription, Stand.EntityUpdateCallback callback);
 
     /**
-     * Creates a subscription for the passed {@code Target} and adds it to the registry.
+     * Creates a subscription for the passed {@link Topic} and adds it to the registry.
      *
-     * @param target the target for a new subscription
+     * @param topic the topic to subscribe to
      * @return the created subscription
      */
-    synchronized Subscription addSubscription(Target target) {
-        final String subscriptionId = Identifiers.newUuid();
-        final String typeAsString = target.getType();
-        final TypeUrl type = TypeName.of(typeAsString)
-                                     .toUrl();
-        final Subscription subscription = Subscription.newBuilder()
-                                                      .setId(subscriptionId)
-                                                      .setType(typeAsString)
-                                                      .build();
-        final SubscriptionRecord attributes = new SubscriptionRecord(subscription, target, type);
-
-        if (!typeToAttrs.containsKey(type)) {
-            typeToAttrs.put(type, new HashSet<SubscriptionRecord>());
-        }
-        typeToAttrs.get(type)
-                   .add(attributes);
-
-        subscriptionToAttrs.put(subscription, attributes);
-        return subscription;
-    }
+    Subscription addSubscription(Topic topic);
 
     /**
      * Remove the subscription from this registry.
      *
-     * <p>If there is no such subscription in this instance of {@code SubscriptionRegistry}, invocation has no effect.
+     * <p>If there is no such subscription in this instance of {@code SubscriptionRegistry},
+     * invocation has no effect.
      *
      * @param subscription the subscription to remove
      */
-    synchronized void removeSubscription(Subscription subscription) {
-        if (!subscriptionToAttrs.containsKey(subscription)) {
-            return;
-        }
-        final SubscriptionRecord attributes = subscriptionToAttrs.get(subscription);
-
-        if (typeToAttrs.containsKey(attributes.getType())) {
-            typeToAttrs.get(attributes.getType())
-                       .remove(attributes);
-        }
-        subscriptionToAttrs.remove(subscription);
-    }
+    void removeSubscription(Subscription subscription);
 
     /**
      * Filter the registered {@link SubscriptionRecord}s by their type.
@@ -113,10 +69,7 @@ final class SubscriptionRegistry {
      * @param type the type to filter by
      * @return the collection of filtered records
      */
-    synchronized Set<SubscriptionRecord> byType(TypeUrl type) {
-        final Set<SubscriptionRecord> result = typeToAttrs.get(type);
-        return result;
-    }
+    Set<SubscriptionRecord> byType(TypeUrl type);
 
     /**
      * Checks whether the current registry has the records related to a given type.
@@ -124,8 +77,5 @@ final class SubscriptionRegistry {
      * @param type the type to check records for
      * @return {@code true} if there are records with the given type, {@code false} otherwise
      */
-    synchronized boolean hasType(TypeUrl type) {
-        final boolean result = typeToAttrs.containsKey(type);
-        return result;
-    }
+    boolean hasType(TypeUrl type);
 }

@@ -33,7 +33,7 @@ import static org.spine3.protobuf.Values.pack;
  *
  * @author Alexander Yevsyukov
  */
-public class StringMismatch {
+public final class StringMismatch {
 
     private StringMismatch() {
         // Prevent instantiation of this utility class.
@@ -77,7 +77,8 @@ public class StringMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(String expected, String actual, String newValue, int version) {
+    public static ValueMismatch unexpectedValue(String expected, String actual,
+                                                String newValue, int version) {
         checkNotNull(expected);
         checkNotNull(actual);
         checkNotNull(newValue);

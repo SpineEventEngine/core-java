@@ -20,18 +20,17 @@
 package org.spine3.server.stand;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
+import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
@@ -40,8 +39,10 @@ import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
+import org.spine3.time.Time;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -65,6 +66,9 @@ import static org.spine3.base.Versions.newVersion;
  * @author Dmytro Dashenkov
  */
 public class StandFunnelShould {
+
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(StandFunnelShould.class);
 
     // **** Positive scenarios (unit) ****
 
@@ -99,6 +103,7 @@ public class StandFunnelShould {
         Assert.assertNotNull(funnelForBusyStand);
     }
 
+    @SuppressWarnings({"OverlyComplexAnonymousInnerClass", "ConstantConditions"})
     @Test
     public void deliver_updates_to_stand() {
         final AggregateRepository<ProjectId, Given.StandTestAggregate> repository = Given.aggregateRepo();
@@ -107,18 +112,33 @@ public class StandFunnelShould {
                                             .build();
         final Given.StandTestAggregate entity = repository.create(entityId);
         final StringValue state = entity.getState();
-        final Any packedState = AnyPacker.pack(state);
         final Version version = entity.getVersion();
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
-                   .update(entityId, packedState, version);
+                   .update(any(EntityStateEnvelope.class));
 
         final StandFunnel funnel = StandFunnel.newBuilder()
                                               .setStand(stand)
                                               .build();
-        funnel.post(entity);
-        verify(stand).update(entityId, packedState, version);
+        funnel.post(entity, requestFactory.createCommandContext());
+
+        final ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
+                new ArgumentMatcher<EntityStateEnvelope<?, ?>>() {
+                    @Override
+                    public boolean matches(EntityStateEnvelope<?, ?> argument) {
+                        final boolean entityIdMatches = argument.getEntityId()
+                                                                .equals(entityId);
+                        final boolean versionMatches = version.equals(argument.getEntityVersion()
+                                                                              .orNull());
+                        final boolean stateMatches = argument.getMessage()
+                                                             .equals(state);
+                        return entityIdMatches &&
+                                versionMatches &&
+                                stateMatches;
+                    }
+                };
+        verify(stand).update(ArgumentMatchers.argThat(argumentMatcher));
     }
 
     @SuppressWarnings("MagicNumber")
@@ -145,11 +165,12 @@ public class StandFunnelShould {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
-        when(entity.getVersion()).thenReturn(newVersion(17, Timestamps2.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
 
-        standFunnel.post(entity);
+        final CommandContext context = requestFactory.createCommandContext();
+        standFunnel.post(entity, context);
 
-        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity);
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, context.getTenantId());
         verify(delivery).deliverNow(eq(envelope), eq(Stand.class));
     }
 
@@ -204,7 +225,8 @@ public class StandFunnelShould {
         return result;
     }
 
-    private static void checkUpdatesDelivery(boolean isConcurrent, BoundedContextAction... dispatchActions) {
+    private static void checkUpdatesDelivery(boolean isConcurrent,
+                                             BoundedContextAction... dispatchActions) {
         checkNotNull(dispatchActions);
 
         final Stand stand = mock(Stand.class);
@@ -229,8 +251,7 @@ public class StandFunnelShould {
             }
         }
 
-        verify(stand, times(dispatchActions.length))
-                .update(ArgumentMatchers.any(), any(Any.class), any(Version.class));
+        verify(stand, times(dispatchActions.length)).update(any(EntityStateEnvelope.class));
     }
 
     private static BoundedContextAction aggregateRepositoryDispatch() {
@@ -240,7 +261,7 @@ public class StandFunnelShould {
                 // Init repository
                 final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
 
-                repository.initStorage(storageFactory());
+                repository.initStorage(storageFactory(context.isMultitenant()));
 
                 try {
                     // Mock aggregate and mock stand are not able to handle events
@@ -271,7 +292,7 @@ public class StandFunnelShould {
             public void perform(BoundedContext context) {
                 // Init repository
                 final ProjectionRepository repository = Given.projectionRepo(context);
-                repository.initStorage(storageFactory());
+                repository.initStorage(storageFactory(context.isMultitenant()));
 
                 // Dispatch an update from projection repo
                 repository.dispatch(EventEnvelope.of(Given.validEvent()));
@@ -279,8 +300,8 @@ public class StandFunnelShould {
         };
     }
 
-    private static StorageFactory storageFactory() {
-        return StorageFactorySwitch.getInstance().get();
+    private static StorageFactory storageFactory(boolean multitenant) {
+        return StorageFactorySwitch.getInstance(multitenant).get();
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
@@ -294,7 +315,7 @@ public class StandFunnelShould {
 
         final Stand stand = mock(Stand.class);
         doNothing().when(stand)
-                   .update(ArgumentMatchers.any(), any(Any.class), any(Version.class));
+                   .update(any(EntityStateEnvelope.class));
 
         final StandFunnel standFunnel = StandFunnel.newBuilder()
                                                    .setStand(stand)
@@ -313,7 +334,7 @@ public class StandFunnelShould {
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);
-                standFunnel.post(entity);
+                standFunnel.post(entity, requestFactory.createCommandContext());
 
                 threadInvocationRegistry.add(threadName);
             }

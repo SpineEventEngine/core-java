@@ -28,13 +28,15 @@ import org.slf4j.LoggerFactory;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.client.grpc.CommandServiceGrpc;
-import org.spine3.server.command.CommandBus;
-import org.spine3.server.command.CommandException;
-import org.spine3.server.command.UnsupportedCommandException;
+import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.commandbus.CommandException;
+import org.spine3.server.commandbus.UnsupportedCommandException;
 import org.spine3.type.CommandClass;
 
 import java.util.Map;
 import java.util.Set;
+
+import static org.spine3.server.Statuses.invalidArgumentWithCause;
 
 /**
  * The {@code CommandService} allows client applications to post commands and
@@ -54,8 +56,8 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     }
 
     /**
-     * Constructs new instance using the map from a {@code CommandClass} to a {@code BoundedContext} instance
-     * which handles the command.
+     * Constructs new instance using the map from a {@code CommandClass} to
+     * a {@code BoundedContext} instance which handles the command.
      */
     protected CommandService(Map<CommandClass, BoundedContext> map) {
         super();
@@ -63,7 +65,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod")
-        // as we override default implementation with `unimplemented` status.
+    // as we override default implementation with `unimplemented` status.
     @Override
     public void post(Command request, StreamObserver<Response> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
@@ -76,10 +78,11 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         }
     }
 
-    private static void handleUnsupported(Command request, StreamObserver<Response> responseObserver) {
+    private static void handleUnsupported(Command request,
+                                          StreamObserver<Response> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
-        responseObserver.onError(Statuses.invalidArgumentWithCause(unsupported));
+        responseObserver.onError(invalidArgumentWithCause(unsupported, unsupported.getError()));
     }
 
     public static class Builder {
@@ -124,10 +127,12 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         }
 
         /**
-         * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that handle such commands.
+         * Creates a map from {@code CommandClass}es to {@code BoundedContext}s that
+         * handle such commands.
          */
         private ImmutableMap<CommandClass, BoundedContext> createMap() {
-            final ImmutableMap.Builder<CommandClass, BoundedContext> builder = ImmutableMap.builder();
+            final ImmutableMap.Builder<CommandClass, BoundedContext> builder =
+                    ImmutableMap.builder();
             for (BoundedContext boundedContext : boundedContexts) {
                 putIntoMap(boundedContext, builder);
             }
@@ -139,11 +144,11 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
          * that handles such commands.
          */
         private static void putIntoMap(BoundedContext boundedContext,
-                                       ImmutableMap.Builder<CommandClass, BoundedContext> mapBuilder) {
+                                       ImmutableMap.Builder<CommandClass, BoundedContext> builder) {
             final CommandBus commandBus = boundedContext.getCommandBus();
             final Set<CommandClass> cmdClasses = commandBus.getRegisteredCommandClasses();
             for (CommandClass commandClass : cmdClasses) {
-                mapBuilder.put(commandClass, boundedContext);
+                builder.put(commandClass, boundedContext);
             }
         }
     }

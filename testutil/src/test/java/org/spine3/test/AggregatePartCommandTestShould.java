@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.client.CommandFactory;
+import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
@@ -34,7 +34,7 @@ import org.spine3.server.command.Assign;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.test.CommandTestShould.newCommandFactory;
+import static org.spine3.test.CommandTestShould.newRequestFactory;
 
 /**
  * @author Alexander Yevsyukov
@@ -68,8 +68,8 @@ public class AggregatePartCommandTestShould {
      */
     @SuppressWarnings("ResultOfObjectAllocationIgnored") // because we don't need the result.
     @Test
-    public void has_constructor_with_CommandFactory() {
-        new TimerCountingTest(newCommandFactory(getClass()));
+    public void has_constructor_with_ActorRequestFactory() {
+        new TimerCountingTest(newRequestFactory(getClass()));
     }
 
     /**
@@ -97,10 +97,11 @@ public class AggregatePartCommandTestShould {
     /**
      * The test harness class that tests how {@code TimerCounterPart} handles its command.
      */
-    private static class TimerCountingTest extends AggregatePartCommandTest<Timestamp, TimerCounter> {
+    private static class TimerCountingTest
+                   extends AggregatePartCommandTest<Timestamp, TimerCounter> {
 
-        protected TimerCountingTest(CommandFactory commandFactory) {
-            super(commandFactory);
+        protected TimerCountingTest(ActorRequestFactory requestFactory) {
+            super(requestFactory);
         }
 
         protected TimerCountingTest() {
