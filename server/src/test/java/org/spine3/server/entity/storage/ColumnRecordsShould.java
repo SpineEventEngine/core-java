@@ -21,7 +21,10 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.base.Function;
+import com.google.common.collect.HashMultimap;
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.Tests;
 
@@ -57,6 +60,18 @@ public class ColumnRecordsShould {
     @Test
     public void have_private_util_ctor() {
         assertHasPrivateParameterlessCtor(ColumnRecords.class);
+    }
+
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .setDefault(EntityRecordWithColumns.class,
+                            EntityRecordWithColumns.of(EntityRecord.getDefaultInstance()))
+                .setDefault(ColumnTypeRegistry.class, ColumnTypeRegistry.newBuilder().build())
+                .setDefault(EntityQuery.class,
+                            EntityQuery.of(EntityIdFilter.getDefaultInstance(),
+                                           HashMultimap.<Column<?>, Object>create()))
+                .testAllPublicStaticMethods(ColumnRecords.class);
     }
 
     @Test
