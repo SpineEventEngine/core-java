@@ -55,7 +55,7 @@ public final class EntityQueries {
             final Column<?> column = Columns.metadata(entityClass, fieldName);
             final Function<Any, ?> typeTransformer = ProtoToJavaMapper.function(column.getType());
             final Collection<?> filterValues = Collections2.transform(filter.getValueList(),
-                                                                           typeTransformer);
+                                                                      typeTransformer);
             queryParams.putAll(column, filterValues);
         }
         final EntityIdFilter idFilter = entityFilters.getIdFilter();

@@ -146,6 +146,22 @@ public class ColumnsShould {
         assertContains("someTime", storageFieldNames);
     }
 
+    @Test
+    public void retrieve_column_metadata_from_given_class() {
+        final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
+        final String existingColumnName = "archived";
+        final Column<?> archivedColumn = Columns.metadata(entityClass, existingColumnName);
+        assertNotNull(archivedColumn);
+        assertEquals(existingColumnName, archivedColumn.getName());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_retrieve_non_existing_column() {
+        final Class<? extends Entity<?, ?>> entityClass = EntityWithNoStorageFields.class;
+        final String existingColumnName = "foo";
+        Columns.metadata(entityClass, existingColumnName);
+    }
+
     public static class EntityWithNoStorageFields extends AbstractEntity<String, Any> {
         protected EntityWithNoStorageFields(String id) {
             super(id);

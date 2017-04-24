@@ -44,7 +44,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * @author Dmytro Dashenkov
  */
-// TODO:2017-04-21:dmytro.dashenkov: Maybe we should move this to client code ti make this util reusable.
+// TODO:2017-04-21:dmytro.dashenkov: Maybe we should move this to client code to make this util reusable.
 final class ProtoToJavaMapper {
 
     private ProtoToJavaMapper() {
@@ -62,7 +62,7 @@ final class ProtoToJavaMapper {
         return caster;
     }
 
-    abstract static class AnyCaster<T> implements Function<com.google.protobuf.Any, T> {
+    abstract static class AnyCaster<T> implements Function<Any, T> {
 
         private static <T> AnyCaster<T> forType(Class<T> cls) {
             checkNotNull(cls);
@@ -74,18 +74,18 @@ final class ProtoToJavaMapper {
         }
 
         @Override
-        public T apply(@Nullable com.google.protobuf.Any input) {
+        public T apply(@Nullable Any input) {
             checkNotNull(input);
             return cast(input);
         }
 
-        protected abstract T cast(com.google.protobuf.Any input);
+        protected abstract T cast(Any input);
     }
 
     private static class MessageTypeCaster<T> extends AnyCaster<T> {
 
         @Override
-        protected T cast(com.google.protobuf.Any input) {
+        protected T cast(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
             @SuppressWarnings("unchecked")
             final T result = (T) unpacked;
@@ -110,7 +110,7 @@ final class ProtoToJavaMapper {
                         .build();
 
         @Override
-        protected T cast(com.google.protobuf.Any input) {
+        protected T cast(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
             final Class boxedType = unpacked.getClass();
             @SuppressWarnings("unchecked")
