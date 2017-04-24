@@ -67,7 +67,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
-            FieldMask fieldMask) {
+                                                         FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
         // It is not possible to return an immutable collection,
