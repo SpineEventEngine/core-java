@@ -30,7 +30,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.test.entity.Project;
@@ -60,7 +60,8 @@ public class RepositoryShould {
                                        .setMultitenant(true)
                                        .build();
         repository = new TestRepo();
-        storageFactory = InMemoryStorageFactory.getInstance(boundedContext.isMultitenant());
+        storageFactory = StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                             .get();
         tenantId = newTenantUuid();
         //TODO:2017-03-26:alexander.yevsyukov: Have single-tenant version of tests too.
     }
@@ -222,7 +223,7 @@ public class RepositoryShould {
                 return entities.size();
             }
         }.execute();
-        
+
         assertEquals(3, numEntities);
     }
 

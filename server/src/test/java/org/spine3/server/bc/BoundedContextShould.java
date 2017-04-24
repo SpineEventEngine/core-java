@@ -47,7 +47,7 @@ import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.command.AddTask;
@@ -91,7 +91,8 @@ public class BoundedContextShould {
     @Before
     public void setUp() {
         boundedContext = MultiTenant.newBoundedContext();
-        storageFactory = InMemoryStorageFactory.getInstance(boundedContext.isMultitenant());
+        storageFactory = StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                             .get();
     }
 
     @After

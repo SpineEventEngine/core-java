@@ -42,7 +42,7 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
@@ -156,7 +156,7 @@ public class ProjectionRepositoryShould
     @Before
     public void setUp() {
         super.setUp();
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -260,7 +260,7 @@ public class ProjectionRepositoryShould
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
         final Event event = EventTests.createContextlessEvent(unknownEventMessage);
-        
+
         repository().dispatch(event);
     }
 
@@ -413,7 +413,7 @@ public class ProjectionRepositoryShould
         final Duration duration = Durations2.seconds(10L);
         final ProjectionRepository repository = spy(
                 new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         repository.catchUp();
 
         // Check bulk write
@@ -445,7 +445,7 @@ public class ProjectionRepositoryShould
         final Duration duration = Durations2.nanos(1L);
         final ProjectionRepository repository =
                 spy(new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         repository.catchUp();
 
         // Check bulk write
@@ -473,8 +473,13 @@ public class ProjectionRepositoryShould
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
-        repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repo.initStorage(storageFactory());
         return repo;
+    }
+
+    private StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                   .get();
     }
 
     /** The projection stub used in tests. */
