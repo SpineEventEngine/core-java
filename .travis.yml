@@ -20,6 +20,9 @@ deploy:
   secret_access_key:
     secure: QXXB/ZIKfw+QJyrv/5debBJWfI9P+56/Y5UUrcUOY2+PV4e2ujczSJ/cYIlItMA03wK6eI1NnkdnDPL0oZSuvRwzDylrfHuDfJsCA/wrLrIU2O40L2y2OsG528HglPY4NciCQ4GgiyrZ0NH5nQYinArjbMAwTVPdvjddPjaz/oX1pN6V+sXMQMP3ZMvHXpjoRn3XByaes2hN8AWxaOshOGnmJN83uJmeYLIlgDvrl2CoV/WJYplIH7qE6DIxRq5BzW48VQbtS6GBugI1iDrCASPUKDPm7YULchJxC1Y6+9ZnxxYhj1JbLvu6MYRwVtPVJ0xcQJRRASDt451Dhpu2ZTBzFXzqKaDKEuATaE0CRK/q2/ImV8S6CutOAZlPhBrdrHLuv4V8ZuwHpw+xvytCM6b4DjE69CH4lQO0uFN22dhHhFNwAdRfoRr41uQ/HNdIVS74ybkU6KaPzuw3VaQ56lZLLlECMxaclgn+WhHthWKNpdE/ySHlOfoEW6l5U1wsetJfsRu5rxgCAlHdeGVh6sxTT9e0bcIwOLezghV4YXwZZLEwQdUIMykjiVz57cbCD5nHEW/VDoznlLBrYyqBPJ6d9WFMY35KlUQ66HDBTwCna7fWl5iU85YiRnoxy0pzASEUfEVu0tBXR+KTFJFn7x9Q516uoHyKutKzdBKG8ZE=
   bucket: test-artifacts
+  on:
+    repo: SpineEventEngine/core-java
+    all_branches: true
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
