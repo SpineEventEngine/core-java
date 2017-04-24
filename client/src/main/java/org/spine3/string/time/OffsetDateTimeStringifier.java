@@ -31,6 +31,7 @@ import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
  * Default stringifier for {@link OffsetDateTime}.
+ *
  * @author Alexander Yevsyukov
  */
 final class OffsetDateTimeStringifier extends Stringifier<OffsetDateTime> implements Serializable {

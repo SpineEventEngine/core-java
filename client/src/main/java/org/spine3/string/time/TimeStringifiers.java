@@ -42,8 +42,8 @@ import java.util.Map;
  * A collection of stringifiers for date/time value objects.
  *
  * @author Alexander Yevsyukov
- * @see TimeStringifiers#forDuration() Duration stringifier
- * @see TimeStringifiers#forTimestamp() Timestap stringifier
+ * @see #forDuration() Duration stringifier
+ * @see #forTimestamp() Timestap stringifier
  */
 public final class TimeStringifiers {
 
@@ -68,6 +68,9 @@ public final class TimeStringifiers {
 
     /**
      * Obtains default stringifier for {@code ZoneOffset}s.
+     *
+     * <p>This stringifier is automatically registered in the
+     * {@link StringifierRegistry StringifierRegistry}.
      */
     public static Stringifier<ZoneOffset> forZoneOffset() {
         return ZoneOffsetStringifier.instance();
@@ -120,6 +123,9 @@ public final class TimeStringifiers {
      *
      * <p>The stringifier uses {@code yyyy-MM-dd} format for dates.
      *
+     * <p>This stringifier is automatically registered in the
+     * {@link StringifierRegistry StringifierRegistry}.
+     *
      * @see LocalDates#parse(String)
      */
     public static Stringifier<LocalDate> forLocalDate() {
@@ -128,6 +134,9 @@ public final class TimeStringifiers {
 
     /**
      * Obtains default stringifier for {@code LocalTime} values.
+     *
+     * <p>This stringifier is automatically registered in the
+     * {@link StringifierRegistry StringifierRegistry}.
      *
      * @see org.spine3.time.LocalTimes#parse(String) LocalTimes.parse(String)
      */
@@ -138,6 +147,9 @@ public final class TimeStringifiers {
     /**
      * Obtains a stringifier for {@code OffsetDateTime} values.
      *
+     * <p>This stringifier is automatically registered in the
+     * {@link StringifierRegistry StringifierRegistry}.
+     *
      * @see org.spine3.time.OffsetDateTimes#parse(String) OffsetDateTimes.parse(String)
      */
     public static Stringifier<OffsetDateTime> forOffsetDateTime() {
@@ -146,6 +158,9 @@ public final class TimeStringifiers {
 
     /**
      * Obtains default stringifier for {@code OffsetTime} values.
+     *
+     * <p>This stringifier is automatically registered in the
+     * {@link StringifierRegistry StringifierRegistry}.
      *
      * @see org.spine3.time.OffsetTimes#parse(String) OffsetTimes.parse(String)
      */

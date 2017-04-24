@@ -32,6 +32,8 @@ import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
  * The default stringifier for {@link LocalTime} values.
+ *
+ * @author Alexander Yevsyukov
  */
 final class LocalTimeStringifier extends Stringifier<LocalTime> implements Serializable {
 
