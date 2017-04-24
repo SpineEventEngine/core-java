@@ -41,6 +41,7 @@ import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.test.EventTests;
@@ -310,7 +311,9 @@ public class ProcessManagerRepositoryShould
 
     // Marked as {@code public} to reuse for {@code CommandBus} dispatcher registration tests as well
     // with no code duplication.
-    public static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+    public static class TestProcessManager
+            extends ProcessManager<ProjectId, Project>
+            implements TestEntityWithStringColumn {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
@@ -421,6 +424,11 @@ public class ProcessManagerRepositoryShould
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();
+        }
+
+        @Override
+        public String getIdString() {
+            return getId().toString();
         }
     }
 }

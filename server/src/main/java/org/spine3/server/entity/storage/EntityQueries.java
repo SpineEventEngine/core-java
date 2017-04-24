@@ -32,15 +32,12 @@ import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * @author Dmytro Dashenkov
  */
 public final class EntityQueries {
-
-    private static final String FIELD_PATH_SEPARATOR = ".";
 
     private EntityQueries() {
         // Prevent utility class initialization
@@ -54,7 +51,7 @@ public final class EntityQueries {
         final Multimap<Column<?>, Object> queryParams = HashMultimap.create();
         final Iterable<FieldFilter> fieldFilters = entityFilters.getColumnFilterList();
         for (FieldFilter filter : fieldFilters) {
-            final String fieldName = getFieldName(filter);
+            final String fieldName = filter.getFieldPath();
             final Column<?> column = Columns.metadata(entityClass, fieldName);
             final Function<Any, ?> typeTransformer = ProtoToJavaMapper.function(column.getType());
             final Collection<?> filterValues = Collections2.transform(filter.getValueList(),
@@ -64,15 +61,5 @@ public final class EntityQueries {
         final EntityIdFilter idFilter = entityFilters.getIdFilter();
         final EntityQuery query = EntityQuery.of(idFilter, queryParams);
         return query;
-    }
-
-    private static String getFieldName(FieldFilter fieldFilter) {
-        final String path = fieldFilter.getFieldPath();
-        final int fieldNameStartIndex = path.lastIndexOf(FIELD_PATH_SEPARATOR) + 1;
-        checkArgument(fieldNameStartIndex > 0 && fieldNameStartIndex < path.length(),
-                      "Invalid field path %s.",
-                      path);
-        final String result = path.substring(fieldNameStartIndex);
-        return result;
     }
 }

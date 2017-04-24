@@ -65,27 +65,32 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
             return false;
         }
 
-        final Any entityId = input.getRecord()
-                                  .getEntityId();
-        final boolean idMatches = acceptedIds.contains(entityId);
-        if (!idMatches) {
-            return false;
+        if (!acceptedIds.isEmpty()) {
+            final Any entityId = input.getRecord()
+                                      .getEntityId();
+            final boolean idMatches = acceptedIds.contains(entityId);
+            if (!idMatches) {
+                return false;
+            }
         }
 
         final Map<String, Column.MemoizedValue<?>> entityColumns = input.getColumnValues();
         final Map<Column<?>, Collection<Object>> paramsMap = queryParams.asMap();
 
-        for (Map.Entry<Column<?>, Collection<Object>> param : paramsMap.entrySet()) {
-            final Column<?> column = param.getKey();
-            final String columnName = column.getName();
+        if (!paramsMap.isEmpty()) {
+            for (Map.Entry<Column<?>, Collection<Object>> param : paramsMap.entrySet()) {
+                final Column<?> column = param.getKey();
+                final String columnName = column.getName();
 
-            final Collection<Object> possibleValues = param.getValue();
-            final Column.MemoizedValue<?> actualValueWithMetadata = entityColumns.get(columnName);
-            final Object actualValue = actualValueWithMetadata.getValue();
-
-            final boolean matches = possibleValues.contains(actualValue);
-            if (!matches) {
-                return false;
+                final Collection<Object> possibleValues = param.getValue();
+                final Column.MemoizedValue<?> actualValueWithMetadata = entityColumns.get(columnName);
+                final Object actualValue = actualValueWithMetadata != null
+                        ? actualValueWithMetadata.getValue()
+                        : null;
+                final boolean matches = possibleValues.contains(actualValue);
+                if (!matches) {
+                    return false;
+                }
             }
         }
 
