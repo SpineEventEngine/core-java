@@ -117,6 +117,11 @@ public class BoundedContextShould {
     }
 
     @Test
+    public void return_FailureBus() {
+        assertNotNull(boundedContext.getFailureBus());
+    }
+
+    @Test
     public void return_CommandDispatcher() {
         assertNotNull(boundedContext.getCommandBus());
     }
