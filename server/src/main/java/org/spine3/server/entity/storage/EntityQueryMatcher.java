@@ -59,12 +59,12 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
         this.queryParams = query.getParameters();
     }
 
+    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK for a predicate method
     @Override
     public boolean apply(@Nullable EntityRecordWithColumns input) {
         if (input == null) {
             return false;
         }
-
         if (!acceptedIds.isEmpty()) {
             final Any entityId = input.getRecord()
                                       .getEntityId();
