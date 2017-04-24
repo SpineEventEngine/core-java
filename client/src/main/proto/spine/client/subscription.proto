@@ -53,7 +53,8 @@ message Topic {
     TopicId id = 1 [(required) = true];
 
     // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
-    Target target = 2 [(required) = true];
+    Target target = 2 [(required) = true, (valid) = true,
+                       (if_invalid).msg_format = "Invalid topic target"];
 
     // Field mask to be applied to the entity updates applicable to this topic.
     //
@@ -61,7 +62,8 @@ message Topic {
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the topic was created.
-    ActorContext context = 4 [(required) = true];
+    ActorContext context = 4 [(required) = true, (valid) = true,
+                              (if_invalid).msg_format = "Invalid actor context"];
 
     // Reserved for utility fields.
     reserved 5 to 10;
@@ -71,11 +73,11 @@ message Topic {
 message SubscriptionUpdate {
 
     // The subscription in which scope this update is propagated.
-    Subscription subscription = 1;
+    Subscription subscription = 1 [(required) = true];
 
     // Represents the base part of the response,
     //   i.e. whether the Topic subscription has been acked or not.
-    base.Response response = 2;
+    base.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.
     reserved 3 to 9;
@@ -102,11 +104,40 @@ message Subscription {
     // Unique identifier of the subscription.
     //
     // Must be unique in scope of a bounded context.
-    SubscriptionId id = 1;
+    SubscriptionId id = 1 [(required) = true];
 
     // Represents the original topic for this subscription.
-    Topic topic = 2;
+    Topic topic = 2 [(required) = true, (valid) = true, (if_invalid).msg_format = "Invalid topic"];
 
     // Reserved for subscription attributes.
     reserved 3 to 10;
+}
+
+// Enumeration of possible technical error reasons occurred in topic validation.
+enum TopicValidationError {
+
+    // Reserved value.
+    TVE_UNKNOWN_REASON = 0;
+
+    // The topic target is not supported by the server.
+    UNSUPPORTED_TOPIC_TARGET = 1;
+
+    // The topic message is invalid according to custom Protobuf options set.
+    INVALID_TOPIC = 2;
+}
+
+// Enumeration of possible technical error reasons occurred in subscription validation.
+enum SubscriptionValidationError {
+
+    // Reserved value.
+    SVE_UNKNOWN_REASON = 0;
+
+    // The target of the subscription topic is not supported by the server.
+    UNSUPPORTED_SUBSCRIPTION_TARGET = 1;
+
+    // The subscription message is invalid according to custom Protobuf options set.
+    INVALID_SUBSCRIPTION = 2;
+
+    // This subscription is unknown to this server.
+    UNKNOWN_SUBSCRIPTION = 3;
 }

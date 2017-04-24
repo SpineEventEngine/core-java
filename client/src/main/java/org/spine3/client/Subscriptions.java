@@ -22,6 +22,8 @@ package org.spine3.client;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Identifiers;
 
+import static java.lang.String.format;
+
 /**
  * Utility class for working with {@linkplain Subscription subscriptions}.
  *
@@ -29,6 +31,11 @@ import org.spine3.base.Identifiers;
  */
 @Internal
 public final class Subscriptions {
+
+    /**
+     * The format of all {@linkplain SubscriptionId Subscription identifiers}.
+     */
+    private static final String SUBSCRIPTION_ID_FORMAT = "subscription-%s";
 
     private Subscriptions() {
         // prevent instantiation.
@@ -42,7 +49,8 @@ public final class Subscriptions {
      * @return new subscription identifier.
      */
     public static SubscriptionId newId() {
-        return newId(Identifiers.newUuid());
+        final String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifiers.newUuid());
+        return newId(formattedId);
     }
 
     /**
