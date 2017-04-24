@@ -20,6 +20,8 @@
 
 package org.spine3.time;
 
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +54,7 @@ import static org.spine3.time.OffsetDateTimes.subtractMinutes;
 import static org.spine3.time.OffsetDateTimes.subtractMonths;
 import static org.spine3.time.OffsetDateTimes.subtractSeconds;
 import static org.spine3.time.OffsetDateTimes.subtractYears;
+import static org.spine3.time.Time.getCurrentTime;
 
 public class OffsetDateTimesShould extends AbstractZonedTimeTest {
 
@@ -66,6 +69,7 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
 
     private LocalDate gmtToday;
     private LocalTime now;
+    private OffsetDateTime todayNow;
 
     @Override
     @Before
@@ -73,6 +77,7 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
         super.setUp();
         gmtToday = LocalDates.of(year, month, day);
         now = LocalTimes.of(hours, minutes, seconds, millis, nanos);
+        todayNow = OffsetDateTimes.now(zoneOffset);
     }
 
     @Test
@@ -371,6 +376,185 @@ public class OffsetDateTimesShould extends AbstractZonedTimeTest {
         assertEquals(millis - millisToSubtract, time.getMillis());
         assertEquals(nanos, time.getNanos());
         assertEquals(zoneOffset, offset);
+    }
+
+    @Test
+    public void pass_null_tolerance_test() {
+        new NullPointerTester()
+                .setDefault(Timestamp.class, getCurrentTime())
+                .setDefault(OffsetDateTime.class, OffsetDateTimes.now(zoneOffset))
+                .setDefault(ZoneOffset.class, zoneOffset)
+                .setDefault(LocalTime.class, LocalTimes.now())
+                .setDefault(LocalDate.class, LocalDates.now())
+                .testAllPublicStaticMethods(OffsetDateTimes.class);
+    }
+
+    /*
+     * Illegal argsIllegal args. check for math with years.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_years_to_add() {
+        OffsetDateTimes.addYears(todayNow, -5);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_years_to_add() {
+        OffsetDateTimes.addYears(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_years_to_subtract() {
+        OffsetDateTimes.subtractYears(todayNow, -6);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_years_to_subtract() {
+        OffsetDateTimes.subtractYears(todayNow, 0);
+    }
+
+    /*
+     * Illegal args. check for math with months.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_months_to_add() {
+        OffsetDateTimes.addMonths(todayNow, -5);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_months_to_add() {
+        OffsetDateTimes.addMonths(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_months_to_subtract() {
+        OffsetDateTimes.subtractMonths(todayNow, -6);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_months_to_subtract() {
+        OffsetDateTimes.subtractMonths(todayNow, 0);
+    }
+
+    /*
+     * Illegal args. check for math with days.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_days_to_add() {
+        OffsetDateTimes.addDays(todayNow, -5);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_days_to_add() {
+        OffsetDateTimes.addDays(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_days_to_subtract() {
+        OffsetDateTimes.subtractDays(todayNow, -6);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_days_to_subtract() {
+        OffsetDateTimes.subtractDays(todayNow, 0);
+    }
+
+    /*
+     * Illegal args. check for math with hours.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_hours_to_add() {
+        OffsetDateTimes.addHours(todayNow, -5);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_hours_to_add() {
+        OffsetDateTimes.addHours(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_hours_to_subtract() {
+        OffsetDateTimes.subtractHours(todayNow, -6);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_hours_to_subtract() {
+        OffsetDateTimes.subtractHours(todayNow, 0);
+    }
+
+    /*
+     * Illegal args. check for math with minutes.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_minutes_to_add() {
+        OffsetDateTimes.addMinutes(todayNow, -7);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_minutes_to_add() {
+        OffsetDateTimes.addMinutes(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_minutes_to_subtract() {
+        OffsetDateTimes.subtractMinutes(todayNow, -8);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_minutes_to_subtract() {
+        OffsetDateTimes.subtractMinutes(todayNow, 0);
+    }
+
+    /*
+     * Illegal args. check for math with seconds.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_seconds_to_add() {
+        OffsetDateTimes.addSeconds(todayNow, -25);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_seconds_to_add() {
+        OffsetDateTimes.addSeconds(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_seconds_to_subtract() {
+        OffsetDateTimes.subtractSeconds(todayNow, -27);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_seconds_to_subtract() {
+        OffsetDateTimes.subtractSeconds(todayNow, 0);
+    }
+
+    /*
+     * Illegal args. check for math with millis.
+     */
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_millis_to_add() {
+        OffsetDateTimes.addMillis(todayNow, -500);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_millis_to_add() {
+        OffsetDateTimes.addMillis(todayNow, 0);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_negative_millis_to_subtract() {
+        OffsetDateTimes.subtractMillis(todayNow, -270);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void not_accept_zero_millis_to_subtract() {
+        OffsetDateTimes.subtractMillis(todayNow, 0);
     }
 
     /*

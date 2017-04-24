@@ -91,12 +91,11 @@ public class OffsetTimesShould extends AbstractZonedTimeTest {
 
     @Test
     public void create_instance_on_local_time_at_offset() {
-        final ZoneOffset delhiOffset = ZoneOffsets.ofHoursMinutes(3, 30);
         final LocalTime localTime = generateLocalTime();
-        final OffsetTime delhiTime = OffsetTimes.of(localTime, delhiOffset);
+        final OffsetTime delhiTime = OffsetTimes.of(localTime, zoneOffset);
 
         assertEquals(localTime, delhiTime.getTime());
-        assertEquals(delhiOffset, delhiTime.getOffset());
+        assertEquals(zoneOffset, delhiTime.getOffset());
     }
 
     private static LocalTime generateLocalTime() {
