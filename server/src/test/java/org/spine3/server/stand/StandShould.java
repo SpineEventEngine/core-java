@@ -954,8 +954,9 @@ public class StandShould extends TenantAwareTest {
 
     private StandStorage setupStandStorageWithCustomers(Map<CustomerId, Customer> sampleCustomers,
                                                         TypeUrl customerType) {
-        final StandStorage standStorage = InMemoryStorageFactory.getInstance(isMultitenant())
-                                                                .createStandStorage();
+        final StandStorage standStorage = StorageFactorySwitch.getInstance(isMultitenant())
+                                                              .get()
+                                                              .createStandStorage();
 
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
         final ImmutableList.Builder<EntityRecord> recordsBuilder = ImmutableList.builder();
@@ -1052,21 +1053,6 @@ public class StandShould extends TenantAwareTest {
                 boolean everyElementPresent = true;
                 for (ProjectId projectId : argument) {
                     everyElementPresent = everyElementPresent && projectIds.contains(projectId);
-                }
-                return everyElementPresent;
-            }
-        };
-    }
-
-    private static ArgumentMatcher<Iterable<AggregateStateId>> idsMatcher(
-            final List<AggregateStateId> stateIds) {
-        return new ArgumentMatcher<Iterable<AggregateStateId>>() {
-            @Override
-            public boolean matches(Iterable<AggregateStateId> argument) {
-                boolean everyElementPresent = true;
-                for (AggregateStateId aggregateStateId : argument) {
-                    everyElementPresent = everyElementPresent
-                                          && stateIds.contains(aggregateStateId);
                 }
                 return everyElementPresent;
             }

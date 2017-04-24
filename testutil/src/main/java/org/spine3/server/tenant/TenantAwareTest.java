@@ -23,7 +23,7 @@ package org.spine3.server.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import org.spine3.annotations.Internal;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
 import org.spine3.util.Environment;
 
@@ -42,7 +42,7 @@ import static com.google.common.base.Preconditions.checkState;
 public abstract class TenantAwareTest {
 
     public static TenantIndex createTenantIndex(boolean multitenant,
-                                                InMemoryStorageFactory storageFactory) {
+                                                StorageFactory storageFactory) {
         return multitenant
                ? TenantIndex.Factory.createDefault(storageFactory)
                : TenantIndex.Factory.singleTenant();

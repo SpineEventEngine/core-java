@@ -36,8 +36,6 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -79,7 +77,6 @@ public class AggregateCommandEndpointShould {
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = InMemoryStorageFactory.getInstance(true);
         eventBus = mock(EventBus.class);
         final CommandStore commandStore = mock(CommandStore.class);
         final CommandBus commandBus = CommandBus.newBuilder()

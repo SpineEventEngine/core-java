@@ -110,8 +110,7 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final BoundedContext boundedContext =
-                TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
         repo.initStorage(storageFactory());
         return repo;
