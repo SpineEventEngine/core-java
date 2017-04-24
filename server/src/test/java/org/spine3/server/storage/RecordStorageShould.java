@@ -27,17 +27,22 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.spine3.base.FieldFilter;
 import org.spine3.base.Version;
+import org.spine3.client.EntityFilters;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityQueries;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
@@ -60,6 +65,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
@@ -348,13 +354,82 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = newStorageRecord(id);
         final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
         final EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.create(record, testEntity);
+                create(record, testEntity);
         final S storage = getStorage();
         storage.write(id, recordWithColumns);
 
         final Optional<EntityRecord> readRecord = storage.read(id);
         assertTrue(readRecord.isPresent());
         assertEquals(record, readRecord.get());
+    }
+
+    @Test
+    public void filter_records_by_columns() {
+        final int requiredValue = 777;
+        final Int32Value wrappedValue = Int32Value.newBuilder()
+                                                  .setValue(requiredValue)
+                                                  .build();
+        final FieldFilter injectableStateVersion = FieldFilter.newBuilder()
+                                                              .setFieldPath("injectableState")
+                                                              .addValue(
+                                                                      AnyPacker.pack(wrappedValue))
+                                                              .build();
+        final Version versionValue = Version.newBuilder()
+                                            .setNumber(2) // Value of the counter after one columns
+                                            .build();     // scan (incremented 2 times internally)
+        final FieldFilter counterFilter = FieldFilter.newBuilder()
+                                                     .setFieldPath("counterVersion")
+                                                     .addValue(AnyPacker.pack(versionValue))
+                                                     .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addColumnFilter(injectableStateVersion)
+                                                   .addColumnFilter(counterFilter)
+                                                   .build();
+        final EntityQuery query = EntityQueries.from(filters, TestCounterEntity.class);
+        final I idMatching = newId();
+        final I idWrong1 = newId();
+        final I idWrong2 = newId();
+
+        final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
+        final TestCounterEntity<I> wrongEntity1 = new TestCounterEntity<>(idWrong1);
+        final TestCounterEntity<I> wrongEntity2 = new TestCounterEntity<>(idWrong2);
+
+        // 2 of 3 have required values
+        matchingEntity.injectInjectableState(requiredValue);
+        wrongEntity1.injectInjectableState(requiredValue);
+        wrongEntity2.injectInjectableState(Integer.MAX_VALUE);
+
+        // Change internal Entity state
+        wrongEntity1.getCounter();
+
+        // After the mutation above the single matching record is record under the ID `idMatching`
+
+        final EntityRecord fineRecord = newStorageRecord(idMatching);
+        final EntityRecord notFineRecord1 = newStorageRecord(idWrong1);
+        final EntityRecord notFineRecord2 = newStorageRecord(idWrong2);
+
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
+        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
+        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
+
+        final RecordStorage<I> storage = getStorage();
+
+        storage.write(idMatching, recordRight);
+        storage.write(idWrong1, recordWrong1);
+        storage.write(idWrong2, recordWrong2);
+
+        final Map<I, EntityRecord> readRecords = storage.readAll(query,
+                                                                 FieldMask.getDefaultInstance());
+        assertSize(1, readRecords);
+        final I singleId = readRecords.keySet()
+                                      .iterator()
+                                      .next();
+        assertEquals(idMatching, singleId);
+
+        final EntityRecord singleRecord = readRecords.values()
+                                                     .iterator()
+                                                     .next();
+        assertEquals(fineRecord, singleRecord);
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
@@ -372,6 +447,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
 
         private int counter = 0;
+        private int injectableState;
 
         protected TestCounterEntity(I id) {
             super(id);
@@ -406,6 +482,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         public Project getCounterState() {
             return getState();
+        }
+
+        public int getInjectableState() {
+            return injectableState;
+        }
+
+        private void injectInjectableState(int state) {
+            this.injectableState = state;
         }
     }
 }

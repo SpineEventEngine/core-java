@@ -159,6 +159,13 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         }
     }
 
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors
+    @Override
+    @Test
+    public void filter_records_by_columns() {
+        // Stand storage does not support entity columns
+    }
+
     @Override
     protected AggregateStateId newId() {
         return DEFAULT_ID_SUPPLIER.get();
