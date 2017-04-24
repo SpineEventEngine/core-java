@@ -26,13 +26,13 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 import java.util.Set;
 import java.util.SimpleTimeZone;
 import java.util.TimeZone;
 import java.util.concurrent.TimeUnit;
 
-import static com.google.common.base.Strings.nullToEmpty;
 import static org.spine3.time.Time.MILLIS_PER_SECOND;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -115,11 +115,9 @@ final class ZoneConverter extends Converter<TimeZone, ZoneOffset> implements Ser
         final Timestamp now = getCurrentTime();
         final long date = Timestamps.toMillis(now);
         final int offsetInSeconds = getOffsetInSeconds(timeZone, date);
-        final String id = nullToEmpty(timeZone.getID());
-        return ZoneOffset.newBuilder()
-                         .setAmountSeconds(offsetInSeconds)
-                         .setId(id)
-                         .build();
+        @Nullable
+        final String zoneId = timeZone.getID();
+        return ZoneOffsets.create(offsetInSeconds, zoneId);
     }
 
     /**

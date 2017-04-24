@@ -39,6 +39,7 @@ import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.time.Formats.appendSubSecond;
 import static org.spine3.time.Formats.appendZoneOffset;
 import static org.spine3.time.Formats.dateTimeFormat;
+import static org.spine3.time.ZoneOffsets.adjustZero;
 
 /**
  * Routines for working with {@link OffsetDateTime}.
@@ -76,7 +77,7 @@ public final class OffsetDateTimes {
         return OffsetDateTime.newBuilder()
                              .setDate(date)
                              .setTime(time)
-                             .setOffset(offset)
+                             .setOffset(adjustZero(offset))
                              .build();
     }
 

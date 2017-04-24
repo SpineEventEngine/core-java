@@ -63,7 +63,6 @@ public abstract class AbstractZonedTimeTest {
         assertConversionAt(ZoneOffsets.UTC);
     }
 
-//    @Ignore //TODO:2017-04-21:alexander.yevsyukov: Enable back when able to get failing test logs from Travis
     @Test
     public void convert_values_at_current_time_zone() throws ParseException {
         // Get current zone offset and strip ID value because it's not stored into date/time.

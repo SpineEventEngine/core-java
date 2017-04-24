@@ -33,6 +33,7 @@ import static org.spine3.time.Calendars.toCalendar;
 import static org.spine3.time.Calendars.toLocalDate;
 import static org.spine3.time.Formats.appendZoneOffset;
 import static org.spine3.time.Formats.dateFormat;
+import static org.spine3.time.ZoneOffsets.adjustZero;
 
 /**
  * Routines for working with {@link OffsetDate}.
@@ -55,7 +56,7 @@ public final class OffsetDates {
         final LocalDate localDate = toLocalDate(cal);
         final OffsetDate result = OffsetDate.newBuilder()
                                             .setDate(localDate)
-                                            .setOffset(zoneOffset)
+                                            .setOffset(adjustZero(zoneOffset))
                                             .build();
         return result;
     }

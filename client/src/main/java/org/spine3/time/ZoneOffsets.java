@@ -23,12 +23,15 @@ package org.spine3.time;
 import com.google.protobuf.Duration;
 import org.spine3.time.Formats.Parameter;
 
+import javax.annotation.Nullable;
 import java.text.ParseException;
 import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Strings.nullToEmpty;
 import static java.lang.String.format;
+import static org.spine3.time.Durations2.hoursAndMinutes;
 import static org.spine3.time.Formats.formatOffsetTime;
 import static org.spine3.time.Time.MINUTES_PER_HOUR;
 import static org.spine3.time.Time.SECONDS_PER_MINUTE;
@@ -82,10 +85,16 @@ public final class ZoneOffsets {
         return ofSeconds(seconds);
     }
 
+    /**
+     * Obtains the ZoneOffset for the passed number of seconds.
+     *
+     * <p>If zero is passed {@link #UTC} instance is returned.
+     *
+     * @param seconds a positive, zero,
+     * @return the instance for the passed offset
+     */
     public static ZoneOffset ofSeconds(int seconds) {
-        return ZoneOffset.newBuilder()
-                         .setAmountSeconds(seconds)
-                         .build();
+        return create(seconds, null);
     }
 
     /**
@@ -99,7 +108,7 @@ public final class ZoneOffsets {
         checkArgument(((hours < 0) == (minutes < 0)) || (minutes == 0),
                       "Hours (%s) and minutes (%s) must have the same sign.", hours, minutes);
 
-        final Duration duration = Durations2.hoursAndMinutes(hours, minutes);
+        final Duration duration = hoursAndMinutes(hours, minutes);
         final int seconds = toSeconds(duration);
         return ofSeconds(seconds);
     }
@@ -174,5 +183,32 @@ public final class ZoneOffsets {
                 .append(seconds >= 0 ? Formats.PLUS : Formats.MINUS)
                 .append(formatOffsetTime(hours, minutes));
         return builder.toString();
+    }
+
+    static ZoneOffset create(int offsetInSeconds, @Nullable String zoneId) {
+        if (offsetInSeconds == 0 && zoneId == null) {
+            return UTC;
+        }
+        final String id = nullToEmpty(zoneId);
+        return ZoneOffset.newBuilder()
+                         .setAmountSeconds(offsetInSeconds)
+                         .setId(id)
+                         .build();
+    }
+
+    /**
+     * Verifies if the passed instance has zero offset and no ID.
+     *
+     * <p>If the passed instance is zero without a zone ID, returns the {@link #UTC} instance.
+     * Otherwise returns the passed instance.
+     */
+    static ZoneOffset adjustZero(ZoneOffset offset) {
+        if (offset.getAmountSeconds() == 0) {
+            if (offset.getId()
+                      .isEmpty()) {
+                return UTC;
+            }
+        }
+        return offset;
     }
 }

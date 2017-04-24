@@ -36,6 +36,7 @@ import static org.spine3.time.Calendars.toLocalTime;
 import static org.spine3.time.Formats.appendSubSecond;
 import static org.spine3.time.Formats.appendZoneOffset;
 import static org.spine3.time.Formats.timeFormat;
+import static org.spine3.time.ZoneOffsets.adjustZero;
 import static org.spine3.validate.Validate.checkPositive;
 
 /**
@@ -59,7 +60,7 @@ public final class OffsetTimes {
         final LocalTime localTime = toLocalTime(cal);
         final OffsetTime result = OffsetTime.newBuilder()
                                             .setTime(localTime)
-                                            .setOffset(zoneOffset)
+                                            .setOffset(adjustZero(zoneOffset))
                                             .build();
         return result;
     }
