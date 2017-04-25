@@ -19,6 +19,7 @@
  */
 package org.spine3.client;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
@@ -230,6 +231,53 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
         verifyIdFilter(ids, entityFilters);
         verifyColumnFilters(columnFilters, entityFilters);
         verifyMultiplePathsInQuery(requiredFields, query);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_columns_set() {
+        factory().query().byColumns(TestEntity.class, Collections.<FieldFilter>emptySet());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_columns_and_IDs() {
+        factory().query().byIdsAndColumns(TestEntity.class,
+                                          Collections.singleton(Any.getDefaultInstance()),
+                                          Collections.<FieldFilter>emptySet());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_columns_with_mask() {
+        factory().query().byColumnsWithMask(TestEntity.class,
+                                            Collections.<FieldFilter>emptySet(),
+                                            "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_columns_nad_IDs_with_mask() {
+        factory().query().byIdsAndColumnsWithMask(TestEntity.class,
+                                                  Collections.singleton(Any.getDefaultInstance()),
+                                                  Collections.<FieldFilter>emptySet(),
+                                                  "");
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_IDs_set_and_columns() {
+        factory().query().byIdsAndColumns(TestEntity.class,
+                                          Collections.<Message>emptySet(),
+                                          Collections.singleton(FieldFilter.getDefaultInstance()));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_IDs_only() {
+        factory().query().byIds(TestEntity.class,
+                                Collections.<Message>emptySet());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_query_with_empty_IDs_with_mask() {
+        factory().query().byIdsWithMask(TestEntity.class,
+                                        Collections.<Message>emptySet(),
+                                        "", "");
     }
 
     private static void verifyMultiplePathsInQuery(String[] paths,

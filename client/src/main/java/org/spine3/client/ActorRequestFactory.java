@@ -343,7 +343,8 @@ public class ActorRequestFactory {
                            Set<? extends Message> ids) {
             checkNotNull(entityClass);
             checkNotNull(ids);
-
+            checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
+            
             return composeQuery(entityClass, ids, null, null);
         }
 
