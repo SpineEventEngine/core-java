@@ -14,17 +14,12 @@ before_install:
   # END of Codacy setup.
 
 deploy:
-  artifacts:
-    paths:
-      - zip client
-    debug: true
-
-  skip_cleanup: true
   provider: gcs
   access_key_id: GCS_KEY
   secret_access_key:
-    secure: QXXB/ZIKfw+QJyrv/5debBJWfI9P+56/Y5UUrcUOY2+PV4e2ujczSJ/cYIlItMA03wK6eI1NnkdnDPL0oZSuvRwzDylrfHuDfJsCA/wrLrIU2O40L2y2OsG528HglPY4NciCQ4GgiyrZ0NH5nQYinArjbMAwTVPdvjddPjaz/oX1pN6V+sXMQMP3ZMvHXpjoRn3XByaes2hN8AWxaOshOGnmJN83uJmeYLIlgDvrl2CoV/WJYplIH7qE6DIxRq5BzW48VQbtS6GBugI1iDrCASPUKDPm7YULchJxC1Y6+9ZnxxYhj1JbLvu6MYRwVtPVJ0xcQJRRASDt451Dhpu2ZTBzFXzqKaDKEuATaE0CRK/q2/ImV8S6CutOAZlPhBrdrHLuv4V8ZuwHpw+xvytCM6b4DjE69CH4lQO0uFN22dhHhFNwAdRfoRr41uQ/HNdIVS74ybkU6KaPzuw3VaQ56lZLLlECMxaclgn+WhHthWKNpdE/ySHlOfoEW6l5U1wsetJfsRu5rxgCAlHdeGVh6sxTT9e0bcIwOLezghV4YXwZZLEwQdUIMykjiVz57cbCD5nHEW/VDoznlLBrYyqBPJ6d9WFMY35KlUQ66HDBTwCna7fWl5iU85YiRnoxy0pzASEUfEVu0tBXR+KTFJFn7x9Q516uoHyKutKzdBKG8ZE=
+      secure: "L9I+KVv5yYZ2f8vKhmT6a76hMoHY8HoYXngx+v/Uf6Szg59usSaONe9Wcl5CBQ9HGazG2vv1lBRVBylFZvqmZl5HFq1RfoqXVejLU92VHDlYcHLG6d81F1ycZ4DU+0ZtqMxZQxmBHDsUhtUuj+993fqHdtty/A2bdxYlpp83yM/35/BWVpT+fQjkjPtQEoq0IycOTfVVqPyYrbLlt8lkKP68x63VspaDKGKK0WFSbforXAXUaGBtrDXNbM7BSxsi1rEYKHuUKGfwzenCLFbIco3XWyFd1TF4R0Rfgw7INL6tSZ+GnFq18cUtklNh1OwQhQzcjiMk6G4IEWoHjRL3w3yNGUV2rz8MCFqbnu/ZB9U5i3HUwAvouV/qLSocJmzPk3SOvCYsbODy69LuOh29GWk0tfvxXKWd5sctOVpKI8o8/nxCfEBTStAd1bGqLT093hkR9N8eg1/QiOIvpUAw3o+L7CPM+1uJfCQWbt6niSP776UvKS7O8+NbVuK+yorayD/PvnyZ6h/+q78y6A7nY/Ky4PRZ5I1X5wTIEe3UHIBNUWxDk1jm77RkvYPyxk6XoW8EmtyGSw8+EjJfyKZNrJv1W13B71ZGpN1Kj08vJqkgObPMyKixLtRpTsYDh38zeU4Acy35+sAClVBuLRItAVTXdASayj81CQ39n6nRcPw="
   bucket: spine-dev.appspot.com
+  skip_cleanup: true
   on:
     repo: SpineEventEngine/core-java
     all_branches: true
