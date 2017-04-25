@@ -34,7 +34,7 @@ import javax.annotation.Nullable;
  *
  * @author Dmytro Dashenkov
  */
-enum EntityRecordUnPacker implements Function<EntityRecordWithColumns, EntityRecord> {
+enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
     INSTANCE;
 
     @Nullable

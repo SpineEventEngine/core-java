@@ -86,7 +86,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     Map<I, EntityRecord> readAllRecords() {
         final Map<I, EntityRecordWithColumns> filtered = filtered();
         final Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecordUnPacker.INSTANCE);
+                                                             EntityRecordUnpacker.INSTANCE);
         final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
         return result;
     }
@@ -96,7 +96,7 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
                 filterValues(filtered(),
                              new EntityQueryMatcher(query));
         final Map<I, EntityRecord> records = transformValues(filtered,
-                                                             EntityRecordUnPacker.INSTANCE);
+                                                             EntityRecordUnpacker.INSTANCE);
         final Function<EntityRecord, EntityRecord> fieldMaskApplier =
                 new FieldMaskApplier(fieldMask);
         final Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier);

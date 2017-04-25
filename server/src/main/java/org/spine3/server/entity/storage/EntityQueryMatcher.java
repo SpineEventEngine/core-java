@@ -39,9 +39,8 @@ import static com.google.common.collect.Sets.newHashSet;
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
  * {@link EntityQuery}.
  *
- * <p>See {@link EntityQuery} for the matching contract
- *
  * @author Dmytro Dashenkov
+ * @see EntityQuery for the matching contract
  */
 @Internal
 public final class EntityQueryMatcher implements Predicate<EntityRecordWithColumns> {

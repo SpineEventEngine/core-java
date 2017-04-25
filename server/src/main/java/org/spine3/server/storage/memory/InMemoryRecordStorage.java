@@ -110,7 +110,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Optional<EntityRecord> readRecord(I id) {
         return getStorage().get(id)
-                           .transform(EntityRecordUnPacker.INSTANCE);
+                           .transform(EntityRecordUnpacker.INSTANCE);
     }
 
     @Override

@@ -36,6 +36,7 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.ProtoToJavaMapper;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 

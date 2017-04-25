@@ -25,9 +25,11 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
+import org.spine3.annotations.Internal;
 import org.spine3.base.FieldFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.protobuf.ProtoToJavaMapper;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
@@ -35,11 +37,12 @@ import java.util.Collection;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A factory for generating the {@link EntityQuery} instances.
+ * A utility class for working with {@link EntityQuery} instances.
  *
  * @author Dmytro Dashenkov
  * @see EntityQuery
  */
+@Internal
 public final class EntityQueries {
 
     private EntityQueries() {

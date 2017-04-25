@@ -40,11 +40,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain Column Entity Columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified (see
- * {@link org.spine3.server.stand.StandStorage StandSotrage}). By default, a
+ * {@link org.spine3.server.stand.StandStorage StandSotrage}). By default,
  * {@link org.spine3.server.storage.RecordStorage RecordStorage} supports the Entity queries.
  *
  * <p>If the {@linkplain EntityQuery#getIdFilter()} accepted IDs list} is empty, all the IDs are
- * considered as queried.
+ * considered to be queried.
  *
  * <p>Empty {@linkplain EntityQuery#getParameters() query parameters} are not considered when
  * the actual data query is performed as well as the parameters which have no accepted values.

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package org.spine3.protobuf;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableMap;
@@ -34,7 +34,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.annotations.Internal;
 
 import javax.annotation.Nullable;
 
@@ -56,8 +56,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-// TODO:2017-04-21:dmytro.dashenkov: Maybe we should move this to client code to make this util reusable.
-final class ProtoToJavaMapper {
+@Internal
+public final class ProtoToJavaMapper {
 
     private ProtoToJavaMapper() {
         // Prevent utility class initialization

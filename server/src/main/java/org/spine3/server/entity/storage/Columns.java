@@ -113,7 +113,7 @@ class Columns {
         }
         ensureRegistered(entityType);
 
-        final Map<String, Column.MemoizedValue<?>> fields = getStorageFields(entityType, entity);
+        final Map<String, Column.MemoizedValue<?>> fields = extractColumns(entityType, entity);
         return fields;
     }
 
@@ -157,7 +157,7 @@ class Columns {
      * @param entity     the object which to take the values from
      * @return a {@link Map} of the {@link Column Columns}
      */
-    private static Map<String, Column.MemoizedValue<?>> getStorageFields(
+    private static Map<String, Column.MemoizedValue<?>> extractColumns(
             Class<? extends Entity> entityType,
             Entity entity) {
         final Collection<Column<?>> storageFieldProperties =
