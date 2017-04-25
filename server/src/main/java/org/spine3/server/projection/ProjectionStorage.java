@@ -21,9 +21,11 @@
 package org.spine3.server.projection;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.annotations.SPI;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 
@@ -63,6 +65,12 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         final RecordStorage<I> storage = recordStorage();
         storage.write(records);
+    }
+
+    @Override
+    public Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+        final RecordStorage<I> storage = recordStorage();
+        return storage.readAll(query, fieldMask);
     }
 
     /**

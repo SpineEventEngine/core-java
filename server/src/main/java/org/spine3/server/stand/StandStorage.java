@@ -86,4 +86,10 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
     public Map<AggregateStateId, EntityRecord> readAll(EntityQuery query, FieldMask fieldMask) {
         return readAll(fieldMask);
     }
+
+    @Override
+    protected Map<AggregateStateId, EntityRecord> readAllRecords(EntityQuery query,
+                                                                 FieldMask fieldMask) {
+        throw new IllegalStateException("Call #readAll(EntityQuery, FieldMask) instead.");
+    }
 }
