@@ -26,7 +26,8 @@ script: ./gradlew check --stacktrace
 
 before_deploy:
   - mkdir -m777 archives
-  - zip -r /archives/reports.zip **/build/reports
+  - ls -l
+  - zip -r archives/reports.zip **/build/reports
 
 deploy:
   provider: gcs
