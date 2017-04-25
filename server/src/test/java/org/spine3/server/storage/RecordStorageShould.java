@@ -366,12 +366,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("OverlyLongMethod") // Complex test case (still tests a single operation)
     @Test
     public void filter_records_by_columns() {
-        final int requiredValue = 777;
+        final Project.Status requiredValue = Project.Status.DONE;
         final Int32Value wrappedValue = Int32Value.newBuilder()
-                                                  .setValue(requiredValue)
+                                                  .setValue(requiredValue.getNumber())
                                                   .build();
         final FieldFilter injectableStateVersion = FieldFilter.newBuilder()
-                                                              .setFieldPath("injectableState")
+                                                              .setFieldPath("projectStatusValue")
                                                               .addValue(
                                                                       AnyPacker.pack(wrappedValue))
                                                               .build();
@@ -396,9 +396,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final TestCounterEntity<I> wrongEntity2 = new TestCounterEntity<>(idWrong2);
 
         // 2 of 3 have required values
-        matchingEntity.injectInjectableState(requiredValue);
-        wrongEntity1.injectInjectableState(requiredValue);
-        wrongEntity2.injectInjectableState(Integer.MAX_VALUE);
+        matchingEntity.setStatus(requiredValue);
+        wrongEntity1.setStatus(requiredValue);
+        wrongEntity2.setStatus(Project.Status.CANCELLED);
 
         // Change internal Entity state
         wrongEntity1.getCounter();
@@ -448,7 +448,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
 
         private int counter = 0;
-        private int injectableState;
 
         protected TestCounterEntity(I id) {
             super(id);
@@ -485,12 +484,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             return getState();
         }
 
-        public int getInjectableState() {
-            return injectableState;
+        public int getProjectStatusValue() {
+            return getState().getStatusValue();
         }
 
-        private void injectInjectableState(int state) {
-            this.injectableState = state;
+        private void setStatus(Project.Status status) {
+            final Project newState = Project.newBuilder(getState())
+                                            .setStatus(status)
+                                            .build();
+            incrementState(newState);
         }
     }
 }

@@ -268,12 +268,6 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void fail_to_create_query_with_empty_IDs_only() {
-        factory().query().byIds(TestEntity.class,
-                                Collections.<Message>emptySet());
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void fail_to_create_query_with_empty_IDs_with_mask() {
         factory().query().byIdsWithMask(TestEntity.class,
                                         Collections.<Message>emptySet(),
