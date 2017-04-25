@@ -26,6 +26,7 @@ script: ./gradlew check --stacktrace
 
 before_deploy:
   - mkdir archives
+  - tree
   - zip -r /archives/reports.zip **/build/reports
 
 deploy:
