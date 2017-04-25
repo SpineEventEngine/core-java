@@ -19,7 +19,7 @@ deploy:
       - zip client
     debug: true
 
-  skip_cleaning: true
+  skip_cleanup: true
   provider: gcs
   access_key_id: GCS_KEY
   secret_access_key:
