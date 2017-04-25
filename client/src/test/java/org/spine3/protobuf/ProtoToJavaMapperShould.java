@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package org.spine3.protobuf;
 
 import com.google.common.base.Charsets;
 import com.google.common.testing.NullPointerTester;
@@ -35,8 +35,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.ProtoToJavaMapper;
 import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 
