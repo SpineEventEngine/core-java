@@ -160,10 +160,37 @@ public class ActorRequestFactory {
             // Prevent instantiation from the outside.
         }
 
-        public Query byIdsAndCoulumnsWithMask(Class<? extends Message> entityClass,
-                                              Set<? extends Message> ids,
-                                              Set<FieldFilter> columnFilters,
-                                              String... maskPaths) {
+        /**
+         * Creates a {@link Query} to read certain entity states by IDs and Entity Column values
+         * with the {@link FieldMask} applied to each of the results.
+         *
+         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
+         * The processing results will contain only the entities, which IDs are present among
+         * the {@code ids}.
+         *
+         * <p>Also, allows to specify the Entity Column values for the target Entity. The processing
+         * results will contain only the entities, which Entity Columns are among the specified
+         * Column values.
+         *
+         * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
+         * results. This processing is performed according to the
+         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
+         *
+         * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
+         * (e.g. a {@code path} references a missing field),
+         * such invalid paths are silently ignored.
+         *
+         * @param entityClass the class of a target entity
+         * @param ids the entity IDs of interest
+         * @param columnFilters the entity Column filters
+         * @param maskPaths the property paths for the {@code FieldMask} applied
+         * @return an instance of {@code Query} formed according to the passed parameters
+         * @see #byIdsAndColumns(Class, Set, Set)
+         */
+        public Query byIdsAndColumnsWithMask(Class<? extends Message> entityClass,
+                                             Set<? extends Message> ids,
+                                             Set<FieldFilter> columnFilters,
+                                             String... maskPaths) {
             checkNotNull(entityClass);
             checkNotNull(ids);
             checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
@@ -177,9 +204,25 @@ public class ActorRequestFactory {
             return result;
         }
 
-        public Query byIdsAndCoulumns(Class<? extends Message> entityClass,
-                                      Set<? extends Message> ids,
-                                      Set<FieldFilter> columnFilters) {
+        /**
+         * Creates a {@link Query} to read certain entity states by IDs and Entity Column values.
+         *
+         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
+         * The processing results will contain only the entities, which IDs are present among
+         * the {@code ids}.
+         *
+         * <p>Also, allows to specify the Entity Column values for the target Entity. The processing
+         * results will contain only the entities, which Entity Columns are among the specified
+         * Column values.
+         *
+         * @param entityClass the class of a target entity
+         * @param ids the entity IDs of interest
+         * @param columnFilters the entity Column filters
+         * @return an instance of {@code Query} formed according to the passed parameters
+         */
+        public Query byIdsAndColumns(Class<? extends Message> entityClass,
+                                     Set<? extends Message> ids,
+                                     Set<FieldFilter> columnFilters) {
             checkNotNull(entityClass);
             checkNotNull(ids);
             checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
@@ -187,6 +230,64 @@ public class ActorRequestFactory {
             checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
 
             final Query result = composeQuery(entityClass, ids, columnFilters, null);
+            return result;
+        }
+
+        /**
+         * Creates a {@link Query} to read certain entity states by Entity Column values with
+         * the {@link FieldMask} applied to each of the results.
+         *
+         * <p>Allows to specify the Entity Column values for the target Entity. The processing
+         * results will contain only the entities, which Entity Columns are among the specified
+         * Column values.
+         *
+         * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
+         * results. This processing is performed according to the
+         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
+         *
+         * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
+         * (e.g. a {@code path} references a missing field),
+         * such invalid paths are silently ignored.
+         *
+         * @param entityClass the class of a target entity
+         * @param columnFilters the entity Column filters
+         * @param maskPaths the property paths for the {@code FieldMask} applied
+         * @return an instance of {@code Query} formed according to the passed parameters
+         * @see #byIdsAndColumns(Class, Set, Set)
+         */
+        public Query byColumnsWithMask(Class<? extends Message> entityClass,
+                                       Set<FieldFilter> columnFilters,
+                                       String... maskPaths) {
+            checkNotNull(entityClass);
+            checkNotNull(columnFilters);
+            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
+
+            final FieldMask fieldMask = FieldMask.newBuilder()
+                                                 .addAllPaths(Arrays.asList(maskPaths))
+                                                 .build();
+            final Query result = composeQuery(entityClass, null, columnFilters, fieldMask);
+            return result;
+        }
+
+        /**
+         * Creates a {@link Query} to read certain entity states by Entity Column values.
+         *
+         * <p>Allows to specify the Entity Column values for the target Entity. The processing
+         * results will contain only the entities, which Entity Columns are among the specified
+         * Column values.
+         *
+         * @param entityClass the class of a target entity
+         * @param columnFilters the entity Column filters
+         * @return an instance of {@code Query} formed according to the passed parameters
+         * @see #byIdsAndColumns(Class, Set, Set)
+         */
+        public Query byColumns(Class<? extends Message> entityClass,
+                               Set<FieldFilter> columnFilters) {
+            checkNotNull(entityClass);
+            checkNotNull(columnFilters);
+            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
+
+            final Query result = composeQuery(entityClass, null, columnFilters, null);
             return result;
         }
 

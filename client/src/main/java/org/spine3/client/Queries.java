@@ -46,6 +46,23 @@ public final class Queries {
         // Prevent instantiation of this utility class.
     }
 
+    /**
+     * Extract the type of {@link Target} for the given {@link Query}.
+     *
+     * <p>Returns null if the {@code Target} type is unknown to the application.
+     *
+     * @param query the query of interest.
+     * @return the URL of the type of the query {@linkplain Query#getTarget() target}
+     */
+    public static TypeUrl typeOf(Query query) {
+        checkNotNull(query);
+
+        final Target target = query.getTarget();
+        final TypeName typeName = TypeName.of(target.getType());
+        final TypeUrl type = typeName.toUrl();
+        return type;
+    }
+
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
                                          @Nullable Iterable<FieldFilter> columnFilters,
@@ -75,23 +92,6 @@ public final class Queries {
             target = someOf(entityClass, ids, columnFilters);
         }
         return target;
-    }
-
-    /**
-     * Extract the type of {@link Target} for the given {@link Query}.
-     *
-     * <p>Returns null if the {@code Target} type is unknown to the application.
-     *
-     * @param query the query of interest.
-     * @return the URL of the type of the query {@linkplain Query#getTarget() target}
-     */
-    public static TypeUrl typeOf(Query query) {
-        checkNotNull(query);
-
-        final Target target = query.getTarget();
-        final TypeName typeName = TypeName.of(target.getType());
-        final TypeUrl type = typeName.toUrl();
-        return type;
     }
 
 }
