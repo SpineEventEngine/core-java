@@ -79,8 +79,8 @@ public final class Queries {
     }
 
     private static Target forParams(Class<? extends Message> entityClass,
-                                     @Nullable Set<? extends Message> ids,
-                                     @Nullable Iterable<FieldFilter> columnFilters) {
+                                    @Nullable Set<? extends Message> ids,
+                                    @Nullable Iterable<FieldFilter> columnFilters) {
         final Target target;
         if (ids == null && columnFilters == null) {
             target = allOf(entityClass);
