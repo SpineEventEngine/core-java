@@ -20,6 +20,7 @@
 package org.spine3.server.stand;
 
 import org.spine3.client.Subscription;
+import org.spine3.client.SubscriptionId;
 import org.spine3.client.Topic;
 import org.spine3.type.TypeUrl;
 
@@ -51,7 +52,7 @@ interface SubscriptionRegistry {
      * @param topic the topic to subscribe to
      * @return the created subscription
      */
-    Subscription addSubscription(Topic topic);
+    Subscription add(Topic topic);
 
     /**
      * Remove the subscription from this registry.
@@ -61,7 +62,16 @@ interface SubscriptionRegistry {
      *
      * @param subscription the subscription to remove
      */
-    void removeSubscription(Subscription subscription);
+    void remove(Subscription subscription);
+
+    /**
+     * Allows to determine if this registry has an item with the specified ID.
+     *
+     * @param subscriptionId the subscription ID to look for.
+     * @return {@code true}, if this registry has a subscription with the given ID,
+     *         {@code false} otherwise.
+     */
+    boolean containsId(SubscriptionId subscriptionId);
 
     /**
      * Filter the registered {@link SubscriptionRecord}s by their type.

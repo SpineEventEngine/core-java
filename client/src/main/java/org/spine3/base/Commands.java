@@ -30,7 +30,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.annotations.Internal;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.string.Stringifier;
+import org.spine3.time.Timestamps2;
 import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
@@ -47,7 +48,7 @@ import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -55,7 +56,7 @@ import static org.spine3.validate.Validate.isNotDefault;
  *
  * @author Alexander Yevsyukov
  */
-public class Commands {
+public final class Commands {
 
     /** A suffix which the {@code .proto} file containing commands must have in its name. */
     public static final String FILE_NAME_SUFFIX = "commands";

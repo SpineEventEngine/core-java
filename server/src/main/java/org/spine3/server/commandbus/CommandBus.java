@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
@@ -132,8 +133,15 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return scheduler;
     }
 
-    @VisibleForTesting
-    FailureBus failureBus() {
+    /**
+     * Exposes the {@code FailureBus} instance for this {@code CommandBus}.
+     *
+     * <p>This method is designed for internal use only. Client code should use
+     * {@link org.spine3.server.BoundedContext#getFailureBus() BoundedContext.getFailureBus()}
+     * instead.
+     */
+    @Internal
+    public FailureBus failureBus() {
         return this.failureBus;
     }
 

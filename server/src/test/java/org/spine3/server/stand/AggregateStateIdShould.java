@@ -24,8 +24,8 @@ import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import org.junit.Test;
-import org.spine3.base.Stringifier;
-import org.spine3.base.StringifierRegistry;
+import org.spine3.string.Stringifier;
+import org.spine3.string.StringifierRegistry;
 import org.spine3.type.TypeUrl;
 
 import static org.junit.Assert.assertTrue;

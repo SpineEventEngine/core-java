@@ -29,7 +29,6 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Durations2;
 import org.spine3.protobuf.Values;
 import org.spine3.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
 import org.spine3.test.validate.msg.CustomMessageRequiredEnumFieldValue;
@@ -65,6 +64,7 @@ import org.spine3.test.validate.msg.RequiredStringFieldValue;
 import org.spine3.test.validate.msg.TimeInFutureFieldValue;
 import org.spine3.test.validate.msg.TimeInPastFieldValue;
 import org.spine3.test.validate.msg.TimeWithoutOptsFieldValue;
+import org.spine3.time.Durations2;
 import org.spine3.validate.internal.Time;
 import org.spine3.validate.internal.ValidationProto;
 
@@ -78,8 +78,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Litus

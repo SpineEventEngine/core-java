@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.time.Time;
 import org.spine3.users.UserId;
 
 import static org.junit.Assert.assertEquals;
@@ -52,7 +53,7 @@ public class MessagesShould {
 
     @Test
     public void pack_to_Any() {
-        final Timestamp timestamp = Timestamps2.getCurrentTime();
+        final Timestamp timestamp = Time.getCurrentTime();
         assertEquals(timestamp, unpack(Messages.toAny(timestamp)));
     }
 

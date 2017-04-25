@@ -31,7 +31,7 @@ import static org.spine3.net.Patterns.EMAIL_ADDRESS;
  *
  * @author Alexander Yevsyukov
  */
-public class EmailAddresses {
+public final class EmailAddresses {
 
     private EmailAddresses() {
         // Prevent instantiation of this utility class.
