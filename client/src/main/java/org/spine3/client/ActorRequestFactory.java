@@ -36,6 +36,7 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -185,11 +186,10 @@ public class ActorRequestFactory {
          * @param columnFilters the entity Column filters
          * @param maskPaths the property paths for the {@code FieldMask} applied
          * @return an instance of {@code Query} formed according to the passed parameters
-         * @see #byIdsAndColumns(Class, Set, Set)
          */
         public Query byIdsAndColumnsWithMask(Class<? extends Message> entityClass,
                                              Set<? extends Message> ids,
-                                             Set<FieldFilter> columnFilters,
+                                             Collection<FieldFilter> columnFilters,
                                              String... maskPaths) {
             checkNotNull(entityClass);
             checkNotNull(ids);
@@ -222,7 +222,7 @@ public class ActorRequestFactory {
          */
         public Query byIdsAndColumns(Class<? extends Message> entityClass,
                                      Set<? extends Message> ids,
-                                     Set<FieldFilter> columnFilters) {
+                                     Collection<FieldFilter> columnFilters) {
             checkNotNull(entityClass);
             checkNotNull(ids);
             checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
@@ -253,10 +253,9 @@ public class ActorRequestFactory {
          * @param columnFilters the entity Column filters
          * @param maskPaths the property paths for the {@code FieldMask} applied
          * @return an instance of {@code Query} formed according to the passed parameters
-         * @see #byIdsAndColumns(Class, Set, Set)
          */
         public Query byColumnsWithMask(Class<? extends Message> entityClass,
-                                       Set<FieldFilter> columnFilters,
+                                       Collection<FieldFilter> columnFilters,
                                        String... maskPaths) {
             checkNotNull(entityClass);
             checkNotNull(columnFilters);
@@ -279,10 +278,9 @@ public class ActorRequestFactory {
          * @param entityClass the class of a target entity
          * @param columnFilters the entity Column filters
          * @return an instance of {@code Query} formed according to the passed parameters
-         * @see #byIdsAndColumns(Class, Set, Set)
          */
         public Query byColumns(Class<? extends Message> entityClass,
-                               Set<FieldFilter> columnFilters) {
+                               Collection<FieldFilter> columnFilters) {
             checkNotNull(entityClass);
             checkNotNull(columnFilters);
             checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
@@ -391,7 +389,7 @@ public class ActorRequestFactory {
 
         private Query composeQuery(Class<? extends Message> entityClass,
                                    @Nullable Set<? extends Message> ids,
-                                   @Nullable Set<FieldFilter> columnFilters,
+                                   @Nullable Collection<FieldFilter> columnFilters,
                                    @Nullable FieldMask fieldMask) {
             checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 

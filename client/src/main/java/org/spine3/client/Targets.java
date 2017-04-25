@@ -19,6 +19,7 @@
  */
 package org.spine3.client;
 
+import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
@@ -117,12 +118,15 @@ public final class Targets {
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
                                 @Nullable Iterable<FieldFilter> columnFilters) {
-        final boolean includeAll = (ids == null);
+        final boolean includeAll = (ids == null && columnFilters == null);
+
+        final Set<? extends Message> entityIds = nullToEmpty(ids);
+        final Set<FieldFilter> entityColumnFilters = nullToEmpty(columnFilters);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 
         if (!includeAll) {
-            for (Message rawId : ids) {
+            for (Message rawId : entityIds) {
                 final Any packedId = AnyPacker.pack(rawId);
                 final EntityId entityId = EntityId.newBuilder()
                                                   .setId(packedId)
@@ -132,13 +136,9 @@ public final class Targets {
         }
         final EntityIdFilter idFilter = idFilterBuilder.build();
 
-        final Iterable<FieldFilter> columnFieldFilters = columnFilters != null
-                ? columnFilters
-                : Collections.<FieldFilter>emptyList();
-
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
-                                                   .addAllColumnFilter(columnFieldFilters)
+                                                   .addAllColumnFilter(entityColumnFilters)
                                                    .build();
         final String typeName = TypeName.of(entityClass)
                                         .value();
@@ -152,4 +152,13 @@ public final class Targets {
 
         return builder.build();
     }
+
+    private static <T> Set<T> nullToEmpty(@Nullable Iterable<T> input) {
+        if (input == null) {
+            return Collections.emptySet();
+        } else {
+            return Sets.newHashSet(input);
+        }
+    }
+
 }
