@@ -32,7 +32,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-public class Exceptions {
+public final class Exceptions {
 
     private Exceptions() {
         // Prevent instantiation of this utility class.
@@ -94,10 +94,23 @@ public class Exceptions {
      * @return nothing ever, always throws an exception, the return type is for convenience
      * @throws IllegalStateException always
      */
-    public static IllegalStateException wrappedCause(Throwable throwable) {
+    public static IllegalStateException illegalStateWithCauseOf(Throwable throwable) {
         checkNotNull(throwable);
-        final Throwable cause = getRootCause(throwable);
-        throw new IllegalStateException(cause);
+        final Throwable rootCause = getRootCause(throwable);
+        throw new IllegalStateException(rootCause);
+    }
+
+    /**
+     * Sets a throwable's cause as the cause of a {@link IllegalArgumentException} and throws it.
+     *
+     * @param throwable to wrap
+     * @return nothing ever, always throws an exception, the return type is for convenience
+     * @throws IllegalArgumentException always
+     */
+    public static IllegalArgumentException illegalArgumentWithCauseOf(Throwable throwable) {
+        checkNotNull(throwable);
+        final Throwable rootCause = getRootCause(throwable);
+        throw new IllegalArgumentException(rootCause);
     }
 
     private static String formatMessage(String format, Object[] args) {

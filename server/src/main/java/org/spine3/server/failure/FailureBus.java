@@ -29,6 +29,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.FailureEnvelope;
+import org.spine3.io.StreamObservers;
 import org.spine3.server.outbus.CommandOutputBus;
 import org.spine3.server.outbus.OutputDispatcherRegistry;
 import org.spine3.type.FailureClass;
@@ -37,7 +38,6 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.io.StreamObservers.emptyObserver;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -145,7 +145,7 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
      * @see #post(Message, StreamObserver)
      */
     public void post(Failure failure) {
-        post(failure, emptyObserver());
+        post(failure, StreamObservers.<Response>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

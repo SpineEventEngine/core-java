@@ -21,15 +21,15 @@
 package org.spine3.server.stand;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Stringifier;
-import org.spine3.base.Stringifiers;
+import org.spine3.string.Stringifier;
+import org.spine3.string.Stringifiers;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.checkSupported;
-import static org.spine3.util.Exceptions.wrappedCause;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * A {@link Stringifier} for the {@link AggregateStateId}.
@@ -114,7 +114,7 @@ class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
             try {
                 result = Class.forName(JAVA_LANG_PACKAGE_NAME + idTypeString);
             } catch (ClassNotFoundException e) {
-                throw wrappedCause(e);
+                throw illegalStateWithCauseOf(e);
             }
         }
         return result;

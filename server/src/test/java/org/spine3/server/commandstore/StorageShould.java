@@ -39,7 +39,7 @@ import org.spine3.base.Failures;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.Given;
 import org.spine3.server.commandbus.ProcessingStatus;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
 import org.spine3.test.command.CreateProject;
@@ -62,11 +62,11 @@ import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.pack;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.server.commandstore.Records.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -88,7 +88,8 @@ public class StorageShould extends TenantAwareTest {
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
         storage = new Storage();
-        storage.initStorage(InMemoryStorageFactory.getInstance(true));
+        storage.initStorage(StorageFactorySwitch.getInstance(true)
+                                                .get());
     }
 
     @After

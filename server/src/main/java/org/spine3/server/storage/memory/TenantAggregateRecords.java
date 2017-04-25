@@ -26,10 +26,10 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.aggregate.AggregateEventRecord;
 import org.spine3.server.entity.EntityWithLifecycle;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.time.Timestamps2;
 
 import javax.annotation.Nullable;
 import java.io.Serializable;

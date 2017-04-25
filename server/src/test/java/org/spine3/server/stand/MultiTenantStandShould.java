@@ -30,7 +30,6 @@ import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
-import org.spine3.client.Subscription;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
@@ -42,7 +41,6 @@ import org.spine3.users.TenantId;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.newTenantUuid;
@@ -119,14 +117,14 @@ public class MultiTenantStandShould extends StandShould {
         assertEquals(null, anotherCallback.getNewEntityState());
     }
 
-    protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand, ActorRequestFactory requestFactory,
+    protected MemoizeEntityUpdateCallback subscribeToAllOf(Stand stand,
+                                                           ActorRequestFactory requestFactory,
                                                            Class<? extends Message> entityClass) {
         final Topic allCustomers = requestFactory.topic().allOf(entityClass);
-        final MemoizeEntityUpdateCallback memoizeCallback = new MemoizeEntityUpdateCallback();
-        final Subscription subscription = stand.subscribe(allCustomers);
-        stand.activate(subscription, memoizeCallback);
-        assertNotNull(subscription);
-        assertNull(memoizeCallback.getNewEntityState());
-        return memoizeCallback;
+        final MemoizeEntityUpdateCallback callback = new MemoizeEntityUpdateCallback();
+        subscribeAndActivate(stand, allCustomers, callback);
+
+        assertNull(callback.getNewEntityState());
+        return callback;
     }
 }

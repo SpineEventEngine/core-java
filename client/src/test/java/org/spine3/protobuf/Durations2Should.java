@@ -22,31 +22,34 @@ package org.spine3.protobuf;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import org.junit.Test;
+import org.spine3.string.Stringifier;
+import org.spine3.string.time.TimeStringifiers;
+import org.spine3.time.Durations2;
 
 import static com.google.protobuf.util.Durations.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Durations2.ZERO;
-import static org.spine3.protobuf.Durations2.add;
-import static org.spine3.protobuf.Durations2.fromHours;
-import static org.spine3.protobuf.Durations2.fromMinutes;
-import static org.spine3.protobuf.Durations2.getHours;
-import static org.spine3.protobuf.Durations2.getMinutes;
-import static org.spine3.protobuf.Durations2.hoursAndMinutes;
-import static org.spine3.protobuf.Durations2.isGreaterThan;
-import static org.spine3.protobuf.Durations2.isLessThan;
-import static org.spine3.protobuf.Durations2.isNegative;
-import static org.spine3.protobuf.Durations2.isPositive;
-import static org.spine3.protobuf.Durations2.isPositiveOrZero;
-import static org.spine3.protobuf.Durations2.isZero;
-import static org.spine3.protobuf.Durations2.minutes;
-import static org.spine3.protobuf.Durations2.nanos;
-import static org.spine3.protobuf.Durations2.seconds;
-import static org.spine3.protobuf.Durations2.toMinutes;
-import static org.spine3.protobuf.Durations2.toNanos;
-import static org.spine3.protobuf.Durations2.toSeconds;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Durations2.ZERO;
+import static org.spine3.time.Durations2.add;
+import static org.spine3.time.Durations2.fromHours;
+import static org.spine3.time.Durations2.fromMinutes;
+import static org.spine3.time.Durations2.getHours;
+import static org.spine3.time.Durations2.getMinutes;
+import static org.spine3.time.Durations2.hoursAndMinutes;
+import static org.spine3.time.Durations2.isGreaterThan;
+import static org.spine3.time.Durations2.isLessThan;
+import static org.spine3.time.Durations2.isNegative;
+import static org.spine3.time.Durations2.isPositive;
+import static org.spine3.time.Durations2.isPositiveOrZero;
+import static org.spine3.time.Durations2.isZero;
+import static org.spine3.time.Durations2.minutes;
+import static org.spine3.time.Durations2.nanos;
+import static org.spine3.time.Durations2.seconds;
+import static org.spine3.time.Durations2.toMinutes;
+import static org.spine3.time.Durations2.toNanos;
+import static org.spine3.time.Durations2.toSeconds;
 
 /**
  * @author Alexander Yevsyukov
@@ -240,4 +243,11 @@ public class Durations2Should {
         return minutes * 60L;
     }
 
+    @Test
+    public void provide_stringifier() {
+        final Stringifier<Duration> stringifier = TimeStringifiers.forDuration();
+        final Duration duration = hoursAndMinutes(10, 20);
+        assertEquals(duration, stringifier.reverse()
+                                          .convert(stringifier.convert(duration)));
+    }
 }

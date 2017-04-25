@@ -30,7 +30,7 @@ import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Tests;
 import org.spine3.testdata.TestCommandBusFactory;
@@ -51,7 +51,8 @@ public class BoundedContextBuilderShould {
     @Before
     public void setUp() {
         final boolean multitenant = true;
-        storageFactory = InMemoryStorageFactory.getInstance(multitenant);
+        storageFactory = StorageFactorySwitch.getInstance(multitenant)
+                                             .get();
         builder = BoundedContext.newBuilder()
                                 .setMultitenant(multitenant);
     }

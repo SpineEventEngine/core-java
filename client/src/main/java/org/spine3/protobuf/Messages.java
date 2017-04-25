@@ -38,7 +38,7 @@ import static org.spine3.protobuf.AnyPacker.pack;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public class Messages {
+public final class Messages {
 
     private Messages() {
         // Prevent instantiation of this utility class.

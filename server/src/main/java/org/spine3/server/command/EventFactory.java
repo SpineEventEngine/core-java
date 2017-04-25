@@ -38,8 +38,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**

@@ -32,7 +32,7 @@ import static org.spine3.protobuf.Messages.toAny;
  *
  * @author Alexander Yevsyukov
  */
-public class Failures {
+public final class Failures {
 
     private Failures() {
         // Prevent instantiation of this utility class.

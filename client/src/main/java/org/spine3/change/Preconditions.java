@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-public class Preconditions {
+public final class Preconditions {
 
     private static final String NEW_VALUE_CANNOT_BE_EMPTY =
             "newValue cannot be empty";
@@ -43,6 +43,7 @@ public class Preconditions {
             "`expected` and `actual` cannot be equal in ValueMismatch";
 
     private Preconditions() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

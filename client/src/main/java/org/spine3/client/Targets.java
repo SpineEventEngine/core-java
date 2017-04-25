@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  */
 @Internal
-public class Targets {
+public final class Targets {
 
     private Targets() {
         // Prevent instantiation of this utility class.

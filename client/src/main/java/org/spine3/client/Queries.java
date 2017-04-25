@@ -40,7 +40,7 @@ import static org.spine3.client.Targets.someOf;
  * @author Dmytro Dashenkov
  */
 @Internal
-public class Queries {
+public final class Queries {
 
     private Queries() {
         // Prevent instantiation of this utility class.

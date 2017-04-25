@@ -28,6 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.FieldFilter;
+import org.spine3.base.Identifiers;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -39,8 +40,10 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.client.Queries.queryBuilderFor;
 import static org.spine3.client.Targets.composeTarget;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * A factory for the various requests fired from the client-side by an actor.
@@ -96,9 +99,9 @@ public class ActorRequestFactory {
      */
     public ActorRequestFactory switchTimezone(ZoneOffset zoneOffset) {
         final ActorRequestFactory result = newBuilder().setActor(getActor())
-                                                      .setZoneOffset(zoneOffset)
-                                                      .setTenantId(getTenantId())
-                                                      .build();
+                                                       .setZoneOffset(zoneOffset)
+                                                       .setTenantId(getTenantId())
+                                                       .build();
         return result;
     }
 
@@ -124,13 +127,17 @@ public class ActorRequestFactory {
 
     /**
      * Creates an {@linkplain ActorContext actor context}, based on the factory properties.
+     *
+     * <p>Sets the timestamp value to the
+     * {@linkplain org.spine3.time.Time#getCurrentTime() current time}.
      */
     @VisibleForTesting
     ActorContext actorContext() {
         final ActorContext.Builder builder = ActorContext.newBuilder()
                                                          .setActor(actor)
+                                                         .setTimestamp(getCurrentTime())
                                                          .setZoneOffset(zoneOffset);
-        if(tenantId != null) {
+        if (tenantId != null) {
             builder.setTenantId(tenantId);
         }
         return builder.build();
@@ -142,6 +149,10 @@ public class ActorRequestFactory {
      */
     public final class ForQuery {
 
+        /**
+         * The format of all {@linkplain QueryId query identifiers}.
+         */
+        private static final String QUERY_ID_FORMAT = "query-%s";
         private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty";
         private static final String COLUMNS_EMPTY_MSG = "Column filters set must not be empty";
 
@@ -287,8 +298,17 @@ public class ActorRequestFactory {
                                                           ids,
                                                           columnFilters,
                                                           fieldMask);
+
+            builder.setId(newQueryId());
             builder.setContext(actorContext());
             return builder.build();
+        }
+
+        private QueryId newQueryId() {
+            final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+            return QueryId.newBuilder()
+                          .setUuid(formattedId)
+                          .build();
         }
     }
 
@@ -297,6 +317,11 @@ public class ActorRequestFactory {
      * configuration.
      */
     public final class ForTopic {
+
+        /**
+         * The format of all {@linkplain TopicId topic identifiers}.
+         */
+        private static final String TOPIC_ID_FORMAT = "topic-%s";
 
         private ForTopic() {
             // Prevent instantiation from the outside.
@@ -345,11 +370,19 @@ public class ActorRequestFactory {
         @Internal
         public Topic forTarget(Target target) {
             checkNotNull(target);
-
+            final TopicId id = newTopicId();
             return Topic.newBuilder()
+                        .setId(id)
                         .setContext(actorContext())
                         .setTarget(target)
                         .build();
+        }
+
+        private TopicId newTopicId() {
+            final String formattedId = format(TOPIC_ID_FORMAT, Identifiers.newUuid());
+            return TopicId.newBuilder()
+                          .setUuid(formattedId)
+                          .build();
         }
     }
 

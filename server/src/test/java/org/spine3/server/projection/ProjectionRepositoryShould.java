@@ -34,8 +34,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
-import org.spine3.protobuf.Durations2;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -45,7 +43,7 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
@@ -57,6 +55,8 @@ import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.testdata.TestEventBusFactory;
+import org.spine3.time.Durations2;
+import org.spine3.time.Time;
 import org.spine3.type.EventClass;
 import org.spine3.users.TenantId;
 
@@ -157,7 +157,7 @@ public class ProjectionRepositoryShould
     @Before
     public void setUp() {
         super.setUp();
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         TestProjection.clearMessageDeliveryHistory();
     }
 
@@ -261,7 +261,7 @@ public class ProjectionRepositoryShould
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
         final Event event = EventTests.createContextlessEvent(unknownEventMessage);
-        
+
         repository().dispatch(event);
     }
 
@@ -414,7 +414,7 @@ public class ProjectionRepositoryShould
         final Duration duration = Durations2.seconds(10L);
         final ProjectionRepository repository = spy(
                 new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         repository.catchUp();
 
         // Check bulk write
@@ -446,7 +446,7 @@ public class ProjectionRepositoryShould
         final Duration duration = Durations2.nanos(1L);
         final ProjectionRepository repository =
                 spy(new ManualCatchupProjectionRepository(boundedContext, duration));
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         repository.catchUp();
 
         // Check bulk write
@@ -466,7 +466,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void convert_null_timestamp_to_default() {
-        final Timestamp timestamp = Timestamps2.getCurrentTime();
+        final Timestamp timestamp = Time.getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
@@ -474,8 +474,13 @@ public class ProjectionRepositoryShould
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
-        repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repo.initStorage(storageFactory());
         return repo;
+    }
+
+    private StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                   .get();
     }
 
     /** The projection stub used in tests. */

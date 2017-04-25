@@ -32,10 +32,11 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Durations2;
+import org.spine3.string.Stringifiers;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.commands.TestCommand;
+import org.spine3.time.Durations2;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -55,8 +56,6 @@ import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations2.seconds;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newTenantUuid;
@@ -64,6 +63,8 @@ import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
 import static org.spine3.test.TimeTests.Past.secondsAgo;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.time.Durations2.seconds;
+import static org.spine3.time.Time.getCurrentTime;
 
 public class CommandsShould {
 
@@ -278,7 +279,8 @@ public class CommandsShould {
     }
 
     @Test
-    public void not_throw_exception_if_checked_command_id_is_valid() {
-        Commands.checkValid(Commands.generateId());
+    public void return_value_id_when_checked() {
+        final CommandId id = Commands.generateId();
+        assertEquals(id, Commands.checkValid(id));
     }
 }

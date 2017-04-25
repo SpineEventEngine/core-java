@@ -43,7 +43,8 @@ import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
@@ -96,6 +97,11 @@ public class ProcessManagerRepositoryShould
     // Configuration of the test suite
     //---------------------------------
 
+    private StorageFactory storageFactory() {
+        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
+                                   .get();
+    }
+
     @Override
     protected ProjectId createId(int value) {
         return ProjectId.newBuilder()
@@ -105,9 +111,9 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
-        repo.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repo.initStorage(storageFactory());
         return repo;
     }
 
@@ -156,7 +162,7 @@ public class ProcessManagerRepositoryShould
                       });
 
         repository = new TestProcessManagerRepository(boundedContext);
-        repository.initStorage(InMemoryStorageFactory.getInstance(boundedContext.isMultitenant()));
+        repository.initStorage(storageFactory());
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
