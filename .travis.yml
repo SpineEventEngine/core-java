@@ -13,8 +13,19 @@ before_install:
   - curl -sL  http://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar >> codacy-coverage-reporter.jar
   # END of Codacy setup.
 
+after_success:
+  # See: https://github.com/codecov/example-java/blob/master/.travis.yml
+  - bash <(curl -s https://codecov.io/bash)
+  # Codacy setup. https://github.com/codacy/codacy-coverage-reporter#build-from-source
+  - java -cp ./codacy-coverage-reporter.jar com.codacy.CodacyCoverageReporter -l Java -r ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
+  # END of Codacy setup.
+  - chmod +x ./scripts/publish-artifacts.sh
+  - ./scripts/publish-artifacts.sh
+
+script: ./gradlew check --stacktrace
+
 before_deploy:
-  zip reports.zip /**/build/reports
+  zip -r reports.zip /**/build/reports
 
 deploy:
   provider: gcs
@@ -28,14 +39,3 @@ deploy:
   on:
     repo: SpineEventEngine/core-java
     all_branches: true
-
-after_success:
-  # See: https://github.com/codecov/example-java/blob/master/.travis.yml
-  - bash <(curl -s https://codecov.io/bash)
-  # Codacy setup. https://github.com/codacy/codacy-coverage-reporter#build-from-source
-  - java -cp ./codacy-coverage-reporter.jar com.codacy.CodacyCoverageReporter -l Java -r ./build/reports/jacoco/jacocoRootReport/jacocoRootReport.xml
-  # END of Codacy setup.
-  - chmod +x ./scripts/publish-artifacts.sh
-  - ./scripts/publish-artifacts.sh
-
-script: ./gradlew check --stacktrace
