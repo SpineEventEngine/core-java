@@ -32,7 +32,7 @@ import java.util.Iterator;
  * @author Alexander Yevsyukov
  * @see AnyPacker#pack(Iterator)
  */
-class PackingIterator extends UnmodifiableIterator<Any> {
+final class PackingIterator extends UnmodifiableIterator<Any> {
 
     private final Iterator<Message> source;
 

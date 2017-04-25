@@ -22,10 +22,10 @@ package org.spine3.server.stand;
 import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.FieldMask;
 import org.spine3.annotations.SPI;
-import org.spine3.base.StringifierRegistry;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.string.StringifierRegistry;
 import org.spine3.type.TypeUrl;
 
 import java.util.Map;

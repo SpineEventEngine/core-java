@@ -45,8 +45,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
-import static org.spine3.util.Exceptions.wrappedCause;
 
 /**
  * The wrapper for a command handler method.
@@ -154,7 +154,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
                                                                         context);
             return eventMessages;
         } catch (InvocationTargetException e) {
-            throw wrappedCause(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 

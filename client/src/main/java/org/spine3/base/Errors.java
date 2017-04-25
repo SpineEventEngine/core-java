@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public class Errors {
+public final class Errors {
 
     private Errors() {
         // Prevent instantiation of this utility class.

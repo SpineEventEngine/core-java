@@ -29,9 +29,9 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.protobuf.Values;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.time.Time;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -39,6 +39,7 @@ import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.abs;
@@ -239,7 +240,7 @@ public class Tests {
      * Factory method for creating versions from tests.
      */
     public static Version newVersionWithNumber(int number) {
-        return Versions.newVersion(number, Timestamps2.getCurrentTime());
+        return Versions.newVersion(number, Time.getCurrentTime());
     }
 
     /**
@@ -258,6 +259,21 @@ public class Tests {
     public static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {
         final long diffSec = abs(expectedSec - actualSec);
         assertTrue(diffSec <= maxDiffSec);
+    }
+
+    /**
+     * Generates a random integer in the range [0, max).
+     */
+    public static int random(int max) {
+        return random(0, max);
+    }
+
+    /**
+     * Generates a random integer in the range [min, max).
+     */
+    public static int random(int min, int max) {
+        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
+        return randomNum;
     }
 
     /**

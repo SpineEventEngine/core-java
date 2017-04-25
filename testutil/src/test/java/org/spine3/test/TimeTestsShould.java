@@ -24,14 +24,14 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Time;
 
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
-import static org.spine3.protobuf.Durations2.fromMinutes;
-import static org.spine3.protobuf.Timestamps2.getCurrentTime;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.time.Durations2.fromMinutes;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Yevsyukov
@@ -58,7 +58,7 @@ public class TimeTestsShould {
         final Timestamp fiveMinutesAgo = subtract(getCurrentTime(),
                                                   fromMinutes(5));
 
-        final Timestamps2.Provider provider =
+        final Time.Provider provider =
                 new TimeTests.FrozenMadHatterParty(fiveMinutesAgo);
 
         assertEquals(fiveMinutesAgo, provider.getCurrentTime());

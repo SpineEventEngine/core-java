@@ -34,6 +34,7 @@ import org.spine3.client.SubscriptionUpdate;
 import org.spine3.client.Target;
 import org.spine3.client.Topic;
 import org.spine3.client.grpc.SubscriptionServiceGrpc;
+import org.spine3.io.StreamObservers;
 import org.spine3.server.stand.Stand;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
@@ -74,10 +75,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
             final BoundedContext boundedContext = selectBoundedContext(target);
             final Stand stand = boundedContext.getStand();
 
-            final Subscription subscription = stand.subscribe(topic);
-
-            responseObserver.onNext(subscription);
-            responseObserver.onCompleted();
+            stand.subscribe(topic, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing subscription request", e);
             responseObserver.onError(e);
@@ -106,7 +104,9 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
                 }
             };
             final Stand targetStand = boundedContext.getStand();
-            targetStand.activate(subscription, updateCallback);
+            targetStand.activate(subscription,
+                                 updateCallback,
+                                 StreamObservers.<Response>forwardErrorsOnly(responseObserver));
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error activating the subscription", e);
             responseObserver.onError(e);
@@ -120,9 +120,7 @@ public class SubscriptionService extends SubscriptionServiceGrpc.SubscriptionSer
         final BoundedContext boundedContext = selectBoundedContext(subscription);
         try {
             final Stand stand = boundedContext.getStand();
-            stand.cancel(subscription);
-            responseObserver.onNext(Responses.ok());
-            responseObserver.onCompleted();
+            stand.cancel(subscription, responseObserver);
         } catch (@SuppressWarnings("OverlyBroadCatchBlock") Exception e) {
             log().error("Error processing cancel subscription request", e);
             responseObserver.onError(e);
