@@ -135,7 +135,6 @@ public final class Targets {
             }
         }
         final EntityIdFilter idFilter = idFilterBuilder.build();
-
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .addAllColumnFilter(entityColumnFilters)
