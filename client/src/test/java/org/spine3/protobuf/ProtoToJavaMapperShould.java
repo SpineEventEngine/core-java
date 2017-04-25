@@ -35,8 +35,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
-import org.spine3.test.entity.Project;
-import org.spine3.testdata.Sample;
+import org.spine3.test.commands.TestCommand;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -61,7 +60,9 @@ public class ProtoToJavaMapperShould {
 
     @Test
     public void map_arbitrary_message_to_itself() {
-        final Project message = Sample.messageOfType(Project.class);
+        final Message message = TestCommand.newBuilder()
+                                           .setValue("my-command-message")
+                                           .build();
         final Any wrapped = AnyPacker.pack(message);
         final Message result = ProtoToJavaMapper.map(wrapped, Message.class);
         assertEquals(message, result);
