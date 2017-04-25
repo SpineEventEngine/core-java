@@ -25,7 +25,7 @@ after_success:
 script: ./gradlew check --stacktrace
 
 before_deploy:
-  zip -r reports.zip /**/build/reports
+  zip -r reports.zip **/build/reports
 
 deploy:
   provider: gcs
@@ -33,7 +33,7 @@ deploy:
   secret_access_key:
       secure: "f1I4fDf+X/RM998YVCRsOzh1PkaVyaW7Z5Sqr89M30VTT3FV8V+dcpIpqWbe1jRXfPc5egUk/161PqxNKZcjMftRcjox1IVwC+xEfadDZGKDTRkIlmKINe8xHDnYUYmQZzR7AVKjk5JsnDD7qZjONEjGqM2ZilZ0Ht4er+DAfydqGOU75FkVMKX75vGFfcsXHqVFbGWjlRjRGTBswrkImH6CSmWol3YOG8S/Ar34dBPBbVQwZiI9dggF8irbO1kSUGz2Hz3KV48vZ/6D/8/eAcS1WAnU0bW4gMdKHf27LX70HqAUE94IQNZXuIgt4bK697cxz6F+ngC+0DClHaxopbrobRkU79kV/IQf+HKqdwxkGTfe9bTWoWp9KZ9qlztQDBR+brkohmnaBc9BVKcYJG1DMsBz8FRWkVzjaxe61G5RMdTER+wscAxEieqWfFj9xOQWcqqf7YWo8Ri42GJHGGjHat3OuzbeDuM3LV/5CthlC9BNEHmxHF/kTpyU+M/KPVvb+Y9JCqKjlGbPC35Nx/ms46bth8M3i/ynNWM8GMLBzPUZp74V2F4qFgk4AIiASJ2ix/Hs1PMt5rZxcZmk9L0SmkaHufLpH7hhDY0CZwnCqrFq00MmqCuo9L9aojAsgQb111e+szCXjSWV81jeK27gMPsLZZaXiRlPCam9S0c="
   bucket: spine-dev.appspot.com
-  upload-dir: "core-java/builds/{TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}"
+  upload-dir: "core-java/builds/${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER}"
   local-dir: "reports.zip"
   skip_cleanup: true
   on:
