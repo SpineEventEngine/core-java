@@ -21,8 +21,14 @@
 package org.spine3.server.entity;
 
 /**
+ * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
+ * {@link RecordBasedRepository}.
+ *
  * @author Dmytro Dashenkov
+ * @see RecordBasedRepositoryShould
  */
 public interface TestEntityWithStringColumn {
+
+    @SuppressWarnings("unused") // Reflective access
     String getIdString();
 }
