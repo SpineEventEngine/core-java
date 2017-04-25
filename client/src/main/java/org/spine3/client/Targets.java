@@ -67,6 +67,7 @@ public class Targets {
                                 Iterable<FieldFilter> columnFilters) {
         checkNotNull(entityClass);
         checkNotNull(ids);
+        checkNotNull(columnFilters);
 
         final Target result = composeTarget(entityClass, ids, columnFilters);
         return result;
