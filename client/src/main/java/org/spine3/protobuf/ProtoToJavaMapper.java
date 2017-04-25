@@ -48,10 +48,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>Currently, the supported types are:
  * <ul>
  *     <li>{@link Message} - converted via {@link AnyPacker};
- *     <li>Java primitives - the passed {@link Any} is unpacked into one of types {@code Int32Value,
- *     Int64Value, UInt32Value, UInt64Value, FloatValue, DoubleValue, BoolValue, StringValue,
- *     BytesValue} and then into the corresponding Java type, either a primitive value, or
- *     {@code String} of {@link ByteString}.
+ *     <li>Java primitives - the passed {@link Any} is unpacked into one of the types
+ *         {@code Int32Value, Int64Value, UInt32Value, UInt64Value, FloatValue, DoubleValue,
+ *         BoolValue, StringValue, BytesValue} and then into the corresponding Java type, either
+ *         a primitive value, or {@code String} of {@link ByteString}.
  * </ul>
  *
  * @author Dmytro Dashenkov
