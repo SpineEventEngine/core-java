@@ -22,6 +22,7 @@ package org.spine3.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
+import org.spine3.base.FieldFilter;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -46,17 +47,34 @@ public class Queries {
     }
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
-                                      @Nullable Set<? extends Message> ids,
-                                      @Nullable FieldMask fieldMask) {
+                                         @Nullable Set<? extends Message> ids,
+                                         @Nullable Iterable<FieldFilter> columnFilters,
+                                         @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
-        final Target target = ids == null ? allOf(entityClass) : someOf(entityClass, ids);
+        final Target target = forParams(entityClass, ids, columnFilters);
         final Query.Builder queryBuilder = Query.newBuilder()
                                                 .setTarget(target);
         if (fieldMask != null) {
             queryBuilder.setFieldMask(fieldMask);
         }
         return queryBuilder;
+    }
+
+    private static Target forParams(Class<? extends Message> entityClass,
+                                     @Nullable Set<? extends Message> ids,
+                                     @Nullable Iterable<FieldFilter> columnFilters) {
+        final Target target;
+        if (ids == null && columnFilters == null) {
+            target = allOf(entityClass);
+        } else if (ids == null) {
+            target = someOf(entityClass, columnFilters);
+        } else if (columnFilters == null) {
+            target = someOf(entityClass, ids);
+        } else {
+            target = someOf(entityClass, ids, columnFilters);
+        }
+        return target;
     }
 
     /**

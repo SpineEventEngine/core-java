@@ -27,6 +27,7 @@ import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.base.FieldFilter;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -141,9 +142,43 @@ public class ActorRequestFactory {
      */
     public final class ForQuery {
 
+        private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty";
+        private static final String COLUMNS_EMPTY_MSG = "Column filters set must not be empty";
+
         private ForQuery() {
             // Prevent instantiation from the outside.
         }
+
+        public Query byIdsAndCoulumnsWithMask(Class<? extends Message> entityClass,
+                                              Set<? extends Message> ids,
+                                              Set<FieldFilter> columnFilters,
+                                              String... maskPaths) {
+            checkNotNull(entityClass);
+            checkNotNull(ids);
+            checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
+            checkNotNull(columnFilters);
+            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
+
+            final FieldMask fieldMask = FieldMask.newBuilder()
+                                                 .addAllPaths(Arrays.asList(maskPaths))
+                                                 .build();
+            final Query result = composeQuery(entityClass, ids, columnFilters, fieldMask);
+            return result;
+        }
+
+        public Query byIdsAndCoulumns(Class<? extends Message> entityClass,
+                                      Set<? extends Message> ids,
+                                      Set<FieldFilter> columnFilters) {
+            checkNotNull(entityClass);
+            checkNotNull(ids);
+            checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
+            checkNotNull(columnFilters);
+            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
+
+            final Query result = composeQuery(entityClass, ids, columnFilters, null);
+            return result;
+        }
+
 
         /**
          * Creates a {@link Query} to read certain entity states by IDs with the {@link FieldMask}
@@ -171,12 +206,12 @@ public class ActorRequestFactory {
                                    Set<? extends Message> ids,
                                    String... maskPaths) {
             checkNotNull(ids);
-            checkArgument(!ids.isEmpty(), "Entity ID set must not be empty");
+            checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
 
             final FieldMask fieldMask = FieldMask.newBuilder()
                                                  .addAllPaths(Arrays.asList(maskPaths))
                                                  .build();
-            final Query result = composeQuery(entityClass, ids, fieldMask);
+            final Query result = composeQuery(entityClass, ids, null, fieldMask);
             return result;
         }
 
@@ -199,7 +234,7 @@ public class ActorRequestFactory {
             checkNotNull(entityClass);
             checkNotNull(ids);
 
-            return composeQuery(entityClass, ids, null);
+            return composeQuery(entityClass, ids, null, null);
         }
 
         /**
@@ -223,7 +258,7 @@ public class ActorRequestFactory {
             final FieldMask fieldMask = FieldMask.newBuilder()
                                                  .addAllPaths(Arrays.asList(maskPaths))
                                                  .build();
-            final Query result = composeQuery(entityClass, null, fieldMask);
+            final Query result = composeQuery(entityClass, null, null, fieldMask);
             return result;
         }
 
@@ -239,15 +274,19 @@ public class ActorRequestFactory {
         public Query all(Class<? extends Message> entityClass) {
             checkNotNull(entityClass);
 
-            return composeQuery(entityClass, null, null);
+            return composeQuery(entityClass, null, null, null);
         }
 
         private Query composeQuery(Class<? extends Message> entityClass,
                                    @Nullable Set<? extends Message> ids,
+                                   @Nullable Set<FieldFilter> columnFilters,
                                    @Nullable FieldMask fieldMask) {
             checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 
-            final Query.Builder builder = queryBuilderFor(entityClass, ids, fieldMask);
+            final Query.Builder builder = queryBuilderFor(entityClass,
+                                                          ids,
+                                                          columnFilters,
+                                                          fieldMask);
             builder.setContext(actorContext());
             return builder.build();
         }
@@ -274,7 +313,7 @@ public class ActorRequestFactory {
             checkNotNull(entityClass);
             checkNotNull(ids);
 
-            final Target target = composeTarget(entityClass, ids);
+            final Target target = composeTarget(entityClass, ids, null);
             final Topic result = forTarget(target);
             return result;
         }
@@ -288,7 +327,7 @@ public class ActorRequestFactory {
         public Topic allOf(Class<? extends Message> entityClass) {
             checkNotNull(entityClass);
 
-            final Target target = composeTarget(entityClass, null);
+            final Target target = composeTarget(entityClass, null, null);
             final Topic result = forTarget(target);
             return result;
         }

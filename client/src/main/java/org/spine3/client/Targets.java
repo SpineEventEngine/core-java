@@ -22,10 +22,12 @@ package org.spine3.client;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
+import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,7 +58,26 @@ public class Targets {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
-        final Target result = composeTarget(entityClass, ids);
+        final Target result = composeTarget(entityClass, ids, null);
+        return result;
+    }
+
+    public static Target someOf(Class<? extends Message> entityClass,
+                                Set<? extends Message> ids,
+                                Iterable<FieldFilter> columnFilters) {
+        checkNotNull(entityClass);
+        checkNotNull(ids);
+
+        final Target result = composeTarget(entityClass, ids, columnFilters);
+        return result;
+    }
+
+    public static Target someOf(Class<? extends Message> entityClass,
+                                Iterable<FieldFilter> columnFilters) {
+        checkNotNull(entityClass);
+        checkNotNull(columnFilters);
+
+        final Target result = composeTarget(entityClass, null, columnFilters);
         return result;
     }
 
@@ -69,12 +90,13 @@ public class Targets {
     public static Target allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
 
-        final Target result = composeTarget(entityClass, null);
+        final Target result = composeTarget(entityClass, null, null);
         return result;
     }
 
     static Target composeTarget(Class<? extends Message> entityClass,
-                                @Nullable Set<? extends Message> ids) {
+                                @Nullable Set<? extends Message> ids,
+                                @Nullable Iterable<FieldFilter> columnFilters) {
         final boolean includeAll = (ids == null);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
@@ -89,8 +111,14 @@ public class Targets {
             }
         }
         final EntityIdFilter idFilter = idFilterBuilder.build();
+
+        final Iterable<FieldFilter> columnFieldFilters = columnFilters != null
+                ? columnFilters
+                : Collections.<FieldFilter>emptyList();
+
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
+                                                   .addAllColumnFilter(columnFieldFilters)
                                                    .build();
         final String typeName = TypeName.of(entityClass)
                                         .value();
