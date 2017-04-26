@@ -32,6 +32,7 @@ after_script:
   # Reports creation.
   - mkdir reports
   - zip -r reports/test-reports.zip **/build/reports
+  - zip reports/jacoco-reports.zip **/build/jacoco
   # Reports deployment to GCS.
   - dpl --provider=gcs
         --access-key-id=GOOGX66ER6DXLZH7IKQF
