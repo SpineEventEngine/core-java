@@ -161,7 +161,7 @@ public class ActorRequestFactory {
          *
          * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
          * results. This processing is performed according to the
-         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
+         * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
          *
          * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
          * (e.g. a {@code path} references a missing field),
@@ -214,7 +214,7 @@ public class ActorRequestFactory {
          *
          * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
          * results. This processing is performed according to the
-         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
+         * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
          *
          * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
          * (e.g. a {@code path} references a missing field), such invalid paths
