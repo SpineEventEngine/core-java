@@ -148,11 +148,6 @@ public class ActorRequestFactory {
      */
     public final class ForQuery {
 
-        /**
-         * The format of all {@linkplain QueryId query identifiers}.
-         */
-        private static final String QUERY_ID_FORMAT = "q-%s";
-
         private ForQuery() {
             // Prevent instantiation from the outside.
         }
@@ -261,17 +256,11 @@ public class ActorRequestFactory {
 
             final Query.Builder builder = queryBuilderFor(entityClass, ids, fieldMask);
 
-            builder.setId(newQueryId());
+            builder.setId(Queries.generateId());
             builder.setContext(actorContext());
             return builder.build();
         }
 
-        private QueryId newQueryId() {
-            final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
-            return QueryId.newBuilder()
-                          .setUuid(formattedId)
-                          .build();
-        }
     }
 
     /**

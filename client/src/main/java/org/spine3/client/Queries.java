@@ -22,6 +22,7 @@ package org.spine3.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
+import org.spine3.base.Identifiers;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
@@ -29,6 +30,7 @@ import javax.annotation.Nullable;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.client.Targets.allOf;
 import static org.spine3.client.Targets.someOf;
 
@@ -41,8 +43,20 @@ import static org.spine3.client.Targets.someOf;
 @Internal
 public final class Queries {
 
+    /**
+     * The format of all {@linkplain QueryId query identifiers}.
+     */
+    private static final String QUERY_ID_FORMAT = "q-%s";
+
     private Queries() {
         // Prevent instantiation of this utility class.
+    }
+
+    public static QueryId generateId() {
+        final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+        return QueryId.newBuilder()
+                      .setValue(formattedId)
+                      .build();
     }
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,

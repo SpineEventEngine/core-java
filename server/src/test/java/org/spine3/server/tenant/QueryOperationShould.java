@@ -21,12 +21,12 @@
 package org.spine3.server.tenant;
 
 import org.junit.Test;
+import org.spine3.client.Queries;
 import org.spine3.client.Query;
 import org.spine3.client.QueryId;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Yevsyukov
@@ -61,9 +61,7 @@ public class QueryOperationShould {
 
     @Test
     public void return_query_id() {
-        final QueryId id = QueryId.newBuilder()
-                                     .setUuid(newUuid())
-                                     .build();
+        final QueryId id = Queries.generateId();
         final Query query = Query.newBuilder()
                                  .setId(id)
                                  .build();
