@@ -151,7 +151,7 @@ public class ActorRequestFactory {
         /**
          * The format of all {@linkplain QueryId query identifiers}.
          */
-        private static final String QUERY_ID_FORMAT = "query-%s";
+        private static final String QUERY_ID_FORMAT = "q-%s";
 
         private ForQuery() {
             // Prevent instantiation from the outside.
@@ -283,7 +283,7 @@ public class ActorRequestFactory {
         /**
          * The format of all {@linkplain TopicId topic identifiers}.
          */
-        private static final String TOPIC_ID_FORMAT = "topic-%s";
+        private static final String TOPIC_ID_FORMAT = "t-%s";
 
         private ForTopic() {
             // Prevent instantiation from the outside.
