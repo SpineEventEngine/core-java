@@ -40,16 +40,17 @@ public interface ValidatingBuilder<T extends Message> {
      * @param fieldValue the value of the field
      * @param fieldName  the name of the field
      * @param <V>        the type of the field value
-     * @throws ConstraintViolationThrowable if there are some constraint violations
+     * @throws ConstraintViolationThrowable if there are any constraint violations
      */
     <V> void validate(FieldDescriptor descriptor,
                       V fieldValue,
                       String fieldName) throws ConstraintViolationThrowable;
 
     /**
-     * Returns constructed and validated {@code Message}.
+     * Validates and builds {@code Message}.
      *
      * @return the {@code Message} instance
+     * @throws ConstraintViolationThrowable if there are any constraint violations
      */
-    T build();
+    T build() throws ConstraintViolationThrowable;
 }
