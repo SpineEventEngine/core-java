@@ -25,7 +25,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
@@ -33,6 +32,7 @@ import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
+import org.spine3.time.Time;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -241,7 +241,7 @@ public class ColumnsShould {
         }
 
         public Timestamp getSomeTime() {
-            return Timestamps2.getCurrentTime();
+            return Time.getCurrentTime();
         }
 
         public boolean isVisible() {

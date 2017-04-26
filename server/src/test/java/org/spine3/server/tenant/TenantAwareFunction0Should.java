@@ -22,7 +22,7 @@ package org.spine3.server.tenant;
 
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
+import org.spine3.time.Time;
 
 import static org.spine3.test.Tests.newTenantUuid;
 
@@ -36,7 +36,7 @@ public class TenantAwareFunction0Should {
         final TenantAwareFunction0<Timestamp> whichTime = new TenantAwareFunction0<Timestamp>() {
             @Override
             public Timestamp apply() {
-                return Timestamps2.getCurrentTime();
+                return Time.getCurrentTime();
             }
         };
 

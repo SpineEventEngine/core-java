@@ -25,8 +25,8 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
 import java.lang.reflect.Type;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.base.Types.listTypeOf;

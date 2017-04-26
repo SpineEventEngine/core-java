@@ -31,17 +31,18 @@ import org.spine3.base.Identifiers;
 import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.testdata.TestStandFactory;
+import org.spine3.time.Time;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -164,7 +165,7 @@ public class StandFunnelShould {
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
         when(entity.getState()).thenReturn(state);
         when(entity.getId()).thenReturn(id);
-        when(entity.getVersion()).thenReturn(newVersion(17, Timestamps2.getCurrentTime()));
+        when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
 
         final CommandContext context = requestFactory.createCommandContext();
         standFunnel.post(entity, context);
@@ -260,7 +261,7 @@ public class StandFunnelShould {
                 // Init repository
                 final AggregateRepository<?, ?> repository = Given.aggregateRepo(context);
 
-                repository.initStorage(InMemoryStorageFactory.getInstance(context.isMultitenant()));
+                repository.initStorage(storageFactory(context.isMultitenant()));
 
                 try {
                     // Mock aggregate and mock stand are not able to handle events
@@ -291,12 +292,16 @@ public class StandFunnelShould {
             public void perform(BoundedContext context) {
                 // Init repository
                 final ProjectionRepository repository = Given.projectionRepo(context);
-                repository.initStorage(InMemoryStorageFactory.getInstance(context.isMultitenant()));
+                repository.initStorage(storageFactory(context.isMultitenant()));
 
                 // Dispatch an update from projection repo
                 repository.dispatch(EventEnvelope.of(Given.validEvent()));
             }
         };
+    }
+
+    private static StorageFactory storageFactory(boolean multitenant) {
+        return StorageFactorySwitch.getInstance(multitenant).get();
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")

@@ -38,8 +38,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Durations2.milliseconds;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
+import static org.spine3.time.Durations2.milliseconds;
 
 /**
  * @author Alexander Litus

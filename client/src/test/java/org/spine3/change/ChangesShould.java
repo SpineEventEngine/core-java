@@ -24,8 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.protobuf.Timestamps2;
 import org.spine3.test.TimeTests;
+import org.spine3.time.Time;
 
 import java.util.UUID;
 
@@ -113,24 +113,24 @@ public class ChangesShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Timestamp_previousValue() {
-        Changes.of(null, Timestamps2.getCurrentTime());
+        Changes.of(null, Time.getCurrentTime());
     }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_Timestamp_newValue() {
-        Changes.of(Timestamps2.getCurrentTime(), null);
+        Changes.of(Time.getCurrentTime(), null);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void do_not_accept_equal_Timestamp_values() {
-        final Timestamp now = Timestamps2.getCurrentTime();
+        final Timestamp now = Time.getCurrentTime();
         Changes.of(now, now);
     }
 
     @Test
     public void create_TimestampChange_instance() {
         final Timestamp fiveMinutesAgo = TimeTests.Past.minutesAgo(5);
-        final Timestamp now = Timestamps2.getCurrentTime();
+        final Timestamp now = Time.getCurrentTime();
 
         final TimestampChange result = Changes.of(fiveMinutesAgo, now);
 
@@ -363,7 +363,7 @@ public class ChangesShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(ByteString.class, ByteString.EMPTY)
-                .setDefault(Timestamp.class, Timestamps2.getCurrentTime())
+                .setDefault(Timestamp.class, Time.getCurrentTime())
                 .testAllPublicStaticMethods(Changes.class);
     }
 }

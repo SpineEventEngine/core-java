@@ -42,6 +42,7 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
+import org.spine3.server.failure.FailureBus;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.procman.ProcessManagerRepository;
@@ -328,6 +329,12 @@ public final class BoundedContext
     @CheckReturnValue
     public EventBus getEventBus() {
         return this.eventBus;
+    }
+
+    /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
+    @CheckReturnValue
+    public FailureBus getFailureBus() {
+        return this.commandBus.failureBus();
     }
 
     /** Obtains instance of {@link StandFunnel} of this {@code BoundedContext}. */

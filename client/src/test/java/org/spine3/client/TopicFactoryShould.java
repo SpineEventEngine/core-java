@@ -93,7 +93,10 @@ public class TopicFactoryShould
         assertEquals(TARGET_ENTITY_TYPE_NAME.value(), topic.getTarget()
                                                            .getType());
         assertEquals(FieldMask.getDefaultInstance(), topic.getFieldMask());
-        assertEquals(actorContext(), topic.getContext());
+
+        final ActorContext actualContext = topic.getContext();
+        verifyContext(actualContext);
+
     }
 
     private static TestEntityId entityId(int idValue) {

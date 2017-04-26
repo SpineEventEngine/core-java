@@ -25,7 +25,7 @@ import org.junit.Test;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryStorageFactory;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Tests;
 import org.spine3.validate.MessageValidator;
 
@@ -46,7 +46,8 @@ public class EventBusBuilderShould {
 
     @Before
     public void setUp() {
-        this.storageFactory = InMemoryStorageFactory.getInstance(true);
+        this.storageFactory = StorageFactorySwitch.getInstance(true)
+                                                  .get();
     }
 
     @Test(expected = NullPointerException.class)

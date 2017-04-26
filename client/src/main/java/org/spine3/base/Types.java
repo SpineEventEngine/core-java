@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Illia Shepilov
  */
-public class Types {
+public final class Types {
 
     private Types() {
         // Disable instantiation of this utility class.

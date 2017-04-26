@@ -37,9 +37,10 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-public class Values {
+public final class Values {
 
     private Values() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

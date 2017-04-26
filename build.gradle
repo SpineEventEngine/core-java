@@ -194,7 +194,7 @@ subprojects {
         }
     }
 
-    /* Uncomment this block if you need to display console output during the Gradle build.
+    /* Uncomment this block if you need to display console output during the Gradle build.*/
     test {
         testLogging {
             // Make sure output from standard out or error is shown in Gradle output.
@@ -212,7 +212,7 @@ subprojects {
             //        org.gradle.api.tasks.testing.logging.TestLogEvent.STANDARD_ERROR,
         }
     }
-    */
+
 
     protobuf {
         // The below suppressions `GroovyAssignabilityCheck` is a workaround for the IDEA bug.

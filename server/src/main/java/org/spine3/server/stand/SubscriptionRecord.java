@@ -46,7 +46,7 @@ final class SubscriptionRecord {
     /**
      * The {@code callback} is null after the creation and until the subscription is activated.
      *
-     * @see SubscriptionRegistry#addSubscription(Topic)
+     * @see SubscriptionRegistry#add(Topic)
      * @see SubscriptionRegistry#activate(Subscription, Stand.EntityUpdateCallback)
      */
     @Nullable
