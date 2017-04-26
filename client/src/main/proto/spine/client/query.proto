@@ -41,7 +41,12 @@ import "spine/client/actor_context.proto";
 
 // Query identifier.
 message QueryId {
-    string uuid = 1;
+
+    // The value of the ID.
+    //
+    // Starts with the `q-` prefix followed by a generated UUID value.
+    //
+    string value = 1;
 }
 
 // Allows clients to form the requests to the read-side through the `QueryService`.
