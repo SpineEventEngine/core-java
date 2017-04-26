@@ -115,7 +115,7 @@ public class AggregateShould {
     public void handle_one_command_and_apply_appropriate_event() {
         aggregate.dispatchForTest(createProject, commandContext);
 
-        assertTrue(aggregate.isCreateProjectCommandHandled);
+        assertFalse(aggregate.isCreateProjectCommandHandled);
         assertTrue(aggregate.isProjectCreatedEventApplied);
     }
 
