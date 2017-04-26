@@ -24,6 +24,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.After;
 import org.junit.Before;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
@@ -116,11 +117,15 @@ public abstract class AbstractCommandBusTestSuite {
 
     protected static Command newCommandWithoutTenantId() {
         final Command cmd = createProject();
-        final Command invalidCmd = cmd.toBuilder()
-                                      .setContext(cmd.getContext()
-                                                     .toBuilder()
-                                                     .setTenantId(TenantId.getDefaultInstance()))
-                                      .build();
+        final ActorContext.Builder withNoTenant =
+                ActorContext.newBuilder()
+                            .setTenantId(TenantId.getDefaultInstance());
+        final Command invalidCmd =
+                cmd.toBuilder()
+                   .setContext(cmd.getContext()
+                                  .toBuilder()
+                                  .setActorContext(withNoTenant))
+                   .build();
         return invalidCmd;
     }
 
@@ -128,7 +133,8 @@ public abstract class AbstractCommandBusTestSuite {
     public void setUp() {
         final InMemoryStorageFactory storageFactory =
                 InMemoryStorageFactory.getInstance(this.multitenant);
-        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant, storageFactory);
+        final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
+                                                                          storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));
         scheduler = spy(new ExecutorCommandScheduler());
         log = spy(new Log());

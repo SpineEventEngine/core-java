@@ -170,7 +170,9 @@ public class StandFunnelShould {
         final CommandContext context = requestFactory.createCommandContext();
         standFunnel.post(entity, context);
 
-        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, context.getTenantId());
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
+                                                                    context.getActorContext()
+                                                                           .getTenantId());
         verify(delivery).deliverNow(eq(envelope), eq(Stand.class));
     }
 

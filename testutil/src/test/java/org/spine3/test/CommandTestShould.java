@@ -131,7 +131,9 @@ public class CommandTestShould {
         final Timestamp timestamp = TimeTests.Past.minutesAgo(5);
         final Command command = commandTest.createCommand(commandMessage, timestamp);
 
-        assertEquals(timestamp, command.getContext().getTimestamp());
+        assertEquals(timestamp, command.getContext()
+                                       .getActorContext()
+                                       .getTimestamp());
     }
 
     @SuppressWarnings("ConstantConditions") // Passing `null` is the purpose of the test.
@@ -156,7 +158,9 @@ public class CommandTestShould {
                 commandTest.createDifferentCommand(anotherCommandMsg, timestamp);
 
         assertEquals(anotherCommandMsg, Commands.getMessage(anotherCommand));
-        assertEquals(timestamp, anotherCommand.getContext().getTimestamp());
+        assertEquals(timestamp, anotherCommand.getContext()
+                                              .getActorContext()
+                                              .getTimestamp());
     }
 
     /**

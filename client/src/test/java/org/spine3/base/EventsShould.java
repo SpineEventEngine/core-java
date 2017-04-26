@@ -111,6 +111,7 @@ public class EventsShould {
     @Test
     public void return_actor_from_EventContext() {
         assertEquals(context.getCommandContext()
+                            .getActorContext()
                             .getActor(), getActor(context));
     }
 

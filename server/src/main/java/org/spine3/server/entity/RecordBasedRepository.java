@@ -185,10 +185,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>Acts in the same way as {@link #loadAll(Iterable)}, with
      * the {@code FieldMask} applied to the results.
      *
-     * <p>Field mask is applied according to
-     * <a
-     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
-     * >FieldMask specs</a>.
+     * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *

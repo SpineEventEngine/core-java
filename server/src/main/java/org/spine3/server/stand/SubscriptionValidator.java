@@ -93,7 +93,6 @@ class SubscriptionValidator extends RequestValidator<Subscription> {
                                          .getTenantId();
         final Boolean result = new TenantAwareFunction<Subscription, Boolean>(tenantId) {
 
-            @Nullable
             @Override
             public Boolean apply(@Nullable Subscription input) {
                 checkNotNull(input);

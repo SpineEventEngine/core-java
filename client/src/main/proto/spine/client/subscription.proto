@@ -36,9 +36,9 @@ import "spine/validate.proto";
 import "spine/ui/language.proto";
 import "spine/users/user_id.proto";
 import "spine/users/tenant_id.proto";
+import "spine/base/actor_context.proto";
 import "spine/base/response.proto";
 import "spine/client/entities.proto";
-import "spine/client/actor_context.proto";
 
 // Topic identifier.
 message TopicId {
@@ -59,7 +59,8 @@ message Topic {
     TopicId id = 1 [(required) = true];
 
     // Defines the entity of interest, e.g. entity type URL and a set of subscription criteria.
-    Target target = 2 [(required) = true, (valid) = true,
+    Target target = 2 [(required) = true,
+                       (valid) = true,
                        (if_invalid).msg_format = "Invalid topic target"];
 
     // Field mask to be applied to the entity updates applicable to this topic.
@@ -68,8 +69,9 @@ message Topic {
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the topic was created.
-    ActorContext context = 4 [(required) = true, (valid) = true,
-                              (if_invalid).msg_format = "Invalid actor context"];
+    base.ActorContext context = 4 [(required) = true,
+                                   (valid) = true,
+                                   (if_invalid).msg_format = "Invalid actor context"];
 
     // Reserved for utility fields.
     reserved 5 to 10;

@@ -77,6 +77,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         commandBus.post(command, responseObserver);
 
         final TenantId tenantId = command.getContext()
+                                         .getActorContext()
                                          .getTenantId();
         final CommandId commandId = command.getContext()
                                            .getCommandId();
@@ -119,7 +120,9 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         // Check that the status has the correct code,
         // and the failure matches the thrown failure.
-        final TenantId tenantId = command.getContext().getTenantId();
+        final TenantId tenantId = command.getContext()
+                                         .getActorContext()
+                                         .getTenantId();
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.FAILURE, status.getCode());
@@ -173,6 +176,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
     private ProcessingStatus getProcessingStatus(CommandEnvelope commandEnvelope) {
         final TenantId tenantId = commandEnvelope.getCommandContext()
+                                                 .getActorContext()
                                                  .getTenantId();
         final TenantAwareFunction<CommandId, ProcessingStatus> func =
                 new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {

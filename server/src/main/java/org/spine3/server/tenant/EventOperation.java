@@ -45,6 +45,7 @@ public abstract class EventOperation extends TenantAwareOperation {
     protected EventOperation(Event event) {
         super(event.getContext()
                    .getCommandContext()
+                   .getActorContext()
                    .getTenantId());
         this.event = event;
     }

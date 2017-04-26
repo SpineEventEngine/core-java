@@ -26,6 +26,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.type.CommandClass;
+import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Commands.getId;
@@ -75,6 +76,13 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
      */
     public CommandId getCommandId() {
         return commandId;
+    }
+
+    /**
+     * Obtains the tenant ID of the command.
+     */
+    public TenantId getTenantId() {
+        return Commands.getTenantId(getCommand());
     }
 
     /**
