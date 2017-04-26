@@ -42,7 +42,12 @@ import "spine/client/actor_context.proto";
 
 // Topic identifier.
 message TopicId {
-    string uuid = 1;
+
+    // The value of the ID.
+    //
+    // Starts with `t-` prefix followed by a generated UUID value.
+    //
+    string value = 1;
 }
 
 // An object defining a unit of subscription.
