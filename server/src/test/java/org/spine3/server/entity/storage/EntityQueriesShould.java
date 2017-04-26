@@ -24,6 +24,7 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.FieldFilter;
 import org.spine3.base.Version;
@@ -36,7 +37,6 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.testdata.Sample;
-import org.spine3.validate.Validate;
 
 import java.util.Collection;
 
@@ -73,12 +73,13 @@ public class EntityQueriesShould {
         final EntityQuery query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
         assertEmpty(query.getParameters());
-        assertTrue(Validate.isDefault(query.getIdFilter()));
+        assertTrue(query.getIds().isEmpty());
     }
 
     @Test
     public void construct_non_empty_queries() {
-        final Any someId = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
+        final Message someGenericId = Sample.messageOfType(ProjectId.class);
+        final Any someId = AnyPacker.pack(someGenericId);
         final EntityId entityId = EntityId.newBuilder()
                                           .setId(someId)
                                           .build();
@@ -112,11 +113,13 @@ public class EntityQueriesShould {
         final EntityQuery query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
         assertSize(3, query.getParameters());
-        assertSize(2, query.getParameters()
-                           .asMap());
-        assertFalse(Validate.isDefault(query.getIdFilter()));
+        assertSize(2, query.getParameters().asMap());
 
-        assertEquals(idFilter, query.getIdFilter());
+        final Collection<Object> ids = query.getIds();
+        assertFalse(ids.isEmpty());
+        assertSize(1, ids);
+        final Object singleId = ids.iterator().next();
+        assertEquals(someGenericId, singleId);
 
         final Multimap<Column<?>, Object> params = query.getParameters();
         final Collection<Object> values = params.values();

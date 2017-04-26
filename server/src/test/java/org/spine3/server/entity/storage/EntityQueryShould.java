@@ -24,13 +24,14 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Any;
 import org.junit.Test;
-import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 
 import static org.mockito.Mockito.mock;
 import static org.spine3.test.Verify.assertContains;
@@ -49,26 +50,14 @@ public class EntityQueryShould {
 
     @Test
     public void support_equality() {
-        final EntityId defaultId = EntityId.getDefaultInstance();
-        final Any someIdWrapped = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
-        final EntityId someId = EntityId.newBuilder()
-                                        .setId(someIdWrapped)
-                                        .build();
-        final EntityId someIdCopy = EntityId.newBuilder(someId)
-                                            .build();
-        final Any otherIdWrapped = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
-        final EntityId otherId = EntityId.newBuilder()
-                                         .setId(otherIdWrapped)
-                                         .build();
-        final EntityIdFilter idFilterA = EntityIdFilter.newBuilder()
-                                                       .addIds(someId)
-                                                       .addIds(defaultId)
-                                                       .build();
-        final EntityIdFilter idFilterB = EntityIdFilter.getDefaultInstance();
-        final EntityIdFilter idFilterC = EntityIdFilter.newBuilder()
-                                                       .addIds(otherId)
-                                                       .addIds(someIdCopy)
-                                                       .build();
+        final Object defaultId = 0;
+        final ProjectId someId = Sample.messageOfType(ProjectId.class);
+        final ProjectId someIdCopy = ProjectId.newBuilder(someId)
+                                              .build();
+        final ProjectId otherId = Sample.messageOfType(ProjectId.class);
+        final Collection<Object> idsA = Arrays.asList(someId, defaultId);
+        final Collection<Object> idsB = Collections.emptyList();
+        final Collection<Object> idsC = Arrays.<Object>asList(otherId, someIdCopy);
         final Column<?> someColumn = mock(Column.class);
         final Column<?> otherColumn = mock(Column.class);
 
@@ -89,12 +78,12 @@ public class EntityQueryShould {
         final Multimap<Column<?>, Object> paramsCCopy = HashMultimap.create();
         paramsA.put(otherColumn, someValue);
 
-        final EntityQuery queryA = EntityQuery.of(idFilterA, paramsA);
-        final EntityQuery queryB = EntityQuery.of(idFilterB, paramsB);
-        final EntityQuery queryC = EntityQuery.of(idFilterC, paramsC);
-        final EntityQuery queryD = EntityQuery.of(idFilterA, paramsC);
-        final EntityQuery queryE = EntityQuery.of(idFilterB, paramsB);
-        final EntityQuery queryF = EntityQuery.of(idFilterC, paramsCCopy);
+        final EntityQuery queryA = EntityQuery.of(idsA, paramsA);
+        final EntityQuery queryB = EntityQuery.of(idsB, paramsB);
+        final EntityQuery queryC = EntityQuery.of(idsC, paramsC);
+        final EntityQuery queryD = EntityQuery.of(idsA, paramsC);
+        final EntityQuery queryE = EntityQuery.of(idsB, paramsB);
+        final EntityQuery queryF = EntityQuery.of(idsC, paramsCCopy);
 
         new EqualsTester()
                 .addEqualityGroup(queryA)
@@ -106,23 +95,20 @@ public class EntityQueryShould {
 
     @Test
     public void support_toString() {
-        final Any someIdWrapped = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
-        final EntityId someId = EntityId.newBuilder()
-                                        .setId(someIdWrapped)
-                                        .build();
-        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(someId)
-                                                      .build();
+        final Object someId = Sample.messageOfType(ProjectId.class);
+        final Collection<Object> ids = Collections.singleton(someId);
         final Column<?> someColumn = mock(Column.class);
         final Object someValue = "something";
 
         final Multimap<Column<?>, Object> params = HashMultimap.create();
         params.put(someColumn, someValue);
 
-        final EntityQuery query = EntityQuery.of(idFilter, params);
+        final EntityQuery query = EntityQuery.of(ids, params);
         final String repr = query.toString();
 
-        assertContains(query.getIdFilter().toString(), repr);
-        assertContains(query.getParameters().toString(), repr);
+        assertContains(query.getIds()
+                            .toString(), repr);
+        assertContains(query.getParameters()
+                            .toString(), repr);
     }
 }

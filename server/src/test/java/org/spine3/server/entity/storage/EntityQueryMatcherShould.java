@@ -24,15 +24,16 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
+import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.TaskId;
 import org.spine3.testdata.Sample;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Map;
 
 import static org.junit.Assert.assertFalse;
@@ -48,7 +49,7 @@ public class EntityQueryMatcherShould {
 
     @Test
     public void match_everything_except_null_to_empty_query() {
-        final EntityIdFilter idFilter = EntityIdFilter.getDefaultInstance();
+        final Collection<Object> idFilter = Collections.emptyList();
         final Multimap<Column<?>, Object> params = ImmutableMultimap.of();
         final EntityQuery query = EntityQuery.of(idFilter, params);
 
@@ -60,11 +61,9 @@ public class EntityQueryMatcherShould {
 
     @Test
     public void match_ids() {
-        final Any entityId = AnyPacker.pack(Sample.messageOfType(ProjectId.class));
-        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(EntityId.newBuilder()
-                                                                      .setId(entityId))
-                                                      .build();
+        final Message genericId = Sample.messageOfType(ProjectId.class);
+        final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
+        final Any entityId = AnyPacker.pack(genericId);
         final Multimap<Column<?>, Object> params = ImmutableMultimap.of();
         final EntityQuery query = EntityQuery.of(idFilter, params);
 
@@ -92,10 +91,10 @@ public class EntityQueryMatcherShould {
         when(target.getType()).thenReturn((Class) Boolean.class);
         final Object acceptedValue = true;
 
-        final EntityIdFilter idFilter = EntityIdFilter.getDefaultInstance();
+        final Collection<Object> ids = Collections.emptyList();
         final Multimap<Column<?>, Object> params =
                 ImmutableMultimap.<Column<?>, Object>of(target, acceptedValue);
-        final EntityQuery query = EntityQuery.of(idFilter, params);
+        final EntityQuery query = EntityQuery.of(ids, params);
 
         final Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
         final Any nonMatchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));

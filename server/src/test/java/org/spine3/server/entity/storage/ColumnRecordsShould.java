@@ -24,13 +24,13 @@ import com.google.common.base.Function;
 import com.google.common.collect.HashMultimap;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.client.EntityIdFilter;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.Tests;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,7 +69,7 @@ public class ColumnRecordsShould {
                             EntityRecordWithColumns.of(EntityRecord.getDefaultInstance()))
                 .setDefault(ColumnTypeRegistry.class, ColumnTypeRegistry.newBuilder().build())
                 .setDefault(EntityQuery.class,
-                            EntityQuery.of(EntityIdFilter.getDefaultInstance(),
+                            EntityQuery.of(Collections.emptyList(),
                                            HashMultimap.<Column<?>, Object>create()))
                 .testAllPublicStaticMethods(ColumnRecords.class);
     }

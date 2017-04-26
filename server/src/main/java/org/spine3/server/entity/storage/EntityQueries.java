@@ -27,12 +27,15 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotations.Internal;
 import org.spine3.base.FieldFilter;
+import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.ProtoToJavaMapper;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
+import java.util.LinkedList;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -62,6 +65,15 @@ public final class EntityQueries {
         checkNotNull(entityFilters);
         checkNotNull(entityClass);
 
+        final Multimap<Column<?>, Object> queryParams = toQueryParams(entityFilters, entityClass);
+        final Collection<Object> ids = toGenericIdValues(entityFilters);
+
+        final EntityQuery result = EntityQuery.of(ids, queryParams);
+        return result;
+    }
+
+    private static Multimap<Column<?>, Object> toQueryParams(EntityFilters entityFilters,
+                                                             Class<? extends Entity> entityClass) {
         final Multimap<Column<?>, Object> queryParams = HashMultimap.create();
         final Iterable<FieldFilter> fieldFilters = entityFilters.getColumnFilterList();
         for (FieldFilter filter : fieldFilters) {
@@ -72,8 +84,17 @@ public final class EntityQueries {
                                                                       typeTransformer);
             queryParams.putAll(column, filterValues);
         }
+        return queryParams;
+    }
+
+    private static Collection<Object> toGenericIdValues(EntityFilters entityFilters) {
         final EntityIdFilter idFilter = entityFilters.getIdFilter();
-        final EntityQuery query = EntityQuery.of(idFilter, queryParams);
-        return query;
+        final Collection<Object> ids = new LinkedList<>();
+        for (EntityId entityId : idFilter.getIdsList()) {
+            final Any wrappedMessageId = entityId.getId();
+            final Object genericId = Identifiers.idFromAny(wrappedMessageId);
+            ids.add(genericId);
+        }
+        return ids;
     }
 }

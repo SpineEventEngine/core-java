@@ -20,20 +20,17 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotations.Internal;
-import org.spine3.client.EntityId;
+import org.spine3.base.Identifiers;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Sets.newHashSet;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -45,23 +42,12 @@ import static com.google.common.collect.Sets.newHashSet;
 @Internal
 public final class EntityQueryMatcher implements Predicate<EntityRecordWithColumns> {
 
-    private static final Function<EntityId, Any> ENTITY_ID_UNWRAPPER =
-            new Function<EntityId, Any>() {
-                @Override
-                public Any apply(@Nullable EntityId input) {
-                    checkNotNull(input);
-                    return input.getId();
-                }
-            };
-
-    private final Collection<Any> acceptedIds;
+    private final Collection<Object> acceptedIds;
     private final Multimap<Column<?>, Object> queryParams;
 
     public EntityQueryMatcher(EntityQuery query) {
         checkNotNull(query);
-        final Collection<EntityId> entityIds = query.getIdFilter()
-                                                    .getIdsList();
-        this.acceptedIds = newHashSet(transform(entityIds, ENTITY_ID_UNWRAPPER));
+        this.acceptedIds = query.getIds();
         this.queryParams = query.getParameters();
     }
 
@@ -74,7 +60,8 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
         if (!acceptedIds.isEmpty()) {
             final Any entityId = input.getRecord()
                                       .getEntityId();
-            final boolean idMatches = acceptedIds.contains(entityId);
+            final Object genericId = Identifiers.idFromAny(entityId);
+            final boolean idMatches = acceptedIds.contains(genericId);
             if (!idMatches) {
                 return false;
             }

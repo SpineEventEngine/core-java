@@ -23,8 +23,10 @@ package org.spine3.server.entity.storage;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
-import org.spine3.client.EntityIdFilter;
+
+import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@link org.spine3.server.stand.StandStorage StandSotrage}). By default,
  * {@link org.spine3.server.storage.RecordStorage RecordStorage} supports the Entity queries.
  *
- * <p>If the {@linkplain EntityQuery#getIdFilter()} accepted IDs list} is empty, all the IDs are
+ * <p>If the {@linkplain EntityQuery#getIds() accepted IDs set} is empty, all the IDs are
  * considered to be queried.
  *
  * <p>Empty {@linkplain EntityQuery#getParameters() query parameters} are not considered when
@@ -52,7 +54,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>If the {@linkplain Column Entity Column} specified in the query is absent in a record,
  * the record is considered <b>not matching</b>.
  *
- * <p>If both the {@linkplain EntityQuery#getIdFilter()} accepted IDs list} and
+ * <p>If both the {@linkplain EntityQuery#getIds() accepted IDs set} and
  * {@linkplain EntityQuery#getParameters() query parameters} are empty, all the records are
  * considered matching.
  *
@@ -61,34 +63,35 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityQuery {
 
-    private final EntityIdFilter idFilter;
+    private final ImmutableSet<Object> ids;
     private final ImmutableMultimap<Column<?>, Object> parameters;
 
     /**
      * Creates new instance of {@code EntityQuery}.
      *
-     * @param idFilter   the {@link EntityIdFilter} to get the acceptable ID values from
+     * @param ids        accepted ID values
      * @param parameters the values of the {@link Column}s stored in a mapping of the
      *                   {@link Column}'s metadata to the (multiple) acceptable values; if there are
      *                   no values, all the values are matched upon such Column
      * @return new instance of {@code EntityQuery}
      */
-    static EntityQuery of(EntityIdFilter idFilter, Multimap<Column<?>, Object> parameters) {
-        checkNotNull(idFilter);
+    static EntityQuery of(Collection<?> ids, Multimap<Column<?>, Object> parameters) {
+        checkNotNull(ids);
         checkNotNull(parameters);
-        return new EntityQuery(idFilter, parameters);
+        return new EntityQuery(ids, parameters);
     }
 
-    private EntityQuery(EntityIdFilter idFilter, Multimap<Column<?>, Object> parameters) {
-        this.idFilter = idFilter;
+    private EntityQuery(Collection<?> ids, Multimap<Column<?>, Object> parameters) {
+        this.ids = ImmutableSet.copyOf(ids);
         this.parameters = ImmutableMultimap.copyOf(parameters);
     }
 
     /**
-     * @return the ID filter containing the accepted ID values
+     * @return a set of accepted ID values
      */
-    public EntityIdFilter getIdFilter() {
-        return idFilter;
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
+    public ImmutableSet<Object> getIds() {
+        return ids;
     }
 
     /**
@@ -108,19 +111,19 @@ public final class EntityQuery {
             return false;
         }
         EntityQuery that = (EntityQuery) o;
-        return Objects.equal(idFilter, that.idFilter) &&
+        return Objects.equal(ids, that.ids) &&
                 Objects.equal(getParameters(), that.getParameters());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(idFilter, getParameters());
+        return Objects.hashCode(ids, getParameters());
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                          .add("idFilter", idFilter)
+                          .add("idFilter", ids)
                           .add("parameters", parameters)
                           .toString();
     }

@@ -65,6 +65,7 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * @return the {@code Map} containing the ID -> record entries.
      * @throws IllegalStateException if the storage was closed before
      */
+    @Deprecated
     @CheckReturnValue
     Map<I, R> readAll();
 }

@@ -177,6 +177,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public Iterable<EntityRecord> readMultiple(Iterable<I> ids) {
         checkNotClosed();
@@ -192,6 +193,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param fieldMask the mask to apply
      * @return the items with the given IDs and with the given {@code FieldMask} applied
      */
+    @Deprecated
     public Iterable<EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(ids);
@@ -202,6 +204,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * {@inheritDoc}
      */
+    @Deprecated
     @Override
     public Map<I, EntityRecord> readAll() {
         checkNotClosed();
@@ -215,6 +218,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param fieldMask the {@code FieldMask} to apply
      * @return all items from this repository with the given {@code FieldMask} applied
      */
+    @Deprecated
     public Map<I, EntityRecord> readAll(FieldMask fieldMask) {
         checkNotClosed();
 
