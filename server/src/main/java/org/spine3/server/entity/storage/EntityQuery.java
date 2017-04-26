@@ -22,11 +22,11 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Multimap;
 
 import java.util.Collection;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -64,7 +64,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EntityQuery {
 
     private final ImmutableSet<Object> ids;
-    private final ImmutableMultimap<Column<?>, Object> parameters;
+    private final ImmutableMap<Column<?>, Object> parameters;
 
     /**
      * Creates new instance of {@code EntityQuery}.
@@ -75,15 +75,15 @@ public final class EntityQuery {
      *                   no values, all the values are matched upon such Column
      * @return new instance of {@code EntityQuery}
      */
-    static EntityQuery of(Collection<?> ids, Multimap<Column<?>, Object> parameters) {
+    static EntityQuery of(Collection<?> ids, Map<Column<?>, Object> parameters) {
         checkNotNull(ids);
         checkNotNull(parameters);
         return new EntityQuery(ids, parameters);
     }
 
-    private EntityQuery(Collection<?> ids, Multimap<Column<?>, Object> parameters) {
+    private EntityQuery(Collection<?> ids, Map<Column<?>, Object> parameters) {
         this.ids = ImmutableSet.copyOf(ids);
-        this.parameters = ImmutableMultimap.copyOf(parameters);
+        this.parameters = ImmutableMap.copyOf(parameters);
     }
 
     /**
@@ -95,10 +95,10 @@ public final class EntityQuery {
     }
 
     /**
-     * @return a {@linkplain Multimap map} of the {@linkplain Column Column metadata} to the
-     * accepted values of the column
+     * @return a {@link Map} of the {@linkplain Column Column metadata} to the column required value
      */
-    public Multimap<Column<?>, Object> getParameters() {
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
+    public Map<Column<?>, Object> getParameters() {
         return parameters;
     }
 

@@ -21,13 +21,13 @@ package org.spine3.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -36,7 +36,7 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -189,7 +189,7 @@ public class ActorRequestFactory {
          */
         public Query byIdsAndColumnsWithMask(Class<? extends Message> entityClass,
                                              Set<? extends Message> ids,
-                                             Collection<FieldFilter> columnFilters,
+                                             Map<String, Any> columnFilters,
                                              String... maskPaths) {
             checkNotNull(entityClass);
             checkNotNull(ids);
@@ -222,7 +222,7 @@ public class ActorRequestFactory {
          */
         public Query byIdsAndColumns(Class<? extends Message> entityClass,
                                      Set<? extends Message> ids,
-                                     Collection<FieldFilter> columnFilters) {
+                                     Map<String, Any> columnFilters) {
             checkNotNull(entityClass);
             checkNotNull(ids);
             checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
@@ -255,7 +255,7 @@ public class ActorRequestFactory {
          * @return an instance of {@code Query} formed according to the passed parameters
          */
         public Query byColumnsWithMask(Class<? extends Message> entityClass,
-                                       Collection<FieldFilter> columnFilters,
+                                       Map<String, Any> columnFilters,
                                        String... maskPaths) {
             checkNotNull(entityClass);
             checkNotNull(columnFilters);
@@ -280,7 +280,7 @@ public class ActorRequestFactory {
          * @return an instance of {@code Query} formed according to the passed parameters
          */
         public Query byColumns(Class<? extends Message> entityClass,
-                               Collection<FieldFilter> columnFilters) {
+                               Map<String, Any> columnFilters) {
             checkNotNull(entityClass);
             checkNotNull(columnFilters);
             checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
@@ -389,7 +389,7 @@ public class ActorRequestFactory {
 
         private Query composeQuery(Class<? extends Message> entityClass,
                                    @Nullable Set<? extends Message> ids,
-                                   @Nullable Collection<FieldFilter> columnFilters,
+                                   @Nullable Map<String, Any> columnFilters,
                                    @Nullable FieldMask fieldMask) {
             checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 

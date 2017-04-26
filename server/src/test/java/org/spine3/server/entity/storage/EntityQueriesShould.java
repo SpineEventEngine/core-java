@@ -20,13 +20,11 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.base.FieldFilter;
 import org.spine3.base.Version;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -39,6 +37,7 @@ import org.spine3.test.storage.ProjectId;
 import org.spine3.testdata.Sample;
 
 import java.util.Collection;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,34 +85,23 @@ public class EntityQueriesShould {
         final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
                                                       .addIds(entityId)
                                                       .build();
-        final Version versionValue1 = Version.newBuilder()
+        final Version versionValue = Version.newBuilder()
                                              .setNumber(1)
                                              .build();
-        final Version versionValue2 = Version.newBuilder()
-                                             .setNumber(2)
-                                             .build();
-        final FieldFilter versionFilter = FieldFilter.newBuilder()
-                                                     .setFieldPath("version")
-                                                     .addValue(AnyPacker.pack(versionValue1))
-                                                     .addValue(AnyPacker.pack(versionValue2))
-                                                     .build();
         final BoolValue archivedValue = BoolValue.newBuilder()
                                                  .setValue(true)
                                                  .build();
-        final FieldFilter archivedFilter = FieldFilter.newBuilder()
-                                                      .setFieldPath("archived")
-                                                      .addValue(AnyPacker.pack(archivedValue))
-                                                      .build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
-                                                   .addColumnFilter(versionFilter)
-                                                   .addColumnFilter(archivedFilter)
+                                                   .putColumnFilter("version",
+                                                                    AnyPacker.pack(versionValue))
+                                                   .putColumnFilter("archived",
+                                                                    AnyPacker.pack(archivedValue))
                                                    .build();
         final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
         final EntityQuery query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
-        assertSize(3, query.getParameters());
-        assertSize(2, query.getParameters().asMap());
+        assertSize(2, query.getParameters());
 
         final Collection<Object> ids = query.getIds();
         assertFalse(ids.isEmpty());
@@ -121,10 +109,9 @@ public class EntityQueriesShould {
         final Object singleId = ids.iterator().next();
         assertEquals(someGenericId, singleId);
 
-        final Multimap<Column<?>, Object> params = query.getParameters();
+        final Map<Column<?>, Object> params = query.getParameters();
         final Collection<Object> values = params.values();
-        assertContains(versionValue1, values);
-        assertContains(versionValue2, values);
+        assertContains(versionValue, values);
         assertContains(archivedValue.getValue(), values);
     }
 }

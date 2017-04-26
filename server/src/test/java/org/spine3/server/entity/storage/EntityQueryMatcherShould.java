@@ -21,8 +21,6 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.ImmutableMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
@@ -50,7 +48,7 @@ public class EntityQueryMatcherShould {
     @Test
     public void match_everything_except_null_to_empty_query() {
         final Collection<Object> idFilter = Collections.emptyList();
-        final Multimap<Column<?>, Object> params = ImmutableMultimap.of();
+        final Map<Column<?>, Object> params = ImmutableMap.of();
         final EntityQuery query = EntityQuery.of(idFilter, params);
 
         final EntityQueryMatcher matcher = new EntityQueryMatcher(query);
@@ -64,7 +62,7 @@ public class EntityQueryMatcherShould {
         final Message genericId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
         final Any entityId = AnyPacker.pack(genericId);
-        final Multimap<Column<?>, Object> params = ImmutableMultimap.of();
+        final Map<Column<?>, Object> params = ImmutableMap.of();
         final EntityQuery query = EntityQuery.of(idFilter, params);
 
         final EntityQueryMatcher matcher = new EntityQueryMatcher(query);
@@ -92,8 +90,8 @@ public class EntityQueryMatcherShould {
         final Object acceptedValue = true;
 
         final Collection<Object> ids = Collections.emptyList();
-        final Multimap<Column<?>, Object> params =
-                ImmutableMultimap.<Column<?>, Object>of(target, acceptedValue);
+        final Map<Column<?>, Object> params =
+                ImmutableMap.<Column<?>, Object>of(target, acceptedValue);
         final EntityQuery query = EntityQuery.of(ids, params);
 
         final Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));

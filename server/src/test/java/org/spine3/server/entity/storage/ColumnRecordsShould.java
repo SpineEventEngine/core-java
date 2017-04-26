@@ -21,7 +21,6 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.base.Function;
-import com.google.common.collect.HashMultimap;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.server.entity.EntityRecord;
@@ -70,7 +69,7 @@ public class ColumnRecordsShould {
                 .setDefault(ColumnTypeRegistry.class, ColumnTypeRegistry.newBuilder().build())
                 .setDefault(EntityQuery.class,
                             EntityQuery.of(Collections.emptyList(),
-                                           HashMultimap.<Column<?>, Object>create()))
+                                           Collections.<Column<?>, Object>emptyMap()))
                 .testAllPublicStaticMethods(ColumnRecords.class);
     }
 

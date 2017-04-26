@@ -23,12 +23,12 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
-import org.spine3.base.FieldFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -75,7 +75,7 @@ public final class Targets {
      */
     public static Target someOf(Class<? extends Message> entityClass,
                                 Set<? extends Message> ids,
-                                Iterable<FieldFilter> columnFilters) {
+                                Map<String, Any> columnFilters) {
         checkNotNull(entityClass);
         checkNotNull(ids);
         checkNotNull(columnFilters);
@@ -94,7 +94,7 @@ public final class Targets {
      * @return the instance of {@code Target} assembled according to the parameters.
      */
     public static Target someOf(Class<? extends Message> entityClass,
-                                Iterable<FieldFilter> columnFilters) {
+                                Map<String, Any> columnFilters) {
         checkNotNull(entityClass);
         checkNotNull(columnFilters);
 
@@ -117,11 +117,11 @@ public final class Targets {
 
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
-                                @Nullable Iterable<FieldFilter> columnFilters) {
+                                @Nullable Map<String, Any> columnFilters) {
         final boolean includeAll = (ids == null && columnFilters == null);
 
         final Set<? extends Message> entityIds = nullToEmpty(ids);
-        final Set<FieldFilter> entityColumnFilters = nullToEmpty(columnFilters);
+        final Map<String, Any> entityColumnValues = nullToEmpty(columnFilters);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 
@@ -137,7 +137,7 @@ public final class Targets {
         final EntityIdFilter idFilter = idFilterBuilder.build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
-                                                   .addAllColumnFilter(entityColumnFilters)
+                                                   .putAllColumnFilter(entityColumnValues)
                                                    .build();
         final String typeName = TypeName.of(entityClass)
                                         .value();
@@ -160,4 +160,11 @@ public final class Targets {
         }
     }
 
+    private static <K, V> Map<K, V> nullToEmpty(@Nullable Map<K, V> input) {
+        if (input == null) {
+            return Collections.emptyMap();
+        } else {
+            return input;
+        }
+    }
 }

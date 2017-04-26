@@ -378,13 +378,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Version versionValue = Version.newBuilder()
                                             .setNumber(2) // Value of the counter after one columns
                                             .build();     // scan (incremented 2 times internally)
-        final FieldFilter counterFilter = FieldFilter.newBuilder()
-                                                     .setFieldPath("counterVersion")
-                                                     .addValue(AnyPacker.pack(versionValue))
-                                                     .build();
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .addColumnFilter(injectableStateVersion)
-                                                   .addColumnFilter(counterFilter)
+                                                   .putColumnFilter("projectStatusValue",
+                                                                    AnyPacker.pack(wrappedValue))
+                                                   .putColumnFilter("counterVersion",
+                                                                    AnyPacker.pack(versionValue))
                                                    .build();
         final EntityQuery query = EntityQueries.from(filters, TestCounterEntity.class);
         final I idMatching = newId();

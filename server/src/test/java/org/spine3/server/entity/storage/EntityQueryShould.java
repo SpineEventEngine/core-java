@@ -20,8 +20,6 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
@@ -32,6 +30,8 @@ import org.spine3.testdata.Sample;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 import static org.mockito.Mockito.mock;
 import static org.spine3.test.Verify.assertContains;
@@ -64,18 +64,17 @@ public class EntityQueryShould {
         final Object someValue = "anything";
         final Object otherValue = 5;
 
-        final Multimap<Column<?>, Object> paramsA = HashMultimap.create();
+        final Map<Column<?>, Object> paramsA = new HashMap<>(2);
         paramsA.put(someColumn, someValue);
         paramsA.put(otherColumn, otherValue);
 
-        final Multimap<Column<?>, Object> paramsB = HashMultimap.create();
-        paramsB.put(someColumn, otherValue);
+        final Map<Column<?>, Object> paramsB = new HashMap<>(1);
         paramsB.put(someColumn, otherValue);
 
-        final Multimap<Column<?>, Object> paramsC = HashMultimap.create();
+        final Map<Column<?>, Object> paramsC = new HashMap<>(1);
         paramsA.put(otherColumn, someValue);
 
-        final Multimap<Column<?>, Object> paramsCCopy = HashMultimap.create();
+        final Map<Column<?>, Object> paramsCCopy = new HashMap<>(1);
         paramsA.put(otherColumn, someValue);
 
         final EntityQuery queryA = EntityQuery.of(idsA, paramsA);
@@ -100,7 +99,7 @@ public class EntityQueryShould {
         final Column<?> someColumn = mock(Column.class);
         final Object someValue = "something";
 
-        final Multimap<Column<?>, Object> params = HashMultimap.create();
+        final Map<Column<?>, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
         final EntityQuery query = EntityQuery.of(ids, params);

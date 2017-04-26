@@ -20,24 +20,21 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.HashMultimap;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotations.Internal;
-import org.spine3.base.FieldFilter;
 import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.ProtoToJavaMapper;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.ProtoToJavaMapper.map;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -65,24 +62,21 @@ public final class EntityQueries {
         checkNotNull(entityFilters);
         checkNotNull(entityClass);
 
-        final Multimap<Column<?>, Object> queryParams = toQueryParams(entityFilters, entityClass);
+        final Map<Column<?>, Object> queryParams = toQueryParams(entityFilters, entityClass);
         final Collection<Object> ids = toGenericIdValues(entityFilters);
 
         final EntityQuery result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
-    private static Multimap<Column<?>, Object> toQueryParams(EntityFilters entityFilters,
+    private static Map<Column<?>, Object> toQueryParams(EntityFilters entityFilters,
                                                              Class<? extends Entity> entityClass) {
-        final Multimap<Column<?>, Object> queryParams = HashMultimap.create();
-        final Iterable<FieldFilter> fieldFilters = entityFilters.getColumnFilterList();
-        for (FieldFilter filter : fieldFilters) {
-            final String fieldName = filter.getFieldPath();
-            final Column<?> column = Columns.metadata(entityClass, fieldName);
-            final Function<Any, ?> typeTransformer = ProtoToJavaMapper.function(column.getType());
-            final Collection<?> filterValues = Collections2.transform(filter.getValueList(),
-                                                                      typeTransformer);
-            queryParams.putAll(column, filterValues);
+        final Map<Column<?>, Object> queryParams = new HashMap<>(entityFilters.getColumnFilterCount());
+        final Map<String, Any> columnValues = entityFilters.getColumnFilterMap();
+        for (Map.Entry<String, Any> filter : columnValues.entrySet()) {
+            final Column<?> column = Columns.metadata(entityClass, filter.getKey());
+            final Object filterValues = map(filter.getValue(), column.getType());
+            queryParams.put(column, filterValues);
         }
         return queryParams;
     }

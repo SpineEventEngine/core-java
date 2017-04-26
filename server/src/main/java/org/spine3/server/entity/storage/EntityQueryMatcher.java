@@ -21,7 +21,6 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Identifiers;
@@ -29,6 +28,7 @@ import org.spine3.base.Identifiers;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EntityQueryMatcher implements Predicate<EntityRecordWithColumns> {
 
     private final Collection<Object> acceptedIds;
-    private final Multimap<Column<?>, Object> queryParams;
+    private final Map<Column<?>, Object> queryParams;
 
     public EntityQueryMatcher(EntityQuery query) {
         checkNotNull(query);
@@ -68,24 +68,19 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
         }
 
         final Map<String, Column.MemoizedValue<?>> entityColumns = input.getColumnValues();
-        final Map<Column<?>, Collection<Object>> paramsMap = queryParams.asMap();
-
-        if (!paramsMap.isEmpty()) {
-            for (Map.Entry<Column<?>, Collection<Object>> param : paramsMap.entrySet()) {
+        if (!queryParams.isEmpty()) {
+            for (Map.Entry<Column<?>, Object> param : queryParams.entrySet()) {
                 final Column<?> column = param.getKey();
                 final String columnName = column.getName();
 
-                final Collection<Object> possibleValues = param.getValue();
-                if (possibleValues.isEmpty()) {
-                    continue;
-                }
+                final Object requiredValue = param.getValue();
                 final Column.MemoizedValue<?> actualValueWithMetadata =
                         entityColumns.get(columnName);
                 if (actualValueWithMetadata == null) {
                     return false;
                 }
                 final Object actualValue = actualValueWithMetadata.getValue();
-                final boolean matches = possibleValues.contains(actualValue);
+                final boolean matches = Objects.equals(requiredValue, actualValue);
                 if (!matches) {
                     return false;
                 }

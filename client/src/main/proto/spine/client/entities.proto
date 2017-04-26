@@ -71,7 +71,7 @@ message EntityFilters {
     EntityIdFilter id_filter = 1;
 
     // Match the entities by the value of the Entity Columns.
-    repeated spine.base.FieldFilter column_filter = 2;
+    map<string, google.protobuf.Any> column_filter = 2;
 
     // Reserved for more filter types
     reserved 3 to 40;

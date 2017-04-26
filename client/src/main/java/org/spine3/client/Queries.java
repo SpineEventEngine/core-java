@@ -19,14 +19,15 @@
  */
 package org.spine3.client;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
-import org.spine3.base.FieldFilter;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -65,7 +66,7 @@ public final class Queries {
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
-                                         @Nullable Iterable<FieldFilter> columnFilters,
+                                         @Nullable Map<String, Any> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
@@ -80,7 +81,7 @@ public final class Queries {
 
     private static Target forParams(Class<? extends Message> entityClass,
                                     @Nullable Set<? extends Message> ids,
-                                    @Nullable Iterable<FieldFilter> columnFilters) {
+                                    @Nullable Map<String, Any> columnFilters) {
         final Target target;
         if (ids == null && columnFilters == null) {
             target = allOf(entityClass);
