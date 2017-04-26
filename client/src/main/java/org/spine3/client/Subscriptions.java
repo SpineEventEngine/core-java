@@ -48,23 +48,22 @@ public final class Subscriptions {
      *
      * @return new subscription identifier.
      */
-    public static SubscriptionId newId() {
+    public static SubscriptionId generateId() {
         final String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifiers.newUuid());
         return newId(formattedId);
     }
 
     /**
-     * Wraps a given {@code String} as a subscription identifier
+     * Wraps a given {@code String} as a subscription identifier.
      *
-     * <p>Not recommended for a production usage. Use {@linkplain #newId() automatic generation}
+     * <p>Should not be used in production. Use {@linkplain #generateId() automatic generation}
      * instead.
      *
      * @return new subscription identifier.
      */
-    @Internal
     public static SubscriptionId newId(String value) {
         return SubscriptionId.newBuilder()
-                             .setUuid(value)
+                             .setValue(value)
                              .build();
     }
 }

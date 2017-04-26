@@ -91,7 +91,12 @@ message SubscriptionUpdate {
 
 // Subscription identifier.
 message SubscriptionId {
-    string uuid = 1;
+
+    // The value of the subscription ID.
+    //
+    // Starts with the `s-` prefix followed with a generated UUID value.
+    //
+    string value = 1;
 }
 
 // The subscription object.
