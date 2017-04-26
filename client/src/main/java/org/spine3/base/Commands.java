@@ -168,14 +168,12 @@ public final class Commands {
      */
     public static CommandContext newContextBasedOn(CommandContext value) {
         checkNotNull(value);
-        final ActorContext.Builder withCurrentTime =
-                value.getActorContext()
-                     .toBuilder()
-                     .setTimestamp(getCurrentTime());
-        final CommandContext.Builder result =
-                value.toBuilder()
-                     .setCommandId(generateId())
-                     .setActorContext(withCurrentTime);
+        final ActorContext.Builder withCurrentTime = value.getActorContext()
+                                                          .toBuilder()
+                                                          .setTimestamp(getCurrentTime());
+        final CommandContext.Builder result = value.toBuilder()
+                                                   .setCommandId(generateId())
+                                                   .setActorContext(withCurrentTime);
         return result.build();
     }
 

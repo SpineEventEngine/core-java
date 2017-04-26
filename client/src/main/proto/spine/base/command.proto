@@ -70,7 +70,7 @@ message CommandContext {
     // The ID of the command.
     CommandId command_id = 1 [(required) = true];
 
-    // Information about the user who created the command.
+    // Information about the environment of the user who created the command.
     ActorContext actor_context = 2 [(required) = true];
 
     // A command may be scheduled. This type defines scheduling options.
