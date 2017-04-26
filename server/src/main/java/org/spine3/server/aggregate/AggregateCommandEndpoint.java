@@ -57,9 +57,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
     private AggregateCommandEndpoint(AggregateRepository<I, A> repository,
                                      CommandEnvelope command) {
-        super(command.getCommandContext()
-                     .getActorContext()
-                     .getTenantId());
+        super(command.getTenantId());
         this.repository = repository;
         this.command = command;
     }

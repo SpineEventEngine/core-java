@@ -214,13 +214,24 @@ public final class Commands {
     }
 
     /**
-     * Extracts a command ID from the passed {@code Command} instance.
+     * Obtains a command ID from the passed {@code Command} instance.
      */
     public static CommandId getId(Command command) {
         checkNotNull(command);
         final CommandId id = command.getContext()
                                     .getCommandId();
         return id;
+    }
+
+    /**
+     * Obtains a tenant ID from the command.
+     */
+    public static TenantId getTenantId(Command command) {
+        checkNotNull(command);
+        final TenantId result = command.getContext()
+                                       .getActorContext()
+                                       .getTenantId();
+        return result;
     }
 
     /**
