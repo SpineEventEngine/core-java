@@ -29,11 +29,11 @@ script: ./gradlew check --stacktrace
 after_script:
   # Installation of https://github.com/travis-ci/dpl.
   - gem instal dpl
-  # Reports creation.
+  # Prepare the test and coverage reports for the upload.
   - mkdir reports
   - zip -r reports/test-reports.zip **/build/reports
-  - zip reports/jacoco-reports.zip **/build/jacoco
-  # Reports deployment to GCS.
+  - zip -r reports/jacoco-reports.zip **/build/jacoco
+  #Upload the prepared reports to GCS.
   - dpl --provider=gcs
         --access-key-id=GOOGX66ER6DXLZH7IKQF
         --secret-access-key=${GCS_SECRET}
