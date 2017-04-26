@@ -70,7 +70,8 @@ public class StandFunnel {
      */
     public void post(final VersionableEntity entity, CommandContext commandContext) {
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
-                                                                    commandContext.getTenantId());
+                                                                    commandContext.getActorContext()
+                                                                                  .getTenantId());
         delivery.deliver(envelope);
     }
 

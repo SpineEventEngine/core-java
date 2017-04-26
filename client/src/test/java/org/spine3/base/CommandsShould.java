@@ -109,9 +109,11 @@ public class CommandsShould {
                                                             zoneOffset,
                                                             targetVersion);
 
-        assertEquals(tenantId, commandContext.getTenantId());
-        assertEquals(userId, commandContext.getActor());
-        assertEquals(zoneOffset, commandContext.getZoneOffset());
+        final ActorContext actorContext = commandContext.getActorContext();
+
+        assertEquals(tenantId, actorContext.getTenantId());
+        assertEquals(userId, actorContext.getActor());
+        assertEquals(zoneOffset, actorContext.getZoneOffset());
         assertEquals(targetVersion, commandContext.getTargetVersion());
     }
 
@@ -125,13 +127,20 @@ public class CommandsShould {
 
     @Test
     public void check_if_contexts_have_same_actor_and_tenantId() {
-        final CommandContext commandContext = CommandContext.newBuilder()
-                                                            .setActor(newUserUuid())
-                                                            .setTenantId(
-                                                                    TenantId.getDefaultInstance())
-                                                            .build();
+        final ActorContext.Builder actorContext =
+                ActorContext.newBuilder()
+                            .setActor(newUserUuid())
+                            .setTenantId(newTenantUuid());
+        final CommandContext c1 =
+                CommandContext.newBuilder()
+                              .setActorContext(actorContext)
+                              .build();
+        final CommandContext c2 =
+                CommandContext.newBuilder()
+                              .setActorContext(actorContext)
+                              .build();
 
-        assertTrue(sameActorAndTenant(commandContext, commandContext));
+        assertTrue(sameActorAndTenant(c1, c2));
     }
 
     @Test

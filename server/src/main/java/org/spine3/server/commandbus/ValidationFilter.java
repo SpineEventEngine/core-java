@@ -61,6 +61,7 @@ class ValidationFilter implements CommandBusFilter {
     private boolean isTenantIdValid(CommandEnvelope envelope,
                                     StreamObserver<Response> responseObserver) {
         final TenantId tenantId = envelope.getCommandContext()
+                                          .getActorContext()
                                           .getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
         final Command command = envelope.getCommand();

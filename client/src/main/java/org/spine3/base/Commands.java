@@ -143,15 +143,17 @@ public final class Commands {
     private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
                                                             UserId userId,
                                                             ZoneOffset zoneOffset) {
-        final CommandId commandId = generateId();
-        final CommandContext.Builder result = newBuilder()
-                .setActor(userId)
-                .setTimestamp(getCurrentTime())
-                .setCommandId(commandId)
-                .setZoneOffset(zoneOffset);
+        final ActorContext.Builder actorContext = ActorContext.newBuilder()
+                                                              .setActor(userId)
+                                                              .setTimestamp(getCurrentTime())
+                                                              .setZoneOffset(zoneOffset);
         if (tenantId != null) {
-            result.setTenantId(tenantId);
+            actorContext.setTenantId(tenantId);
         }
+
+        final CommandId commandId = generateId();
+        final CommandContext.Builder result = newBuilder().setCommandId(commandId)
+                                                          .setActorContext(actorContext);
         return result;
     }
 
@@ -161,14 +163,19 @@ public final class Commands {
      * <p>The returned instance gets new generated {@code CommandId} and {@code timestamp}
      * set to the time of the call.
      *
-     * @param commandContext the instance from which to copy values
+     * @param value the instance from which to copy values
      * @return new {@code CommandContext}
      */
-    public static CommandContext newContextBasedOn(CommandContext commandContext) {
-        checkNotNull(commandContext);
-        final CommandContext.Builder result = commandContext.toBuilder()
-                                                            .setCommandId(generateId())
-                                                            .setTimestamp(getCurrentTime());
+    public static CommandContext newContextBasedOn(CommandContext value) {
+        checkNotNull(value);
+        final ActorContext.Builder withCurrentTime =
+                value.getActorContext()
+                     .toBuilder()
+                     .setTimestamp(getCurrentTime());
+        final CommandContext.Builder result =
+                value.toBuilder()
+                     .setCommandId(generateId())
+                     .setActorContext(withCurrentTime);
         return result.build();
     }
 
@@ -250,6 +257,7 @@ public final class Commands {
     private static Timestamp getTimestamp(Command request) {
         checkNotNull(request);
         final Timestamp result = request.getContext()
+                                        .getActorContext()
                                         .getTimestamp();
         return result;
     }
@@ -317,10 +325,12 @@ public final class Commands {
     public static boolean sameActorAndTenant(CommandContext c1, CommandContext c2) {
         checkNotNull(c1);
         checkNotNull(c2);
-        return c1.getActor()
-                 .equals(c2.getActor()) &&
-               c1.getTenantId()
-                 .equals(c2.getTenantId());
+        final ActorContext a1 = c1.getActorContext();
+        final ActorContext a2 = c2.getActorContext();
+        return a1.getActor()
+                 .equals(a2.getActor()) &&
+               a1.getTenantId()
+                 .equals(a2.getTenantId());
     }
 
     /**

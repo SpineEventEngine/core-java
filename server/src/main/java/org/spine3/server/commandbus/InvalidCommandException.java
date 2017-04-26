@@ -114,6 +114,7 @@ public class InvalidCommandException extends CommandException {
                 typeName,
                 cmd.getCommandId(),
                 command.getContext()
+                       .getActorContext()
                        .getTenantId());
         final Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
         return new InvalidCommandException(errMsg, command, error);

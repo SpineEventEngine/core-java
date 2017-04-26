@@ -110,7 +110,8 @@ public final class Events {
     public static UserId getActor(EventContext context) {
         checkNotNull(context);
         final CommandContext commandContext = checkNotNull(context).getCommandContext();
-        return commandContext.getActor();
+        return commandContext.getActorContext()
+                             .getActor();
     }
 
     /**

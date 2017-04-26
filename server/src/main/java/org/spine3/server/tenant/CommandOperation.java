@@ -45,6 +45,7 @@ public abstract class CommandOperation extends TenantAwareOperation {
      */
     protected CommandOperation(Command command) {
         super(command.getContext()
+                     .getActorContext()
                      .getTenantId());
         this.command = command;
     }

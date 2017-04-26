@@ -22,6 +22,7 @@ package org.spine3.testdata;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import org.spine3.base.ActorContext;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandContext.Schedule;
 import org.spine3.base.CommandId;
@@ -61,12 +62,14 @@ public class TestCommandContextFactory {
 
         final TenantId.Builder generatedTenantId = TenantId.newBuilder()
                                                            .setValue(newUuid());
+        final ActorContext.Builder actorContext = ActorContext.newBuilder()
+                                                              .setActor(userId)
+                                                              .setTimestamp(when)
+                                                              .setZoneOffset(UTC)
+                                                              .setTenantId(generatedTenantId);
         final CommandContext.Builder builder = CommandContext.newBuilder()
                                                              .setCommandId(commandId)
-                                                             .setActor(userId)
-                                                             .setTimestamp(when)
-                                                             .setZoneOffset(UTC)
-                                                             .setTenantId(generatedTenantId);
+                                                             .setActorContext(actorContext);
         return builder.build();
     }
 
