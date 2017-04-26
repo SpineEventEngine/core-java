@@ -45,7 +45,7 @@ message TopicId {
 
     // The value of the ID.
     //
-    // Starts with `t-` prefix followed by a generated UUID value.
+    // Starts with the `t-` prefix followed by a generated UUID value.
     //
     string value = 1;
 }
@@ -53,6 +53,7 @@ message TopicId {
 // An object defining a unit of subscription.
 //
 // Defines the target (entities and criteria) of subscription.
+//
 message Topic {
 
     TopicId id = 1 [(required) = true];
@@ -99,7 +100,7 @@ message SubscriptionId {
 
     // The value of the subscription ID.
     //
-    // Starts with the `s-` prefix followed with a generated UUID value.
+    // Starts with the `s-` prefix followed by a generated UUID value.
     //
     string value = 1;
 }
@@ -114,6 +115,7 @@ message Subscription {
     // Unique identifier of the subscription.
     //
     // Must be unique in scope of a bounded context.
+    //
     SubscriptionId id = 1 [(required) = true];
 
     // Represents the original topic for this subscription.

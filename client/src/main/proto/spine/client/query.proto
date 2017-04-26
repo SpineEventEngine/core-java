@@ -44,7 +44,7 @@ message QueryId {
 
     // The value of the ID.
     //
-    // The value starts from the `q-` prefix, then follows a generated UUID value.
+    // Starts with the `q-` prefix followed by a generated UUID value.
     //
     string value = 1;
 }
