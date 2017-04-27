@@ -75,7 +75,7 @@ public final class Field {
 
         final Method getter;
         try {
-            getter = Classes.getGetterForField(messageClass, name);
+            getter = getGetterForField(messageClass, name);
         } catch (NoSuchMethodException ignored) {
             return Optional.absent();
         }
@@ -151,6 +151,28 @@ public final class Field {
                 throw newIllegalArgumentException("Unknown field type discovered: %s",
                                                    field.getFullName());
         }
+    }
+
+    /**
+     * Finds a getter method in given class or its superclasses.
+     *
+     * <p>The method must match {@code getFieldName} notation, have no argument to be found.
+     *
+     * @param cls       class containing the getter method
+     * @param fieldName field to find a getter for
+     * @return {@link Method} instance reflecting the getter method
+     * @throws RuntimeException upon reflective failure
+     */
+    private static Method getGetterForField(Class<?> cls, String fieldName)
+            throws NoSuchMethodException {
+        checkNotNull(cls);
+        checkNotNull(fieldName);
+
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        final String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                        .toUpperCase() + fieldName.substring(1);
+        final Method fieldGetter = cls.getMethod(fieldGetterName);
+        return fieldGetter;
     }
 
     /**

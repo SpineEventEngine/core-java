@@ -159,7 +159,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         checkNotNull(cls);
 
         final ImmutableSet<FailureClass> result =
-                FailureClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
+                FailureClass.setOf(HandlerMethod.getHandledMessageClasses(cls, predicate()));
         return result;
     }
 

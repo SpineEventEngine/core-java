@@ -39,10 +39,10 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
+import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * Abstract base class for repositories.

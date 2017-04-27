@@ -30,10 +30,10 @@ import java.util.Map;
  * @author Alexander Yevsyukov
  */
 public abstract class CommandAttribute<T>
-                extends Attribute<T, CommandContext, CommandContext.Builder>  {
+                extends Attribute<T, CommandContext, CommandContext.Builder> {
 
-    protected CommandAttribute(Type type, String name) {
-        super(type, name);
+    public CommandAttribute(String name) {
+        super(name);
     }
 
     @Override

@@ -21,10 +21,12 @@
 package org.spine3.base;
 
 import com.google.protobuf.Empty;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.time.Time;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -35,20 +37,32 @@ public class CommandAttributeShould {
     private final TestActorRequestFactory factory =
             TestActorRequestFactory.newInstance(CommandAttributeShould.class);
 
-    private final CommandAttribute<Boolean> boolAttr = new CommandAttribute<Boolean>(
-            Attribute.Type.BOOLEAN, "flag") {
-    };
+    private CommandContext.Builder contextBuilder;
+
+    @Before
+    public void setUp() {
+        Command command = factory.createCommand(Empty.getDefaultInstance(),
+                                                Time.getCurrentTime());
+        contextBuilder = command.getContext().toBuilder();
+    }
 
     @Test
     public void set_and_get_bool_attribute() {
-        final Command command = factory.createCommand(Empty.getDefaultInstance(),
-                                                      Time.getCurrentTime());
-        final CommandContext.Builder builder = command.getContext()
-                                                      .toBuilder();
-        boolAttr.set(builder, true);
+        final CommandAttribute<Boolean> boolAttr = new CommandAttribute<Boolean>("flag") {};
+        boolAttr.set(contextBuilder, true);
 
-        assertTrue(boolAttr.get(builder.build())
+        assertTrue(boolAttr.get(contextBuilder.build())
                            .get());
     }
 
+    @Test
+    public void set_and_get_string_attribute() {
+        final CommandAttribute<String> strAttr = new CommandAttribute<String>("str") {};
+
+        final String expected = getClass().getName();
+        strAttr.set(contextBuilder, expected);
+
+        assertEquals(expected, strAttr.get(contextBuilder.build())
+                                      .get());
+    }
 }

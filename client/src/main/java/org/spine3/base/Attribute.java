@@ -25,11 +25,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Wrapper;
+import org.spine3.util.Reflection;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An attribute stored in a protobuf {@code map<string, Any>}.
@@ -45,11 +47,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
     private final Type type;
     private final String name;
 
-    protected Attribute(Type type, String name) {
-        checkNotNull(type);
+    protected Attribute(String name) {
         checkNotNull(name);
         checkArgument(name.length() > 0, "Attribute name cannot be empty");
-        this.type = type;
+        final Class<Object> cls = Reflection.getGenericParameterType(getClass(), 0);
+        this.type = Type.getType(cls);
         this.name = name;
     }
 
@@ -97,12 +99,17 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
     }
 
     @SuppressWarnings("unchecked") // Conversions are safe as we unpack specific types.
-    protected enum Type {
+    private enum Type {
         BOOLEAN {
             @Override
             <T> Any pack(T value) {
                 return Wrapper.forBoolean()
                               .pack((Boolean) value);
+            }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return Boolean.class.equals(valueClass);
             }
 
             @Override
@@ -117,6 +124,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
             <T> Any pack(T value) {
                 return Wrapper.forString()
                               .pack((String) value);
+            }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return String.class.equals(valueClass);
             }
 
             @Override
@@ -138,6 +150,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
                 return Wrapper.forInteger()
                               .pack((Integer) value);
             }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return Integer.class.equals(valueClass);
+            }
         },
 
         LONG {
@@ -151,6 +168,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
             <T> Any pack(T value) {
                 return Wrapper.forLong()
                               .pack((Long) value);
+            }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return Long.class.equals(valueClass);
             }
         },
 
@@ -166,6 +188,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
                 return Wrapper.forFloat()
                               .pack((Float) value);
             }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return Float.class.equals(valueClass);
+            }
         },
 
         DOUBLE {
@@ -180,6 +207,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
                 return Wrapper.forDouble()
                               .pack((Double) value);
             }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return Double.class.equals(valueClass);
+            }
         },
 
         MESSAGE {
@@ -193,10 +225,31 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
             <T> Any pack(T value) {
                 return AnyPacker.pack((Message) value);
             }
+
+            @Override
+            <T> boolean matchClass(Class<T> valueClass) {
+                return Message.class.isAssignableFrom(valueClass);
+            }
         };
+
+        static <T> Type getType(Class<T> valueClass) {
+            for (Type type : values()) {
+                if (type.matchClass(valueClass)) {
+                    return type;
+                }
+            }
+            throw unsupportedClass(valueClass);
+        }
 
         abstract <T> T unpack(Any any);
 
         abstract <T> Any pack(T value);
+
+        abstract <T> boolean matchClass(Class<T> valueClass);
+
+        private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
+            return newIllegalArgumentException("Unsupported attribute class encountered: %s",
+                                               idClass.getName());
+        }
     }
 }

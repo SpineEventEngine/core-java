@@ -110,7 +110,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         checkNotNull(cls);
 
         final ImmutableSet<EventClass> result =
-                EventClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
+                EventClass.setOf(HandlerMethod.getHandledMessageClasses(cls, predicate()));
         return result;
     }
 
