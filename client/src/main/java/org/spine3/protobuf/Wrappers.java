@@ -22,7 +22,6 @@ package org.spine3.protobuf;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
-import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
@@ -79,11 +78,6 @@ public final class Wrappers {
     public static Any pack(double value) {
         return Wrapper.forDouble()
                       .pack(value);
-    }
-
-    /** Creates a new {@code FloatValue} wrapping the passed number. */
-    public static FloatValue newFloatValue(float value) {
-        return Wrapper.forFloat(value);
     }
 
     /** Packs the passed value into {@link Any}. */

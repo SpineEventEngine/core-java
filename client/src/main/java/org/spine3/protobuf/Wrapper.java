@@ -388,7 +388,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W> impl
 
         @Override
         public String toString() {
-            return "Wrappper.forLong()";
+            return "Wrapper.forLong()";
         }
 
         private Object readResolve() {
