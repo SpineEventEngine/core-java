@@ -37,12 +37,12 @@ public abstract class CommandAttribute<T>
     }
 
     @Override
-    protected Map<String, Any> getMap(CommandContext context) {
+    protected final Map<String, Any> getMap(CommandContext context) {
         return context.getAttributes();
     }
 
     @Override
-    protected Map<String, Any> getMutableMap(CommandContext.Builder builder) {
+    protected final Map<String, Any> getMutableMap(CommandContext.Builder builder) {
         return builder.getMutableAttributes();
     }
 }
