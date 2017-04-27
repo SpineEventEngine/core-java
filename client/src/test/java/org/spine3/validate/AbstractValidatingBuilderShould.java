@@ -106,8 +106,13 @@ public class AbstractValidatingBuilderShould {
 
     private static class TestValidatingBuilder extends AbstractValidatingBuilder<Task> {
         @Override
-        public Task build() {
+        protected Task internalBuild() {
             return Task.getDefaultInstance();
+        }
+
+        @Override
+        protected void onOriginalStateChanged(Task state) {
+            // do nothing for test.
         }
     }
 }

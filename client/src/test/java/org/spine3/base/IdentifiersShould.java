@@ -176,13 +176,13 @@ public class IdentifiersShould {
 
         final SeveralFieldsId idToConvert = SeveralFieldsId.newBuilder()
                                                            .setString(outerString)
-                                                           .setInt(number)
+                                                           .setNumber(number)
                                                            .setMessage(newStringValue(nestedString))
                                                            .build();
 
         final String expected =
                 "string=\"" + outerString + '\"' +
-                " int=" + number +
+                " number=" + number +
                 " message { value=\"" + nestedString + "\" }";
 
         final String actual = idToString(idToConvert);
