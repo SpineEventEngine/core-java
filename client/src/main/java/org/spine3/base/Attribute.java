@@ -36,7 +36,8 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 /**
  * An attribute stored in a protobuf {@code map<string, Any>}.
  *
- * @param <T> the type of the attribute value
+ * @param <T> the type of the attribute value, which can be {@code Integer}, {@code Long},
+ *            {@code Float}, {@code Double}, {@code Double}, or a class implementing {@code Message}
  * @param <M> the type of the message object to which the attribute belongs
  * @param <B> the type of the message builder
  *
@@ -47,6 +48,11 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
     private final Type type;
     private final String name;
 
+    /**
+     * Creates a new instance with the passed name.
+     *
+     * @param name the key in the attribute map
+     */
     protected Attribute(String name) {
         checkNotNull(name);
         checkArgument(name.length() > 0, "Attribute name cannot be empty");
@@ -62,15 +68,12 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
 
     protected abstract Map<String, Any> getMutableMap(B builder);
 
-    /**
-     * Extracts the value from {@code Any}.
-     */
-    protected T unpack(Any any) {
+    private T unpack(Any any) {
         final T result = type.unpack(any);
         return result;
     }
 
-    protected Any pack(T value) {
+    private Any pack(T value) {
         final Any result = type.pack(value);
         return result;
     }
@@ -86,13 +89,19 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
         return Optional.of(result);
     }
 
-    public Optional<T> get(M obj) {
+    /**
+     * Returns the attribute value or {@code Optional.absent()} if the attribute is not set.
+     */
+    public final Optional<T> get(M obj) {
         final Map<String, Any> map = getMap(obj);
         final Optional<T> result = getValue(map);
         return result;
     }
 
-    public void set(B builder, T value) {
+    /**
+     * Sets the value of the attribute in the passed builder.
+     */
+    public final void set(B builder, T value) {
         final Map<String, Any> map = getMutableMap(builder);
         final Any packed = this.pack(value);
         map.put(name, packed);
