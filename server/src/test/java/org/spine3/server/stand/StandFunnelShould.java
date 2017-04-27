@@ -221,7 +221,9 @@ public class StandFunnelShould {
         final BoundedContextAction[] result = new BoundedContextAction[Given.SEVERAL];
 
         for (int i = 0; i < result.length; i++) {
-            result[i] = (i % 2 == 0) ? aggregateRepositoryDispatch() : projectionRepositoryDispatch();
+            result[i] = (i % 2 == 0)
+                    ? aggregateRepositoryDispatch()
+                    : projectionRepositoryDispatch();
         }
 
         return result;
