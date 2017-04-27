@@ -29,7 +29,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Values;
+import org.spine3.protobuf.Wrappers;
 import org.spine3.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
 import org.spine3.test.validate.msg.CustomMessageRequiredEnumFieldValue;
 import org.spine3.test.validate.msg.CustomMessageRequiredMsgFieldValue;
@@ -876,7 +876,7 @@ public class MessageValidatorShould {
     }
 
     private static StringValue newStringValue() {
-        return Values.newStringValue(newUuid());
+        return Wrappers.newStringValue(newUuid());
     }
 
     private static ByteString newByteString() {

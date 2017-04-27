@@ -53,7 +53,7 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.server.commandbus.CommandExpiredException.commandExpiredError;
 import static org.spine3.server.commandbus.Given.Command.addTask;
 import static org.spine3.server.commandbus.Given.Command.createProject;

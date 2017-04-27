@@ -45,7 +45,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.sameActorAndTenant;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Alexander Yevsyukov

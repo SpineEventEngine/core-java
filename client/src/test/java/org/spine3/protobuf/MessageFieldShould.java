@@ -31,7 +31,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.MessageField.getFieldDescriptor;
 import static org.spine3.protobuf.MessageField.getFieldName;
 import static org.spine3.protobuf.MessageField.toAccessorMethodName;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 
 public class MessageFieldShould {
 

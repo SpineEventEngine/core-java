@@ -26,7 +26,7 @@ import org.spine3.server.event.UnsupportedEventException;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Alexander Litus

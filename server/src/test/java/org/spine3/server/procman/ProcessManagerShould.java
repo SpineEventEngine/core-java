@@ -70,7 +70,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("OverlyCoupledClass")

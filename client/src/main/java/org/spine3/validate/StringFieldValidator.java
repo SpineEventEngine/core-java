@@ -27,7 +27,7 @@ import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
-import static org.spine3.protobuf.Values.pack;
+import static org.spine3.protobuf.Wrappers.pack;
 
 /**
  * Validates fields of type {@link String}.

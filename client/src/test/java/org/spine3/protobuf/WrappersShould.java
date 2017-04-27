@@ -38,26 +38,26 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Alexander Litus
  */
-public class ValuesShould {
+public class WrappersShould {
 
     public static final double DELTA = 0.01;
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Values.class);
+        assertHasPrivateParameterlessCtor(Wrappers.class);
     }
 
     @Test
     public void create_new_StringValue() {
         final String value = newUuid();
-        final StringValue msg = Values.newStringValue(value);
+        final StringValue msg = Wrappers.newStringValue(value);
         assertEquals(value, msg.getValue());
     }
 
     @Test
     public void create_new_Any_from_String() {
         final String value = newUuid();
-        final Any msg = Values.pack(value);
+        final Any msg = Wrappers.pack(value);
         final StringValue unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
@@ -65,14 +65,14 @@ public class ValuesShould {
     @Test
     public void create_new_DoubleValue() {
         final double value = 0.5;
-        final DoubleValue msg = Values.newDoubleValue(value);
+        final DoubleValue msg = Wrappers.newDoubleValue(value);
         assertEquals(value, msg.getValue(), 0);
     }
 
     @Test
     public void create_new_Any_from_double() {
         final double value = 0.5;
-        final Any msg = Values.pack(value);
+        final Any msg = Wrappers.pack(value);
         final DoubleValue unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue(), DELTA);
     }
@@ -80,14 +80,14 @@ public class ValuesShould {
     @Test
     public void create_new_FloatValue() {
         final float value = 0.5F;
-        final FloatValue msg = Values.newFloatValue(value);
+        final FloatValue msg = Wrappers.newFloatValue(value);
         assertEquals(value, msg.getValue(), 0);
     }
 
     @Test
     public void create_new_Any_from_float() {
         final float value = 0.5F;
-        final Any msg = Values.pack(value);
+        final Any msg = Wrappers.pack(value);
         final FloatValue unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue(), DELTA);
     }
@@ -95,14 +95,14 @@ public class ValuesShould {
     @Test
     public void create_new_Int32Value() {
         final int value = 2;
-        final Int32Value msg = Values.newIntValue(value);
+        final Int32Value msg = Wrappers.newIntValue(value);
         assertEquals(value, msg.getValue());
     }
 
     @Test
     public void create_new_Any_from_int32() {
         final int value = 2;
-        final Any msg = Values.pack(value);
+        final Any msg = Wrappers.pack(value);
         final Int32Value unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
@@ -110,14 +110,14 @@ public class ValuesShould {
     @Test
     public void create_new_Int64Value() {
         final long value = 2L;
-        final Int64Value msg = Values.newLongValue(value);
+        final Int64Value msg = Wrappers.newLongValue(value);
         assertEquals(value, msg.getValue());
     }
 
     @Test
     public void create_new_Any_from_int64() {
         final long value = 2L;
-        final Any msg = Values.pack(value);
+        final Any msg = Wrappers.pack(value);
         final Int64Value unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
@@ -125,14 +125,14 @@ public class ValuesShould {
     @Test
     public void create_new_BoolValue() {
         final boolean value = true;
-        final BoolValue msg = Values.newBoolValue(value);
+        final BoolValue msg = Wrappers.newBoolValue(value);
         assertEquals(value, msg.getValue());
     }
 
     @Test
     public void create_new_Any_from_boolean() {
         final boolean value = true;
-        final Any msg = Values.pack(value);
+        final Any msg = Wrappers.pack(value);
         final BoolValue unpackedMsg = unpack(msg);
         assertEquals(value, unpackedMsg.getValue());
     }
@@ -140,6 +140,6 @@ public class ValuesShould {
     @Test
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(Values.class);
+                .testAllPublicStaticMethods(Wrappers.class);
     }
 }

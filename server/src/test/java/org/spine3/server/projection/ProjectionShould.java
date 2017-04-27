@@ -34,8 +34,8 @@ import org.spine3.type.EventClass;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newIntValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ProjectionShould {

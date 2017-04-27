@@ -38,9 +38,9 @@ import static org.spine3.base.Identifiers.NULL_ID;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newLongValue;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newIntValue;
+import static org.spine3.protobuf.Wrappers.newLongValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 

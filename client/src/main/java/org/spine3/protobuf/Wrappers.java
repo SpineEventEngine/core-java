@@ -30,16 +30,15 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 
 /**
  * Utility class for working with {@link com.google.protobuf.Message Message} value wrapper objects.
  *
  * @author Alexander Litus
  */
-public final class Values {
+public final class Wrappers {
 
-    private Values() {
+    private Wrappers() {
         // Prevent instantiation of this utility class.
     }
 
@@ -50,11 +49,7 @@ public final class Values {
      * @return a new {@code StringValue} instance
      */
     public static StringValue newStringValue(String value) {
-        checkNotNull(value);
-        final StringValue result = StringValue.newBuilder()
-                                              .setValue(value)
-                                              .build();
-        return result;
+        return Wrapper.forString(value);
     }
 
     /**
@@ -65,37 +60,32 @@ public final class Values {
      * @return a new {@code StringValue} instance
      * @see String#format(String, Object...)
      */
-    public static StringValue newStringValue(String format, Object... args) {
+    public static StringValue format(String format, Object... args) {
         checkNotNull(format);
         checkNotNull(args);
-        final String msg = format(format, args);
+        final String msg = String.format(format, args);
         return newStringValue(msg);
     }
 
     /** Packs the passed value into {@link Any}. */
     public static Any pack(String value) {
         checkNotNull(value);
-        final Any result = AnyPacker.pack(newStringValue(value));
+        final Any result = Wrapper.forString()
+                                  .pack(value);
         return result;
     }
 
     /**
      * Creates a new {@code DoubleValue} wrapping the passed number.
-     *
-     * @param value the value to wrap
-     * @return a new DoubleValue instance
      */
     public static DoubleValue newDoubleValue(double value) {
-        final DoubleValue result = DoubleValue.newBuilder()
-                                              .setValue(value)
-                                              .build();
-        return result;
+        return Wrapper.forDouble(value);
     }
 
     /** Packs the passed value into {@link Any}. */
     public static Any pack(double value) {
-        final Any result = AnyPacker.pack(newDoubleValue(value));
-        return result;
+        return Wrapper.forDouble()
+                      .pack(value);
     }
 
     /**
@@ -105,98 +95,65 @@ public final class Values {
      * @return a new FloatValue instance
      */
     public static FloatValue newFloatValue(float value) {
-        final FloatValue result = FloatValue.newBuilder()
-                                            .setValue(value)
-                                            .build();
-        return result;
+        return Wrapper.forFloat(value);
     }
 
     /** Packs the passed value into {@link Any}. */
     public static Any pack(float value) {
-        final Any result = AnyPacker.pack(newFloatValue(value));
-        return result;
+        return Wrapper.forFloat()
+                      .pack(value);
     }
 
     /**
      * Creates a new {@code Int32Value} wrapping the passed number.
-     *
-     * @param value the value to wrap
-     * @return a new Int32Value instance
      */
     public static Int32Value newIntValue(int value) {
-        final Int32Value result = Int32Value.newBuilder()
-                                            .setValue(value)
-                                            .build();
-        return result;
+        return Wrapper.forInteger(value);
     }
 
     /**
      * Creates a new {@code UInt32Value} wrapping the passed number.
-     *
-     * @param value the value to wrap
-     * @return a new UInt32Value instance
      */
     public static UInt32Value newUIntValue(int value) {
-        final UInt32Value result = UInt32Value.newBuilder()
-                                              .setValue(value)
-                                              .build();
-        return result;
+        return Wrapper.forUnsignedInteger(value);
     }
 
-    /** Packs the passed value into {@link Any}. */
+    /** Packs the passed value into {@link Int32Value} and then into {@link Any}. */
     public static Any pack(int value) {
-        final Any result = AnyPacker.pack(newIntValue(value));
-        return result;
+        return Wrapper.forInteger()
+                      .pack(value);
     }
 
     /**
      * Creates a new {@code Int64Value} wrapping the passed number.
-     *
-     * @param value the value to wrap
-     * @return a new Int64Value instance
      */
     public static Int64Value newLongValue(long value) {
-        final Int64Value result = Int64Value.newBuilder()
-                                            .setValue(value)
-                                            .build();
-        return result;
+        return Wrapper.forLong(value);
     }
 
     /**
      * Creates a new {@code UInt64Value} wrapping the passed number.
-     *
-     * @param value the value to wrap
-     * @return a new Int64Value instance
      */
     public static UInt64Value newUInt64Value(long value) {
-        final UInt64Value result = UInt64Value.newBuilder()
-                                              .setValue(value)
-                                              .build();
-        return result;
+        return Wrapper.forUnsignedLong(value);
     }
 
-    /** Packs the passed value into {@link Any}. */
+    /** Packs the passed value into {@link Int64Value} and then into {@link Any}. */
     public static Any pack(long value) {
-        final Any result = AnyPacker.pack(newLongValue(value));
-        return result;
+        return Wrapper.forLong()
+                      .pack(value);
     }
 
     /**
      * Creates a new {@code BoolValue} wrapping the passed value.
-     *
-     * @param value the value to wrap
-     * @return a new BoolValue instance
      */
     public static BoolValue newBoolValue(boolean value) {
-        final BoolValue result = BoolValue.newBuilder()
-                                          .setValue(value)
-                                          .build();
-        return result;
+        return Wrapper.forBoolean(value);
     }
 
-    /** Packs the passed value into {@link Any}. */
+    /** Packs the passed value into {@link BoolValue} and then into {@link Any}. */
     public static Any pack(boolean value) {
-        final Any result = AnyPacker.pack(newBoolValue(value));
-        return result;
+        return Wrapper.forBoolean()
+                      .pack(value);
     }
 }

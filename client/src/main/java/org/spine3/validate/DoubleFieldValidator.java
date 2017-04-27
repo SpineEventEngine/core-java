@@ -26,7 +26,7 @@ import org.spine3.base.FieldPath;
 import org.spine3.protobuf.AnyPacker;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Values.newDoubleValue;
+import static org.spine3.protobuf.Wrappers.newDoubleValue;
 
 /**
  * Validates fields of {@link Double} types.

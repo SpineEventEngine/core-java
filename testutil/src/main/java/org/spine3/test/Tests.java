@@ -29,7 +29,7 @@ import io.grpc.stub.StreamObserver;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
-import org.spine3.protobuf.Values;
+import org.spine3.protobuf.Wrappers;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.time.Time;
 import org.spine3.users.TenantId;
@@ -216,7 +216,7 @@ public class Tests {
      * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
      */
     public static StringValue newUuidValue() {
-        return Values.newStringValue(newUuid());
+        return Wrappers.newStringValue(newUuid());
     }
 
     /**

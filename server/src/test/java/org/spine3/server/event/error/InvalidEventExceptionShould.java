@@ -28,7 +28,7 @@ import org.spine3.validate.ConstraintViolation;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Alexander Litus

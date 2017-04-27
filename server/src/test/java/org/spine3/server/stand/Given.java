@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Dmytro Dashenkov

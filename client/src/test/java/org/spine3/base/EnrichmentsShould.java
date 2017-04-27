@@ -39,8 +39,8 @@ import static org.spine3.base.Enrichments.isEnrichmentEnabled;
 import static org.spine3.base.EventsShould.newEventContext;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.protobuf.Values.newBoolValue;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newBoolValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**

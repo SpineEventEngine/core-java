@@ -33,11 +33,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newLongValue;
-import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.protobuf.Values.newUInt64Value;
-import static org.spine3.protobuf.Values.newUIntValue;
+import static org.spine3.protobuf.Wrappers.newIntValue;
+import static org.spine3.protobuf.Wrappers.newLongValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
+import static org.spine3.protobuf.Wrappers.newUInt64Value;
+import static org.spine3.protobuf.Wrappers.newUIntValue;
 import static org.spine3.validate.Validate.isDefault;
 
 /**

@@ -26,7 +26,7 @@ import org.junit.Test;
 import org.spine3.client.EntityId;
 import org.spine3.protobuf.AnyPacker;
 
-import static org.spine3.protobuf.Values.newLongValue;
+import static org.spine3.protobuf.Wrappers.newLongValue;
 
 /**
  * @author Alexander Yevsyukov

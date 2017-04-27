@@ -26,7 +26,7 @@ import com.google.protobuf.Int32Value;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Preconditions.checkNotNullOrEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.pack;
+import static org.spine3.protobuf.Wrappers.pack;
 
 /**
  * Utility class for working with {@code int} values in {@link ValueMismatch}es.

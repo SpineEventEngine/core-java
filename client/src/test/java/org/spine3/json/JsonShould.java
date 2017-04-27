@@ -40,7 +40,7 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.json.Json.fromJson;
 import static org.spine3.json.Json.toCompactJson;
 import static org.spine3.json.Json.toJson;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**

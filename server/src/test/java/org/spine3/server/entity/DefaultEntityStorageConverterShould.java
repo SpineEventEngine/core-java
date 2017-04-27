@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.server.BoundedContext;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.server.entity.DefaultEntityStorageConverter.forAllFields;
 
 /**

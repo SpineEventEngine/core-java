@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.time.Time;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 
 @SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
         "ResultOfMethodCallIgnored" /* we ignore when we test for `null`s */})

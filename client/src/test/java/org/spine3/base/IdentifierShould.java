@@ -31,10 +31,10 @@ import org.spine3.base.Identifier.Type;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.protobuf.Values.newUInt64Value;
-import static org.spine3.protobuf.Values.newUIntValue;
+import static org.spine3.protobuf.Wrappers.newIntValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
+import static org.spine3.protobuf.Wrappers.newUInt64Value;
+import static org.spine3.protobuf.Wrappers.newUIntValue;
 
 public class IdentifierShould {
 

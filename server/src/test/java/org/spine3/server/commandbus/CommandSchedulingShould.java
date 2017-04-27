@@ -45,7 +45,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.server.commandbus.CommandScheduler.setSchedule;
 import static org.spine3.server.commandbus.Given.Command.addTask;
 import static org.spine3.server.commandbus.Given.Command.createProject;

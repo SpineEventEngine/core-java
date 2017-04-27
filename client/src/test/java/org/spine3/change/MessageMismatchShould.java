@@ -31,7 +31,7 @@ import static org.spine3.change.MessageMismatch.unexpectedValue;
 import static org.spine3.change.MessageMismatch.unpackActual;
 import static org.spine3.change.MessageMismatch.unpackExpected;
 import static org.spine3.change.MessageMismatch.unpackNewValue;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessageMismatchShould {

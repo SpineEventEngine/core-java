@@ -26,7 +26,7 @@ import com.google.protobuf.StringValue;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.change.Preconditions.checkNotEqual;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.pack;
+import static org.spine3.protobuf.Wrappers.pack;
 
 /**
  * Utility class for working with string values in ValueMismatches.
