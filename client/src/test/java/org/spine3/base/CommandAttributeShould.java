@@ -109,4 +109,14 @@ public class CommandAttributeShould {
 
         assertSetGet(attr, value);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_on_unsupported_type() {
+        final CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {};
+
+        @SuppressWarnings("EmptyClass")
+        final Object value = new Object() {};
+
+        attr.set(contextBuilder, value);
+    }
 }
