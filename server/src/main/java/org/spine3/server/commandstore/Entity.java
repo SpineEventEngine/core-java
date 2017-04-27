@@ -23,7 +23,6 @@ package org.spine3.server.commandstore;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
-import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.server.commandbus.CommandRecord;
@@ -56,7 +55,7 @@ class Entity extends AbstractEntity<CommandId, CommandRecord> {
         checkNotNull(command);
         checkNotNull(status);
 
-        final CommandId commandId = Commands.getId(command);
+        final CommandId commandId = command.getId();
         final Entity entity = create(commandId);
         entity.setCommandAndStatus(command, status);
         return entity;

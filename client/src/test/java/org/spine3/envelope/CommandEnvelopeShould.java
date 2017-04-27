@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.Commands;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.time.Time;
 import org.spine3.type.CommandClass;
@@ -86,7 +85,7 @@ public class CommandEnvelopeShould {
 
     @Test
     public void obtain_command_id() {
-        assertEquals(Commands.getId(command), envelope.getCommandId());
+        assertEquals(command.getId(), envelope.getCommandId());
     }
 
     @Test

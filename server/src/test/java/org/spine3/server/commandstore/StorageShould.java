@@ -58,7 +58,6 @@ import static org.spine3.base.CommandStatus.OK;
 import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Wrappers.pack;
 import static org.spine3.server.commandstore.CommandTestUtil.checkRecord;
@@ -103,7 +102,7 @@ public class StorageShould extends TenantAwareTest {
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
                              .setCommandType(commandType)
-                             .setCommandId(Commands.getId(command))
+                             .setCommandId(command.getId())
                              .setCommand(command)
                              .setTimestamp(getCurrentTime())
                              .setStatus(ProcessingStatus.newBuilder()
@@ -128,7 +127,7 @@ public class StorageShould extends TenantAwareTest {
     @Test
     public void store_and_read_command() {
         final Command command = Given.Command.createProject();
-        final CommandId commandId = getId(command);
+        final CommandId commandId = command.getId();
 
         storage.store(command);
         final CommandRecord record = read(commandId).get();
@@ -140,7 +139,7 @@ public class StorageShould extends TenantAwareTest {
     @Test
     public void store_command_with_error() {
         final Command command = Given.Command.createProject();
-        final CommandId commandId = getId(command);
+        final CommandId commandId = command.getId();
         final Error error = newError();
 
         storage.store(command, error);
@@ -170,7 +169,7 @@ public class StorageShould extends TenantAwareTest {
     @Test
     public void store_command_with_status() {
         final Command command = Given.Command.createProject();
-        final CommandId commandId = getId(command);
+        final CommandId commandId = command.getId();
         final CommandStatus status = SCHEDULED;
 
         storage.store(command, status);
