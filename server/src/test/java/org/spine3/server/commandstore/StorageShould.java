@@ -35,6 +35,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
 import org.spine3.base.FailureContext;
+import org.spine3.base.FailureId;
 import org.spine3.base.Failures;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.Given;
@@ -362,10 +363,11 @@ public class StorageShould extends TenantAwareTest {
 
     private static Failure newFailure() {
         final Any packedFailureMessage = pack("newFailure");
+        final FailureId id = Failures.generateId();
         return Failure.newBuilder()
+                      .setId(id)
                       .setMessage(packedFailureMessage)
                       .setContext(FailureContext.newBuilder()
-                                                .setFailureId(Failures.generateId())
                                                 .setStacktrace("failure stacktrace")
                                                 .setTimestamp(getCurrentTime()))
                       .build();
