@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Values;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.event.Given;
 import org.spine3.server.event.enrich.EventEnricher.SameTransition;
 import org.spine3.test.Tests;
@@ -56,7 +56,7 @@ public class EventEnricherBuilderShould {
                 if (input == null) {
                     return null;
                 }
-                return Values.newStringValue(Timestamps.toString(input));
+                return Wrapper.forString(Timestamps.toString(input));
             }
         };
         this.fieldEnricher = FieldEnricher.newInstance(Timestamp.class, StringValue.class, function);

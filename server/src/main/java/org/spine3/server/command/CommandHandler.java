@@ -28,6 +28,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
@@ -36,8 +37,6 @@ import org.spine3.type.CommandClass;
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
-
-import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * The abstract base for non-aggregate classes that expose command handling methods
@@ -91,7 +90,7 @@ public abstract class CommandHandler implements CommandDispatcher {
      */
     protected CommandHandler(EventBus eventBus) {
         this.eventBus = eventBus;
-        final StringValue className = newStringValue(getClass().getName());
+        final StringValue className = Wrapper.forString(getClass().getName());
         this.producerId = AnyPacker.pack(className);
     }
 

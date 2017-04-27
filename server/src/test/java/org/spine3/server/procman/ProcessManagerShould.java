@@ -35,6 +35,7 @@ import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcher;
@@ -70,7 +71,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("OverlyCoupledClass")
@@ -226,7 +226,7 @@ public class ProcessManagerShould {
 
     @Test
     public void create_iterating_router() {
-        final StringValue commandMessage = newStringValue("create_iterating_router");
+        final StringValue commandMessage = Wrapper.forString("create_iterating_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
@@ -249,7 +249,7 @@ public class ProcessManagerShould {
 
     @Test
     public void create_router() {
-        final StringValue commandMessage = newStringValue("create_router");
+        final StringValue commandMessage = Wrapper.forString("create_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));

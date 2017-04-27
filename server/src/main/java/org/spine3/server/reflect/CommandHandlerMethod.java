@@ -44,7 +44,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -226,7 +225,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
-        return Factory.instance();
+        return Factory.getInstance();
     }
 
     /**
@@ -269,7 +268,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             private final Factory value = new Factory();
         }
 
-        private static Factory instance() {
+        private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
     }

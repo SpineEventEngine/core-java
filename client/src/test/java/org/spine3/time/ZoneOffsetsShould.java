@@ -152,7 +152,7 @@ public class ZoneOffsetsShould {
         final ZoneOffset offset = ZoneOffsets.getDefault();
         assertEquals(offset, adjustZero(offset));
 
-        final ZoneOffset gmtOffset = ZoneConverter.instance()
+        final ZoneOffset gmtOffset = ZoneConverter.getInstance()
                                                   .convert(TimeZone.getTimeZone("GMT"));
         checkNotNull(gmtOffset);
         assertEquals(gmtOffset, adjustZero(gmtOffset));

@@ -159,7 +159,7 @@ final class Formats {
     }
 
     private static TimeZone toTimeZone(ZoneOffset offset) {
-        final TimeZone timeZone = ZoneConverter.instance()
+        final TimeZone timeZone = ZoneConverter.getInstance()
                                                .reverse()
                                                .convert(offset);
         checkNotNull(timeZone);

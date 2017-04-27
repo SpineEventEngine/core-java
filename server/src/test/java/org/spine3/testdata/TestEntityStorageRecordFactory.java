@@ -24,7 +24,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.Tests;
 
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.pack;
+import static org.spine3.protobuf.Wrappers.pack;
 
 /**
  * Creates {@link EntityRecord}s for tests.

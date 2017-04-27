@@ -32,6 +32,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
@@ -56,7 +57,6 @@ import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newUserUuid;
@@ -73,7 +73,7 @@ public class CommandsShould {
 
     private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
             CommandsShould.class);
-    private final StringValue stringValue = newStringValue(newUuid());
+    private final StringValue stringValue = Wrapper.forString(newUuid());
 
     @Test
     public void have_private_ctor() {
@@ -184,7 +184,7 @@ public class CommandsShould {
 
     @Test
     public void extract_message_from_command() {
-        final StringValue message = newStringValue("extract_message_from_command");
+        final StringValue message = Wrapper.forString("extract_message_from_command");
 
         final Command command = Commands.createCommand(message,
                                                        CommandContext.getDefaultInstance());

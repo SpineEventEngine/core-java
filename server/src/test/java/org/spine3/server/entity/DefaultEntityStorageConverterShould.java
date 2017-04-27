@@ -24,10 +24,10 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
 
 import static org.junit.Assert.assertEquals;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.entity.DefaultEntityStorageConverter.forAllFields;
 
 /**
@@ -73,7 +73,7 @@ public class DefaultEntityStorageConverterShould {
 
     @Test
     public void convert_forward_and_backward() throws Exception {
-        final TestEntity entity = createEntity(100L, newStringValue("back and forth"));
+        final TestEntity entity = createEntity(100L, Wrapper.forString("back and forth"));
 
         final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
                 repository);

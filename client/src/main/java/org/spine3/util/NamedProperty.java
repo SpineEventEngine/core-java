@@ -18,46 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.string;
+package org.spine3.util;
 
-import java.io.Serializable;
+import com.google.common.base.Optional;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
- * The {@code Stringifier} for boolean values.
+ * The abstract base for classes obtaining a value of a named property.
  *
+ * @param <T> the type of the property
+ * @param <O> the type of the object from which we get the value
  * @author Alexander Yevsyukov
  */
-final class BooleanStringifier extends Stringifier<Boolean> implements Serializable {
+public abstract class NamedProperty<T, O> {
 
-    private static final long serialVersionUID = 1;
+    private final String name;
 
-    private static final BooleanStringifier INSTANCE = new BooleanStringifier();
-
-    static BooleanStringifier getInstance() {
-        return INSTANCE;
+    protected NamedProperty(String name) {
+        checkNotNull(name);
+        checkArgument(name.length() > 0, "Property name cannot be empty");
+        this.name = name;
     }
 
-    @Override
-    protected String toString(Boolean value) {
-        checkNotNull(value);
-        return value.toString();
+    /**
+     * Extracts the property value from the passed object.
+     */
+    protected abstract Optional<T> getValue(O obj);
+
+    /**
+     * Obtains the class of the value.
+     */
+    protected Class<T> getValueClass() {
+        final Class<T> cls = getGenericParameterType(getClass(), 0);
+        return cls;
     }
 
-    @Override
-    protected Boolean fromString(String s) {
-        checkNotNull(s);
-        final Boolean result = Boolean.parseBoolean(s);
-        return result;
-    }
-
-    @Override
-    public String toString() {
-        return "Stringifiers.forBoolean()";
-    }
-
-    private Object readResolve() {
-        return INSTANCE;
+    /**
+     * Obtains the name of the property.
+     */
+    protected String getName() {
+        return name;
     }
 }

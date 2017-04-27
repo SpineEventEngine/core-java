@@ -18,28 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package org.spine3.util;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 
 import javax.annotation.CheckReturnValue;
-import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utilities for working with classes.
+ * Utilities for working with run-time type information.
  *
- * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class Classes {
+@Internal
+public class Reflection {
 
-    private Classes() {
+    private Reflection() {
         // Prevent instantiation of this utility class.
     }
 
@@ -78,50 +75,5 @@ public class Classes {
             which meets the requirements described in the Javadoc. */
         final Class<T> result = (Class<T>) typeArgument;
         return result;
-    }
-
-    /**
-     * Returns event/command types handled by the passed class.
-     *
-     * @return immutable set of message classes or an empty set
-     */
-    @CheckReturnValue
-    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
-            Class<?> cls,
-            Predicate<Method> predicate) {
-        final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
-
-        for (Method method : cls.getDeclaredMethods()) {
-            final boolean methodMatches = predicate.apply(method);
-            if (methodMatches) {
-                final Class<? extends Message> firstParamType =
-                        HandlerMethod.getFirstParamType(method);
-                builder.add(firstParamType);
-            }
-        }
-
-        return builder.build();
-    }
-
-    /**
-     * Finds a getter method in given class or its superclasses.
-     *
-     * <p>The method must match {@code getFieldName} notation, have no argument to be found.
-     *
-     * @param cls       class containing the getter method
-     * @param fieldName field to find a getter for
-     * @return {@link Method} instance reflecting the getter method
-     * @throws RuntimeException upon reflective failure
-     */
-    public static Method getGetterForField(Class<?> cls, String fieldName)
-            throws NoSuchMethodException {
-        checkNotNull(cls);
-        checkNotNull(fieldName);
-
-        @SuppressWarnings("DuplicateStringLiteralInspection")
-        final String fieldGetterName = "get" + fieldName.substring(0, 1)
-                                                        .toUpperCase() + fieldName.substring(1);
-        final Method fieldGetter = cls.getMethod(fieldGetterName);
-        return fieldGetter;
     }
 }

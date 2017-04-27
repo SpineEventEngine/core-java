@@ -35,7 +35,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Messages.builderFor;
 import static org.spine3.protobuf.Messages.isMessage;
-import static org.spine3.protobuf.Values.pack;
+import static org.spine3.protobuf.Wrappers.pack;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {

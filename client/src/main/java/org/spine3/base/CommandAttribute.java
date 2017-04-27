@@ -18,48 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.validate;
+package org.spine3.base;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Wrapper;
+import org.spine3.protobuf.Attribute;
 
-import static java.lang.Math.abs;
+import java.util.Map;
 
 /**
- * Validates fields of {@link Long} number types.
+ * Abstract base for attributes extending {@link CommandContext}.
  *
- * @author Alexander Litus
+ * <p>Example of usage: <pre>
+ *     {@code
+ *      // Init attribute.
+ *      CommandAttribute<Long> attr = new CommandAttribute<Long>("attrName") {};
+ *
+ *      // Setting value.
+ *      CommandContext.Builder builder = ...;
+ *      attr.setValue(builder, 100L);
+ *
+ *      // Getting value.
+ *      CommandContext context = builder.build();
+ *      Long value = attr.getValue(context);
+ * }</pre>
+ * @author Alexander Yevsyukov
  */
-class LongFieldValidator extends NumberFieldValidator<Long> {
+public abstract class CommandAttribute<T>
+        extends Attribute<T, CommandContext, CommandContext.Builder> {
 
     /**
-     * Creates a new validator instance.
-     *  @param descriptor    a descriptor of the field to validate
-     * @param fieldValues   values to validate
-     * @param rootFieldPath a path to the root field (if present)
+     * Creates a new instance for the passed name.
      */
-    LongFieldValidator(FieldDescriptor descriptor, Object fieldValues, FieldPath rootFieldPath) {
-        super(descriptor, FieldValidator.<Long>toValueList(fieldValues), rootFieldPath);
+    public CommandAttribute(String name) {
+        super(name);
     }
 
     @Override
-    protected Long toNumber(String value) {
-        final Long number = Long.valueOf(value);
-        return number;
+    protected final Map<String, Any> getMap(CommandContext context) {
+        return context.getAttributes();
     }
 
     @Override
-    protected Long getAbs(Long value) {
-        final Long abs = abs(value);
-        return abs;
-    }
-
-    @Override
-    protected Any wrap(Long value) {
-        final Any any = Wrapper.forLong()
-                               .pack(value);
-        return any;
+    protected final Map<String, Any> getMutableMap(CommandContext.Builder builder) {
+        return builder.getMutableAttributes();
     }
 }

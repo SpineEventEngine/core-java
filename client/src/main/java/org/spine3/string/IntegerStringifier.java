@@ -36,7 +36,7 @@ final class IntegerStringifier extends Stringifier<Integer> implements Serializa
 
     private static final IntegerStringifier INSTANCE = new IntegerStringifier();
 
-    static IntegerStringifier instance() {
+    static IntegerStringifier getInstance() {
         return INSTANCE;
     }
 

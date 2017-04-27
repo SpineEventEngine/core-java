@@ -23,10 +23,9 @@ package org.spine3.validate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Values.newFloatValue;
 
 /**
  * Validates fields of {@link Float} types.
@@ -59,7 +58,7 @@ class FloatFieldValidator extends FloatFieldValidatorBase<Float> {
 
     @Override
     protected Any wrap(Float value) {
-        final Any any = AnyPacker.pack(newFloatValue(value));
+        final Any any = Wrapper.forFloat().pack(value);
         return any;
     }
 }

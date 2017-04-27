@@ -62,6 +62,19 @@ message Command {
 
     // Service information about the environment in which the command was created.
     CommandContext context = 2 [(required) = true];
+
+    // Properties that may be set by the framework as the command is delivered and handled.
+    //
+    // These properties are not visible to the business logic code of an application.
+    //
+    message SystemProperties {
+
+        // If `true` the command was scheduled.
+        bool scheduled = 1;
+    }
+
+    // Service information used by the framework.
+    SystemProperties system_properties = 3;
 }
 
 // Meta-information about the command and the environment, which generated the command.
@@ -84,10 +97,11 @@ message CommandContext {
         // Is set automatically and used only by Spine when re-scheduling a command.
         google.protobuf.Timestamp scheduling_time = 2 [(internal) = true];
 
-        //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific OffsetDateTime.
+        //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific date/time.
         // Name the field `at`;
 
-        //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence. Name the attribute `every`.
+        //TODO:2016-05-27:alexander.yevsyukov: Have an option for recurrence.
+        // Name the field `every`.
     }
 
     // The schedule to execute the command.
@@ -99,6 +113,12 @@ message CommandContext {
     // any version of the entity.
     //
     int32 target_version = 7;
+
+    // Domain-specific attributes of a command.
+    //
+    // One of the usage scenarios for this field is adding attributes common for several commands.
+    //
+    map<string, google.protobuf.Any> attributes = 8;
 }
 
 // Enumeration of possible failures when validating a command.

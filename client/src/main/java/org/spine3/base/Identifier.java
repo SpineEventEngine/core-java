@@ -27,10 +27,10 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
+import org.spine3.protobuf.Wrapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -146,7 +146,7 @@ final class Identifier<I> {
 
             @Override
             <I> Message toMessage(I id) {
-                return newStringValue((String)id);
+                return Wrapper.forString((String)id);
             }
 
             @Override
