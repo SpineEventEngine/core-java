@@ -57,11 +57,14 @@ message CommandId {
 //
 message Command {
 
+    // The ID of the command.
+    CommandId id = 1 [(required) = true];
+
     // The message of the command wrapped into `Any`.
-    google.protobuf.Any message = 1 [(required) = true];
+    google.protobuf.Any message = 2 [(required) = true];
 
     // Service information about the environment in which the command was created.
-    CommandContext context = 2 [(required) = true];
+    CommandContext context = 3 [(required) = true];
 
     // Properties that may be set by the framework as the command is delivered and handled.
     //
@@ -74,17 +77,27 @@ message Command {
     }
 
     // Service information used by the framework.
-    SystemProperties system_properties = 3;
+    SystemProperties system_properties = 4;
 }
 
 // Meta-information about the command and the environment, which generated the command.
 message CommandContext {
 
-    // The ID of the command.
-    CommandId command_id = 1 [(required) = true];
-
     // Information about the environment of the user who created the command.
-    ActorContext actor_context = 2 [(required) = true];
+    ActorContext actor_context = 1 [(required) = true];
+
+    // The version of the entity for which this command is intended.
+    //
+    // A client app may not fill in this attribute if the command applies to
+    // any version of the entity.
+    //
+    int32 target_version = 2;
+
+    // Domain-specific attributes of a command.
+    //
+    // One of the usage scenarios for this field is adding attributes common for several commands.
+    //
+    map<string, google.protobuf.Any> attributes = 3;
 
     // A command may be scheduled. This type defines scheduling options.
     message Schedule {
@@ -105,20 +118,7 @@ message CommandContext {
     }
 
     // The schedule to execute the command.
-    Schedule schedule = 6;
-
-    // The version of the entity for which this command is intended.
-    //
-    // A client app may not fill in this attribute if the command applies to
-    // any version of the entity.
-    //
-    int32 target_version = 7;
-
-    // Domain-specific attributes of a command.
-    //
-    // One of the usage scenarios for this field is adding attributes common for several commands.
-    //
-    map<string, google.protobuf.Any> attributes = 8;
+    Schedule schedule = 4;
 }
 
 // Enumeration of possible failures when validating a command.

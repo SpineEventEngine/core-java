@@ -25,8 +25,6 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.ActorContext;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandContext.Schedule;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
@@ -49,14 +47,11 @@ public class TestCommandContextFactory {
     public static CommandContext createCommandContext() {
         final UserId userId = newUserId(newUuid());
         final Timestamp now = getCurrentTime();
-        final CommandId commandId = Commands.generateId();
-        return createCommandContext(userId, commandId, now);
+        return createCommandContext(userId, now);
     }
 
     /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext createCommandContext(UserId userId,
-                                                      CommandId commandId,
-                                                      Timestamp when) {
+    public static CommandContext createCommandContext(UserId userId, Timestamp when) {
 
         //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestActorRequestFactory
 
@@ -68,7 +63,6 @@ public class TestCommandContextFactory {
                                                               .setZoneOffset(UTC)
                                                               .setTenantId(generatedTenantId);
         final CommandContext.Builder builder = CommandContext.newBuilder()
-                                                             .setCommandId(commandId)
                                                              .setActorContext(actorContext);
         return builder.build();
     }

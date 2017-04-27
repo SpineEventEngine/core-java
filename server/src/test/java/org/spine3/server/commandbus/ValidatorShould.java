@@ -52,21 +52,25 @@ public class ValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_message_is_NOT_valid() {
-        final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(),
-                                                   createCommandContext());
+        final Command commandWithEmptyMessage =
+                Commands.createCommand(CreateProject.getDefaultInstance(),
+                                       createCommandContext());
 
-        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
+        final List<ConstraintViolation> violations =
+                validator.validate(CommandEnvelope.of(commandWithEmptyMessage));
 
         assertEquals(3, violations.size());
     }
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command cmd = Commands.createCommand(createProjectMessage(),
-                                                   CommandContext.getDefaultInstance());
+        final Command commandWithoutContext =
+                Commands.createCommand(createProjectMessage(),
+                                       CommandContext.getDefaultInstance());
 
-        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
+        final List<ConstraintViolation> violations =
+                validator.validate(CommandEnvelope.of(commandWithoutContext));
 
-        assertEquals(2, violations.size());
+        assertEquals(1, violations.size());
     }
 }

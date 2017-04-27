@@ -63,7 +63,7 @@ public class Given {
          * {@link Command} instance.
          */
         private static org.spine3.base.Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId, Commands.generateId(), when);
+            final CommandContext context = createCommandContext(userId, when);
             final org.spine3.base.Command result = Commands.createCommand(command, context);
             return result;
         }
