@@ -194,6 +194,7 @@ public class EventFactory {
 
         public EventFactory build() {
             checkNotNull(producerId, "Producer ID must be set.");
+            checkNotNull(commandId, "Command ID must be set.");
             checkNotNull(commandContext, "Command must be set.");
 
             final EventFactory result = new EventFactory(this);
