@@ -21,13 +21,14 @@
 package org.spine3.base;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.time.Time;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -46,34 +47,66 @@ public class CommandAttributeShould {
         contextBuilder = command.getContext().toBuilder();
     }
 
+    private <T> void assertSetGet(CommandAttribute<T> attr, T value) {
+        attr.set(contextBuilder, value);
+
+        assertEquals(value, attr.get(contextBuilder.build())
+                                .get());
+    }
+
     @Test
     public void set_and_get_bool_attribute() {
-        final CommandAttribute<Boolean> boolAttr = new CommandAttribute<Boolean>("flag") {};
-        boolAttr.set(contextBuilder, true);
-
-        assertTrue(boolAttr.get(contextBuilder.build())
-                           .get());
+        final CommandAttribute<Boolean> attr = new CommandAttribute<Boolean>("flag") {};
+        assertSetGet(attr, true);
+        assertSetGet(attr, false);
     }
 
     @Test
     public void set_and_get_string_attribute() {
-        final CommandAttribute<String> strAttr = new CommandAttribute<String>("str") {};
+        final CommandAttribute<String> attr = new CommandAttribute<String>("str") {};
+        final String value = getClass().getName();
 
-        final String expected = getClass().getName();
-        strAttr.set(contextBuilder, expected);
-
-        assertEquals(expected, strAttr.get(contextBuilder.build())
-                                      .get());
+        assertSetGet(attr, value);
     }
 
     @Test
     public void set_and_get_long_attribute() {
-        final CommandAttribute<Long> longAttr = new CommandAttribute<Long>("l-o-n-g") {};
-
+        final CommandAttribute<Long> attr = new CommandAttribute<Long>("l-o-n-g") {};
         final Long value = 10101010L;
-        longAttr.set(contextBuilder, value);
 
-        assertEquals(value, longAttr.get(contextBuilder.build())
-                                    .get());
+        assertSetGet(attr, value);
+    }
+
+    @Test
+    public void set_and_get_int_attribute() {
+        final CommandAttribute<Integer> attr = new CommandAttribute<Integer>("int") {};
+        final Integer value = 1024;
+
+        assertSetGet(attr, value);
+    }
+
+    @Test
+    public void set_and_get_message_attribute() {
+        final CommandAttribute<StringValue> attr =
+                new CommandAttribute<StringValue>("str-val") {};
+        final StringValue value = Wrapper.forString(getClass().getName());
+
+        assertSetGet(attr, value);
+    }
+
+    @Test
+    public void set_and_get_float_attribute() {
+        final CommandAttribute<Float> attr = new CommandAttribute<Float>("flp") {};
+        final Float value = 1024.512f;
+
+        assertSetGet(attr, value);
+    }
+
+    @Test
+    public void set_and_get_double_attribute() {
+        final CommandAttribute<Double> attr = new CommandAttribute<Double>("dbl") {};
+        final Double value = 100.500;
+
+        assertSetGet(attr, value);
     }
 }

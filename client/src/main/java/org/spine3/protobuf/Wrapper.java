@@ -73,7 +73,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W> impl
     /**
      * Creates a new {@code StringValue} wrapping the passed string.
      */
-    static StringValue forString(String str) {
+    public static StringValue forString(String str) {
         checkNotNull(str);
         return forString().convert(str);
     }
@@ -88,7 +88,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W> impl
     /**
      * Creates a new {@code DoubleValue} wrapping the passed number.
      */
-    static DoubleValue forDouble(double value) {
+    public static DoubleValue forDouble(double value) {
         return forDouble().convert(value);
     }
 
@@ -102,7 +102,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W> impl
     /**
      * Creates a new {@code FloatValue} wrapping the passed number.
      */
-    static FloatValue forFloat(float value) {
+    public static FloatValue forFloat(float value) {
         return forFloat().convert(value);
     }
 
