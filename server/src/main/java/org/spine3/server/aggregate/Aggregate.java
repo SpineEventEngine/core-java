@@ -303,8 +303,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Applies event messages.
      *
      * @param eventMessages the event message to apply
-     * @param envelope the context of the command, execution of which produces
-     *                       the passed events
+     * @param envelope      the envelope of the command which caused the events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
     private void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope)
@@ -320,8 +319,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies the passed event message or {@code Event} to the aggregate.
      *
-     * @param eventMessages  the event message to apply
-     * @param envelope the context of the command which handler generated the message or event
+     * @param eventMessages the event messages or events to apply
+     * @param envelope      the envelope of the command which generated the events
      * @throws InvocationTargetException if the applier method throws an exception
      * @see #ensureEventMessage(Message)
      */
