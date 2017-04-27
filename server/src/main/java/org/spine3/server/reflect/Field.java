@@ -68,8 +68,7 @@ public final class Field {
      * @return new field instance
      */
     @VisibleForTesting
-    static Optional<Field> newField(Class<? extends Message> messageClass,
-                                            String name) {
+    static Optional<Field> newField(Class<? extends Message> messageClass, String name) {
         checkNotNull(messageClass);
         checkNotNull(name);
 

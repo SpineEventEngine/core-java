@@ -18,13 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.base;
+package org.spine3.protobuf;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.Wrapper;
 import org.spine3.util.Reflection;
 
 import java.util.Map;
@@ -78,7 +76,16 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
         return result;
     }
 
-    private Optional<T> getValue(Map<String, Any> map) {
+    /**
+     * Returns the attribute value or {@code Optional.absent()} if the attribute is not set.
+     */
+    public final Optional<T> get(M obj) {
+        final Map<String, Any> map = getMap(obj);
+        final Optional<T> result = getFromMap(map);
+        return result;
+    }
+
+    private Optional<T> getFromMap(Map<String, Any> map) {
         final Any any = map.get(name);
         if (any == null || Any.getDefaultInstance()
                               .equals(any)) {
@@ -87,15 +94,6 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
 
         final T result = unpack(any);
         return Optional.of(result);
-    }
-
-    /**
-     * Returns the attribute value or {@code Optional.absent()} if the attribute is not set.
-     */
-    public final Optional<T> get(M obj) {
-        final Map<String, Any> map = getMap(obj);
-        final Optional<T> result = getValue(map);
-        return result;
     }
 
     /**

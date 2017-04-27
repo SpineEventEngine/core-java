@@ -21,6 +21,7 @@
 package org.spine3.base;
 
 import com.google.protobuf.Any;
+import org.spine3.protobuf.Attribute;
 
 import java.util.Map;
 
@@ -30,7 +31,7 @@ import java.util.Map;
  * @author Alexander Yevsyukov
  */
 public abstract class CommandAttribute<T>
-                extends Attribute<T, CommandContext, CommandContext.Builder> {
+        extends Attribute<T, CommandContext, CommandContext.Builder> {
 
     public CommandAttribute(String name) {
         super(name);
