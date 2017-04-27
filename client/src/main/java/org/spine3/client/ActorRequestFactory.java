@@ -20,6 +20,7 @@
 package org.spine3.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Sets;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -36,6 +37,7 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -161,134 +163,11 @@ public class ActorRequestFactory {
             // Prevent instantiation from the outside.
         }
 
-        /**
-         * Creates a {@link Query} to read certain entity states by IDs and Entity Column values
-         * with the {@link FieldMask} applied to each of the results.
-         *
-         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
-         * The processing results will contain only the entities, which IDs are present among
-         * the {@code ids}.
-         *
-         * <p>Also, allows to specify the Entity Column values for the target Entity. The processing
-         * results will contain only the entities, which Entity Columns are among the specified
-         * Column values.
-         *
-         * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
-         * results. This processing is performed according to the
-         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
-         *
-         * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-         * (e.g. a {@code path} references a missing field),
-         * such invalid paths are silently ignored.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids the entity IDs of interest
-         * @param columnFilters the entity Column filters
-         * @param maskPaths the property paths for the {@code FieldMask} applied
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query byIdsAndColumnsWithMask(Class<? extends Message> entityClass,
-                                             Set<? extends Message> ids,
-                                             Map<String, Any> columnFilters,
-                                             String... maskPaths) {
-            checkNotNull(entityClass);
-            checkNotNull(ids);
-            checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
-            checkNotNull(columnFilters);
-            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
-
-            final FieldMask fieldMask = FieldMask.newBuilder()
-                                                 .addAllPaths(Arrays.asList(maskPaths))
-                                                 .build();
-            final Query result = composeQuery(entityClass, ids, columnFilters, fieldMask);
-            return result;
+        public QueryBuilder select(Class<? extends Message> targetType) {
+            checkNotNull(targetType);
+            final QueryBuilder queryBuilder = new QueryBuilder(targetType);
+            return queryBuilder;
         }
-
-        /**
-         * Creates a {@link Query} to read certain entity states by IDs and Entity Column values.
-         *
-         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
-         * The processing results will contain only the entities, which IDs are present among
-         * the {@code ids}.
-         *
-         * <p>Also, allows to specify the Entity Column values for the target Entity. The processing
-         * results will contain only the entities, which Entity Columns are among the specified
-         * Column values.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids the entity IDs of interest
-         * @param columnFilters the entity Column filters
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query byIdsAndColumns(Class<? extends Message> entityClass,
-                                     Set<? extends Message> ids,
-                                     Map<String, Any> columnFilters) {
-            checkNotNull(entityClass);
-            checkNotNull(ids);
-            checkArgument(!ids.isEmpty(), ENTITY_IDS_EMPTY_MSG);
-            checkNotNull(columnFilters);
-            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
-
-            final Query result = composeQuery(entityClass, ids, columnFilters, null);
-            return result;
-        }
-
-        /**
-         * Creates a {@link Query} to read certain entity states by Entity Column values with
-         * the {@link FieldMask} applied to each of the results.
-         *
-         * <p>Allows to specify the Entity Column values for the target Entity. The processing
-         * results will contain only the entities, which Entity Columns are among the specified
-         * Column values.
-         *
-         * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
-         * results. This processing is performed according to the
-         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
-         *
-         * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-         * (e.g. a {@code path} references a missing field),
-         * such invalid paths are silently ignored.
-         *
-         * @param entityClass the class of a target entity
-         * @param columnFilters the entity Column filters
-         * @param maskPaths the property paths for the {@code FieldMask} applied
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query byColumnsWithMask(Class<? extends Message> entityClass,
-                                       Map<String, Any> columnFilters,
-                                       String... maskPaths) {
-            checkNotNull(entityClass);
-            checkNotNull(columnFilters);
-            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
-
-            final FieldMask fieldMask = FieldMask.newBuilder()
-                                                 .addAllPaths(Arrays.asList(maskPaths))
-                                                 .build();
-            final Query result = composeQuery(entityClass, null, columnFilters, fieldMask);
-            return result;
-        }
-
-        /**
-         * Creates a {@link Query} to read certain entity states by Entity Column values.
-         *
-         * <p>Allows to specify the Entity Column values for the target Entity. The processing
-         * results will contain only the entities, which Entity Columns are among the specified
-         * Column values.
-         *
-         * @param entityClass the class of a target entity
-         * @param columnFilters the entity Column filters
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query byColumns(Class<? extends Message> entityClass,
-                               Map<String, Any> columnFilters) {
-            checkNotNull(entityClass);
-            checkNotNull(columnFilters);
-            checkArgument(!columnFilters.isEmpty(), COLUMNS_EMPTY_MSG);
-
-            final Query result = composeQuery(entityClass, null, columnFilters, null);
-            return result;
-        }
-
 
         /**
          * Creates a {@link Query} to read certain entity states by IDs with the {@link FieldMask}
@@ -408,6 +287,91 @@ public class ActorRequestFactory {
             return QueryId.newBuilder()
                           .setUuid(formattedId)
                           .build();
+        }
+    }
+
+    public final class QueryBuilder {
+
+        private final Class<? extends Message> targetType;
+        private Set<?> ids;
+        private Map<String, Any> columns;
+        private Set<String> fieldMask;
+
+        private QueryBuilder(Class<? extends Message> targetType) {
+            this.targetType = targetType;
+        }
+
+        public QueryBuilder whereIdIn(Iterable<?> ids) {
+            this.ids = Sets.newHashSet(ids);
+            return this;
+        }
+
+        public QueryBuilder whereIdIn(Message... ids) {
+            this.ids = Sets.newHashSet(ids);
+            return this;
+        }
+
+        public QueryBuilder whereIdIn(String... ids) {
+            this.ids = Sets.newHashSet(ids);
+            return this;
+        }
+
+        public QueryBuilder whereIdIn(int... ids) {
+            this.ids = Sets.newHashSet(ids);
+            return this;
+        }
+
+        public QueryBuilder whereIdIn(long... ids) {
+            this.ids = Sets.newHashSet(ids);
+            return this;
+        }
+
+        public QueryBuilder where(QueryParameter... predicate) {
+            columns = new HashMap<>(predicate.length);
+            for (QueryParameter param : predicate) {
+                columns.put(param.getColumnName(), param.getValue());
+            }
+            return this;
+        }
+
+        public QueryBuilder fields(Iterable<String> fieldMask) {
+            this.fieldMask = Sets.newHashSet(fieldMask);
+            return this;
+        }
+
+        public QueryBuilder fields(String... fieldNames) {
+            this.fieldMask = Sets.newHashSet(fieldNames);
+            return this;
+        }
+
+        public Query build() {
+            return null;
+        }
+    }
+
+    public static class QueryParameter {
+
+        private final String columnName;
+        private final Any value;
+
+        private QueryParameter(String columnName, Any value) {
+            this.columnName = columnName;
+            this.value = value;
+        }
+
+        public static QueryParameter eq(String columnName, Object value) {
+            checkNotNull(columnName);
+            checkNotNull(value);
+//            final Any wrappedValue =
+            return null;
+        }
+
+        public String getColumnName() {
+            return columnName;
+        }
+
+        public Any getValue() {
+            return value;
         }
     }
 
