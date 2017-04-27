@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.command.CreateProject;
 import org.spine3.validate.ConstraintViolation;
 
@@ -44,7 +45,7 @@ public class ValidatorShould {
     public void validate_command_and_return_nothing_if_it_is_valid() {
         final Command cmd = Given.Command.createProject();
 
-        final List<ConstraintViolation> violations = validator.validate(cmd);
+        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
 
         assertEquals(0, violations.size());
     }
@@ -54,7 +55,7 @@ public class ValidatorShould {
         final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(),
                                                    createCommandContext());
 
-        final List<ConstraintViolation> violations = validator.validate(cmd);
+        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
 
         assertEquals(3, violations.size());
     }
@@ -64,7 +65,7 @@ public class ValidatorShould {
         final Command cmd = Commands.createCommand(createProjectMessage(),
                                                    CommandContext.getDefaultInstance());
 
-        final List<ConstraintViolation> violations = validator.validate(cmd);
+        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
 
         assertEquals(2, violations.size());
     }

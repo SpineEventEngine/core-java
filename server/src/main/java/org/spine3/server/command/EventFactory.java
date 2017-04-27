@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
@@ -56,7 +57,7 @@ public class EventFactory {
     protected EventFactory(Builder builder) {
         this.producerId = builder.producerId;
         this.commandContext = builder.commandContext;
-        this.idSequence = EventIdSequence.on(commandContext.getCommandId())
+        this.idSequence = EventIdSequence.on(builder.commandId)
                                          .withMaxSize(builder.maxEventCount);
     }
 
@@ -143,6 +144,7 @@ public class EventFactory {
     public static class Builder {
 
         private Any producerId;
+        private CommandId commandId;
         private CommandContext commandContext;
         private int maxEventCount = EventIdSequence.MAX_ONE_DIGIT_SIZE;
 
@@ -155,6 +157,14 @@ public class EventFactory {
          */
         public Builder setProducerId(Message messageOrAny) {
             this.producerId = toAny(checkNotNull(messageOrAny));
+            return this;
+        }
+
+        /**
+         * Sets the ID of the command which caused events we are about to generate.
+         */
+        public Builder setCommandId(CommandId commandId) {
+            this.commandId = checkNotNull(commandId);
             return this;
         }
 

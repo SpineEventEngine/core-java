@@ -23,6 +23,7 @@ package org.spine3.server.tenant;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
 
 import static org.spine3.base.Commands.getTenantId;
 
@@ -54,8 +55,7 @@ public abstract class CommandOperation extends TenantAwareOperation {
      * Obtains the ID of the command.
      */
     protected CommandId commandId() {
-        return command.getContext()
-                      .getCommandId();
+        return Commands.getId(command);
     }
 
     /**

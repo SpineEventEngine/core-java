@@ -81,7 +81,7 @@ class ValidationFilter implements CommandBusFilter {
                                    StreamObserver<Response> responseObserver) {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
-                                                              .validate(command);
+                                                              .validate(envelope);
         if (!violations.isEmpty()) {
             final CommandException invalidCommand =
                     InvalidCommandException.onConstraintViolations(command, violations);

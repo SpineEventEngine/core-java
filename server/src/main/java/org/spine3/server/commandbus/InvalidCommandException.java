@@ -23,9 +23,7 @@ package org.spine3.server.commandbus;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandValidationError;
-import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.type.CommandClass;
@@ -77,8 +75,8 @@ public class InvalidCommandException extends CommandException {
      * the {@code CommandContext}, which is required in a multitenant application.
      */
     public static InvalidCommandException onMissingTenantId(Command command) {
-        final Message commandMessage = Commands.getMessage(command);
-        final CommandContext context = command.getContext();
+        final CommandEnvelope envelope = CommandEnvelope.of(command);
+        final Message commandMessage = envelope.getMessage();
         final String errMsg = format(
                 "The command (class: `%s`, type: `%s`, id: `%s`) is posted to " +
                 "multitenant Command Bus, but has no `tenant_id` attribute in the context.",
@@ -86,7 +84,7 @@ public class InvalidCommandException extends CommandException {
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                idToString(context.getCommandId()));
+                idToString(envelope.getCommandId()));
         final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }

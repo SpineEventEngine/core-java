@@ -23,9 +23,9 @@ package org.spine3.server.commandstore;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.type.TypeName;
@@ -81,11 +81,9 @@ class Records {
     static CommandRecord.Builder newRecordBuilder(Command command,
                                                   CommandStatus status,
                                                   @Nullable CommandId generatedCommandId) {
-        final CommandContext context = command.getContext();
-
         final CommandId commandId = generatedCommandId != null
                                     ? generatedCommandId
-                                    : context.getCommandId();
+                                    : Commands.getId(command);
 
         final String commandType = TypeName.ofCommand(command)
                                            .getSimpleName();

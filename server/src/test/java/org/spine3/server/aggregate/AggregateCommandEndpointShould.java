@@ -21,13 +21,14 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
+import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
@@ -47,11 +48,10 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 
-import java.util.Map;
+import java.util.List;
 
-import static com.google.common.collect.Maps.newConcurrentMap;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -183,13 +183,35 @@ public class AggregateCommandEndpointShould {
     }
 
     /*
-     * Test environment classes
-     ****************************/
+     * Test environment classes and utilities
+     *****************************************/
+    private static class CommandHistory {
+        private final List<Message> messages = Lists.newArrayList();
+        private final List<CommandContext> contexts = Lists.newArrayList();
+
+        void add(Message message, CommandContext context) {
+            messages.add(message);
+            contexts.add(context);
+        }
+
+        boolean contains(Command command) {
+            final Message message = Commands.getMessage(command);
+            final CommandContext context = command.getContext();
+            final int messageIndex = messages.indexOf(message);
+            final int contextIndex = contexts.indexOf(context);
+            return (messageIndex != -1) && (messageIndex == contextIndex);
+        }
+
+        void clear() {
+            messages.clear();
+            contexts.clear();
+        }
+    }
 
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
-        private static final Map<CommandId, Command> commandsHandled = newConcurrentMap();
+        private static final CommandHistory commandsHandled = new CommandHistory();
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -197,8 +219,7 @@ public class AggregateCommandEndpointShould {
 
         @Assign
         ProjectCreated handle(CreateProject msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
+            commandsHandled.add(msg, context);
             return ProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .setName(msg.getName())
@@ -213,8 +234,7 @@ public class AggregateCommandEndpointShould {
 
         @Assign
         TaskAdded handle(AddTask msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
+            commandsHandled.add(msg, context);
             return TaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
                             .build();
@@ -227,8 +247,7 @@ public class AggregateCommandEndpointShould {
 
         @Assign
         ProjectStarted handle(StartProject msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
+            commandsHandled.add(msg, context);
             return ProjectStarted.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .build();
@@ -238,14 +257,11 @@ public class AggregateCommandEndpointShould {
         private void apply(ProjectStarted event) {
         }
 
-        static void assertHandled(Command expected) {
-            final CommandId id = Commands.getId(expected);
-            final Command actual = commandsHandled.get(id);
+        private static void assertHandled(Command expected) {
             final String cmdName = Commands.getMessage(expected)
                                            .getClass()
                                            .getName();
-            assertNotNull("No such command handled: " + cmdName, actual);
-            assertEquals(expected, actual);
+            assertTrue("No such command handled: " + cmdName, commandsHandled.contains(expected));
         }
 
         static void clearCommandsHandled() {
