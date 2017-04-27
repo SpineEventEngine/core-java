@@ -28,6 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.base.Error;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
@@ -79,8 +80,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final TenantId tenantId = command.getContext()
                                          .getActorContext()
                                          .getTenantId();
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = Commands.getId(command);
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.OK, status.getCode());

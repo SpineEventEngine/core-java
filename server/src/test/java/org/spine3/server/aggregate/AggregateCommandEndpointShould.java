@@ -21,19 +21,17 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
-import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
+import org.spine3.server.command.CommandHistory;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
@@ -48,10 +46,7 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 
-import java.util.List;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
@@ -186,35 +181,6 @@ public class AggregateCommandEndpointShould {
      * Test environment classes and utilities
      *****************************************/
 
-    /**
-     * Test utility for keeping the history of command messages and their contexts
-     * handled by an aggregate.
-     *
-     * @author Alexander Yevsyukov
-     */
-    public static class CommandHistory {
-        private final List<Message> messages = Lists.newArrayList();
-        private final List<CommandContext> contexts = Lists.newArrayList();
-
-        public void add(Message message, CommandContext context) {
-            messages.add(message);
-            contexts.add(context);
-        }
-
-        public boolean contains(Command command) {
-            final Message message = Commands.getMessage(command);
-            final CommandContext context = command.getContext();
-            final int messageIndex = messages.indexOf(message);
-            final int contextIndex = contexts.indexOf(context);
-            return (messageIndex != -1) && (messageIndex == contextIndex);
-        }
-
-        public void clear() {
-            messages.clear();
-            contexts.clear();
-        }
-    }
-
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
@@ -265,10 +231,7 @@ public class AggregateCommandEndpointShould {
         }
 
         private static void assertHandled(Command expected) {
-            final String cmdName = Commands.getMessage(expected)
-                                           .getClass()
-                                           .getName();
-            assertTrue("No such command handled: " + cmdName, commandsHandled.contains(expected));
+            commandsHandled.assertHandled(expected);
         }
 
         static void clearCommandsHandled() {

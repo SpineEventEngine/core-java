@@ -42,7 +42,6 @@ import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Tests;
-import org.spine3.test.command.CreateProject;
 import org.spine3.type.TypeName;
 
 import java.util.Iterator;
@@ -61,14 +60,12 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Wrappers.pack;
+import static org.spine3.server.commandstore.CommandTestUtil.checkRecord;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.server.commandstore.Records.toCommandIterator;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.time.Time.getCurrentTime;
-import static org.spine3.validate.Validate.isDefault;
-import static org.spine3.validate.Validate.isNotDefault;
 
 /**
  * @author Alexander Litus
@@ -106,7 +103,7 @@ public class StorageShould extends TenantAwareTest {
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
                              .setCommandType(commandType)
-                             .setCommandId(command.getContext().getCommandId())
+                             .setCommandId(Commands.getId(command))
                              .setCommand(command)
                              .setTimestamp(getCurrentTime())
                              .setStatus(ProcessingStatus.newBuilder()
@@ -373,45 +370,5 @@ public class StorageShould extends TenantAwareTest {
                                                 .setStacktrace("failure stacktrace")
                                                 .setTimestamp(getCurrentTime()))
                       .build();
-    }
-
-    private static void checkRecord(CommandRecord record,
-                                    Command cmd,
-                                    CommandStatus statusExpected) {
-        final CommandContext context = cmd.getContext();
-        final CommandId commandId = context.getCommandId();
-        final CreateProject message = unpack(cmd.getMessage());
-        assertEquals(cmd.getMessage(), record.getCommand()
-                                             .getMessage());
-        assertTrue(record.getTimestamp()
-                         .getSeconds() > 0);
-        assertEquals(message.getClass()
-                            .getSimpleName(), record.getCommandType());
-        assertEquals(commandId, record.getCommandId());
-        assertEquals(statusExpected, record.getStatus()
-                                           .getCode());
-        assertEquals(context, record.getCommand()
-                                    .getContext());
-        switch (statusExpected) {
-            case RECEIVED:
-            case OK:
-            case SCHEDULED:
-                assertTrue(isDefault(record.getStatus()
-                                           .getError()));
-                assertTrue(isDefault(record.getStatus()
-                                           .getFailure()));
-                break;
-            case ERROR:
-                assertTrue(isNotDefault(record.getStatus()
-                                              .getError()));
-                break;
-            case FAILURE:
-                assertTrue(isNotDefault(record.getStatus()
-                                              .getFailure()));
-                break;
-            case UNDEFINED:
-            case UNRECOGNIZED:
-                break;
-        }
     }
 }

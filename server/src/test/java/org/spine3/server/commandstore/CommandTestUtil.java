@@ -24,6 +24,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
+import org.spine3.base.Commands;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.test.command.CreateProject;
 
@@ -45,10 +46,10 @@ class CommandTestUtil {
     }
 
     static void checkRecord(CommandRecord record,
-                                    Command cmd,
-                                    CommandStatus statusExpected) {
+                            Command cmd,
+                            CommandStatus statusExpected) {
         final CommandContext context = cmd.getContext();
-        final CommandId commandId = context.getCommandId();
+        final CommandId commandId = Commands.getId(cmd);
         final CreateProject message = unpack(cmd.getMessage());
         assertEquals(cmd.getMessage(), record.getCommand()
                                              .getMessage());
