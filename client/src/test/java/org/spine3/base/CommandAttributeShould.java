@@ -48,9 +48,9 @@ public class CommandAttributeShould {
     }
 
     private <T> void assertSetGet(CommandAttribute<T> attr, T value) {
-        attr.set(contextBuilder, value);
+        attr.setValue(contextBuilder, value);
 
-        assertEquals(value, attr.get(contextBuilder.build())
+        assertEquals(value, attr.getValue(contextBuilder.build())
                                 .get());
     }
 
@@ -87,8 +87,7 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_message_attribute() {
-        final CommandAttribute<StringValue> attr =
-                new CommandAttribute<StringValue>("str-val") {};
+        final CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {};
         final StringValue value = Wrapper.forString(getClass().getName());
 
         assertSetGet(attr, value);
@@ -117,6 +116,6 @@ public class CommandAttributeShould {
         @SuppressWarnings("EmptyClass")
         final Object value = new Object() {};
 
-        attr.set(contextBuilder, value);
+        attr.setValue(contextBuilder, value);
     }
 }

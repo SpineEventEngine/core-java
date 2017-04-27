@@ -23,12 +23,11 @@ package org.spine3.protobuf;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.util.Reflection;
+import org.spine3.util.NamedProperty;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -41,10 +40,11 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class Attribute<T, M extends Message, B extends Message.Builder> {
+public abstract class Attribute<T, M extends Message, B extends Message.Builder>
+        extends NamedProperty<T, M> {
 
-    private final Type type;
-    private final String name;
+    @Nullable
+    private volatile Type type;
 
     /**
      * Creates a new instance with the passed name.
@@ -52,11 +52,7 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
      * @param name the key in the attribute map
      */
     protected Attribute(String name) {
-        checkNotNull(name);
-        checkArgument(name.length() > 0, "Attribute name cannot be empty");
-        final Class<Object> cls = Reflection.getGenericParameterType(getClass(), 0);
-        this.type = Type.getType(cls);
-        this.name = name;
+        super(name);
     }
 
     /**
@@ -66,27 +62,36 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
 
     protected abstract Map<String, Any> getMutableMap(B builder);
 
+    protected Type getType() {
+        if (type == null) {
+            final Class<T> cls = getValueClass();
+            type = Type.getType(cls);
+        }
+        return type;
+    }
+
     private T unpack(Any any) {
-        final T result = type.unpack(any);
+        final T result = getType().unpack(any);
         return result;
     }
 
     private Any pack(T value) {
-        final Any result = type.pack(value);
+        final Any result = getType().pack(value);
         return result;
     }
 
     /**
      * Returns the attribute value or {@code Optional.absent()} if the attribute is not set.
      */
-    public final Optional<T> get(M obj) {
+    @Override
+    public final Optional<T> getValue(M obj) {
         final Map<String, Any> map = getMap(obj);
         final Optional<T> result = getFromMap(map);
         return result;
     }
 
     private Optional<T> getFromMap(Map<String, Any> map) {
-        final Any any = map.get(name);
+        final Any any = map.get(getName());
         if (any == null || Any.getDefaultInstance()
                               .equals(any)) {
             return Optional.absent();
@@ -99,10 +104,10 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
     /**
      * Sets the value of the attribute in the passed builder.
      */
-    public final void set(B builder, T value) {
+    public final void setValue(B builder, T value) {
         final Map<String, Any> map = getMutableMap(builder);
         final Any packed = this.pack(value);
-        map.put(name, packed);
+        map.put(getName(), packed);
     }
 
     @SuppressWarnings("unchecked") // Conversions are safe as we unpack specific types.

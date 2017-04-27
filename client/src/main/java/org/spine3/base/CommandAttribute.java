@@ -28,11 +28,27 @@ import java.util.Map;
 /**
  * Abstract base for attributes extending {@link CommandContext}.
  *
+ * <p>Example of usage: <pre>
+ *     {@code
+ *      // Init attribute.
+ *      CommandAttribute<Long> attr = new CommandAttribute<Long>("attrName") {};
+ *
+ *      // Setting value.
+ *      CommandContext.Builder builder = ...;
+ *      attr.setValue(builder, 100L);
+ *
+ *      // Getting value.
+ *      CommandContext context = builder.build();
+ *      Long value = attr.getValue(context);
+ * }</pre>
  * @author Alexander Yevsyukov
  */
 public abstract class CommandAttribute<T>
         extends Attribute<T, CommandContext, CommandContext.Builder> {
 
+    /**
+     * Creates a new instance for the passed name.
+     */
     public CommandAttribute(String name) {
         super(name);
     }
