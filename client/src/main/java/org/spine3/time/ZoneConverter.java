@@ -48,7 +48,7 @@ final class ZoneConverter extends Converter<TimeZone, ZoneOffset> implements Ser
     private static final long serialVersionUID = 1L;
     private static final Set<String> supportedIds = ImmutableSet.copyOf(TimeZone.getAvailableIDs());
 
-    static ZoneConverter instance() {
+    static ZoneConverter getInstance() {
         return INSTANCE;
     }
 

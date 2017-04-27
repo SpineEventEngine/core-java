@@ -36,7 +36,7 @@ final class NoOpStringifier extends Stringifier<String> implements Serializable 
 
     private static final NoOpStringifier INSTANCE = new NoOpStringifier();
 
-    static NoOpStringifier instance() {
+    static NoOpStringifier getInstance() {
         return INSTANCE;
     }
 

@@ -225,7 +225,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
-        return Factory.instance();
+        return Factory.getInstance();
     }
 
     /**
@@ -268,7 +268,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             private final Factory value = new Factory();
         }
 
-        private static Factory instance() {
+        private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
     }

@@ -73,7 +73,7 @@ public final class TimeStringifiers {
      * {@link StringifierRegistry StringifierRegistry}.
      */
     public static Stringifier<ZoneOffset> forZoneOffset() {
-        return ZoneOffsetStringifier.instance();
+        return ZoneOffsetStringifier.getInstance();
     }
 
     /**
@@ -86,7 +86,7 @@ public final class TimeStringifiers {
      * @see Durations#parse(String)
      */
     public static Stringifier<Duration> forDuration() {
-        return DurationStringifier.instance();
+        return DurationStringifier.getInstance();
     }
 
     /**
@@ -95,7 +95,7 @@ public final class TimeStringifiers {
      * @see Timestamps#toString(Timestamp)
      */
     public static Stringifier<Timestamp> forTimestamp() {
-        return TimestampStringifier.instance();
+        return TimestampStringifier.getInstance();
     }
 
     /**
@@ -115,7 +115,7 @@ public final class TimeStringifiers {
      * <p>This stringifier can be convenient for storing IDs based on {@code Timestamp}s.
      */
     public static Stringifier<Timestamp> forTimestampWebSafe() {
-        return WebSafeTimestampStringifer.instance();
+        return WebSafeTimestampStringifer.getInstance();
     }
 
     /**
@@ -129,7 +129,7 @@ public final class TimeStringifiers {
      * @see LocalDates#parse(String)
      */
     public static Stringifier<LocalDate> forLocalDate() {
-        return LocalDateStringifier.instance();
+        return LocalDateStringifier.getInstance();
     }
 
     /**
@@ -141,7 +141,7 @@ public final class TimeStringifiers {
      * @see org.spine3.time.LocalTimes#parse(String) LocalTimes.parse(String)
      */
     public static Stringifier<LocalTime> forLocalTime() {
-        return LocalTimeStringifier.instance();
+        return LocalTimeStringifier.getInstance();
     }
 
     /**
@@ -153,7 +153,7 @@ public final class TimeStringifiers {
      * @see org.spine3.time.OffsetDateTimes#parse(String) OffsetDateTimes.parse(String)
      */
     public static Stringifier<OffsetDateTime> forOffsetDateTime() {
-        return OffsetDateTimeStringifier.instance();
+        return OffsetDateTimeStringifier.getInstance();
     }
 
     /**
@@ -165,6 +165,6 @@ public final class TimeStringifiers {
      * @see org.spine3.time.OffsetTimes#parse(String) OffsetTimes.parse(String)
      */
     public static Stringifier<OffsetTime> forOffsetTime() {
-        return OffsetTimeStringifier.instance();
+        return OffsetTimeStringifier.getInstance();
     }
 }

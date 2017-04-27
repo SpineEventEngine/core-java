@@ -39,7 +39,7 @@ final class DurationStringifier extends Stringifier<Duration> implements Seriali
     private static final long serialVersionUID = 1;
     private static final DurationStringifier INSTANCE = new DurationStringifier();
 
-    static DurationStringifier instance() {
+    static DurationStringifier getInstance() {
         return INSTANCE;
     }
 
