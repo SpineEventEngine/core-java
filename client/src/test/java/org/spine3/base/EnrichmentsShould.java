@@ -40,7 +40,7 @@ import static org.spine3.base.Enrichments.isEnrichmentEnabled;
 import static org.spine3.base.EventsShould.newEventContext;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.protobuf.Wrappers.newBoolValue;
+import static org.spine3.protobuf.Wrapper.forBoolean;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -55,7 +55,7 @@ public class EnrichmentsShould {
     private EventContext context;
 
     private final StringValue stringValue = Wrapper.forString(newUuid());
-    private final BoolValue boolValue = newBoolValue(true);
+    private final BoolValue boolValue = forBoolean(true);
 
     private static EventContext newEventContextWithEnrichment(String enrichmentKey,
             Message enrichment) {

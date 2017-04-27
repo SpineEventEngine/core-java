@@ -32,6 +32,7 @@ import org.spine3.base.Response;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.io.StreamObservers;
 import org.spine3.protobuf.Wrapper;
+import org.spine3.protobuf.Wrappers;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
@@ -149,7 +150,7 @@ public class AggregateRepositoryViewsShould {
         private static final char SEPARATOR = '-';
 
         private static StringValue createCommandMessage(Long id, String msg) {
-            return Wrapper.format("%d%s" + msg, id, SEPARATOR);
+            return Wrappers.format("%d%s" + msg, id, SEPARATOR);
         }
 
         private static Long getId(StringValue commandMessage) {

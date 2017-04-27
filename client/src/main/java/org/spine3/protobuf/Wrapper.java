@@ -41,28 +41,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A helper for working with wrapper Protobuf types.
  *
- * <p>See {@code google.protobuf.wrappers.proto} for declaration of the wrapper types.
+ * <p>See {@code google.protobuf.wrappers.proto} for declarations of the wrapper types.
  *
- * @param <T> the type of the type to wrap
+ * @param <T> the type to wrap
  * @param <W> the wrapping type
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ClassWithTooManyMethods")
-public abstract class Wrapper<T, W extends Message> extends Converter<T, W> implements Serializable {
+public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
+                implements Serializable {
 
     private static final long serialVersionUID = 1L;
-
-    /**
-     * Creates a new formatted string wrapped into {@code StringValue}.
-     *
-     * @see String#format(String, Object...)
-     */
-    public static StringValue format(String format, Object... args) {
-        checkNotNull(format);
-        checkNotNull(args);
-        final String msg = String.format(format, args);
-        return forString(msg);
-    }
 
     public Any pack(T value) {
         checkNotNull(value);

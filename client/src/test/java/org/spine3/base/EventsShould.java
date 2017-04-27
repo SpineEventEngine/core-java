@@ -49,7 +49,7 @@ import static org.spine3.base.Events.getTimestamp;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Wrappers.newBoolValue;
+import static org.spine3.protobuf.Wrapper.forBoolean;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -67,7 +67,7 @@ public class EventsShould {
     private EventContext context;
 
     private final StringValue stringValue = Wrapper.forString(newUuid());
-    private final BoolValue boolValue = newBoolValue(true);
+    private final BoolValue boolValue = forBoolean(true);
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = Wrapper.forDouble(10.1);
 
