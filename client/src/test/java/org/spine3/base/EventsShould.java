@@ -64,6 +64,7 @@ public class EventsShould {
             TestEventFactory.newInstance(Wrapper.forString()
                                                 .pack(EventsShould.class.getSimpleName()),
                                          EventsShould.class);
+    private Event event;
     private EventContext context;
 
     private final StringValue stringValue = Wrapper.forString(newUuid());
@@ -95,11 +96,13 @@ public class EventsShould {
         final Command cmd = requestFactory.command().create(Time.getCurrentTime());
         final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
+                                                .setCommandId(Commands.generateId())
                                                 .setProducerId(producerId)
                                                 .setCommandContext(cmd.getContext())
                                                 .build();
-        context = eventFactory.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef())
-                              .getContext();
+        event = eventFactory.createEvent(Time.getCurrentTime(),
+                                                     Tests.<Version>nullRef());
+        context = event.getContext();
     }
 
     @Test
@@ -178,7 +181,7 @@ public class EventsShould {
 
     @Test
     public void provide_EventId_stringifier() {
-        final EventId id = context.getEventId();
+        final EventId id = event.getId();
         
         final String str = Stringifiers.toString(id);
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
@@ -193,6 +196,7 @@ public class EventsShould {
 
     @Test
     public void accept_generated_event_id() {
-        checkValid(context.getEventId());
+        final EventId eventId = event.getId();
+        assertEquals(eventId, checkValid(eventId));
     }
 }

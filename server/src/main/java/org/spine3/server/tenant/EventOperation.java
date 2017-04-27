@@ -22,7 +22,6 @@ package org.spine3.server.tenant;
 
 import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
-import org.spine3.base.EventId;
 
 /**
  * A tenant-aware operation performed in relation to an event.
@@ -53,7 +52,7 @@ public abstract class EventOperation extends TenantAwareOperation {
     /**
      * Obtains the ID of the event.
      */
-    protected EventId eventId() {
-        return event.getContext().getEventId();
+    protected Event getEvent() {
+        return event;
     }
 }

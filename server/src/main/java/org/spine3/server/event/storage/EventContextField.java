@@ -24,7 +24,7 @@ import org.spine3.annotations.SPI;
 import org.spine3.server.storage.StorageField;
 
 /**
- * A container for the storage fields required for storing
+ * Enumeration of storage fields required for storing
  * {@link org.spine3.base.EventContext EventContext}.
  *
  * @author Dmytro Dashenkov
@@ -34,27 +34,22 @@ import org.spine3.server.storage.StorageField;
 public enum EventContextField implements StorageField {
 
     /**
-     * A field representing the {@link org.spine3.base.EventContext#getEventId() event ID} stored
-     * in the {@link org.spine3.base.EventContext EventContext}.
-     */
-    context_event_id,
-
-    /**
      * A field representing the {@link org.spine3.base.EventContext#getTimestamp()
      * event posting time}.
      */
     context_timestamp,
 
     /**
-     * A field representing the serialized {@link org.spine3.base.CommandContext CommandContext}.
+     * A field representing a {@link org.spine3.base.CommandContext CommandContext}.
      *
-     * <p>This is not the only way to store it, but it's acceptable.
+     * <p>Presumably the field would contain a serialized format, but other storage options
+     * (e.g. Json) are possible.
      */
     context_of_command,
 
     /**
-     * A field representing a {@link org.spine3.base.EventContext#getVersion()
-     * version} of the entity, which produced the event.
+     * A field representing a {@link org.spine3.base.EventContext#getVersion() version} of the
+     * entity, which produced the event.
      */
     context_version
 }

@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.tenant.TenantAwareOperation;
 
@@ -89,16 +90,14 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
     private static class Action<I, A extends Aggregate<I, ?, ?>> {
 
         private final AggregateRepository<I, A> repository;
-        private final Message commandMessage;
-        private final CommandContext context;
+        private final CommandEnvelope envelope;
         private final I aggregateId;
 
         private Action(AggregateCommandEndpoint<I, A> commandEndpoint, CommandEnvelope envelope) {
             this.repository = commandEndpoint.repository;
-
-            this.commandMessage = envelope.getMessage();
-            this.context = envelope.getCommandContext();
-            this.aggregateId = commandEndpoint.getAggregateId(commandMessage, context);
+            this.envelope = envelope;
+            this.aggregateId = commandEndpoint.getAggregateId(envelope.getMessage(),
+                                                              envelope.getCommandContext());
         }
 
         /**
@@ -110,7 +109,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
          * concurrent actor changes, the event count from the last snapshot should remain the same
          * during the {@linkplain AggregateRepository#find(Object) loading}
-         * and {@linkplain Aggregate#dispatchCommand(Message, CommandContext) command dispatching}.
+         * and {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope) command dispatching}.
          *
          * <p>In case the new events are detected, the loading and command
          * dispatching is repeated from scratch.
@@ -123,7 +122,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
             do {
                 if (eventCountBeforeSave != null) {
                     final int newEventCount = eventCountBeforeSave - eventCountBeforeDispatch;
-                    logConcurrentModification(aggregateId, commandMessage, newEventCount);
+                    logConcurrentModification(aggregateId, envelope.getMessage(), newEventCount);
                 }
 
                 eventCountBeforeDispatch = storage.readEventCountAfterLastSnapshot(aggregateId);
@@ -141,7 +140,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
             final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
 
-            aggregate.dispatchCommand(commandMessage, context);
+            aggregate.dispatchCommand(envelope);
 
             // Update status only if the command was handled successfully.
             final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();

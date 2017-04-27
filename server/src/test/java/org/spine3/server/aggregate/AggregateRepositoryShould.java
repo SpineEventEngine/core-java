@@ -21,15 +21,18 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.matchers.GreaterThan;
 import org.spine3.base.CommandContext;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Given;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -55,7 +58,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -67,6 +69,9 @@ public class AggregateRepositoryShould {
     /** Use spy only when it is required to avoid problems,
      * make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
+
+    private static final TestActorRequestFactory factory =
+            TestActorRequestFactory.newInstance(AggregateRepositoryShould.class);
 
     @Before
     public void setUp() {
@@ -238,12 +243,15 @@ public class AggregateRepositoryShould {
         return givenAggregateWithUncommittedEvents(Sample.messageOfType(ProjectId.class));
     }
 
+    private static CommandEnvelope env(Message commandMessage) {
+        return CommandEnvelope.of(factory.command().create(commandMessage));
+    }
+
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
         final ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
                                                 .withId(id)
                                                 .build();
 
-        final CommandContext context = createCommandContext();
         final CreateProject createProject =
                 ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
                         .setProjectId(id)
@@ -257,9 +265,9 @@ public class AggregateRepositoryShould {
                         .setProjectId(id)
                         .build();
 
-        aggregate.dispatchForTest(createProject, context);
-        aggregate.dispatchForTest(addTask, context);
-        aggregate.dispatchForTest(startProject, context);
+        aggregate.dispatchForTest(env(createProject));
+        aggregate.dispatchForTest(env(addTask));
+        aggregate.dispatchForTest(env(startProject));
         return aggregate;
     }
 
