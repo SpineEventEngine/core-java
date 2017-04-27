@@ -35,6 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Utility class for working with {@link com.google.protobuf.Message Message} value wrapper objects.
  *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public final class Wrappers {
 
@@ -44,20 +45,14 @@ public final class Wrappers {
 
     /**
      * Creates a new {@code StringValue} wrapping the passed string.
-     *
-     * @param value the value to wrap
-     * @return a new {@code StringValue} instance
      */
     public static StringValue newStringValue(String value) {
         return Wrapper.forString(value);
     }
 
     /**
-     * Creates a new {@code StringValue} wrapping the passed string.
+     * Creates a new formatted string wrapped into {@code StringValue}.
      *
-     * @param format a format string
-     * @param args   arguments referenced by the format string
-     * @return a new {@code StringValue} instance
      * @see String#format(String, Object...)
      */
     public static StringValue format(String format, Object... args) {
@@ -67,7 +62,7 @@ public final class Wrappers {
         return newStringValue(msg);
     }
 
-    /** Packs the passed value into {@link Any}. */
+    /** Packs the passed value into {@link StringValue} and then into {@link Any}. */
     public static Any pack(String value) {
         checkNotNull(value);
         final Any result = Wrapper.forString()
@@ -75,9 +70,7 @@ public final class Wrappers {
         return result;
     }
 
-    /**
-     * Creates a new {@code DoubleValue} wrapping the passed number.
-     */
+    /** Creates a new {@code DoubleValue} wrapping the passed number. */
     public static DoubleValue newDoubleValue(double value) {
         return Wrapper.forDouble(value);
     }
@@ -88,12 +81,7 @@ public final class Wrappers {
                       .pack(value);
     }
 
-    /**
-     * Creates a new {@code FloatValue} wrapping the passed number.
-     *
-     * @param value the value to wrap
-     * @return a new FloatValue instance
-     */
+    /** Creates a new {@code FloatValue} wrapping the passed number. */
     public static FloatValue newFloatValue(float value) {
         return Wrapper.forFloat(value);
     }
@@ -104,16 +92,12 @@ public final class Wrappers {
                       .pack(value);
     }
 
-    /**
-     * Creates a new {@code Int32Value} wrapping the passed number.
-     */
+    /** Creates a new {@code Int32Value} wrapping the passed number. */
     public static Int32Value newIntValue(int value) {
         return Wrapper.forInteger(value);
     }
 
-    /**
-     * Creates a new {@code UInt32Value} wrapping the passed number.
-     */
+    /** Creates a new {@code UInt32Value} wrapping the passed number. */
     public static UInt32Value newUIntValue(int value) {
         return Wrapper.forUnsignedInteger(value);
     }
@@ -124,16 +108,12 @@ public final class Wrappers {
                       .pack(value);
     }
 
-    /**
-     * Creates a new {@code Int64Value} wrapping the passed number.
-     */
+    /** Creates a new {@code Int64Value} wrapping the passed number. */
     public static Int64Value newLongValue(long value) {
         return Wrapper.forLong(value);
     }
 
-    /**
-     * Creates a new {@code UInt64Value} wrapping the passed number.
-     */
+    /** Creates a new {@code UInt64Value} wrapping the passed number. */
     public static UInt64Value newUInt64Value(long value) {
         return Wrapper.forUnsignedLong(value);
     }
@@ -144,9 +124,7 @@ public final class Wrappers {
                       .pack(value);
     }
 
-    /**
-     * Creates a new {@code BoolValue} wrapping the passed value.
-     */
+    /** Creates a new {@code BoolValue} wrapping the passed value. */
     public static BoolValue newBoolValue(boolean value) {
         return Wrapper.forBoolean(value);
     }

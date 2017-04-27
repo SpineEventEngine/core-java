@@ -23,6 +23,8 @@ package org.spine3.protobuf;
 import com.google.common.base.Converter;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
+import com.google.protobuf.ByteString;
+import com.google.protobuf.BytesValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
@@ -172,6 +174,20 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W> impl
      */
     public static BoolValue forBoolean(boolean value) {
         return forBoolean().convert(value);
+    }
+
+    /**
+     * Obtains the wrapper helper for {@link ByteString}.
+     */
+    public static Wrapper<ByteString, BytesValue> forBytes() {
+        return BytesWrapper.getInstance();
+    }
+
+    /**
+     * Creates a new wrapping instance of {@link BytesValue} for the passed bytes.
+     */
+    public static BytesValue forBytes(ByteString value) {
+        return forBytes().convert(value);
     }
 
     /*
@@ -441,6 +457,40 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W> impl
         @Override
         public String toString() {
             return "Wrapper.forBoolean()";
+        }
+
+        private Object readResolve() {
+            return INSTANCE;
+        }
+    }
+
+    /**
+     * The wrapper helper for {@link ByteString}.
+     */
+    private static class BytesWrapper extends Wrapper<ByteString, BytesValue> {
+
+        private static final long serialVersionUID = 1L;
+        private static final BytesWrapper INSTANCE = new BytesWrapper();
+
+        static BytesWrapper getInstance() {
+            return INSTANCE;
+        }
+
+        @Override
+        protected BytesValue doForward(ByteString value) {
+            return BytesValue.newBuilder()
+                             .setValue(value)
+                             .build();
+        }
+
+        @Override
+        protected ByteString doBackward(BytesValue value) {
+            return value.getValue();
+        }
+
+        @Override
+        public String toString() {
+            return "Wrapper.forByteString()";
         }
 
         private Object readResolve() {
