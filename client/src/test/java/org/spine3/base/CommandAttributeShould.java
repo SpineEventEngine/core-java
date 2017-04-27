@@ -65,4 +65,15 @@ public class CommandAttributeShould {
         assertEquals(expected, strAttr.get(contextBuilder.build())
                                       .get());
     }
+
+    @Test
+    public void set_and_get_long_attribute() {
+        final CommandAttribute<Long> longAttr = new CommandAttribute<Long>("l-o-n-g") {};
+
+        final Long value = 10101010L;
+        longAttr.set(contextBuilder, value);
+
+        assertEquals(value, longAttr.get(contextBuilder.build())
+                                    .get());
+    }
 }
