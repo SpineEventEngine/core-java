@@ -29,6 +29,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Version;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 
@@ -38,7 +39,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -104,7 +104,7 @@ public class EventFactory {
      */
     public static Event toEvent(IntegrationEvent integrationEvent) {
         final IntegrationEventContext sourceContext = integrationEvent.getContext();
-        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
+        final StringValue producerId = Wrapper.forString(sourceContext.getBoundedContextName());
         final EventContext context = EventContext.newBuilder()
                                                  .setEventId(sourceContext.getEventId())
                                                  .setTimestamp(sourceContext.getTimestamp())

@@ -30,6 +30,7 @@ import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
@@ -38,7 +39,6 @@ import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.newUuidValue;
 
 /**
@@ -111,7 +111,7 @@ public class TypeNameShould {
     @Test
     public void obtain_type_name_of_event() {
         final Command command = requestFactory.command().create(newUuidValue());
-        final StringValue producerId = newStringValue(getClass().getSimpleName());
+        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
         final EventFactory ef = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(command.getContext())

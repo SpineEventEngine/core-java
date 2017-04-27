@@ -21,44 +21,23 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
-import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class for working with {@link com.google.protobuf.Message Message} value wrapper objects.
+ * Utility class for packing wrapped values.
  *
  * @author Alexander Litus
  * @author Alexander Yevsyukov
+ * @see Wrapper
  */
 public final class Wrappers {
 
     private Wrappers() {
         // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Creates a new {@code StringValue} wrapping the passed string.
-     */
-    public static StringValue newStringValue(String value) {
-        return Wrapper.forString(value);
-    }
-
-    /**
-     * Creates a new formatted string wrapped into {@code StringValue}.
-     *
-     * @see String#format(String, Object...)
-     */
-    public static StringValue format(String format, Object... args) {
-        checkNotNull(format);
-        checkNotNull(args);
-        final String msg = String.format(format, args);
-        return newStringValue(msg);
     }
 
     /** Packs the passed value into {@link StringValue} and then into {@link Any}. */
@@ -67,11 +46,6 @@ public final class Wrappers {
         final Any result = Wrapper.forString()
                                   .pack(value);
         return result;
-    }
-
-    /** Creates a new {@code DoubleValue} wrapping the passed number. */
-    public static DoubleValue newDoubleValue(double value) {
-        return Wrapper.forDouble(value);
     }
 
     /** Packs the passed value into {@link Any}. */
@@ -86,30 +60,10 @@ public final class Wrappers {
                       .pack(value);
     }
 
-    /** Creates a new {@code Int32Value} wrapping the passed number. */
-    public static Int32Value newIntValue(int value) {
-        return Wrapper.forInteger(value);
-    }
-
-    /** Creates a new {@code UInt32Value} wrapping the passed number. */
-    public static UInt32Value newUIntValue(int value) {
-        return Wrapper.forUnsignedInteger(value);
-    }
-
     /** Packs the passed value into {@link Int32Value} and then into {@link Any}. */
     public static Any pack(int value) {
         return Wrapper.forInteger()
                       .pack(value);
-    }
-
-    /** Creates a new {@code Int64Value} wrapping the passed number. */
-    public static Int64Value newLongValue(long value) {
-        return Wrapper.forLong(value);
-    }
-
-    /** Creates a new {@code UInt64Value} wrapping the passed number. */
-    public static UInt64Value newUInt64Value(long value) {
-        return Wrapper.forUnsignedLong(value);
     }
 
     /** Packs the passed value into {@link Int64Value} and then into {@link Any}. */

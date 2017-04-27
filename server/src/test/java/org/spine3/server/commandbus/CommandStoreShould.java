@@ -31,6 +31,7 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.tenant.TenantAwareFunction;
@@ -53,7 +54,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.server.commandbus.CommandExpiredException.commandExpiredError;
 import static org.spine3.server.commandbus.Given.Command.addTask;
 import static org.spine3.server.commandbus.Given.Command.createProject;
@@ -276,9 +276,9 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(newStringValue("some Command message"),
+            super(Wrapper.forString("some Command message"),
                   CommandContext.getDefaultInstance(),
-                  newStringValue(TestFailure.class.getName()));
+                  Wrapper.forString(TestFailure.class.getName()));
         }
     }
 

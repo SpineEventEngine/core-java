@@ -24,9 +24,7 @@ import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 import org.spine3.client.EntityId;
-import org.spine3.protobuf.AnyPacker;
-
-import static org.spine3.protobuf.Wrappers.newLongValue;
+import org.spine3.protobuf.Wrapper;
 
 /**
  * @author Alexander Yevsyukov
@@ -39,7 +37,7 @@ public class EntityIdFunctionShould {
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
         final EntityId wrongType = EntityId.newBuilder()
-                                           .setId(AnyPacker.pack(newLongValue(100)))
+                                           .setId(Wrapper.forLong().pack(100L))
                                            .build();
         func.apply(wrongType);
     }

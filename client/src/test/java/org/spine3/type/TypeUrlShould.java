@@ -34,6 +34,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
 import org.spine3.client.ActorRequestFactory;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.users.UserId;
@@ -41,7 +42,6 @@ import org.spine3.users.UserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.type.TypeUrl.composeTypeUrl;
 
 public class TypeUrlShould {
@@ -67,7 +67,7 @@ public class TypeUrlShould {
 
     @Test
     public void create_from_message() {
-        final TypeUrl typeUrl = TypeUrl.of(newStringValue(newUuid()));
+        final TypeUrl typeUrl = TypeUrl.of(Wrapper.forString(newUuid()));
 
         assertIsStringValueUrl(typeUrl);
     }
@@ -149,7 +149,7 @@ public class TypeUrlShould {
     @Test
     public void obtain_type_of_command() {
         final ActorRequestFactory factory = TestActorRequestFactory.newInstance(TypeUrlShould.class);
-        final StringValue message = newStringValue(newUuid());
+        final StringValue message = Wrapper.forString(newUuid());
         final Command command = factory.command().create(message);
 
         final TypeUrl typeUrl = TypeUrl.ofCommand(command);

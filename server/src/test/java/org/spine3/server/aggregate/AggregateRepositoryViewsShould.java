@@ -31,7 +31,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Response;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.io.StreamObservers;
-import org.spine3.protobuf.Wrappers;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
@@ -39,7 +39,6 @@ import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Alexander Yevsyukov
@@ -123,7 +122,7 @@ public class AggregateRepositoryViewsShould {
         StringValue handle(StringValue commandMessage) {
             final String msg = commandMessage.getValue();
             // Transform the command to the event (the fact in the past).
-            return newStringValue(msg + 'd');
+            return Wrapper.forString(msg + 'd');
         }
 
         @Apply
@@ -150,7 +149,7 @@ public class AggregateRepositoryViewsShould {
         private static final char SEPARATOR = '-';
 
         private static StringValue createCommandMessage(Long id, String msg) {
-            return Wrappers.format("%d%s" + msg, id, SEPARATOR);
+            return Wrapper.format("%d%s" + msg, id, SEPARATOR);
         }
 
         private static Long getId(StringValue commandMessage) {

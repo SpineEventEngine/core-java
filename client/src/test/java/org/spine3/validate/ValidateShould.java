@@ -24,13 +24,13 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
@@ -59,7 +59,7 @@ public class ValidateShould {
 
     @Test
     public void verify_that_message_is_not_in_default_state() {
-        final Message msg = newStringValue("check_if_message_is_not_in_default_state");
+        final Message msg = Wrapper.forString("check_if_message_is_not_in_default_state");
 
         assertTrue(isNotDefault(msg));
         assertFalse(isNotDefault(StringValue.getDefaultInstance()));

@@ -28,14 +28,14 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.base.Subscribe;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Given;
 import org.spine3.type.EventClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Wrappers.newIntValue;
-import static org.spine3.protobuf.Wrappers.newStringValue;
+import static org.spine3.protobuf.Wrapper.forInteger;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ProjectionShould {
@@ -47,20 +47,20 @@ public class ProjectionShould {
         projection = Given.projectionOfClass(TestProjection.class)
                                           .withId(newUuid())
                                           .withVersion(1)
-                                          .withState(newStringValue("Initial state"))
+                                          .withState(Wrapper.forString("Initial state"))
                                           .build();
     }
 
     @Test
     public void handle_events() {
         final String stringValue = newUuid();
-        projection.handle(newStringValue(stringValue), EventContext.getDefaultInstance());
+        projection.handle(Wrapper.forString(stringValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(stringValue));
 
         final Integer integerValue = 1024;
-        projection.handle(newIntValue(integerValue), EventContext.getDefaultInstance());
+        projection.handle(forInteger(integerValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
@@ -112,7 +112,7 @@ public class ProjectionShould {
             final String currentState = getState().getValue();
             final String result = currentState + (currentState.length() > 0 ? " + " : "") +
                     type + '(' + value + ')' + System.lineSeparator();
-            return newStringValue(result);
+            return Wrapper.forString(result);
         }
     }
 }

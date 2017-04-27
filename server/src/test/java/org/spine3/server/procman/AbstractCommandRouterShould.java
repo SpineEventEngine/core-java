@@ -32,6 +32,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcher;
@@ -45,7 +46,6 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.sameActorAndTenant;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Alexander Yevsyukov
@@ -66,10 +66,10 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
 
     /** Command messages to be sent. */
     private final List<Message> messages = ImmutableList.<Message>of(
-            newStringValue("uno"),
-            newStringValue("dos"),
-            newStringValue("tres"),
-            newStringValue("cuatro")
+            Wrapper.forString("uno"),
+            Wrapper.forString("dos"),
+            Wrapper.forString("tres"),
+            Wrapper.forString("cuatro")
     );
 
     abstract T createRouter(CommandBus commandBus, Message sourceMessage, CommandContext commandContext);
@@ -103,7 +103,7 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
             }
         });
 
-        sourceMessage = newStringValue(getClass().getSimpleName());
+        sourceMessage = Wrapper.forString(getClass().getSimpleName());
         sourceContext = requestFactory.createCommandContext();
 
         router = createRouter(commandBus, sourceMessage, sourceContext);

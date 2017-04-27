@@ -23,10 +23,9 @@ package org.spine3.validate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Wrappers.newLongValue;
 
 /**
  * Validates fields of {@link Long} number types.
@@ -59,7 +58,8 @@ class LongFieldValidator extends NumberFieldValidator<Long> {
 
     @Override
     protected Any wrap(Long value) {
-        final Any any = AnyPacker.pack(newLongValue(value));
+        final Any any = Wrapper.forLong()
+                               .pack(value);
         return any;
     }
 }

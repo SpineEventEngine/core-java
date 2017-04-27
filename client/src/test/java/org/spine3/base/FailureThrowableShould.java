@@ -26,13 +26,13 @@ import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.newUuidValue;
 
 public class FailureThrowableShould {
@@ -48,7 +48,7 @@ public class FailureThrowableShould {
 
     @Test
     public void create_instance() {
-        final StringValue failure = newStringValue(newUuid());
+        final StringValue failure = Wrapper.forString(newUuid());
 
         final FailureThrowable failureThrowable = new TestFailure(command.getMessage(),
                                                                   command.getContext(),
@@ -60,7 +60,7 @@ public class FailureThrowableShould {
 
     @Test
     public void convert_to_failure_message() {
-        final StringValue failure = newStringValue(newUuid());
+        final StringValue failure = Wrapper.forString(newUuid());
 
         final Failure failureWrapper = new TestFailure(command.getMessage(),
                                                        command.getContext(),

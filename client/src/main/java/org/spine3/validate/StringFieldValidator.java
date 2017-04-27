@@ -22,12 +22,11 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.validate.internal.PatternOption;
 import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
-
-import static org.spine3.protobuf.Wrappers.pack;
 
 /**
  * Validates fields of type {@link String}.
@@ -77,12 +76,14 @@ class StringFieldValidator extends FieldValidator<String> {
 
     private ConstraintViolation newViolation(String fieldValue) {
         final String msg = getErrorMsgFormat(patternOption, patternOption.getMsgFormat());
-        final ConstraintViolation violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(regex)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(pack(fieldValue))
-                .build();
+        final ConstraintViolation violation =
+                ConstraintViolation.newBuilder()
+                                   .setMsgFormat(msg)
+                                   .addParam(regex)
+                                   .setFieldPath(getFieldPath())
+                                   .setFieldValue(Wrapper.forString()
+                                                         .pack(fieldValue))
+                                   .build();
         return violation;
     }
 

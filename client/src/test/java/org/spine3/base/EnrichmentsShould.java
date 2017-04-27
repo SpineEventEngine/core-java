@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.EventTests;
 import org.spine3.test.TestEventFactory;
 import org.spine3.time.Time;
@@ -40,7 +41,6 @@ import static org.spine3.base.EventsShould.newEventContext;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Wrappers.newBoolValue;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -48,13 +48,13 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
  */
 public class EnrichmentsShould {
 
-    private static final StringValue producerId = newStringValue(
+    private static final StringValue producerId = Wrapper.forString(
             EnrichmentsShould.class.getSimpleName());
 
     private TestEventFactory eventFactory;
     private EventContext context;
 
-    private final StringValue stringValue = newStringValue(newUuid());
+    private final StringValue stringValue = Wrapper.forString(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
 
     private static EventContext newEventContextWithEnrichment(String enrichmentKey,

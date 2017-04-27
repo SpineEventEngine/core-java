@@ -27,14 +27,13 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Identifier.Type;
+import org.spine3.protobuf.Wrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.protobuf.Wrappers.newIntValue;
-import static org.spine3.protobuf.Wrappers.newStringValue;
-import static org.spine3.protobuf.Wrappers.newUInt64Value;
-import static org.spine3.protobuf.Wrappers.newUIntValue;
+import static org.spine3.protobuf.Wrapper.forUnsignedInteger;
+import static org.spine3.protobuf.Wrapper.forUnsignedLong;
 
 public class IdentifierShould {
 
@@ -51,14 +50,14 @@ public class IdentifierShould {
         assertTrue(Identifier.from("").isString());
         assertTrue(Identifier.from(0).isInteger());
         assertTrue(Identifier.from(0L).isLong());
-        assertTrue(Identifier.from(newIntValue(300)).isMessage());
+        assertTrue(Identifier.from(Wrapper.forInteger(300)).isMessage());
     }
 
     @Test
     public void recognize_type_by_supported_message_type() {
-        assertTrue(Type.INTEGER.matchMessage(newUIntValue(10)));
-        assertTrue(Type.LONG.matchMessage(newUInt64Value(1020L)));
-        assertTrue(Type.STRING.matchMessage(newStringValue("")));
+        assertTrue(Type.INTEGER.matchMessage(forUnsignedInteger(10)));
+        assertTrue(Type.LONG.matchMessage(forUnsignedLong(1020L)));
+        assertTrue(Type.STRING.matchMessage(Wrapper.forString("")));
         assertTrue(Type.MESSAGE.matchMessage(Timestamp.getDefaultInstance()));
 
         assertFalse(Type.MESSAGE.matchMessage(StringValue.getDefaultInstance()));
@@ -68,10 +67,10 @@ public class IdentifierShould {
 
     @Test
     public void create_values_depending_from_message_type() {
-        assertEquals(10, Type.INTEGER.fromMessage(newUIntValue(10)));
-        assertEquals(1024L, Type.LONG.fromMessage(newUInt64Value(1024L)));
+        assertEquals(10, Type.INTEGER.fromMessage(forUnsignedInteger(10)));
+        assertEquals(1024L, Type.LONG.fromMessage(forUnsignedLong(1024L)));
         final String value = getClass().getSimpleName();
-        assertEquals(value, Type.STRING.fromMessage(newStringValue(value)));
+        assertEquals(value, Type.STRING.fromMessage(Wrapper.forString(value)));
     }
 
     @Test(expected = IllegalArgumentException.class)

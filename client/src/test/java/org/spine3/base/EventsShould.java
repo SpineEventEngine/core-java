@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.EventTests;
@@ -49,9 +50,6 @@ import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Wrappers.newBoolValue;
-import static org.spine3.protobuf.Wrappers.newDoubleValue;
-import static org.spine3.protobuf.Wrappers.newStringValue;
-import static org.spine3.protobuf.Wrappers.pack;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -63,14 +61,15 @@ import static org.spine3.test.TimeTests.Past.minutesAgo;
 public class EventsShould {
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(pack(EventsShould.class.getSimpleName()),
+            TestEventFactory.newInstance(Wrapper.forString()
+                                                .pack(EventsShould.class.getSimpleName()),
                                          EventsShould.class);
     private EventContext context;
 
-    private final StringValue stringValue = newStringValue(newUuid());
+    private final StringValue stringValue = Wrapper.forString(newUuid());
     private final BoolValue boolValue = newBoolValue(true);
     @SuppressWarnings("MagicNumber")
-    private final DoubleValue doubleValue = newDoubleValue(10.1);
+    private final DoubleValue doubleValue = Wrapper.forDouble(10.1);
 
     static EventContext newEventContext() {
         final Event event = eventFactory.createEvent(Time.getCurrentTime(),
@@ -94,7 +93,7 @@ public class EventsShould {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
         final Command cmd = requestFactory.command().create(Time.getCurrentTime());
-        final StringValue producerId = newStringValue(getClass().getSimpleName());
+        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
                                                 .setProducerId(producerId)
                                                 .setCommandContext(cmd.getContext())

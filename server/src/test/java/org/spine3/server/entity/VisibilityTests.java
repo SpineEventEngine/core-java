@@ -24,6 +24,7 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
 import org.spine3.server.entity.failure.CannotModifyDeletedEntity;
 import org.spine3.test.TestActorRequestFactory;
@@ -35,7 +36,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * Tests of working with entity visibility.
@@ -66,7 +66,7 @@ public class VisibilityTests {
         final TestActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
         modificationCommand =
-                factory.command().create(newStringValue("Entity modification command"));
+                factory.command().create(Wrapper.forString("Entity modification command"));
     }
 
     @Test

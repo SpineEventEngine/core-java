@@ -22,13 +22,13 @@ package org.spine3.server.event.error;
 
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.event.InvalidEventException;
 import org.spine3.validate.ConstraintViolation;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * @author Alexander Litus
@@ -38,7 +38,7 @@ public class InvalidEventExceptionShould {
 
     @Test
     public void create_exception_with_violations() {
-        final StringValue msg = newStringValue("");
+        final StringValue msg = Wrapper.forString("");
 
         final InvalidEventException exception = InvalidEventException.onConstraintViolations(
                 msg,

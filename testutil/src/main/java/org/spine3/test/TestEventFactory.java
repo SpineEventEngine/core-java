@@ -28,13 +28,13 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.protobuf.Wrappers.newStringValue;
 
 /**
  * The factory or producing events for tests.
@@ -52,7 +52,7 @@ public class TestEventFactory extends EventFactory {
         checkNotNull(testSuiteClass);
         checkNotNull(commandContext);
 
-        final StringValue producerId = newStringValue(testSuiteClass.getName());
+        final StringValue producerId = Wrapper.forString(testSuiteClass.getName());
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(commandContext);

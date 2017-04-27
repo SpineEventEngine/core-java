@@ -47,17 +47,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @param <W> the wrapping type
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("ClassWithTooManyMethods")
 public abstract class Wrapper<T, W extends Message> extends Converter<T, W> implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * Creates a new formatted string wrapped into {@code StringValue}.
+     *
+     * @see String#format(String, Object...)
+     */
+    public static StringValue format(String format, Object... args) {
+        checkNotNull(format);
+        checkNotNull(args);
+        final String msg = String.format(format, args);
+        return forString(msg);
+    }
+
     public Any pack(T value) {
+        checkNotNull(value);
         final W wrapper = doForward(value);
         final Any result = AnyPacker.pack(wrapper);
         return result;
     }
 
     public T unpack(Any any) {
+        checkNotNull(any);
         final W wrapper = AnyPacker.unpack(any);
         final T result = doBackward(wrapper);
         return result;
