@@ -185,16 +185,23 @@ public class AggregateCommandEndpointShould {
     /*
      * Test environment classes and utilities
      *****************************************/
-    private static class CommandHistory {
+
+    /**
+     * Test utility for keeping the history of command messages and their contexts
+     * handled by an aggregate.
+     *
+     * @author Alexander Yevsyukov
+     */
+    public static class CommandHistory {
         private final List<Message> messages = Lists.newArrayList();
         private final List<CommandContext> contexts = Lists.newArrayList();
 
-        void add(Message message, CommandContext context) {
+        public void add(Message message, CommandContext context) {
             messages.add(message);
             contexts.add(context);
         }
 
-        boolean contains(Command command) {
+        public boolean contains(Command command) {
             final Message message = Commands.getMessage(command);
             final CommandContext context = command.getContext();
             final int messageIndex = messages.indexOf(message);
@@ -202,7 +209,7 @@ public class AggregateCommandEndpointShould {
             return (messageIndex != -1) && (messageIndex == contextIndex);
         }
 
-        void clear() {
+        public void clear() {
             messages.clear();
             contexts.clear();
         }
