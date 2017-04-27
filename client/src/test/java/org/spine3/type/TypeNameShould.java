@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
@@ -113,6 +114,7 @@ public class TypeNameShould {
         final Command command = requestFactory.command().create(newUuidValue());
         final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
         final EventFactory ef = EventFactory.newBuilder()
+                                            .setCommandId(Commands.generateId())
                                             .setProducerId(producerId)
                                             .setCommandContext(command.getContext())
                                             .build();

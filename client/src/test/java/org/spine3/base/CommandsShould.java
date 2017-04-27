@@ -52,7 +52,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.createContext;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.idToString;
@@ -122,7 +121,8 @@ public class CommandsShould {
         final CommandContext commandContext = createCommandContext();
         final CommandContext newContext = newContextBasedOn(commandContext);
 
-        assertNotEquals(commandContext.getCommandId(), newContext.getCommandId());
+        assertNotEquals(commandContext.getActorContext().getTimestamp(),
+                        newContext.getActorContext().getTimestamp());
     }
 
     @Test
@@ -190,15 +190,6 @@ public class CommandsShould {
                                                        CommandContext.getDefaultInstance());
 
         assertEquals(message, Commands.getMessage(command));
-    }
-
-    @Test
-    public void extract_id_from_command() {
-        final Command command = requestFactory.command()
-                                              .create(stringValue);
-
-        assertEquals(command.getContext()
-                            .getCommandId(), getId(command));
     }
 
     @Test

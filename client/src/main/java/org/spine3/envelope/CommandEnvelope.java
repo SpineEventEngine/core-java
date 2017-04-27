@@ -29,7 +29,6 @@ import org.spine3.type.CommandClass;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Commands.getId;
 
 /**
  * The holder of a {@code Command}, which provides convenient access to its properties.
@@ -51,7 +50,7 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
 
     private CommandEnvelope(Command command) {
         super(command);
-        this.commandId = getId(command);
+        this.commandId = command.getId();
         this.commandMessage = Commands.getMessage(command);
         this.commandClass = CommandClass.of(commandMessage);
     }

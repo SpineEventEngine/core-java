@@ -164,7 +164,7 @@ public abstract class AggregateStorage<I>
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
-        final String eventIdStr = idToString(context.getEventId());
+        final String eventIdStr = idToString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID");
 
         checkArgument(event.hasMessage(), "Event message must be set.");

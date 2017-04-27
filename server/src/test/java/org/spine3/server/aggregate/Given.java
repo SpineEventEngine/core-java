@@ -124,7 +124,7 @@ class Given {
          */
         static Command create(Message command, UserId userId, Timestamp when) {
             final CommandContext context =
-                    createCommandContext(userId, Commands.generateId(), when);
+                    createCommandContext(userId, when);
             final Command result = Commands.createCommand(command, context);
             return result;
         }

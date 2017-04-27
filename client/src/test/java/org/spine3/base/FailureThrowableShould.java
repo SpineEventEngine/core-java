@@ -28,6 +28,7 @@ import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.TestActorRequestFactory;
+import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -62,9 +63,9 @@ public class FailureThrowableShould {
     public void convert_to_failure_message() {
         final StringValue failure = Wrapper.forString(newUuid());
 
-        final Failure failureWrapper = new TestFailure(command.getMessage(),
-                                                       command.getContext(),
-                                                       failure).toFailure();
+        final Failure failureWrapper = new TestFailure(Tests.<GeneratedMessageV3>nullRef(),
+                                                       Tests.<CommandContext>nullRef(),
+                                                       failure).toFailure(command);
 
         assertEquals(failure, AnyPacker.unpack(failureWrapper.getMessage()));
         assertFalse(failureWrapper.getContext()
