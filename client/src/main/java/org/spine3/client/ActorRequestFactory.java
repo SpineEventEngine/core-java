@@ -290,7 +290,7 @@ public class ActorRequestFactory {
         }
     }
 
-    public final class QueryBuilder {
+    public static final class QueryBuilder {
 
         private final Class<? extends Message> targetType;
         private Set<?> ids;
