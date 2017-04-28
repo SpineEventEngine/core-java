@@ -82,7 +82,7 @@ message Command {
     }
 
     // Service information used by the framework.
-    SystemProperties system_properties = 4;
+    SystemProperties system_properties = 4 [(internal) = true];
 }
 
 // Meta-information about the command and the environment, which generated the command.
