@@ -21,6 +21,7 @@ package org.spine3.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -314,27 +315,37 @@ public class ActorRequestFactory {
         }
 
         public QueryBuilder whereIdIn(Iterable<?> ids) {
-            this.ids = newHashSet(ids);
+            this.ids = ImmutableSet.builder()
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
         public QueryBuilder whereIdIn(Message... ids) {
-            this.ids = newHashSet(ids);
+            this.ids = ImmutableSet.<Message>builder()
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
         public QueryBuilder whereIdIn(String... ids) {
-            this.ids = newHashSet(ids);
+            this.ids = ImmutableSet.<String>builder()
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
-        public QueryBuilder whereIdIn(int... ids) {
-            this.ids = newHashSet(ids);
+        public QueryBuilder whereIdIn(Integer... ids) {
+            this.ids = ImmutableSet.<Integer>builder()
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
-        public QueryBuilder whereIdIn(long... ids) {
-            this.ids = newHashSet(ids);
+        public QueryBuilder whereIdIn(Long... ids) {
+            this.ids = ImmutableSet.<Long>builder()
+                                   .add(ids)
+                                   .build();
             return this;
         }
 

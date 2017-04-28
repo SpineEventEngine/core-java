@@ -21,7 +21,6 @@
 package org.spine3.client;
 
 import com.google.common.base.Function;
-import com.google.common.collect.Collections2;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -38,8 +37,10 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
+import static com.google.common.collect.Collections2.transform;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
+import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -90,7 +91,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final EntityIdFilter idFilter = entityFilters.getIdFilter();
         final Collection<EntityId> idValues = idFilter.getIdsList();
         final Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
-        final Collection<Integer> intIdValues = Collections2.transform(idValues, transformer);
+        final Collection<Integer> intIdValues = transform(idValues, transformer);
 
         assertSize(2, idValues);
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
@@ -201,7 +202,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final EntityIdFilter idFilter = entityFilters.getIdFilter();
         final Collection<EntityId> idValues = idFilter.getIdsList();
         final Function<EntityId, Integer> transformer = new EntityIdUnpacker<>(int.class);
-        final Collection<Integer> intIdValues = Collections2.transform(idValues, transformer);
+        final Collection<Integer> intIdValues = transform(idValues, transformer);
 
         assertSize(2, idValues);
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
@@ -226,7 +227,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final Iterable<?> genericIds = asList(newUuid(),
                                               -1,
                                               Sample.messageOfType(ProjectId.class));
-        final long[] longIds = {1L, 2L, 3L};
+        final Long[] longIds = {1L, 2L, 3L};
         final Message[] messageIds = {
                 Sample.messageOfType(ProjectId.class),
                 Sample.messageOfType(ProjectId.class),
@@ -237,7 +238,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
                 newUuid(),
                 newUuid()
         };
-        final int[] intIds = {4, 5, 6};
+        final Integer[] intIds = {4, 5, 6};
 
         final Query query = factory().query()
                                      .select(TestEntity.class)
@@ -254,9 +255,9 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final Collection<EntityId> entityIds = filters.getIdFilter()
                                                       .getIdsList();
         assertSize(messageIds.length, entityIds);
-        final Function<EntityId, ?> transformer = new EntityIdUnpacker<>(ProjectId.class);
-        final Collection<?> actualValues = Collections2.transform(entityIds, transformer);
-        assertContains(asList(messageIds), actualValues);
+        final Function<EntityId, ProjectId> transformer = new EntityIdUnpacker<>(ProjectId.class);
+        final Iterable<? extends Message> actualValues = transform(entityIds, transformer);
+        assertThat(actualValues, containsInAnyOrder(messageIds));
     }
 
     @Test
@@ -274,7 +275,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Collection<String> maskFields = mask.getPathsList();
         assertSize(arrayFields.length, maskFields);
-        assertContains(asList(arrayFields), maskFields);
+        assertThat(maskFields, contains(arrayFields));
     }
 
     private static class EntityIdUnpacker<T> implements Function<EntityId, T> {
