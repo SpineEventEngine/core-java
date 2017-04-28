@@ -316,6 +316,20 @@ public class ActorRequestFactory {
      * <p>Calling of any of the builder methods overrides the previous call of the given method of
      * any of its overloads.
      *
+     * <p>Usage example:
+     * <pre>
+     *     {@code
+     *     final Query query = factory().query()
+     *                                  .select(Customer.class)
+     *                                  .fields("name", "address", "email")
+     *                                  .whereIdIn(getWestCostCustomersIds())
+     *                                  .where({@link QueryParameter#eq(String, Object) eq}("type", "permanent"),
+     *                                         eq("discountPercent", 10),
+     *                                         eq("companySize", Company.Size.SMALL))
+     *                                  .build();
+     *     }
+     * </pre>
+     *
      * @see ForQuery#select(Class) for the intialization
      */
     public final class QueryBuilder {
@@ -557,6 +571,8 @@ public class ActorRequestFactory {
      *
      * <p>This class may be considered as a filter for the query. An instance contains the name of
      * the Entity Column to filter by and the value of the Column.
+     *
+     * <p>The supported types for querying are {@link Message} and Protobuf primitives.
      */
     public static final class QueryParameter {
 
