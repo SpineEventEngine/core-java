@@ -41,9 +41,9 @@ import static org.spine3.server.aggregate.AggregatePartRepositoryLookup.createLo
 public class AggregateRoot<I> {
 
     /** The map from a part class to a repository which manages corresponding aggregate part */
-    private static final Map<Class<? extends Message>,
-                             AggregatePartRepository<?, ?, ?>> partsAccess =
-                                                               Maps.newConcurrentMap();
+    private final Map<Class<? extends Message>,
+                      AggregatePartRepository<?, ?, ?>> partsAccess =
+                                                        Maps.newConcurrentMap();
 
     /** The bounded context to which the aggregate belongs. */
     private final BoundedContext boundedContext;

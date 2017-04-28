@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
@@ -71,9 +72,11 @@ public class TestEventFactory extends EventFactory {
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
         final CommandContext commandContext = requestFactory.createCommandContext();
+        final CommandId commandId = requestFactory.createCommandId();
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
-                                            .setCommandContext(commandContext);
+                                            .setCommandContext(commandContext)
+                                            .setCommandId(commandId);
         final TestEventFactory result = new TestEventFactory(builder);
         return result;
     }
