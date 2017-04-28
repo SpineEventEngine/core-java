@@ -38,8 +38,8 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.atMost;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 
@@ -101,8 +101,23 @@ public class AggregateRootShould {
         rootSpy.getPartState(partClass);
         rootSpy.getPartState(partClass);
 
-        // It may be called once in another test. So here we check for atMost().
-        verify(rootSpy, atMost(1)).lookup(partClass);
+        verify(rootSpy, times(1)).lookup(partClass);
+    }
+
+    @Test
+    public void have_different_cache_for_different_instances() {
+        final ProjectId projectId = ProjectId.getDefaultInstance();
+        final AggregateRoot firstRoot = new ProjectRoot(boundedContext, projectId);
+        final AggregateRoot secondRoot = new ProjectRoot(boundedContext, projectId);
+        final AggregateRoot firstRootSpy = spy(firstRoot);
+        final AggregateRoot secondRootSpy = spy(secondRoot);
+        final Class<ProjectDefinition> partClass = ProjectDefinition.class;
+
+        firstRootSpy.getPartState(partClass);
+        secondRootSpy.getPartState(partClass);
+
+        verify(firstRootSpy, times(1)).lookup(partClass);
+        verify(secondRootSpy, times(1)).lookup(partClass);
     }
 
     /*
