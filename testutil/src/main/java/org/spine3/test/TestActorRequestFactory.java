@@ -26,6 +26,8 @@ import com.google.protobuf.Timestamp;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Identifiers;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -82,5 +84,13 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     @Override
     public CommandContext createCommandContext() {
         return super.createCommandContext();
+    }
+
+    public CommandId createCommandId() {
+        final String uid = Identifiers.newUuid();
+        final CommandId commandId = CommandId.newBuilder()
+                                             .setUuid(uid)
+                                             .build();
+        return commandId;
     }
 }
