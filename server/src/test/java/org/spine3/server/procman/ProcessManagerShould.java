@@ -142,10 +142,11 @@ public class ProcessManagerShould {
         testDispatchCommand(startProject());
     }
 
-    private List<Event> testDispatchCommand(Message command) {
-        final List<Event> events = processManager.dispatchCommand(command,
-                                                                  requestFactory.createCommandContext());
-        assertEquals(AnyPacker.pack(command), processManager.getState());
+    private List<Event> testDispatchCommand(Message commandMsg) {
+        final CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
+                                                                          .create(commandMsg));
+        final List<Event> events = processManager.dispatchCommand(envelope);
+        assertEquals(AnyPacker.pack(commandMsg), processManager.getState());
         return events;
     }
 
@@ -205,7 +206,11 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, requestFactory.createCommandContext());
+
+        final CommandEnvelope envelope = CommandEnvelope.of(
+                requestFactory.command().create(unknownCommand)
+        );
+        processManager.dispatchCommand(envelope);
     }
 
     @Test(expected = IllegalStateException.class)

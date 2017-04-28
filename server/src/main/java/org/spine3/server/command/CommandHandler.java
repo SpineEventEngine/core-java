@@ -24,7 +24,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
@@ -104,7 +103,12 @@ public abstract class CommandHandler implements CommandDispatcher {
      */
     @Override
     public void dispatch(CommandEnvelope envelope) {
-        handle(envelope.getMessage(), envelope.getCommandContext());
+        final List<? extends Message> eventMessages =
+                CommandHandlerMethod.invokeHandler(this,
+                                                   envelope.getMessage(),
+                                                   envelope.getCommandContext());
+        final List<Event> events = toEvents(eventMessages, envelope);
+        postEvents(events);
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
@@ -117,28 +121,9 @@ public abstract class CommandHandler implements CommandDispatcher {
         return commandClasses;
     }
 
-    /**
-     * Dispatches the command to the handler method and
-     * posts resulting events to the {@link EventBus}.
-     *
-     * @param commandMessage the command message
-     * @param context        the command context
-     * @throws IllegalStateException if an exception occurred during command dispatching
-     *                               with this exception as the cause
-     */
-    private void handle(Message commandMessage, CommandContext context) {
-        final List<? extends Message> eventMessages =
-                CommandHandlerMethod.invokeHandler(this, commandMessage, context);
-        final List<Event> events = toEvents(eventMessages, context);
-        postEvents(events);
-    }
-
     private List<Event> toEvents(List<? extends Message> eventMessages,
-                                 CommandContext commandContext) {
-        return CommandHandlerMethod.toEvents(producerId,
-                                             null,
-                                             eventMessages,
-                                             commandContext);
+                                 CommandEnvelope envelope) {
+        return CommandHandlerMethod.toEvents(producerId, null, eventMessages, envelope);
     }
 
     /** Posts passed events to {@link EventBus}. */

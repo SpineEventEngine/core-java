@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -154,13 +153,13 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     private static boolean isScheduledAlready(Command command) {
-        final CommandId id = getId(command);
+        final CommandId id = command.getId();
         final boolean isScheduledAlready = scheduledCommandIds.contains(id);
         return isScheduledAlready;
     }
 
     private static void markAsScheduled(Command command) {
-        final CommandId id = getId(command);
+        final CommandId id = command.getId();
         scheduledCommandIds.add(id);
     }
 

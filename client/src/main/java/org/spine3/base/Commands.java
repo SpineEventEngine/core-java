@@ -45,7 +45,6 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandContext.Schedule;
-import static org.spine3.base.CommandContext.newBuilder;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.time.Time.getCurrentTime;
@@ -151,9 +150,8 @@ public final class Commands {
             actorContext.setTenantId(tenantId);
         }
 
-        final CommandId commandId = generateId();
-        final CommandContext.Builder result = newBuilder().setCommandId(commandId)
-                                                          .setActorContext(actorContext);
+        final CommandContext.Builder result = CommandContext.newBuilder()
+                                                            .setActorContext(actorContext);
         return result;
     }
 
@@ -172,7 +170,6 @@ public final class Commands {
                                                           .toBuilder()
                                                           .setTimestamp(getCurrentTime());
         final CommandContext.Builder result = value.toBuilder()
-                                                   .setCommandId(generateId())
                                                    .setActorContext(withCurrentTime);
         return result.build();
     }
@@ -193,6 +190,7 @@ public final class Commands {
 
         final Any packed = AnyPacker.pack(message);
         final Command.Builder result = Command.newBuilder()
+                                              .setId(generateId())
                                               .setMessage(packed)
                                               .setContext(context);
         return result.build();
@@ -209,16 +207,6 @@ public final class Commands {
         checkNotNull(command);
         final M result = AnyPacker.unpack(command.getMessage());
         return result;
-    }
-
-    /**
-     * Obtains a command ID from the passed {@code Command} instance.
-     */
-    public static CommandId getId(Command command) {
-        checkNotNull(command);
-        final CommandId id = command.getContext()
-                                    .getCommandId();
-        return id;
     }
 
     /**

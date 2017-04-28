@@ -52,7 +52,6 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.server.commandbus.CommandExpiredException.commandExpiredError;
 import static org.spine3.server.commandbus.Given.Command.addTask;
@@ -79,8 +78,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final TenantId tenantId = command.getContext()
                                          .getActorContext()
                                          .getTenantId();
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = command.getId();
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.OK, status.getCode());
@@ -110,7 +108,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     public void set_command_status_to_failure_when_handler_throws_failure() {
         final TestFailure failure = new TestFailure();
         final Command command = givenThrowingHandler(failure);
-        final CommandId commandId = getId(command);
+        final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
         commandBus.post(command, responseObserver);
@@ -126,7 +124,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.FAILURE, status.getCode());
-        assertEquals(failure.toFailure()
+        assertEquals(failure.toFailure(command)
                             .getMessage(), status.getFailure()
                                                  .getMessage());
     }

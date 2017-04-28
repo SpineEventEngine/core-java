@@ -25,9 +25,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.event.EventBus;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.event.ProjectCreated;
 import org.spine3.testdata.TestEventBusFactory;
@@ -46,11 +48,15 @@ import static org.spine3.server.reflect.CommandHandlerMethod.predicate;
 import static org.spine3.server.reflect.Given.CommandMessage.createProject;
 import static org.spine3.server.reflect.Given.CommandMessage.startProject;
 import static org.spine3.server.reflect.Given.EventMessage.projectCreated;
+import static org.spine3.test.Tests.newUuidValue;
 
 /**
  * @author Alexander Litus
  */
 public class CommandHandlerMethodShould {
+
+    private static final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(CommandHandlerMethodShould.class);
 
     private static final CommandContext defCmdCtx = CommandContext.getDefaultInstance();
 
@@ -59,6 +65,8 @@ public class CommandHandlerMethodShould {
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
+                .setDefault(CommandEnvelope.class, CommandEnvelope.of(
+                        requestFactory.command().create(newUuidValue())))
                 .setDefault(CommandContext.class, defCmdCtx)
                 .setDefault(Any.class, Any.getDefaultInstance())
                 .testAllPublicStaticMethods(CommandHandlerMethod.class);

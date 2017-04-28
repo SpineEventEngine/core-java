@@ -193,7 +193,9 @@ public class EventBusShould {
 
         eventBus.post(event);
 
-        assertEquals(event, subscriber.getEventHandled());
+        // Exclude event ID from comparison.
+        assertEquals(event.getMessage(), subscriber.getEventHandled().getMessage());
+        assertEquals(event.getContext(), subscriber.getEventHandled().getContext());
     }
 
     @Test

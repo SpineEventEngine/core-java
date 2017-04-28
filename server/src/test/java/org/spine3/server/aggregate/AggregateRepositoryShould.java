@@ -21,18 +21,18 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.internal.matchers.GreaterThan;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Given;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -44,10 +44,8 @@ import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
 
-import java.util.Map;
 import java.util.Set;
 
-import static com.google.common.collect.Maps.newConcurrentMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -60,7 +58,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -73,6 +70,9 @@ public class AggregateRepositoryShould {
      * make tests faster and make it easier to debug. */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
+    private static final TestActorRequestFactory factory =
+            TestActorRequestFactory.newInstance(AggregateRepositoryShould.class);
+
     @Before
     public void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
@@ -83,7 +83,6 @@ public class AggregateRepositoryShould {
 
     @After
     public void tearDown() throws Exception {
-        ProjectAggregate.clearCommandsHandled();
         repository.close();
     }
 
@@ -244,12 +243,15 @@ public class AggregateRepositoryShould {
         return givenAggregateWithUncommittedEvents(Sample.messageOfType(ProjectId.class));
     }
 
+    private static CommandEnvelope env(Message commandMessage) {
+        return CommandEnvelope.of(factory.command().create(commandMessage));
+    }
+
     private static ProjectAggregate givenAggregateWithUncommittedEvents(ProjectId id) {
         final ProjectAggregate aggregate = Given.aggregateOfClass(ProjectAggregate.class)
                                                 .withId(id)
                                                 .build();
 
-        final CommandContext context = createCommandContext();
         final CreateProject createProject =
                 ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
                         .setProjectId(id)
@@ -263,9 +265,9 @@ public class AggregateRepositoryShould {
                         .setProjectId(id)
                         .build();
 
-        aggregate.dispatchForTest(createProject, context);
-        aggregate.dispatchForTest(addTask, context);
-        aggregate.dispatchForTest(startProject, context);
+        aggregate.dispatchForTest(env(createProject));
+        aggregate.dispatchForTest(env(addTask));
+        aggregate.dispatchForTest(env(startProject));
         return aggregate;
     }
 
@@ -292,17 +294,12 @@ public class AggregateRepositoryShould {
     @SuppressWarnings("RedundantMethodOverride")
     private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
 
-        // Needs to be `static` to share the state updates in scope of the test.
-        private static final Map<CommandId, Command> commandsHandled = newConcurrentMap();
-
         private ProjectAggregate(ProjectId id) {
             super(id);
         }
 
         @Assign
         ProjectCreated handle(CreateProject msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
             return ProjectCreated.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .setName(msg.getName())
@@ -317,8 +314,6 @@ public class AggregateRepositoryShould {
 
         @Assign
         TaskAdded handle(AddTask msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
             return TaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
                             .build();
@@ -331,8 +326,6 @@ public class AggregateRepositoryShould {
 
         @Assign
         ProjectStarted handle(StartProject msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
             return ProjectStarted.newBuilder()
                                  .setProjectId(msg.getProjectId())
                                  .build();
@@ -340,10 +333,6 @@ public class AggregateRepositoryShould {
 
         @Apply
         private void apply(ProjectStarted event) {
-        }
-
-        static void clearCommandsHandled() {
-            commandsHandled.clear();
         }
 
         /**

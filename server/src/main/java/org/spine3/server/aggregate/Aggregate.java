@@ -30,6 +30,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.command.EventFactory;
@@ -223,14 +224,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * {@inheritDoc}
      *
      * <p>Overrides to apply generated events to the state.
+     * @param envelope
      */
     @Override
-    protected List<? extends Message> dispatchCommand(Message commandMessage,
-                                                      CommandContext context) {
-        final List<? extends Message> eventMessages = super.dispatchCommand(commandMessage,
-                                                                            context);
+    protected List<? extends Message> dispatchCommand(CommandEnvelope envelope) {
+        final List<? extends Message> eventMessages = super.dispatchCommand(envelope);
         try {
-            apply(eventMessages, context);
+            apply(eventMessages, envelope);
         } catch (InvocationTargetException e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -303,15 +303,14 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Applies event messages.
      *
      * @param eventMessages the event message to apply
-     * @param commandContext the context of the command, execution of which produces
-     *                       the passed events
+     * @param envelope      the envelope of the command which caused the events
      * @throws InvocationTargetException if an exception occurs during event applying
      */
-    private void apply(Iterable<? extends Message> eventMessages, CommandContext commandContext)
+    private void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope)
             throws InvocationTargetException {
         createBuilder();
         try {
-            applyMessages(eventMessages, commandContext);
+            applyMessages(eventMessages, envelope);
         } finally {
             updateState();
         }
@@ -320,15 +319,15 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     /**
      * Applies the passed event message or {@code Event} to the aggregate.
      *
-     * @param eventMessages  the event message to apply
-     * @param commandContext the context of the command which handler generated the message or event
+     * @param eventMessages the event messages or events to apply
+     * @param envelope      the envelope of the command which generated the events
      * @throws InvocationTargetException if the applier method throws an exception
      * @see #ensureEventMessage(Message)
      */
     private void applyMessages(Iterable<? extends Message> eventMessages,
-                               CommandContext commandContext) throws InvocationTargetException {
+                               CommandEnvelope envelope) throws InvocationTargetException {
         final List<? extends Message> messages = Lists.newArrayList(eventMessages);
-        final EventFactory eventFactory = createEventFactory(commandContext, messages.size());
+        final EventFactory eventFactory = createEventFactory(envelope, messages.size());
 
         for (Message eventOrMessage : messages) {
             final Message eventMessage = ensureEventMessage(eventOrMessage);
@@ -338,7 +337,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
 
             final Event event;
             if (eventOrMessage instanceof Event) {
-                event = importEvent((Event) eventOrMessage, commandContext);
+                event = importEvent((Event) eventOrMessage, envelope.getCommandContext());
             } else {
                 event = eventFactory.createEvent(eventMessage, getVersion());
             }
@@ -366,11 +365,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         return result;
     }
 
-    private EventFactory createEventFactory(CommandContext commandContext, int eventCount) {
+    private EventFactory createEventFactory(CommandEnvelope envelope, int eventCount) {
         final EventFactory result = EventFactory.newBuilder()
+                                                .setCommandId(envelope.getCommandId())
                                                 .setProducerId(getProducerId())
                                                 .setMaxEventCount(eventCount)
-                                                .setCommandContext(commandContext)
+                                                .setCommandContext(envelope.getCommandContext())
                                                 .build();
         return result;
     }

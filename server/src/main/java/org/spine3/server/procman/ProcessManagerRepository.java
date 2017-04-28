@@ -28,6 +28,7 @@ import org.spine3.base.EventContext;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcherDelegate;
 import org.spine3.server.entity.EventDispatchingRepository;
@@ -108,7 +109,7 @@ public abstract class ProcessManagerRepository<I,
      * a new process manager is created and stored after it handles the passed command.
      *
      * @param envelope a request to dispatch
-     * @see ProcessManager#dispatchCommand(Message, CommandContext)
+     * @see CommandHandlingEntity#dispatchCommand(CommandEnvelope)
      */
     @Override
     public void dispatchCommand(CommandEnvelope envelope) {
@@ -118,7 +119,7 @@ public abstract class ProcessManagerRepository<I,
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
         final P manager = findOrCreate(id);
-        final List<Event> events = manager.dispatchCommand(commandMessage, context);
+        final List<Event> events = manager.dispatchCommand(envelope);
         store(manager);
         postEvents(events);
     }

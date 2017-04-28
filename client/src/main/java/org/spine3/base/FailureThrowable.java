@@ -25,6 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.spine3.annotations.Internal;
 
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.time.Time.getCurrentTime;
@@ -44,25 +45,13 @@ public abstract class FailureThrowable extends Throwable {
      */
     private final GeneratedMessageV3 failureMessage;
 
-    /**
-     * The message of the {@code Command}, which led to this {@code Failure}.
-     */
-    private final GeneratedMessageV3 commandMessage;
-
-    /**
-     * The context of the {@code Command}, which led to this {@code Failure}.
-     */
-    private final CommandContext commandContext;
-
     /** The moment of creation of this object. */
     private final Timestamp timestamp;
 
-    protected FailureThrowable(GeneratedMessageV3 commandMessage,
-                               CommandContext commandContext,
+    protected FailureThrowable(GeneratedMessageV3 unused,
+                               CommandContext ignored,
                                GeneratedMessageV3 failureMessage) {
         super();
-        this.commandMessage = commandMessage;
-        this.commandContext = commandContext;
         this.failureMessage = failureMessage;
         this.timestamp = getCurrentTime();
     }
@@ -80,22 +69,24 @@ public abstract class FailureThrowable extends Throwable {
 
     /**
      * Converts this {@code FailureThrowable} into {@link Failure}.
+     *
+     * @param command the command which caused the failure
      */
-    public Failure toFailure() {
+    @Internal
+    public Failure toFailure(Command command) {
         final Any packedMessage = pack(failureMessage);
-        final Failure.Builder builder =
-                Failure.newBuilder()
-                       .setMessage(packedMessage)
-                       .setContext(createContext());
-        return builder.build();
+        final FailureContext context = createContext(command);
+        final FailureId id = Failures.generateId();
+        return Failure.newBuilder()
+                      .setId(id)
+                      .setMessage(packedMessage)
+                      .setContext(context)
+                      .build();
     }
 
-    private FailureContext createContext() {
+    private FailureContext createContext(Command command) {
         final String stacktrace = Throwables.getStackTraceAsString(this);
-        final Command command = Commands.createCommand(commandMessage, commandContext);
-
         return FailureContext.newBuilder()
-                             .setFailureId(Failures.generateId())
                              .setTimestamp(timestamp)
                              .setStacktrace(stacktrace)
                              .setCommand(command)

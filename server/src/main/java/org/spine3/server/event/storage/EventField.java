@@ -24,7 +24,7 @@ import org.spine3.annotations.SPI;
 import org.spine3.server.storage.StorageField;
 
 /**
- * A container for the storage fields required for storing events.
+ * Enumeration of storage fields required for storing events.
  *
  * @author Dmytro Dashenkov
  * @see StorageField
@@ -33,26 +33,17 @@ import org.spine3.server.storage.StorageField;
 public enum EventField implements StorageField {
 
     /**
-     * A field representing the string representation of
-     * the {@linkplain org.spine3.base.EventContext#getProducerId() producer ID} of an event.
-     *
-     * <p>Typically, it's an ID of an {@linkplain org.spine3.server.aggregate.Aggregate aggregate}
-     * that produced the {@linkplain org.spine3.base.Event event}.
+     * A field a string value of an identifier of an entity produced the event.
      */
     producer_id,
 
     /**
-     * A field representing the {@linkplain org.spine3.base.EventContext#getEventId() event ID}.
-     *
-     * <p>The string representation is what is stored in this field indeed.
+     * A field containing value of an event ID.
      */
     event_id,
 
     /**
-     * A field representing the type of an {@linkplain org.spine3.base.Event event} message,
-     * e.g. as a {@link org.spine3.type.TypeUrl type URL}.
-     *
-     * <p>This field may be used for serialization.
+     * A type of an event message.
      */
     event_type
 }

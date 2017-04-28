@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.reflect.CommandHandlerMethod;
@@ -95,12 +96,13 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * Dispatches the command to the handler method and transforms the output
      * into a list of events.
      *
+     * @param envelope the envelop with the command to dispatch
      * @return the list of events generated as the result of handling the command.
      */
     @Override
-    protected List<Event> dispatchCommand(Message commandMessage, CommandContext context) {
-        final List<? extends Message> messages = super.dispatchCommand(commandMessage, context);
-        final List<Event> result = toEvents(messages, context);
+    protected List<Event> dispatchCommand(CommandEnvelope envelope) {
+        final List<? extends Message> messages = super.dispatchCommand(envelope);
+        final List<Event> result = toEvents(messages, envelope);
         return result;
     }
 
@@ -108,15 +110,15 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * Transforms the passed list of event messages into the list of events.
      *
      * @param eventMessages event messages for which generate events
-     * @param commandContext the context of the command which generated the event messages
+     * @param envelope the context of the command which generated the event messages
      * @return list of events
      */
     private List<Event> toEvents(List<? extends Message> eventMessages,
-                                 final CommandContext commandContext) {
+                                 final CommandEnvelope envelope) {
         return CommandHandlerMethod.toEvents(getProducerId(),
                                              getVersion(),
                                              eventMessages,
-                                             commandContext);
+                                             envelope);
     }
 
     /**
