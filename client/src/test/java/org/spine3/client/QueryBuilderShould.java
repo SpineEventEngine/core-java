@@ -38,12 +38,15 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.client.ActorRequestFactory.QueryParameter.eq;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -164,7 +167,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @SuppressWarnings("OverlyLongMethod")
-        // A big test case covering the query arguments co-living
+    // A big test case covering the query arguments co-living
     @Test
     public void create_queries_with_all_arguments() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
@@ -216,6 +219,62 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertNotNull(actualValue2);
         final Message actualGenericValue2 = ProtoToJavaMapper.map(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
+    }
+
+    @Test
+    public void persist_only_last_ids_clause() {
+        final Iterable<?> genericIds = asList(newUuid(),
+                                              -1,
+                                              Sample.messageOfType(ProjectId.class));
+        final long[] longIds = {1L, 2L, 3L};
+        final Message[] messageIds = {
+                Sample.messageOfType(ProjectId.class),
+                Sample.messageOfType(ProjectId.class),
+                Sample.messageOfType(ProjectId.class)
+        };
+        final String[] stringIds = {
+                newUuid(),
+                newUuid(),
+                newUuid()
+        };
+        final int[] intIds = {4, 5, 6};
+
+        final Query query = factory().query()
+                                     .select(TestEntity.class)
+                                     .whereIdIn(genericIds)
+                                     .whereIdIn(longIds)
+                                     .whereIdIn(stringIds)
+                                     .whereIdIn(intIds)
+                                     .whereIdIn(messageIds)
+                                     .build();
+        assertNotNull(query);
+
+        final Target target = query.getTarget();
+        final EntityFilters filters = target.getFilters();
+        final Collection<EntityId> entityIds = filters.getIdFilter()
+                                                      .getIdsList();
+        assertSize(messageIds.length, entityIds);
+        final Function<EntityId, ?> transformer = new EntityIdUnpacker<>(ProjectId.class);
+        final Collection<?> actualValues = Collections2.transform(entityIds, transformer);
+        assertContains(asList(messageIds), actualValues);
+    }
+
+    @Test
+    public void persist_only_last_field_mask() {
+        final Iterable<String> iterableFields = singleton("TestEntity.firstField");
+        final String[] arrayFields = {"TestEntity.secondField"};
+
+        final Query query = factory().query()
+                                     .select(TestEntity.class)
+                                     .fields(iterableFields)
+                                     .fields(arrayFields)
+                                     .build();
+        assertNotNull(query);
+        final FieldMask mask = query.getFieldMask();
+
+        final Collection<String> maskFields = mask.getPathsList();
+        assertSize(arrayFields.length, maskFields);
+        assertContains(asList(arrayFields), maskFields);
     }
 
     private static class EntityIdUnpacker<T> implements Function<EntityId, T> {
