@@ -26,6 +26,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.json.Json;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.test.client.TestEntity;
@@ -38,10 +39,12 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Collections2.transform;
+import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -276,6 +279,37 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final Collection<String> maskFields = mask.getPathsList();
         assertSize(arrayFields.length, maskFields);
         assertThat(maskFields, contains(arrayFields));
+    }
+
+    @Test
+    public void support_toString() {
+        final Class<? extends Message> testEntityClass = TestEntity.class;
+        final int id1 = 314;
+        final int id2 = 271;
+        final String columnName1 = "column1";
+        final Object columnValue1 = 42;
+        final String columnName2 = "column2";
+        final Message columnValue2 = Sample.messageOfType(ProjectId.class);
+        final String fieldName = "TestEntity.secondField";
+        final ActorRequestFactory.QueryBuilder builder = factory().query()
+                                                                  .select(testEntityClass)
+                                                                  .fields(fieldName)
+                                                                  .whereIdIn(id1, id2)
+                                                                  .where(eq(columnName1,
+                                                                            columnValue1),
+                                                                         eq(columnName2,
+                                                                            columnValue2));
+
+        final String stringRepr = builder.toString();
+
+        assertThat(stringRepr, containsString(testEntityClass.getSimpleName()));
+        assertThat(stringRepr, containsString(valueOf(id1)));
+        assertThat(stringRepr, containsString(valueOf(id2)));
+        assertThat(stringRepr, containsString(columnName1));
+        assertThat(stringRepr, containsString(valueOf(columnValue1)));
+        assertThat(stringRepr, containsString(columnName2));
+        assertThat(stringRepr, containsString(Json.toCompactJson(columnValue2)));
+        assertThat(stringRepr, containsString(fieldName));
     }
 
     private static class EntityIdUnpacker<T> implements Function<EntityId, T> {
