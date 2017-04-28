@@ -115,7 +115,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
         }
         final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
-        markAsScheduled(commandUpdated);
+        rememberAsScheduled(commandUpdated);
     }
 
     /**
@@ -158,7 +158,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
         return isScheduledAlready;
     }
 
-    private static void markAsScheduled(Command command) {
+    private static void rememberAsScheduled(Command command) {
         final CommandId id = command.getId();
         scheduledCommandIds.add(id);
     }
@@ -210,13 +210,18 @@ public abstract class CommandScheduler implements CommandBusFilter {
         final CommandContext.Schedule scheduleUpdated = context.getSchedule()
                                                                .toBuilder()
                                                                .setDelay(delay)
-                                                               .setSchedulingTime(schedulingTime)
                                                                .build();
         final CommandContext contextUpdated = context.toBuilder()
                                                      .setSchedule(scheduleUpdated)
                                                      .build();
+
+        final Command.SystemProperties sysProps = command.getSystemProperties()
+                                                         .toBuilder()
+                                                         .setSchedulingTime(schedulingTime)
+                                                         .build();
         final Command result = command.toBuilder()
                                       .setContext(contextUpdated)
+                                      .setSystemProperties(sysProps)
                                       .build();
         return result;
     }

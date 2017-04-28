@@ -196,25 +196,30 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = requestFactory.command().create(Wrapper.forString(newUuid()));
+        final Command cmd = requestFactory.command()
+                                          .create(Wrapper.forString(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations2.minutes(5);
 
         final Command cmdUpdated = setSchedule(cmd, delay, schedulingTime);
+        final CommandContext.Schedule schedule = cmdUpdated.getContext()
+                                                           .getSchedule();
 
-        final CommandContext.Schedule schedule = cmdUpdated.getContext().getSchedule();
         assertEquals(delay, schedule.getDelay());
-        assertEquals(schedulingTime, schedule.getSchedulingTime());
+        assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
+                                               .getSchedulingTime());
     }
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = requestFactory.command().create(Wrapper.forString(newUuid()));
+        final Command cmd = requestFactory.command()
+                                          .create(Wrapper.forString(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);
 
-        assertEquals(schedulingTime, cmdUpdated.getContext().getSchedule().getSchedulingTime());
+        assertEquals(schedulingTime, cmdUpdated.getSystemProperties()
+                                               .getSchedulingTime());
     }
 
     /*
