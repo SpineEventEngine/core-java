@@ -28,7 +28,7 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.ProtoToJavaMapper;
+import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.test.client.TestEntity;
 import org.spine3.test.validate.msg.ProjectId;
 import org.spine3.testdata.Sample;
@@ -157,12 +157,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Any actualValue1 = columnFilters.get(columnName1);
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = ProtoToJavaMapper.map(actualValue1, int.class);
+        final int actualGenericValue1 = ProtoJavaMapper.map(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
         final Any actualValue2 = columnFilters.get(columnName2);
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = ProtoToJavaMapper.map(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = ProtoJavaMapper.map(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
@@ -212,12 +212,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Any actualValue1 = columnFilters.get(columnName1);
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = ProtoToJavaMapper.map(actualValue1, int.class);
+        final int actualGenericValue1 = ProtoJavaMapper.map(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
         final Any actualValue2 = columnFilters.get(columnName2);
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = ProtoToJavaMapper.map(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = ProtoJavaMapper.map(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
@@ -289,7 +289,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         public T apply(@Nullable EntityId entityId) {
             assertNotNull(entityId);
             final Any value = entityId.getId();
-            final T actual = ProtoToJavaMapper.map(value, targetClass);
+            final T actual = ProtoJavaMapper.map(value, targetClass);
             return actual;
         }
     }

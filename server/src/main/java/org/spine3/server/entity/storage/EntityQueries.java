@@ -34,7 +34,7 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.ProtoToJavaMapper.map;
+import static org.spine3.protobuf.ProtoJavaMapper.map;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.

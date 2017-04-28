@@ -20,7 +20,7 @@
 package org.spine3.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Sets;
+import com.google.common.base.Function;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -30,6 +30,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
+import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -37,12 +38,15 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 import static org.spine3.client.Queries.queryBuilderFor;
 import static org.spine3.client.Targets.composeTarget;
@@ -55,6 +59,11 @@ import static org.spine3.time.Time.getCurrentTime;
  * @author Alexander Yevsyukov
  */
 public class ActorRequestFactory {
+
+    /**
+     * The format of all {@linkplain QueryId query identifiers}.
+     */
+    private static final String QUERY_ID_FORMAT = "query-%s";
 
     private final UserId actor;
 
@@ -146,18 +155,36 @@ public class ActorRequestFactory {
         return builder.build();
     }
 
+    private Query composeQuery(Class<? extends Message> entityClass,
+                               @Nullable Set<? extends Message> ids,
+                               @Nullable Map<String, Any> columnFilters,
+                               @Nullable FieldMask fieldMask) {
+        checkNotNull(entityClass, "The class of Entity must be specified for a Query");
+
+        final Query.Builder builder = queryBuilderFor(entityClass,
+                                                      ids,
+                                                      columnFilters,
+                                                      fieldMask);
+
+        builder.setId(newQueryId());
+        builder.setContext(actorContext());
+        return builder.build();
+    }
+
+    private QueryId newQueryId() {
+        final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+        return QueryId.newBuilder()
+                      .setUuid(formattedId)
+                      .build();
+    }
+
     /**
      * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}
      * configuration.
      */
     public final class ForQuery {
 
-        /**
-         * The format of all {@linkplain QueryId query identifiers}.
-         */
-        private static final String QUERY_ID_FORMAT = "query-%s";
         private static final String ENTITY_IDS_EMPTY_MSG = "Entity ID set must not be empty";
-        private static final String COLUMNS_EMPTY_MSG = "Column filters set must not be empty";
 
         private ForQuery() {
             // Prevent instantiation from the outside.
@@ -265,36 +292,21 @@ public class ActorRequestFactory {
 
             return composeQuery(entityClass, null, null, null);
         }
-
-        private Query composeQuery(Class<? extends Message> entityClass,
-                                   @Nullable Set<? extends Message> ids,
-                                   @Nullable Map<String, Any> columnFilters,
-                                   @Nullable FieldMask fieldMask) {
-            checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-
-            final Query.Builder builder = queryBuilderFor(entityClass,
-                                                          ids,
-                                                          columnFilters,
-                                                          fieldMask);
-
-            builder.setId(newQueryId());
-            builder.setContext(actorContext());
-            return builder.build();
-        }
-
-        private QueryId newQueryId() {
-            final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
-            return QueryId.newBuilder()
-                          .setUuid(formattedId)
-                          .build();
-        }
     }
 
-    public static final class QueryBuilder {
+    public final class QueryBuilder {
 
         private final Class<? extends Message> targetType;
+
+        // All the optional fields are initialized only when and if set
+
+        @Nullable
         private Set<?> ids;
+
+        @Nullable
         private Map<String, Any> columns;
+
+        @Nullable
         private Set<String> fieldMask;
 
         private QueryBuilder(Class<? extends Message> targetType) {
@@ -302,27 +314,27 @@ public class ActorRequestFactory {
         }
 
         public QueryBuilder whereIdIn(Iterable<?> ids) {
-            this.ids = Sets.newHashSet(ids);
+            this.ids = newHashSet(ids);
             return this;
         }
 
         public QueryBuilder whereIdIn(Message... ids) {
-            this.ids = Sets.newHashSet(ids);
+            this.ids = newHashSet(ids);
             return this;
         }
 
         public QueryBuilder whereIdIn(String... ids) {
-            this.ids = Sets.newHashSet(ids);
+            this.ids = newHashSet(ids);
             return this;
         }
 
         public QueryBuilder whereIdIn(int... ids) {
-            this.ids = Sets.newHashSet(ids);
+            this.ids = newHashSet(ids);
             return this;
         }
 
         public QueryBuilder whereIdIn(long... ids) {
-            this.ids = Sets.newHashSet(ids);
+            this.ids = newHashSet(ids);
             return this;
         }
 
@@ -335,17 +347,51 @@ public class ActorRequestFactory {
         }
 
         public QueryBuilder fields(Iterable<String> fieldMask) {
-            this.fieldMask = Sets.newHashSet(fieldMask);
+            this.fieldMask = newHashSet(fieldMask);
             return this;
         }
 
         public QueryBuilder fields(String... fieldNames) {
-            this.fieldMask = Sets.newHashSet(fieldNames);
+            this.fieldMask = newHashSet(fieldNames);
             return this;
         }
 
         public Query build() {
-            return null;
+            final FieldMask mask = composeMask();
+            // Implying AnyPacker.pack to be idempotent
+            final Set<Any> entityIds = composeIdPredicate();
+
+            final Query result = composeQuery(targetType, entityIds, columns, mask);
+            return result;
+        }
+
+        @Nullable
+        private FieldMask composeMask() {
+            if (fieldMask == null || fieldMask.isEmpty()) {
+                return null;
+            }
+            final FieldMask mask = FieldMask.newBuilder()
+                                            .addAllPaths(fieldMask)
+                                            .build();
+            return mask;
+        }
+
+        @Nullable
+        private Set<Any> composeIdPredicate() {
+            if (ids == null || ids.isEmpty()) {
+                return null;
+            }
+            final Collection<Any> entityIds = transform(ids, new Function<Object, Any>() {
+                @Nullable
+                @Override
+                public Any apply(@Nullable Object o) {
+                    checkNotNull(o);
+                    final Any id = Identifiers.idToAny(o);
+                    return id;
+                }
+            });
+            final Set<Any> result = newHashSet(entityIds);
+            return result;
         }
     }
 
@@ -362,8 +408,9 @@ public class ActorRequestFactory {
         public static QueryParameter eq(String columnName, Object value) {
             checkNotNull(columnName);
             checkNotNull(value);
-//            final Any wrappedValue =
-            return null;
+            final Any wrappedValue = ProtoJavaMapper.map(value);
+            final QueryParameter parameter = new QueryParameter(columnName, wrappedValue);
+            return parameter;
         }
 
         public String getColumnName() {

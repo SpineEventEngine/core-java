@@ -43,18 +43,18 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Dmytro Dashenkov
  */
-public class ProtoToJavaMapperShould {
+public class ProtoJavaMapperShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(ProtoToJavaMapper.class);
+        assertHasPrivateParameterlessCtor(ProtoJavaMapper.class);
     }
 
     @Test
     public void pass_null_check() {
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .testStaticMethods(ProtoToJavaMapper.class,
+                .testStaticMethods(ProtoJavaMapper.class,
                                    NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -64,7 +64,7 @@ public class ProtoToJavaMapperShould {
                                            .setValue("my-command-message")
                                            .build();
         final Any wrapped = AnyPacker.pack(message);
-        final Message result = ProtoToJavaMapper.map(wrapped, Message.class);
+        final Message result = ProtoJavaMapper.map(wrapped, Message.class);
         assertEquals(message, result);
     }
 
@@ -75,7 +75,7 @@ public class ProtoToJavaMapperShould {
                                         .setValue(rowValue)
                                         .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, int.class);
+        final Object result = ProtoJavaMapper.map(wrapped, int.class);
         assertEquals(rowValue, result);
     }
 
@@ -86,7 +86,7 @@ public class ProtoToJavaMapperShould {
                                         .setValue(rowValue)
                                         .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, long.class);
+        final Object result = ProtoJavaMapper.map(wrapped, long.class);
         assertEquals(rowValue, result);
     }
 
@@ -97,7 +97,7 @@ public class ProtoToJavaMapperShould {
                                          .setValue(rowValue)
                                          .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, int.class);
+        final Object result = ProtoJavaMapper.map(wrapped, int.class);
         assertEquals(rowValue, result);
     }
 
@@ -108,7 +108,7 @@ public class ProtoToJavaMapperShould {
                                          .setValue(rowValue)
                                          .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, long.class);
+        final Object result = ProtoJavaMapper.map(wrapped, long.class);
         assertEquals(rowValue, result);
     }
 
@@ -119,7 +119,7 @@ public class ProtoToJavaMapperShould {
                                         .setValue(rowValue)
                                         .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, float.class);
+        final Object result = ProtoJavaMapper.map(wrapped, float.class);
         assertEquals(rowValue, result);
     }
 
@@ -130,7 +130,7 @@ public class ProtoToJavaMapperShould {
                                          .setValue(rowValue)
                                          .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, double.class);
+        final Object result = ProtoJavaMapper.map(wrapped, double.class);
         assertEquals(rowValue, result);
     }
 
@@ -141,7 +141,7 @@ public class ProtoToJavaMapperShould {
                                        .setValue(rowValue)
                                        .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, boolean.class);
+        final Object result = ProtoJavaMapper.map(wrapped, boolean.class);
         assertEquals(rowValue, result);
     }
 
@@ -152,7 +152,7 @@ public class ProtoToJavaMapperShould {
                                          .setValue(rowValue)
                                          .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, String.class);
+        final Object result = ProtoJavaMapper.map(wrapped, String.class);
         assertEquals(rowValue, result);
     }
 
@@ -163,7 +163,7 @@ public class ProtoToJavaMapperShould {
                                         .setValue(rowValue)
                                         .build();
         final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoToJavaMapper.map(wrapped, ByteString.class);
+        final Object result = ProtoJavaMapper.map(wrapped, ByteString.class);
         assertEquals(rowValue, result);
     }
 }
