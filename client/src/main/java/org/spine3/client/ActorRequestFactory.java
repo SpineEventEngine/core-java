@@ -21,6 +21,8 @@ package org.spine3.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
+import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
@@ -31,6 +33,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
+import org.spine3.json.Json;
 import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
@@ -40,7 +43,6 @@ import org.spine3.users.UserId;
 import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -51,6 +53,7 @@ import static com.google.common.collect.Sets.newHashSet;
 import static java.lang.String.format;
 import static org.spine3.client.Queries.queryBuilderFor;
 import static org.spine3.client.Targets.composeTarget;
+import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -172,7 +175,7 @@ public class ActorRequestFactory {
         return builder.build();
     }
 
-    private QueryId newQueryId() {
+    private static QueryId newQueryId() {
         final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
         return QueryId.newBuilder()
                       .setUuid(formattedId)
@@ -191,6 +194,13 @@ public class ActorRequestFactory {
             // Prevent instantiation from the outside.
         }
 
+        /**
+         * Creates a new instance of {@link QueryBuilder} for the further {@linkplain Query}
+         * construction.
+         *
+         * @param targetType the {@linkplain Query query} target type
+         * @return new instance of {@link QueryBuilder}
+         */
         public QueryBuilder select(Class<? extends Message> targetType) {
             checkNotNull(targetType);
             final QueryBuilder queryBuilder = new QueryBuilder(targetType);
@@ -295,6 +305,19 @@ public class ActorRequestFactory {
         }
     }
 
+    /**
+     * A builder for the {@link Query} instances.
+     *
+     * <p>The API of this class is insiped by the SQL syntax.
+     *
+     * <p>Calling any of the methods is optional. Call {@link #build() build()} to retrieve
+     * the instance of {@link Query}.
+     *
+     * <p>Calling of any of the builder methods overrides the previous call of the given method of
+     * any of its overloads.
+     *
+     * @see ForQuery#select(Class) for the intialization
+     */
     public final class QueryBuilder {
 
         private final Class<? extends Message> targetType;
@@ -314,6 +337,20 @@ public class ActorRequestFactory {
             this.targetType = targetType;
         }
 
+        /**
+         * Sets the ID predicate to the {@linkplain Query}.
+         *
+         * <p>Though it's not prohibited in compile time, please make sure to pass instances of the
+         * same type to the argument of this method. Moreover, the instances must be of the type of
+         * the query target type identifier. This method or any of its overload do not check these
+         * constrains an assume they are followed by the caller.
+         *
+         * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query will
+         * retrieve all the records regardless their IDs.
+         *
+         * @param ids the values of the IDs to look up
+         * @return self for method chaining
+         */
         public QueryBuilder whereIdIn(Iterable<?> ids) {
             this.ids = ImmutableSet.builder()
                                    .add(ids)
@@ -321,52 +358,128 @@ public class ActorRequestFactory {
             return this;
         }
 
+        /**
+         * Sets the IP predicate to the {@linkplain Query}.
+         *
+         * @param ids the values of the IDs to look up
+         * @return self for method chaining
+         * @see #whereIdIn(Iterable)
+         */
         public QueryBuilder whereIdIn(Message... ids) {
             this.ids = ImmutableSet.<Message>builder()
-                                   .add(ids)
-                                   .build();
+                    .add(ids)
+                    .build();
             return this;
         }
 
+        /**
+         * Sets the IP predicate to the {@linkplain Query}.
+         *
+         * @param ids the values of the IDs to look up
+         * @return self for method chaining
+         * @see #whereIdIn(Iterable)
+         */
         public QueryBuilder whereIdIn(String... ids) {
             this.ids = ImmutableSet.<String>builder()
-                                   .add(ids)
-                                   .build();
+                    .add(ids)
+                    .build();
             return this;
         }
 
+        /**
+         * Sets the IP predicate to the {@linkplain Query}.
+         *
+         * @param ids the values of the IDs to look up
+         * @return self for method chaining
+         * @see #whereIdIn(Iterable)
+         */
         public QueryBuilder whereIdIn(Integer... ids) {
             this.ids = ImmutableSet.<Integer>builder()
-                                   .add(ids)
-                                   .build();
+                    .add(ids)
+                    .build();
             return this;
         }
 
+        /**
+         * Sets the IP predicate to the {@linkplain Query}.
+         *
+         * @param ids the values of the IDs to look up
+         * @return self for method chaining
+         * @see #whereIdIn(Iterable)
+         */
         public QueryBuilder whereIdIn(Long... ids) {
             this.ids = ImmutableSet.<Long>builder()
-                                   .add(ids)
-                                   .build();
+                    .add(ids)
+                    .build();
             return this;
         }
 
+        /**
+         * Sets the Entity Column predicate to the {@linkplain Query}.
+         *
+         * <p>If there are no {@link QueryParameter}s (i.e. the passed array is empty), all
+         * the records will be retrieved regardless the Entity Columns values.
+         *
+         * <p>The multiple parameters passed into this method are considered to be joined in
+         * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches all of
+         * these parameters.
+         *
+         * <p>The disjunctive filters currently are not supported.
+         *
+         * @param predicate the {@link QueryParameter}s to filter the requested entities by
+         * @return self for method chaining
+         * @see QueryParameter
+         */
         public QueryBuilder where(QueryParameter... predicate) {
-            columns = new HashMap<>(predicate.length);
+            final ImmutableMap.Builder<String, Any> mapBuilder = ImmutableMap.builder();
             for (QueryParameter param : predicate) {
-                columns.put(param.getColumnName(), param.getValue());
+                mapBuilder.put(param.getColumnName(), param.getValue());
             }
+            columns = mapBuilder.build();
             return this;
         }
 
-        public QueryBuilder fields(Iterable<String> fieldMask) {
-            this.fieldMask = newHashSet(fieldMask);
+        /**
+         * Sets the entity fields to retrieve.
+         *
+         * <p>The names of the fields must be formatted according to the {@link FieldMask}
+         * specification.
+         *
+         * <p>If there are no fields (i.e. an empty {@link Iterable} is passed), all the fields will
+         * be retrieved.
+         *
+         * @param fieldNames the fields to query
+         * @return self for method chaining
+         */
+        public QueryBuilder fields(Iterable<String> fieldNames) {
+            this.fieldMask = ImmutableSet.copyOf(fieldNames);
             return this;
         }
 
+        /**
+         * Sets the entity fields to retrieve.
+         *
+         * <p>The names of the fields must be formatted according to the {@link FieldMask}
+         * specification.
+         *
+         * <p>If there are no fields (i.e. an empty array is passed), all the fields will
+         * be retrieved.
+         *
+         * @param fieldNames the fields to query
+         * @return self for method chaining
+         */
         public QueryBuilder fields(String... fieldNames) {
-            this.fieldMask = newHashSet(fieldNames);
+            this.fieldMask = ImmutableSet.<String>builder()
+                    .add(fieldNames)
+                    .build();
             return this;
         }
 
+        /**
+         * Generates a new instance of {@link Query} regarding all the set parameters.
+         *
+         * @return the built {@link Query}
+         */
         public Query build() {
             final FieldMask mask = composeMask();
             // Implying AnyPacker.pack to be idempotent
@@ -404,9 +517,48 @@ public class ActorRequestFactory {
             final Set<Any> result = newHashSet(entityIds);
             return result;
         }
+
+        @SuppressWarnings("MethodWithMoreThanThreeNegations")
+            // OK for this method as it's used primarily for debugging
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append(QueryBuilder.class.getSimpleName())
+              .append('(')
+              .append("SELECT ");
+            if (fieldMask == null || fieldMask.isEmpty()) {
+                sb.append('*');
+            } else {
+                sb.append(fieldMask);
+            }
+            sb.append(" FROM ")
+              .append(targetType.getSimpleName())
+              .append(" WHERE (");
+            if (ids != null && !ids.isEmpty()) {
+                sb.append("id IN ")
+                  .append(ids)
+                  .append("; ");
+            }
+            if (columns != null && !columns.isEmpty()) {
+                for (Map.Entry<String, Any> column : columns.entrySet()) {
+                    sb.append(column.getKey())
+                      .append('=')
+                      .append(Json.toCompactJson(unpack(column.getValue())))
+                      .append("; ");
+                }
+            }
+            sb.append(");");
+            return sb.toString();
+        }
     }
 
-    public static class QueryParameter {
+    /**
+     * A parameter of a {@link Query} to the read side.
+     *
+     * <p>This class may be considered as a filter for the query. An instance contains the name of
+     * the Entity Column to filter by and the value of the Column.
+     */
+    public static final class QueryParameter {
 
         private final String columnName;
         private final Any value;
@@ -416,6 +568,13 @@ public class ActorRequestFactory {
             this.value = value;
         }
 
+        /**
+         * Creates new equality {@code QueryParameter}.
+         *
+         * @param columnName the name of the Entity Column to query by
+         * @param value      the requested value of the Entity Column
+         * @return new instance of the QueryParameter
+         */
         public static QueryParameter eq(String columnName, Object value) {
             checkNotNull(columnName);
             checkNotNull(value);
@@ -430,6 +589,35 @@ public class ActorRequestFactory {
 
         public Any getValue() {
             return value;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            QueryParameter parameter = (QueryParameter) o;
+            return Objects.equal(getColumnName(), parameter.getColumnName()) &&
+                    Objects.equal(getValue(), parameter.getValue());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getColumnName(), getValue());
+        }
+
+        @Override
+        public String toString() {
+            final StringBuilder sb = new StringBuilder();
+            sb.append('(')
+              .append(columnName)
+              .append(" = ")
+              .append(unpack(value))
+              .append(')');
+            return sb.toString();
         }
     }
 
