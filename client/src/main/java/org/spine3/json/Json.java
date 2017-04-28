@@ -56,7 +56,7 @@ public class Json {
      * @return Json string
      */
     public static String toJson(Message message) {
-        final String result = toJson(message, JsonPrinter.instance());
+        final String result = toJson(message, JsonPrinter.getInstance());
         return result;
     }
 
@@ -69,7 +69,7 @@ public class Json {
      * @return the converted message to Json
      */
     public static String toCompactJson(Message message) {
-        final JsonFormat.Printer compactPrinter = JsonPrinter.instance()
+        final JsonFormat.Printer compactPrinter = JsonPrinter.getInstance()
                                                              .omittingInsignificantWhitespace();
         final String result = toJson(message, compactPrinter);
         return result;
@@ -93,7 +93,7 @@ public class Json {
         checkNotNull(json);
         try {
             final Message.Builder messageBuilder = builderFor(messageClass);
-            JsonParser.instance()
+            JsonParser.getInstance()
                       .merge(json, messageBuilder);
             final T result = (T) messageBuilder.build();
             return result;
@@ -130,7 +130,7 @@ public class Json {
         private final JsonFormat.Printer value = JsonFormat.printer()
                                                            .usingTypeRegistry(typeRegistry);
 
-        private static JsonFormat.Printer instance() {
+        private static JsonFormat.Printer getInstance() {
             return INSTANCE.value;
         }
     }
@@ -142,7 +142,7 @@ public class Json {
         private final JsonFormat.Parser value = JsonFormat.parser()
                                                           .usingTypeRegistry(typeRegistry);
 
-        private static JsonFormat.Parser instance() {
+        private static JsonFormat.Parser getInstance() {
             return INSTANCE.value;
         }
     }

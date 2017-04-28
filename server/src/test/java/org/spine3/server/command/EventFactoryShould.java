@@ -21,10 +21,15 @@
 package org.spine3.server.command;
 
 import com.google.protobuf.Empty;
+import com.google.protobuf.Message;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
+import org.spine3.base.Commands;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.test.TestActorRequestFactory;
+import org.spine3.test.Tests;
 
 import static org.spine3.test.Tests.newUuidValue;
 
@@ -36,28 +41,54 @@ public class EventFactoryShould {
     private final ActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(getClass());
 
+    private Message producerId;
+    private CommandContext commandContext;
+    private CommandId commandId;
+
+    @Before
+    public void setUp() {
+        commandContext = requestFactory.command()
+                                       .create(Empty.getDefaultInstance())
+                                       .getContext();
+        producerId = newUuidValue();
+        commandId = Commands.generateId();
+    }
+
     @Test(expected = NullPointerException.class)
     public void require_producer_id_in_builder() {
-        final CommandContext ctx = requestFactory.command()
-                                                 .create(Empty.getDefaultInstance())
-                                                 .getContext();
         EventFactory.newBuilder()
-                    .setCommandContext(ctx)
+                    .setCommandContext(commandContext)
+                    .setCommandId(commandId)
                     .build();
     }
 
     @Test(expected = NullPointerException.class)
     public void require_non_null_command_context_in_builder() {
         EventFactory.newBuilder()
-                    .setProducerId(newUuidValue())
+                    .setProducerId(producerId)
+                    .setCommandId(commandId)
                     .build();
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void require_non_default_command_context_in_builder() {
         EventFactory.newBuilder()
-                    .setProducerId(newUuidValue())
+                    .setProducerId(producerId)
+                    .setCommandId(commandId)
                     .setCommandContext(CommandContext.getDefaultInstance())
+                    .build();
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void require_non_null_command_id() {
+        EventFactory.newBuilder().setCommandId(Tests.<CommandId>nullRef());
+    }
+    
+    @Test(expected = NullPointerException.class)
+    public void require_set_command_id() {
+        EventFactory.newBuilder()
+                    .setProducerId(producerId)
+                    .setCommandContext(commandContext)
                     .build();
     }
 }

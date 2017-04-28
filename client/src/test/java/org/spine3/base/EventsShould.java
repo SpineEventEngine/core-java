@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.EventTests;
@@ -48,10 +49,7 @@ import static org.spine3.base.Events.getTimestamp;
 import static org.spine3.base.Events.sort;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newBoolValue;
-import static org.spine3.protobuf.Values.newDoubleValue;
-import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.protobuf.Values.pack;
+import static org.spine3.protobuf.Wrapper.forBoolean;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.test.TimeTests.Past.minutesAgo;
@@ -63,14 +61,16 @@ import static org.spine3.test.TimeTests.Past.minutesAgo;
 public class EventsShould {
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(pack(EventsShould.class.getSimpleName()),
+            TestEventFactory.newInstance(Wrapper.forString()
+                                                .pack(EventsShould.class.getSimpleName()),
                                          EventsShould.class);
+    private Event event;
     private EventContext context;
 
-    private final StringValue stringValue = newStringValue(newUuid());
-    private final BoolValue boolValue = newBoolValue(true);
+    private final StringValue stringValue = Wrapper.forString(newUuid());
+    private final BoolValue boolValue = forBoolean(true);
     @SuppressWarnings("MagicNumber")
-    private final DoubleValue doubleValue = newDoubleValue(10.1);
+    private final DoubleValue doubleValue = Wrapper.forDouble(10.1);
 
     static EventContext newEventContext() {
         final Event event = eventFactory.createEvent(Time.getCurrentTime(),
@@ -94,13 +94,15 @@ public class EventsShould {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(getClass());
         final Command cmd = requestFactory.command().create(Time.getCurrentTime());
-        final StringValue producerId = newStringValue(getClass().getSimpleName());
+        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
         EventFactory eventFactory = EventFactory.newBuilder()
+                                                .setCommandId(Commands.generateId())
                                                 .setProducerId(producerId)
                                                 .setCommandContext(cmd.getContext())
                                                 .build();
-        context = eventFactory.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef())
-                              .getContext();
+        event = eventFactory.createEvent(Time.getCurrentTime(),
+                                                     Tests.<Version>nullRef());
+        context = event.getContext();
     }
 
     @Test
@@ -111,6 +113,7 @@ public class EventsShould {
     @Test
     public void return_actor_from_EventContext() {
         assertEquals(context.getCommandContext()
+                            .getActorContext()
                             .getActor(), getActor(context));
     }
 
@@ -178,7 +181,7 @@ public class EventsShould {
 
     @Test
     public void provide_EventId_stringifier() {
-        final EventId id = context.getEventId();
+        final EventId id = event.getId();
         
         final String str = Stringifiers.toString(id);
         final EventId convertedBack = Stringifiers.fromString(str, EventId.class);
@@ -193,6 +196,7 @@ public class EventsShould {
 
     @Test
     public void accept_generated_event_id() {
-        checkValid(context.getEventId());
+        final EventId eventId = event.getId();
+        assertEquals(eventId, checkValid(eventId));
     }
 }

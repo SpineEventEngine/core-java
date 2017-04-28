@@ -23,7 +23,6 @@ package org.spine3.server.commandstore;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.server.commandbus.CommandRecord;
@@ -34,7 +33,6 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static org.spine3.base.Commands.generateId;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.time.Time.getCurrentTime;
@@ -81,11 +79,9 @@ class Records {
     static CommandRecord.Builder newRecordBuilder(Command command,
                                                   CommandStatus status,
                                                   @Nullable CommandId generatedCommandId) {
-        final CommandContext context = command.getContext();
-
         final CommandId commandId = generatedCommandId != null
                                     ? generatedCommandId
-                                    : context.getCommandId();
+                                    : command.getId();
 
         final String commandType = TypeName.ofCommand(command)
                                            .getSimpleName();
@@ -115,7 +111,7 @@ class Records {
      * where {@code command.context.command_id} field is empty.
      */
     static CommandId getOrGenerateCommandId(Command command) {
-        CommandId id = getId(command);
+        CommandId id = command.getId();
         if (idToString(id).equals(EMPTY_ID)) {
             id = generateId();
         }

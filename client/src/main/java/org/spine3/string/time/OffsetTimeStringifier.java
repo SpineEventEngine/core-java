@@ -39,7 +39,7 @@ final class OffsetTimeStringifier extends Stringifier<OffsetTime> implements Ser
     private static final long serialVersionUID = 1L;
     private static final OffsetTimeStringifier INSTANCE = new OffsetTimeStringifier();
 
-    static OffsetTimeStringifier instance() {
+    static OffsetTimeStringifier getInstance() {
         return INSTANCE;
     }
 

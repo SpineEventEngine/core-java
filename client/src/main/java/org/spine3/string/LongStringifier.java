@@ -36,7 +36,7 @@ final class LongStringifier extends Stringifier<Long> implements Serializable {
 
     private static final LongStringifier INSTANCE = new LongStringifier();
 
-    static LongStringifier instance() {
+    static LongStringifier getInstance() {
         return INSTANCE;
     }
 

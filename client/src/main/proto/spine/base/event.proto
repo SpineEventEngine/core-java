@@ -57,11 +57,14 @@ import "spine/base/enrichment.proto";
 //
 message Event {
 
+    // The ID of the event.
+    EventId id = 1 [(required) = true];
+
     // The message of the event wrapped into `Any`.
-    google.protobuf.Any message = 1 [(required) = true];
+    google.protobuf.Any message = 2 [(required) = true];
 
     // The context of the event.
-    EventContext context = 2 [(required) = true];
+    EventContext context = 3 [(required) = true];
 }
 
 // Event identifier.
@@ -85,27 +88,27 @@ message EventId {
 // Meta-information for an event.
 message EventContext {
 
-    // The ID of the event.
-    EventId event_id = 1 [(required) = true];
-
     // When the event occurred.
-    google.protobuf.Timestamp timestamp = 2 [(required) = true];
+    google.protobuf.Timestamp timestamp = 1 [(required) = true];
 
     // The context of the command, which generated this event.
-    CommandContext command_context = 3;
+    //
+    // This field is empty if an event was converted from `IntegrationEvent`.
+    //
+    CommandContext command_context = 2;
 
     // The ID of the entity which generated the event.
     //
-    // Examples of event producers are: aggregates, process managers
-    // (which generate `CommandRouted`), bounded contexts (for integration events).
+    // Examples of event producers are: aggregates, process managers (which generate
+    // `CommandRouted`), and bounded contexts (for integration events).
     //
-    google.protobuf.Any producer_id = 4 [(required) = true];
+    google.protobuf.Any producer_id = 3 [(required) = true];
 
     // The version of the entity after the event was applied.
-    Version version = 5 [(required) = true];
+    Version version = 4 [(required) = true];
 
     // Optional enrichment of the event.
-    Enrichment enrichment = 6;
+    Enrichment enrichment = 5;
 }
 
 // Enumeration of possible event validation technical error reasons.

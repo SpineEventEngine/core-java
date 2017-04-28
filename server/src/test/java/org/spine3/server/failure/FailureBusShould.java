@@ -166,7 +166,21 @@ public class FailureBusShould {
 
         failureBus.post(failure);
 
-        assertEquals(failure, subscriber.getFailureHandled());
+        final Failure handled = subscriber.getFailureHandled();
+        // Compare the content without command ID, which is different in the remembered
+        assertEquals(failure.getMessage(), handled.getMessage());
+        assertEquals(failure.getContext()
+                            .getCommand()
+                            .getMessage(),
+                     handled.getContext()
+                            .getCommand()
+                            .getMessage());
+        assertEquals(failure.getContext()
+                            .getCommand()
+                            .getContext(),
+                     handled.getContext()
+                            .getCommand()
+                            .getContext());
     }
 
     @Test

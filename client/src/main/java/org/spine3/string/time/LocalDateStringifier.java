@@ -39,7 +39,7 @@ final class LocalDateStringifier extends Stringifier<LocalDate> implements Seria
     private static final long serialVersionUID = 1;
     private static final LocalDateStringifier INSTANCE = new LocalDateStringifier();
 
-    static LocalDateStringifier instance() {
+    static LocalDateStringifier getInstance() {
         return INSTANCE;
     }
 

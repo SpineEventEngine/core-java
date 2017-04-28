@@ -18,22 +18,31 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package org.spine3.util;
 
-import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.test.Tests;
 
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
-public class ClassesShould {
+/**
+ * @author Alexander Yevsyukov
+ */
+public class ReflectionShould {
+
     @Test
-    public void have_private_ctor() {
-        assertHasPrivateParameterlessCtor(Classes.class);
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(Reflection.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Classes.class);
+    public void obtain_generic_parameter() {
+        final Derived<Long> val = new Derived<Long>() {};
+        assertEquals(Long.class, Reflection.getGenericParameterType(val.getClass(), 0));
     }
+
+    @SuppressWarnings("EmptyClass")
+    private static class Base<T> {}
+
+    private static class Derived<T> extends Base<T> {}
 }

@@ -453,7 +453,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = Stand.newBuilder()
                                  .build();
         final Subscription inexistentSubscription = Subscription.newBuilder()
-                                                                .setId(Subscriptions.newId())
+                                                                .setId(Subscriptions.generateId())
                                                                 .build();
         stand.cancel(inexistentSubscription, StreamObservers.<Response>noOpObserver());
     }
@@ -979,7 +979,7 @@ public class StandShould extends TenantAwareTest {
         final Topic allCustomersTopic = requestFactory.topic()
                                                       .allOf(Customer.class);
         return Subscription.newBuilder()
-                           .setId(Subscriptions.newId())
+                           .setId(Subscriptions.generateId())
                            .setTopic(allCustomersTopic)
                            .build();
     }

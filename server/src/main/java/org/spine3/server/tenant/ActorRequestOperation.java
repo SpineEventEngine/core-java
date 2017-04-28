@@ -19,7 +19,7 @@
  */
 package org.spine3.server.tenant;
 
-import org.spine3.client.ActorContext;
+import org.spine3.base.ActorContext;
 
 /**
  * A tenant-aware operation performed in relation to a request sent by an actor.

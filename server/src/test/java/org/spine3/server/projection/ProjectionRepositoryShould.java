@@ -240,6 +240,7 @@ public class ProjectionRepositoryShould
     private void keepTenantIdFromEvent(Event event) {
         final TenantId tenantId = event.getContext()
                                        .getCommandContext()
+                                       .getActorContext()
                                        .getTenantId();
         if (boundedContext.isMultitenant()) {
             boundedContext.getTenantIndex().keep(tenantId);

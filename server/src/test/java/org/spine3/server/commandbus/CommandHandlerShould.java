@@ -29,13 +29,12 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.CommandId;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
+import org.spine3.server.command.CommandHistory;
 import org.spine3.server.event.EventBus;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -47,17 +46,13 @@ import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.List;
-import java.util.Map;
 
-import static com.google.common.collect.Maps.newHashMap;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Commands.getMessage;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.nullRef;
 
@@ -127,9 +122,9 @@ public class CommandHandlerShould {
         assertTrue(handler.equals(same));
     }
 
+    @SuppressWarnings("EqualsWithItself") // is the goal of the test
     @Test
     public void assure_handler_is_equal_to_itself() {
-        // noinspection EqualsWithItself
         assertTrue(handler.equals(handler));
     }
 
@@ -138,9 +133,9 @@ public class CommandHandlerShould {
         assertFalse(handler.equals(nullRef()));
     }
 
+    @SuppressWarnings("EqualsBetweenInconvertibleTypes") // is the goal of the test
     @Test
     public void assure_handler_is_not_equal_to_object_of_another_class() {
-        //noinspection EqualsBetweenInconvertibleTypes
         assertFalse(handler.equals(newUuid()));
     }
 
@@ -160,20 +155,17 @@ public class CommandHandlerShould {
     @SuppressWarnings({"OverloadedMethodsWithSameNumberOfParameters", "ReturnOfCollectionOrArrayField"})
     private class TestCommandHandler extends CommandHandler {
 
-        private final ImmutableList<Message> eventsOnStartProjectCmd = createEventsOnStartProjectCmd();
+        private final ImmutableList<Message> eventsOnStartProjectCmd =
+                createEventsOnStartProjectCmd();
 
-        private final Map<CommandId, Command> commandsHandled = newHashMap();
+        private final CommandHistory commandsHandled = new CommandHistory();
 
         private TestCommandHandler() {
             super(eventBus);
         }
 
         private void assertHandled(Command expected) {
-            final CommandId id = Commands.getId(expected);
-            final Command actual = commandsHandled.get(id);
-            final String cmdName = getMessage(expected).getClass().getName();
-            assertNotNull("Expected but wasn't handled, command: " + cmdName, actual);
-            assertEquals(expected, actual);
+            commandsHandled.assertHandled(expected);
         }
 
         private void handle(Command cmd) {
@@ -187,22 +179,19 @@ public class CommandHandlerShould {
 
         @Assign
         ProjectCreated handle(CreateProject msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
+            commandsHandled.add(msg, context);
             return ProjectCreated.getDefaultInstance();
         }
 
         @Assign
         TaskAdded handle(AddTask msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
+            commandsHandled.add(msg, context);
             return TaskAdded.getDefaultInstance();
         }
 
         @Assign
         List<Message> handle(StartProject msg, CommandContext context) {
-            final Command cmd = Commands.createCommand(msg, context);
-            commandsHandled.put(context.getCommandId(), cmd);
+            commandsHandled.add(msg, context);
             return eventsOnStartProjectCmd;
         }
 

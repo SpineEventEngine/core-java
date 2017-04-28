@@ -29,7 +29,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A part of a larger aggregate.

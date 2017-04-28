@@ -22,6 +22,7 @@ package org.spine3.client;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import org.junit.Test;
+import org.spine3.base.ActorContext;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.test.client.TestEntity;
 import org.spine3.test.client.TestEntityId;

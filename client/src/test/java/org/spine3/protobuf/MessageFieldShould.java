@@ -31,7 +31,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.MessageField.getFieldDescriptor;
 import static org.spine3.protobuf.MessageField.getFieldName;
 import static org.spine3.protobuf.MessageField.toAccessorMethodName;
-import static org.spine3.protobuf.Values.newStringValue;
 
 public class MessageFieldShould {
 
@@ -40,7 +39,7 @@ public class MessageFieldShould {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     public static final String STR_VALUE_FIELD_NAME = "value";
 
-    private final StringValue stringValue = newStringValue(newUuid());
+    private final StringValue stringValue = Wrapper.forString(newUuid());
 
     @Test
     public void accept_positive_index() {

@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Tests;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
@@ -40,7 +41,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.json.Json.fromJson;
 import static org.spine3.json.Json.toCompactJson;
 import static org.spine3.json.Json.toJson;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -75,7 +75,7 @@ public class JsonShould {
 
     @Test
     public void print_to_json() {
-        final StringValue value = newStringValue("print_to_json");
+        final StringValue value = Wrapper.forString("print_to_json");
         assertFalse(toJson(value).isEmpty());
     }
 

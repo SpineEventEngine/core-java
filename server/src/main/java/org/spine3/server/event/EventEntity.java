@@ -53,8 +53,7 @@ class EventEntity extends AbstractEntity<EventId, Event> {
     }
 
     EventEntity(Event event) {
-        this(event.getContext()
-                  .getEventId());
+        this(event.getId());
         updateState(event);
     }
 

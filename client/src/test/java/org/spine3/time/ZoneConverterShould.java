@@ -29,7 +29,7 @@ import static org.junit.Assert.assertEquals;
  */
 public class ZoneConverterShould {
 
-    private static final ZoneConverter converter = ZoneConverter.instance();
+    private static final ZoneConverter converter = ZoneConverter.getInstance();
 
     @Test
     public void convert_GMT_zone() {

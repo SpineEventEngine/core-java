@@ -27,9 +27,11 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
@@ -38,7 +40,6 @@ import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.newUuidValue;
 
 /**
@@ -111,8 +112,9 @@ public class TypeNameShould {
     @Test
     public void obtain_type_name_of_event() {
         final Command command = requestFactory.command().create(newUuidValue());
-        final StringValue producerId = newStringValue(getClass().getSimpleName());
+        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
         final EventFactory ef = EventFactory.newBuilder()
+                                            .setCommandId(Commands.generateId())
                                             .setProducerId(producerId)
                                             .setCommandContext(command.getContext())
                                             .build();

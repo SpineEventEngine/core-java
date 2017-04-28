@@ -84,8 +84,12 @@ public class ExecutorCommandSchedulerShould {
     @Test
     public void not_schedule_command_with_same_id_twice() {
         final String id = newUuid();
-        final Command expectedCmd = Commands.createCommand(Given.CommandMessage.createProjectMessage(id), context);
-        final Command extraCmd = Commands.createCommand(Given.CommandMessage.addTask(id), context);
+        final Command expectedCmd = Commands.createCommand(
+                Given.CommandMessage.createProjectMessage(id), context);
+        final Command extraCmd = Commands.createCommand(Given.CommandMessage.addTask(id), context)
+                                         .toBuilder()
+                                         .setId(expectedCmd.getId())
+                                         .build();
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);

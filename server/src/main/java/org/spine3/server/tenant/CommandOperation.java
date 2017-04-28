@@ -24,6 +24,8 @@ import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.CommandId;
 
+import static org.spine3.base.Commands.getTenantId;
+
 /**
  * A tenant-aware operation performed in response to a command or in relation to a command.
  *
@@ -44,8 +46,7 @@ public abstract class CommandOperation extends TenantAwareOperation {
      * @param command the command from which context to obtain the tenant ID
      */
     protected CommandOperation(Command command) {
-        super(command.getContext()
-                     .getTenantId());
+        super(getTenantId(command));
         this.command = command;
     }
 
@@ -53,8 +54,7 @@ public abstract class CommandOperation extends TenantAwareOperation {
      * Obtains the ID of the command.
      */
     protected CommandId commandId() {
-        return command.getContext()
-                      .getCommandId();
+        return command.getId();
     }
 
     /**

@@ -20,10 +20,12 @@
 package org.spine3.server.reflect;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -62,6 +64,29 @@ abstract class HandlerMethod<C extends Message> {
         this.method = checkNotNull(method);
         this.paramCount = method.getParameterTypes().length;
         method.setAccessible(true);
+    }
+
+    /**
+     * Returns types of messages handled by the passed class.
+     *
+     * @return immutable set of message classes or an empty set
+     */
+    @CheckReturnValue
+    static ImmutableSet<Class<? extends Message>> getHandledMessageClasses(
+            Class<?> cls,
+            Predicate<Method> predicate) {
+        final ImmutableSet.Builder<Class<? extends Message>> builder = ImmutableSet.builder();
+
+        for (Method method : cls.getDeclaredMethods()) {
+            final boolean methodMatches = predicate.apply(method);
+            if (methodMatches) {
+                final Class<? extends Message> firstParamType =
+                        getFirstParamType(method);
+                builder.add(firstParamType);
+            }
+        }
+
+        return builder.build();
     }
 
     /** Returns the handling method. */

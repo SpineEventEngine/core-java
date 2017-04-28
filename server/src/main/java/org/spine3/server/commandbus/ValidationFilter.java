@@ -60,8 +60,7 @@ class ValidationFilter implements CommandBusFilter {
 
     private boolean isTenantIdValid(CommandEnvelope envelope,
                                     StreamObserver<Response> responseObserver) {
-        final TenantId tenantId = envelope.getCommandContext()
-                                          .getTenantId();
+        final TenantId tenantId = envelope.getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
@@ -82,7 +81,7 @@ class ValidationFilter implements CommandBusFilter {
                                    StreamObserver<Response> responseObserver) {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
-                                                              .validate(command);
+                                                              .validate(envelope);
         if (!violations.isEmpty()) {
             final CommandException invalidCommand =
                     InvalidCommandException.onConstraintViolations(command, violations);

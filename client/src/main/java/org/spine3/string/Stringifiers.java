@@ -139,21 +139,21 @@ public final class Stringifiers {
      * Obtains {@code Stringifier} for {@code Boolean} values.
      */
     public static Stringifier<Boolean> forBoolean() {
-        return BooleanStringifier.instance();
+        return BooleanStringifier.getInstance();
     }
 
     /**
      * Obtains {@code Stringifier} for {@code Integer} values.
      */
     public static Stringifier<Integer> forInteger() {
-        return IntegerStringifier.instance();
+        return IntegerStringifier.getInstance();
     }
 
     /**
      * Obtains {@code Stringifier} for {@code Long} values.
      */
     public static Stringifier<Long> forLong() {
-        return LongStringifier.instance();
+        return LongStringifier.getInstance();
     }
 
     /**
@@ -162,7 +162,7 @@ public final class Stringifiers {
      * <p>Simply returns passed strings.
      */
     static Stringifier<String> forString() {
-        return NoOpStringifier.instance();
+        return NoOpStringifier.getInstance();
     }
 
     /**

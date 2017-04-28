@@ -21,6 +21,7 @@ package org.spine3.protobuf;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -109,6 +110,7 @@ public final class Messages {
      * @param typeToCheck the type to check
      * @return {@code true} if the type is message class, {@code false} otherwise
      */
+    @Internal
     public static boolean isMessage(Type typeToCheck) {
         checkNotNull(typeToCheck);
         if (typeToCheck instanceof Class) {

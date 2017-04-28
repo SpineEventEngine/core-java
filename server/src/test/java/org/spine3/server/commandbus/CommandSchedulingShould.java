@@ -27,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.time.Durations2;
@@ -45,7 +46,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.commandbus.CommandScheduler.setSchedule;
 import static org.spine3.server.commandbus.Given.Command.addTask;
 import static org.spine3.server.commandbus.Given.Command.createProject;
@@ -196,7 +196,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_schedule_options() {
-        final Command cmd = requestFactory.command().create(newStringValue(newUuid()));
+        final Command cmd = requestFactory.command().create(Wrapper.forString(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations2.minutes(5);
 
@@ -209,7 +209,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void update_scheduling_time() {
-        final Command cmd = requestFactory.command().create(newStringValue(newUuid()));
+        final Command cmd = requestFactory.command().create(Wrapper.forString(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);

@@ -25,6 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.client.ActorRequestFactory;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.util.Environment;
 
@@ -69,7 +70,7 @@ public class CommandHandlingEntityShould {
             environment.setToProduction();
 
             final Command cmd = requestFactory.command().create(msg());
-            entity.dispatchForTest(cmd.getMessage(), cmd.getContext());
+            entity.dispatchForTest(CommandEnvelope.of(cmd));
 
         } finally {
             environment.setToTests();

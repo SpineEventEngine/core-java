@@ -23,7 +23,9 @@ package org.spine3.test;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.time.Durations2;
 import org.spine3.time.Time;
 
@@ -64,11 +66,14 @@ public class TimeTests {
      * @return new command instance with the modified timestamp
      */
     public static Command adjustTimestamp(Command command, Timestamp timestamp) {
+        final CommandContext context = command.getContext();
+        final ActorContext.Builder withTime = context.getActorContext()
+                                                     .toBuilder()
+                                                     .setTimestamp(timestamp);
         final Command.Builder commandBuilder =
                 command.toBuilder()
-                       .setContext(command.getContext()
-                                          .toBuilder()
-                                          .setTimestamp(timestamp));
+                       .setContext(context.toBuilder()
+                                          .setActorContext(withTime));
         return commandBuilder.build();
     }
 

@@ -31,6 +31,7 @@ import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.tenant.TenantAwareFunction;
@@ -51,9 +52,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.getMessage;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.commandbus.CommandExpiredException.commandExpiredError;
 import static org.spine3.server.commandbus.Given.Command.addTask;
 import static org.spine3.server.commandbus.Given.Command.createProject;
@@ -77,9 +76,9 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         commandBus.post(command, responseObserver);
 
         final TenantId tenantId = command.getContext()
+                                         .getActorContext()
                                          .getTenantId();
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = command.getId();
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.OK, status.getCode());
@@ -109,7 +108,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
     public void set_command_status_to_failure_when_handler_throws_failure() {
         final TestFailure failure = new TestFailure();
         final Command command = givenThrowingHandler(failure);
-        final CommandId commandId = getId(command);
+        final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
         commandBus.post(command, responseObserver);
@@ -119,11 +118,13 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         // Check that the status has the correct code,
         // and the failure matches the thrown failure.
-        final TenantId tenantId = command.getContext().getTenantId();
+        final TenantId tenantId = command.getContext()
+                                         .getActorContext()
+                                         .getTenantId();
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.FAILURE, status.getCode());
-        assertEquals(failure.toFailure()
+        assertEquals(failure.toFailure(command)
                             .getMessage(), status.getFailure()
                                                  .getMessage());
     }
@@ -173,6 +174,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
     private ProcessingStatus getProcessingStatus(CommandEnvelope commandEnvelope) {
         final TenantId tenantId = commandEnvelope.getCommandContext()
+                                                 .getActorContext()
                                                  .getTenantId();
         final TenantAwareFunction<CommandId, ProcessingStatus> func =
                 new TenantAwareFunction<CommandId, ProcessingStatus>(tenantId) {
@@ -272,9 +274,9 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(newStringValue("some Command message"),
+            super(Wrapper.forString("some Command message"),
                   CommandContext.getDefaultInstance(),
-                  newStringValue(TestFailure.class.getName()));
+                  Wrapper.forString(TestFailure.class.getName()));
         }
     }
 

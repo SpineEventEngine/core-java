@@ -25,10 +25,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.EventId;
 import org.spine3.base.Version;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.IntegrationEventContext;
 
@@ -38,7 +40,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Messages.toAny;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -56,7 +57,7 @@ public class EventFactory {
     protected EventFactory(Builder builder) {
         this.producerId = builder.producerId;
         this.commandContext = builder.commandContext;
-        this.idSequence = EventIdSequence.on(commandContext.getCommandId())
+        this.idSequence = EventIdSequence.on(builder.commandId)
                                          .withMaxSize(builder.maxEventCount);
     }
 
@@ -69,30 +70,25 @@ public class EventFactory {
     public Event createEvent(Message messageOrAny, @Nullable Version version) {
         checkNotNull(messageOrAny);
         final EventId eventId = idSequence.next();
-        final EventContext context = createContext(eventId,
-                                                   producerId,
-                                                   commandContext,
-                                                   version);
-        final Any packed = toAny(messageOrAny);
-        final Event result = Event.newBuilder()
-                                  .setMessage(packed)
-                                  .setContext(context)
-                                  .build();
+        final EventContext context = createContext(producerId, commandContext, version);
+        final Event result = createEvent(eventId, messageOrAny, context);
         return result;
     }
 
     /**
      * Creates a new {@code Event} instance.
      *
+     * @param id           the ID of the event
      * @param messageOrAny the event message or {@code Any} containing the message
      * @param context      the event context
      * @return created event instance
      */
-    private static Event createEvent(Message messageOrAny, EventContext context) {
+    private static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
         final Any packed = toAny(messageOrAny);
         final Event result = Event.newBuilder()
+                                  .setId(id)
                                   .setMessage(packed)
                                   .setContext(context)
                                   .build();
@@ -104,23 +100,28 @@ public class EventFactory {
      */
     public static Event toEvent(IntegrationEvent integrationEvent) {
         final IntegrationEventContext sourceContext = integrationEvent.getContext();
-        final StringValue producerId = newStringValue(sourceContext.getBoundedContextName());
-        final EventContext context = EventContext.newBuilder()
-                                                 .setEventId(sourceContext.getEventId())
-                                                 .setTimestamp(sourceContext.getTimestamp())
-                                                 .setProducerId(pack(producerId))
-                                                 .build();
-        final Event result = createEvent(integrationEvent.getMessage(), context);
+        final EventContext context = toEventContext(sourceContext);
+        final Event result = createEvent(sourceContext.getEventId(),
+                                         integrationEvent.getMessage(),
+                                         context);
         return result;
     }
 
-    private static EventContext createContext(EventId eventId,
-                                              Any producerId,
+    private static EventContext toEventContext(IntegrationEventContext value) {
+        final StringValue producerId = Wrapper.forString(value.getBoundedContextName());
+        final Timestamp timestamp = value.getTimestamp();
+        final Any producerAny = pack(producerId);
+        return EventContext.newBuilder()
+                           .setTimestamp(timestamp)
+                           .setProducerId(producerAny)
+                           .build();
+    }
+
+    private static EventContext createContext(Any producerId,
                                               CommandContext commandContext,
                                               @Nullable Version version) {
         final Timestamp timestamp = getCurrentTime();
         final EventContext.Builder builder = EventContext.newBuilder()
-                                                         .setEventId(eventId)
                                                          .setTimestamp(timestamp)
                                                          .setCommandContext(commandContext)
                                                          .setProducerId(producerId);
@@ -143,6 +144,7 @@ public class EventFactory {
     public static class Builder {
 
         private Any producerId;
+        private CommandId commandId;
         private CommandContext commandContext;
         private int maxEventCount = EventIdSequence.MAX_ONE_DIGIT_SIZE;
 
@@ -155,6 +157,14 @@ public class EventFactory {
          */
         public Builder setProducerId(Message messageOrAny) {
             this.producerId = toAny(checkNotNull(messageOrAny));
+            return this;
+        }
+
+        /**
+         * Sets the ID of the command which caused events we are about to generate.
+         */
+        public Builder setCommandId(CommandId commandId) {
+            this.commandId = checkNotNull(commandId);
             return this;
         }
 
@@ -184,6 +194,7 @@ public class EventFactory {
 
         public EventFactory build() {
             checkNotNull(producerId, "Producer ID must be set.");
+            checkNotNull(commandId, "Command ID must be set.");
             checkNotNull(commandContext, "Command must be set.");
 
             final EventFactory result = new EventFactory(this);

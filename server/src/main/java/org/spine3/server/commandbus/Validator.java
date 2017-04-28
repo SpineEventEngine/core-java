@@ -23,9 +23,9 @@ package org.spine3.server.commandbus;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
+import org.spine3.base.CommandId;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.MessageValidator;
@@ -58,13 +58,15 @@ class Validator {
      * Validates a command checking that its required fields are valid and
      * validates a command message according to Spine custom protobuf options.
      *
-     * @param command a command to validate
+     * @param envelope a command to validate
      * @return constraint violations found
      */
-    List<ConstraintViolation> validate(Command command) {
+    List<ConstraintViolation> validate(CommandEnvelope envelope) {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
-        final Message message = Commands.getMessage(command);
-        final CommandContext context = command.getContext();
+        final Message message = envelope.getMessage();
+        final CommandContext context = envelope.getCommandContext();
+        final CommandId id = envelope.getCommandId();
+        validateCommandId(id, result);
         validateMessage(message, result);
         validateContext(context, result);
         validateTargetId(message, result);
@@ -86,7 +88,11 @@ class Validator {
         if (isDefault(context)) {
             result.add(newConstraintViolation("Non-default command context must be set."));
         }
-        final String commandId = idToString(context.getCommandId());
+    }
+
+    private static void validateCommandId(CommandId id,
+                                          ImmutableList.Builder<ConstraintViolation> result) {
+        final String commandId = idToString(id);
         if (commandId.equals(EMPTY_ID)) {
             result.add(newConstraintViolation("Command ID cannot be empty or blank."));
         }

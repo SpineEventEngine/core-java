@@ -106,6 +106,7 @@ public class CommandStore implements AutoCloseable {
 
     private void keepTenantId(Command command) {
         tenantIndex.keep(command.getContext()
+                                .getActorContext()
                                 .getTenantId());
     }
 
@@ -261,7 +262,7 @@ public class CommandStore implements AutoCloseable {
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
             log.failureHandling(failure, commandMessage, commandId);
-            updateStatus(commandEnvelope, failure.toFailure());
+            updateStatus(commandEnvelope, failure.toFailure(commandEnvelope.getCommand()));
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             log.errorHandling(exception, commandMessage, commandId);

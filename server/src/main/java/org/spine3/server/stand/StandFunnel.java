@@ -24,6 +24,7 @@ import org.spine3.annotations.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.entity.VersionableEntity;
+import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -69,8 +70,9 @@ public class StandFunnel {
      * @param commandContext the context of the command, which triggered the entity state update.
      */
     public void post(final VersionableEntity entity, CommandContext commandContext) {
-        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
-                                                                    commandContext.getTenantId());
+        final TenantId tenantId = commandContext.getActorContext()
+                                                .getTenantId();
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
         delivery.deliver(envelope);
     }
 

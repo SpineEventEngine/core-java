@@ -24,6 +24,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.command.CreateProject;
 import org.spine3.validate.ConstraintViolation;
 
@@ -44,28 +45,32 @@ public class ValidatorShould {
     public void validate_command_and_return_nothing_if_it_is_valid() {
         final Command cmd = Given.Command.createProject();
 
-        final List<ConstraintViolation> violations = validator.validate(cmd);
+        final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
 
         assertEquals(0, violations.size());
     }
 
     @Test
     public void validate_command_and_return_violations_if_message_is_NOT_valid() {
-        final Command cmd = Commands.createCommand(CreateProject.getDefaultInstance(),
-                                                   createCommandContext());
+        final Command commandWithEmptyMessage =
+                Commands.createCommand(CreateProject.getDefaultInstance(),
+                                       createCommandContext());
 
-        final List<ConstraintViolation> violations = validator.validate(cmd);
+        final List<ConstraintViolation> violations =
+                validator.validate(CommandEnvelope.of(commandWithEmptyMessage));
 
         assertEquals(3, violations.size());
     }
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command cmd = Commands.createCommand(createProjectMessage(),
-                                                   CommandContext.getDefaultInstance());
+        final Command commandWithoutContext =
+                Commands.createCommand(createProjectMessage(),
+                                       CommandContext.getDefaultInstance());
 
-        final List<ConstraintViolation> violations = validator.validate(cmd);
+        final List<ConstraintViolation> violations =
+                validator.validate(CommandEnvelope.of(commandWithoutContext));
 
-        assertEquals(2, violations.size());
+        assertEquals(1, violations.size());
     }
 }

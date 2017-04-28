@@ -35,6 +35,7 @@ import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcher;
@@ -70,7 +71,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("OverlyCoupledClass")
@@ -142,10 +142,11 @@ public class ProcessManagerShould {
         testDispatchCommand(startProject());
     }
 
-    private List<Event> testDispatchCommand(Message command) {
-        final List<Event> events = processManager.dispatchCommand(command,
-                                                                  requestFactory.createCommandContext());
-        assertEquals(AnyPacker.pack(command), processManager.getState());
+    private List<Event> testDispatchCommand(Message commandMsg) {
+        final CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
+                                                                          .create(commandMsg));
+        final List<Event> events = processManager.dispatchCommand(envelope);
+        assertEquals(AnyPacker.pack(commandMsg), processManager.getState());
         return events;
     }
 
@@ -205,7 +206,11 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_command() {
         final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        processManager.dispatchCommand(unknownCommand, requestFactory.createCommandContext());
+
+        final CommandEnvelope envelope = CommandEnvelope.of(
+                requestFactory.command().create(unknownCommand)
+        );
+        processManager.dispatchCommand(envelope);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -226,7 +231,7 @@ public class ProcessManagerShould {
 
     @Test
     public void create_iterating_router() {
-        final StringValue commandMessage = newStringValue("create_iterating_router");
+        final StringValue commandMessage = Wrapper.forString("create_iterating_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
@@ -249,7 +254,7 @@ public class ProcessManagerShould {
 
     @Test
     public void create_router() {
-        final StringValue commandMessage = newStringValue("create_router");
+        final StringValue commandMessage = Wrapper.forString("create_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));

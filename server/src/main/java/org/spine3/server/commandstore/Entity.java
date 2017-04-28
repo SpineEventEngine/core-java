@@ -55,8 +55,7 @@ class Entity extends AbstractEntity<CommandId, CommandRecord> {
         checkNotNull(command);
         checkNotNull(status);
 
-        final CommandId commandId = command.getContext()
-                                           .getCommandId();
+        final CommandId commandId = command.getId();
         final Entity entity = create(commandId);
         entity.setCommandAndStatus(command, status);
         return entity;

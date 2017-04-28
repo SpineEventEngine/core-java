@@ -29,6 +29,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
@@ -217,7 +218,7 @@ public class ActorRequestFactory {
          *
          * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
          * results. This processing is performed according to the
-         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
+         * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
          *
          * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
          * (e.g. a {@code path} references a missing field),
@@ -270,7 +271,7 @@ public class ActorRequestFactory {
          *
          * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
          * results. This processing is performed according to the
-         * <a href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask">FieldMask specs</a>.
+         * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
          *
          * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
          * (e.g. a {@code path} references a missing field), such invalid paths
@@ -644,11 +645,6 @@ public class ActorRequestFactory {
      */
     public final class ForTopic {
 
-        /**
-         * The format of all {@linkplain TopicId topic identifiers}.
-         */
-        private static final String TOPIC_ID_FORMAT = "topic-%s";
-
         private ForTopic() {
             // Prevent instantiation from the outside.
         }
@@ -696,7 +692,7 @@ public class ActorRequestFactory {
         @Internal
         public Topic forTarget(Target target) {
             checkNotNull(target);
-            final TopicId id = newTopicId();
+            final TopicId id = Topics.generateId();
             return Topic.newBuilder()
                         .setId(id)
                         .setContext(actorContext())
@@ -704,12 +700,6 @@ public class ActorRequestFactory {
                         .build();
         }
 
-        private TopicId newTopicId() {
-            final String formattedId = format(TOPIC_ID_FORMAT, Identifiers.newUuid());
-            return TopicId.newBuilder()
-                          .setUuid(formattedId)
-                          .build();
-        }
     }
 
     /**
