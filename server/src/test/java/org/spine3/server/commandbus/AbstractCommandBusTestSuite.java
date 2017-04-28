@@ -132,13 +132,13 @@ public abstract class AbstractCommandBusTestSuite {
     protected static Command clearTenantId(Command cmd) {
         final ActorContext.Builder withNoTenant =
                 ActorContext.newBuilder()
-                            .setTenantId(TenantId.getDefaultInstance());
-        final Command result =
-                cmd.toBuilder()
-                   .setContext(cmd.getContext()
-                                  .toBuilder()
-                                  .setActorContext(withNoTenant))
-                   .build();
+                            .setTenantId(
+                                    TenantId.getDefaultInstance());
+        final Command result = cmd.toBuilder()
+                                  .setContext(cmd.getContext()
+                                                 .toBuilder()
+                                                 .setActorContext(withNoTenant))
+                                  .build();
         return result;
     }
 
