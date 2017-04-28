@@ -68,15 +68,18 @@ message Command {
 
     // Properties that may be set by the framework as the command is delivered and handled.
     //
-    // These properties are not visible to the business logic code of an application.
+    // All fields of this type are reserved for internal framework needs, and are not visible to
+    // the business logic code of an application.
     //
     message SystemProperties {
+
+        option (internal_type) = true;
 
         reserved 1 to 10; // for future priority properties.
 
         // The time when the command was scheduled.
         // Is set automatically and used only by Spine when re-scheduling a command.
-        google.protobuf.Timestamp scheduling_time = 11 [(internal) = true];
+        google.protobuf.Timestamp scheduling_time = 11;
 
         reserved 12 to 20; // for other scheduling-related properties.
     }
