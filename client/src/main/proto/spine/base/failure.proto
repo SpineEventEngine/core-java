@@ -38,7 +38,13 @@ import "spine/base/version.proto";
 
 // Failure identifier.
 message FailureId {
-    string uuid = 1;
+
+    // The value is based upon the ID of the command, which caused the failure.
+    // It has the following format:
+    //
+    //      `<commandId>-fail`
+    //
+    string value = 1;
 }
 
 // A business failure is a condition in business, which does not allow to

@@ -26,10 +26,12 @@ import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
+import org.spine3.base.FailureThrowable;
 import org.spine3.base.Identifiers;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.io.StreamObservers;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.failure.FailureBus;
@@ -242,6 +244,20 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(commandEnvelope, cause, log);
+
+            emitFailure(commandEnvelope, cause);
+        }
+    }
+
+    /**
+     * Emits the {@code Failure} and posts it to the {@code FailureBus},
+     * if the given {@code cause} is in fact a {@code FailureThrowable} instance.
+     */
+    private void emitFailure(CommandEnvelope commandEnvelope, Throwable cause) {
+        if (cause instanceof FailureThrowable) {
+            final FailureThrowable failure = (FailureThrowable) cause;
+            failureBus.post(failure.toFailure(commandEnvelope.getCommand()),
+                            StreamObservers.<Response>noOpObserver());
         }
     }
 

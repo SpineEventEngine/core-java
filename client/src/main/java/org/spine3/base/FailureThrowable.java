@@ -74,7 +74,7 @@ public abstract class FailureThrowable extends Throwable {
     public Failure toFailure(Command command) {
         final Any packedMessage = pack(failureMessage);
         final FailureContext context = createContext(command);
-        final FailureId id = Failures.generateId();
+        final FailureId id = Failures.generateId(command.getId());
         return Failure.newBuilder()
                       .setId(id)
                       .setMessage(packedMessage)
