@@ -536,6 +536,7 @@ public class ActorRequestFactory {
             // OK for this method as it's used primarily for debugging
         @Override
         public String toString() {
+            final String valueSeparator = "; ";
             final StringBuilder sb = new StringBuilder();
             sb.append(QueryBuilder.class.getSimpleName())
               .append('(')
@@ -551,14 +552,14 @@ public class ActorRequestFactory {
             if (ids != null && !ids.isEmpty()) {
                 sb.append("id IN ")
                   .append(ids)
-                  .append("; ");
+                  .append(valueSeparator);
             }
             if (columns != null && !columns.isEmpty()) {
                 for (Map.Entry<String, Any> column : columns.entrySet()) {
                     sb.append(column.getKey())
                       .append('=')
                       .append(Json.toCompactJson(unpack(column.getValue())))
-                      .append("; ");
+                      .append(valueSeparator);
                 }
             }
             sb.append(");");
