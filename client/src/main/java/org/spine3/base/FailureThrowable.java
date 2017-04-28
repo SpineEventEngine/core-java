@@ -76,17 +76,17 @@ public abstract class FailureThrowable extends Throwable {
     public Failure toFailure(Command command) {
         final Any packedMessage = pack(failureMessage);
         final FailureContext context = createContext(command);
-        final Failure.Builder builder = Failure.newBuilder()
-                                               .setMessage(packedMessage)
-                                               .setContext(context);
-        return builder.build();
+        final FailureId id = Failures.generateId();
+        return Failure.newBuilder()
+                      .setId(id)
+                      .setMessage(packedMessage)
+                      .setContext(context)
+                      .build();
     }
 
     private FailureContext createContext(Command command) {
-        final FailureId id = Failures.generateId();
         final String stacktrace = Throwables.getStackTraceAsString(this);
         return FailureContext.newBuilder()
-                             .setFailureId(id)
                              .setTimestamp(timestamp)
                              .setStacktrace(stacktrace)
                              .setCommand(command)
