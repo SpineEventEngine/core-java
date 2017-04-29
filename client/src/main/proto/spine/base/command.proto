@@ -68,16 +68,24 @@ message Command {
 
     // Properties that may be set by the framework as the command is delivered and handled.
     //
-    // These properties are not visible to the business logic code of an application.
+    // All fields of this type are reserved for internal framework needs, and are not visible to
+    // the business logic code of an application.
     //
     message SystemProperties {
 
-        // If `true` the command was scheduled.
-        bool scheduled = 1;
+        option (internal_type) = true;
+
+        reserved 1 to 10; // for future priority properties.
+
+        // The time when the command was scheduled.
+        // Is set automatically and used only by Spine when re-scheduling a command.
+        google.protobuf.Timestamp scheduling_time = 11;
+
+        reserved 12 to 20; // for other scheduling-related properties.
     }
 
     // Service information used by the framework.
-    SystemProperties system_properties = 4;
+    SystemProperties system_properties = 4 [(internal) = true];
 }
 
 // Meta-information about the command and the environment, which generated the command.
@@ -105,10 +113,6 @@ message CommandContext {
         // The delay between the moment of receiving a command at the server
         // and its delivery to the target.
         google.protobuf.Duration delay = 1;
-
-        // The time when the command was scheduled.
-        // Is set automatically and used only by Spine when re-scheduling a command.
-        google.protobuf.Timestamp scheduling_time = 2 [(internal) = true];
 
         //TODO:2016-05-27:alexander.yevsyukov: Have an option for defining schedule at a specific date/time.
         // Name the field `at`;

@@ -137,7 +137,8 @@ class Rescheduler {
     private static Timestamp getTimeToPost(Command command) {
         final CommandContext.Schedule schedule = command.getContext()
                                                         .getSchedule();
-        final Timestamp timeToPost = add(schedule.getSchedulingTime(), schedule.getDelay());
+        final Timestamp timeToPost = add(command.getSystemProperties()
+                                                .getSchedulingTime(), schedule.getDelay());
         return timeToPost;
     }
 
