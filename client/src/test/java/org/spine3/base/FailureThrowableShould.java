@@ -83,7 +83,7 @@ public class FailureThrowableShould {
         protected TestFailure(GeneratedMessageV3 commandMessage,
                               CommandContext context,
                               GeneratedMessageV3 failure) {
-            super(commandMessage, context, failure);
+            super(failure);
         }
 
         private static final long serialVersionUID = 0L;
