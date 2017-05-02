@@ -589,7 +589,8 @@ public class ActorRequestFactory {
         /**
          * Creates new equality {@code QueryParameter}.
          *
-         * @param columnName the name of the Entity Column to query by
+         * @param columnName the name of the Entity Column to query by, expressed in a single field
+         *                   name with no type info
          * @param value      the requested value of the Entity Column
          * @return new instance of the QueryParameter
          */
@@ -601,10 +602,16 @@ public class ActorRequestFactory {
             return parameter;
         }
 
+        /**
+         * @return the name of the Entity Column to query by
+         */
         public String getColumnName() {
             return columnName;
         }
 
+        /**
+         * @return the value of the Entity Column to look for
+         */
         public Any getValue() {
             return value;
         }
