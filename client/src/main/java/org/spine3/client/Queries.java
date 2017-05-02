@@ -33,8 +33,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.client.Targets.allOf;
-import static org.spine3.client.Targets.someOf;
+import static org.spine3.client.Targets.composeTarget;
 
 /**
  * Client-side utilities for working with queries.
@@ -84,7 +83,7 @@ public final class Queries {
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 
-        final Target target = forParams(entityClass, ids, columnFilters);
+        final Target target = composeTarget(entityClass, ids, columnFilters);
         final Query.Builder queryBuilder = Query.newBuilder()
                                                 .setTarget(target);
         if (fieldMask != null) {
@@ -92,21 +91,4 @@ public final class Queries {
         }
         return queryBuilder;
     }
-
-    private static Target forParams(Class<? extends Message> entityClass,
-                                    @Nullable Set<? extends Message> ids,
-                                    @Nullable Map<String, Any> columnFilters) {
-        final Target target;
-        if (ids == null && columnFilters == null) {
-            target = allOf(entityClass);
-        } else if (ids == null) {
-            target = someOf(entityClass, columnFilters);
-        } else if (columnFilters == null) {
-            target = someOf(entityClass, ids);
-        } else {
-            target = someOf(entityClass, ids, columnFilters);
-        }
-        return target;
-    }
-
 }
