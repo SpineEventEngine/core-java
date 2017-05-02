@@ -26,12 +26,12 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.base.Identifiers;
 import org.spine3.json.Json;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.test.client.TestEntity;
 import org.spine3.test.validate.msg.ProjectId;
-import org.spine3.testdata.Sample;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
@@ -144,7 +144,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String columnName1 = "myColumn";
         final Object columnValue1 = 42;
         final String columnName2 = "oneMore";
-        final Object columnValue2 = Sample.messageOfType(ProjectId.class);
+        final Object columnValue2 = newMessageId();
 
         final Query query = factory().query()
                                      .select(TestEntity.class)
@@ -180,7 +180,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String columnName1 = "column1";
         final Object columnValue1 = 42;
         final String columnName2 = "column2";
-        final Object columnValue2 = Sample.messageOfType(ProjectId.class);
+        final Object columnValue2 = newMessageId();
         final String fieldName = "TestEntity.secondField";
         final Query query = factory().query()
                                      .select(testEntityClass)
@@ -229,12 +229,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     public void persist_only_last_ids_clause() {
         final Iterable<?> genericIds = asList(newUuid(),
                                               -1,
-                                              Sample.messageOfType(ProjectId.class));
+                                              newMessageId());
         final Long[] longIds = {1L, 2L, 3L};
         final Message[] messageIds = {
-                Sample.messageOfType(ProjectId.class),
-                Sample.messageOfType(ProjectId.class),
-                Sample.messageOfType(ProjectId.class)
+                newMessageId(),
+                newMessageId(),
+                newMessageId()
         };
         final String[] stringIds = {
                 newUuid(),
@@ -289,7 +289,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String columnName1 = "column1";
         final Object columnValue1 = 42;
         final String columnName2 = "column2";
-        final Message columnValue2 = Sample.messageOfType(ProjectId.class);
+        final Message columnValue2 = newMessageId();
         final String fieldName = "TestEntity.secondField";
         final ActorRequestFactory.QueryBuilder builder = factory().query()
                                                                   .select(testEntityClass)
@@ -310,6 +310,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(stringRepr, containsString(columnName2));
         assertThat(stringRepr, containsString(Json.toCompactJson(columnValue2)));
         assertThat(stringRepr, containsString(fieldName));
+    }
+
+    private static ProjectId newMessageId() {
+        return ProjectId.newBuilder()
+                        .setValue(Identifiers.newUuid())
+                        .build();
     }
 
     private static class EntityIdUnpacker<T> implements Function<EntityId, T> {

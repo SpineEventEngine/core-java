@@ -57,7 +57,7 @@ public final class Queries {
     public static QueryId generateId() {
         final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
         return QueryId.newBuilder()
-                      .setUuid(formattedId)
+                      .setValue(formattedId)
                       .build();
     }
 

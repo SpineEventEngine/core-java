@@ -179,7 +179,7 @@ public class ActorRequestFactory {
     private static QueryId newQueryId() {
         final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
         return QueryId.newBuilder()
-                      .setUuid(formattedId)
+                      .setValue(formattedId)
                       .build();
     }
 
