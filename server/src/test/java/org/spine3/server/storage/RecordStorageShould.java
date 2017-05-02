@@ -32,7 +32,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.spine3.base.FieldFilter;
 import org.spine3.base.Version;
 import org.spine3.client.EntityFilters;
 import org.spine3.protobuf.AnyPacker;
@@ -370,11 +369,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Int32Value wrappedValue = Int32Value.newBuilder()
                                                   .setValue(requiredValue.getNumber())
                                                   .build();
-        final FieldFilter injectableStateVersion = FieldFilter.newBuilder()
-                                                              .setFieldPath("projectStatusValue")
-                                                              .addValue(
-                                                                      AnyPacker.pack(wrappedValue))
-                                                              .build();
         final Version versionValue = Version.newBuilder()
                                             .setNumber(2) // Value of the counter after one columns
                                             .build();     // scan (incremented 2 times internally)
