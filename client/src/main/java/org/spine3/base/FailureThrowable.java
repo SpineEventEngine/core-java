@@ -48,9 +48,7 @@ public abstract class FailureThrowable extends Throwable {
     /** The moment of creation of this object. */
     private final Timestamp timestamp;
 
-    protected FailureThrowable(GeneratedMessageV3 unused,
-                               CommandContext ignored,
-                               GeneratedMessageV3 failureMessage) {
+    protected FailureThrowable(GeneratedMessageV3 failureMessage) {
         super();
         this.failureMessage = failureMessage;
         this.timestamp = getCurrentTime();
@@ -76,7 +74,7 @@ public abstract class FailureThrowable extends Throwable {
     public Failure toFailure(Command command) {
         final Any packedMessage = pack(failureMessage);
         final FailureContext context = createContext(command);
-        final FailureId id = Failures.generateId();
+        final FailureId id = Failures.generateId(command.getId());
         return Failure.newBuilder()
                       .setId(id)
                       .setMessage(packedMessage)

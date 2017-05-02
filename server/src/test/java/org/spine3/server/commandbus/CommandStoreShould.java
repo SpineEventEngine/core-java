@@ -274,9 +274,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         private static final long serialVersionUID = 1L;
 
         private TestFailure() {
-            super(Wrapper.forString("some Command message"),
-                  CommandContext.getDefaultInstance(),
-                  Wrapper.forString(TestFailure.class.getName()));
+            super(Wrapper.forString(TestFailure.class.getName()));
         }
     }
 
