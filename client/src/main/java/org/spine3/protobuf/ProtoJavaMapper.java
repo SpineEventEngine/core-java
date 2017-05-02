@@ -43,7 +43,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * A utility for converting the {@linkplain Message Protobuf Messages} (in form of {@link Any}) into
- * arbitrary {@linkplain Object Java Objects}.
+ * arbitrary {@linkplain Object Java Objects} and vice versa.
  *
  * <p>Currently, the supported types are:
  * <ul>
@@ -69,7 +69,7 @@ public final class ProtoJavaMapper {
      * @param message the {@link Any} value to convert
      * @param target  the conversion target class
      * @param <T>     the conversion target type
-     * @return te converted value
+     * @return the converted value
      */
     public static <T> T map(Any message, Class<T> target) {
         checkNotNull(message);
@@ -79,6 +79,13 @@ public final class ProtoJavaMapper {
         return result;
     }
 
+    /**
+     * Performs the {@link Object} to {@link Any} mapping.
+     *
+     * @param value the {@link Object} value to convert
+     * @param <T>   the converted object type
+     * @return the packed value
+     */
     public static <T> Any map(T value) {
         checkNotNull(value);
         @SuppressWarnings("unchecked") // Must be checked in runtime
@@ -92,19 +99,6 @@ public final class ProtoJavaMapper {
     }
 
     /**
-     * Selects and retrieves a {@link Function} for performing the described conversion.
-     *
-     * @param target the conversion target class
-     * @param <T>    the conversion target type
-     * @return the conversion target type
-     */
-    public static <T> Function<Any, T> converter(Class<T> target) {
-        final AnyCaster<T> caster = AnyCaster.forType(target);
-
-        return caster;
-    }
-
-    /**
      * The {@link Function} performing the described type convertion.
      */
     private abstract static class AnyCaster<T> extends Converter<Any, T> {
@@ -113,6 +107,10 @@ public final class ProtoJavaMapper {
             checkNotNull(cls);
             if (Message.class.isAssignableFrom(cls)) {
                 return new MessageTypeCaster<>();
+            } else if (ByteString.class.isAssignableFrom(cls)) {
+                @SuppressWarnings("unchecked") // Logically checked
+                final AnyCaster<T> result = (AnyCaster<T>) new BytesCaster();
+                return result;
             } else {
                 return new PrimitiveTypeCaster<>();
             }
@@ -132,6 +130,24 @@ public final class ProtoJavaMapper {
         protected abstract T cast(Any input);
 
         protected abstract Message uncast(T input);
+    }
+
+    private static class BytesCaster extends AnyCaster<ByteString> {
+
+        @Override
+        protected ByteString cast(Any input) {
+            final BytesValue bytes = AnyPacker.unpack(input);
+            final ByteString result = bytes.getValue();
+            return result;
+        }
+
+        @Override
+        protected Message uncast(ByteString input) {
+            final BytesValue bytes = BytesValue.newBuilder()
+                                               .setValue(input)
+                                               .build();
+            return bytes;
+        }
     }
 
     private static class MessageTypeCaster<T> extends AnyCaster<T> {
@@ -164,7 +180,6 @@ public final class ProtoJavaMapper {
                         .put(DoubleValue.class, new DoubleHandler())
                         .put(BoolValue.class, new BoolHandler())
                         .put(StringValue.class, new StringHandler())
-                        .put(BytesValue.class, new BytesHandler())
                         .build();
         private static final ImmutableMap<Class, Converter<? extends Message, ?>>
                 PRIMITIVE_TO_HANDLER =
@@ -175,16 +190,13 @@ public final class ProtoJavaMapper {
                         .put(Double.class, new DoubleHandler())
                         .put(Boolean.class, new BoolHandler())
                         .put(String.class, new StringHandler())
-                        .put(Byte[].class, new BytesHandler())
-                        .put(byte[].class, new BytesHandler())
                         .build();
 
         @Override
         protected T cast(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
             final Class boxedType = unpacked.getClass();
-            @SuppressWarnings("unchecked")
-            final Function<Message, T> typeUnpacker =
+            @SuppressWarnings("unchecked") final Function<Message, T> typeUnpacker =
                     (Function<Message, T>) PROTO_WRAPPER_TO_HANDLER.get(boxedType);
             checkArgument(typeUnpacker != null,
                           "Could not find a primitive type for %s.",
@@ -196,8 +208,7 @@ public final class ProtoJavaMapper {
         @Override
         protected Message uncast(T input) {
             final Class<?> cls = input.getClass();
-            @SuppressWarnings("unchecked")
-            final Converter<Message, T> converter =
+            @SuppressWarnings("unchecked") final Converter<Message, T> converter =
                     (Converter<Message, T>) PRIMITIVE_TO_HANDLER.get(cls);
             checkArgument(converter != null,
                           "Could not find a wrapper type for %s.",
@@ -350,22 +361,6 @@ public final class ProtoJavaMapper {
             return StringValue.newBuilder()
                               .setValue(value)
                               .build();
-        }
-    }
-
-    private static class BytesHandler extends PrimitiveHandler<BytesValue, ByteString> {
-
-        @Override
-        protected ByteString unpack(BytesValue message) {
-            checkNotNull(message);
-            return message.getValue();
-        }
-
-        @Override
-        protected BytesValue pack(ByteString value) {
-            return BytesValue.newBuilder()
-                             .setValue(value)
-                             .build();
         }
     }
 }

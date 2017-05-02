@@ -32,8 +32,6 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.test.commands.TestCommand;
 
@@ -63,9 +61,7 @@ public class ProtoJavaMapperShould {
         final Message message = TestCommand.newBuilder()
                                            .setValue("my-command-message")
                                            .build();
-        final Any wrapped = AnyPacker.pack(message);
-        final Message result = ProtoJavaMapper.map(wrapped, Message.class);
-        assertEquals(message, result);
+        checkMapping(message, message);
     }
 
     @Test
@@ -74,9 +70,7 @@ public class ProtoJavaMapperShould {
         final Message value = Int32Value.newBuilder()
                                         .setValue(rowValue)
                                         .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, int.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
     }
 
     @Test
@@ -85,31 +79,7 @@ public class ProtoJavaMapperShould {
         final Message value = Int64Value.newBuilder()
                                         .setValue(rowValue)
                                         .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, long.class);
-        assertEquals(rowValue, result);
-    }
-
-    @Test
-    public void map_UInt32Value_to_int() {
-        final int rowValue = 42;
-        final Message value = UInt32Value.newBuilder()
-                                         .setValue(rowValue)
-                                         .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, int.class);
-        assertEquals(rowValue, result);
-    }
-
-    @Test
-    public void map_UInt64Value_to_long() {
-        final long rowValue = 42L;
-        final Message value = UInt64Value.newBuilder()
-                                         .setValue(rowValue)
-                                         .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, long.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
     }
 
     @Test
@@ -118,9 +88,7 @@ public class ProtoJavaMapperShould {
         final Message value = FloatValue.newBuilder()
                                         .setValue(rowValue)
                                         .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, float.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
     }
 
     @Test
@@ -129,9 +97,7 @@ public class ProtoJavaMapperShould {
         final Message value = DoubleValue.newBuilder()
                                          .setValue(rowValue)
                                          .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, double.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
     }
 
     @Test
@@ -140,9 +106,7 @@ public class ProtoJavaMapperShould {
         final Message value = BoolValue.newBuilder()
                                        .setValue(rowValue)
                                        .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, boolean.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
     }
 
     @Test
@@ -151,9 +115,7 @@ public class ProtoJavaMapperShould {
         final Message value = StringValue.newBuilder()
                                          .setValue(rowValue)
                                          .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, String.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
     }
 
     @Test
@@ -162,8 +124,16 @@ public class ProtoJavaMapperShould {
         final Message value = BytesValue.newBuilder()
                                         .setValue(rowValue)
                                         .build();
-        final Any wrapped = AnyPacker.pack(value);
-        final Object result = ProtoJavaMapper.map(wrapped, ByteString.class);
-        assertEquals(rowValue, result);
+        checkMapping(rowValue, value);
+    }
+
+    private static void checkMapping(Object javaObject,
+                                     Message protoObject) {
+        final Any wrapped = AnyPacker.pack(protoObject);
+        final Object mappedJavaObject = ProtoJavaMapper.map(wrapped, javaObject.getClass());
+        assertEquals(javaObject, mappedJavaObject);
+        final Any restoredWrapped = ProtoJavaMapper.map(mappedJavaObject);
+        final Message restored = AnyPacker.unpack(restoredWrapped);
+        assertEquals(protoObject, restored);
     }
 }
