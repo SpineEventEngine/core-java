@@ -111,8 +111,7 @@ public class ExecutorCommandSchedulerShould {
     }
 
     private static Timestamp getSchedulingTime(Command cmd) {
-        final Timestamp time = cmd.getContext()
-                                  .getSchedule()
+        final Timestamp time = cmd.getSystemProperties()
                                   .getSchedulingTime();
         return time;
     }

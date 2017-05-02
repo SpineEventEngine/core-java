@@ -20,6 +20,7 @@
 
 package org.spine3.base;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
@@ -34,15 +35,25 @@ import static org.spine3.protobuf.Messages.toAny;
  */
 public final class Failures {
 
+    @VisibleForTesting
+    static final String FAILURE_ID_FORMAT = "%s-fail";
+
     private Failures() {
         // Prevent instantiation of this utility class.
     }
 
-    /** Generates a new random UUID-based {@code FailureId}. */
-    public static FailureId generateId() {
-        final String value = Identifiers.newUuid();
+    /**
+     * Generates a {@code FailureId} based upon a {@linkplain CommandId command ID} in a format:
+     *
+     * <pre>{@code <commandId>-fail}</pre>
+     *
+     * @param id the identifier of the {@linkplain Command command}, which processing caused the
+     *           failure
+     **/
+    public static FailureId generateId(CommandId id) {
+        final String idValue = String.format(FAILURE_ID_FORMAT, id.getUuid());
         return FailureId.newBuilder()
-                        .setUuid(value)
+                        .setValue(idValue)
                         .build();
     }
 

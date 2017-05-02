@@ -22,7 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Command;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
@@ -298,34 +297,28 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     /**
      * Ensures that the entity is not marked as {@code archived}.
      *
-     * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyArchivedEntity if the entity in in the archived status
      * @see #getLifecycleFlags()
      * @see LifecycleFlags#getArchived()
      */
-    protected void checkNotArchived(Command modification) throws CannotModifyArchivedEntity {
+    protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyArchivedEntity(modification.getMessage(),
-                                                 modification.getContext(),
-                                                 idStr);
+            throw new CannotModifyArchivedEntity(idStr);
         }
     }
 
     /**
      * Ensures that the entity is not marked as {@code deleted}.
      *
-     * @param modification the {@linkplain Command} which execution triggered this check
      * @throws CannotModifyDeletedEntity if the entity is marked as {@code deleted}
      * @see #getLifecycleFlags()
      * @see LifecycleFlags#getDeleted()
      */
-    protected void checkNotDeleted(Command modification) throws CannotModifyDeletedEntity {
+    protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
             final String idStr = idToString(getId());
-            throw new CannotModifyDeletedEntity(modification.getMessage(),
-                                                modification.getContext(),
-                                                idStr);
+            throw new CannotModifyDeletedEntity(idStr);
         }
     }
 
