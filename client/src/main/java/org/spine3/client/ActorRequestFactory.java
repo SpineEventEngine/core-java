@@ -309,7 +309,7 @@ public class ActorRequestFactory {
     /**
      * A builder for the {@link Query} instances.
      *
-     * <p>The API of this class is insiped by the SQL syntax.
+     * <p>The API of this class is inspired by the SQL syntax.
      *
      * <p>Calling any of the methods is optional. Call {@link #build() build()} to retrieve
      * the instance of {@link Query}.
