@@ -374,7 +374,7 @@ public class ActorRequestFactory {
         }
 
         /**
-         * Sets the IP predicate to the {@linkplain Query}.
+         * Sets the ID predicate to the {@linkplain Query}.
          *
          * @param ids the values of the IDs to look up
          * @return self for method chaining
@@ -388,7 +388,7 @@ public class ActorRequestFactory {
         }
 
         /**
-         * Sets the IP predicate to the {@linkplain Query}.
+         * Sets the ID predicate to the {@linkplain Query}.
          *
          * @param ids the values of the IDs to look up
          * @return self for method chaining
@@ -402,7 +402,7 @@ public class ActorRequestFactory {
         }
 
         /**
-         * Sets the IP predicate to the {@linkplain Query}.
+         * Sets the ID predicate to the {@linkplain Query}.
          *
          * @param ids the values of the IDs to look up
          * @return self for method chaining
@@ -416,7 +416,7 @@ public class ActorRequestFactory {
         }
 
         /**
-         * Sets the IP predicate to the {@linkplain Query}.
+         * Sets the ID predicate to the {@linkplain Query}.
          *
          * @param ids the values of the IDs to look up
          * @return self for method chaining
@@ -436,8 +436,8 @@ public class ActorRequestFactory {
          * the records will be retrieved regardless the Entity Columns values.
          *
          * <p>The multiple parameters passed into this method are considered to be joined in
-         * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches all of
-         * these parameters.
+         * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches
+         * all of these parameters.
          *
          * <p>The disjunctive filters currently are not supported.
          *
