@@ -64,45 +64,6 @@ public final class Targets {
     }
 
     /**
-     * Create a {@link Target} for a subset of the entity states by specifying their IDs and
-     * the Entity Column query parameters.
-     *
-     * @param entityClass   the class of a target entity
-     * @param ids           the IDs of interest
-     * @param columnFilters the Entity Columns filters serving as the predicate of the constructed
-     *                      {@link Target}
-     * @return the instance of {@code Target} assembled according to the parameters.
-     */
-    public static Target someOf(Class<? extends Message> entityClass,
-                                Set<? extends Message> ids,
-                                Map<String, Any> columnFilters) {
-        checkNotNull(entityClass);
-        checkNotNull(ids);
-        checkNotNull(columnFilters);
-
-        final Target result = composeTarget(entityClass, ids, columnFilters);
-        return result;
-    }
-
-    /**
-     * Create a {@link Target} for a subset of the entity states by specifying the Entity Column
-     * query parameters.
-     *
-     * @param entityClass   the class of a target entity
-     * @param columnFilters the Entity Columns filters serving as the predicate of the constructed
-     *                      {@link Target}
-     * @return the instance of {@code Target} assembled according to the parameters.
-     */
-    public static Target someOf(Class<? extends Message> entityClass,
-                                Map<String, Any> columnFilters) {
-        checkNotNull(entityClass);
-        checkNotNull(columnFilters);
-
-        final Target result = composeTarget(entityClass, null, columnFilters);
-        return result;
-    }
-
-    /**
      * Create a {@link Target} for all of the specified entity states.
      *
      * @param entityClass the class of a target entity
