@@ -395,7 +395,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         // Change internal Entity state
         wrongEntity1.getCounter();
 
-        // After the mutation above the single matching record is record under the ID `idMatching`
+        // After the mutation above the single matching record is the one under the `idMatching` ID
 
         final EntityRecord fineRecord = newStorageRecord(idMatching);
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1);

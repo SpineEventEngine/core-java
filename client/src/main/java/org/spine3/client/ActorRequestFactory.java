@@ -170,7 +170,6 @@ public class ActorRequestFactory {
                                                       ids,
                                                       columnFilters,
                                                       fieldMask);
-
         builder.setId(newQueryId());
         builder.setContext(actorContext());
         return builder.build();
@@ -338,6 +337,8 @@ public class ActorRequestFactory {
         private final Class<? extends Message> targetType;
 
         // All the optional fields are initialized only when and if set
+        // The empty collections make effectively no influence, but null values allow us to create
+        // the query `Target` more efficiently
 
         @Nullable
         private Set<?> ids;
@@ -355,7 +356,7 @@ public class ActorRequestFactory {
         /**
          * Sets the ID predicate to the {@linkplain Query}.
          *
-         * <p>Though it's not prohibited in compile time, please make sure to pass instances of the
+         * <p>Though it's not prohibited at compile-time, please make sure to pass instances of the
          * same type to the argument of this method. Moreover, the instances must be of the type of
          * the query target type identifier. This method or any of its overload do not check these
          * constrains an assume they are followed by the caller.
@@ -382,8 +383,8 @@ public class ActorRequestFactory {
          */
         public QueryBuilder whereIdIn(Message... ids) {
             this.ids = ImmutableSet.<Message>builder()
-                    .add(ids)
-                    .build();
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
@@ -396,8 +397,8 @@ public class ActorRequestFactory {
          */
         public QueryBuilder whereIdIn(String... ids) {
             this.ids = ImmutableSet.<String>builder()
-                    .add(ids)
-                    .build();
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
@@ -410,8 +411,8 @@ public class ActorRequestFactory {
          */
         public QueryBuilder whereIdIn(Integer... ids) {
             this.ids = ImmutableSet.<Integer>builder()
-                    .add(ids)
-                    .build();
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
@@ -424,8 +425,8 @@ public class ActorRequestFactory {
          */
         public QueryBuilder whereIdIn(Long... ids) {
             this.ids = ImmutableSet.<Long>builder()
-                    .add(ids)
-                    .build();
+                                   .add(ids)
+                                   .build();
             return this;
         }
 
@@ -485,8 +486,8 @@ public class ActorRequestFactory {
          */
         public QueryBuilder fields(String... fieldNames) {
             this.fieldMask = ImmutableSet.<String>builder()
-                    .add(fieldNames)
-                    .build();
+                                         .add(fieldNames)
+                                         .build();
             return this;
         }
 
@@ -569,9 +570,9 @@ public class ActorRequestFactory {
     }
 
     /**
-     * A parameter of a {@link Query} to the read side.
+     * A parameter of a {@link Query}.
      *
-     * <p>This class may be considered as a filter for the query. An instance contains the name of
+     * <p>This class may be considered a filter for the query. An instance contains the name of
      * the Entity Column to filter by and the value of the Column.
      *
      * <p>The supported types for querying are {@link Message} and Protobuf primitives.

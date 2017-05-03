@@ -50,8 +50,8 @@ import static com.google.common.base.Preconditions.checkState;
  *     <li>{@link Message} - converted via {@link AnyPacker};
  *     <li>Java primitives - the passed {@link Any} is unpacked into one of the types
  *         {@code Int32Value, Int64Value, UInt32Value, UInt64Value, FloatValue, DoubleValue,
- *         BoolValue, StringValue, BytesValue} and then into the corresponding Java type, either
- *         a primitive value, or {@code String} of {@link ByteString}.
+ *         BoolValue, StringValue, BytesValue} and then transformed into the corresponding Java
+ *         type, either a primitive value, or {@code String} of {@link ByteString}.
  * </ul>
  *
  * @author Dmytro Dashenkov
@@ -60,7 +60,7 @@ import static com.google.common.base.Preconditions.checkState;
 public final class ProtoJavaMapper {
 
     private ProtoJavaMapper() {
-        // Prevent utility class initialization
+        // Prevent utility class initialization.
     }
 
     /**
@@ -88,7 +88,7 @@ public final class ProtoJavaMapper {
      */
     public static <T> Any map(T value) {
         checkNotNull(value);
-        @SuppressWarnings("unchecked") // Must be checked in runtime
+        @SuppressWarnings("unchecked") // Must be checked at runtime
         final Class<T> srcClass = (Class<T>) value.getClass();
         final AnyCaster<T> caster = AnyCaster.forType(srcClass);
         final Message message = caster.reverse()
@@ -219,7 +219,7 @@ public final class ProtoJavaMapper {
         }
     }
 
-    abstract static class PrimitiveHandler<M extends Message, T> extends Converter<M, T> {
+    private abstract static class PrimitiveHandler<M extends Message, T> extends Converter<M, T> {
 
         @Override
         protected T doForward(M input) {
