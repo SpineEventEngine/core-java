@@ -363,7 +363,7 @@ public class StorageShould extends TenantAwareTest {
 
     private static Failure newFailure() {
         final Any packedFailureMessage = pack("newFailure");
-        final FailureId id = Failures.generateId();
+        final FailureId id = Failures.generateId(Commands.generateId());
         return Failure.newBuilder()
                       .setId(id)
                       .setMessage(packedFailureMessage)
