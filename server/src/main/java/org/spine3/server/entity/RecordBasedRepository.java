@@ -23,6 +23,7 @@ package org.spine3.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
@@ -132,6 +133,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
         final E entity = toEntity(record);
         return Optional.of(entity);
+    }
+
+    @Override
+    public Iterator<E> iterator(Predicate<E> filter) {
+        final Iterable<E> allEntities = loadAll();
+        final Iterator<E> result = FluentIterable.from(allEntities)
+                                                 .filter(filter)
+                                                 .iterator();
+        return result;
     }
 
     /**
