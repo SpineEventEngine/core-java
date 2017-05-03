@@ -291,11 +291,11 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String columnName2 = "column2";
         final Message columnValue2 = newMessageId();
         final String fieldName = "TestEntity.secondField";
-        final ActorRequestFactory.QueryBuilder builder = factory().query()
-                                                                  .select(testEntityClass)
-                                                                  .fields(fieldName)
-                                                                  .whereIdIn(id1, id2)
-                                                                  .where(eq(columnName1,
+        final QueryBuilder builder = factory().query()
+                                              .select(testEntityClass)
+                                              .fields(fieldName)
+                                              .whereIdIn(id1, id2)
+                                              .where(eq(columnName1,
                                                                             columnValue1),
                                                                          eq(columnName2,
                                                                             columnValue2));
