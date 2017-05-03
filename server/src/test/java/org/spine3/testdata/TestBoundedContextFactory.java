@@ -66,7 +66,7 @@ public class TestBoundedContextFactory {
             return newBuilder().build();
         }
 
-        public static BoundedContext newBoundedContext(EventBus eventBus) {
+        public static BoundedContext newBoundedContext(EventBus.Builder eventBus) {
             return newBuilder()
                     .setEventBus(eventBus)
                     .build();
@@ -92,17 +92,16 @@ public class TestBoundedContextFactory {
         }
 
         public static BoundedContext newBoundedContext(EventEnricher enricher) {
-            final EventBus eventBus = EventBus.newBuilder()
-                                              .setEnricher(enricher)
-                                              .setStorageFactory(
-                                                      StorageFactorySwitch.getInstance(true)
-                                                                          .get())
-                                              .build();
+            final EventBus.Builder eventBus = EventBus.newBuilder()
+                                                      .setEnricher(enricher)
+                                                      .setStorageFactory(
+                                                              StorageFactorySwitch.getInstance(true)
+                                                                                  .get());
             return newBoundedContext(eventBus);
         }
 
         public static BoundedContext newBoundedContext(CommandBus.Builder commandBus,
-                                                       EventBus eventBus) {
+                                                       EventBus.Builder eventBus) {
             return newBuilder()
                     .setCommandBus(commandBus)
                     .setEventBus(eventBus)

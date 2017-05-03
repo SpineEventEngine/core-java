@@ -20,6 +20,7 @@
 
 package org.spine3.server.bc;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -27,17 +28,16 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.Repository;
-import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
@@ -64,10 +64,10 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -190,15 +190,21 @@ public class BoundedContextShould {
 
     @Test
     public void not_notify_integration_event_subscriber_if_event_is_invalid() {
-        final EventBus eventBus = mock(EventBus.class);
-        doReturn(false).when(eventBus)
-                       .validate(any(Message.class), anyResponseObserver());
-        final BoundedContext boundedContext = MultiTenant.newBoundedContext(eventBus);
-        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
+        final BoundedContext boundedContext = MultiTenant.newBoundedContext();
+        final TestEventSubscriber sub = new TestEventSubscriber();
+        boundedContext.getEventBus()
+                      .register(sub);
+
+        final Any invalidMsg = AnyPacker.pack(ProjectCreated.getDefaultInstance());
+        final IntegrationEvent event =
+                Given.AnIntegrationEvent.projectCreated()
+                                        .toBuilder()
+                                        .setMessage(invalidMsg)
+                                        .build();
 
         boundedContext.notify(event, new TestResponseObserver());
 
-        verify(eventBus, never()).post(any(Event.class));
+        assertNull(sub.eventHandled);
     }
 
     @Test

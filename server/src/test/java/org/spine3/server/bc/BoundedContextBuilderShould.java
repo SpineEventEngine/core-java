@@ -32,7 +32,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Tests;
-import org.spine3.testdata.TestEventBusFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -100,8 +99,8 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_EventBus() {
-        final EventBus expected = TestEventBusFactory.create(storageFactory);
+    public void return_EventBus_builder() {
+        final EventBus.Builder expected = EventBus.newBuilder();
         builder.setEventBus(expected);
         assertEquals(expected, builder.getEventBus()
                                       .get());
@@ -138,14 +137,14 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
-        builder.setEventBus(Tests.<EventBus>nullRef());
+        builder.setEventBus(Tests.<EventBus.Builder>nullRef());
     }
 
     @Test
     public void create_CommandBus_if_it_was_not_set() {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = builder
-                .setEventBus(TestEventBusFactory.create(storageFactory))
+                .setEventBus(EventBus.newBuilder())
                 .build();
         assertNotNull(boundedContext.getCommandBus());
     }

@@ -113,7 +113,7 @@ public final class BoundedContext
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus.build();
-        this.eventBus = builder.eventBus;
+        this.eventBus = builder.eventBus.build();
         this.stand = builder.stand;
         this.tenantIndex = builder.tenantIndex;
     }
@@ -357,7 +357,6 @@ public final class BoundedContext
      * <p>An application can have more than one bounded context. To distinguish
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
-    @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
         private String name = DEFAULT_NAME;
@@ -366,7 +365,7 @@ public final class BoundedContext
         private Supplier<StorageFactory> storageFactorySupplier;
 
         private CommandBus.Builder commandBus;
-        private EventBus eventBus;
+        private EventBus.Builder eventBus;
         private Stand stand;
 
         /**
@@ -430,12 +429,12 @@ public final class BoundedContext
             return Optional.fromNullable(tenantIndex);
         }
 
-        public Builder setEventBus(EventBus eventBus) {
+        public Builder setEventBus(EventBus.Builder eventBus) {
             this.eventBus = checkNotNull(eventBus);
             return this;
         }
 
-        public Optional<EventBus> getEventBus() {
+        public Optional<EventBus.Builder> getEventBus() {
             return Optional.fromNullable(eventBus);
         }
 
@@ -525,7 +524,14 @@ public final class BoundedContext
 
         private void initEventBus(StorageFactory storageFactory) {
             if (eventBus == null) {
-                eventBus = createEventBus(storageFactory);
+                eventBus = EventBus.newBuilder()
+                                   .setStorageFactory(storageFactory);
+            } else {
+                final boolean eventStoreConfigured = eventBus.getEventStore()
+                                                             .isPresent();
+                if (!eventStoreConfigured) {
+                    eventBus.setStorageFactory(storageFactory);
+                }
             }
         }
 
@@ -545,13 +551,6 @@ public final class BoundedContext
 
         private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
             final CommandStore result = new CommandStore(factory, index);
-            return result;
-        }
-
-        private static EventBus createEventBus(StorageFactory factory) {
-            final EventBus result = EventBus.newBuilder()
-                                            .setStorageFactory(factory)
-                                            .build();
             return result;
         }
 
