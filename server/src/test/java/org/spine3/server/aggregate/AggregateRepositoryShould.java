@@ -21,6 +21,8 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import org.junit.After;
 import org.junit.Before;
@@ -31,6 +33,7 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
@@ -44,6 +47,7 @@ import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
 
+import java.util.Iterator;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -58,6 +62,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
 
@@ -235,6 +240,26 @@ public class AggregateRepositoryShould {
                               .isPresent());
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
+        createAndStoreAggregate();
+
+        // Store a troublesome entity, which cannot be loaded.
+        final TenantAwareOperation op = new TenantAwareOperation(newTenantUuid()) {
+            @Override
+            public void run() {
+                createAndStore(ProjectAggregateRepository.troublesome.getId());
+            }
+        };
+        op.execute();
+
+        final Iterator<ProjectAggregate> iterator = repository.iterator(
+                Predicates.<ProjectAggregate>alwaysTrue());
+
+        // This should iterate through all.
+        Lists.newArrayList(iterator);
+    }
+
     /*
      * Utility methods.
      ****************************/
@@ -277,6 +302,15 @@ public class AggregateRepositoryShould {
 
         repository.store(aggregate);
         return aggregate;
+    }
+
+    private void createAndStore(String id) {
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(id)
+                                             .build();
+        final ProjectAggregate aggregate = givenAggregateWithUncommittedEvents(projectId);
+
+        repository.store(aggregate);
     }
 
     private AggregateStorage<ProjectId> givenAggregateStorageMock() {
@@ -358,10 +392,23 @@ public class AggregateRepositoryShould {
 
     private static class ProjectAggregateRepository
                    extends AggregateRepository<ProjectId, ProjectAggregate> {
+
+        private static final ProjectId troublesome = ProjectId.newBuilder()
+                                                              .setId("CANNOT_BE_LOADED")
+                                                              .build();
+
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
                                             .get());
+        }
+
+        @Override
+        public Optional<ProjectAggregate> find(ProjectId id) {
+            if (id.equals(troublesome)) {
+                return Optional.absent();
+            }
+            return super.find(id);
         }
     }
 }
