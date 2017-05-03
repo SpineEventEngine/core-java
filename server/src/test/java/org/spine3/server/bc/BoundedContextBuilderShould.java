@@ -28,7 +28,6 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
@@ -179,13 +178,6 @@ public class BoundedContextBuilderShould {
     @Test(expected = NullPointerException.class)
     public void reject_null_CommandStore() {
         builder.setCommandStore(Tests.<CommandStore>nullRef());
-    }
-
-    @Test
-    public void return_StandUpdateDelivery_if_set() {
-        final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
-        assertEquals(mock, builder.setStandUpdateDelivery(mock)
-                                  .getStandUpdateDelivery().get());
     }
 
     @Test(expected = IllegalStateException.class)

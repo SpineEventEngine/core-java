@@ -46,10 +46,8 @@ import org.spine3.server.failure.FailureBus;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.procman.ProcessManagerRepository;
-import org.spine3.server.stand.Funnel;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandStorage;
-import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
@@ -90,7 +88,6 @@ public final class BoundedContext
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
-    private final Funnel funnel;
 
     /** All the repositories registered with this bounded context. */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
@@ -118,7 +115,6 @@ public final class BoundedContext
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
-        this.funnel = builder.funnel;
         this.tenantIndex = builder.tenantIndex;
     }
 
@@ -337,12 +333,6 @@ public final class BoundedContext
         return this.commandBus.failureBus();
     }
 
-    /** Obtains instance of {@link Funnel} of this {@code BoundedContext}. */
-    @CheckReturnValue
-    public Funnel getFunnel() {
-        return this.funnel;
-    }
-
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
     @CheckReturnValue
     public Stand getStand() {
@@ -376,8 +366,6 @@ public final class BoundedContext
         private EventBus eventBus;
         private boolean multitenant;
         private Stand stand;
-        private StandUpdateDelivery standUpdateDelivery;
-        private Funnel funnel;
         private TenantIndex tenantIndex;
 
         /**
@@ -468,15 +456,6 @@ public final class BoundedContext
             return Optional.fromNullable(stand);
         }
 
-        public Optional<StandUpdateDelivery> getStandUpdateDelivery() {
-            return Optional.fromNullable(standUpdateDelivery);
-        }
-
-        public Builder setStandUpdateDelivery(StandUpdateDelivery standUpdateDelivery) {
-            this.standUpdateDelivery = standUpdateDelivery;
-            return this;
-        }
-
         public Builder setTenantIndex(TenantIndex tenantIndex) {
             if (this.multitenant) {
                 checkNotNull(tenantIndex,
@@ -539,21 +518,11 @@ public final class BoundedContext
 
             }
 
-            funnel = createStandFunnel(standUpdateDelivery);
 
             final BoundedContext result = new BoundedContext(this);
 
             log().info(result.nameForLogging() + " created.");
             return result;
-        }
-
-        private Funnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
-            final Funnel.Builder builder = Funnel.newBuilder()
-                                                 .setStand(stand);
-            if (standUpdateDelivery != null) {
-                builder.setDelivery(standUpdateDelivery);
-            }
-            return builder.build();
         }
 
         private static CommandStore createCommandStore(StorageFactory storageFactory,

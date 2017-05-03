@@ -224,7 +224,7 @@ public class SubscriptionServiceShould {
         final int version = 1;
 
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
-        boundedContext.getFunnel()
+        boundedContext.getStand()
                       .post(entity, requestFactory.createCommandContext());
 
         // isCompleted set to false since we don't expect activationObserver::onCompleted to be called.
@@ -292,7 +292,7 @@ public class SubscriptionServiceShould {
                                             .build();
         final int version = 1;
         final VersionableEntity entity = mockEntity(projectId, projectState, version);
-        boundedContext.getFunnel()
+        boundedContext.getStand()
                       .post(entity, requestFactory.createCommandContext());
 
         // The update must not be handled by the observer

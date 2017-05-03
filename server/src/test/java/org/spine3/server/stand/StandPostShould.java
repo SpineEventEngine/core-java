@@ -23,6 +23,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
@@ -41,7 +42,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.projection.ProjectId;
-import org.spine3.testdata.TestStandFactory;
 import org.spine3.time.Time;
 
 import java.util.Set;
@@ -53,7 +53,6 @@ import java.util.concurrent.TimeUnit;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -65,48 +64,19 @@ import static org.spine3.base.Versions.newVersion;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-public class FunnelShould {
+@Ignore //TODO:2017-05-03:alexander.yevsyukov: Enable back when Stand becomes a Bus.
+public class StandPostShould {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(FunnelShould.class);
+            TestActorRequestFactory.newInstance(StandPostShould.class);
 
     // **** Positive scenarios (unit) ****
 
-    @Test
-    public void initialize_properly_with_stand_only() {
-        final Stand stand = TestStandFactory.create();
-        final Funnel.Builder builder = Funnel.newBuilder()
-                                             .setStand(stand);
-        final Funnel funnel = builder.build();
-        Assert.assertNotNull(funnel);
-    }
-
-    @Test
-    public void initialize_properly_with_all_builder_options() {
-        final Stand stand = TestStandFactory.create();
-        final StandUpdateDelivery delivery = mock(StandUpdateDelivery.class);
-
-        final Funnel funnel = Funnel.newBuilder()
-                                    .setStand(stand)
-                                    .setDelivery(delivery)
-                                    .build();
-        Assert.assertNotNull(funnel);
-    }
-
-    @Test
-    public void initialize_properly_with_no_executor() {
-        final Stand stand = TestStandFactory.create();
-
-        final Funnel funnelForBusyStand = Funnel.newBuilder()
-                                                .setStand(stand)
-                                                .build();
-        Assert.assertNotNull(funnelForBusyStand);
-    }
-
     @SuppressWarnings({"OverlyComplexAnonymousInnerClass", "ConstantConditions"})
     @Test
-    public void deliver_updates_to_stand() {
-        final AggregateRepository<ProjectId, Given.StandTestAggregate> repository = Given.aggregateRepo();
+    public void deliver_updates() {
+        final AggregateRepository<ProjectId, Given.StandTestAggregate> repository =
+                Given.aggregateRepo();
         final ProjectId entityId = ProjectId.newBuilder()
                                             .setId("PRJ-001")
                                             .build();
@@ -114,14 +84,10 @@ public class FunnelShould {
         final StringValue state = entity.getState();
         final Version version = entity.getVersion();
 
-        final Stand stand = mock(Stand.class);
-        doNothing().when(stand)
-                   .update(any(EntityStateEnvelope.class));
+        final Stand innerStand = Stand.newBuilder().build();
+        final Stand stand = spy(innerStand);
 
-        final Funnel funnel = Funnel.newBuilder()
-                                    .setStand(stand)
-                                    .build();
-        funnel.post(entity, requestFactory.createCommandContext());
+        stand.post(entity, requestFactory.createCommandContext());
 
         final ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
                 new ArgumentMatcher<EntityStateEnvelope<?, ?>>() {
@@ -144,7 +110,6 @@ public class FunnelShould {
     @SuppressWarnings("MagicNumber")
     @Test
     public void use_delivery_from_builder() {
-        final Stand stand = TestStandFactory.create();
         final StandUpdateDelivery delivery = spy(new StandUpdateDelivery() {
             @Override
             protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
@@ -152,12 +117,11 @@ public class FunnelShould {
                 return false;
             }
         });
-        final Funnel.Builder builder = Funnel.newBuilder()
-                                             .setStand(stand)
-                                             .setDelivery(delivery);
+        final Stand.Builder builder = Stand.newBuilder()
+                                           .setDelivery(delivery);
 
-        final Funnel funnel = builder.build();
-        Assert.assertNotNull(funnel);
+        final Stand stand = builder.build();
+        Assert.assertNotNull(stand);
 
         final Object id = Identifiers.newUuid();
         final StringValue state = StringValue.getDefaultInstance();
@@ -168,31 +132,12 @@ public class FunnelShould {
         when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
 
         final CommandContext context = requestFactory.createCommandContext();
-        funnel.post(entity, context);
+        stand.post(entity, context);
 
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
                                                                     context.getActorContext()
                                                                            .getTenantId());
         verify(delivery).deliverNow(eq(envelope), eq(Stand.class));
-    }
-
-    // **** Negative scenarios (unit) ****
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = NullPointerException.class)
-    public void fail_to_initialize_with_improper_stand() {
-        @SuppressWarnings("ConstantConditions") // null is marked as improper with this warning
-        final Funnel.Builder builder = Funnel.newBuilder()
-                                             .setStand(null);
-
-        builder.build();
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    @Test(expected = IllegalStateException.class)
-    public void fail_to_initialize_from_empty_builder() {
-        final Funnel.Builder builder = Funnel.newBuilder();
-        builder.build();
     }
 
     // **** Integration scenarios (<source> -> StandFunnel -> Mock Stand) ****
@@ -234,9 +179,9 @@ public class FunnelShould {
         checkNotNull(dispatchActions);
 
         final Stand stand = mock(Stand.class);
-        final Executor executor = isConcurrent ?
-                                  Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR) :
-                                  MoreExecutors.directExecutor();
+        final Executor executor = isConcurrent
+                ? Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR)
+                : MoreExecutors.directExecutor();
         final StandUpdateDelivery delivery = spy(new SpyableStandUpdateDelivery(executor));
 
         final BoundedContext boundedContext = Given.boundedContext(stand, delivery);
@@ -317,13 +262,8 @@ public class FunnelShould {
 
         final Set<String> threadInvocationRegistry = new ConcurrentSet<>();
 
-        final Stand stand = mock(Stand.class);
-        doNothing().when(stand)
-                   .update(any(EntityStateEnvelope.class));
-
-        final Funnel funnel = Funnel.newBuilder()
-                                    .setStand(stand)
-                                    .build();
+        final Stand stand = Stand.newBuilder()
+                                 .build();
 
         final ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
 
@@ -338,7 +278,7 @@ public class FunnelShould {
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);
-                funnel.post(entity, requestFactory.createCommandContext());
+                stand.post(entity, requestFactory.createCommandContext());
 
                 threadInvocationRegistry.add(threadName);
             }

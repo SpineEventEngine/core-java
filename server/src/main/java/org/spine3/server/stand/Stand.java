@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.base.CommandContext;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.client.Queries;
@@ -65,7 +66,7 @@ import static org.spine3.io.StreamObservers.ack;
  *
  * <p>Provides an optimal way to access the latest state of published aggregates
  * for read-side services. The aggregate states are delivered to the instance of {@code Stand}
- * through {@link Funnel} from {@link AggregateRepository} instances.
+ * from {@link AggregateRepository} instances.
  *
  * <p>In order to provide a flexibility in defining data access policies,
  * {@code Stand} contains only the states of published aggregates.
@@ -107,6 +108,11 @@ public class Stand implements AutoCloseable {
      */
     private final Executor callbackExecutor;
 
+    /**
+     * The delivery strategy to propagate the {@code Entity} state to the instance of {@code Stand}.
+     */
+    private final StandUpdateDelivery delivery;
+
     private final boolean multitenant;
 
     private final TopicValidator topicValidator;
@@ -115,6 +121,9 @@ public class Stand implements AutoCloseable {
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
+        delivery = builder.delivery;
+        init();
+
         callbackExecutor = builder.getCallbackExecutor();
         multitenant = builder.isMultitenant();
         subscriptionRegistry = builder.getSubscriptionRegistry();
@@ -122,6 +131,23 @@ public class Stand implements AutoCloseable {
         topicValidator = builder.getTopicValidator();
         queryValidator = builder.getQueryValidator();
         subscriptionValidator = builder.getSubscriptionValidator();
+    }
+
+    private void init() {
+        delivery.setStand(this);
+    }
+
+    /**
+     * Posts the state of an {@link VersionableEntity} to this {@link Stand}.
+     *
+     * @param entity         the entity which state should be delivered to the {@code Stand}
+     * @param commandContext the context of the command, which triggered the entity state update.
+     */
+    public void post(final VersionableEntity entity, CommandContext commandContext) {
+        final TenantId tenantId = commandContext.getActorContext()
+                                                .getTenantId();
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
+        delivery.deliver(envelope);
     }
 
     public static Builder newBuilder() {
@@ -269,7 +295,6 @@ public class Stand implements AutoCloseable {
 
             @Override
             public void run() {
-
                 subscriptionRegistry.remove(subscription);
                 ack(responseObserver);
             }
@@ -437,6 +462,14 @@ public class Stand implements AutoCloseable {
     }
 
     public static class Builder {
+
+        /**
+         * Optional {@code StandUpdateDelivery} for propagating the data to {@code Stand}.
+         *
+         * <p>If not set, a {@link StandUpdateDelivery#directDelivery() directDelivery()}
+         * value will be set by the builder.
+         */
+        private StandUpdateDelivery delivery;
         private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
@@ -513,12 +546,36 @@ public class Stand implements AutoCloseable {
             return typeRegistry;
         }
 
+        public Optional<StandUpdateDelivery> getDelivery() {
+            return Optional.fromNullable(delivery);
+        }
+
+        /**
+         * Sets the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
+         *
+         * <p>The value must not be {@code null}.
+         *
+         * <p> If this method is not used, a
+         * {@link StandUpdateDelivery#directDelivery() directDelivery()} value will be used.
+         *
+         * @param delivery the instance of {@code StandUpdateDelivery}.
+         * @return {@code this} instance of {@code Builder}
+         */
+        public Builder setDelivery(StandUpdateDelivery delivery) {
+            this.delivery = checkNotNull(delivery);
+            return this;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
          * @return the instance of Stand
          */
         public Stand build() {
+            if (delivery == null) {
+                delivery = StandUpdateDelivery.directDelivery();
+            }
+
             if (storage == null) {
                 storage = StorageFactorySwitch.getInstance(multitenant)
                                               .get()
@@ -537,6 +594,7 @@ public class Stand implements AutoCloseable {
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
             final Stand result = new Stand(this);
+            result.init();
             return result;
         }
     }

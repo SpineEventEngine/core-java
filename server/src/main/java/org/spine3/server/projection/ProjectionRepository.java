@@ -38,7 +38,7 @@ import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.stand.Funnel;
+import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -69,8 +69,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /** The {@code BoundedContext} in which this repository works. */
     private final BoundedContext boundedContext;
 
-    /** An instance of {@link Funnel} to be informed about state updates */
-    private final Funnel funnel;
+    /** An instance of {@link Stand} to be informed about state updates */
+    private final Stand stand;
 
     /**
      * If {@code true} the projection repository will start the {@linkplain #catchUp() catch up}
@@ -148,7 +148,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                                    Duration catchUpMaxDuration) {
         super(EventDispatchingRepository.<I>producerFromContext());
         this.boundedContext = boundedContext;
-        this.funnel = boundedContext.getFunnel();
+        this.stand = boundedContext.getStand();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;
         this.catchUpMaxDuration = checkNotNull(catchUpMaxDuration);
     }
@@ -295,7 +295,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             storeNow(projection, eventTime);
         }
 
-        funnel.post(projection, context.getCommandContext());
+        stand.post(projection, context.getCommandContext());
     }
 
     /**
