@@ -32,6 +32,8 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.UInt32Value;
+import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.test.commands.TestCommand;
 
@@ -125,6 +127,28 @@ public class ProtoJavaMapperShould {
                                         .setValue(rowValue)
                                         .build();
         checkMapping(rowValue, value);
+    }
+
+    @Test
+    public void map_uint32_to_int() {
+        final int value = 42;
+        final UInt32Value wrapped = UInt32Value.newBuilder()
+                                              .setValue(value)
+                                              .build();
+        final Any packed = AnyPacker.pack(wrapped);
+        final int mapped = ProtoJavaMapper.map(packed, Integer.class);
+        assertEquals(value, mapped);
+    }
+
+    @Test
+    public void map_uint64_to_long() {
+        final long value = 42L;
+        final UInt64Value wrapped = UInt64Value.newBuilder()
+                                               .setValue(value)
+                                               .build();
+        final Any packed = AnyPacker.pack(wrapped);
+        final long mapped = ProtoJavaMapper.map(packed, Long.class);
+        assertEquals(value, mapped);
     }
 
     private static void checkMapping(Object javaObject,

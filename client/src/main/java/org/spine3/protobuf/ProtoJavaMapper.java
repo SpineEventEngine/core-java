@@ -219,6 +219,20 @@ public final class ProtoJavaMapper {
         }
     }
 
+    /**
+     * A converter handling the primitive types transformations.
+     *
+     * <p>It's sufficient to override methods {@link #pack(Object) pack(T)} and
+     * {@link #unpack(Message) unpack(M)} when extending this class.
+     *
+     * <p>Since the Protobuf and java primitives differ, there may be more then one
+     * {@code PrimitiveHandler} for a Java primitive type. In this case, if the result Protobuf
+     * value type is not specified explicitly, the closest type is selected as a target for
+     * the conversion. The closeness of two types is determined by the lexicographic closeness.
+     *
+     * @param <M> the type of the Protobuf primitive wrapper
+     * @param <T> the type of the Java primitive wrapper
+     */
     private abstract static class PrimitiveHandler<M extends Message, T> extends Converter<M, T> {
 
         @Override
@@ -231,8 +245,20 @@ public final class ProtoJavaMapper {
             return pack(input);
         }
 
+        /**
+         * Unpacks a primitive value of type {@code T} from the given wrapper value.
+         *
+         * @param message packed value
+         * @return unpacked value
+         */
         protected abstract T unpack(M message);
 
+        /**
+         * Packs the given primitive value into a Protobuf wrapper of type {@code M}.
+         *
+         * @param value primitive value
+         * @return packed value
+         */
         protected abstract M pack(T value);
     }
 
@@ -278,6 +304,7 @@ public final class ProtoJavaMapper {
 
         @Override
         protected UInt32Value pack(Integer value) {
+            // Hidden by Int32Handler
             return UInt32Value.newBuilder()
                               .setValue(value)
                               .build();
@@ -294,6 +321,7 @@ public final class ProtoJavaMapper {
 
         @Override
         protected UInt64Value pack(Long value) {
+            // Hidden by Int64Handler
             return UInt64Value.newBuilder()
                               .setValue(value)
                               .build();
