@@ -61,16 +61,14 @@ message Url {
 
         // Most often used application layer protocols.
         enum Schema {
-            // TODO:2017-04-20:dmytro.dashenkov: Check the enum values.
-
             UNDEFINED = 0;
             HTTP = 1;
             HTTPS = 2;
             FTP = 3;
-            SSL = 4;
-            SSH = 5;
-            DNS = 6;
-            SOAP = 7;
+            MAILTO = 4;
+            FILE = 5;
+            DATA = 6;
+            IRC = 7;
             RTP = 8;
         }
 
