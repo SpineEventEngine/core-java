@@ -65,20 +65,20 @@ import static org.spine3.base.Versions.newVersion;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-public class StandFunnelShould {
+public class FunnelShould {
 
     private final TestActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(StandFunnelShould.class);
+            TestActorRequestFactory.newInstance(FunnelShould.class);
 
     // **** Positive scenarios (unit) ****
 
     @Test
     public void initialize_properly_with_stand_only() {
         final Stand stand = TestStandFactory.create();
-        final StandFunnel.Builder builder = StandFunnel.newBuilder()
-                                                       .setStand(stand);
-        final StandFunnel standFunnel = builder.build();
-        Assert.assertNotNull(standFunnel);
+        final Funnel.Builder builder = Funnel.newBuilder()
+                                             .setStand(stand);
+        final Funnel funnel = builder.build();
+        Assert.assertNotNull(funnel);
     }
 
     @Test
@@ -86,10 +86,10 @@ public class StandFunnelShould {
         final Stand stand = TestStandFactory.create();
         final StandUpdateDelivery delivery = mock(StandUpdateDelivery.class);
 
-        final StandFunnel funnel = StandFunnel.newBuilder()
-                                              .setStand(stand)
-                                              .setDelivery(delivery)
-                                              .build();
+        final Funnel funnel = Funnel.newBuilder()
+                                    .setStand(stand)
+                                    .setDelivery(delivery)
+                                    .build();
         Assert.assertNotNull(funnel);
     }
 
@@ -97,9 +97,9 @@ public class StandFunnelShould {
     public void initialize_properly_with_no_executor() {
         final Stand stand = TestStandFactory.create();
 
-        final StandFunnel funnelForBusyStand = StandFunnel.newBuilder()
-                                                          .setStand(stand)
-                                                          .build();
+        final Funnel funnelForBusyStand = Funnel.newBuilder()
+                                                .setStand(stand)
+                                                .build();
         Assert.assertNotNull(funnelForBusyStand);
     }
 
@@ -118,9 +118,9 @@ public class StandFunnelShould {
         doNothing().when(stand)
                    .update(any(EntityStateEnvelope.class));
 
-        final StandFunnel funnel = StandFunnel.newBuilder()
-                                              .setStand(stand)
-                                              .build();
+        final Funnel funnel = Funnel.newBuilder()
+                                    .setStand(stand)
+                                    .build();
         funnel.post(entity, requestFactory.createCommandContext());
 
         final ArgumentMatcher<EntityStateEnvelope<?, ?>> argumentMatcher =
@@ -152,12 +152,12 @@ public class StandFunnelShould {
                 return false;
             }
         });
-        final StandFunnel.Builder builder = StandFunnel.newBuilder()
-                                                       .setStand(stand)
-                                                       .setDelivery(delivery);
+        final Funnel.Builder builder = Funnel.newBuilder()
+                                             .setStand(stand)
+                                             .setDelivery(delivery);
 
-        final StandFunnel standFunnel = builder.build();
-        Assert.assertNotNull(standFunnel);
+        final Funnel funnel = builder.build();
+        Assert.assertNotNull(funnel);
 
         final Object id = Identifiers.newUuid();
         final StringValue state = StringValue.getDefaultInstance();
@@ -168,7 +168,7 @@ public class StandFunnelShould {
         when(entity.getVersion()).thenReturn(newVersion(17, Time.getCurrentTime()));
 
         final CommandContext context = requestFactory.createCommandContext();
-        standFunnel.post(entity, context);
+        funnel.post(entity, context);
 
         final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity,
                                                                     context.getActorContext()
@@ -182,8 +182,8 @@ public class StandFunnelShould {
     @Test(expected = NullPointerException.class)
     public void fail_to_initialize_with_improper_stand() {
         @SuppressWarnings("ConstantConditions") // null is marked as improper with this warning
-        final StandFunnel.Builder builder = StandFunnel.newBuilder()
-                                                       .setStand(null);
+        final Funnel.Builder builder = Funnel.newBuilder()
+                                             .setStand(null);
 
         builder.build();
     }
@@ -191,7 +191,7 @@ public class StandFunnelShould {
     @SuppressWarnings("ResultOfMethodCallIgnored")
     @Test(expected = IllegalStateException.class)
     public void fail_to_initialize_from_empty_builder() {
-        final StandFunnel.Builder builder = StandFunnel.newBuilder();
+        final Funnel.Builder builder = Funnel.newBuilder();
         builder.build();
     }
 
@@ -321,9 +321,9 @@ public class StandFunnelShould {
         doNothing().when(stand)
                    .update(any(EntityStateEnvelope.class));
 
-        final StandFunnel standFunnel = StandFunnel.newBuilder()
-                                                   .setStand(stand)
-                                                   .build();
+        final Funnel funnel = Funnel.newBuilder()
+                                    .setStand(stand)
+                                    .build();
 
         final ExecutorService executor = Executors.newFixedThreadPool(threadsCount);
 
@@ -338,7 +338,7 @@ public class StandFunnelShould {
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);
-                standFunnel.post(entity, requestFactory.createCommandContext());
+                funnel.post(entity, requestFactory.createCommandContext());
 
                 threadInvocationRegistry.add(threadName);
             }

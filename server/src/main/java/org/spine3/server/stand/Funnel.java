@@ -51,14 +51,14 @@ import static com.google.common.base.Preconditions.checkState;
  *      ProjectionRepository.dispatch(Event)
  */
 @Internal
-public class StandFunnel {
+public class Funnel {
 
     /**
      * The delivery strategy to propagate the {@code Entity} state to the instance of {@code Stand}.
      */
     private final StandUpdateDelivery delivery;
 
-    private StandFunnel(Builder builder) {
+    private Funnel(Builder builder) {
         this.delivery = builder.delivery;
         this.delivery.setStand(builder.stand);
     }
@@ -77,7 +77,7 @@ public class StandFunnel {
     }
 
     /**
-     * Creates a new {@code Builder} for {@link StandFunnel}.
+     * Creates a new {@code Builder} for {@link Funnel}.
      *
      * @return a new {@code Builder} instance.
      */
@@ -137,7 +137,7 @@ public class StandFunnel {
             return this;
         }
 
-        public StandFunnel build() {
+        public Funnel build() {
             checkState(stand != null,
                        "Stand must be defined for the funnel");
 
@@ -145,7 +145,7 @@ public class StandFunnel {
                 delivery = StandUpdateDelivery.directDelivery();
             }
 
-            final StandFunnel result = new StandFunnel(this);
+            final Funnel result = new Funnel(this);
             return result;
         }
     }

@@ -65,7 +65,7 @@ import static org.spine3.io.StreamObservers.ack;
  *
  * <p>Provides an optimal way to access the latest state of published aggregates
  * for read-side services. The aggregate states are delivered to the instance of {@code Stand}
- * through {@link StandFunnel} from {@link AggregateRepository} instances.
+ * through {@link Funnel} from {@link AggregateRepository} instances.
  *
  * <p>In order to provide a flexibility in defining data access policies,
  * {@code Stand} contains only the states of published aggregates.

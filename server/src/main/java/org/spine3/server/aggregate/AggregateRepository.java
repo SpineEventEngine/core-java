@@ -36,7 +36,7 @@ import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.stand.Funnel;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.CommandOperation;
@@ -93,7 +93,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private final EventBus eventBus;
 
     /** The funnel for sending updated aggregate states to Stand. */
-    private final StandFunnel standFunnel;
+    private final Funnel funnel;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -110,7 +110,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateRepository(BoundedContext boundedContext) {
         super();
         this.eventBus = boundedContext.getEventBus();
-        this.standFunnel = boundedContext.getStandFunnel();
+        this.funnel = boundedContext.getFunnel();
     }
 
     /**
@@ -221,7 +221,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 final List<Event> events = aggregate.getUncommittedEvents();
 
                 store(aggregate);
-                standFunnel.post(aggregate, command.getContext());
+                funnel.post(aggregate, command.getContext());
 
                 postEvents(events);
             }

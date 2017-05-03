@@ -46,8 +46,8 @@ import org.spine3.server.failure.FailureBus;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.server.stand.Funnel;
 import org.spine3.server.stand.Stand;
-import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
@@ -90,7 +90,7 @@ public final class BoundedContext
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
-    private final StandFunnel standFunnel;
+    private final Funnel funnel;
 
     /** All the repositories registered with this bounded context. */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
@@ -118,7 +118,7 @@ public final class BoundedContext
         this.commandBus = builder.commandBus;
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
-        this.standFunnel = builder.standFunnel;
+        this.funnel = builder.funnel;
         this.tenantIndex = builder.tenantIndex;
     }
 
@@ -337,10 +337,10 @@ public final class BoundedContext
         return this.commandBus.failureBus();
     }
 
-    /** Obtains instance of {@link StandFunnel} of this {@code BoundedContext}. */
+    /** Obtains instance of {@link Funnel} of this {@code BoundedContext}. */
     @CheckReturnValue
-    public StandFunnel getStandFunnel() {
-        return this.standFunnel;
+    public Funnel getFunnel() {
+        return this.funnel;
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
@@ -377,7 +377,7 @@ public final class BoundedContext
         private boolean multitenant;
         private Stand stand;
         private StandUpdateDelivery standUpdateDelivery;
-        private StandFunnel standFunnel;
+        private Funnel funnel;
         private TenantIndex tenantIndex;
 
         /**
@@ -539,7 +539,7 @@ public final class BoundedContext
 
             }
 
-            standFunnel = createStandFunnel(standUpdateDelivery);
+            funnel = createStandFunnel(standUpdateDelivery);
 
             final BoundedContext result = new BoundedContext(this);
 
@@ -547,9 +547,9 @@ public final class BoundedContext
             return result;
         }
 
-        private StandFunnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
-            final StandFunnel.Builder builder = StandFunnel.newBuilder()
-                                                           .setStand(stand);
+        private Funnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
+            final Funnel.Builder builder = Funnel.newBuilder()
+                                                 .setStand(stand);
             if (standUpdateDelivery != null) {
                 builder.setDelivery(standUpdateDelivery);
             }

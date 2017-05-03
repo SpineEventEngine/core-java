@@ -38,7 +38,7 @@ import java.util.concurrent.Executor;
  * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
  * and {@link ProjectionRepository}.
  *
- * <p>Delivery is performed via {@link StandFunnel}.
+ * <p>Delivery is performed via {@link Funnel}.
  *
  * @author Alex Tymchenko
  */
