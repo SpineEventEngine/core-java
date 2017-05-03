@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.EventFactory;
@@ -44,7 +45,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.spine3.server.reflect.Classes.getHandledMessageClasses;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -161,15 +161,16 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     public static List<Event> toEvents(final Any producerId,
                                        @Nullable final Version version,
                                        final List<? extends Message> eventMessages,
-                                       final CommandContext commandContext) {
+                                       final CommandEnvelope envelope) {
         checkNotNull(producerId);
         checkNotNull(eventMessages);
-        checkNotNull(commandContext);
+        checkNotNull(envelope);
 
         final EventFactory eventFactory = EventFactory.newBuilder()
+                .setCommandId(envelope.getCommandId())
                 .setProducerId(producerId)
                 .setMaxEventCount(eventMessages.size())
-                .setCommandContext(commandContext)
+                .setCommandContext(envelope.getCommandContext())
                 .build();
 
         return Lists.transform(eventMessages, new Function<Message, Event>() {
@@ -226,7 +227,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
     }
 
     private static HandlerMethod.Factory<CommandHandlerMethod> factory() {
-        return Factory.instance();
+        return Factory.getInstance();
     }
 
     /**
@@ -269,7 +270,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
             private final Factory value = new Factory();
         }
 
-        private static Factory instance() {
+        private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
     }

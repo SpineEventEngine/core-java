@@ -23,10 +23,9 @@ package org.spine3.validate;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 
 import static java.lang.Math.abs;
-import static org.spine3.protobuf.Values.newIntValue;
 
 /**
  * Validates fields of {@link Integer} types.
@@ -61,7 +60,8 @@ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
     @Override
     protected Any wrap(Integer value) {
-        final Any any = AnyPacker.pack(newIntValue(value));
+        final Any any = Wrapper.forInteger()
+                               .pack(value);
         return any;
     }
 }

@@ -45,6 +45,7 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
 
         assertTrue(Timestamps2.isBetween(
                 command.getContext()
+                       .getActorContext()
                        .getTimestamp(), beforeCall, afterCall));
     }
 
@@ -71,6 +72,7 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
                                          .create(StringValue.getDefaultInstance());
 
         assertEquals(tenantId, command.getContext()
+                                      .getActorContext()
                                       .getTenantId());
     }
 }

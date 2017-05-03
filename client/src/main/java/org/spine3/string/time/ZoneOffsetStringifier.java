@@ -40,7 +40,7 @@ final class ZoneOffsetStringifier extends Stringifier<ZoneOffset> implements Ser
     private static final long serialVersionUID = 1;
     private static final ZoneOffsetStringifier INSTANCE = new ZoneOffsetStringifier();
 
-    static ZoneOffsetStringifier instance() {
+    static ZoneOffsetStringifier getInstance() {
         return INSTANCE;
     }
 

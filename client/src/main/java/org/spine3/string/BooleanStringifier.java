@@ -35,7 +35,7 @@ final class BooleanStringifier extends Stringifier<Boolean> implements Serializa
 
     private static final BooleanStringifier INSTANCE = new BooleanStringifier();
 
-    static BooleanStringifier instance() {
+    static BooleanStringifier getInstance() {
         return INSTANCE;
     }
 

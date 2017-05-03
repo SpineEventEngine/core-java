@@ -33,11 +33,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newLongValue;
-import static org.spine3.protobuf.Values.newStringValue;
-import static org.spine3.protobuf.Values.newUInt64Value;
-import static org.spine3.protobuf.Values.newUIntValue;
+import static org.spine3.protobuf.Wrapper.forInteger;
+import static org.spine3.protobuf.Wrapper.forLong;
+import static org.spine3.protobuf.Wrapper.forUnsignedInteger;
+import static org.spine3.protobuf.Wrapper.forUnsignedLong;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -51,11 +50,11 @@ public class PackingIteratorShould {
     @Before
     public void setUp() {
         list = Lists.<Message>newArrayList(
-                newStringValue("one"),
-                newIntValue(2),
-                newLongValue(3),
-                newUIntValue(4),
-                newUInt64Value(5));
+                Wrapper.forString("one"),
+                forInteger(2),
+                forLong(3),
+                forUnsignedInteger(4),
+                forUnsignedLong(5));
         packer = new PackingIterator(list.iterator());
     }
 

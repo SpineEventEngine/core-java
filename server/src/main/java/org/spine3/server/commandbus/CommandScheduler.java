@@ -39,7 +39,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static org.spine3.base.CommandStatus.SCHEDULED;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.isScheduled;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -116,7 +115,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
         }
         final Command commandUpdated = setSchedulingTime(command, getCurrentTime());
         doSchedule(commandUpdated);
-        markAsScheduled(commandUpdated);
+        rememberAsScheduled(commandUpdated);
     }
 
     /**
@@ -154,13 +153,13 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     private static boolean isScheduledAlready(Command command) {
-        final CommandId id = getId(command);
+        final CommandId id = command.getId();
         final boolean isScheduledAlready = scheduledCommandIds.contains(id);
         return isScheduledAlready;
     }
 
-    private static void markAsScheduled(Command command) {
-        final CommandId id = getId(command);
+    private static void rememberAsScheduled(Command command) {
+        final CommandId id = command.getId();
         scheduledCommandIds.add(id);
     }
 
@@ -211,13 +210,18 @@ public abstract class CommandScheduler implements CommandBusFilter {
         final CommandContext.Schedule scheduleUpdated = context.getSchedule()
                                                                .toBuilder()
                                                                .setDelay(delay)
-                                                               .setSchedulingTime(schedulingTime)
                                                                .build();
         final CommandContext contextUpdated = context.toBuilder()
                                                      .setSchedule(scheduleUpdated)
                                                      .build();
+
+        final Command.SystemProperties sysProps = command.getSystemProperties()
+                                                         .toBuilder()
+                                                         .setSchedulingTime(schedulingTime)
+                                                         .build();
         final Command result = command.toBuilder()
                                       .setContext(contextUpdated)
+                                      .setSystemProperties(sysProps)
                                       .build();
         return result;
     }

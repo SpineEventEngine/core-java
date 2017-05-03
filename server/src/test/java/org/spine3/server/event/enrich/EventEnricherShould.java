@@ -29,6 +29,7 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Subscribe;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
@@ -52,7 +53,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Enrichments.getEnrichment;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.event.Given.AnEvent.projectStarted;
 import static org.spine3.server.event.Given.EventMessage.projectCreated;
 import static org.spine3.test.TestEventFactory.newInstance;
@@ -186,14 +186,14 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_no_such_enrichment_registered() {
-        final Event dummyEvent = createEvent(newStringValue(newUuid()));
+        final Event dummyEvent = createEvent(Wrapper.forString(newUuid()));
 
         assertFalse(enricher.canBeEnriched(dummyEvent));
     }
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
-        final Event event = createEvent(newStringValue(newUuid()));
+        final Event event = createEvent(Wrapper.forString(newUuid()));
         final Event notEnrichableEvent =
                 event.toBuilder()
                      .setContext(event.getContext()

@@ -25,16 +25,17 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
+import org.spine3.base.CommandId;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * The factory or producing events for tests.
@@ -52,7 +53,7 @@ public class TestEventFactory extends EventFactory {
         checkNotNull(testSuiteClass);
         checkNotNull(commandContext);
 
-        final StringValue producerId = newStringValue(testSuiteClass.getName());
+        final StringValue producerId = Wrapper.forString(testSuiteClass.getName());
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
                                             .setCommandContext(commandContext);
@@ -71,9 +72,11 @@ public class TestEventFactory extends EventFactory {
                                                TestActorRequestFactory requestFactory) {
         checkNotNull(requestFactory);
         final CommandContext commandContext = requestFactory.createCommandContext();
+        final CommandId commandId = requestFactory.createCommandId();
         final Builder builder = EventFactory.newBuilder()
                                             .setProducerId(producerId)
-                                            .setCommandContext(commandContext);
+                                            .setCommandContext(commandContext)
+                                            .setCommandId(commandId);
         final TestEventFactory result = new TestEventFactory(builder);
         return result;
     }

@@ -59,7 +59,6 @@ public class StorageFieldShould {
 
     @Test
     public void enclose_all_event_context_fields() {
-        assertField(EventContextField.context_event_id);
         assertField(EventContextField.context_of_command);
         assertField(EventContextField.context_timestamp);
         assertField(EventContextField.context_version);

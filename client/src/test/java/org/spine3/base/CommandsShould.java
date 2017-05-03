@@ -32,6 +32,7 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.string.Stringifiers;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
@@ -51,12 +52,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.createContext;
-import static org.spine3.base.Commands.getId;
 import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newUserUuid;
@@ -73,7 +72,7 @@ public class CommandsShould {
 
     private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
             CommandsShould.class);
-    private final StringValue stringValue = newStringValue(newUuid());
+    private final StringValue stringValue = Wrapper.forString(newUuid());
 
     @Test
     public void have_private_ctor() {
@@ -109,9 +108,11 @@ public class CommandsShould {
                                                             zoneOffset,
                                                             targetVersion);
 
-        assertEquals(tenantId, commandContext.getTenantId());
-        assertEquals(userId, commandContext.getActor());
-        assertEquals(zoneOffset, commandContext.getZoneOffset());
+        final ActorContext actorContext = commandContext.getActorContext();
+
+        assertEquals(tenantId, actorContext.getTenantId());
+        assertEquals(userId, actorContext.getActor());
+        assertEquals(zoneOffset, actorContext.getZoneOffset());
         assertEquals(targetVersion, commandContext.getTargetVersion());
     }
 
@@ -120,18 +121,26 @@ public class CommandsShould {
         final CommandContext commandContext = createCommandContext();
         final CommandContext newContext = newContextBasedOn(commandContext);
 
-        assertNotEquals(commandContext.getCommandId(), newContext.getCommandId());
+        assertNotEquals(commandContext.getActorContext().getTimestamp(),
+                        newContext.getActorContext().getTimestamp());
     }
 
     @Test
     public void check_if_contexts_have_same_actor_and_tenantId() {
-        final CommandContext commandContext = CommandContext.newBuilder()
-                                                            .setActor(newUserUuid())
-                                                            .setTenantId(
-                                                                    TenantId.getDefaultInstance())
-                                                            .build();
+        final ActorContext.Builder actorContext =
+                ActorContext.newBuilder()
+                            .setActor(newUserUuid())
+                            .setTenantId(newTenantUuid());
+        final CommandContext c1 =
+                CommandContext.newBuilder()
+                              .setActorContext(actorContext)
+                              .build();
+        final CommandContext c2 =
+                CommandContext.newBuilder()
+                              .setActorContext(actorContext)
+                              .build();
 
-        assertTrue(sameActorAndTenant(commandContext, commandContext));
+        assertTrue(sameActorAndTenant(c1, c2));
     }
 
     @Test
@@ -175,21 +184,12 @@ public class CommandsShould {
 
     @Test
     public void extract_message_from_command() {
-        final StringValue message = newStringValue("extract_message_from_command");
+        final StringValue message = Wrapper.forString("extract_message_from_command");
 
         final Command command = Commands.createCommand(message,
                                                        CommandContext.getDefaultInstance());
 
         assertEquals(message, Commands.getMessage(command));
-    }
-
-    @Test
-    public void extract_id_from_command() {
-        final Command command = requestFactory.command()
-                                              .create(stringValue);
-
-        assertEquals(command.getContext()
-                            .getCommandId(), getId(command));
     }
 
     @Test

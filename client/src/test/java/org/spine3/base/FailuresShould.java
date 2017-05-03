@@ -23,7 +23,8 @@ package org.spine3.base;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertEquals;
+import static org.spine3.base.Failures.FAILURE_ID_FORMAT;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -40,13 +41,16 @@ public class FailuresShould {
     public void pass_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(Command.class, Command.getDefaultInstance())
+                .setDefault(CommandId.class, CommandId.getDefaultInstance())
                 .testAllPublicStaticMethods(Failures.class);
     }
 
     @Test
-    public void generate_failure_id() {
-        assertFalse(Failures.generateId()
-                            .getUuid()
-                            .isEmpty());
+    public void generate_failure_id_upon_command_id() {
+        final CommandId commandId = Commands.generateId();
+        final FailureId actual = Failures.generateId(commandId);
+
+        final String expected = String.format(FAILURE_ID_FORMAT, commandId.getUuid());
+        assertEquals(expected, actual.getValue());
     }
 }

@@ -23,6 +23,7 @@ package org.spine3.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
@@ -134,6 +135,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return Optional.of(entity);
     }
 
+    @Override
+    public Iterator<E> iterator(Predicate<E> filter) {
+        final Iterable<E> allEntities = loadAll();
+        final Iterator<E> result = FluentIterable.from(allEntities)
+                                                 .filter(filter)
+                                                 .iterator();
+        return result;
+    }
+
     /**
      * Loads an entity by the passed ID or creates a new one, if the entity was not found.
      */
@@ -185,10 +195,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>Acts in the same way as {@link #loadAll(Iterable)}, with
      * the {@code FieldMask} applied to the results.
      *
-     * <p>Field mask is applied according to
-     * <a
-     *  href="https://developers.google.com/protocol-buffers/docs/reference/google.protobuf#google.protobuf.FieldMask"
-     * >FieldMask specs</a>.
+     * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *

@@ -23,6 +23,7 @@ package org.spine3.change;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.protobuf.Wrapper;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.change.MessageMismatch.expectedDefault;
@@ -31,14 +32,13 @@ import static org.spine3.change.MessageMismatch.unexpectedValue;
 import static org.spine3.change.MessageMismatch.unpackActual;
 import static org.spine3.change.MessageMismatch.unpackExpected;
 import static org.spine3.change.MessageMismatch.unpackNewValue;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessageMismatchShould {
 
-    private static final StringValue EXPECTED = newStringValue("expected_value");
-    private static final StringValue ACTUAL = newStringValue("actual-value");
-    private static final StringValue NEW_VALUE = newStringValue("new-value");
+    private static final StringValue EXPECTED = Wrapper.forString("expected_value");
+    private static final StringValue ACTUAL = Wrapper.forString("actual-value");
+    private static final StringValue NEW_VALUE = Wrapper.forString("new-value");
     private static final StringValue DEFAULT_VALUE = StringValue.getDefaultInstance();
     private static final int VERSION = 1;
 

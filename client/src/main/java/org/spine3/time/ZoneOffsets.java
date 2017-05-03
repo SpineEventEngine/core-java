@@ -69,7 +69,7 @@ public final class ZoneOffsets {
      */
     public static ZoneOffset getDefault() {
         final TimeZone timeZone = TimeZone.getDefault();
-        final ZoneOffset result = ZoneConverter.instance()
+        final ZoneOffset result = ZoneConverter.getInstance()
                                                .convert(timeZone);
         return result;
     }

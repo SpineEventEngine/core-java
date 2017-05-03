@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.server.reflect.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.server.reflect.Classes.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Class) identity}.

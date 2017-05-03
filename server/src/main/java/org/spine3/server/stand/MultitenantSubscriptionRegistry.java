@@ -150,7 +150,7 @@ final class MultitenantSubscriptionRegistry implements SubscriptionRegistry {
          */
         @Override
         public synchronized Subscription add(Topic topic) {
-            final SubscriptionId subscriptionId = Subscriptions.newId();
+            final SubscriptionId subscriptionId = Subscriptions.generateId();
             final Target target = topic.getTarget();
             final String typeAsString = target
                     .getType();

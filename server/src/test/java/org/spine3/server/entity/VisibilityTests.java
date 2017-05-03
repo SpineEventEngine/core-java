@@ -23,19 +23,14 @@ package org.spine3.server.entity;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
 import org.spine3.server.entity.failure.CannotModifyArchivedEntity;
 import org.spine3.server.entity.failure.CannotModifyDeletedEntity;
-import org.spine3.test.TestActorRequestFactory;
-import org.spine3.time.ZoneOffset;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
 
 /**
  * Tests of working with entity visibility.
@@ -48,7 +43,6 @@ import static org.spine3.protobuf.Values.newStringValue;
 public class VisibilityTests {
 
     private AbstractVersionableEntity<Long, StringValue> entity;
-    private Command modificationCommand;
 
     /**
      * A minimal entity class.
@@ -63,10 +57,6 @@ public class VisibilityTests {
     public void setUp() {
         entity = new MiniEntity(ThreadLocalRandom.current()
                                                  .nextLong());
-        final TestActorRequestFactory factory =
-                TestActorRequestFactory.newInstance(newUuid(), ZoneOffset.getDefaultInstance());
-        modificationCommand =
-                factory.command().create(newStringValue("Entity modification command"));
     }
 
     @Test
@@ -138,10 +128,10 @@ public class VisibilityTests {
         entity.setArchived(true);
 
         // This should pass.
-        entity.checkNotDeleted(modificationCommand);
+        entity.checkNotDeleted();
 
         // This should throw.
-        entity.checkNotArchived(modificationCommand);
+        entity.checkNotArchived();
     }
 
     @Test(expected = CannotModifyDeletedEntity.class)
@@ -149,9 +139,9 @@ public class VisibilityTests {
         entity.setDeleted(true);
 
         // This should pass.
-        entity.checkNotArchived(modificationCommand);
+        entity.checkNotArchived();
 
         // This should throw.
-        entity.checkNotDeleted(modificationCommand);
+        entity.checkNotDeleted();
     }
 }

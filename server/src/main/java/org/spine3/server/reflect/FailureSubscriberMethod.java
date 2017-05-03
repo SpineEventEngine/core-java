@@ -159,13 +159,13 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         checkNotNull(cls);
 
         final ImmutableSet<FailureClass> result =
-                FailureClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
+                FailureClass.setOf(HandlerMethod.getHandledMessageClasses(cls, predicate()));
         return result;
     }
 
     /** Returns the factory for filtering and creating failure subscriber methods. */
     private static HandlerMethod.Factory<FailureSubscriberMethod> factory() {
-        return Factory.instance();
+        return Factory.getInstance();
     }
 
     static MethodPredicate predicate() {
@@ -206,7 +206,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
                     new FailureSubscriberMethod.Factory();
         }
 
-        private static Factory instance() {
+        private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
     }

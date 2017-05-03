@@ -57,7 +57,7 @@ final class WebSafeTimestampStringifer extends Stringifier<Timestamp> implements
      */
     private static final int MINUTE_SEPARATOR_INDEX = 16;
 
-    static WebSafeTimestampStringifer instance() {
+    static WebSafeTimestampStringifer getInstance() {
         return INSTANCE;
     }
 

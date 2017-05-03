@@ -38,9 +38,9 @@ import static org.spine3.base.Identifiers.NULL_ID;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newIntValue;
-import static org.spine3.protobuf.Values.newLongValue;
-import static org.spine3.protobuf.Values.newStringValue;
+import static org.spine3.protobuf.Wrapper.forInteger;
+import static org.spine3.protobuf.Wrapper.forLong;
+import static org.spine3.protobuf.Wrapper.forString;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 
@@ -118,7 +118,7 @@ public class IdentifiersShould {
     @Test
     public void return_same_string_when_convert_string_wrapped_into_message() {
 
-        final StringValue id = newStringValue(TEST_ID);
+        final StringValue id = forString(TEST_ID);
 
         final String result = idToString(id);
 
@@ -128,7 +128,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_integer_id_wrapped_into_message() {
         final Integer value = 1024;
-        final Int32Value id = newIntValue(value);
+        final Int32Value id = forInteger(value);
         final String expected = value.toString();
 
         final String actual = idToString(id);
@@ -139,7 +139,7 @@ public class IdentifiersShould {
     @Test
     public void convert_to_string_long_id_wrapped_into_message() {
         final Long value = 100500L;
-        final Int64Value id = newLongValue(value);
+        final Int64Value id = forLong(value);
         final String expected = value.toString();
 
         final String actual = idToString(id);
@@ -149,7 +149,7 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_with_string_field() {
-        final StringValue id = newStringValue(TEST_ID);
+        final StringValue id = forString(TEST_ID);
 
         final String result = idToString(id);
 
@@ -158,7 +158,7 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_with_message_field() {
-        final StringValue value = newStringValue(TEST_ID);
+        final StringValue value = forString(TEST_ID);
         final NestedMessageId idToConvert = NestedMessageId.newBuilder()
                                                            .setId(value)
                                                            .build();
@@ -177,7 +177,8 @@ public class IdentifiersShould {
         final SeveralFieldsId idToConvert = SeveralFieldsId.newBuilder()
                                                            .setString(outerString)
                                                            .setNumber(number)
-                                                           .setMessage(newStringValue(nestedString))
+                                                           .setMessage(
+                                                                   forString(nestedString))
                                                            .build();
 
         final String expected =
@@ -192,7 +193,7 @@ public class IdentifiersShould {
 
     @Test
     public void convert_to_string_message_id_wrapped_in_Any() {
-        final StringValue messageToWrap = newStringValue(TEST_ID);
+        final StringValue messageToWrap = forString(TEST_ID);
         final Any any = AnyPacker.pack(messageToWrap);
 
         final String result = idToString(any);

@@ -102,7 +102,7 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
     }
 
     public static HandlerMethod.Factory<EventApplierMethod> factory() {
-        return Factory.instance();
+        return Factory.getInstance();
     }
 
     /** The factory for filtering methods that match {@code EventApplier} specification. */
@@ -136,7 +136,7 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
             private final EventApplierMethod.Factory value = new EventApplierMethod.Factory();
         }
 
-        private static Factory instance() {
+        private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
     }

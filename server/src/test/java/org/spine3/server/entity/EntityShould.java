@@ -30,6 +30,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
+import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Tests;
 import org.spine3.test.TimeTests;
 import org.spine3.test.entity.Project;
@@ -52,7 +53,6 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.protobuf.Values.newStringValue;
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -123,7 +123,7 @@ public class EntityShould {
 
     @Test
     public void accept_Message_id_to_constructor() {
-        final StringValue messageId = newStringValue("messageId");
+        final StringValue messageId = Wrapper.forString("messageId");
         final TestEntityWithIdMessage entityWithMessageID = new TestEntityWithIdMessage(messageId);
 
         assertEquals(messageId, entityWithMessageID.getId());

@@ -110,13 +110,13 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
         checkNotNull(cls);
 
         final ImmutableSet<EventClass> result =
-                EventClass.setOf(Classes.getHandledMessageClasses(cls, predicate()));
+                EventClass.setOf(HandlerMethod.getHandledMessageClasses(cls, predicate()));
         return result;
     }
 
     /** Returns the factory for filtering and creating event subscriber methods. */
     private static HandlerMethod.Factory<EventSubscriberMethod> factory() {
-        return Factory.instance();
+        return Factory.getInstance();
     }
 
     static MethodPredicate predicate() {
@@ -154,7 +154,7 @@ public class EventSubscriberMethod extends HandlerMethod<EventContext> {
             private final EventSubscriberMethod.Factory value = new EventSubscriberMethod.Factory();
         }
 
-        private static Factory instance() {
+        private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
     }

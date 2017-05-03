@@ -68,14 +68,13 @@ public final class Field {
      * @return new field instance
      */
     @VisibleForTesting
-    static Optional<Field> newField(Class<? extends Message> messageClass,
-                                            String name) {
+    static Optional<Field> newField(Class<? extends Message> messageClass, String name) {
         checkNotNull(messageClass);
         checkNotNull(name);
 
         final Method getter;
         try {
-            getter = Classes.getGetterForField(messageClass, name);
+            getter = getGetterForField(messageClass, name);
         } catch (NoSuchMethodException ignored) {
             return Optional.absent();
         }
@@ -154,6 +153,28 @@ public final class Field {
     }
 
     /**
+     * Finds a getter method in given class or its superclasses.
+     *
+     * <p>The method must match {@code getFieldName} notation, have no argument to be found.
+     *
+     * @param cls       class containing the getter method
+     * @param fieldName field to find a getter for
+     * @return {@link Method} instance reflecting the getter method
+     * @throws RuntimeException upon reflective failure
+     */
+    private static Method getGetterForField(Class<?> cls, String fieldName)
+            throws NoSuchMethodException {
+        checkNotNull(cls);
+        checkNotNull(fieldName);
+
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        final String fieldGetterName = "get" + fieldName.substring(0, 1)
+                                                        .toUpperCase() + fieldName.substring(1);
+        final Method fieldGetter = cls.getMethod(fieldGetterName);
+        return fieldGetter;
+    }
+
+    /**
      * Obtains the name of the field.
      */
     public String getName() {
@@ -166,7 +187,7 @@ public final class Field {
      * <p>If the corresponding field is of type {@code Any} it will be unpacked.
      *
      * @return field value or unpacked field value, or
-     *         {@code Optional.absent()} if the field is a defaulf {@code Any}
+     *         {@code Optional.absent()} if the field is a default {@code Any}
      * @throws IllegalStateException if getting the field value caused an exception.
      *                               The root cause will be available from the thrown instance.
      */

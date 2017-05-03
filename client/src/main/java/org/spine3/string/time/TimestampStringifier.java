@@ -39,7 +39,7 @@ final class TimestampStringifier extends Stringifier<Timestamp> implements Seria
     private static final long serialVersionUID = 1;
     private static final TimestampStringifier INSTANCE = new TimestampStringifier();
 
-    static TimestampStringifier instance() {
+    static TimestampStringifier getInstance() {
         return INSTANCE;
     }
 
