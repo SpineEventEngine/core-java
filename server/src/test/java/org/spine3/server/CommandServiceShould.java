@@ -30,10 +30,8 @@ import org.spine3.base.Command;
 import org.spine3.base.Commands;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
-import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.UnsupportedCommandException;
 import org.spine3.server.transport.GrpcContainer;
-import org.spine3.testdata.TestCommandBusFactory;
 
 import java.io.IOException;
 import java.util.Set;
@@ -44,8 +42,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class CommandServiceShould {
@@ -61,14 +57,18 @@ public class CommandServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository.
-        projectsContext = newBoundedContext(spy(TestCommandBusFactory.create()));
+        projectsContext = BoundedContext.newBuilder()
+                                        .setMultitenant(true)
+                                        .build();
         final Given.ProjectAggregateRepository projectRepo =
                 new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        customersContext = newBoundedContext(spy(TestCommandBusFactory.create()));
+        customersContext = BoundedContext.newBuilder()
+                                         .setMultitenant(true)
+                                         .build();
         final Given.CustomerAggregateRepository customerRepo =
                 new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
@@ -91,8 +91,8 @@ public class CommandServiceShould {
 
     @Test
     public void post_commands_to_appropriate_bounded_context() {
-        verifyPostsCommand(Given.ACommand.createProject(), projectsContext.getCommandBus());
-        verifyPostsCommand(Given.ACommand.createCustomer(), customersContext.getCommandBus());
+        verifyPostsCommand(Given.ACommand.createProject());
+        verifyPostsCommand(Given.ACommand.createCustomer());
     }
 
     @Test
@@ -109,13 +109,12 @@ public class CommandServiceShould {
         assertFalse(builder.contains(projectsContext));
     }
 
-    private void verifyPostsCommand(Command cmd, CommandBus commandBus) {
+    private void verifyPostsCommand(Command cmd) {
         service.post(cmd, responseObserver);
 
         assertEquals(Responses.ok(), responseObserver.getResponseHandled());
         assertTrue(responseObserver.isCompleted());
         assertNull(responseObserver.getThrowable());
-        verify(commandBus).post(cmd, responseObserver);
     }
 
     @Test

@@ -74,10 +74,9 @@ public class AggregateCommandEndpointShould {
     public void setUp() {
         eventBus = mock(EventBus.class);
         final CommandStore commandStore = mock(CommandStore.class);
-        final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setMultitenant(true)
-                                                .setCommandStore(commandStore)
-                                                .build();
+        final CommandBus.Builder commandBus = CommandBus.newBuilder()
+                                                        .setMultitenant(true)
+                                                        .setCommandStore(commandStore);
         final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
         repository = new ProjectAggregateRepository(boundedContext);
         repositorySpy = spy(repository);

@@ -112,7 +112,7 @@ public final class BoundedContext
         this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
-        this.commandBus = builder.commandBus;
+        this.commandBus = builder.commandBus.build();
         this.eventBus = builder.eventBus;
         this.stand = builder.stand;
         this.tenantIndex = builder.tenantIndex;
@@ -360,13 +360,14 @@ public final class BoundedContext
     public static class Builder {
 
         private String name = DEFAULT_NAME;
-        private Supplier<StorageFactory> storageFactorySupplier;
-        private CommandStore commandStore;
-        private CommandBus commandBus;
-        private EventBus eventBus;
         private boolean multitenant;
-        private Stand stand;
         private TenantIndex tenantIndex;
+        private Supplier<StorageFactory> storageFactorySupplier;
+
+        private CommandStore commandStore;
+        private CommandBus.Builder commandBus;
+        private EventBus eventBus;
+        private Stand stand;
 
         /**
          * Sets the name for a new bounded context.
@@ -425,12 +426,12 @@ public final class BoundedContext
             return Optional.fromNullable(commandStore);
         }
 
-        public Builder setCommandBus(CommandBus commandBus) {
+        public Builder setCommandBus(CommandBus.Builder commandBus) {
             this.commandBus = checkNotNull(commandBus);
             return this;
         }
 
-        public Optional<CommandBus> getCommandBus() {
+        public Optional<CommandBus.Builder> getCommandBus() {
             return Optional.fromNullable(commandBus);
         }
 
@@ -486,20 +487,34 @@ public final class BoundedContext
                               : TenantIndex.Factory.singleTenant();
             }
 
+            //TODO:2017-05-03:alexander.yevsyukov: set CommandStore only via CommandBus.Builder.
+
             /* If some of the properties were not set, create them using set StorageFactory. */
             if (commandStore == null) {
                 commandStore = createCommandStore(storageFactory, tenantIndex);
             }
 
             if (commandBus == null) {
-                commandBus = createCommandBus(storageFactory, tenantIndex);
+                commandBus = CommandBus.newBuilder()
+                                       .setMultitenant(this.multitenant)
+                                       .setCommandStore(commandStore);
             } else {
-                // Check that both either multi-tenant or single-tenant.
-                checkState(multitenant == commandBus.isMultitenant(),
-                           "CommandBus must match multitenancy of BoundedContext. " +
-                           "Status in BoundedContext.Builder: %s CommandBus: %s",
-                           String.valueOf(multitenant), String.valueOf(commandBus.isMultitenant())
-                );
+                final Boolean commandBusMultitenancy = commandBus.isMultitenant();
+                if (commandBusMultitenancy != null) {
+                    // Check that both either multi-tenant or single-tenant.
+                    checkState(this.multitenant == commandBusMultitenancy,
+                               "CommandBus must match multitenancy of BoundedContext. " +
+                                       "Status in BoundedContext.Builder: %s CommandBus: %s",
+                               String.valueOf(this.multitenant),
+                               String.valueOf(commandBusMultitenancy)
+                    );
+                } else {
+                    commandBus.setMultitenant(this.multitenant);
+                }
+
+                if (commandBus.getCommandStore() == null) {
+                    commandBus.setCommandStore(commandStore);
+                }
             }
 
             if (eventBus == null) {
@@ -529,17 +544,6 @@ public final class BoundedContext
                                                        TenantIndex tenantIndex) {
             final CommandStore result = new CommandStore(storageFactory, tenantIndex);
             return result;
-        }
-
-        private CommandBus createCommandBus(StorageFactory storageFactory,
-                                            TenantIndex tenantIndex) {
-            if (commandStore == null) {
-                this.commandStore = createCommandStore(storageFactory, tenantIndex);
-            }
-            final CommandBus.Builder builder = CommandBus.newBuilder()
-                                                    .setMultitenant(this.multitenant)
-                                                    .setCommandStore(commandStore);
-            return builder.build();
         }
 
         private static EventBus createEventBus(StorageFactory storageFactory) {

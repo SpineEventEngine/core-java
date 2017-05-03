@@ -32,7 +32,6 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Tests;
-import org.spine3.testdata.TestCommandBusFactory;
 import org.spine3.testdata.TestEventBusFactory;
 
 import static org.junit.Assert.assertEquals;
@@ -88,12 +87,12 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandDispatcher() {
-        builder.setCommandBus(Tests.<CommandBus>nullRef());
+        builder.setCommandBus(Tests.<CommandBus.Builder>nullRef());
     }
 
     @Test
-    public void return_CommandBus() {
-        final CommandBus expected = TestCommandBusFactory.create(storageFactory);
+    public void return_CommandBus_Builder() {
+        final CommandBus.Builder expected = CommandBus.newBuilder();
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus()
@@ -153,10 +152,10 @@ public class BoundedContextBuilderShould {
 
     @Test
     public void create_EventBus_if_it_was_not_set() {
-        // Pass CommandBus to builder initialization, and do NOT pass EventBus.
+        // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = builder
                 .setMultitenant(true)
-                .setCommandBus(TestCommandBusFactory.create(storageFactory))
+                .setCommandBus(CommandBus.newBuilder())
                 .build();
         assertNotNull(boundedContext.getEventBus());
     }
@@ -182,10 +181,9 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = IllegalStateException.class)
     public void match_multitenance_state_of_BoundedContext_and_CommandBus_if_single_tenant() {
-        final CommandBus commandBus = CommandBus.newBuilder()
+        final CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
-                                                .setCommandStore(mock(CommandStore.class))
-                                                .build();
+                                                .setCommandStore(mock(CommandStore.class));
         BoundedContext.newBuilder()
                        .setMultitenant(false)
                        .setCommandBus(commandBus)

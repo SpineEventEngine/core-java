@@ -72,7 +72,7 @@ public class TestBoundedContextFactory {
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(CommandBus commandBus) {
+        public static BoundedContext newBoundedContext(CommandBus.Builder commandBus) {
             return newBuilder()
                     .setCommandBus(commandBus)
                     .build();
@@ -101,7 +101,8 @@ public class TestBoundedContextFactory {
             return newBoundedContext(eventBus);
         }
 
-        public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
+        public static BoundedContext newBoundedContext(CommandBus.Builder commandBus,
+                                                       EventBus eventBus) {
             return newBuilder()
                     .setCommandBus(commandBus)
                     .setEventBus(eventBus)
