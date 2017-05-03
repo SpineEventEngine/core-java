@@ -167,18 +167,6 @@ public class BoundedContextBuilderShould {
         assertNotNull(boundedContext.getEventBus());
     }
 
-    @Test
-    public void accept_CommandStore() {
-        final CommandStore commandStore = mock(CommandStore.class);
-        builder.setCommandStore(commandStore);
-        assertEquals(commandStore, builder.getCommandStore().get());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void reject_null_CommandStore() {
-        builder.setCommandStore(Tests.<CommandStore>nullRef());
-    }
-
     @Test(expected = IllegalStateException.class)
     public void match_multitenance_state_of_BoundedContext_and_CommandBus_if_single_tenant() {
         final CommandBus.Builder commandBus = CommandBus.newBuilder()

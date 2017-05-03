@@ -357,6 +357,7 @@ public final class BoundedContext
      * <p>An application can have more than one bounded context. To distinguish
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
+    @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
         private String name = DEFAULT_NAME;
@@ -364,7 +365,6 @@ public final class BoundedContext
         private TenantIndex tenantIndex;
         private Supplier<StorageFactory> storageFactorySupplier;
 
-        private CommandStore commandStore;
         private CommandBus.Builder commandBus;
         private EventBus eventBus;
         private Stand stand;
@@ -417,15 +417,6 @@ public final class BoundedContext
             return Optional.fromNullable(storageFactorySupplier);
         }
 
-        public Builder setCommandStore(CommandStore commandStore) {
-            this.commandStore = checkNotNull(commandStore);
-            return this;
-        }
-
-        public Optional<CommandStore> getCommandStore() {
-            return Optional.fromNullable(commandStore);
-        }
-
         public Builder setCommandBus(CommandBus.Builder commandBus) {
             this.commandBus = checkNotNull(commandBus);
             return this;
@@ -467,6 +458,20 @@ public final class BoundedContext
         }
 
         public BoundedContext build() {
+            final StorageFactory storageFactory = getStorageFactory();
+
+            initTenantIndex(storageFactory);
+            initCommandBus(storageFactory);
+            initEventBus(storageFactory);
+            initStand(storageFactory);
+
+            final BoundedContext result = new BoundedContext(this);
+
+            log().info(result.nameForLogging() + " created.");
+            return result;
+        }
+
+        private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
                 storageFactorySupplier = StorageFactorySwitch.getInstance(multitenant);
             }
@@ -480,21 +485,20 @@ public final class BoundedContext
                 );
                 throw new IllegalStateException(errMsg);
             }
+            return storageFactory;
+        }
 
+        private void initTenantIndex(StorageFactory factory) {
             if (tenantIndex == null) {
                 tenantIndex = multitenant
-                              ? TenantIndex.Factory.createDefault(storageFactory)
-                              : TenantIndex.Factory.singleTenant();
+                        ? TenantIndex.Factory.createDefault(factory)
+                        : TenantIndex.Factory.singleTenant();
             }
+        }
 
-            //TODO:2017-05-03:alexander.yevsyukov: set CommandStore only via CommandBus.Builder.
-
-            /* If some of the properties were not set, create them using set StorageFactory. */
-            if (commandStore == null) {
-                commandStore = createCommandStore(storageFactory, tenantIndex);
-            }
-
+        private void initCommandBus(StorageFactory factory) {
             if (commandBus == null) {
+                final CommandStore commandStore = createCommandStore(factory, tenantIndex);
                 commandBus = CommandBus.newBuilder()
                                        .setMultitenant(this.multitenant)
                                        .setCommandStore(commandStore);
@@ -513,16 +517,21 @@ public final class BoundedContext
                 }
 
                 if (commandBus.getCommandStore() == null) {
+                    final CommandStore commandStore = createCommandStore(factory, tenantIndex);
                     commandBus.setCommandStore(commandStore);
                 }
             }
+        }
 
+        private void initEventBus(StorageFactory storageFactory) {
             if (eventBus == null) {
                 eventBus = createEventBus(storageFactory);
             }
+        }
 
+        private void initStand(StorageFactory factory) {
             if (stand == null) {
-                stand = createStand(storageFactory);
+                stand = createStand(factory);
             } else {
                 // Check that both either multi-tenant or single-tenant.
                 checkState(multitenant == stand.isMultitenant(),
@@ -532,29 +541,22 @@ public final class BoundedContext
                 );
 
             }
+        }
 
-
-            final BoundedContext result = new BoundedContext(this);
-
-            log().info(result.nameForLogging() + " created.");
+        private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
+            final CommandStore result = new CommandStore(factory, index);
             return result;
         }
 
-        private static CommandStore createCommandStore(StorageFactory storageFactory,
-                                                       TenantIndex tenantIndex) {
-            final CommandStore result = new CommandStore(storageFactory, tenantIndex);
-            return result;
-        }
-
-        private static EventBus createEventBus(StorageFactory storageFactory) {
+        private static EventBus createEventBus(StorageFactory factory) {
             final EventBus result = EventBus.newBuilder()
-                                            .setStorageFactory(storageFactory)
+                                            .setStorageFactory(factory)
                                             .build();
             return result;
         }
 
-        private Stand createStand(StorageFactory storageFactory) {
-            final StandStorage standStorage = storageFactory.createStandStorage();
+        private Stand createStand(StorageFactory factory) {
+            final StandStorage standStorage = factory.createStandStorage();
             final Stand result = Stand.newBuilder()
                                       .setMultitenant(multitenant)
                                       .setStorage(standStorage)
