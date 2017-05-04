@@ -39,6 +39,7 @@ import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.entity.Repository;
+import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
@@ -231,6 +232,14 @@ public class BoundedContextShould {
         final Repository spy = spy(repository);
         boundedContext.register(repository);
         verify(spy, never()).initStorage(any(StorageFactory.class));
+    }
+
+    @Test
+    public void set_storage_factory_for_EventBus() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder())
+                                                .build();
+        assertNotNull(bc.getEventBus());
     }
 
     @Test
