@@ -41,7 +41,6 @@ import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.command.CreateProject;
 import org.spine3.test.command.event.ProjectCreated;
-import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.testdata.TestFailureBusFactory;
 import org.spine3.users.TenantId;
 
@@ -160,7 +159,9 @@ public abstract class AbstractCommandBusTestSuite {
                                .setLog(log)
                                .setAutoReschedule(false)
                                .build();
-        eventBus = TestEventBusFactory.create(storageFactory);
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(storageFactory)
+                           .build();
         requestFactory = this.multitenant
                             ? TestActorRequestFactory.newInstance(getClass(), newTenantUuid())
                             : TestActorRequestFactory.newInstance(getClass());

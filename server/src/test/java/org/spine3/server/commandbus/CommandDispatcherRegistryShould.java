@@ -41,7 +41,6 @@ import org.spine3.test.command.event.ProjectStarted;
 import org.spine3.test.command.event.TaskAdded;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
-import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.type.CommandClass;
 
 import java.util.Collections;
@@ -69,7 +68,9 @@ public class CommandDispatcherRegistryShould {
 
     @Before
     public void setUp() {
-        eventBus = TestEventBusFactory.create(StorageFactorySwitch.get(true));
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(StorageFactorySwitch.get(true))
+                           .build();
         registry = new CommandDispatcherRegistry();
     }
 
