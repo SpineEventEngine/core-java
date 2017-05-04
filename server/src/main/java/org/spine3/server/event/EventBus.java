@@ -465,7 +465,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         /**
          * Builds an instance of {@link EventBus}.
          *
-         * <p>This method is supposed to be called internally when building an aggregating
+         * <p>This method is supposed to be called internally when building an enclosing
          * {@code BoundedContext}.
          */
         @Internal

@@ -465,7 +465,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         /**
          * Builds an instance of {@link CommandBus}.
          *
-         * <p>This method is supposed to be called internally when building an aggregating
+         * <p>This method is supposed to be called internally when building an enclosing
          * {@code BoundedContext}.
          */
         @Internal

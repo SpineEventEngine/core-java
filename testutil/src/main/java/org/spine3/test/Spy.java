@@ -40,7 +40,7 @@ public class Spy<T> {
     private final Class<T> classOfSpy;
 
     public static <T> Spy<T> ofClass(Class<T> spyClass) {
-        return  new Spy<T>(spyClass);
+        return new Spy<>(spyClass);
     }
 
     public Spy(Class<T> classOfSpy) {
