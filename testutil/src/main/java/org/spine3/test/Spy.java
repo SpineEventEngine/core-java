@@ -62,7 +62,8 @@ public class Spy<T> {
             final Object fieldValue = field.get(obj);
             spy = Mockito.spy(fieldValue);
             field.set(obj, spy);
-            return classOfSpy.cast(spy);
+            final T result = classOfSpy.cast(spy);
+            return result;
         } catch (NoSuchFieldException | IllegalAccessException | ClassCastException e) {
             throw illegalArgumentWithCauseOf(e);
         }

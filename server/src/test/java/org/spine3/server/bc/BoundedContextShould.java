@@ -247,6 +247,16 @@ public class BoundedContextShould {
         verify(stand).registerTypeSupplier(eq(repository));
     }
 
+    @Test(expected = IllegalStateException.class)
+    public void match_multi_tenancy_in_Stand() {
+        BoundedContext.newBuilder()
+                      .setMultitenant(true)
+                      .setStand(Stand.newBuilder()
+                                     .setMultitenant(false))
+                      .build();
+
+    }
+
     private static class TestResponseObserver implements StreamObserver<Response> {
 
         private Response responseHandled;
