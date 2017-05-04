@@ -37,6 +37,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.integration.IntegrationEvent;
@@ -248,7 +249,16 @@ public class BoundedContextShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void match_multi_tenancy_in_Stand() {
+    public void match_multi_tenancy_with_CommandBus() {
+        BoundedContext.newBuilder()
+                      .setMultitenant(true)
+                      .setCommandBus(CommandBus.newBuilder()
+                                               .setMultitenant(false))
+                      .build();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void match_multi_tenancy_with_Stand() {
         BoundedContext.newBuilder()
                       .setMultitenant(true)
                       .setStand(Stand.newBuilder()
