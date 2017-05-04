@@ -53,7 +53,6 @@ public class Spy<T> {
         return on(obj, fieldName);
     }
 
-    @SuppressWarnings("unchecked") // cast will be rethrown
     public T on(Object obj, String fieldName) {
         final Class<?> cls = obj.getClass();
         final Object spy;
@@ -63,7 +62,7 @@ public class Spy<T> {
             final Object fieldValue = field.get(obj);
             spy = Mockito.spy(fieldValue);
             field.set(obj, spy);
-            return (T)spy;
+            return classOfSpy.cast(spy);
         } catch (NoSuchFieldException | IllegalAccessException | ClassCastException e) {
             throw illegalArgumentWithCauseOf(e);
         }

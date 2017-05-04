@@ -38,6 +38,8 @@ import static org.mockito.Mockito.verify;
  */
 public class SpyShould {
 
+    private static final String FIELD_NAME = "list";
+
     private List<String> list;
 
     @Before
@@ -60,7 +62,7 @@ public class SpyShould {
     @Test
     public void inject_by_name() {
         final List spy = Spy.ofClass(List.class)
-                            .on(this, "list");
+                            .on(this, FIELD_NAME);
         assertSpy(spy);
     }
 
@@ -73,5 +75,11 @@ public class SpyShould {
         // Check that we got a Mockito spy.
         assertEquals(3, list.size());
         verify(spy, times(1)).size();
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void propagate_exception() {
+        Spy.ofClass(Number.class)
+           .on(this, FIELD_NAME);
     }
 }
