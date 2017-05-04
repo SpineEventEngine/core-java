@@ -20,6 +20,7 @@
 
 package org.spine3.server.bc;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -27,17 +28,19 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
@@ -48,6 +51,7 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.test.Spy;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.command.AddTask;
@@ -57,17 +61,16 @@ import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
-import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -91,8 +94,7 @@ public class BoundedContextShould {
     @Before
     public void setUp() {
         boundedContext = MultiTenant.newBoundedContext();
-        storageFactory = StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                             .get();
+        storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     @After
@@ -105,9 +107,9 @@ public class BoundedContextShould {
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(storageFactory);
-        boundedContext.register(repository);
+        final ProjectAggregateRepository repo = new ProjectAggregateRepository(boundedContext);
+        repo.initStorage(storageFactory);
+        boundedContext.register(repo);
         boundedContext.getEventBus().register(subscriber);
         handlersRegistered = true;
     }
@@ -190,15 +192,21 @@ public class BoundedContextShould {
 
     @Test
     public void not_notify_integration_event_subscriber_if_event_is_invalid() {
-        final EventBus eventBus = mock(EventBus.class);
-        doReturn(false).when(eventBus)
-                       .validate(any(Message.class), anyResponseObserver());
-        final BoundedContext boundedContext = MultiTenant.newBoundedContext(eventBus);
-        final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
+        final BoundedContext boundedContext = MultiTenant.newBoundedContext();
+        final TestEventSubscriber sub = new TestEventSubscriber();
+        boundedContext.getEventBus()
+                      .register(sub);
+
+        final Any invalidMsg = AnyPacker.pack(ProjectCreated.getDefaultInstance());
+        final IntegrationEvent event =
+                Given.AnIntegrationEvent.projectCreated()
+                                        .toBuilder()
+                                        .setMessage(invalidMsg)
+                                        .build();
 
         boundedContext.notify(event, new TestResponseObserver());
 
-        verify(eventBus, never()).post(any(Event.class));
+        assertNull(sub.eventHandled);
     }
 
     @Test
@@ -229,9 +237,31 @@ public class BoundedContextShould {
     }
 
     @Test
+    public void set_storage_factory_for_EventBus() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder())
+                                                .build();
+        assertNotNull(bc.getEventBus());
+    }
+
+    @Test
+    public void do_not_set_storage_factory_if_EventStore_is_set() {
+        final EventStore eventStore = mock(EventStore.class);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder()
+                                                .setEventStore(eventStore))
+                                                .build();
+        assertEquals(eventStore, bc.getEventBus()
+                                   .getEventStore());
+    }
+
+    @Test
     public void propagate_registered_repositories_to_stand() {
-        final Stand stand = spy(mock(Stand.class));
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
+        final Stand stand = Spy.ofClass(Stand.class)
+                               .on(boundedContext);
+
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 
         final ProjectAggregateRepository repository =
@@ -240,10 +270,57 @@ public class BoundedContextShould {
         verify(stand).registerTypeSupplier(eq(repository));
     }
 
-    /** Returns {@link org.mockito.Mockito#any() Mockito.any()} matcher for response observer. */
-    @SuppressWarnings("unchecked")
-    private static StreamObserver<Response> anyResponseObserver() {
-        return (StreamObserver<Response>) any();
+    @Test(expected = IllegalStateException.class)
+    public void match_multi_tenancy_with_CommandBus() {
+        BoundedContext.newBuilder()
+                      .setMultitenant(true)
+                      .setCommandBus(CommandBus.newBuilder()
+                                               .setMultitenant(false))
+                      .build();
+    }
+
+    @Test
+    public void set_multi_tenancy_in_CommandBus() {
+        BoundedContext bc = BoundedContext.newBuilder()
+                                          .setMultitenant(true)
+                                          .build();
+
+        assertEquals(bc.isMultitenant(), bc.getCommandBus()
+                                           .isMultitenant());
+
+        bc = BoundedContext.newBuilder()
+                           .setMultitenant(false)
+                           .build();
+
+        assertEquals(bc.isMultitenant(), bc.getCommandBus()
+                                           .isMultitenant());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void match_multi_tenancy_with_Stand() {
+        BoundedContext.newBuilder()
+                      .setMultitenant(true)
+                      .setStand(Stand.newBuilder()
+                                     .setMultitenant(false))
+                      .build();
+
+    }
+
+    @Test
+    public void set_same_multitenancy_in_Stand() {
+        BoundedContext bc = BoundedContext.newBuilder()
+                      .setMultitenant(true)
+                      .build();
+
+        assertEquals(bc.isMultitenant(), bc.getStand()
+                                           .isMultitenant());
+
+        bc = BoundedContext.newBuilder()
+                           .setMultitenant(false)
+                           .build();
+
+        assertEquals(bc.isMultitenant(), bc.getStand()
+                                           .isMultitenant());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {

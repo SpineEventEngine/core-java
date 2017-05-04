@@ -23,16 +23,17 @@ package org.spine3.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.reflect.command.CreateProject;
 import org.spine3.test.reflect.event.ProjectCreated;
-import org.spine3.testdata.TestEventBusFactory;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -60,7 +61,14 @@ public class CommandHandlerMethodShould {
 
     private static final CommandContext defCmdCtx = CommandContext.getDefaultInstance();
 
-    private final EventBus eventBus = TestEventBusFactory.create();
+    private EventBus eventBus;
+
+    @Before
+    public void setUp() {
+        eventBus = EventBus.newBuilder()
+                           .setStorageFactory(StorageFactorySwitch.get(true))
+                           .build();
+    }
 
     @Test
     public void pass_null_tolerance_check() {
@@ -211,6 +219,7 @@ public class CommandHandlerMethodShould {
     }
 
     private class ValidHandlerOneParamReturnsList extends TestCommandHandler {
+        @SuppressWarnings("UnusedReturnValue")
         @Assign
         List<Message> handleTest(CreateProject cmd) {
             final List<Message> result = newLinkedList();
@@ -219,6 +228,7 @@ public class CommandHandlerMethodShould {
         }
     }
 
+    @SuppressWarnings("UnusedReturnValue")
     private class ValidHandlerTwoParams extends TestCommandHandler {
         @Assign
         @SuppressWarnings("unused")

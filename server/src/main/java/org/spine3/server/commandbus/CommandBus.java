@@ -38,6 +38,7 @@ import org.spine3.server.failure.FailureBus;
 import org.spine3.type.CommandClass;
 import org.spine3.util.Environment;
 
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
@@ -91,7 +92,9 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as nested objects only
     private CommandBus(Builder builder) {
         super();
-        this.multitenant = builder.multitenant;
+        this.multitenant = builder.multitenant != null
+                ? builder.multitenant
+                : false;
         this.commandStore = builder.commandStore;
         this.scheduler = builder.commandScheduler;
         this.log = builder.log;
@@ -114,6 +117,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return new Builder();
     }
 
+    @Internal
+    @VisibleForTesting
     public boolean isMultitenant() {
         return multitenant;
     }
@@ -306,7 +311,18 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     public static class Builder {
 
-        private boolean multitenant;
+        /**
+         * The multi-tenancy flag for the {@code CommandBus} to build.
+         *
+         * <p>The value of this field should be equal to that of corresponding
+         * {@linkplain org.spine3.server.BoundedContext.Builder BoundedContext.Builder} and is not
+         * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
+         *
+         * <p>If set directly, the value would be matched to the multi-tenancy flag of
+         * {@code BoundedContext}.
+         */
+        @Nullable
+        private Boolean multitenant;
 
         private CommandStore commandStore;
 
@@ -339,8 +355,16 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return !appEngine;
         }
 
-        public boolean isMultitenant() {
+        @Internal
+        @Nullable
+        public Boolean isMultitenant() {
             return multitenant;
+        }
+
+        @Internal
+        public Builder setMultitenant(@Nullable Boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
         }
 
         public boolean isThreadSpawnAllowed() {
@@ -357,11 +381,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
         public Optional<FailureBus> getFailureBus() {
             return Optional.fromNullable(failureBus);
-        }
-
-        public Builder setMultitenant(boolean multitenant) {
-            this.multitenant = multitenant;
-            return this;
         }
 
         public Builder setCommandStore(CommandStore commandStore) {
@@ -445,7 +464,11 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
         /**
          * Builds an instance of {@link CommandBus}.
+         *
+         * <p>This method is supposed to be called internally when building an enclosing
+         * {@code BoundedContext}.
          */
+        @Internal
         public CommandBus build() {
             checkState(
                     commandStore != null,

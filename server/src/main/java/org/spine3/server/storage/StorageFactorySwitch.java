@@ -82,6 +82,13 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
     }
 
     /**
+     * Obtains the instance of {@code StorageFactory} for the passed multi-tenancy mode.
+     */
+    public static StorageFactory get(boolean multitenant) {
+        return getInstance(multitenant).get();
+    }
+
+    /**
      * Initializes the current singleton instance with the suppliers.
      *
      *

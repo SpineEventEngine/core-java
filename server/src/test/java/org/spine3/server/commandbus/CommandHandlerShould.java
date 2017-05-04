@@ -32,6 +32,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.command.CommandHistory;
@@ -42,8 +43,6 @@ import org.spine3.test.command.StartProject;
 import org.spine3.test.command.event.ProjectCreated;
 import org.spine3.test.command.event.ProjectStarted;
 import org.spine3.test.command.event.TaskAdded;
-import org.spine3.testdata.TestCommandBusFactory;
-import org.spine3.testdata.TestEventBusFactory;
 
 import java.util.List;
 
@@ -61,12 +60,19 @@ import static org.spine3.test.Tests.nullRef;
  */
 public class CommandHandlerShould {
 
-    private final CommandBus commandBus = TestCommandBusFactory.create();
-    private final EventBus eventBus = spy(TestEventBusFactory.create());
-    private final TestCommandHandler handler = new TestCommandHandler();
+    private CommandBus commandBus;
+    private EventBus eventBus;
+    private TestCommandHandler handler;
 
     @Before
-    public void setUpTest() {
+    public void setUp() {
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setMultitenant(true)
+                                                            .build();
+        commandBus = boundedContext.getCommandBus();
+        eventBus = spy(boundedContext.getEventBus());
+        handler = new TestCommandHandler();
+
         commandBus.register(handler);
     }
 
