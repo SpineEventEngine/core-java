@@ -25,6 +25,7 @@ import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.stand.Stand;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 
 /**
@@ -32,10 +33,10 @@ import org.spine3.server.storage.StorageFactorySwitch;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class TestBoundedContextFactory {
 
     private TestBoundedContextFactory() {
+        // Prevent instantiation of this utility class.
     }
 
     public static class SingleTenant {
@@ -44,7 +45,7 @@ public class TestBoundedContextFactory {
             // Prevent instantiation of this utility class.
         }
 
-        public static BoundedContext newBoundedContext(Stand stand) {
+        public static BoundedContext newBoundedContext(Stand.Builder stand) {
             return BoundedContext.newBuilder()
                                  .setStand(stand)
                                  .build();
@@ -78,25 +79,25 @@ public class TestBoundedContextFactory {
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(String name, Stand stand) {
+        public static BoundedContext newBoundedContext(String name, Stand.Builder stand) {
             return newBuilder()
                     .setStand(stand)
                     .setName(name)
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(Stand stand) {
+        public static BoundedContext newBoundedContext(Stand.Builder stand) {
             return newBuilder()
                     .setStand(stand)
                     .build();
         }
 
         public static BoundedContext newBoundedContext(EventEnricher enricher) {
+            final StorageFactory factory = StorageFactorySwitch.getInstance(true)
+                                                               .get();
             final EventBus.Builder eventBus = EventBus.newBuilder()
                                                       .setEnricher(enricher)
-                                                      .setStorageFactory(
-                                                              StorageFactorySwitch.getInstance(true)
-                                                                                  .get());
+                                                      .setStorageFactory(factory);
             return newBoundedContext(eventBus);
         }
 

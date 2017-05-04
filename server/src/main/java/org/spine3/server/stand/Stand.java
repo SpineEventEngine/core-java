@@ -26,6 +26,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.annotations.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
@@ -35,6 +36,7 @@ import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -52,6 +54,7 @@ import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -104,7 +107,7 @@ public class Stand implements AutoCloseable {
     private final TypeRegistry typeRegistry;
 
     /**
-     * An instance of executor used to invoke callbacks
+     * An instance of executor used to invoke callbacks.
      */
     private final Executor callbackExecutor;
 
@@ -121,11 +124,12 @@ public class Stand implements AutoCloseable {
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
-        delivery = builder.delivery;
-        init();
-
+        delivery = builder.getDelivery()
+                          .get();
         callbackExecutor = builder.getCallbackExecutor();
-        multitenant = builder.isMultitenant();
+        multitenant = builder.multitenant != null
+                ? builder.multitenant
+                : false;
         subscriptionRegistry = builder.getSubscriptionRegistry();
         typeRegistry = builder.getTypeRegistry();
         topicValidator = builder.getTopicValidator();
@@ -215,7 +219,7 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    public boolean isMultitenant() {
+    boolean isMultitenant() {
         return multitenant;
     }
 
@@ -464,17 +468,30 @@ public class Stand implements AutoCloseable {
     public static class Builder {
 
         /**
+         * The multi-tenancy flag for the {@code Stand} to build.
+         *
+         * <p>The value of this field should be equal to that of corresponding
+         * {@linkplain BoundedContext.Builder BoundedContext.Builder} and is not supposed to be
+         * {@linkplain #setMultitenant(Boolean) set directly}.
+         *
+         * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
+         * {@code BoundedContext}.
+         */
+        @Nullable
+        private Boolean multitenant;
+
+        /**
          * Optional {@code StandUpdateDelivery} for propagating the data to {@code Stand}.
          *
          * <p>If not set, a {@link StandUpdateDelivery#directDelivery() directDelivery()}
          * value will be set by the builder.
          */
         private StandUpdateDelivery delivery;
+
         private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private TypeRegistry typeRegistry;
-        private boolean multitenant;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
@@ -517,12 +534,15 @@ public class Stand implements AutoCloseable {
             return storage;
         }
 
-        public Builder setMultitenant(boolean multitenant) {
+        @Internal
+        public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
-        public boolean isMultitenant() {
+        @Internal
+        @Nullable
+        public Boolean isMultitenant() {
             return multitenant;
         }
 
@@ -569,12 +589,20 @@ public class Stand implements AutoCloseable {
         /**
          * Builds an instance of {@code Stand}.
          *
-         * @return the instance of Stand
+         * <p>This method is supposed to be called internally when building aggregating
+         * {@code BoundedContext}.
+         *
+         * @return new instance of Stand
          */
+        @Internal
         public Stand build() {
             if (delivery == null) {
                 delivery = StandUpdateDelivery.directDelivery();
             }
+
+            final boolean multitenant = this.multitenant == null
+                    ? false
+                    : this.multitenant;
 
             if (storage == null) {
                 storage = StorageFactorySwitch.getInstance(multitenant)
@@ -593,9 +621,10 @@ public class Stand implements AutoCloseable {
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
-            final Stand result = new Stand(this);
-            result.init();
-            return result;
+            final Stand product = new Stand(this);
+            product.init();
+
+            return product;
         }
     }
 }

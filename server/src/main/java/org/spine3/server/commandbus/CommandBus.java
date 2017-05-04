@@ -118,7 +118,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return new Builder();
     }
 
-    public boolean isMultitenant() {
+    boolean isMultitenant() {
         return multitenant;
     }
 
@@ -360,6 +360,12 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
             return multitenant;
         }
 
+        @Internal
+        public Builder setMultitenant(@Nullable Boolean multitenant) {
+            this.multitenant = multitenant;
+            return this;
+        }
+
         public boolean isThreadSpawnAllowed() {
             return threadSpawnAllowed;
         }
@@ -374,12 +380,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
 
         public Optional<FailureBus> getFailureBus() {
             return Optional.fromNullable(failureBus);
-        }
-
-        @Internal
-        public Builder setMultitenant(Boolean multitenant) {
-            this.multitenant = multitenant;
-            return this;
         }
 
         public Builder setCommandStore(CommandStore commandStore) {

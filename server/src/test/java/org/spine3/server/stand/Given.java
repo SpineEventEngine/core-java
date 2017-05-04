@@ -109,15 +109,14 @@ class Given {
         return aggregateRepo(boundedContext);
     }
 
-    static BoundedContext boundedContext(Stand stand, StandUpdateDelivery delivery) {
+    static BoundedContext boundedContext(Stand.Builder stand, StandUpdateDelivery delivery) {
         return boundedContextBuilder(stand)
                 .setStand(Stand.newBuilder()
-                               .setDelivery(delivery)
-                               .build())
+                               .setDelivery(delivery))
                 .build();
     }
 
-    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
+    private static BoundedContext.Builder boundedContextBuilder(Stand.Builder stand) {
         return BoundedContext.newBuilder()
                              .setStand(stand);
     }

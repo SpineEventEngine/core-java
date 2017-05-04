@@ -35,7 +35,6 @@ import org.spine3.server.stand.Stand;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
-import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.time.Time;
 
 import java.util.List;
@@ -54,7 +53,6 @@ import static org.mockito.Mockito.when;
 import static org.spine3.base.Versions.newVersion;
 import static org.spine3.test.Verify.assertInstanceOf;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 /**
  * @author Dmytro Dashenkov
@@ -69,35 +67,40 @@ public class SubscriptionServiceShould {
      * --------------
      */
 
+    /** Creates a new multi-tenant BoundedContext with the passed name. */
+    private static BoundedContext ctx(String name) {
+        return BoundedContext.newBuilder()
+                             .setName(name)
+                             .setMultitenant(true)
+                             .build();
+    }
+
     @Test
     public void initialize_properly_with_one_bounded_context() {
-        final BoundedContext singleBoundedContext = newBoundedContext("Single",
-                                                                      newMultitenantStand());
+        final BoundedContext oneContext = ctx("One");
 
         final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                       .add(singleBoundedContext);
+                                                                       .add(oneContext);
 
         final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
-        final List<BoundedContext> boundedContexs = builder.getBoundedContexts();
-        assertSize(1, boundedContexs);
-        assertTrue(boundedContexs.contains(singleBoundedContext));
+        final List<BoundedContext> boundedContexts = builder.getBoundedContexts();
+        assertSize(1, boundedContexts);
+        assertTrue(boundedContexts.contains(oneContext));
     }
 
     @Test
     public void initialize_properly_with_several_bounded_contexts() {
-        final BoundedContext firstBoundedContext = newBoundedContext("First",
-                                                                     newMultitenantStand());
-        final BoundedContext secondBoundedContext = newBoundedContext("Second",
-                                                                      newMultitenantStand());
-        final BoundedContext thirdBoundedContext = newBoundedContext("Third",
-                                                                     newMultitenantStand());
+        final BoundedContext firstBoundedContext = ctx("First");
+        final BoundedContext secondBoundedContext = ctx("Second");
+        final BoundedContext thirdBoundedContext = ctx("Third");
 
-        final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                       .add(firstBoundedContext)
-                                                                       .add(secondBoundedContext)
-                                                                       .add(thirdBoundedContext);
+        final SubscriptionService.Builder builder =
+                SubscriptionService.newBuilder()
+                                   .add(firstBoundedContext)
+                                   .add(secondBoundedContext)
+                                   .add(thirdBoundedContext);
         final SubscriptionService service = builder.build();
         assertNotNull(service);
 
@@ -110,19 +113,17 @@ public class SubscriptionServiceShould {
 
     @Test
     public void be_able_to_remove_bounded_context_from_builder() {
-        final BoundedContext firstBoundedContext = newBoundedContext("Removed",
-                                                                     newMultitenantStand());
-        final BoundedContext secondBoundedContext = newBoundedContext("Also removed",
-                                                                      newMultitenantStand());
-        final BoundedContext thirdBoundedContext = newBoundedContext("The one to stay",
-                                                                     newMultitenantStand());
+        final BoundedContext firstBoundedContext = ctx("Removed");
+        final BoundedContext secondBoundedContext = ctx("Also removed");
+        final BoundedContext thirdBoundedContext = ctx("The one to stay");
 
-        final SubscriptionService.Builder builder = SubscriptionService.newBuilder()
-                                                                       .add(firstBoundedContext)
-                                                                       .add(secondBoundedContext)
-                                                                       .add(thirdBoundedContext)
-                                                                       .remove(secondBoundedContext)
-                                                                       .remove(firstBoundedContext);
+        final SubscriptionService.Builder builder =
+                SubscriptionService.newBuilder()
+                                   .add(firstBoundedContext)
+                                   .add(secondBoundedContext)
+                                   .add(thirdBoundedContext)
+                                   .remove(secondBoundedContext)
+                                   .remove(firstBoundedContext);
         final SubscriptionService subscriptionService = builder.build();
         assertNotNull(subscriptionService);
 
@@ -332,9 +333,11 @@ public class SubscriptionServiceShould {
     }
 
     private static BoundedContext setupBoundedContextWithProjectAggregateRepo() {
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setStand(Stand.newBuilder())
+                                                            .build();
+        final Stand stand = boundedContext.getStand();
+
         stand.registerTypeSupplier(new Given.ProjectAggregateRepository(boundedContext));
 
         return boundedContext;
@@ -342,12 +345,6 @@ public class SubscriptionServiceShould {
 
     private static Target getProjectQueryTarget() {
         return Targets.allOf(Project.class);
-    }
-
-    private static Stand newMultitenantStand() {
-        return Stand.newBuilder()
-                    .setMultitenant(true)
-                    .build();
     }
 
     private static class MemoizeStreamObserver<T> implements StreamObserver<T> {

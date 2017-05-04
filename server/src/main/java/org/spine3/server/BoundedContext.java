@@ -114,7 +114,7 @@ public final class BoundedContext
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
         this.commandBus = builder.commandBus.build();
         this.eventBus = builder.eventBus.build();
-        this.stand = builder.stand;
+        this.stand = builder.stand.build();
         this.tenantIndex = builder.tenantIndex;
     }
 
@@ -357,6 +357,7 @@ public final class BoundedContext
      * <p>An application can have more than one bounded context. To distinguish
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
+    @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
         private String name = DEFAULT_NAME;
@@ -366,7 +367,7 @@ public final class BoundedContext
 
         private CommandBus.Builder commandBus;
         private EventBus.Builder eventBus;
-        private Stand stand;
+        private Stand.Builder stand;
 
         /**
          * Sets the name for a new bounded context.
@@ -438,12 +439,12 @@ public final class BoundedContext
             return Optional.fromNullable(eventBus);
         }
 
-        public Builder setStand(Stand stand) {
+        public Builder setStand(Stand.Builder stand) {
             this.stand = checkNotNull(stand);
             return this;
         }
 
-        public Optional<Stand> getStand() {
+        public Optional<Stand.Builder> getStand() {
             return Optional.fromNullable(stand);
         }
 
@@ -504,13 +505,9 @@ public final class BoundedContext
             } else {
                 final Boolean commandBusMultitenancy = commandBus.isMultitenant();
                 if (commandBusMultitenancy != null) {
-                    // Check that both either multi-tenant or single-tenant.
-                    checkState(this.multitenant == commandBusMultitenancy,
-                               "CommandBus must match multitenancy of BoundedContext. " +
-                                       "Status in BoundedContext.Builder: %s CommandBus: %s",
-                               String.valueOf(this.multitenant),
-                               String.valueOf(commandBusMultitenancy)
-                    );
+                    checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
+                                            "Status in BoundedContext.Builder: %s CommandBus: %s",
+                                   commandBusMultitenancy);
                 } else {
                     commandBus.setMultitenant(this.multitenant);
                 }
@@ -539,14 +536,29 @@ public final class BoundedContext
             if (stand == null) {
                 stand = createStand(factory);
             } else {
+                final Boolean standMultitenant = stand.isMultitenant();
                 // Check that both either multi-tenant or single-tenant.
-                checkState(multitenant == stand.isMultitenant(),
-                           "Stand must match multitenancy of BoundedContext. " +
-                                   "Status in BoundedContext.Builder: %s Stand: %s",
-                           String.valueOf(multitenant), String.valueOf(stand.isMultitenant())
-                );
-
+                if (standMultitenant == null) {
+                    stand.setMultitenant(multitenant);
+                } else {
+                    checkSameValue("Stand must match multitenancy of BoundedContext. " +
+                                            "Status in BoundedContext.Builder: %s Stand: %s",
+                                   standMultitenant);
+                }
             }
+        }
+
+        /**
+         * Ensures that the value of the passed flag is equal to the value of
+         * the {@link BoundedContext.Builder#multitenant}.
+         *
+         * @throws IllegalStateException if the flags values do not match
+         */
+        private void checkSameValue(String errMsgFmt, boolean partMultitenancy) {
+            checkState(this.multitenant == partMultitenancy,
+                       errMsgFmt,
+                       String.valueOf(this.multitenant),
+                       String.valueOf(partMultitenancy));
         }
 
         private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
@@ -554,12 +566,11 @@ public final class BoundedContext
             return result;
         }
 
-        private Stand createStand(StorageFactory factory) {
+        private Stand.Builder createStand(StorageFactory factory) {
             final StandStorage standStorage = factory.createStandStorage();
-            final Stand result = Stand.newBuilder()
-                                      .setMultitenant(multitenant)
-                                      .setStorage(standStorage)
-                                      .build();
+            final Stand.Builder result = Stand.newBuilder()
+                                              .setMultitenant(multitenant)
+                                              .setStorage(standStorage);
             return result;
         }
     }

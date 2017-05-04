@@ -178,13 +178,18 @@ public class StandPostShould {
                                              BoundedContextAction... dispatchActions) {
         checkNotNull(dispatchActions);
 
-        final Stand stand = mock(Stand.class);
         final Executor executor = isConcurrent
                 ? Executors.newFixedThreadPool(Given.THREADS_COUNT_IN_POOL_EXECUTOR)
                 : MoreExecutors.directExecutor();
         final StandUpdateDelivery delivery = spy(new SpyableStandUpdateDelivery(executor));
 
-        final BoundedContext boundedContext = Given.boundedContext(stand, delivery);
+        final BoundedContext boundedContext =
+                BoundedContext.newBuilder()
+                              .setStand(Stand.newBuilder()
+                                             .setDelivery(delivery))
+                              .build();
+
+        final Stand stand = boundedContext.getStand();
 
         for (BoundedContextAction dispatchAction : dispatchActions) {
             dispatchAction.perform(boundedContext);

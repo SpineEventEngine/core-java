@@ -68,8 +68,6 @@ import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
-import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
-import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
@@ -186,10 +184,10 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void register_projection_repositories() {
         final boolean multitenant = isMultitenant();
-        final Stand stand = Stand.newBuilder()
-                                 .setMultitenant(multitenant)
-                                 .build();
-        final BoundedContext boundedContext = createBoundedContext(stand);
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setMultitenant(multitenant)
+                                                            .build();
+        final Stand stand = boundedContext.getStand();
 
         checkTypesEmpty(stand);
 
@@ -209,17 +207,11 @@ public class StandShould extends TenantAwareTest {
         checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
     }
 
-    private static BoundedContext createBoundedContext(Stand stand) {
-        return stand.isMultitenant()
-                    ? MultiTenant.newBoundedContext(stand)
-                    : SingleTenant.newBoundedContext(stand);
-    }
-
     @Test
     public void register_aggregate_repositories() {
-        final Stand stand = Stand.newBuilder()
-                                 .build();
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
+        final Stand stand = boundedContext.getStand();
 
         checkTypesEmpty(stand);
 
@@ -242,10 +234,14 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void use_provided_executor_upon_update_of_watched_type() {
         final Executor executor = mock(Executor.class);
-        final Stand stand = Stand.newBuilder()
-                                 .setCallbackExecutor(executor)
-                                 .build();
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+        final BoundedContext boundedContext =
+                BoundedContext.newBuilder()
+                              .setStand(Stand.newBuilder()
+                                             .setCallbackExecutor(executor))
+                              .build();
+        final Stand stand = boundedContext.getStand();
+
+
         final StandTestProjectionRepository standTestProjectionRepo =
                 new StandTestProjectionRepository(boundedContext);
         stand.registerTypeSupplier(standTestProjectionRepo);
@@ -273,12 +269,16 @@ public class StandShould extends TenantAwareTest {
     @Test
     public void operate_with_storage_provided_through_builder() {
         final StandStorage standStorageMock = mock(StandStorage.class);
-        final Stand stand = Stand.newBuilder()
-                                 .setStorage(standStorageMock)
-                                 .build();
+        final BoundedContext boundedContext =
+                BoundedContext.newBuilder()
+                              .setStand(Stand.newBuilder()
+                                             .setStorage(standStorageMock))
+                              .build();
+        final Stand stand = boundedContext.getStand();
+
         assertNotNull(stand);
 
-        final BoundedContext boundedContext = SingleTenant.newBoundedContext(stand);
+
         final CustomerAggregateRepository customerAggregateRepo =
                 new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
@@ -1373,13 +1373,16 @@ public class StandShould extends TenantAwareTest {
     }
 
     protected Stand prepareStandWithAggregateRepo(StandStorage standStorage) {
-        final Stand stand = Stand.newBuilder()
-                                 .setStorage(standStorage)
-                                 .setMultitenant(multitenant)
-                                 .build();
+        final BoundedContext boundedContext =
+                BoundedContext.newBuilder()
+                              .setMultitenant(multitenant)
+                              .setStand(Stand.newBuilder()
+                                             .setStorage(standStorage))
+                              .build();
+
+        final Stand stand = boundedContext.getStand();
         assertNotNull(stand);
 
-        final BoundedContext boundedContext = createBoundedContext(stand);
         final CustomerAggregateRepository customerAggregateRepo =
                 new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
