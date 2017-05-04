@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
@@ -49,6 +48,7 @@ import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.test.Spy;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.command.AddTask;
@@ -233,13 +233,12 @@ public class BoundedContextShould {
         verify(spy, never()).initStorage(any(StorageFactory.class));
     }
 
-    @Ignore
     @Test
     public void propagate_registered_repositories_to_stand() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder().build();
-        //TODO:2017-05-04:alexander.yevsyukov: Spy on stand using new API.
-        // final Stand stand = spy(mock(Stand.class));
-        final Stand stand = boundedContext.getStand();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
+        final Stand stand = Spy.ofClass(Stand.class)
+                               .on(boundedContext);
 
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 

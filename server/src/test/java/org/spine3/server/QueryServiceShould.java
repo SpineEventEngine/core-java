@@ -23,7 +23,6 @@ import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.EventContext;
 import org.spine3.base.Responses;
@@ -33,6 +32,7 @@ import org.spine3.client.QueryResponse;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
+import org.spine3.test.Spy;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
@@ -52,7 +52,6 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alex Tymchenko
  */
-@Ignore //TODO:2017-05-04:alexander.yevsyukov: Enable back after applying new Spy API.
 public class QueryServiceShould {
 
     private QueryService service;
@@ -67,11 +66,12 @@ public class QueryServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository and one projection.
-        //TODO:2017-05-04:alexander.yevsyukov: Spy using new Spy API.
-        // projectsContext = SingleTenant.newBoundedContext(spy(TestStandFactory.create()));
         projectsContext = BoundedContext.newBuilder()
                                         .setName("Projects")
                                         .build();
+        // Inject spy, which will be obtained later via getStand().
+        Spy.ofClass(Stand.class)
+           .on(projectsContext);
 
         final Given.ProjectAggregateRepository projectRepo =
                 new Given.ProjectAggregateRepository(projectsContext);
@@ -82,11 +82,12 @@ public class QueryServiceShould {
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        //TODO:2017-05-04:alexander.yevsyukov: Spy using new Spy API.
-        // customersContext = SingleTenant.newBoundedContext(spy(TestStandFactory.create()));
         customersContext = BoundedContext.newBuilder()
                                          .setName("Customers")
                                          .build();
+        // Inject spy, which will be obtained later via getStand().
+        Spy.ofClass(Stand.class)
+           .on(customersContext);
 
         final Given.CustomerAggregateRepository customerRepo =
                 new Given.CustomerAggregateRepository(customersContext);
