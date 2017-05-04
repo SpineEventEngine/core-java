@@ -32,11 +32,10 @@ import org.spine3.client.QueryResponse;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
+import org.spine3.test.Spy;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
-import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
-import org.spine3.testdata.TestStandFactory;
 
 import java.util.Set;
 
@@ -67,7 +66,12 @@ public class QueryServiceShould {
     @Before
     public void setUp() {
         // Create Projects Bounded Context with one repository and one projection.
-        projectsContext = SingleTenant.newBoundedContext(spy(TestStandFactory.create()));
+        projectsContext = BoundedContext.newBuilder()
+                                        .setName("Projects")
+                                        .build();
+        // Inject spy, which will be obtained later via getStand().
+        Spy.ofClass(Stand.class)
+           .on(projectsContext);
 
         final Given.ProjectAggregateRepository projectRepo =
                 new Given.ProjectAggregateRepository(projectsContext);
@@ -78,7 +82,13 @@ public class QueryServiceShould {
         boundedContexts.add(projectsContext);
 
         // Create Customers Bounded Context with one repository.
-        customersContext = SingleTenant.newBoundedContext(spy(TestStandFactory.create()));
+        customersContext = BoundedContext.newBuilder()
+                                         .setName("Customers")
+                                         .build();
+        // Inject spy, which will be obtained later via getStand().
+        Spy.ofClass(Stand.class)
+           .on(customersContext);
+
         final Given.CustomerAggregateRepository customerRepo =
                 new Given.CustomerAggregateRepository(customersContext);
         customersContext.register(customerRepo);
@@ -121,8 +131,8 @@ public class QueryServiceShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_create_with_removed_bounded_context_from_builder() {
-        final BoundedContext boundedContext =
-                SingleTenant.newBoundedContext(TestStandFactory.create());
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
 
         final QueryService.Builder builder = QueryService.newBuilder();
         builder.add(boundedContext)

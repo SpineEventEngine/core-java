@@ -60,8 +60,7 @@ public class RepositoryShould {
                                        .setMultitenant(true)
                                        .build();
         repository = new TestRepo();
-        storageFactory = StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                             .get();
+        storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
         tenantId = newTenantUuid();
         //TODO:2017-03-26:alexander.yevsyukov: Have single-tenant version of tests too.
     }

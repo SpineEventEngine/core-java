@@ -47,9 +47,7 @@ import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.procman.ProcessManagerRepository;
 import org.spine3.server.stand.Stand;
-import org.spine3.server.stand.StandFunnel;
 import org.spine3.server.stand.StandStorage;
-import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
@@ -90,7 +88,6 @@ public final class BoundedContext
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
-    private final StandFunnel standFunnel;
 
     /** All the repositories registered with this bounded context. */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
@@ -115,10 +112,9 @@ public final class BoundedContext
         this.name = builder.name;
         this.multitenant = builder.multitenant;
         this.storageFactory = Suppliers.memoize(builder.storageFactorySupplier);
-        this.commandBus = builder.commandBus;
-        this.eventBus = builder.eventBus;
-        this.stand = builder.stand;
-        this.standFunnel = builder.standFunnel;
+        this.commandBus = builder.commandBus.build();
+        this.eventBus = builder.eventBus.build();
+        this.stand = builder.stand.build();
         this.tenantIndex = builder.tenantIndex;
     }
 
@@ -337,12 +333,6 @@ public final class BoundedContext
         return this.commandBus.failureBus();
     }
 
-    /** Obtains instance of {@link StandFunnel} of this {@code BoundedContext}. */
-    @CheckReturnValue
-    public StandFunnel getStandFunnel() {
-        return this.standFunnel;
-    }
-
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
     @CheckReturnValue
     public Stand getStand() {
@@ -367,18 +357,17 @@ public final class BoundedContext
      * <p>An application can have more than one bounded context. To distinguish
      * them use {@link #setName(String)}. If no name is given the default name will be assigned.
      */
+    @SuppressWarnings("ClassWithTooManyMethods") // OK for this central piece.
     public static class Builder {
 
         private String name = DEFAULT_NAME;
-        private Supplier<StorageFactory> storageFactorySupplier;
-        private CommandStore commandStore;
-        private CommandBus commandBus;
-        private EventBus eventBus;
         private boolean multitenant;
-        private Stand stand;
-        private StandUpdateDelivery standUpdateDelivery;
-        private StandFunnel standFunnel;
         private TenantIndex tenantIndex;
+        private Supplier<StorageFactory> storageFactorySupplier;
+
+        private CommandBus.Builder commandBus;
+        private EventBus.Builder eventBus;
+        private Stand.Builder stand;
 
         /**
          * Sets the name for a new bounded context.
@@ -428,21 +417,12 @@ public final class BoundedContext
             return Optional.fromNullable(storageFactorySupplier);
         }
 
-        public Builder setCommandStore(CommandStore commandStore) {
-            this.commandStore = checkNotNull(commandStore);
-            return this;
-        }
-
-        public Optional<CommandStore> getCommandStore() {
-            return Optional.fromNullable(commandStore);
-        }
-
-        public Builder setCommandBus(CommandBus commandBus) {
+        public Builder setCommandBus(CommandBus.Builder commandBus) {
             this.commandBus = checkNotNull(commandBus);
             return this;
         }
 
-        public Optional<CommandBus> getCommandBus() {
+        public Optional<CommandBus.Builder> getCommandBus() {
             return Optional.fromNullable(commandBus);
         }
 
@@ -450,31 +430,22 @@ public final class BoundedContext
             return Optional.fromNullable(tenantIndex);
         }
 
-        public Builder setEventBus(EventBus eventBus) {
+        public Builder setEventBus(EventBus.Builder eventBus) {
             this.eventBus = checkNotNull(eventBus);
             return this;
         }
 
-        public Optional<EventBus> getEventBus() {
+        public Optional<EventBus.Builder> getEventBus() {
             return Optional.fromNullable(eventBus);
         }
 
-        public Builder setStand(Stand stand) {
+        public Builder setStand(Stand.Builder stand) {
             this.stand = checkNotNull(stand);
             return this;
         }
 
-        public Optional<Stand> getStand() {
+        public Optional<Stand.Builder> getStand() {
             return Optional.fromNullable(stand);
-        }
-
-        public Optional<StandUpdateDelivery> getStandUpdateDelivery() {
-            return Optional.fromNullable(standUpdateDelivery);
-        }
-
-        public Builder setStandUpdateDelivery(StandUpdateDelivery standUpdateDelivery) {
-            this.standUpdateDelivery = standUpdateDelivery;
-            return this;
         }
 
         public Builder setTenantIndex(TenantIndex tenantIndex) {
@@ -487,6 +458,20 @@ public final class BoundedContext
         }
 
         public BoundedContext build() {
+            final StorageFactory storageFactory = getStorageFactory();
+
+            initTenantIndex(storageFactory);
+            initCommandBus(storageFactory);
+            initEventBus(storageFactory);
+            initStand(storageFactory);
+
+            final BoundedContext result = new BoundedContext(this);
+
+            log().info(result.nameForLogging() + " created.");
+            return result;
+        }
+
+        private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
                 storageFactorySupplier = StorageFactorySwitch.getInstance(multitenant);
             }
@@ -500,92 +485,92 @@ public final class BoundedContext
                 );
                 throw new IllegalStateException(errMsg);
             }
+            return storageFactory;
+        }
 
+        private void initTenantIndex(StorageFactory factory) {
             if (tenantIndex == null) {
                 tenantIndex = multitenant
-                              ? TenantIndex.Factory.createDefault(storageFactory)
-                              : TenantIndex.Factory.singleTenant();
+                        ? TenantIndex.Factory.createDefault(factory)
+                        : TenantIndex.Factory.singleTenant();
             }
+        }
 
-            /* If some of the properties were not set, create them using set StorageFactory. */
-            if (commandStore == null) {
-                commandStore = createCommandStore(storageFactory, tenantIndex);
-            }
-
+        private void initCommandBus(StorageFactory factory) {
             if (commandBus == null) {
-                commandBus = createCommandBus(storageFactory, tenantIndex);
+                final CommandStore commandStore = createCommandStore(factory, tenantIndex);
+                commandBus = CommandBus.newBuilder()
+                                       .setMultitenant(this.multitenant)
+                                       .setCommandStore(commandStore);
             } else {
-                // Check that both either multi-tenant or single-tenant.
-                checkState(multitenant == commandBus.isMultitenant(),
-                           "CommandBus must match multitenancy of BoundedContext. " +
-                           "Status in BoundedContext.Builder: %s CommandBus: %s",
-                           String.valueOf(multitenant), String.valueOf(commandBus.isMultitenant())
-                );
-            }
+                final Boolean commandBusMultitenancy = commandBus.isMultitenant();
+                if (commandBusMultitenancy != null) {
+                    checkSameValue("CommandBus must match multitenancy of BoundedContext. " +
+                                            "Status in BoundedContext.Builder: %s CommandBus: %s",
+                                   commandBusMultitenancy);
+                } else {
+                    commandBus.setMultitenant(this.multitenant);
+                }
 
+                if (commandBus.getCommandStore() == null) {
+                    final CommandStore commandStore = createCommandStore(factory, tenantIndex);
+                    commandBus.setCommandStore(commandStore);
+                }
+            }
+        }
+
+        private void initEventBus(StorageFactory storageFactory) {
             if (eventBus == null) {
-                eventBus = createEventBus(storageFactory);
-            }
-
-            if (stand == null) {
-                stand = createStand(storageFactory);
+                eventBus = EventBus.newBuilder()
+                                   .setStorageFactory(storageFactory);
             } else {
+                final boolean eventStoreConfigured = eventBus.getEventStore()
+                                                             .isPresent();
+                if (!eventStoreConfigured) {
+                    eventBus.setStorageFactory(storageFactory);
+                }
+            }
+        }
+
+        private void initStand(StorageFactory factory) {
+            if (stand == null) {
+                stand = createStand(factory);
+            } else {
+                final Boolean standMultitenant = stand.isMultitenant();
                 // Check that both either multi-tenant or single-tenant.
-                checkState(multitenant == stand.isMultitenant(),
-                           "Stand must match multitenancy of BoundedContext. " +
-                                   "Status in BoundedContext.Builder: %s Stand: %s",
-                           String.valueOf(multitenant), String.valueOf(stand.isMultitenant())
-                );
-
+                if (standMultitenant == null) {
+                    stand.setMultitenant(multitenant);
+                } else {
+                    checkSameValue("Stand must match multitenancy of BoundedContext. " +
+                                            "Status in BoundedContext.Builder: %s Stand: %s",
+                                   standMultitenant);
+                }
             }
+        }
 
-            standFunnel = createStandFunnel(standUpdateDelivery);
+        /**
+         * Ensures that the value of the passed flag is equal to the value of
+         * the {@link BoundedContext.Builder#multitenant}.
+         *
+         * @throws IllegalStateException if the flags values do not match
+         */
+        private void checkSameValue(String errMsgFmt, boolean partMultitenancy) {
+            checkState(this.multitenant == partMultitenancy,
+                       errMsgFmt,
+                       String.valueOf(this.multitenant),
+                       String.valueOf(partMultitenancy));
+        }
 
-            final BoundedContext result = new BoundedContext(this);
-
-            log().info(result.nameForLogging() + " created.");
+        private static CommandStore createCommandStore(StorageFactory factory, TenantIndex index) {
+            final CommandStore result = new CommandStore(factory, index);
             return result;
         }
 
-        private StandFunnel createStandFunnel(@Nullable StandUpdateDelivery standUpdateDelivery) {
-            final StandFunnel.Builder builder = StandFunnel.newBuilder()
-                                                           .setStand(stand);
-            if (standUpdateDelivery != null) {
-                builder.setDelivery(standUpdateDelivery);
-            }
-            return builder.build();
-        }
-
-        private static CommandStore createCommandStore(StorageFactory storageFactory,
-                                                       TenantIndex tenantIndex) {
-            final CommandStore result = new CommandStore(storageFactory, tenantIndex);
-            return result;
-        }
-
-        private CommandBus createCommandBus(StorageFactory storageFactory,
-                                            TenantIndex tenantIndex) {
-            if (commandStore == null) {
-                this.commandStore = createCommandStore(storageFactory, tenantIndex);
-            }
-            final CommandBus.Builder builder = CommandBus.newBuilder()
-                                                    .setMultitenant(this.multitenant)
-                                                    .setCommandStore(commandStore);
-            return builder.build();
-        }
-
-        private static EventBus createEventBus(StorageFactory storageFactory) {
-            final EventBus result = EventBus.newBuilder()
-                                            .setStorageFactory(storageFactory)
-                                            .build();
-            return result;
-        }
-
-        private Stand createStand(StorageFactory storageFactory) {
-            final StandStorage standStorage = storageFactory.createStandStorage();
-            final Stand result = Stand.newBuilder()
-                                      .setMultitenant(multitenant)
-                                      .setStorage(standStorage)
-                                      .build();
+        private Stand.Builder createStand(StorageFactory factory) {
+            final StandStorage standStorage = factory.createStandStorage();
+            final Stand.Builder result = Stand.newBuilder()
+                                              .setMultitenant(multitenant)
+                                              .setStorage(standStorage);
             return result;
         }
     }
