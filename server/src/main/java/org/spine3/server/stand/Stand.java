@@ -36,7 +36,6 @@ import org.spine3.client.QueryResponse;
 import org.spine3.client.Subscription;
 import org.spine3.client.Topic;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
@@ -471,8 +470,8 @@ public class Stand implements AutoCloseable {
          * The multi-tenancy flag for the {@code Stand} to build.
          *
          * <p>The value of this field should be equal to that of corresponding
-         * {@linkplain BoundedContext.Builder BoundedContext.Builder} and is not supposed to be
-         * {@linkplain #setMultitenant(Boolean) set directly}.
+         * {@linkplain org.spine3.server.BoundedContext.Builder BoundedContext.Builder} and is not
+         * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
          *
          * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
          * {@code BoundedContext}.

@@ -32,7 +32,6 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.io.StreamObservers;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.failure.FailureBus;
@@ -314,8 +313,8 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
          * The multi-tenancy flag for the {@code CommandBus} to build.
          *
          * <p>The value of this field should be equal to that of corresponding
-         * {@linkplain BoundedContext.Builder BoundedContext.Builder} and is not supposed to be
-         * {@linkplain #setMultitenant(Boolean) set directly}.
+         * {@linkplain org.spine3.server.BoundedContext.Builder BoundedContext.Builder} and is not
+         * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
          *
          * <p>If set directly, the value would be matched to the multi-tenancy flag of
          * {@code BoundedContext}.
