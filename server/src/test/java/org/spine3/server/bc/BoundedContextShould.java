@@ -50,6 +50,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
+import org.spine3.test.bc.ProjectValidatingBuilder;
 import org.spine3.test.bc.command.AddTask;
 import org.spine3.test.bc.command.CreateProject;
 import org.spine3.test.bc.command.StartProject;
@@ -58,6 +59,7 @@ import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import java.util.List;
 
@@ -149,7 +151,7 @@ public class BoundedContextShould {
     }
 
     private static class AnotherProjectAggregate
-                   extends Aggregate<ProjectId, Project, Project.Builder> {
+                   extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
         protected AnotherProjectAggregate(ProjectId id) {
             super(id);
         }
@@ -269,7 +271,8 @@ public class BoundedContextShould {
     }
 
     @SuppressWarnings({"unused", "TypeMayBeWeakened"})
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
@@ -303,7 +306,7 @@ public class BoundedContextShould {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(ProjectCreated event) throws ConstraintViolationThrowable {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
@@ -317,7 +320,7 @@ public class BoundedContextShould {
         }
 
         @Apply
-        private void event(ProjectStarted event) {
+        private void event(ProjectStarted event) throws ConstraintViolationThrowable {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)

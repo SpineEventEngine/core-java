@@ -32,6 +32,8 @@ import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+import org.spine3.validate.ValidatingBuilders.TimestampValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -61,7 +63,8 @@ public class GivenShould {
                                              .getResultClass());
     }
 
-    private static class AnAggregate extends Aggregate<Integer, StringValue, StringValue.Builder> {
+    private static class AnAggregate
+            extends Aggregate<Integer, StringValue, StringValueValidatingBuilder> {
         protected AnAggregate(Integer id) {
             super(id);
         }
@@ -75,7 +78,7 @@ public class GivenShould {
 
     private static class AnAggregatePart extends AggregatePart<Long,
                                                                Timestamp,
-                                                               Timestamp.Builder,
+                                                               TimestampValidatingBuilder,
                                                                AnAggregateRoot> {
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);

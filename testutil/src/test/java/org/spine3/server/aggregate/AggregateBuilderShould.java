@@ -24,6 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.test.TimeTests;
 import org.spine3.time.Time;
+import org.spine3.validate.ValidatingBuilders.TimestampValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 
@@ -56,7 +57,8 @@ public class AggregateBuilderShould {
         assertEquals(whenModified, aggregate.whenModified());
     }
 
-    private static class TestAggregate extends Aggregate<Integer, Timestamp, Timestamp.Builder> {
+    private static class TestAggregate
+            extends Aggregate<Integer, Timestamp, TimestampValidatingBuilder> {
         protected TestAggregate(Integer id) {
             super(id);
         }

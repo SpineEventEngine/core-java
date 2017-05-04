@@ -47,6 +47,7 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -149,7 +150,7 @@ class Given {
     }
 
     static class StandTestAggregate
-            extends Aggregate<ProjectId, StringValue, StringValue.Builder> {
+            extends Aggregate<ProjectId, StringValue, StringValueValidatingBuilder> {
 
         /**
          * Creates a new aggregate instance.

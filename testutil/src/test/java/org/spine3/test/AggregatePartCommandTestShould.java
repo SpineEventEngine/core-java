@@ -30,6 +30,7 @@ import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.validate.ValidatingBuilders.UInt32ValueValidatingBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -77,7 +78,7 @@ public class AggregatePartCommandTestShould {
      */
     private static final class TimerCounter extends AggregatePart<String,
                                                                   UInt32Value,
-                                                                  UInt32Value.Builder,
+                                                                  UInt32ValueValidatingBuilder,
                                                                   TimerCounterRoot> {
         private TimerCounter(TimerCounterRoot root) {
             super(root);

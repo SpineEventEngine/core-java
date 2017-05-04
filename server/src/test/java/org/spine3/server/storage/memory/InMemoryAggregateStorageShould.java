@@ -25,6 +25,7 @@ import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.aggregate.AggregateStorageShould;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.validate.ValidatingBuilder;
 
 /**
  * @author Alexander Litus
@@ -38,7 +39,9 @@ public class InMemoryAggregateStorageShould extends AggregateStorageShould {
 
     @Override
     protected <Id> AggregateStorage<Id> getStorage(
-            Class<? extends Aggregate<Id, ? extends Message, ? extends Message.Builder>> aggregateClass) {
+            Class<? extends Aggregate<Id,
+                                      ? extends Message,
+                                      ? extends ValidatingBuilder<?,?>>> aggregateClass) {
         return InMemoryAggregateStorage.newInstance();
     }
 }

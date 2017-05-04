@@ -27,7 +27,9 @@ import org.junit.Test;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.aggregate.user.User;
+import org.spine3.test.aggregate.user.UserValidatingBuilder;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -147,7 +149,7 @@ public class AggregatePartShould {
 
     private static class WrongAggregatePart extends AggregatePart<String,
             StringValue,
-            StringValue.Builder,
+            StringValueValidatingBuilder,
             AnAggregateRoot> {
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
@@ -158,7 +160,7 @@ public class AggregatePartShould {
 
     private static class AnAggregatePart extends AggregatePart<String,
             User,
-            User.Builder,
+            UserValidatingBuilder,
             AnAggregateRoot> {
 
         protected AnAggregatePart(AnAggregateRoot root) {

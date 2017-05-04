@@ -40,6 +40,7 @@ import org.spine3.test.TestEventFactory;
 import org.spine3.test.TimeTests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
@@ -49,9 +50,11 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
+import org.spine3.test.aggregate.user.UserValidatingBuilder;
 import org.spine3.time.Time;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -391,7 +394,8 @@ public class AggregateShould {
     }
 
     @SuppressWarnings("unused")
-    private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class TestAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
@@ -442,7 +446,7 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(ProjectCreated event) {
+        private void event(ProjectCreated event) throws ConstraintViolationThrowable {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED);
@@ -456,7 +460,7 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(ProjectStarted event) {
+        private void event(ProjectStarted event) throws ConstraintViolationThrowable {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED);
@@ -474,7 +478,7 @@ public class AggregateShould {
 
     /** Class only for test cases: exception if missing command handler or missing event applier. */
     private static class TestAggregateForCaseMissingHandlerOrApplier
-            extends Aggregate<ProjectId, Project, Project.Builder> {
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -491,7 +495,7 @@ public class AggregateShould {
     }
 
     private static class TestAggregateWithIdInteger
-            extends Aggregate<Integer, Project, Project.Builder> {
+            extends Aggregate<Integer, Project, ProjectValidatingBuilder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
@@ -532,7 +536,8 @@ public class AggregateShould {
 
     /** The class to check raising and catching exceptions. */
     @SuppressWarnings("unused")
-    private static class FaultyAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class FaultyAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         private static final String BROKEN_HANDLER = "broken_handler";
         private static final String BROKEN_APPLIER = "broken_applier";
@@ -679,7 +684,7 @@ public class AggregateShould {
                                              .build();
     }
 
-    private static class UserAggregate extends Aggregate<String, User, User.Builder> {
+    private static class UserAggregate extends Aggregate<String, User, UserValidatingBuilder> {
         private UserAggregate(String id) {
             super(id);
         }

@@ -37,6 +37,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.test.TestActorRequestFactory;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -114,7 +115,8 @@ public class AggregateRepositoryViewsShould {
      * in the tests. Real aggregates should use generated messages.
      */
     @SuppressWarnings("RedundantMethodOverride") // We expose methods to the tests.
-    private static class SHAggregate extends Aggregate<Long, StringValue, StringValue.Builder> {
+    private static class SHAggregate
+            extends Aggregate<Long, StringValue, StringValueValidatingBuilder> {
         private SHAggregate(Long id) {
             super(id);
         }

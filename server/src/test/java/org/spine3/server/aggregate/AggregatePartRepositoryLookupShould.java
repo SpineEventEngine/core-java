@@ -29,12 +29,15 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.TaskId;
+import org.spine3.test.aggregate.TaskValidatingBuilder;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -111,7 +114,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class ProjectPart extends AggregatePart<ProjectId,
                                                            Project,
-                                                           Project.Builder,
+                                                           ProjectValidatingBuilder,
                                                            ProjectRoot> {
         private ProjectPart(ProjectRoot root) {
             super(root);
@@ -126,7 +129,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(ProjectCreated event) throws ConstraintViolationThrowable {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -154,7 +157,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class TaskAggregatePart extends AggregatePart<TaskId,
                                                                  Task,
-                                                                 Task.Builder,
+                                                                 TaskValidatingBuilder,
                                                                  TaskRoot> {
         private TaskAggregatePart(TaskRoot root) {
             super(root);
@@ -168,7 +171,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Apply
-        public void apply(TaskAdded event) {
+        public void apply(TaskAdded event) throws ConstraintViolationThrowable {
             final Task task = event.getTask();
             getBuilder().setTitle(task.getTitle())
                         .setDescription(task.getDescription())

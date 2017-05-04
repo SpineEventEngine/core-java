@@ -38,6 +38,7 @@ import org.spine3.server.event.EventBus;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -45,6 +46,7 @@ import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -181,7 +183,8 @@ public class AggregateCommandEndpointShould {
      * Test environment classes and utilities
      *****************************************/
 
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
         private static final CommandHistory commandsHandled = new CommandHistory();
@@ -200,7 +203,7 @@ public class AggregateCommandEndpointShould {
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(ProjectCreated event) throws ConstraintViolationThrowable {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -214,7 +217,7 @@ public class AggregateCommandEndpointShould {
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(TaskAdded event) throws ConstraintViolationThrowable {
             getBuilder().setId(event.getProjectId());
         }
 

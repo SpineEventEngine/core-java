@@ -37,6 +37,9 @@ import org.spine3.server.command.EventFactory;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 import org.spine3.type.CommandClass;
+import org.spine3.util.Exceptions;
+import org.spine3.validate.ConstraintViolationThrowable;
+import org.spine3.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -48,6 +51,7 @@ import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+import static org.spine3.util.Reflection.getGenericParameterType;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -113,7 +117,9 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
+public abstract class Aggregate<I,
+                                S extends Message,
+                                B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S> {
 
     /**
@@ -164,9 +170,26 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * <p>The update phase is closed by the {@link #updateState()}.
      */
     private void createBuilder() {
-        @SuppressWarnings("unchecked") // It is safe as we checked the type on the construction.
-        final B builder = (B) getState().toBuilder();
+        final B builder = newBuilderInstance();
+        builder.mergeFrom(getState());
         this.builder = builder;
+
+//        @SuppressWarnings("unchecked") // It is safe as we checked the type on the construction.
+//        final B builder = (B) getState().toBuilder();
+//        this.builder = builder;
+    }
+
+    private B newBuilderInstance() {
+        final B builder;
+        try {
+            final Class<B> builderClass = getGenericParameterType(getClass(), 2);
+            builder = (B) builderClass.getMethod("newBuilder")
+                                                 .invoke(null);
+
+        } catch (Exception e) {
+            throw Exceptions.illegalStateWithCauseOf(e);
+        }
+        return builder;
     }
 
     /**
@@ -190,11 +213,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * Updates the aggregate state and closes the update phase of the aggregate.
      */
     private void updateState() {
-        @SuppressWarnings("unchecked")
-         /* It is safe to assume that correct builder type is passed to the aggregate,
-            because otherwise it won't be possible to write the code of applier methods
-            that make sense to the aggregate. */
-        final S newState = (S) getBuilder().build();
+        final S newState;
+        try {
+            newState = getBuilder().build();
+        } catch (ConstraintViolationThrowable violation) {
+            // should not happen, as the `Builder` validates the input in its setters.
+            throw Exceptions.illegalStateWithCauseOf(violation);
+        }
         final Version version = getVersion();
         updateState(newState, version);
         this.builder = null;
@@ -451,7 +476,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         try {
             @SuppressWarnings("unchecked")
                 // The cast is safe as we checked the type on the construction.
-            final B fakeBuilder = (B) getState().newBuilderForType();
+            final B fakeBuilder = newBuilderInstance();
             this.builder = fakeBuilder;
             updateState(stateToRestore, versionFromSnapshot);
         } finally {

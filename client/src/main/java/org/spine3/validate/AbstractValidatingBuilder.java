@@ -46,6 +46,16 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
                                                   implements ValidatingBuilder<T, B> {
 
     /**
+     * The builder for the original {@code Message}.
+     */
+    private final B messageBuilder;
+
+    /**
+     * The class of the {@code Message} being built.
+     */
+    private final Class<T> messageClass;
+
+    /**
      * The state of the message, serving as a base value for this {@code ValidatingBuilder}.
      *
      * <p>Used to verify if any modifications were made by a user via {@code ValidatingBuilder}
@@ -57,9 +67,8 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     @Nullable
     private T originalState;
 
-    private final B messageBuilder;
-
     protected AbstractValidatingBuilder() {
+        this.messageClass = TypeInfo.getMessageClass(getClass());
         this.messageBuilder = createBuilder();
     }
 
@@ -142,6 +151,22 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         return messageBuilder;
     }
 
+    @Override
+    public B newOriginalBuilder() {
+        return createBuilder();
+    }
+
+    @Override
+    public Class<T> getMessageClass() {
+        return messageClass;
+    }
+
+    @Override
+    public ValidatingBuilder<T, B> mergeFrom(T message) {
+        messageBuilder.mergeFrom(message);
+        return this;
+    }
+
     /**
      * Builds a message without triggering its validation.
      *
@@ -168,7 +193,6 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     }
 
     private B createBuilder() {
-        final Class<Message> messageClass = TypeInfo.getMessageClass(getClass());
 
         @SuppressWarnings("unchecked")  // OK, since it is guaranteed by the class declaration.
         final B result = (B) Messages.newInstance(messageClass)

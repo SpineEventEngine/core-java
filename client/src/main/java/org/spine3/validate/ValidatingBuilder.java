@@ -59,6 +59,17 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
      */
     T build() throws ConstraintViolationThrowable;
 
+    /**
+     * Creates an instance of original {@code Message.Builder} for the {@code Message} being built.
+     *
+     * @return the {@code Builder} for the {@code Message} built.
+     */
+    B newOriginalBuilder();
+
+    Class<T> getMessageClass();
+
+    ValidatingBuilder<T, B> mergeFrom(T message);
+
     void clear();
 
     /**

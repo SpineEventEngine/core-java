@@ -29,6 +29,7 @@ import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -73,7 +74,7 @@ public class AggregateCommandTestShould {
      * and prints it into its state.
      */
     private static final class TimePrinter
-                         extends Aggregate<Long, StringValue, StringValue.Builder> {
+                         extends Aggregate<Long, StringValue, StringValueValidatingBuilder> {
 
         TimePrinter(Long id) {
             super(id);

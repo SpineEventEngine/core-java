@@ -38,6 +38,7 @@ import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -46,6 +47,7 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import java.util.Iterator;
 import java.util.Set;
@@ -326,7 +328,8 @@ public class AggregateRepositoryShould {
      ****************************/
 
     @SuppressWarnings("RedundantMethodOverride")
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -341,7 +344,7 @@ public class AggregateRepositoryShould {
         }
 
         @Apply
-        private void apply(ProjectCreated event) {
+        private void apply(ProjectCreated event) throws ConstraintViolationThrowable {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -354,7 +357,7 @@ public class AggregateRepositoryShould {
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(TaskAdded event) throws ConstraintViolationThrowable {
             getBuilder().setId(event.getProjectId());
         }
 
