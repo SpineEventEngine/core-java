@@ -421,11 +421,8 @@ public class KnownTypes {
 
         private void put(TypeUrl typeUrl, ClassName className) {
             if (resultMap.containsKey(typeUrl)) {
-                log().warn("Duplicate key in the {} map: {}. " +
-                           "It may be caused by the " +
-                           "`task.descriptorSetOptions.includeImports` option " +
-                           "set to `true` in the `build.gradle`.", KnownTypes.class.getName(),
-                           typeUrl);
+                // No worries;
+                // probably `task.descriptorSetOptions.includeImports` is set to `true`.
                 return;
             }
             resultMap.put(typeUrl, className);
