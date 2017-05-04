@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
@@ -163,7 +164,14 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     @Override
     @Test
     public void filter_records_by_columns() {
-        // Stand storage does not support entity columns
+        // Stand storage does not support entity columns.
+    }
+
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors
+    @Ignore
+    @Override
+    public void allow_by_single_id_queries_with_no_columns() {
+        // Stand storage does not support entity columns.
     }
 
     @Override

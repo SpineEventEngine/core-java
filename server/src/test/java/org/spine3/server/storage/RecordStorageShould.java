@@ -34,7 +34,10 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
 import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
+import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -63,6 +66,7 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Tests.archived;
@@ -102,6 +106,16 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     private static EntityRecord newStorageRecord(Message state) {
         final Any wrappedState = AnyPacker.pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
+                                                .setState(wrappedState)
+                                                .setVersion(Tests.newVersionWithNumber(0))
+                                                .build();
+        return record;
+    }
+
+    private EntityRecord newStorageRecord(I id, Message state) {
+        final Any wrappedState = AnyPacker.pack(state);
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setEntityId(idToAny(id))
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();
@@ -397,9 +411,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         // After the mutation above the single matching record is the one under the `idMatching` ID
 
-        final EntityRecord fineRecord = newStorageRecord(idMatching);
-        final EntityRecord notFineRecord1 = newStorageRecord(idWrong1);
-        final EntityRecord notFineRecord2 = newStorageRecord(idWrong2);
+        final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
+        final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
+        final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
         final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
         final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
@@ -423,6 +437,55 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                      .iterator()
                                                      .next();
         assertEquals(fineRecord, singleRecord);
+    }
+
+    @Test
+    public void allow_by_single_id_queries_with_no_columns() {
+        // Create the test data
+        final I idMatching = newId();
+        final I idWrong1 = newId();
+        final I idWrong2 = newId();
+
+        final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
+        final TestCounterEntity<I> wrongEntity1 = new TestCounterEntity<>(idWrong1);
+        final TestCounterEntity<I> wrongEntity2 = new TestCounterEntity<>(idWrong2);
+
+        final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
+        final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
+        final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
+
+
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
+        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
+        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
+
+        final RecordStorage<I> storage = getStorage();
+
+        // Fill the storage
+        storage.write(idWrong1, recordWrong1);
+        storage.write(idMatching, recordRight);
+        storage.write(idWrong2, recordWrong2);
+
+        // Prepare the query
+        final Any matchingIdPacked = ProtoJavaMapper.map(idMatching);
+        final EntityId entityId = EntityId.newBuilder()
+                                          .setId(matchingIdPacked)
+                                          .build();
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(entityId)
+                                                      .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(idFilter)
+                                                   .build();
+        final EntityQuery query = EntityQueries.from(filters, TestCounterEntity.class);
+
+        // Perform the query
+        final Map<I, EntityRecord> readRecords =  storage.readAll(query,
+                                                                  FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(1, readRecords);
+        final EntityRecord actualRecord = readRecords.get(idMatching);
+        assertEquals(fineRecord, actualRecord);
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
