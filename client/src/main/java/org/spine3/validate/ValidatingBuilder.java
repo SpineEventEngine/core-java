@@ -23,15 +23,20 @@ package org.spine3.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 
+import static org.spine3.util.Reflection.getGenericParameterType;
+
 /**
  * An interface for all validating builders.
  *
  * <p>Validating builder is used to validate messages according
- * to the business rules during the message building.
+ * to the business rules during the {@code Message} creation.
  *
+ * @param <T> the type of the message to build
+ * @param <B> the type of the message builder
  * @author Illia Shepilov
+ * @author Alex Tymchenko
  */
-public interface ValidatingBuilder<T extends Message> {
+public interface ValidatingBuilder<T extends Message, B extends Message.Builder> {
 
     /**
      * Validates the field according to the protocol buffer message declaration.
@@ -53,4 +58,59 @@ public interface ValidatingBuilder<T extends Message> {
      * @throws ConstraintViolationThrowable if there are any constraint violations
      */
     T build() throws ConstraintViolationThrowable;
+
+    void clear();
+
+    /**
+     * Enumeration of generic type parameters of this interface.
+     */
+    enum GenericParameter {
+
+        /**
+         * The index of the declaration of the generic parameter type {@code <T>}
+         * in {@link ValidatingBuilder}.
+         */
+        MESSAGE(0),
+
+        /**
+         * The index of the declaration of the generic parameter type {@code <B>}
+         * in {@link ValidatingBuilder}
+         */
+        MESSAGE_BUILDER(1);
+
+        private final int index;
+
+        GenericParameter(int index) {
+            this.index = index;
+        }
+
+        public int getIndex() {
+            return this.index;
+        }
+    }
+
+    /**
+     * Provides type information on classes implementing {@link ValidatingBuilder}.
+     */
+    class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction from outside.
+        }
+
+        /**
+         * Retrieves the state class of the passed entity class.
+         *
+         * @param builderClass the builder class to inspect
+         * @param <T>          the state type
+         * @return the entity state class
+         */
+        public static <T extends Message> Class<T> getMessageClass(
+                Class<? extends ValidatingBuilder> builderClass) {
+            final Class<T> result =
+                    getGenericParameterType(builderClass,
+                                            GenericParameter.MESSAGE.getIndex());
+            return result;
+        }
+    }
 }

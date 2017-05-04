@@ -48,7 +48,7 @@ import static org.spine3.base.Types.listTypeOf;
  */
 public class AbstractValidatingBuilderShould {
 
-    private AbstractValidatingBuilder<Task> validatingBuilder;
+    private AbstractValidatingBuilder<Task, Task.Builder> validatingBuilder;
 
     @Before
     public void setUp() {
@@ -104,15 +104,7 @@ public class AbstractValidatingBuilderShould {
         validatingBuilder.validate(descriptor, "incorrectEmail", "email");
     }
 
-    private static class TestValidatingBuilder extends AbstractValidatingBuilder<Task> {
-        @Override
-        protected Task internalBuild() {
-            return Task.getDefaultInstance();
-        }
-
-        @Override
-        protected void onOriginalStateChanged(Task state) {
-            // do nothing for test.
-        }
+    private static class TestValidatingBuilder
+            extends AbstractValidatingBuilder<Task, Task.Builder> {
     }
 }

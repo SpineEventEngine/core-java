@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.annotations.Internal;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.Messages;
 import org.spine3.string.Stringifiers;
 
 import javax.annotation.Nullable;
@@ -36,12 +37,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
- * Serves as an abstract base for all validating builders.
+ * Serves as an abstract base for all {@linkplain ValidatingBuilder validating builders}.
  *
  * @author Illia Shepilov
- * @see ValidatingBuilder
+ * @author Alex Tymchenko
  */
-public abstract class AbstractValidatingBuilder<T extends Message> implements ValidatingBuilder<T> {
+public abstract class AbstractValidatingBuilder<T extends Message, B extends Message.Builder>
+                                                  implements ValidatingBuilder<T, B> {
 
     /**
      * The state of the message, serving as a base value for this {@code ValidatingBuilder}.
@@ -55,18 +57,23 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
     @Nullable
     private T originalState;
 
-    /**
-     * Builds a message without triggering its validation.
-     *
-     * @return the message built from the values set by the user
-     */
-    protected abstract T internalBuild();
+    private final B messageBuilder;
+
+    protected AbstractValidatingBuilder() {
+        this.messageBuilder = createBuilder();
+    }
 
     @Override
     public T build() throws ConstraintViolationThrowable {
         final T message = internalBuild();
         validateResult(message);
         return message;
+    }
+
+    @Override
+    public void clear() {
+        messageBuilder.clear();
+        originalState = null;
     }
 
     /**
@@ -127,17 +134,27 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
         checkNotNull(state);
         this.originalState = state;
 
-        onOriginalStateChanged(state);
+        messageBuilder.clear();
+        messageBuilder.mergeFrom(state);
+    }
+
+    protected B getMessageBuilder() {
+        return messageBuilder;
     }
 
     /**
-     * Notifies the descendants on the change of the original state.
+     * Builds a message without triggering its validation.
      *
-     * @param state the new original state for this builder
-     *              @see #setOriginalState(Message)
-     *
+     * @return the message built from the values set by the user
      */
-    protected abstract void onOriginalStateChanged(T state);
+    private T internalBuild() {
+        final B resultBuilder = createBuilder();
+        if(getOriginalState().isPresent()) {
+            resultBuilder.mergeFrom(getOriginalState().get());
+        }
+        resultBuilder.mergeFrom(getMessageBuilder().build());
+        return (T) resultBuilder.build();
+    }
 
     /**
      * Obtains the original message state, if it has been set via
@@ -146,8 +163,17 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
      * @return original state as {@code Optional} value if it is set,
      *         or {@code Optional.absent()} otherwise
      */
-    protected Optional<T> getOriginalState() {
+    private Optional<T> getOriginalState() {
         return Optional.fromNullable(originalState);
+    }
+
+    private B createBuilder() {
+        final Class<Message> messageClass = TypeInfo.getMessageClass(getClass());
+
+        @SuppressWarnings("unchecked")  // OK, since it is guaranteed by the class declaration.
+        final B result = (B) Messages.newInstance(messageClass)
+                                     .newBuilderForType();
+        return result;
     }
 
     private void validateResult(T message) throws ConstraintViolationThrowable {
