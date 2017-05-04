@@ -20,7 +20,6 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
@@ -38,7 +37,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
@@ -73,21 +71,7 @@ import static java.lang.String.format;
  */
 class Columns {
 
-    /**
-     * The implementations of {@link Entity} interface, which are known to be non-public and
-     * therefore not to support {@code Column} extraction.
-     *
-     * <p>The list values are:
-     * <ul>
-     *     <li>{@link org.spine3.server.commandstore.Entity org.spine3.server.commandstore.Entity}
-     *     <li>{@link org.spine3.server.event.EventEntity org.spine3.server.event.EventEntity}
-     * </ul>
-     */
-    private static final Set<String> KNOWN_NON_PUBLIC_ENTITIES =
-            ImmutableSet.of("org.spine3.server.commandstore.Entity",
-                            "org.spine3.server.event.EventEntity");
-
-
+    private static final String SPINE_PACKAGE = "org.spine3.";
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
 
@@ -185,12 +169,12 @@ class Columns {
 
     /**
      * Writes the non-public {@code Entity} class warning into the log unless the passed class
-     * represents one of the {@linkplain #KNOWN_NON_PUBLIC_ENTITIES internal Entity types}.
+     * represents one of the Spine internal {@link Entity} implementations.
      */
     private static void logNonPublicClass(Class<? extends Entity> cls) {
         final String className = cls.getCanonicalName();
-        final boolean known = KNOWN_NON_PUBLIC_ENTITIES.contains(className);
-        if (!known) {
+        final boolean internal = className.startsWith(SPINE_PACKAGE);
+        if (internal) {
             log().warn(format(NON_PUBLIC_CLASS_WARNING, className));
         }
     }
