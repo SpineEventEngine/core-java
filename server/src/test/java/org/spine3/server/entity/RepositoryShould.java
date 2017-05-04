@@ -255,23 +255,4 @@ public class RepositoryShould {
         ProjectEntity entity = repository.create(createId(entityId));
         repository.store(entity);
     }
-
-    @Test(expected = IllegalStateException.class)
-    public void throw_ISE_if_unable_to_load_entity_by_id_from_storage_index() {
-        createAndStoreEntities();
-
-        // Store a troublesome entity, which cannot be loaded.
-        final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
-            @Override
-            public void run() {
-                createAndStore(TestRepo.troublesome.getId());
-            }
-        };
-        op.execute();
-
-        final Iterator<ProjectEntity> iterator = getIterator(tenantId);
-
-        // This should iterate through all.
-        Lists.newArrayList(iterator);
-    }
 }
