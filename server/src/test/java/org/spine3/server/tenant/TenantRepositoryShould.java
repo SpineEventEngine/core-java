@@ -44,8 +44,7 @@ public class TenantRepositoryShould {
     @Before
     public void setUp() {
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
-        impl.initStorage(StorageFactorySwitch.getInstance(false)
-                                             .get());
+        impl.initStorage(StorageFactorySwitch.get(false));
         repository = spy(impl);
     }
 

@@ -40,8 +40,7 @@ public class TestEventBusFactory {
         final EventStore store =
                 EventStore.newBuilder()
                           .setStreamExecutor(MoreExecutors.directExecutor())
-                          .setStorageFactory(StorageFactorySwitch.getInstance(true)
-                                                                 .get())
+                          .setStorageFactory(StorageFactorySwitch.get(true))
                           .build();
         final EventBus eventBus = EventBus.newBuilder()
                                           .setEventStore(store)

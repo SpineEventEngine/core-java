@@ -998,8 +998,7 @@ public class StandShould extends TenantAwareTest {
     }
 
     private StandStorage createStandStorage() {
-        return StorageFactorySwitch.getInstance(multitenant)
-                                   .get()
+        return StorageFactorySwitch.get(multitenant)
                                    .createStandStorage();
     }
 
@@ -1190,8 +1189,7 @@ public class StandShould extends TenantAwareTest {
 
     private StandStorage setupStandStorageWithCustomers(Map<CustomerId, Customer> sampleCustomers,
                                                         TypeUrl customerType) {
-        final StandStorage standStorage = StorageFactorySwitch.getInstance(isMultitenant())
-                                                              .get()
+        final StandStorage standStorage = StorageFactorySwitch.get(isMultitenant())
                                                               .createStandStorage();
 
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();

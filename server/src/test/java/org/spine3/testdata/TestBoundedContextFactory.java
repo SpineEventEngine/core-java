@@ -93,8 +93,7 @@ public class TestBoundedContextFactory {
         }
 
         public static BoundedContext newBoundedContext(EventEnricher enricher) {
-            final StorageFactory factory = StorageFactorySwitch.getInstance(true)
-                                                               .get();
+            final StorageFactory factory = StorageFactorySwitch.get(true);
             final EventBus.Builder eventBus = EventBus.newBuilder()
                                                       .setEnricher(enricher)
                                                       .setStorageFactory(factory);

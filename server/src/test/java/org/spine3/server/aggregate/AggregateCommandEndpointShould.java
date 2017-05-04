@@ -248,11 +248,10 @@ public class AggregateCommandEndpointShould {
     }
 
     private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
+        extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                            .get());
+            initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
     }
 }

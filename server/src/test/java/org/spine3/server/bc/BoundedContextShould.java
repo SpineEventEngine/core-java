@@ -90,8 +90,7 @@ public class BoundedContextShould {
     @Before
     public void setUp() {
         boundedContext = MultiTenant.newBoundedContext();
-        storageFactory = StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                             .get();
+        storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     @After
@@ -104,9 +103,9 @@ public class BoundedContextShould {
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        final ProjectAggregateRepository repository = new ProjectAggregateRepository(boundedContext);
-        repository.initStorage(storageFactory);
-        boundedContext.register(repository);
+        final ProjectAggregateRepository repo = new ProjectAggregateRepository(boundedContext);
+        repo.initStorage(storageFactory);
+        boundedContext.register(repo);
         boundedContext.getEventBus().register(subscriber);
         handlersRegistered = true;
     }

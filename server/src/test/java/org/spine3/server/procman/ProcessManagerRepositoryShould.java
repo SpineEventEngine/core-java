@@ -89,8 +89,7 @@ public class ProcessManagerRepositoryShould
     //---------------------------------
 
     private StorageFactory storageFactory() {
-        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                   .get();
+        return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     @Override

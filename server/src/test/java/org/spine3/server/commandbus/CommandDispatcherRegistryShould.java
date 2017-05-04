@@ -69,8 +69,7 @@ public class CommandDispatcherRegistryShould {
 
     @Before
     public void setUp() {
-        eventBus = TestEventBusFactory.create(StorageFactorySwitch.getInstance(true)
-                                                                  .get());
+        eventBus = TestEventBusFactory.create(StorageFactorySwitch.get(true));
         registry = new CommandDispatcherRegistry();
     }
 

@@ -605,8 +605,7 @@ public class Stand implements AutoCloseable {
                     : this.multitenant;
 
             if (storage == null) {
-                storage = StorageFactorySwitch.getInstance(multitenant)
-                                              .get()
+                storage = StorageFactorySwitch.get(multitenant)
                                               .createStandStorage();
             }
             if (callbackExecutor == null) {

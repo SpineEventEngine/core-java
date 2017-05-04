@@ -48,8 +48,7 @@ public class BoundedContextBuilderShould {
     @Before
     public void setUp() {
         final boolean multitenant = true;
-        storageFactory = StorageFactorySwitch.getInstance(multitenant)
-                                             .get();
+        storageFactory = StorageFactorySwitch.get(multitenant);
         builder = BoundedContext.newBuilder()
                                 .setMultitenant(multitenant);
     }

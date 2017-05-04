@@ -255,7 +255,7 @@ public class StandPostShould {
     }
 
     private static StorageFactory storageFactory(boolean multitenant) {
-        return StorageFactorySwitch.getInstance(multitenant).get();
+        return StorageFactorySwitch.get(multitenant);
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")
