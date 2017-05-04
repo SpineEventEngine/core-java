@@ -73,6 +73,16 @@ import static java.lang.String.format;
  */
 class Columns {
 
+    /**
+     * The implementations of {@link Entity} interface, which are known to be non-public and
+     * therefore not to support {@code Column} extraction.
+     *
+     * <p>The list values are:
+     * <ul>
+     *     <li>{@link org.spine3.server.commandstore.Entity org.spine3.server.commandstore.Entity}
+     *     <li>{@link org.spine3.server.event.EventEntity org.spine3.server.event.EventEntity}
+     * </ul>
+     */
     private static final Set<String> KNOWN_NON_PUBLIC_ENTITIES =
             ImmutableSet.of("org.spine3.server.commandstore.Entity",
                             "org.spine3.server.event.EventEntity");
@@ -173,6 +183,10 @@ class Columns {
         }
     }
 
+    /**
+     * Writes the non-public {@code Entity} class warning into the log unless the passed class
+     * represents one of the {@linkplain #KNOWN_NON_PUBLIC_ENTITIES internal Entity types}.
+     */
     private static void logNonPublicClass(Class<? extends Entity> cls) {
         final String className = cls.getCanonicalName();
         final boolean known = KNOWN_NON_PUBLIC_ENTITIES.contains(className);
