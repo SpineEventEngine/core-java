@@ -45,8 +45,7 @@ public class TenantIndexShould {
     @Test
     public void pass_null_tolerance_test() {
         new NullPointerTester()
-                .setDefault(StorageFactory.class, StorageFactorySwitch.getInstance(false)
-                                                                      .get())
+                .setDefault(StorageFactory.class, StorageFactorySwitch.get(false))
                 .testAllPublicStaticMethods(TenantIndex.Factory.class);
     }
 

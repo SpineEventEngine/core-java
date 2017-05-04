@@ -53,7 +53,6 @@ import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
-import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.time.Durations2;
 import org.spine3.time.Time;
 import org.spine3.type.EventClass;
@@ -427,8 +426,7 @@ public class ProjectionRepositoryShould
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
         // Set up bounded context
         final BoundedContext boundedContext =
-                TestBoundedContextFactory.MultiTenant.newBoundedContext(
-                        TestEventBusFactory.create());
+                TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final int eventsCount = 10;
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
@@ -479,8 +477,7 @@ public class ProjectionRepositoryShould
     }
 
     private StorageFactory storageFactory() {
-        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                   .get();
+        return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     /** The projection stub used in tests. */
