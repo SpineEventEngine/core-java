@@ -117,7 +117,9 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return new Builder();
     }
 
-    boolean isMultitenant() {
+    @Internal
+    @VisibleForTesting
+    public boolean isMultitenant() {
         return multitenant;
     }
 

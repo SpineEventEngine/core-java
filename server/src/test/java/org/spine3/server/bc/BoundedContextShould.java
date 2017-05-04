@@ -279,6 +279,23 @@ public class BoundedContextShould {
                       .build();
     }
 
+    @Test
+    public void set_multi_tenancy_in_CommandBus() {
+        BoundedContext bc = BoundedContext.newBuilder()
+                                          .setMultitenant(true)
+                                          .build();
+
+        assertEquals(bc.isMultitenant(), bc.getCommandBus()
+                                           .isMultitenant());
+
+        bc = BoundedContext.newBuilder()
+                           .setMultitenant(false)
+                           .build();
+
+        assertEquals(bc.isMultitenant(), bc.getCommandBus()
+                                           .isMultitenant());
+    }
+
     @Test(expected = IllegalStateException.class)
     public void match_multi_tenancy_with_Stand() {
         BoundedContext.newBuilder()
@@ -287,6 +304,23 @@ public class BoundedContextShould {
                                      .setMultitenant(false))
                       .build();
 
+    }
+
+    @Test
+    public void set_same_multitenancy_in_Stand() {
+        BoundedContext bc = BoundedContext.newBuilder()
+                      .setMultitenant(true)
+                      .build();
+
+        assertEquals(bc.isMultitenant(), bc.getStand()
+                                           .isMultitenant());
+
+        bc = BoundedContext.newBuilder()
+                           .setMultitenant(false)
+                           .build();
+
+        assertEquals(bc.isMultitenant(), bc.getStand()
+                                           .isMultitenant());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {

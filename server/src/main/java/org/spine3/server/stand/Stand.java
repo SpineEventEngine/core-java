@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
@@ -218,7 +219,9 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
-    boolean isMultitenant() {
+    @Internal
+    @VisibleForTesting
+    public boolean isMultitenant() {
         return multitenant;
     }
 
