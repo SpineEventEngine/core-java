@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import org.slf4j.Logger;
@@ -37,6 +38,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Multimaps.synchronizedListMultimap;
@@ -70,6 +72,11 @@ import static java.lang.String.format;
  * @see Column
  */
 class Columns {
+
+    private static final Set<String> KNOWN_NON_PUBLIC_ENTITIES =
+            ImmutableSet.of("org.spine3.server.commandstore.Entity",
+                            "org.spine3.server.event.EventEntity");
+
 
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
@@ -106,9 +113,7 @@ class Columns {
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            log().warn(
-                    format(NON_PUBLIC_CLASS_WARNING,
-                           entityType.getCanonicalName()));
+            logNonPublicClass(entityType);
             return Collections.emptyMap();
         }
         ensureRegistered(entityType);
@@ -165,6 +170,14 @@ class Columns {
                 final Column<?> storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
+        }
+    }
+
+    private static void logNonPublicClass(Class<? extends Entity> cls) {
+        final String className = cls.getCanonicalName();
+        final boolean known = KNOWN_NON_PUBLIC_ENTITIES.contains(className);
+        if (!known) {
+            log().warn(format(NON_PUBLIC_CLASS_WARNING, className));
         }
     }
 
