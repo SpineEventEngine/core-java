@@ -40,6 +40,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.procman.CommandRouted;
@@ -70,6 +71,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -240,6 +242,17 @@ public class BoundedContextShould {
                                                 .setEventBus(EventBus.newBuilder())
                                                 .build();
         assertNotNull(bc.getEventBus());
+    }
+
+    @Test
+    public void do_not_set_storage_factory_if_EventStore_is_set() {
+        final EventStore eventStore = mock(EventStore.class);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setEventBus(EventBus.newBuilder()
+                                                .setEventStore(eventStore))
+                                                .build();
+        assertEquals(eventStore, bc.getEventBus()
+                                   .getEventStore());
     }
 
     @Test
