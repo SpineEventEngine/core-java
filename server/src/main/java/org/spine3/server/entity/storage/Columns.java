@@ -75,7 +75,7 @@ class Columns {
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
     private static final String NON_PUBLIC_INTERNAL_CLASS_WARNING =
-            "Passed entity class %s is a Spine internal non-public entity. " +
+            "Passed entity class %s is probably a Spine internal non-public entity. " +
                     "Storage fields won't be extracted.";
 
     /**
