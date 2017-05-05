@@ -20,13 +20,9 @@
 package org.spine3.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.base.Objects;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
-import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import org.spine3.base.ActorContext;
 import org.spine3.base.CommandContext;
-import org.spine3.protobuf.ProtoJavaMapper;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
@@ -35,7 +31,6 @@ import org.spine3.users.UserId;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -134,84 +129,6 @@ public class ActorRequestFactory {
             builder.setTenantId(tenantId);
         }
         return builder.build();
-    }
-
-    /**
-     * A parameter of a {@link Query}.
-     *
-     * <p>This class may be considered a filter for the query. An instance contains the name of
-     * the Entity Column to filter by and the value of the Column.
-     *
-     * <p>The supported types for querying are {@link Message} and Protobuf primitives.
-     */
-    public static final class QueryParameter {
-
-        private final String columnName;
-        private final Any value;
-
-        private QueryParameter(String columnName, Any value) {
-            this.columnName = columnName;
-            this.value = value;
-        }
-
-        /**
-         * Creates new equality {@code QueryParameter}.
-         *
-         * @param columnName the name of the Entity Column to query by, expressed in a single field
-         *                   name with no type info
-         * @param value      the requested value of the Entity Column
-         * @return new instance of the QueryParameter
-         */
-        public static QueryParameter eq(String columnName, Object value) {
-            checkNotNull(columnName);
-            checkNotNull(value);
-            final Any wrappedValue = ProtoJavaMapper.map(value);
-            final QueryParameter parameter = new QueryParameter(columnName, wrappedValue);
-            return parameter;
-        }
-
-        /**
-         * @return the name of the Entity Column to query by
-         */
-        public String getColumnName() {
-            return columnName;
-        }
-
-        /**
-         * @return the value of the Entity Column to look for
-         */
-        public Any getValue() {
-            return value;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-            QueryParameter parameter = (QueryParameter) o;
-            return Objects.equal(getColumnName(), parameter.getColumnName()) &&
-                    Objects.equal(getValue(), parameter.getValue());
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(getColumnName(), getValue());
-        }
-
-        @Override
-        public String toString() {
-            final StringBuilder sb = new StringBuilder();
-            sb.append('(')
-              .append(columnName)
-              .append(" = ")
-              .append(unpack(value))
-              .append(')');
-            return sb.toString();
-        }
     }
 
     /**

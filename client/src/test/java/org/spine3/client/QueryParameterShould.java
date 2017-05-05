@@ -23,12 +23,11 @@ package org.spine3.client;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import org.spine3.client.ActorRequestFactory.QueryParameter;
 
 import static java.lang.String.*;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
-import static org.spine3.client.ActorRequestFactory.QueryParameter.eq;
+import static org.spine3.client.QueryParameter.eq;
 
 /**
  * @author Dmytro Dashenkov

@@ -51,7 +51,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.ActorRequestFactory.QueryParameter.eq;
+import static org.spine3.client.QueryParameter.eq;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
 

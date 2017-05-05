@@ -37,7 +37,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.spine3.client.ActorRequestFactory.QueryParameter;
+
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
