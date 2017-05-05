@@ -76,7 +76,7 @@ message LifecycleFlags {
 // Enumeration of possible entity state validation errors.
 //
 // Contains the reasons of an errors, that are exclusively technical
-// and haven't relation to a business errors.
+// and have no relation to business errors.
 //
 enum EntityStateValidationError {
 
