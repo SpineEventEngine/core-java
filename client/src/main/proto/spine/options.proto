@@ -44,9 +44,9 @@ import "google/protobuf/descriptor.proto";
 //      https://developers.google.com/protocol-buffers/docs/proto#customoptions
 //
 // The whole range reserved for individual organizations is 50000-99999.
-// The range used by Spine Options is from 73812-84000.
+// The range used by Spine Options is 73812-75000.
 // In order to prevent number collision with custom options used by a project based on Spine,
-// numbers for custom options in this project should be in the range 50000-73811 or 84001-99999.
+// numbers for custom options in this project should be in the range 50000-73811 or 75001-99999.
 //
 
 extend google.protobuf.FieldOptions {
@@ -149,10 +149,19 @@ extend google.protobuf.FieldOptions {
     //
     bool beta = 73853;
 
-    // reserved 73854 to 73860 for future API annotation options.
+    // reserved 73854 to 73899 for future options.
 
-    // Enrichment Options
-    //--------------------
+    // Reference Option `by`
+    // ---------------------
+    //
+    // Using `by` for Queryable Fields
+    // --------------------------------
+    // A field of an entity can be marked as one which can participate in queries.
+    //TODO:2017-05-05:alexander.yevsyukov: Document combination of [(query)=true, (by)="priority.value"]
+    //
+    //
+    // Using `by` for Enrichments
+    // ---------------------------
     // An instruction to associate an enrichment message field with the field from an event message
     // to enrich (or event context field).
     //
@@ -214,9 +223,7 @@ extend google.protobuf.FieldOptions {
     //
     string by = 57125; // NOTE: this field number is used in the `tools` project,
                        // EnrichmentLookupPlugin (update it there on changing).
-    //TODO:2017-05-05:alexander.yevsyukov: Change the above value to 73860 after updating Plugin.
-
-    // reserved 73861 to 73900 for future field options
+    //TODO:2017-05-05:alexander.yevsyukov: Change the above value to 73900 after updating Plugin.
 }
 
 extend google.protobuf.MessageOptions {
@@ -253,6 +260,8 @@ extend google.protobuf.MessageOptions {
     //
     string required_field = 73902;
 
+    // reserved 73903 to 73910 for future validation options
+
     // API Annotations
     //-----------------
 
@@ -261,29 +270,29 @@ extend google.protobuf.MessageOptions {
     //
     // See more info in `options.proto`.
     //
-    bool internal_type = 73903;
+    bool internal_type = 73911;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
     //
     // See more info in `options.proto`.
     //
-    bool SPI_type = 73904;
+    bool SPI_type = 73912;
 
     // Indicates a public API that can change at any time, and has no guarantee of API stability and
     // backward-compatibility.
     //
     // See more info in `options.proto`.
     //
-    bool experimental_type = 73905;
+    bool experimental_type = 73913;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future
     // release.
     //
     // See more info in `options.proto`.
     //
-    bool beta_type = 73906;
+    bool beta_type = 73914;
 
-    // reserved 73907 to 73913 for future API annotation options.
+    // reserved 73915 to 73921 for future API annotation options.
 
     // Enrichment Options
     //--------------------
@@ -315,7 +324,7 @@ extend google.protobuf.MessageOptions {
     string enrichment_for = 57124;  // NOTE: this field number is used in `tools` project,
                                     // EnrichmentLookupPlugin (update it there on changing).
 
-    //TODO:2017-05-05:alexander.yevsyukov: Change to 73914 after updating the number in the plugin.
+    //TODO:2017-05-05:alexander.yevsyukov: Change to 73922 after updating the number in the plugin.
 
     // An instruction to enrich an event with one or more enrichments.
     //
@@ -345,9 +354,9 @@ extend google.protobuf.MessageOptions {
     string enrichment = 57126; // NOTE: this field number is used in the `tools` project,
                                // EnrichmentLookupPlugin (update it there on changing).
 
-    //TODO:2017-05-05:alexander.yevsyukov: Change to 73915 after updating the number in the plugin.
+    //TODO:2017-05-05:alexander.yevsyukov: Change to 73923 after updating the number in the plugin.
 
-    // reserved 73916 to 73930 for future enrichment options.
+    // reserved 73924 to 73939 for future options.
 
     // Command Options
     //-------------------
@@ -358,7 +367,7 @@ extend google.protobuf.MessageOptions {
     // If the events are of the same aggregate with the command, non-qualified names can be used.
     // Otherwise, please use fully qualified names.
     //
-    string events = 73931;
+    string events = 73939;
 
     // Specifies Protobuf type names of the failures that can be returned to the attempt to handle
     // a command if business conditions do not allow the command execution.
@@ -367,40 +376,10 @@ extend google.protobuf.MessageOptions {
     // If the failures are of the same aggregate with the command, non-qualified names can be used.
     // Otherwise, please use fully qualified names.
     //
-    string failures = 73932;
-
-    // reserved 73932 to 73940 for future command options.
+    string failures = 73940;
 }
 
 extend google.protobuf.FileOptions {
-
-    // Indicates a file which should not be used by users of the framework.
-    //
-    // See more info in `options.proto`.
-    //
-    bool internal_all = 73941;
-
-    // Indicates a file which contains elements of Service Provider Interface (SPI).
-    //
-    // See more info in `options.proto`.
-    //
-    bool SPI_all = 73942;
-
-    // Indicates a public API that can change at any time, and has no guarantee of API stability and
-    // backward-compatibility.
-    //
-    // See more info in `options.proto`.
-    //
-    bool experimental_all = 73943;
-
-    // Signifies that a public API is subject to incompatible changes, or even removal, in a future
-    // release.
-    //
-    // See more info in `options.proto`.
-    //
-    bool beta_all = 73944;
-
-    // reserved 73945 to 73952
 
     // Specifies a type URL prefix for all types within a file.
     //
@@ -409,9 +388,35 @@ extend google.protobuf.FileOptions {
     //
     string type_url_prefix = 58204; // NOTE: this field number is used in `tools` project,
                                     // ProtoToJavaMapperPlugin (update it there on changing).
-    //TODO:2017-05-05:alexander.yevsyukov: change to 73953 after updating plugin
+    //TODO:2017-05-05:alexander.yevsyukov: change to 73941 after updating plugin
 
-    // reserved 73954 to 73970 for future message options.
+    // Indicates a file which should not be used by users of the framework.
+    //
+    // See more info in `options.proto`.
+    //
+    bool internal_all = 73942;
+
+    // Indicates a file which contains elements of Service Provider Interface (SPI).
+    //
+    // See more info in `options.proto`.
+    //
+    bool SPI_all = 73943;
+
+    // Indicates a public API that can change at any time, and has no guarantee of API stability and
+    // backward-compatibility.
+    //
+    // See more info in `options.proto`.
+    //
+    bool experimental_all = 73944;
+
+    // Signifies that a public API is subject to incompatible changes, or even removal, in a future
+    // release.
+    //
+    // See more info in `options.proto`.
+    //
+    bool beta_all = 73945;
+
+    // reserved 73946 to 73970 for future use.
 }
 
 extend google.protobuf.ServiceOptions {
@@ -695,4 +700,3 @@ message GoesOption {
     // A user-defined validation error format message.
     string msg_format = 2;
 }
-
