@@ -56,8 +56,8 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  *     {@code
  *     final Query query = factory().query()
  *                                  .select(Customer.class)
- *                                  .fields("name", "address", "email")
- *                                  .whereIdIn(getWestCostCustomersIds())
+ *                                  .byId(getWestCostCustomersIds())
+ *                                  .withMask("name", "address", "email")
  *                                  .where({@link QueryParameter#eq eq}("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
@@ -104,7 +104,7 @@ public final class QueryBuilder {
      * @param ids the values of the IDs to look up
      * @return self for method chaining
      */
-    public QueryBuilder whereIdIn(Iterable<?> ids) {
+    public QueryBuilder byId(Iterable<?> ids) {
         this.ids = ImmutableSet.builder()
                                .add(ids)
                                .build();
@@ -116,9 +116,9 @@ public final class QueryBuilder {
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
-     * @see #whereIdIn(Iterable)
+     * @see #byId(Iterable)
      */
-    public QueryBuilder whereIdIn(Message... ids) {
+    public QueryBuilder byId(Message... ids) {
         this.ids = ImmutableSet.<Message>builder()
                                .add(ids)
                                .build();
@@ -130,9 +130,9 @@ public final class QueryBuilder {
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
-     * @see #whereIdIn(Iterable)
+     * @see #byId(Iterable)
      */
-    public QueryBuilder whereIdIn(String... ids) {
+    public QueryBuilder byId(String... ids) {
         this.ids = ImmutableSet.<String>builder()
                                .add(ids)
                                .build();
@@ -144,9 +144,9 @@ public final class QueryBuilder {
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
-     * @see #whereIdIn(Iterable)
+     * @see #byId(Iterable)
      */
-    public QueryBuilder whereIdIn(Integer... ids) {
+    public QueryBuilder byId(Integer... ids) {
         this.ids = ImmutableSet.<Integer>builder()
                                .add(ids)
                                .build();
@@ -158,9 +158,9 @@ public final class QueryBuilder {
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining
-     * @see #whereIdIn(Iterable)
+     * @see #byId(Iterable)
      */
-    public QueryBuilder whereIdIn(Long... ids) {
+    public QueryBuilder byId(Long... ids) {
         this.ids = ImmutableSet.<Long>builder()
                                .add(ids)
                                .build();
@@ -204,7 +204,7 @@ public final class QueryBuilder {
      * @param fieldNames the fields to query
      * @return self for method chaining
      */
-    public QueryBuilder fields(Iterable<String> fieldNames) {
+    public QueryBuilder withMask(Iterable<String> fieldNames) {
         this.fieldMask = ImmutableSet.copyOf(fieldNames);
         return this;
     }
@@ -221,7 +221,7 @@ public final class QueryBuilder {
      * @param fieldNames the fields to query
      * @return self for method chaining
      */
-    public QueryBuilder fields(String... fieldNames) {
+    public QueryBuilder withMask(String... fieldNames) {
         this.fieldMask = ImmutableSet.<String>builder()
                                      .add(fieldNames)
                                      .build();

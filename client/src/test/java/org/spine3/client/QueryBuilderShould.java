@@ -82,7 +82,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final int id2 = 271;
         final Query query = factory().query()
                                      .select(TestEntity.class)
-                                     .whereIdIn(id1, id2)
+                                     .byId(id1, id2)
                                      .build();
         assertNotNull(query);
         assertFalse(query.hasFieldMask());
@@ -105,7 +105,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String fieldName = "TestEntity.firstField";
         final Query query = factory().query()
                                      .select(TestEntity.class)
-                                     .fields(fieldName)
+                                     .withMask(fieldName)
                                      .build();
         assertNotNull(query);
         assertTrue(query.hasFieldMask());
@@ -184,8 +184,8 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String fieldName = "TestEntity.secondField";
         final Query query = factory().query()
                                      .select(testEntityClass)
-                                     .fields(fieldName)
-                                     .whereIdIn(id1, id2)
+                                     .withMask(fieldName)
+                                     .byId(id1, id2)
                                      .where(eq(columnName1, columnValue1),
                                             eq(columnName2, columnValue2))
                                      .build();
@@ -245,11 +245,11 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Query query = factory().query()
                                      .select(TestEntity.class)
-                                     .whereIdIn(genericIds)
-                                     .whereIdIn(longIds)
-                                     .whereIdIn(stringIds)
-                                     .whereIdIn(intIds)
-                                     .whereIdIn(messageIds)
+                                     .byId(genericIds)
+                                     .byId(longIds)
+                                     .byId(stringIds)
+                                     .byId(intIds)
+                                     .byId(messageIds)
                                      .build();
         assertNotNull(query);
 
@@ -270,8 +270,8 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Query query = factory().query()
                                      .select(TestEntity.class)
-                                     .fields(iterableFields)
-                                     .fields(arrayFields)
+                                     .withMask(iterableFields)
+                                     .withMask(arrayFields)
                                      .build();
         assertNotNull(query);
         final FieldMask mask = query.getFieldMask();
@@ -293,8 +293,8 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         final String fieldName = "TestEntity.secondField";
         final QueryBuilder builder = factory().query()
                                               .select(testEntityClass)
-                                              .fields(fieldName)
-                                              .whereIdIn(id1, id2)
+                                              .withMask(fieldName)
+                                              .byId(id1, id2)
                                               .where(eq(columnName1,
                                                                             columnValue1),
                                                                          eq(columnName2,
