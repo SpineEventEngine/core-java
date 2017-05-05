@@ -74,6 +74,9 @@ class Columns {
     private static final String SPINE_PACKAGE = "org.spine3.";
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
+    private static final String NON_PUBLIC_INTERNAL_CLASS_WARNING =
+            "Passed entity class %s is a Spine internal non-public entity. " +
+                    "Storage fields won't be extracted.";
 
     /**
      * A one to many container of the {@link Class} to {@link Column} relations.
@@ -175,6 +178,8 @@ class Columns {
         final String className = cls.getCanonicalName();
         final boolean internal = className.startsWith(SPINE_PACKAGE);
         if (internal) {
+            log().trace(format(NON_PUBLIC_INTERNAL_CLASS_WARNING, className));
+        } else {
             log().warn(format(NON_PUBLIC_CLASS_WARNING, className));
         }
     }
