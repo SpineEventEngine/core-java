@@ -63,9 +63,8 @@ extend google.protobuf.FieldOptions {
     // valid.
     //
     // Unlike the `required` keyword used in Protobuf 2, the option does not affect the transfer
-    // layer.
-    // Even if a message content violates the requirement set by the option, it would still be a
-    // valid message for the Protobuf library.
+    // layer. Even if a message content violates the requirement set by the option, it would still
+    // be a valid message for the Protobuf library.
     //
     // Example:
     //
@@ -260,36 +259,27 @@ extend google.protobuf.MessageOptions {
     //
     string required_field = 73902;
 
-    // reserved 73903 to 73910 for future validation options
+    // The option to mark a message as state of an entity.
+    EntityOption entity = 73903;
+
+    // reserved 73904 to 73910 for future validation options
 
     // API Annotations
     //-----------------
 
     // Indicates a file which is internal to Spine, not part of the public API, and should not be
     // used by users of the framework.
-    //
-    // See more info in `options.proto`.
-    //
     bool internal_type = 73911;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
-    //
-    // See more info in `options.proto`.
-    //
     bool SPI_type = 73912;
 
     // Indicates a public API that can change at any time, and has no guarantee of API stability and
     // backward-compatibility.
-    //
-    // See more info in `options.proto`.
-    //
     bool experimental_type = 73913;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future
     // release.
-    //
-    // See more info in `options.proto`.
-    //
     bool beta_type = 73914;
 
     // reserved 73915 to 73921 for future API annotation options.
@@ -391,29 +381,17 @@ extend google.protobuf.FileOptions {
     //TODO:2017-05-05:alexander.yevsyukov: change to 73941 after updating plugin
 
     // Indicates a file which should not be used by users of the framework.
-    //
-    // See more info in `options.proto`.
-    //
     bool internal_all = 73942;
 
     // Indicates a file which contains elements of Service Provider Interface (SPI).
-    //
-    // See more info in `options.proto`.
-    //
     bool SPI_all = 73943;
 
     // Indicates a public API that can change at any time, and has no guarantee of API stability and
     // backward-compatibility.
-    //
-    // See more info in `options.proto`.
-    //
     bool experimental_all = 73944;
 
     // Signifies that a public API is subject to incompatible changes, or even removal, in a future
     // release.
-    //
-    // See more info in `options.proto`.
-    //
     bool beta_all = 73945;
 
     // reserved 73946 to 73970 for future use.
@@ -699,4 +677,54 @@ message GoesOption {
 
     // A user-defined validation error format message.
     string msg_format = 2;
+}
+
+// Defines options of a message representing a state of an entity.
+message EntityOption {
+
+    // A type of an entity for state of which the message is defined.
+    enum Kind {
+        // Reserved for errors.
+        KIND_UNKNOWN = 0;
+
+        // The message is an aggregate state.
+        AGGREGATE = 1;
+
+        // The message is a state of a projection.
+        PROJECTION = 2;
+
+        // The message is a state of a process manager.
+        PROCESS_MANAGER = 3;
+
+        // The message is a state of an entity.
+        ENTITY = 4;
+    }
+
+    // The type of the entity.
+    Kind kind = 1;
+
+    // The level of visibility of the entity to queries.
+    enum Visibility {
+
+        // Reserved for errors.
+        VISIBILITY_UNKNOWN = 0;
+
+        // The entity is not visible to queries.
+        NONE = 1;
+
+        // Client-side applications can subscribe to updates of entities of this type.
+        SUBSCRIBE = 2;
+
+        // Client-side applications can query this type of entities.
+        QUERY = 3;
+
+        // Client-side applications can subscribe and query this type of entity.
+        FULL = 4;
+    }
+
+    // The visibility of the entity.
+    //
+    // If not defined, the value of this option is `FULL`.
+    //
+    Visibility visibility = 2;
 }
