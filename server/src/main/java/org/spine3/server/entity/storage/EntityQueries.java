@@ -26,6 +26,7 @@ import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
@@ -34,7 +35,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.ProtoJavaMapper.map;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -75,7 +75,7 @@ public final class EntityQueries {
         final Map<String, Any> columnValues = entityFilters.getColumnFilterMap();
         for (Map.Entry<String, Any> filter : columnValues.entrySet()) {
             final Column<?> column = Columns.metadata(entityClass, filter.getKey());
-            final Object filterValues = map(filter.getValue(), column.getType());
+            final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
             queryParams.put(column, filterValues);
         }
         return queryParams;

@@ -57,9 +57,9 @@ import static com.google.common.base.Preconditions.checkState;
  * @author Dmytro Dashenkov
  */
 @Internal
-public final class ProtoJavaMapper {
+public final class TypeConverter {
 
-    private ProtoJavaMapper() {
+    private TypeConverter() {
         // Prevent utility class initialization.
     }
 
@@ -71,7 +71,7 @@ public final class ProtoJavaMapper {
      * @param <T>     the conversion target type
      * @return the converted value
      */
-    public static <T> T map(Any message, Class<T> target) {
+    public static <T> T toObject(Any message, Class<T> target) {
         checkNotNull(message);
         checkNotNull(target);
         final AnyCaster<T> caster = AnyCaster.forType(target);
@@ -86,7 +86,7 @@ public final class ProtoJavaMapper {
      * @param <T>   the converted object type
      * @return the packed value
      */
-    public static <T> Any map(T value) {
+    public static <T> Any toAny(T value) {
         checkNotNull(value);
         @SuppressWarnings("unchecked") // Must be checked at runtime
         final Class<T> srcClass = (Class<T>) value.getClass();
@@ -99,7 +99,7 @@ public final class ProtoJavaMapper {
     }
 
     /**
-     * The {@link Function} performing the described type convertion.
+     * The {@link Function} performing the described type conversion.
      */
     private abstract static class AnyCaster<T> extends Converter<Any, T> {
 
@@ -118,31 +118,31 @@ public final class ProtoJavaMapper {
 
         @Override
         protected T doForward(Any input) {
-            return cast(input);
+            return toObject(input);
         }
 
         @Override
         protected Any doBackward(T t) {
-            final Message message = uncast(t);
+            final Message message = toMessage(t);
             return AnyPacker.pack(message);
         }
 
-        protected abstract T cast(Any input);
+        protected abstract T toObject(Any input);
 
-        protected abstract Message uncast(T input);
+        protected abstract Message toMessage(T input);
     }
 
     private static class BytesCaster extends AnyCaster<ByteString> {
 
         @Override
-        protected ByteString cast(Any input) {
+        protected ByteString toObject(Any input) {
             final BytesValue bytes = AnyPacker.unpack(input);
             final ByteString result = bytes.getValue();
             return result;
         }
 
         @Override
-        protected Message uncast(ByteString input) {
+        protected Message toMessage(ByteString input) {
             final BytesValue bytes = BytesValue.newBuilder()
                                                .setValue(input)
                                                .build();
@@ -153,14 +153,14 @@ public final class ProtoJavaMapper {
     private static class MessageTypeCaster<T> extends AnyCaster<T> {
 
         @Override
-        protected T cast(Any input) {
+        protected T toObject(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
             @SuppressWarnings("unchecked") final T result = (T) unpacked;
             return result;
         }
 
         @Override
-        protected Message uncast(T input) {
+        protected Message toMessage(T input) {
             checkState(input instanceof Message);
             final Message result = (Message) input;
             return result;
@@ -193,7 +193,7 @@ public final class ProtoJavaMapper {
                         .build();
 
         @Override
-        protected T cast(Any input) {
+        protected T toObject(Any input) {
             final Message unpacked = AnyPacker.unpack(input);
             final Class boxedType = unpacked.getClass();
             @SuppressWarnings("unchecked") final Function<Message, T> typeUnpacker =
@@ -206,7 +206,7 @@ public final class ProtoJavaMapper {
         }
 
         @Override
-        protected Message uncast(T input) {
+        protected Message toMessage(T input) {
             final Class<?> cls = input.getClass();
             @SuppressWarnings("unchecked") final Converter<Message, T> converter =
                     (Converter<Message, T>) PRIMITIVE_TO_HANDLER.get(cls);

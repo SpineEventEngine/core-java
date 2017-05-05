@@ -43,18 +43,18 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 /**
  * @author Dmytro Dashenkov
  */
-public class ProtoJavaMapperShould {
+public class TypeConverterShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(ProtoJavaMapper.class);
+        assertHasPrivateParameterlessCtor(TypeConverter.class);
     }
 
     @Test
     public void pass_null_check() {
         new NullPointerTester()
                 .setDefault(Any.class, Any.getDefaultInstance())
-                .testStaticMethods(ProtoJavaMapper.class,
+                .testStaticMethods(TypeConverter.class,
                                    NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -136,7 +136,7 @@ public class ProtoJavaMapperShould {
                                               .setValue(value)
                                               .build();
         final Any packed = AnyPacker.pack(wrapped);
-        final int mapped = ProtoJavaMapper.map(packed, Integer.class);
+        final int mapped = TypeConverter.toObject(packed, Integer.class);
         assertEquals(value, mapped);
     }
 
@@ -147,16 +147,16 @@ public class ProtoJavaMapperShould {
                                                .setValue(value)
                                                .build();
         final Any packed = AnyPacker.pack(wrapped);
-        final long mapped = ProtoJavaMapper.map(packed, Long.class);
+        final long mapped = TypeConverter.toObject(packed, Long.class);
         assertEquals(value, mapped);
     }
 
     private static void checkMapping(Object javaObject,
                                      Message protoObject) {
         final Any wrapped = AnyPacker.pack(protoObject);
-        final Object mappedJavaObject = ProtoJavaMapper.map(wrapped, javaObject.getClass());
+        final Object mappedJavaObject = TypeConverter.toObject(wrapped, javaObject.getClass());
         assertEquals(javaObject, mappedJavaObject);
-        final Any restoredWrapped = ProtoJavaMapper.map(mappedJavaObject);
+        final Any restoredWrapped = TypeConverter.toAny(mappedJavaObject);
         final Message restored = AnyPacker.unpack(restoredWrapped);
         assertEquals(protoObject, restored);
     }

@@ -21,6 +21,7 @@
 package org.spine3.client;
 
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 
@@ -33,6 +34,11 @@ import static org.spine3.client.QueryParameter.eq;
  * @author Dmytro Dashenkov
  */
 public class QueryParameterShould {
+
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester().testAllPublicStaticMethods(QueryParameter.class);
+    }
 
     @Test
     public void support_equality() {

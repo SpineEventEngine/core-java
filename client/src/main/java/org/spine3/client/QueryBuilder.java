@@ -105,6 +105,7 @@ public final class QueryBuilder {
      * @return self for method chaining
      */
     public QueryBuilder byId(Iterable<?> ids) {
+        checkNotNull(ids);
         this.ids = ImmutableSet.builder()
                                .add(ids)
                                .build();
@@ -205,6 +206,7 @@ public final class QueryBuilder {
      * @return self for method chaining
      */
     public QueryBuilder withMask(Iterable<String> fieldNames) {
+        checkNotNull(fieldNames);
         this.fieldMask = ImmutableSet.copyOf(fieldNames);
         return this;
     }

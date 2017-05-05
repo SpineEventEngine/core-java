@@ -37,7 +37,7 @@ import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.ProtoJavaMapper;
+import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -467,7 +467,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         storage.write(idWrong2, recordWrong2);
 
         // Prepare the query
-        final Any matchingIdPacked = ProtoJavaMapper.map(idMatching);
+        final Any matchingIdPacked = TypeConverter.toAny(idMatching);
         final EntityId entityId = EntityId.newBuilder()
                                           .setId(matchingIdPacked)
                                           .build();

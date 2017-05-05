@@ -23,7 +23,7 @@ package org.spine3.client;
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.ProtoJavaMapper;
+import org.spine3.protobuf.TypeConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
@@ -57,7 +57,7 @@ public final class QueryParameter {
     public static QueryParameter eq(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
-        final Any wrappedValue = ProtoJavaMapper.map(value);
+        final Any wrappedValue = TypeConverter.toAny(value);
         final QueryParameter parameter = new QueryParameter(columnName, wrappedValue);
         return parameter;
     }

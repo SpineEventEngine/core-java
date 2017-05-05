@@ -21,6 +21,7 @@
 package org.spine3.client;
 
 import com.google.common.base.Function;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
@@ -29,7 +30,7 @@ import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.json.Json;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.ProtoJavaMapper;
+import org.spine3.protobuf.TypeConverter;
 import org.spine3.test.client.TestEntity;
 import org.spine3.test.validate.msg.ProjectId;
 import org.spine3.type.TypeName;
@@ -59,6 +60,11 @@ import static org.spine3.test.Verify.assertSize;
  * @author Dmytro Dashenkov
  */
 public class QueryBuilderShould extends ActorRequestFactoryShould {
+
+    @Test
+    public void not_accept_nulls_on_creation() {
+        new NullPointerTester().testAllPublicStaticMethods(QueryBuilder.class);
+    }
 
     @Test
     public void create_queries_with_type_only() {
@@ -161,12 +167,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Any actualValue1 = columnFilters.get(columnName1);
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = ProtoJavaMapper.map(actualValue1, int.class);
+        final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
         final Any actualValue2 = columnFilters.get(columnName2);
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = ProtoJavaMapper.map(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
@@ -216,12 +222,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Any actualValue1 = columnFilters.get(columnName1);
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = ProtoJavaMapper.map(actualValue1, int.class);
+        final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
         final Any actualValue2 = columnFilters.get(columnName2);
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = ProtoJavaMapper.map(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
@@ -330,7 +336,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         public T apply(@Nullable EntityId entityId) {
             assertNotNull(entityId);
             final Any value = entityId.getId();
-            final T actual = ProtoJavaMapper.map(value, targetClass);
+            final T actual = TypeConverter.toObject(value, targetClass);
             return actual;
         }
     }
