@@ -29,7 +29,6 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -58,7 +57,6 @@ import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
-import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -68,13 +66,8 @@ import java.util.Set;
 
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.createCommand;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
@@ -92,7 +85,6 @@ public class ProcessManagerRepositoryShould
 
     private BoundedContext boundedContext;
     private TestProcessManagerRepository repository;
-    private EventBus eventBus;
 
     // Configuration of the test suite
     //---------------------------------
