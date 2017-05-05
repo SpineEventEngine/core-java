@@ -155,8 +155,26 @@ extend google.protobuf.FieldOptions {
     //
     // Using `by` for Queryable Fields
     // --------------------------------
-    // A field of an entity can be marked as one which can participate in queries.
-    //TODO:2017-05-05:alexander.yevsyukov: Document combination of [(query)=true, (by)="priority.value"]
+    // A field of an entity can be marked as one which can participate in queries. If this is done
+    // in a regular way by adding option `(query)=true` to a field, the field name can be used in
+    // queries. If a field type is message and one of the nested fields is wanted in queries, the
+    // following syntax should be used:
+    //
+    //  message MyProjection {
+    //      option (entity).kind = PROJECTION;
+    //      ...
+    //      // Use this field in queries by the `name` field of the `User` message.
+    //      User admin = 1 [(query) = true, (by) = "admin.name"];
+    //  }
+    //
+    // If more than one nested fields are wanted for queries, they should be separated by the comma:
+    //
+    //  message MyAggregate {
+    //      option (entity).kind = AGGREGATE;
+    //      ...
+    //      // Use this field in queries by the `name` and `email` fields of the `User` message.
+    //      User author = 1 [(query) = true, (by) = "author.name, author.email"];
+    //  }
     //
     //
     // Using `by` for Enrichments
