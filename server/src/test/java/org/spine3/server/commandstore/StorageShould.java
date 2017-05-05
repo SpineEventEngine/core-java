@@ -85,8 +85,7 @@ public class StorageShould extends TenantAwareTest {
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
         storage = new Storage();
-        storage.initStorage(StorageFactorySwitch.getInstance(true)
-                                                .get());
+        storage.initStorage(StorageFactorySwitch.get(true));
     }
 
     @After

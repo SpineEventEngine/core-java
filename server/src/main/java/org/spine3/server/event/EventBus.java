@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
@@ -461,6 +462,13 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
             return Optional.fromNullable(enricher);
         }
 
+        /**
+         * Builds an instance of {@link EventBus}.
+         *
+         * <p>This method is supposed to be called internally when building an enclosing
+         * {@code BoundedContext}.
+         */
+        @Internal
         public EventBus build() {
             final String message = "Either storageFactory or eventStore must be " +
                                    "set to build the EventBus instance";

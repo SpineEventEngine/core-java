@@ -42,7 +42,7 @@ import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
 import org.spine3.server.entity.TestEntityWithStringColumn;
-import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.EventTests;
@@ -98,8 +98,7 @@ public class ProcessManagerRepositoryShould
     //---------------------------------
 
     private StorageFactory storageFactory() {
-        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                   .get();
+        return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     @Override
@@ -144,8 +143,7 @@ public class ProcessManagerRepositoryShould
     @Before
     public void setUp() {
         super.setUp();
-        eventBus = spy(TestEventBusFactory.create());
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(eventBus);
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
 
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
@@ -156,14 +154,24 @@ public class ProcessManagerRepositoryShould
 
                           @Override
                           public void dispatch(CommandEnvelope envelope) {
-                              // Simply swallow the command. We need this dispatcher for allowing Process Manager
-                              // under test to route the AddTask command.
+                              /* Simply swallow the command. We need this dispatcher for allowing
+                                 Process Manager under test to route the AddTask command. */
                           }
                       });
 
         repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(storageFactory());
         TestProcessManager.clearMessageDeliveryHistory();
+    }
+
+    private static class Subscriber extends EventSubscriber {
+
+        private TaskAdded remembered;
+
+        @Subscribe
+        void on(TaskAdded msg) {
+            remembered = msg;
+        }
     }
 
     @Override
@@ -226,16 +234,12 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_and_post_events() throws InvocationTargetException {
+        final Subscriber subscriber = new Subscriber();
+        boundedContext.getEventBus().register(subscriber);
+
         testDispatchCommand(addTask());
 
-        final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
-
-        verify(eventBus, times(1)).post(argumentCaptor.capture());
-
-        final Event event = argumentCaptor.getValue();
-
-        assertNotNull(event);
-        final TaskAdded message = unpack(event.getMessage());
+        final TaskAdded message = subscriber.remembered;
         assertEquals(ID, message.getProjectId());
     }
 
@@ -318,8 +322,8 @@ public class ProcessManagerRepositoryShould
     // Marked as {@code public} to reuse for {@code CommandBus} dispatcher registration tests as well
     // with no code duplication.
     public static class TestProcessManager
-            extends ProcessManager<ProjectId, Project>
-            implements TestEntityWithStringColumn {
+                  extends ProcessManager<ProjectId, Project>
+                  implements TestEntityWithStringColumn {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();

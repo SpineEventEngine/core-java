@@ -46,8 +46,7 @@ public class EventBusBuilderShould {
 
     @Before
     public void setUp() {
-        this.storageFactory = StorageFactorySwitch.getInstance(true)
-                                                  .get();
+        this.storageFactory = StorageFactorySwitch.get(true);
     }
 
     @Test(expected = NullPointerException.class)
