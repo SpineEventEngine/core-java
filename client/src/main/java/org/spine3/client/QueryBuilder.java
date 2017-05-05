@@ -37,6 +37,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
+import static org.spine3.client.ActorRequestFactory.*;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
@@ -57,7 +58,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  *                                  .select(Customer.class)
  *                                  .fields("name", "address", "email")
  *                                  .whereIdIn(getWestCostCustomersIds())
- *                                  .where({@link ActorRequestFactory.QueryParameter#eq(String, Object) eq}("type", "permanent"),
+ *                                  .where({@link QueryParameter#eq eq}("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
  *                                  .build();
@@ -169,7 +170,7 @@ public final class QueryBuilder {
     /**
      * Sets the Entity Column predicate to the {@linkplain Query}.
      *
-     * <p>If there are no {@link ActorRequestFactory.QueryParameter}s (i.e. the passed array is empty), all
+     * <p>If there are no {@link QueryParameter}s (i.e. the passed array is empty), all
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
@@ -178,13 +179,13 @@ public final class QueryBuilder {
      *
      * <p>The disjunctive filters currently are not supported.
      *
-     * @param predicate the {@link ActorRequestFactory.QueryParameter}s to filter the requested entities by
+     * @param predicate the {@link QueryParameter}s to filter the requested entities by
      * @return self for method chaining
-     * @see ActorRequestFactory.QueryParameter
+     * @see QueryParameter
      */
-    public QueryBuilder where(ActorRequestFactory.QueryParameter... predicate) {
+    public QueryBuilder where(QueryParameter... predicate) {
         final ImmutableMap.Builder<String, Any> mapBuilder = ImmutableMap.builder();
-        for (ActorRequestFactory.QueryParameter param : predicate) {
+        for (QueryParameter param : predicate) {
             mapBuilder.put(param.getColumnName(), param.getValue());
         }
         columns = mapBuilder.build();
