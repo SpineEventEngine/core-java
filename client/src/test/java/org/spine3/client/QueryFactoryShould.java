@@ -28,14 +28,17 @@ import org.spine3.test.client.TestEntity;
 import org.spine3.test.client.TestEntityId;
 import org.spine3.type.TypeName;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Verify.assertContainsAll;
 
 /**
  * @author Alex Tymchenko
@@ -132,9 +135,102 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_create_query_with_empty_IDs_with_mask() {
-        factory().query().byIdsWithMask(TestEntity.class,
-                                        Collections.<Message>emptySet(),
-                                        "", "");
+        factory().query()
+                 .byIdsWithMask(TestEntity.class,
+                                Collections.<Message>emptySet(),
+                                "", "");
+    }
+
+    @Test
+    public void build_consistent_with_QueryBuilder_ID_queries() {
+        final Set<TestEntityId> ids = multipleIds();
+        final Query fromFactory = factory().query()
+                                           .byIds(TestEntity.class, ids);
+        final Query fromBuilder = factory().query()
+                                           .select(TestEntity.class)
+                                           .byId(ids)
+                                           .build();
+        checkIdQueriesEqual(fromFactory, fromBuilder);
+    }
+
+    @Test
+    public void build_consistent_with_QueryBuilder_queries_with_mask() {
+        final String field1 = "TestEntity.firstField";
+        final String field2 = "TesEntity.barField";
+
+        final Query fromFactory = factory().query()
+                                           .allWithMask(TestEntity.class, field1, field2);
+        final Query fromBuilder = factory().query()
+                                          .select(TestEntity.class)
+                                          .withMask(field1, field2)
+                                          .build();
+        assertNotEquals(fromBuilder.getId(), fromFactory.getId());
+        final Target targetFromFactory = fromFactory.getTarget();
+        final Target targetFromBuilder = fromBuilder.getTarget();
+        assertEquals(targetFromFactory, targetFromBuilder);
+    }
+
+    @Test
+    public void build_consistent_with_QueryBuilder_all_queries() {
+        final Query fromFactory = factory().query().all(TestEntity.class);
+        final Query fromBuilder = factory().query()
+                                           .select(TestEntity.class)
+                                           .build();
+        assertEquals(fromFactory.getTarget(), fromBuilder.getTarget());
+        assertNotEquals(fromFactory.getId(), fromBuilder.getId());
+    }
+
+    @Test
+    public void build_consistent_with_QueryBuilder_ID_queries_with_mask() {
+        final String field1 = "TestEntity.secondField";
+        final String field2 = "TesEntity.fooField";
+
+        final Set<TestEntityId> ids = multipleIds();
+        final Query fromFactory = factory().query()
+                                           .byIdsWithMask(TestEntity.class, ids, field1, field2);
+        final Query fromBuilder = factory().query()
+                                           .select(TestEntity.class)
+                                           .byId(ids)
+                                           .withMask(field1, field2)
+                                           .build();
+        checkIdQueriesEqual(fromFactory, fromBuilder);
+    }
+
+    private static void checkIdQueriesEqual(Query query1, Query query2) {
+        assertNotEquals(query1.getId(), query2.getId());
+
+        final Target targetFromFactory = query1.getTarget();
+        final Target targetFromBuilder = query2.getTarget();
+
+        final EntityFilters filtersFromFactory = targetFromFactory.getFilters();
+        final EntityFilters filtersFromBuilder = targetFromBuilder.getFilters();
+
+        // Everything except filters is the same
+        assertEquals(targetFromFactory.toBuilder()
+                                      .clearFilters()
+                                      .build(),
+                     targetFromBuilder.toBuilder()
+                                      .clearFilters()
+                                      .build());
+
+        final EntityIdFilter idFilterFromFactory = filtersFromFactory.getIdFilter();
+        final EntityIdFilter idFilterFromBuilder = filtersFromBuilder.getIdFilter();
+
+        // Everything except ID filter is the same
+        assertEquals(filtersFromBuilder.toBuilder()
+                                       .clearIdFilter()
+                                       .build(),
+                     filtersFromBuilder.toBuilder()
+                                       .clearIdFilter()
+                                       .build());
+
+        final Collection<EntityId> entityIdsFromFactory = idFilterFromFactory.getIdsList();
+        final Collection<EntityId> entityIdsFromBuilder = idFilterFromBuilder.getIdsList();
+
+        // Order may differ byt all the elements are the same
+        assertEquals(entityIdsFromFactory.size(), entityIdsFromBuilder.size());
+        assertContainsAll(entityIdsFromBuilder, entityIdsFromFactory.toArray(
+                new EntityId[entityIdsFromBuilder.size()]));
     }
 
     private static void verifyMultiplePathsInQuery(String[] paths,

@@ -107,7 +107,7 @@ public final class QueryBuilder {
     public QueryBuilder byId(Iterable<?> ids) {
         checkNotNull(ids);
         this.ids = ImmutableSet.builder()
-                               .add(ids)
+                               .addAll(ids)
                                .build();
         return this;
     }
