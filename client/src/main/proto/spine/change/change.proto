@@ -29,8 +29,7 @@ option java_package = "org.spine3.change";
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 //
 // This file provides messages that define changes of fields in other messages.

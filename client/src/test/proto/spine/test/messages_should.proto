@@ -28,7 +28,7 @@ option java_outer_classname = "MessagesShouldProto";
 
 import "google/protobuf/wrappers.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 // Only for usage in `MessagesShould` class.
 

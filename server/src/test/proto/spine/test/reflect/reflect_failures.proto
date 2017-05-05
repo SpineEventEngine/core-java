@@ -27,7 +27,7 @@ option java_package = "org.spine3.test.reflect";
 // Keep all the failures under the same outer class called `ReflectFailures`.
 option java_generate_equals_and_hash = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/test/reflect/project.proto";
 
 message InvalidProjectName {

@@ -26,7 +26,7 @@ option java_package="org.spine3.test.procman.command";
 option java_outer_classname = "ProcmanCommandsProto";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/test/procman/project.proto";
 
 message CreateProject {

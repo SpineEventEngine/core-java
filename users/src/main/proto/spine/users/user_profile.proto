@@ -28,8 +28,7 @@ option java_multiple_files = true;
 option java_outer_classname = "UserProfileProto";
 option java_generate_equals_and_hash = true;
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 import "spine/net/url.proto";
 import "spine/net/email_address.proto";
 

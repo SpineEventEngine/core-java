@@ -29,8 +29,7 @@ option java_package = "org.spine3.test.validate.msg.altfields";
 
 import "google/protobuf/wrappers.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 message PersonName {
     option (required_field) = "first_name | honorific_prefix & last_name";
