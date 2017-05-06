@@ -22,7 +22,7 @@ package org.spine3.server.tenant;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.users.TenantId;
 
 /**

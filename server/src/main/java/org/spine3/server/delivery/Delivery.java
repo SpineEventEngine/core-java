@@ -22,7 +22,7 @@ package org.spine3.server.delivery;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.MoreExecutors;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.envelope.MessageEnvelope;
 
 import javax.annotation.Nullable;

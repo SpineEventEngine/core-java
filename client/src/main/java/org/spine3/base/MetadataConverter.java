@@ -25,7 +25,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;

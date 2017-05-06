@@ -26,7 +26,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors.Descriptor;
-import org.spine3.options.OptionsProto;
+import org.spine3.option.OptionsProto;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;

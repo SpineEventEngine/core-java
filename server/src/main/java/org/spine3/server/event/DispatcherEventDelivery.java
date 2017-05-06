@@ -19,7 +19,7 @@
  */
 package org.spine3.server.event;
 
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.outbus.CommandOutputDelivery;
 import org.spine3.type.EventClass;

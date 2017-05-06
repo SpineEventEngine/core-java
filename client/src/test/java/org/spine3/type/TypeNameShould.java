@@ -31,7 +31,7 @@ import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
-import org.spine3.options.IfMissingOption;
+import org.spine3.option.IfMissingOption;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestActorRequestFactory;

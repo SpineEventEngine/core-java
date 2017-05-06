@@ -25,12 +25,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-import org.spine3.options.DecimalMaxOption;
-import org.spine3.options.DecimalMinOption;
-import org.spine3.options.DigitsOption;
-import org.spine3.options.MaxOption;
-import org.spine3.options.MinOption;
-import org.spine3.options.OptionsProto;
+import org.spine3.option.DecimalMaxOption;
+import org.spine3.option.DecimalMinOption;
+import org.spine3.option.DigitsOption;
+import org.spine3.option.MaxOption;
+import org.spine3.option.MinOption;
+import org.spine3.option.OptionsProto;
 
 import java.util.List;
 import java.util.regex.Pattern;

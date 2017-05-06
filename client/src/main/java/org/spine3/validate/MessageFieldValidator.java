@@ -27,16 +27,16 @@ import com.google.protobuf.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
-import org.spine3.options.IfInvalidOption;
-import org.spine3.options.OptionsProto;
-import org.spine3.options.Time;
-import org.spine3.options.TimeOption;
+import org.spine3.option.IfInvalidOption;
+import org.spine3.option.OptionsProto;
+import org.spine3.option.Time;
+import org.spine3.option.TimeOption;
 import org.spine3.protobuf.AnyPacker;
 
 import java.util.List;
 
-import static org.spine3.options.Time.FUTURE;
-import static org.spine3.options.Time.TIME_UNDEFINED;
+import static org.spine3.option.Time.FUTURE;
+import static org.spine3.option.Time.TIME_UNDEFINED;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.time.Timestamps2.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;

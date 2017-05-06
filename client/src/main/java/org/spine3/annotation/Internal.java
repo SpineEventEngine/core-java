@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.annotations;
+package org.spine3.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
