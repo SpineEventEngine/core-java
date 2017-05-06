@@ -109,7 +109,9 @@ public class GivenShould {
                 .testAllPublicStaticMethods(Given.class);
     }
 
-    private static class AProcessManager extends ProcessManager<Timestamp, StringValue> {
+    private static class AProcessManager extends ProcessManager<Timestamp,
+                                                                StringValue,
+                                                                StringValueValidatingBuilder> {
         protected AProcessManager(Timestamp id) {
             super(id);
         }

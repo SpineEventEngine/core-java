@@ -56,6 +56,7 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
+import org.spine3.validate.ValidatingBuilders.AnyValidatingBuilder;
 
 import java.util.List;
 import java.util.Set;
@@ -286,7 +287,9 @@ public class ProcessManagerShould {
     }
 
     @SuppressWarnings("UnusedParameters") // OK for test class.
-    private static class TestProcessManager extends ProcessManager<ProjectId, Any> {
+    private static class TestProcessManager extends ProcessManager<ProjectId,
+                                                                   Any,
+                                                                   AnyValidatingBuilder> {
 
         private TestProcessManager(ProjectId id) {
             super(id);
@@ -294,22 +297,22 @@ public class ProcessManagerShould {
 
         @Subscribe
         public void on(ProjectCreated event, EventContext ignored) {
-            incrementState(AnyPacker.pack(event));
+            getBuilder().mergeFrom(AnyPacker.pack(event));
         }
 
         @Subscribe
         public void on(TaskAdded event, EventContext ignored) {
-            incrementState(AnyPacker.pack(event));
+            getBuilder().mergeFrom(AnyPacker.pack(event));
         }
 
         @Subscribe
         public void on(ProjectStarted event, EventContext ignored) {
-            incrementState(AnyPacker.pack(event));
+            getBuilder().mergeFrom(AnyPacker.pack(event));
         }
 
         @Assign
         ProjectCreated handle(CreateProject command, CommandContext ignored) {
-            incrementState(AnyPacker.pack(command));
+            getBuilder().mergeFrom(AnyPacker.pack(command));
             return ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
                     .setProjectId(command.getProjectId())
                     .build();
@@ -317,7 +320,7 @@ public class ProcessManagerShould {
 
         @Assign
         TaskAdded handle(AddTask command, CommandContext ignored) {
-            incrementState(AnyPacker.pack(command));
+            getBuilder().mergeFrom(AnyPacker.pack(command));
             return ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
                     .setProjectId(command.getProjectId())
                     .build();
@@ -325,7 +328,7 @@ public class ProcessManagerShould {
 
         @Assign
         CommandRouted handle(StartProject command, CommandContext context) {
-            incrementState(AnyPacker.pack(command));
+            getBuilder().mergeFrom(AnyPacker.pack(command));
 
             final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
                     .setProjectId(command.getProjectId())

@@ -28,8 +28,9 @@ import org.spine3.change.MessageMismatch;
 import org.spine3.change.StringMismatch;
 import org.spine3.change.ValueMismatch;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.EventPlayingEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
+import org.spine3.validate.ValidatingBuilder;
 
 import java.util.List;
 
@@ -57,8 +58,10 @@ import static org.spine3.base.Identifiers.idToAny;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandHandlingEntity<I, S extends Message>
-        extends AbstractVersionableEntity<I, S> {
+public abstract class CommandHandlingEntity<I,
+                                            S extends Message,
+                                            B extends ValidatingBuilder<S, ?>>
+                        extends EventPlayingEntity<I, S, B> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */
     private final Any idAsAny;

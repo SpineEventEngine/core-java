@@ -55,7 +55,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Alexander Yevsyukov
  */
 public abstract class ProcessManagerRepository<I,
-                                               P extends ProcessManager<I, S>,
+                                               P extends ProcessManager<I, S, ?>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {

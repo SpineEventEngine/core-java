@@ -22,7 +22,9 @@ package org.spine3.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
+import org.spine3.base.Version;
 import org.spine3.server.entity.EntityBuilder;
+import org.spine3.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test instances of {@code ProcessManager}.
@@ -34,7 +36,10 @@ import org.spine3.server.entity.EntityBuilder;
  * @author Alexander Yevsyukov
  */
 @VisibleForTesting
-public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends Message>
+public class ProcessManagerBuilder<P extends ProcessManager<I, S, B>,
+                                   I,
+                                   S extends Message,
+                                   B extends ValidatingBuilder<S, ?>>
         extends EntityBuilder<P, I, S> {
 
     public ProcessManagerBuilder() {
@@ -44,8 +49,13 @@ public class ProcessManagerBuilder<P extends ProcessManager<I, S>, I, S extends 
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // fix IDEA bug
     @Override
-    public ProcessManagerBuilder<P, I, S> setResultClass(Class<P> entityClass) {
+    public ProcessManagerBuilder<P, I, S, B> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);
         return this;
+    }
+
+    @Override
+    protected void setState(P result, S state, Version version) {
+        result.injectState(state, version);
     }
 }

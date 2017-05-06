@@ -19,6 +19,8 @@
  */
 package org.spine3.validate;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
@@ -77,6 +79,30 @@ public class ValidatingBuilders {
         public UInt32ValueValidatingBuilder setValue(int value) {
             getMessageBuilder().setValue(value);
             return this;
+        }
+    }
+
+    public static final class AnyValidatingBuilder
+            extends AbstractValidatingBuilder<Any, Any.Builder> {
+
+        private AnyValidatingBuilder() {
+            // Prevent instantiation from the outside.
+        }
+
+        public static AnyValidatingBuilder newBuilder() {
+            return new AnyValidatingBuilder();
+        }
+    }
+
+    public static final class EmptyValidatingBuilder
+            extends AbstractValidatingBuilder<Empty, Empty.Builder> {
+
+        private EmptyValidatingBuilder() {
+            // Prevent instantiation from the outside.
+        }
+
+        public static EmptyValidatingBuilder newBuilder() {
+            return new EmptyValidatingBuilder();
         }
     }
 }

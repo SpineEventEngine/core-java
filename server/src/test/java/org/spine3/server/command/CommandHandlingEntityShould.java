@@ -20,6 +20,7 @@
 
 package org.spine3.server.command;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,6 +29,9 @@ import org.spine3.client.ActorRequestFactory;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.util.Environment;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+
+import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.newUuidValue;
@@ -92,9 +96,16 @@ public class CommandHandlingEntityShould {
     }
 
 
-    private static class HandlingEntity extends CommandHandlingEntity<Long, StringValue> {
+    private static class HandlingEntity extends CommandHandlingEntity<Long,
+                                                                      StringValue,
+                                                                      StringValueValidatingBuilder> {
         private HandlingEntity(Long id) {
             super(id);
+        }
+
+        @Override
+        protected void apply(Message eventMessage) throws InvocationTargetException {
+            // do nothing
         }
     }
 }

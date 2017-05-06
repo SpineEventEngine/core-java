@@ -60,6 +60,7 @@ import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.validate.ConstraintViolationThrowable;
+import org.spine3.validate.ValidatingBuilders.EmptyValidatingBuilder;
 
 import java.util.List;
 
@@ -356,7 +357,9 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectProcessManager extends ProcessManager<ProjectId, Empty> {
+    private static class ProjectProcessManager extends ProcessManager<ProjectId,
+                                                                      Empty,
+                                                                      EmptyValidatingBuilder> {
 
         // a ProcessManager constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
