@@ -287,15 +287,17 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         final P projection = findOrCreate(id);
         projection.handle(eventMessage, context);
 
-        final Timestamp eventTime = context.getTimestamp();
+        if(projection.isStateChanged()) {
+            final Timestamp eventTime = context.getTimestamp();
 
-        if (isBulkWriteInProgress()) {
-            storePostponed(projection, eventTime);
-        } else {
-            storeNow(projection, eventTime);
+            if (isBulkWriteInProgress()) {
+                storePostponed(projection, eventTime);
+            } else {
+                storeNow(projection, eventTime);
+            }
+
+            standFunnel.post(projection, context.getCommandContext());
         }
-
-        standFunnel.post(projection, context.getCommandContext());
     }
 
     /**

@@ -48,6 +48,7 @@ import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
+import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import java.util.Collections;
@@ -185,8 +186,9 @@ class Given {
 
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
-        public void handle(ProjectCreated event, EventContext context) {
-            // Do nothing
+        public void handle(ProjectCreated event,
+                           EventContext context) throws ConstraintViolationThrowable {
+            getBuilder().setId(event.getProjectId());
         }
     }
 }

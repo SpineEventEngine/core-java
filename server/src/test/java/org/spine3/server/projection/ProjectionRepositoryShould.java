@@ -30,7 +30,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -476,7 +475,6 @@ public class ProjectionRepositoryShould
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
 
-    @Ignore    //TODO:4/26/17:alex.tymchenko: re-enable, once the update mechanism is fixed.
     @Test
     public void do_not_create_record_if_entity_isnt_updated() {
         final NoopTaskNamesRepository repo = new NoopTaskNamesRepository(boundedContext);
