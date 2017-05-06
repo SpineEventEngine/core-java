@@ -287,7 +287,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         final P projection = findOrCreate(id);
         projection.handle(eventMessage, context);
 
-        if(projection.isStateChanged()) {
+        if(projection.isChanged()) {
             final Timestamp eventTime = context.getTimestamp();
 
             if (isBulkWriteInProgress()) {

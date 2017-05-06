@@ -34,6 +34,7 @@ import org.spine3.type.EventClass;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Wrapper.forInteger;
@@ -55,16 +56,20 @@ public class ProjectionShould {
     @Test
     public void handle_events() {
         final String stringValue = newUuid();
+        assertFalse(projection.isChanged());
+
         projection.handle(Wrapper.forString(stringValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(stringValue));
+        assertTrue(projection.isChanged());
 
         final Integer integerValue = 1024;
         projection.handle(forInteger(integerValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
+        assertTrue(projection.isChanged());
     }
 
     @Test(expected = IllegalStateException.class)

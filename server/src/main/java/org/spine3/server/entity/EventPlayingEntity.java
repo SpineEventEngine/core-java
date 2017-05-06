@@ -83,12 +83,17 @@ public abstract class EventPlayingEntity <I,
                                   EventContext context) throws InvocationTargetException;
 
     /**
-     * Determines whether the state of this entity has been modified since its creation.
-     * @return {@code true} if the state has been modified, {@code false} otherwise.
+     * Determines whether the state of this entity or its lifecycle flags have been modified
+     * since this entity instance creation.
+     *
+     * <p>This method is used internally to determine whether this entity instance should be
+     * stored or the storage update can be skipped for this instance.
+     *
+     * @return {@code true} if the state or flags have been modified, {@code false} otherwise.
      */
     @Internal
-    public boolean isStateChanged() {
-        return this.stateChanged;
+    public boolean isChanged() {
+        return this.stateChanged || lifecycleFlagsChanged();
     }
 
     /**
@@ -158,6 +163,10 @@ public abstract class EventPlayingEntity <I,
                     "setState() is called from outside of the entity update phase.");
         }
         super.updateState(state, version);
+        markStateChanged();
+    }
+
+    private void markStateChanged() {
         this.stateChanged = true;
     }
 
@@ -208,7 +217,6 @@ public abstract class EventPlayingEntity <I,
         this.builder = builder;
     }
 
-    //TODO:5/6/17:alex.tymchenko: decide on whether it belongs here. Originally from `Aggregate`.
     /**
      * Sets the passed state and version.
      *
@@ -216,16 +224,24 @@ public abstract class EventPlayingEntity <I,
      * setState()} method by creating a fake builder instance, which is cleared
      * after the call.
      *
+     * <p>The {@linkplain #isChanged()} return value is not affected by this method.
+     *
      * <p>This method has package-private access to be accessible by the
      * {@code EntityBuilder} test utility classes from the {@code testutil} module.
      */
     protected void injectState(S stateToRestore, Version versionFromSnapshot) {
         try {
+            // Remember the current flag value.
+            final boolean wasStateChanged = this.stateChanged;
+
             @SuppressWarnings("unchecked")
             // The cast is safe as we checked the type on the construction.
             final B fakeBuilder = newBuilderInstance();
             this.builder = fakeBuilder;
             updateState(stateToRestore, versionFromSnapshot);
+
+            // Restore the previously memoized value.
+            this.stateChanged = wasStateChanged;
         } finally {
             releaseBuilder();
         }
