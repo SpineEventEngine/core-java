@@ -43,3 +43,11 @@ message SubscribableAggregate {
     uint64 id = 1;
     string description = 2;
 }
+
+message HiddenAggregate {
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = NONE;
+
+    string uuid = 1;
+    string secret = 2;
+}

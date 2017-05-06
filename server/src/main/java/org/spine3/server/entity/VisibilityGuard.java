@@ -51,15 +51,15 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
 @Internal
 public final class VisibilityGuard {
 
-    private final Map<Class<? extends Message>, RepositoryAccess> repositories = newHashMap();
+    private final Map<Class, RepositoryAccess> repositories = newHashMap();
 
-    public void register(Repository<?, ? extends Message> repository) {
+    public void register(Repository repository) {
         checkNotNull(repository);
-        final Class<? extends Message> stateClass = repository.getEntityStateClass();
+        final Class stateClass = repository.getEntityStateClass();
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 
-    public Optional<Repository<?, ? extends Message>>
+    public Optional<Repository>
     getRepository(Class<? extends Message> stateClass) {
         final RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
@@ -73,6 +73,7 @@ public final class VisibilityGuard {
     public Set<TypeName> getEntityTypes(final Visibility visibility) {
         checkNotNull(visibility);
 
+        // Filter repositories of entities with this visibility.
         final Collection<RepositoryAccess> repos =
                 filterValues(repositories,
                              new Predicate<RepositoryAccess>() {
@@ -83,14 +84,17 @@ public final class VisibilityGuard {
                                  }
                              }).values();
 
+        // Get type names for entities of the filtered repositories.
         final Iterable<TypeName> entityTypes =
                 transform(repos,
                           new Function<RepositoryAccess, TypeName>() {
                               @Override
                               public TypeName apply(@Nullable RepositoryAccess input) {
                                   checkNotNull(input);
+                                  @SuppressWarnings("unchecked")
+                                        // Safe as it's bounded by Repository class definition.
                                   final Class<? extends Message> cls =
-                                          input.repository.getEntityClass();
+                                          input.repository.getEntityStateClass();
                                   final TypeName result = TypeName.of(cls);
                                   return result;
                               }
@@ -103,20 +107,20 @@ public final class VisibilityGuard {
      */
     private static class RepositoryAccess {
 
-        private final Repository<?, ? extends Message> repository;
+        private final Repository repository;
         private final Visibility visibility;
 
-        private RepositoryAccess(Repository<?, ? extends Message> repository) {
+        private RepositoryAccess(Repository repository) {
             this.repository = repository;
+            @SuppressWarnings("unchecked") // Safe as it's bounded by Repository class definition.
             final Class<? extends Message> stateClass = repository.getEntityStateClass();
-
             this.visibility = EntityOptions.getVisibility(stateClass);
         }
 
-        private Optional<Repository<?, ? extends Message>> get() {
+        private Optional<Repository> get() {
             return (visibility == Visibility.NONE)
-                    ? Optional.<Repository<?, ? extends Message>>absent()
-                    : Optional.<Repository<?, ? extends Message>>of(repository);
+                    ? Optional.<Repository>absent()
+                    : Optional.of(repository);
         }
     }
 }
