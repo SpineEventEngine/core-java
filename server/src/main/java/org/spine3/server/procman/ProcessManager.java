@@ -163,6 +163,12 @@ public abstract class ProcessManager<I,
         dispatchEvent(eventMessage, context);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method has protected access to be accessible by the
+     * {@code ProcessManagerBuilder} test utility classes from the {@code testutil} module.
+     */
     @Override               // Overridden to expose this method to tests.
     @VisibleForTesting
     protected void injectState(S stateToRestore, Version versionFromSnapshot) {

@@ -225,9 +225,6 @@ public abstract class EventPlayingEntity <I,
      * after the call.
      *
      * <p>The {@linkplain #isChanged()} return value is not affected by this method.
-     *
-     * <p>This method has package-private access to be accessible by the
-     * {@code EntityBuilder} test utility classes from the {@code testutil} module.
      */
     protected void injectState(S stateToRestore, Version versionFromSnapshot) {
         try {

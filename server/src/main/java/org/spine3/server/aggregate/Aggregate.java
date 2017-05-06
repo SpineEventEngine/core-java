@@ -345,6 +345,12 @@ public abstract class Aggregate<I,
         }
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method has protected access to be accessible by the
+     * {@code AggregateBuilder} test utility classes from the {@code testutil} module.
+     */
     @Override               // Overrides to expose to the test code.
     @VisibleForTesting
     protected void injectState(S stateToRestore, Version versionFromSnapshot) {

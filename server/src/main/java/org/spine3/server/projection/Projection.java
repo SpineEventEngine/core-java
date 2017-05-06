@@ -86,6 +86,12 @@ public abstract class Projection<I,
         dispatch(eventMessage, eventContext);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method has protected access to be accessible by the
+     * {@code ProjectionBuilder} test utility classes from the {@code testutil} module.
+     */
     @Override               // Overridden to expose this method to tests.
     @VisibleForTesting
     protected void injectState(M stateToRestore, Version versionFromSnapshot) {
