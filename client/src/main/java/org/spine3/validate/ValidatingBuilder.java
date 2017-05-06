@@ -22,6 +22,10 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import org.spine3.annotations.Internal;
+import org.spine3.util.Exceptions;
+
+import java.lang.reflect.Method;
 
 import static org.spine3.util.Reflection.getGenericParameterType;
 
@@ -60,16 +64,40 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
     T build() throws ConstraintViolationThrowable;
 
     /**
-     * Creates an instance of original {@code Message.Builder} for the {@code Message} being built.
+     * Merges the message currently built with the fields of a given {@code message}.
      *
-     * @return the {@code Builder} for the {@code Message} built.
+     * @param message the message to merge into the state this builder
+     * @return the builder instance
      */
-    B newOriginalBuilder();
-
-    Class<T> getMessageClass();
-
     ValidatingBuilder<T, B> mergeFrom(T message);
 
+    /**
+     * Sets an original state for this builder to allow building the new value on top of some
+     * pre-defined value.
+     *
+     * <p>The validation of the passed {@code state} is NOT performed.
+     *
+     * @param state the new state
+     */
+    @Internal
+    void setOriginalState(T state);
+
+    /**
+     * Determines if the message being built has been modified from its original state.
+     *
+     * @return {@code true} if it is modified, {@code false} otherwise
+     */
+    @Internal
+    boolean isDirty();
+
+    /**
+     * Clears the state of this builder.
+     *
+     * <p>In particular, the state of the message being built is reset to the default.
+     * Also the original state (if it {@linkplain #setOriginalState(Message) has been set}
+     * previously) is cleared.
+     */
+    @Internal
     void clear();
 
     /**
@@ -122,6 +150,16 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
                     getGenericParameterType(builderClass,
                                             GenericParameter.MESSAGE.getIndex());
             return result;
+        }
+
+        // as the method names are the same, but methods are different.
+        @SuppressWarnings("DuplicateStringLiteralInspection")
+        public static Method getNewBuilderMethod(Class<? extends ValidatingBuilder<?, ?>> cls) {
+            try {
+                return cls.getMethod("newBuilder");
+            } catch (NoSuchMethodException e) {
+                throw Exceptions.illegalArgumentWithCauseOf(e);
+            }
         }
     }
 }

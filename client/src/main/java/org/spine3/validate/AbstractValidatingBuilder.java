@@ -23,7 +23,6 @@ package org.spine3.validate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.annotations.Internal;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.Messages;
@@ -122,7 +121,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
      *
      * @return {@code true} if any modifications has been made, {@code false} otherwise.
      */
-    @Internal
+    @Override
     public boolean isDirty() {
         final T message = internalBuild();
 
@@ -132,13 +131,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         return result;
     }
 
-    /**
-     * Sets an original state for this builder to allow building the new value on top of some
-     * pre-defined value.
-     *
-     * @param state the new state
-     */
-    @Internal
+    @Override
     public void setOriginalState(T state) {
         checkNotNull(state);
         this.originalState = state;
@@ -149,16 +142,6 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
 
     protected B getMessageBuilder() {
         return messageBuilder;
-    }
-
-    @Override
-    public B newOriginalBuilder() {
-        return createBuilder();
-    }
-
-    @Override
-    public Class<T> getMessageClass() {
-        return messageClass;
     }
 
     @Override

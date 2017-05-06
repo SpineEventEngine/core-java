@@ -158,8 +158,9 @@ public abstract class ProcessManager<I,
     }
 
     @Override
-    protected void apply(Message eventMessage) throws InvocationTargetException {
-        //TODO:5/5/17:alex.tymchenko: implement.
+    protected void apply(Message eventMessage,
+                         EventContext context) throws InvocationTargetException {
+        dispatchEvent(eventMessage, context);
     }
 
     @Override               // Overridden to expose this method to tests.

@@ -119,19 +119,6 @@ public abstract class Aggregate<I,
                 extends CommandHandlingEntity<I, S, B> {
 
     /**
-     * The builder for the aggregate state.
-     *
-     * <p>This field is non-null only when the aggregate changes its state
-     * during command handling or playing events.
-     *
-     * @see #createBuilder()
-     * @see #getBuilder()
-     * @see #updateState()
-     */
-    @Nullable
-    private volatile B builder;
-
-    /**
      * Events generated in the process of handling commands that were not yet committed.
      *
      * @see #commitEvents()
@@ -251,7 +238,7 @@ public abstract class Aggregate<I,
         for (Message eventOrMessage : messages) {
             final Message eventMessage = ensureEventMessage(eventOrMessage);
 
-            apply(eventMessage);
+            apply(eventMessage, null);
             incrementVersion();
 
             final Event event;
@@ -325,7 +312,8 @@ public abstract class Aggregate<I,
      * @throws InvocationTargetException    if an exception occurred when calling event applier
      */
     @Override
-    protected void apply(Message eventMessage) throws InvocationTargetException {
+    protected void apply(Message eventMessage,
+                         @Nullable EventContext ignored) throws InvocationTargetException {
         invokeApplier(eventMessage);
     }
 
@@ -344,10 +332,11 @@ public abstract class Aggregate<I,
         final S stateToRestore = AnyPacker.unpack(snapshot.getState());
 
         // See if we're in the state update cycle.
-        final B builder = this.builder;
+         boolean updateStateInProgress = isUpdateStateInProgress();
 
         final Version versionFromSnapshot = snapshot.getVersion();
-        if (builder != null) {
+        if (updateStateInProgress) {
+            final B builder = getBuilder();
             builder.clear();
             builder.mergeFrom(stateToRestore);
             initVersion(versionFromSnapshot);

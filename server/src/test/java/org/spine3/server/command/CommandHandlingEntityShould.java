@@ -25,6 +25,7 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
+import org.spine3.base.EventContext;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.TestActorRequestFactory;
@@ -104,7 +105,8 @@ public class CommandHandlingEntityShould {
         }
 
         @Override
-        protected void apply(Message eventMessage) throws InvocationTargetException {
+        protected void apply(Message eventMessage,
+                             EventContext ctx) throws InvocationTargetException {
             // do nothing
         }
     }

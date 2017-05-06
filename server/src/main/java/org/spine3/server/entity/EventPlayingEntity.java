@@ -24,14 +24,17 @@ import org.spine3.annotations.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
-import org.spine3.util.Exceptions;
+import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
+import org.spine3.validate.ValidatingBuilders;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.getMessage;
+import static org.spine3.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Reflection.getGenericParameterType;
 
@@ -45,11 +48,10 @@ public abstract class EventPlayingEntity <I,
                                           B extends ValidatingBuilder<S, ? extends Message.Builder>>
                       extends AbstractVersionableEntity<I, S> {
 
-
     /**
-     * The builder for the aggregate state.
+     * The builder for the entity state.
      *
-     * <p>This field is non-null only when the aggregate changes its state
+     * <p>This field is non-null only when the entity changes its state
      * during command handling or playing events.
      *
      * @see #createBuilder()
@@ -58,7 +60,6 @@ public abstract class EventPlayingEntity <I,
      */
     @Nullable
     private volatile B builder;
-
 
     /**
      * Creates a new instance.
@@ -71,7 +72,8 @@ public abstract class EventPlayingEntity <I,
         super(id);
     }
 
-    protected abstract void apply(Message eventMessage) throws InvocationTargetException;
+    protected abstract void apply(Message eventMessage,
+                                  EventContext context) throws InvocationTargetException;
 
     /**
      * Obtains the instance of the state builder.
@@ -82,7 +84,7 @@ public abstract class EventPlayingEntity <I,
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     protected B getBuilder() {
-        if (this.builder == null) {
+        if (!isUpdateStateInProgress()) {
             throw new IllegalStateException(
                     "Builder is not available. Make sure to call getBuilder() " +
                             "only from an event applier method.");
@@ -91,25 +93,41 @@ public abstract class EventPlayingEntity <I,
     }
 
     /**
-     * Updates the aggregate state and closes the update phase of the aggregate.
+     * Determines if the state update cycle is currently active.
+     *
+     * @return {@code true} if it is active, {@code false} otherwise
      */
-    protected void updateState() {
-        final S newState;
-        try {
-            newState = getBuilder().build();
-        } catch (ConstraintViolationThrowable violation) {
-            // should not happen, as the `Builder` validates the input in its setters.
-            throw Exceptions.illegalStateWithCauseOf(violation);
-        }
-        final Version version = getVersion();
-        updateState(newState, version);
-        this.builder = null;
+    protected boolean isUpdateStateInProgress() {
+        final boolean result = this.builder != null;
+        return result;
     }
 
     /**
-     * Sets the new state of the aggregate.
+     * Updates the entity state and closes the update phase of the entity.
+     */
+    protected void updateState() {
+        try {
+            final B builder = getBuilder();
+
+            // The state is only updated, if at least any changes were made to the builder.
+            if(builder.isDirty()) {
+                final S newState = builder.build();
+
+                final Version version = getVersion();
+                updateState(newState, version);
+            }
+        } catch (ConstraintViolationThrowable violation) {
+            // should not happen, as the `Builder` validates the input in its setters.
+            throw illegalStateWithCauseOf(violation);
+        } finally {
+            releaseBuilder();
+        }
+    }
+
+    /**
+     * Sets the new state of the entity.
      *
-     * <p>This method is called during the aggregate update phase.
+     * <p>This method is called during the entity update phase.
      * It is not not supposed to be called from outside of this class.
      *
      * @param state   the state object to set
@@ -121,14 +139,14 @@ public abstract class EventPlayingEntity <I,
     protected final void updateState(S state, Version version) {
         if (builder == null) {
             throw new IllegalStateException(
-                    "setState() is called from outside of the aggregate update phase.");
+                    "setState() is called from outside of the entity update phase.");
         }
         super.updateState(state, version);
     }
 
     protected void play(Iterable<Event> events) {
 
-        if(builder == null) {
+        if(!isUpdateStateInProgress()) {
             createBuilder();
         }
 
@@ -137,7 +155,7 @@ public abstract class EventPlayingEntity <I,
                 final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    apply(message);
+                    apply(message, context);
                     final Version newVersion = context.getVersion();
                     advanceVersion(newVersion);
                 } catch (InvocationTargetException e) {
@@ -146,10 +164,10 @@ public abstract class EventPlayingEntity <I,
             }
         } finally {
             /*
-                We perform updating the state of the aggregate in this `finally`
+                We perform updating the state of the entity in this `finally`
                 block (even if there was an exception in one of the appliers)
-                because we want to transit the aggregate out of the “applying events” mode
-                anyway. We do this to minimize the damage to the aggregate
+                because we want to transit the entity out of the “applying events” mode
+                anyway. We do this to minimize the damage to the entity
                 in the case of an exception caused by an applier method.
 
                 In general, applier methods must not throw. Command handlers can
@@ -182,7 +200,7 @@ public abstract class EventPlayingEntity <I,
      * after the call.
      *
      * <p>This method has package-private access to be accessible by the
-     * {@code AggregateBuilder} test utility class from the {@code testutil} module.
+     * {@code EntityBuilder} test utility classes from the {@code testutil} module.
      */
     protected void injectState(S stateToRestore, Version versionFromSnapshot) {
         try {
@@ -196,21 +214,67 @@ public abstract class EventPlayingEntity <I,
         }
     }
 
-    //TODO:5/6/17:alex.tymchenko: implement this in a more clear way.
-    private B newBuilderInstance() {
-        final B builder;
-        try {
-            final Class<B> builderClass = getGenericParameterType(getClass(), 2);
-            builder = (B) builderClass.getMethod("newBuilder")
-                                      .invoke(null);
+    protected void releaseBuilder() {
+        this.builder = null;
+    }
 
-        } catch (Exception e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
-        }
+    private B newBuilderInstance() {
+        @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
+        final Class<? extends EventPlayingEntity<I, S, B>> aClass =
+                (Class<? extends EventPlayingEntity<I, S, B>>)getClass();
+        final Class<B> builderClass = TypeInfo.getBuilderClass(aClass);
+        final B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
 
-    protected void releaseBuilder() {
-        this.builder = null;
+
+
+    /**
+     * Enumeration of generic type parameters of this class.
+     */
+    enum GenericParameter implements GenericTypeIndex {
+
+        /** The index of the generic type {@code <I>}. */
+        ID(0),
+
+        /** The index of the generic type {@code <S>}. */
+        STATE(1),
+
+        /** The index of the generic type {@code <B>}. */
+        STATE_BUILDER(2);
+
+        private final int index;
+
+        GenericParameter(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return this.index;
+        }
+    }
+
+    /**
+     * Provides type information on classes extending {@code EventPlayingEntity}.
+     */
+    static class TypeInfo {
+
+        private TypeInfo() {
+            // Prevent construction from outside.
+        }
+
+        /**
+         * Obtains the class of the {@linkplain ValidatingBuilder} for the given
+         * {@code EventPlayingEntity} descendant class {@code entityClass}.
+         */
+        static <I, S extends Message, B extends ValidatingBuilder<S, ? extends Message.Builder>>
+        Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
+            checkNotNull(entityClass);
+
+            final Class<B> builderClass = getGenericParameterType(entityClass,
+                                                                  STATE_BUILDER.getIndex());
+            return builderClass;
+        }
     }
 }

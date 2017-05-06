@@ -81,8 +81,9 @@ public abstract class Projection<I,
     }
 
     @Override
-    protected void apply(Message eventMessage) throws InvocationTargetException {
-        //TODO:5/6/17:alex.tymchenko: implement!
+    protected void apply(Message eventMessage,
+                         EventContext eventContext) throws InvocationTargetException {
+        dispatch(eventMessage, eventContext);
     }
 
     @Override               // Overridden to expose this method to tests.

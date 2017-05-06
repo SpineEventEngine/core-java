@@ -25,6 +25,10 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 
+import java.lang.reflect.Method;
+
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+
 /**
  * Utility class for working with {@linkplain ValidatingBuilder validating builders}.
  *
@@ -34,6 +38,23 @@ public class ValidatingBuilders {
 
     private ValidatingBuilders() {
         // Prevent instantiation of this utility class.
+    }
+
+    @SuppressWarnings("OverlyBroadCatchBlock")   // OK, as the exception handling is the same.
+    public static <B extends ValidatingBuilder<?, ?>> B newInstance(Class<B> builderClass) {
+        try {
+            final Method newBuilderMethod =
+                    ValidatingBuilder.TypeInfo.getNewBuilderMethod(builderClass);
+            final Object raw = newBuilderMethod.invoke(null);
+
+            // By convention, `newBuilder()` always returns instances of `B`.
+            @SuppressWarnings("unchecked")
+            final B builder = (B) raw;
+            return builder;
+
+        } catch (Exception e) {
+            throw illegalStateWithCauseOf(e);
+        }
     }
 
     public static final class StringValueValidatingBuilder
