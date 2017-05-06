@@ -37,8 +37,6 @@ import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectValidatingBuilder;
-import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
-import org.spine3.testdata.TestStandFactory;
 
 import java.util.Set;
 

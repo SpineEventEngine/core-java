@@ -39,7 +39,7 @@ buildscript {
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
         //TODO:4/26/17:alex.tymchenko: update to the release version before merging.
-        spineToolsVersion = '0.9.0.2-SNAPSHOT'
+        spineToolsVersion = '0.9.2-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.
