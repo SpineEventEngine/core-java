@@ -62,6 +62,13 @@ public abstract class EventPlayingEntity <I,
     private volatile B builder;
 
     /**
+     * The flag, which becomes {@code true}, if the state of the entity
+     * {@linkplain #updateState() has been changed} since it has been
+     * {@linkplain RecordBasedRepository#findOrCreate(Object)} loaded or created.
+     */
+    private volatile boolean stateChanged;
+
+    /**
      * Creates a new instance.
      *
      * @param id the ID for the new instance
@@ -74,6 +81,15 @@ public abstract class EventPlayingEntity <I,
 
     protected abstract void apply(Message eventMessage,
                                   EventContext context) throws InvocationTargetException;
+
+    /**
+     * Determines whether the state of this entity has been modified since its creation.
+     * @return {@code true} if the state has been modified, {@code false} otherwise.
+     */
+    @Internal
+    public boolean isStateChanged() {
+        return this.stateChanged;
+    }
 
     /**
      * Obtains the instance of the state builder.
@@ -142,6 +158,7 @@ public abstract class EventPlayingEntity <I,
                     "setState() is called from outside of the entity update phase.");
         }
         super.updateState(state, version);
+        this.stateChanged = true;
     }
 
     protected void play(Iterable<Event> events) {
