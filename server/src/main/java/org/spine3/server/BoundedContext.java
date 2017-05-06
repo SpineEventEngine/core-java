@@ -263,6 +263,9 @@ public final class BoundedContext
 
     private void registerAggregateRepository(AggregateRepository<?, ?> repository) {
         final Class<? extends Message> stateClass = repository.getAggregateStateClass();
+
+        //TODO:2017-05-06:alexander.yevsyukov: See if the state can be exposed by Visibility control in the state type descriptor.
+
         final AggregateRepository<?, ?> alreadyRegistered = aggregateRepositories.get(stateClass);
         if (alreadyRegistered != null) {
             final String errMsg = format(
