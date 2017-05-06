@@ -45,6 +45,7 @@ import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
@@ -175,7 +176,8 @@ class Given {
         }
     }
 
-    static class StandTestProjection extends Projection<ProjectId, Project> {
+    static class StandTestProjection
+            extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
 
         public StandTestProjection(ProjectId id) {
             super(id);

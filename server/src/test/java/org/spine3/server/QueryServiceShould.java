@@ -35,6 +35,7 @@ import org.spine3.server.stand.Stand;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.testdata.TestStandFactory;
 
@@ -172,7 +173,8 @@ public class QueryServiceShould {
         }
     }
 
-    private static class ProjectDetails extends Projection<ProjectId, Project> {
+    private static class ProjectDetails
+            extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
 
         /**
          * Creates a new instance.

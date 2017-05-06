@@ -63,7 +63,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <S> the type of projection state messages
  * @author Alexander Yevsyukov
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, S>, S extends Message>
+public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
 
     /** The {@code BoundedContext} in which this repository works. */
@@ -514,7 +514,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
-    private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>
+    private static class PendingDataFlushTask<I, P extends Projection<I, S, ?>, S extends Message>
             implements BulkWriteOperation.FlushCallback<P> {
 
         private final ProjectionRepository<I, P, S> projectionRepository;

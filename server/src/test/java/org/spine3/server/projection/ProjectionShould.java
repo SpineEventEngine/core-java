@@ -31,6 +31,7 @@ import org.spine3.base.Subscribe;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Given;
 import org.spine3.type.EventClass;
+import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -86,7 +87,8 @@ public class ProjectionShould {
         assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
 
-    private static class TestProjection extends Projection<String, StringValue> {
+    private static class TestProjection
+            extends Projection<String, StringValue, StringValueValidatingBuilder> {
 
         /** The number of events this class handles. */
         private static final int HANDLING_EVENT_COUNT = 2;

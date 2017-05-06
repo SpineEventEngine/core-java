@@ -26,6 +26,7 @@ import org.spine3.base.EventContext;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.EventClass;
+import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -44,7 +45,10 @@ import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
  * @param <I> the type of the IDs
  * @param <M> the type of the state objects holding projection data
  */
-public abstract class Projection<I, M extends Message> extends AbstractVersionableEntity<I, M> {
+public abstract class Projection<I,
+                                 M extends Message,
+                                 B extends ValidatingBuilder<M, ? extends Message.Builder>>
+        extends AbstractVersionableEntity<I, M> {
 
     /**
      * Creates a new instance.

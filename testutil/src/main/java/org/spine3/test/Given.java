@@ -86,10 +86,13 @@ public class Given {
     /**
      * Creates a builder for a {@code Projection}.
      */
-    public static <P extends Projection<I, S>, I, S extends Message>
-           ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
+    public static <P extends Projection<I, S, B>,
+            I,
+            S extends Message,
+            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
-        final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
+        final ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
         result.setResultClass(projectionClass);
         return result;
     }

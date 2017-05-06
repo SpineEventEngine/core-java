@@ -388,7 +388,8 @@ public class BoundedContextShould {
         }
     }
 
-    private static class ProjectReport extends Projection<ProjectId, Empty> {
+    private static class ProjectReport
+            extends Projection<ProjectId, Empty, EmptyValidatingBuilder> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // Public constructor is a part of projection public API. It's called by a repository.

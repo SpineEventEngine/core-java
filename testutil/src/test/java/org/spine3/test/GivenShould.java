@@ -34,6 +34,7 @@ import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders.TimestampValidatingBuilder;
+import org.spine3.validate.ValidatingBuilders.UInt32ValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -91,7 +92,9 @@ public class GivenShould {
                                              .getResultClass());
     }
 
-    private static class AProjection extends Projection<String, UInt32Value> {
+    private static class AProjection extends Projection<String,
+                                                        UInt32Value,
+                                                        UInt32ValueValidatingBuilder> {
         protected AProjection(String id) {
             super(id);
         }

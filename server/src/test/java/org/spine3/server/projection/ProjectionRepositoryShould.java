@@ -52,6 +52,8 @@ import org.spine3.test.TestEventFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.ProjectTaskNames;
+import org.spine3.test.projection.ProjectTaskNamesValidatingBuilder;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
@@ -502,7 +504,7 @@ public class ProjectionRepositoryShould
     }
 
     /** The projection stub used in tests. */
-    static class TestProjection extends Projection<ProjectId, Project> {
+    static class TestProjection extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered =
@@ -572,7 +574,9 @@ public class ProjectionRepositoryShould
      * does not modify the state of an {@code Entity}. For the newly created entities it leads
      * to an invalid entry created in the storage.
      */
-    static class NoopTaskNamesProjection extends Projection<ProjectId, ProjectTaskNames> {
+    static class NoopTaskNamesProjection extends Projection<ProjectId,
+                                                            ProjectTaskNames,
+                                                            ProjectTaskNamesValidatingBuilder> {
 
         public NoopTaskNamesProjection(ProjectId id) {
             super(id);
