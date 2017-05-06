@@ -40,6 +40,7 @@ import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * A registry of repositories that controls access to them depending on the visibility of
@@ -53,14 +54,36 @@ public final class VisibilityGuard {
 
     private final Map<Class, RepositoryAccess> repositories = newHashMap();
 
+    private VisibilityGuard() {
+        // Prevent instantiation from outside.
+    }
+
+    public static VisibilityGuard newInstance() {
+        return new VisibilityGuard();
+    }
+
     public void register(Repository repository) {
         checkNotNull(repository);
         final Class stateClass = repository.getEntityStateClass();
+        checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 
-    public Optional<Repository>
-    getRepository(Class<? extends Message> stateClass) {
+    private void checkNotAlreadyRegistered(Class stateClass) {
+        final RepositoryAccess alreadyRegistered = repositories.get(stateClass);
+        if (alreadyRegistered != null) {
+            throw newIllegalStateException(
+                    "A repository for the state class %s already registered: %s",
+                    stateClass, alreadyRegistered);
+        }
+    }
+
+    public boolean hasRepository(Class<? extends Message> stateClass) {
+        final boolean result = repositories.containsKey(stateClass);
+        return result;
+    }
+
+    public Optional<Repository> getRepository(Class<? extends Message> stateClass) {
         final RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
             throw newIllegalArgumentException(

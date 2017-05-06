@@ -23,7 +23,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -40,6 +39,7 @@ import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.entity.VisibilityGuard;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.failure.FailureBus;
@@ -55,12 +55,12 @@ import org.spine3.server.tenant.TenantIndex;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
 
 /**
@@ -92,12 +92,8 @@ public final class BoundedContext
     /** All the repositories registered with this bounded context. */
     private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
 
-    /**
-     * The map from a type of aggregate state to an aggregate repository instance that
-     * manages such aggregates.
-     */
-    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories =
-            Maps.newHashMap();
+    /** The registry of repositories with access control by entity state visibility. */
+    private final VisibilityGuard guard = VisibilityGuard.newInstance();
 
     /**
      * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
@@ -262,19 +258,7 @@ public final class BoundedContext
     }
 
     private void registerAggregateRepository(AggregateRepository<?, ?> repository) {
-        final Class<? extends Message> stateClass = repository.getAggregateStateClass();
-
-        //TODO:2017-05-06:alexander.yevsyukov: See if the state can be exposed by Visibility control in the state type descriptor.
-
-        final AggregateRepository<?, ?> alreadyRegistered = aggregateRepositories.get(stateClass);
-        if (alreadyRegistered != null) {
-            final String errMsg = format(
-                    "Repository for aggregates with the state %s already registered: %s",
-                    stateClass, alreadyRegistered
-            );
-            throw new IllegalStateException(errMsg);
-        }
-        aggregateRepositories.put(stateClass, repository);
+        guard.register(repository);
     }
 
     /**
@@ -350,8 +334,20 @@ public final class BoundedContext
      */
     public Optional<? extends AggregateRepository<?, ?>> getAggregateRepository(
             Class<? extends Message> aggregateStateClass) {
-        final AggregateRepository<?, ?> result = aggregateRepositories.get(aggregateStateClass);
-        return Optional.fromNullable(result);
+        // See if there is a repository for this state at all.
+        if (!guard.hasRepository(aggregateStateClass)) {
+            throw newIllegalStateException("No repository found for class %s",
+                                           aggregateStateClass.getName());
+        }
+
+        // See if the aggregate state is visible.
+        final Optional<Repository> repository = guard.getRepository(aggregateStateClass);
+        if (!repository.isPresent()) {
+            return Optional.absent();
+        }
+
+        final AggregateRepository<?, ?> result = (AggregateRepository<?, ?>) repository.get();
+        return Optional.of(result);
     }
 
     /**

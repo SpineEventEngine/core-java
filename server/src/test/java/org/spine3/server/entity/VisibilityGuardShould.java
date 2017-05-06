@@ -51,7 +51,7 @@ public class VisibilityGuardShould {
     public void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
-        guard = new VisibilityGuard();
+        guard = VisibilityGuard.newInstance();
         guard.register(new ExposedRepository(boundedContext));
         guard.register(new SubscribableRepository(boundedContext));
         guard.register(new HiddenRepository(boundedContext));
