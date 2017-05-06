@@ -130,7 +130,7 @@ public abstract class EventPlayingEntity <I,
         try {
             final B builder = getBuilder();
 
-            // The state is only updated, if at least any changes were made to the builder.
+            // The state is only updated, if at least some changes were made to the builder.
             if(builder.isDirty()) {
                 final S newState = builder.build();
 
