@@ -21,6 +21,7 @@
 package org.spine3.server.projection;
 
 import com.google.protobuf.Message;
+import org.spine3.base.Version;
 import org.spine3.server.entity.EntityBuilder;
 import org.spine3.validate.ValidatingBuilder;
 
@@ -48,5 +49,10 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
     public ProjectionBuilder<P, I, S, B> setResultClass(Class<P> entityClass) {
         super.setResultClass(entityClass);
         return this;
+    }
+
+    @Override
+    protected void setState(P result, S state, Version version) {
+        result.injectState(state, version);
     }
 }

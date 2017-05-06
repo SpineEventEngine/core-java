@@ -20,10 +20,12 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.base.Version;
+import org.spine3.server.entity.EventPlayingEntity;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ValidatingBuilder;
@@ -48,7 +50,7 @@ import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
 public abstract class Projection<I,
                                  M extends Message,
                                  B extends ValidatingBuilder<M, ? extends Message.Builder>>
-        extends AbstractVersionableEntity<I, M> {
+        extends EventPlayingEntity<I, M, B> {
 
     /**
      * Creates a new instance.
@@ -65,12 +67,28 @@ public abstract class Projection<I,
     }
 
     private void dispatch(Message eventMessage, EventContext ctx) {
+        createBuilder();
+
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
             method.invoke(this, eventMessage, ctx);
+            updateState();
         } catch (InvocationTargetException e) {
             throw new IllegalStateException(e);
+        } finally {
+            releaseBuilder();
         }
+    }
+
+    @Override
+    protected void apply(Message eventMessage) throws InvocationTargetException {
+        //TODO:5/6/17:alex.tymchenko: implement!
+    }
+
+    @Override               // Overridden to expose this method to tests.
+    @VisibleForTesting
+    protected void injectState(M stateToRestore, Version versionFromSnapshot) {
+        super.injectState(stateToRestore, versionFromSnapshot);
     }
 
     static class TypeInfo {

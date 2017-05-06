@@ -99,15 +99,15 @@ public class ProjectionShould {
 
         @Subscribe
         public void on(StringValue event) {
-            final StringValue newSate = createNewState("stringState", event.getValue());
-            incrementState(newSate);
+            final StringValue newState = createNewState("stringState", event.getValue());
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
         public void on(Int32Value event) {
-            final StringValue newSate = createNewState("integerState",
+            final StringValue newState = createNewState("integerState",
                                                        String.valueOf(event.getValue()));
-            incrementState(newSate);
+            getBuilder().mergeFrom(newState);
         }
 
         private StringValue createNewState(String type, String value) {
