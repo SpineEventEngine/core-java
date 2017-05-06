@@ -25,7 +25,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.string.Stringifier;
 import org.spine3.string.StringifierRegistry;
 import org.spine3.time.LocalDate;

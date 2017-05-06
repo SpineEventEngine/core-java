@@ -20,7 +20,7 @@
 
 package org.spine3.util;
 
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.ParameterizedType;

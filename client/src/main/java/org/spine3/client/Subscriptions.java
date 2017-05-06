@@ -19,7 +19,7 @@
  */
 package org.spine3.client;
 
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
 
 import static java.lang.String.format;

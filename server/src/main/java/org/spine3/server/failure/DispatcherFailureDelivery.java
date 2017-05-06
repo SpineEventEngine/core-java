@@ -19,7 +19,7 @@
  */
 package org.spine3.server.failure;
 
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.envelope.FailureEnvelope;
 import org.spine3.server.outbus.CommandOutputDelivery;
 import org.spine3.type.FailureClass;

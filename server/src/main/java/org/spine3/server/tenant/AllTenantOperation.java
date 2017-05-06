@@ -20,7 +20,7 @@
 
 package org.spine3.server.tenant;
 
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;

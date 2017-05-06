@@ -18,35 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.annotations;
-
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * Annotates a program element (class, method, package etc.) as an element of
- * Service Provider Interface (SPI).
- *
- * <p>SPI is used to enable framework extension and replaceable components
- * (implement a new storage, etc).
- *
- * <p>See "Effective Java 2nd Edition", chapter 2, item 1 for more info about
- * service provider framework pattern.
- *
- * @author Alexander Litus
+ * This package contains common annotation types for Java code and
+ * generated classes for annotations of Proto types.
  */
-@SPI
-@Retention(RetentionPolicy.SOURCE)
-@Target({
-        ElementType.ANNOTATION_TYPE,
-        ElementType.CONSTRUCTOR,
-        ElementType.FIELD,
-        ElementType.METHOD,
-        ElementType.PACKAGE,
-        ElementType.TYPE})
-@Documented
-public @interface SPI {
-}
+
+@ParametersAreNonnullByDefault
+package org.spine3.annotation;
+
+import javax.annotation.ParametersAreNonnullByDefault;
