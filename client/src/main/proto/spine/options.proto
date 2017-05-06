@@ -238,9 +238,8 @@ extend google.protobuf.FieldOptions {
     // If using the FQN field names, the `enrichment_for` annotation may be omitted
     // (the same behavior as with a single-argument `by` annotation).
     //
-    string by = 57125; // NOTE: this field number is used in the `tools` project,
+    string by = 73900; // NOTE: this field number is used in the `tools` project,
                        // EnrichmentLookupPlugin (update it there on changing).
-    //TODO:2017-05-05:alexander.yevsyukov: Change the above value to 73900 after updating Plugin.
 }
 
 extend google.protobuf.MessageOptions {
@@ -329,10 +328,8 @@ extend google.protobuf.MessageOptions {
     // - all `by` options have the event name prefix ("example.events.MyEvent.user_id" instead of
     //   just "user_id").
     //
-    string enrichment_for = 57124;  // NOTE: this field number is used in `tools` project,
+    string enrichment_for = 73922;  // NOTE: this field number is used in `tools` project,
                                     // EnrichmentLookupPlugin (update it there on changing).
-
-    //TODO:2017-05-05:alexander.yevsyukov: Change to 73922 after updating the number in the plugin.
 
     // An instruction to enrich an event with one or more enrichments.
     //
@@ -359,10 +356,8 @@ extend google.protobuf.MessageOptions {
     //     string username = 1 [(by) = "*.user_id"];
     // }
     //
-    string enrichment = 57126; // NOTE: this field number is used in the `tools` project,
+    string enrichment = 73923; // NOTE: this field number is used in the `tools` project,
                                // EnrichmentLookupPlugin (update it there on changing).
-
-    //TODO:2017-05-05:alexander.yevsyukov: Change to 73923 after updating the number in the plugin.
 
     // reserved 73924 to 73939 for future options.
 
@@ -394,9 +389,8 @@ extend google.protobuf.FileOptions {
     // This type URL will be used when packing messages into `Any`.
     // See `any.proto` for more details.
     //
-    string type_url_prefix = 58204; // NOTE: this field number is used in `tools` project,
+    string type_url_prefix = 73941; // NOTE: this field number is used in `tools` project,
                                     // ProtoToJavaMapperPlugin (update it there on changing).
-    //TODO:2017-05-05:alexander.yevsyukov: change to 73941 after updating plugin
 
     // Indicates a file which should not be used by users of the framework.
     bool internal_all = 73942;
