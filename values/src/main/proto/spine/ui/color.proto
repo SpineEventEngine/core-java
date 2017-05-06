@@ -27,7 +27,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ColorProto";
 option java_package = "org.spine3.ui";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 // RGB definition of a color.
 message Color {

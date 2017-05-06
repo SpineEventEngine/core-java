@@ -27,7 +27,7 @@ import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.string.Stringifier;

@@ -28,13 +28,10 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.stand.StandUpdateDelivery;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
 import org.spine3.test.Tests;
-import org.spine3.testdata.TestCommandBusFactory;
-import org.spine3.testdata.TestEventBusFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,8 +48,7 @@ public class BoundedContextBuilderShould {
     @Before
     public void setUp() {
         final boolean multitenant = true;
-        storageFactory = StorageFactorySwitch.getInstance(multitenant)
-                                             .get();
+        storageFactory = StorageFactorySwitch.get(multitenant);
         builder = BoundedContext.newBuilder()
                                 .setMultitenant(multitenant);
     }
@@ -89,12 +85,12 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_CommandDispatcher() {
-        builder.setCommandBus(Tests.<CommandBus>nullRef());
+        builder.setCommandBus(Tests.<CommandBus.Builder>nullRef());
     }
 
     @Test
-    public void return_CommandBus() {
-        final CommandBus expected = TestCommandBusFactory.create(storageFactory);
+    public void return_CommandBus_Builder() {
+        final CommandBus.Builder expected = CommandBus.newBuilder();
         builder = BoundedContext.newBuilder()
                                 .setCommandBus(expected);
         assertEquals(expected, builder.getCommandBus()
@@ -102,8 +98,8 @@ public class BoundedContextBuilderShould {
     }
 
     @Test
-    public void return_EventBus() {
-        final EventBus expected = TestEventBusFactory.create(storageFactory);
+    public void return_EventBus_builder() {
+        final EventBus.Builder expected = EventBus.newBuilder();
         builder.setEventBus(expected);
         assertEquals(expected, builder.getEventBus()
                                       .get());
@@ -140,24 +136,24 @@ public class BoundedContextBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_EventBus() {
-        builder.setEventBus(Tests.<EventBus>nullRef());
+        builder.setEventBus(Tests.<EventBus.Builder>nullRef());
     }
 
     @Test
     public void create_CommandBus_if_it_was_not_set() {
         // Pass EventBus to builder initialization, and do NOT pass CommandBus.
         final BoundedContext boundedContext = builder
-                .setEventBus(TestEventBusFactory.create(storageFactory))
+                .setEventBus(EventBus.newBuilder())
                 .build();
         assertNotNull(boundedContext.getCommandBus());
     }
 
     @Test
     public void create_EventBus_if_it_was_not_set() {
-        // Pass CommandBus to builder initialization, and do NOT pass EventBus.
+        // Pass CommandBus.Builder to builder initialization, and do NOT pass EventBus.
         final BoundedContext boundedContext = builder
                 .setMultitenant(true)
-                .setCommandBus(TestCommandBusFactory.create(storageFactory))
+                .setCommandBus(CommandBus.newBuilder())
                 .build();
         assertNotNull(boundedContext.getEventBus());
     }
@@ -169,31 +165,11 @@ public class BoundedContextBuilderShould {
         assertNotNull(boundedContext.getEventBus());
     }
 
-    @Test
-    public void accept_CommandStore() {
-        final CommandStore commandStore = mock(CommandStore.class);
-        builder.setCommandStore(commandStore);
-        assertEquals(commandStore, builder.getCommandStore().get());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void reject_null_CommandStore() {
-        builder.setCommandStore(Tests.<CommandStore>nullRef());
-    }
-
-    @Test
-    public void return_StandUpdateDelivery_if_set() {
-        final StandUpdateDelivery mock = mock(StandUpdateDelivery.class);
-        assertEquals(mock, builder.setStandUpdateDelivery(mock)
-                                  .getStandUpdateDelivery().get());
-    }
-
     @Test(expected = IllegalStateException.class)
     public void match_multitenance_state_of_BoundedContext_and_CommandBus_if_single_tenant() {
-        final CommandBus commandBus = CommandBus.newBuilder()
+        final CommandBus.Builder commandBus = CommandBus.newBuilder()
                                                 .setMultitenant(true)
-                                                .setCommandStore(mock(CommandStore.class))
-                                                .build();
+                                                .setCommandStore(mock(CommandStore.class));
         BoundedContext.newBuilder()
                        .setMultitenant(false)
                        .setCommandBus(commandBus)

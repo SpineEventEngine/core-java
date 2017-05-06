@@ -20,7 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;

@@ -402,8 +402,7 @@ public class AggregateRepositoryShould {
 
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                            .get());
+            initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
 
         @Override

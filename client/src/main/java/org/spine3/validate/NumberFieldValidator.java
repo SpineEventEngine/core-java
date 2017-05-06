@@ -25,12 +25,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.internal.DecimalMaxOption;
-import org.spine3.validate.internal.DecimalMinOption;
-import org.spine3.validate.internal.DigitsOption;
-import org.spine3.validate.internal.MaxOption;
-import org.spine3.validate.internal.MinOption;
-import org.spine3.validate.internal.ValidationProto;
+import org.spine3.option.DecimalMaxOption;
+import org.spine3.option.DecimalMinOption;
+import org.spine3.option.DigitsOption;
+import org.spine3.option.MaxOption;
+import org.spine3.option.MinOption;
+import org.spine3.option.OptionsProto;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -67,13 +67,13 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
                                    ImmutableList<V> fieldValues,
                                    FieldPath rootFieldPath) {
         super(descriptor, fieldValues, rootFieldPath, false);
-        this.minDecimalOpt = getFieldOption(ValidationProto.decimalMin);
+        this.minDecimalOpt = getFieldOption(OptionsProto.decimalMin);
         this.isMinDecimalInclusive = minDecimalOpt.getInclusive();
-        this.maxDecimalOpt = getFieldOption(ValidationProto.decimalMax);
+        this.maxDecimalOpt = getFieldOption(OptionsProto.decimalMax);
         this.isMaxDecimalInclusive = maxDecimalOpt.getInclusive();
-        this.minOption = getFieldOption(ValidationProto.min);
-        this.maxOption = getFieldOption(ValidationProto.max);
-        this.digitsOption = getFieldOption(ValidationProto.digits);
+        this.minOption = getFieldOption(OptionsProto.min);
+        this.maxOption = getFieldOption(OptionsProto.max);
+        this.digitsOption = getFieldOption(OptionsProto.digits);
     }
 
     /** Converts a string representation to a number. */

@@ -17,21 +17,13 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.testdata;
-
-import org.spine3.server.failure.FailureBus;
 
 /**
- * @author Alex Tymchenko
+ * This package contains common annotation types for Java code and
+ * generated classes for annotations of Proto types.
  */
-public class TestFailureBusFactory {
 
-    private TestFailureBusFactory() {
-        // Prevent instantiation of this utility factory.
-    }
+@ParametersAreNonnullByDefault
+package org.spine3.annotation;
 
-    public static FailureBus create() {
-        return FailureBus.newBuilder()
-                         .build();
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

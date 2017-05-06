@@ -29,6 +29,8 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.FieldPath;
+import org.spine3.option.OptionsProto;
+import org.spine3.option.Time;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
 import org.spine3.test.validate.msg.CustomMessageRequiredEnumFieldValue;
@@ -65,8 +67,6 @@ import org.spine3.test.validate.msg.TimeInFutureFieldValue;
 import org.spine3.test.validate.msg.TimeInPastFieldValue;
 import org.spine3.test.validate.msg.TimeWithoutOptsFieldValue;
 import org.spine3.time.Durations2;
-import org.spine3.validate.internal.Time;
-import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
@@ -309,7 +309,7 @@ public class MessageValidatorShould {
         final Descriptors.FieldDescriptor firstFieldDescriptor = descriptor.getFields()
                                                                            .get(0);
         return firstFieldDescriptor.getOptions()
-                                   .getExtension(ValidationProto.ifMissing)
+                                   .getExtension(OptionsProto.ifMissing)
                                    .getMsgFormat();
     }
 

@@ -112,13 +112,14 @@ class Given {
         return aggregateRepo(boundedContext);
     }
 
-    static BoundedContext boundedContext(Stand stand, StandUpdateDelivery standUpdateDelivery) {
+    static BoundedContext boundedContext(Stand.Builder stand, StandUpdateDelivery delivery) {
         return boundedContextBuilder(stand)
-                .setStandUpdateDelivery(standUpdateDelivery)
+                .setStand(Stand.newBuilder()
+                               .setDelivery(delivery))
                 .build();
     }
 
-    private static BoundedContext.Builder boundedContextBuilder(Stand stand) {
+    private static BoundedContext.Builder boundedContextBuilder(Stand.Builder stand) {
         return BoundedContext.newBuilder()
                              .setStand(stand);
     }
@@ -127,14 +128,16 @@ class Given {
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            addIdSetFunction(ProjectCreated.class, new IdSetEventFunction<ProjectId, ProjectCreated>() {
-                @Override
-                public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
-                    return ImmutableSet.of(ProjectId.newBuilder()
-                                                    .setId(PROJECT_UUID)
-                                                    .build());
-                }
-            });
+            addIdSetFunction(ProjectCreated.class,
+                             new IdSetEventFunction<ProjectId, ProjectCreated>() {
+                                 @Override
+                                 public Set<ProjectId> apply(ProjectCreated message,
+                                                             EventContext context) {
+                                     return ImmutableSet.of(ProjectId.newBuilder()
+                                                                     .setId(PROJECT_UUID)
+                                                                     .build());
+                                 }
+                             });
         }
     }
 

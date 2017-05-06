@@ -27,19 +27,19 @@ import com.google.protobuf.Timestamp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
+import org.spine3.option.IfInvalidOption;
+import org.spine3.option.OptionsProto;
+import org.spine3.option.Time;
+import org.spine3.option.TimeOption;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.validate.internal.IfInvalidOption;
-import org.spine3.validate.internal.Time;
-import org.spine3.validate.internal.TimeOption;
-import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
+import static org.spine3.option.Time.FUTURE;
+import static org.spine3.option.Time.TIME_UNDEFINED;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.time.Timestamps2.isLaterThan;
 import static org.spine3.validate.Validate.isDefault;
-import static org.spine3.validate.internal.Time.FUTURE;
-import static org.spine3.validate.internal.Time.TIME_UNDEFINED;
 
 /**
  * Validates fields of type {@link Message}.
@@ -69,9 +69,9 @@ class MessageFieldValidator extends FieldValidator<Message> {
               FieldValidator.<Message>toValueList(fieldValues),
               rootFieldPath,
               strict);
-        this.timeOption = getFieldOption(ValidationProto.when);
-        this.validateOption = getFieldOption(ValidationProto.valid);
-        this.ifInvalidOption = getFieldOption(ValidationProto.ifInvalid);
+        this.timeOption = getFieldOption(OptionsProto.when);
+        this.validateOption = getFieldOption(OptionsProto.valid);
+        this.ifInvalidOption = getFieldOption(OptionsProto.ifInvalid);
         this.isFieldTimestamp = isTimestamp();
     }
 

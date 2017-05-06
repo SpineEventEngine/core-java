@@ -23,7 +23,7 @@ package org.spine3.validate;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
 import com.google.protobuf.Value;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Error;
 import org.spine3.type.MessageClass;
 

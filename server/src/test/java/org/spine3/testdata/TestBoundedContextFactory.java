@@ -25,6 +25,7 @@ import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.stand.Stand;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 
 /**
@@ -32,10 +33,10 @@ import org.spine3.server.storage.StorageFactorySwitch;
  *
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings("UtilityClass")
 public class TestBoundedContextFactory {
 
     private TestBoundedContextFactory() {
+        // Prevent instantiation of this utility class.
     }
 
     public static class SingleTenant {
@@ -44,7 +45,7 @@ public class TestBoundedContextFactory {
             // Prevent instantiation of this utility class.
         }
 
-        public static BoundedContext newBoundedContext(Stand stand) {
+        public static BoundedContext newBoundedContext(Stand.Builder stand) {
             return BoundedContext.newBuilder()
                                  .setStand(stand)
                                  .build();
@@ -66,42 +67,41 @@ public class TestBoundedContextFactory {
             return newBuilder().build();
         }
 
-        public static BoundedContext newBoundedContext(EventBus eventBus) {
+        public static BoundedContext newBoundedContext(EventBus.Builder eventBus) {
             return newBuilder()
                     .setEventBus(eventBus)
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(CommandBus commandBus) {
+        public static BoundedContext newBoundedContext(CommandBus.Builder commandBus) {
             return newBuilder()
                     .setCommandBus(commandBus)
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(String name, Stand stand) {
+        public static BoundedContext newBoundedContext(String name, Stand.Builder stand) {
             return newBuilder()
                     .setStand(stand)
                     .setName(name)
                     .build();
         }
 
-        public static BoundedContext newBoundedContext(Stand stand) {
+        public static BoundedContext newBoundedContext(Stand.Builder stand) {
             return newBuilder()
                     .setStand(stand)
                     .build();
         }
 
         public static BoundedContext newBoundedContext(EventEnricher enricher) {
-            final EventBus eventBus = EventBus.newBuilder()
-                                              .setEnricher(enricher)
-                                              .setStorageFactory(
-                                                      StorageFactorySwitch.getInstance(true)
-                                                                          .get())
-                                              .build();
+            final StorageFactory factory = StorageFactorySwitch.get(true);
+            final EventBus.Builder eventBus = EventBus.newBuilder()
+                                                      .setEnricher(enricher)
+                                                      .setStorageFactory(factory);
             return newBoundedContext(eventBus);
         }
 
-        public static BoundedContext newBoundedContext(CommandBus commandBus, EventBus eventBus) {
+        public static BoundedContext newBoundedContext(CommandBus.Builder commandBus,
+                                                       EventBus.Builder eventBus) {
             return newBuilder()
                     .setCommandBus(commandBus)
                     .setEventBus(eventBus)

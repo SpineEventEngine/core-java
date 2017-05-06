@@ -22,7 +22,7 @@ package org.spine3.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotations.ExperimentalApi;
+import org.spine3.annotation.ExperimentalApi;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;

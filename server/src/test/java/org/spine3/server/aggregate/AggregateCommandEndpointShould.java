@@ -27,14 +27,15 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Event;
+import org.spine3.base.Identifiers;
+import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHistory;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandstore.CommandStore;
-import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
@@ -54,7 +55,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.aggregate.Given.ACommand.addTask;
 import static org.spine3.server.aggregate.Given.ACommand.createProject;
 import static org.spine3.server.aggregate.Given.ACommand.startProject;
@@ -68,21 +68,37 @@ public class AggregateCommandEndpointShould {
      * The spy to be used when it is required to avoid problems, make tests faster and easier.
      */
     private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
-    private EventBus eventBus;
 
-    private final ProjectId projectId = Sample.messageOfType(ProjectId.class);
+    private ProjectId projectId;
+    private Subscriber subscriber;
 
     @Before
     public void setUp() {
-        eventBus = mock(EventBus.class);
+        projectId = ProjectId.newBuilder()
+                             .setId(Identifiers.newUuid())
+                             .build();
+
         final CommandStore commandStore = mock(CommandStore.class);
-        final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setMultitenant(true)
-                                                .setCommandStore(commandStore)
-                                                .build();
-        final BoundedContext boundedContext = newBoundedContext(commandBus, eventBus);
+        final CommandBus.Builder commandBus = CommandBus.newBuilder()
+                                                        .setMultitenant(true)
+                                                        .setCommandStore(commandStore);
+        final BoundedContext boundedContext = newBoundedContext(commandBus);
+        subscriber = new Subscriber();
+
+        boundedContext.getEventBus().register(subscriber);
+
         repository = new ProjectAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
+    }
+
+    private static class Subscriber extends EventSubscriber {
+
+        private ProjectCreated remembered;
+
+        @Subscribe
+        void on(ProjectCreated msg) {
+            remembered = msg;
+        }
     }
 
     @After
@@ -97,8 +113,7 @@ public class AggregateCommandEndpointShould {
 
         repository.dispatch(cmd);
 
-        final Event event = verifyEventPosted();
-        final ProjectCreated msg = getMessage(event);
+        final ProjectCreated msg = subscriber.remembered;
         assertEquals(projectId, msg.getProjectId());
     }
 
@@ -158,12 +173,6 @@ public class AggregateCommandEndpointShould {
     /*
      * Utility methods.
      ****************************/
-
-    private Event verifyEventPosted() {
-        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus).post(eventCaptor.capture());
-        return eventCaptor.getValue();
-    }
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
             AggregateCommandEndpointShould.ProjectAggregate> repository) {
@@ -243,11 +252,10 @@ public class AggregateCommandEndpointShould {
     }
 
     private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
+        extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            initStorage(StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                            .get());
+            initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
     }
 }

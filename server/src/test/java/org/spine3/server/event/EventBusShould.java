@@ -80,11 +80,10 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        this.storageFactory = StorageFactorySwitch.getInstance(true)
-                                                  .get();
+        this.storageFactory = StorageFactorySwitch.get(true);
         /**
-         * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() MoreExecutors.directExecutor()}
-         * because it's impossible to spy on {@code final} classes.
+         * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()
+         * MoreExecutors.directExecutor()} because it's impossible to spy on {@code final} classes.
          */
         this.delegateDispatcherExecutor = spy(directExecutor());
         this.postponedDispatcherDelivery =

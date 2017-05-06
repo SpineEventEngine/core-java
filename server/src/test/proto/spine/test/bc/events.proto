@@ -26,11 +26,11 @@ option java_package="org.spine3.test.bc.event";
 option java_outer_classname = "TestBcEventsProto";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/test/bc/project.proto";
 
 message ProjectCreated {
-    ProjectId project_id = 1;
+    ProjectId project_id = 1 [(required) = true];
 }
 
 message TaskAdded {

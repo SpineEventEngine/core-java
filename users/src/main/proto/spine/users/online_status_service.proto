@@ -30,7 +30,7 @@ option java_multiple_files = true;
 option java_outer_classname = "OnlineStatusServiceProto";
 option java_generate_equals_and_hash = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/users/user_id.proto";
 import "spine/users/online_status.proto";
 

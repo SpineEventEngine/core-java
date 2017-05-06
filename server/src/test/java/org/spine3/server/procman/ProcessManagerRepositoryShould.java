@@ -29,7 +29,6 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -41,7 +40,7 @@ import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
-import org.spine3.server.event.EventBus;
+import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.EventTests;
@@ -58,7 +57,6 @@ import org.spine3.test.procman.event.ProjectStarted;
 import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
-import org.spine3.testdata.TestEventBusFactory;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
 
@@ -68,13 +66,8 @@ import java.util.Set;
 
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.createCommand;
-import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
@@ -92,14 +85,12 @@ public class ProcessManagerRepositoryShould
 
     private BoundedContext boundedContext;
     private TestProcessManagerRepository repository;
-    private EventBus eventBus;
 
     // Configuration of the test suite
     //---------------------------------
 
     private StorageFactory storageFactory() {
-        return StorageFactorySwitch.getInstance(boundedContext.isMultitenant())
-                                   .get();
+        return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     @Override
@@ -144,8 +135,7 @@ public class ProcessManagerRepositoryShould
     @Before
     public void setUp() {
         super.setUp();
-        eventBus = spy(TestEventBusFactory.create());
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext(eventBus);
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
 
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
@@ -156,14 +146,24 @@ public class ProcessManagerRepositoryShould
 
                           @Override
                           public void dispatch(CommandEnvelope envelope) {
-                              // Simply swallow the command. We need this dispatcher for allowing Process Manager
-                              // under test to route the AddTask command.
+                              /* Simply swallow the command. We need this dispatcher for allowing
+                                 Process Manager under test to route the AddTask command. */
                           }
                       });
 
         repository = new TestProcessManagerRepository(boundedContext);
         repository.initStorage(storageFactory());
         TestProcessManager.clearMessageDeliveryHistory();
+    }
+
+    private static class Subscriber extends EventSubscriber {
+
+        private TaskAdded remembered;
+
+        @Subscribe
+        void on(TaskAdded msg) {
+            remembered = msg;
+        }
     }
 
     @Override
@@ -226,16 +226,12 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void dispatch_command_and_post_events() throws InvocationTargetException {
+        final Subscriber subscriber = new Subscriber();
+        boundedContext.getEventBus().register(subscriber);
+
         testDispatchCommand(addTask());
 
-        final ArgumentCaptor<Event> argumentCaptor = ArgumentCaptor.forClass(Event.class);
-
-        verify(eventBus, times(1)).post(argumentCaptor.capture());
-
-        final Event event = argumentCaptor.getValue();
-
-        assertNotNull(event);
-        final TaskAdded message = unpack(event.getMessage());
+        final TaskAdded message = subscriber.remembered;
         assertEquals(ID, message.getProjectId());
     }
 

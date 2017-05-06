@@ -89,8 +89,7 @@ public class ProcessManagerShould {
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = StorageFactorySwitch.getInstance(true)
-                                                                  .get();
+        final StorageFactory storageFactory = StorageFactorySwitch.get(true);
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
         final CommandStore commandStore = spy(
                 new CommandStore(storageFactory, tenantIndex)

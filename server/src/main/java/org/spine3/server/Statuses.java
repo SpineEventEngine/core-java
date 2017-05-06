@@ -23,7 +23,7 @@ package org.spine3.server;
 import io.grpc.Metadata;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Error;
 import org.spine3.base.MetadataConverter;
 

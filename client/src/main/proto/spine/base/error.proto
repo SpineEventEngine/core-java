@@ -29,7 +29,7 @@ option java_package = "org.spine3.base";
 
 import "google/protobuf/struct.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/validate/constraint_violation.proto";
 import "spine/validate/validation_error.proto";
 

@@ -25,8 +25,7 @@ option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.projection";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 message ProjectId {
     string id = 1;

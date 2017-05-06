@@ -26,7 +26,7 @@ option java_package="org.spine3.test.commandservice.customer.command";
 option java_outer_classname = "CustomerCommandsProto";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/test/commandservice/customer/customer.proto";
 
 // A request to create a new customer record.

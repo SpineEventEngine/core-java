@@ -21,7 +21,7 @@ package org.spine3.client;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
