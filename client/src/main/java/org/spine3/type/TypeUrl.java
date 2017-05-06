@@ -36,7 +36,7 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
-import org.spine3.options.OptionsProto;
+import org.spine3.option.OptionsProto;
 
 import java.util.List;
 import java.util.Objects;

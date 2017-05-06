@@ -22,8 +22,8 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
-import org.spine3.options.OptionsProto;
-import org.spine3.options.PatternOption;
+import org.spine3.option.OptionsProto;
+import org.spine3.option.PatternOption;
 import org.spine3.protobuf.Wrapper;
 
 import java.util.List;

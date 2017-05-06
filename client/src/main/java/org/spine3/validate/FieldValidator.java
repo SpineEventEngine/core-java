@@ -29,8 +29,8 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
-import org.spine3.options.IfMissingOption;
-import org.spine3.options.OptionsProto;
+import org.spine3.option.IfMissingOption;
+import org.spine3.option.OptionsProto;
 
 import java.util.List;
 
