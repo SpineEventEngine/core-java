@@ -301,7 +301,9 @@ public abstract class EventPlayingEntity <I,
          * Obtains the class of the {@linkplain ValidatingBuilder} for the given
          * {@code EventPlayingEntity} descendant class {@code entityClass}.
          */
-        static <I, S extends Message, B extends ValidatingBuilder<S, ? extends Message.Builder>>
+        private static <I,
+                        S extends Message,
+                        B extends ValidatingBuilder<S, ? extends Message.Builder>>
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
 
