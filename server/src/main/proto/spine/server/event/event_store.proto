@@ -28,7 +28,7 @@ option java_outer_classname = "EventStoreProto";
 // Put generated code under the 'grpc' sub-package, which is annotated @SPI.
 option java_package = "org.spine3.server.event.grpc";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";
 import "spine/server/event/event_stream_query.proto";

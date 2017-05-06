@@ -26,7 +26,7 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Descriptors.Descriptor;
-import org.spine3.annotations.EventAnnotationsProto;
+import org.spine3.options.OptionsProto;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
@@ -161,7 +161,7 @@ class EventEnrichmentsMap {
             final Set<String> result = new HashSet<>();
             for (FieldDescriptor field : enrichmentDescriptor.getFields()) {
                 final String extension = field.getOptions()
-                                              .getExtension(EventAnnotationsProto.by);
+                                              .getExtension(OptionsProto.by);
                 final Collection<String> fieldNames = parseFieldNames(extension);
                 result.addAll(fieldNames);
             }

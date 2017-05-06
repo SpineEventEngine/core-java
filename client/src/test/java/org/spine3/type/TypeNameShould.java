@@ -31,12 +31,12 @@ import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.client.ActorRequestFactory;
+import org.spine3.options.IfMissingOption;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.server.command.EventFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.time.Time;
-import org.spine3.validate.internal.IfMissingOption;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

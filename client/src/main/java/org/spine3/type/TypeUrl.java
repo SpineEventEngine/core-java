@@ -30,13 +30,13 @@ import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import org.spine3.annotations.AnnotationsProto;
 import org.spine3.annotations.Internal;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.envelope.MessageEnvelope;
+import org.spine3.options.OptionsProto;
 
 import java.util.List;
 import java.util.Objects;
@@ -207,7 +207,7 @@ public final class TypeUrl {
             return Prefix.GOOGLE_APIS.value();
         }
         final String result = file.getOptions()
-                                  .getExtension(AnnotationsProto.typeUrlPrefix);
+                                  .getExtension(OptionsProto.typeUrlPrefix);
         return result;
     }
 

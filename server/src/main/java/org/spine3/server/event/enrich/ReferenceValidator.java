@@ -29,8 +29,8 @@ import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.annotations.EventAnnotationsProto;
 import org.spine3.base.EventContext;
+import org.spine3.options.OptionsProto;
 import org.spine3.server.reflect.Field;
 
 import java.util.Collection;
@@ -130,7 +130,7 @@ class ReferenceValidator {
      */
     private Collection<FieldDescriptor> findSourceFields(FieldDescriptor enrichmentField) {
         final String byOptionArgument = enrichmentField.getOptions()
-                                                       .getExtension(EventAnnotationsProto.by);
+                                                       .getExtension(OptionsProto.by);
         checkNotNull(byOptionArgument);
         final String targetFields = removeSpaces(byOptionArgument);
         final int pipeSeparatorIndex = targetFields.indexOf(PIPE_SEPARATOR);

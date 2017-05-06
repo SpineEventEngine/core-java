@@ -26,11 +26,9 @@ option java_package="org.spine3.test.event";
 option java_outer_classname = "EventEventsProto";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/users/user_id.proto";
-import "spine/validate.proto";
 import "spine/test/event/project.proto";
-import "spine/enrichment_annotations.proto";
 
 message ProjectCreated {
     ProjectId project_id = 1;

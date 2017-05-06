@@ -29,7 +29,7 @@ option java_package = "org.spine3.client";
 
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 // Represents an ID of an entity.
 //

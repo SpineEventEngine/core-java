@@ -29,8 +29,7 @@ option java_package = "org.spine3.change";
 
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 // The failure to handle a command because an entity contains a value different than expected in a command.
 message ValueMismatch {
