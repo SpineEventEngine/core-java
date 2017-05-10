@@ -344,6 +344,12 @@ public class BoundedContextShould {
                                  .isEmpty());
     }
 
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_when_no_repository_registered() {
+        boundedContext.getAggregateRepository(Project.class);
+    }
+
     private static class TestResponseObserver implements StreamObserver<Response> {
 
         private Response responseHandled;
