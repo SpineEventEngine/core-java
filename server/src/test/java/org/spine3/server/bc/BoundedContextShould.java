@@ -357,6 +357,7 @@ public class BoundedContextShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_when_no_repository_registered() {
+        // Attempt to get a repository without registering.
         boundedContext.getAggregateRepository(Project.class);
     }
 
