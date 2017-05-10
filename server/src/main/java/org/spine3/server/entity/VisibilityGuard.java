@@ -126,6 +126,16 @@ public final class VisibilityGuard {
     }
 
     /**
+     * Closes all registered repositories and clears the registration list.
+     */
+    public void shutDownRepositories() {
+        for (RepositoryAccess repositoryAccess : repositories.values()) {
+            repositoryAccess.repository.close();
+        }
+        repositories.clear();
+    }
+
+    /**
      * Allows to get a reference to repository if states of its entities are visible.
      */
     private static class RepositoryAccess {

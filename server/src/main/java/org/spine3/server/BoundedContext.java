@@ -22,7 +22,6 @@ package org.spine3.server;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -54,7 +53,6 @@ import org.spine3.server.tenant.TenantIndex;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -90,9 +88,6 @@ public final class BoundedContext
     private final Stand stand;
 
     /** All the repositories registered with this bounded context. */
-    private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
-
-    /** The registry of repositories with access control by entity state visibility. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
 
     /**
@@ -165,10 +160,7 @@ public final class BoundedContext
 
 
     private void shutDownRepositories() throws Exception {
-        for (Repository<?, ?> repository : repositories) {
-            repository.close();
-        }
-        repositories.clear();
+        guard.shutDownRepositories();
 
         if (tenantIndex != null) {
             tenantIndex.close();
@@ -228,7 +220,7 @@ public final class BoundedContext
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
-        repositories.add(repository);
+        guard.register(repository);
 
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
@@ -242,10 +234,6 @@ public final class BoundedContext
             eventBus.register((EventDispatcher) repository);
         }
 
-        if (repository instanceof AggregateRepository) {
-            registerAggregateRepository((AggregateRepository)repository);
-        }
-
         if (managesVersionableEntities(repository)) {
             stand.registerTypeSupplier(cast(repository));
         }
@@ -255,10 +243,6 @@ public final class BoundedContext
         if (!repository.storageAssigned()) {
             repository.initStorage(storageFactory.get());
         }
-    }
-
-    private void registerAggregateRepository(AggregateRepository<?, ?> repository) {
-        guard.register(repository);
     }
 
     /**
@@ -336,7 +320,7 @@ public final class BoundedContext
             Class<? extends Message> aggregateStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(aggregateStateClass)) {
-            throw newIllegalStateException("No repository found for class %s",
+            throw newIllegalStateException("No repository found for the aggregate state class %s",
                                            aggregateStateClass.getName());
         }
 
