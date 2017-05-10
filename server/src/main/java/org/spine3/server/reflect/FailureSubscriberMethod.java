@@ -58,26 +58,6 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
     }
 
     /**
-     * Invokes the underlying {@link Method} with the specified set of params.
-     *
-     * <p>Depending on the implementation, some parameters may be omitted.
-     *
-     * @param target         the invocation target
-     * @param failureMessage the failure message parameter of the handler method
-     * @param context        the {@link CommandContext} parameter of the handler method
-     * @param commandMessage the command message parameter of the handler method
-     * @throws IllegalArgumentException  if thrown by the handler method invocation
-     * @throws IllegalAccessException    if thrown by the handler method invocation
-     * @throws InvocationTargetException if thrown by the handler method invocation
-     */
-    protected abstract void doInvoke(Object target,
-                                     Message failureMessage,
-                                     CommandContext context,
-                                     Message commandMessage) throws IllegalArgumentException,
-                                                                    IllegalAccessException,
-                                                                    InvocationTargetException;
-
-    /**
      * Invokes the wrapped subscriber method to handle {@code failureMessage},
      * {@code commandMessage} with the passed {@code context} of the {@code Command}.
      *
@@ -111,9 +91,29 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
     public <R> R invoke(Object target, Message message, CommandContext context)
                                                             throws InvocationTargetException {
         throw new IllegalStateException("Failure handling method requires " +
-                                        "at least two Message arguments. " +
+                                        "at least one Message argument. " +
                                         "See org.spine3.base.Subscribe for more details");
     }
+
+    /**
+     * Invokes the underlying {@link Method} with the specified set of params.
+     *
+     * <p>Depending on the implementation, some parameters may be omitted.
+     *
+     * @param target         the invocation target
+     * @param failureMessage the failure message parameter of the handler method
+     * @param context        the {@link CommandContext} parameter of the handler method
+     * @param commandMessage the command message parameter of the handler method
+     * @throws IllegalArgumentException  if thrown by the handler method invocation
+     * @throws IllegalAccessException    if thrown by the handler method invocation
+     * @throws InvocationTargetException if thrown by the handler method invocation
+     */
+    protected abstract void doInvoke(Object target,
+                                     Message failureMessage,
+                                     CommandContext context,
+                                     Message commandMessage) throws IllegalArgumentException,
+                                                                    IllegalAccessException,
+                                                                    InvocationTargetException;
 
     /**
      * Invokes the subscriber method in the passed object.
@@ -228,26 +228,48 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         }
     }
 
+    /**
+     * A {@link Function} wrapping the given {@link Method} into a corresponding
+     * {@code FailureSubscriberMethod}.
+     */
     private enum MethodWrapper implements Function<Method, FailureSubscriberMethod> {
 
+        /**
+         * Wraps the given {@link Method} with an instance of {@link ShortFailureSubscriberMethod}.
+         */
         SHORT {
             @Override
             FailureSubscriberMethod wrap(Method method) {
                 return new ShortFailureSubscriberMethod(method);
             }
         },
+
+        /**
+         * Wraps the given {@link Method} with an instance of
+         * {@link CommandContextAwareFailureSubscriberMethod}.
+         */
         COMMAND_CONTEXT_AWARE {
             @Override
             FailureSubscriberMethod wrap(Method method) {
                 return new CommandContextAwareFailureSubscriberMethod(method);
             }
         },
+
+        /**
+         * Wraps the given {@link Method} with an instance of
+         * {@link CommandMessageAwareFailureSubscriberMethod}.
+         */
         COMMAND_MESSAGE_AWARE {
             @Override
             FailureSubscriberMethod wrap(Method method) {
                 return new CommandMessageAwareFailureSubscriberMethod(method);
             }
         },
+
+        /**
+         * Wraps the given {@link Method} with an instance of
+         * {@link CommandAwareFailureSubscriberMethod}.
+         */
         COMMAND_AWARE {
             @Override
             FailureSubscriberMethod wrap(Method method) {
@@ -255,6 +277,12 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
             }
         };
 
+        /**
+         * Retrieves the wrapper implementation for the given set of parameters of a handler method.
+         *
+         * @param paramTypes the types of the parameters of the handler method
+         * @return the corresponding instance of {@code MethodWrapper}
+         */
         private static MethodWrapper forParamSet(Class[] paramTypes) {
             checkNotNull(paramTypes);
             final int paramCount = paramTypes.length;
@@ -275,7 +303,7 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
                 default:
                     throw new IllegalArgumentException(
                             format("Invalid Failure handler method parameter count: %s.",
-                                    paramCount));
+                                   paramCount));
             }
             return methodWrapper;
         }
@@ -310,22 +338,30 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         protected boolean verifyParams(Method method) {
             final Class<?>[] paramTypes = method.getParameterTypes();
             final int paramCount = paramTypes.length;
-            final boolean isParamCountCorrect = (paramCount == 2) || (paramCount == 3);
-            if (!isParamCountCorrect) {
+            final boolean paramCountCorrect = paramCount >= 1 && paramCount <= 3;
+            if (!paramCountCorrect) {
                 return false;
             }
-            // TODO:2017-05-10:dmytro.dashenkov: Update according to the new changes.
-            final boolean isFirstParamMsg = Message.class.isAssignableFrom(paramTypes[0]);
-            final boolean isSecondParamMsg = Message.class.isAssignableFrom(paramTypes[1]);
-            if (paramCount == 2) {
-                return isFirstParamMsg && isSecondParamMsg;
-            } else {
-                final Class<? extends Message> contextClass = getContextClass();
-                final boolean paramsCorrect = isFirstParamMsg
-                                              && isSecondParamMsg
-                                              && contextClass.equals(paramTypes[2]);
-                return paramsCorrect;
+
+            final boolean firstParamCorrect = Message.class.isAssignableFrom(paramTypes[0]);
+            if (!firstParamCorrect) {
+                return false;
             }
+            if (paramCount == 1) {
+                return true;
+            }
+
+            final boolean secondParamCorrect = Message.class.isAssignableFrom(paramTypes[1]);
+            if (!secondParamCorrect) {
+                return false;
+            }
+            if (paramCount == 2) {
+                return true;
+            }
+
+            final Class<? extends Message> contextClass = getContextClass();
+            final boolean thirdParamCorrect = contextClass == paramTypes[2];
+            return thirdParamCorrect;
         }
     }
 }
