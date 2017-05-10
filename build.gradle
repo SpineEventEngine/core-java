@@ -140,9 +140,15 @@ subprojects {
         //
         // Finds and reports FQNs used in links in the wrong format.
         javadocLinkChecker {
-
             threshold = 0
             reportType = "warn"
+        }
+
+        // Right margin line checker.
+        //
+        // Finds and reports about the lines of a code with length above threshold.
+        rightMarginWrappingChecker {
+            threshold = 100
         }
     }
 
