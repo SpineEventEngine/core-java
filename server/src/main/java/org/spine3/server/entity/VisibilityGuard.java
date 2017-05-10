@@ -68,15 +68,14 @@ public final class VisibilityGuard {
     /**
      * Registers the passed repository with the guard.
      */
-    public void register(Repository repository) {
+    public void register(Repository<?, ?> repository) {
         checkNotNull(repository);
-        @SuppressWarnings("unchecked") // The type is ensured by the called method.
         final Class<? extends Message> stateClass = repository.getEntityStateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }
 
-    private void checkNotAlreadyRegistered(Class stateClass) {
+    private void checkNotAlreadyRegistered(Class<? extends Message> stateClass) {
         final RepositoryAccess alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
             throw newIllegalStateException(
