@@ -19,50 +19,35 @@
 //
 syntax = "proto3";
 
-package spine.test.bc;
+package spine.test.options;
 
 option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.bc";
+option java_package="org.spine3.test.options";
 option java_multiple_files = true;
+option java_outer_classname = "EntityOptionsShouldProto";
 
 import "spine/options.proto";
 
-message ProjectId {
-    string id = 1;
-}
+message FullAccessAggregate {
+    option (entity).kind = AGGREGATE;
+    // Do not specify visibility, assuming FULL.
 
-message Project {
-    ProjectId id = 1;
-
+    uint64 id = 1;
     string name = 2;
-
-    repeated Task task = 3;
-
-    enum Status {
-        UNDEFINED = 0;
-        CREATED = 1;
-        STARTED = 2;
-        DONE = 3;
-        CANCELLED = 4;
-    }
-
-    Status status = 4;
 }
 
-message TaskId {
-    int32 id = 1;
+message SubscribableAggregate {
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = SUBSCRIBE;
+
+    uint64 id = 1;
+    string description = 2;
 }
 
-message Task {
-    TaskId task_id = 1;
-    string title = 2;
-    string description = 3;
-}
-
-message SecretProject {
+message HiddenAggregate {
     option (entity).kind = AGGREGATE;
     option (entity).visibility = NONE;
 
-    string id = 1;
-    string name = 2;
+    string uuid = 1;
+    string secret = 2;
 }

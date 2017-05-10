@@ -263,7 +263,10 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         }
     }
 
-    private boolean isOpen() {
+    /**
+     * Verifies if the repository open.
+     */
+    public boolean isOpen() {
         return storage != null;
     }
 

@@ -22,8 +22,6 @@ package org.spine3.server;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
@@ -31,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
+import org.spine3.option.EntityOption.Visibility;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandBus;
@@ -40,6 +39,7 @@ import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.VersionableEntity;
+import org.spine3.server.entity.VisibilityGuard;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventDispatcher;
 import org.spine3.server.failure.FailureBus;
@@ -51,16 +51,17 @@ import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
+import org.spine3.type.TypeName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
-import java.util.List;
-import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.validate.Validate.checkNameNotEmptyOrBlank;
 
 /**
@@ -90,14 +91,7 @@ public final class BoundedContext
     private final Stand stand;
 
     /** All the repositories registered with this bounded context. */
-    private final List<Repository<?, ?>> repositories = Lists.newLinkedList();
-
-    /**
-     * The map from a type of aggregate state to an aggregate repository instance that
-     * manages such aggregates.
-     */
-    private final Map<Class<? extends Message>, AggregateRepository<?, ?>> aggregateRepositories =
-            Maps.newHashMap();
+    private final VisibilityGuard guard = VisibilityGuard.newInstance();
 
     /**
      * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
@@ -167,12 +161,11 @@ public final class BoundedContext
         return name + " closed.";
     }
 
-
+    /**
+     * Closes all repositories and clears {@link TenantIndex}.
+     */
     private void shutDownRepositories() throws Exception {
-        for (Repository<?, ?> repository : repositories) {
-            repository.close();
-        }
-        repositories.clear();
+        guard.shutDownRepositories();
 
         if (tenantIndex != null) {
             tenantIndex.close();
@@ -232,7 +225,7 @@ public final class BoundedContext
     @SuppressWarnings("ChainOfInstanceofChecks") // OK here since ways of registering are way too different
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
-        repositories.add(repository);
+        guard.register(repository);
 
         if (repository instanceof CommandDispatcher) {
             commandBus.register((CommandDispatcher) repository);
@@ -246,10 +239,6 @@ public final class BoundedContext
             eventBus.register((EventDispatcher) repository);
         }
 
-        if (repository instanceof AggregateRepository) {
-            registerAggregateRepository((AggregateRepository)repository);
-        }
-
         if (managesVersionableEntities(repository)) {
             stand.registerTypeSupplier(cast(repository));
         }
@@ -259,19 +248,6 @@ public final class BoundedContext
         if (!repository.storageAssigned()) {
             repository.initStorage(storageFactory.get());
         }
-    }
-
-    private void registerAggregateRepository(AggregateRepository<?, ?> repository) {
-        final Class<? extends Message> stateClass = repository.getAggregateStateClass();
-        final AggregateRepository<?, ?> alreadyRegistered = aggregateRepositories.get(stateClass);
-        if (alreadyRegistered != null) {
-            final String errMsg = format(
-                    "Repository for aggregates with the state %s already registered: %s",
-                    stateClass, alreadyRegistered
-            );
-            throw new IllegalStateException(errMsg);
-        }
-        aggregateRepositories.put(stateClass, repository);
     }
 
     /**
@@ -316,27 +292,31 @@ public final class BoundedContext
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public CommandBus getCommandBus() {
         return this.commandBus;
     }
 
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public EventBus getEventBus() {
         return this.eventBus;
     }
 
     /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public FailureBus getFailureBus() {
         return this.commandBus.failureBus();
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public Stand getStand() {
         return stand;
+    }
+
+    /**
+     * Obtains a set of entity type names by their visibility.
+     */
+    public Set<TypeName> getEntityTypes(Visibility visibility) {
+        final Set<TypeName> result = guard.getEntityTypes(visibility);
+        return result;
     }
 
     /**
@@ -347,8 +327,20 @@ public final class BoundedContext
      */
     public Optional<? extends AggregateRepository<?, ?>> getAggregateRepository(
             Class<? extends Message> aggregateStateClass) {
-        final AggregateRepository<?, ?> result = aggregateRepositories.get(aggregateStateClass);
-        return Optional.fromNullable(result);
+        // See if there is a repository for this state at all.
+        if (!guard.hasRepository(aggregateStateClass)) {
+            throw newIllegalStateException("No repository found for the aggregate state class %s",
+                                           aggregateStateClass.getName());
+        }
+
+        // See if the aggregate state is visible.
+        final Optional<Repository> repository = guard.getRepository(aggregateStateClass);
+        if (!repository.isPresent()) {
+            return Optional.absent();
+        }
+
+        final AggregateRepository<?, ?> result = (AggregateRepository<?, ?>) repository.get();
+        return Optional.of(result);
     }
 
     /**
