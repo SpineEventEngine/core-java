@@ -20,6 +20,7 @@
 
 package org.spine3.server.bc;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
@@ -55,6 +56,7 @@ import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Spy;
 import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
+import org.spine3.test.bc.SecretProject;
 import org.spine3.test.bc.command.AddTask;
 import org.spine3.test.bc.command.CreateProject;
 import org.spine3.test.bc.command.StartProject;
@@ -81,7 +83,15 @@ import static org.spine3.base.Responses.ok;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
+ * Messages used in this test suite are defined in:
+ * <ul>
+ *     <li>spine/test/bc/project.proto - data types
+ *     <li>spine/test/bc/commands.proto — commands
+ *     <li>spine/test/bc/events.proto — events.
+ * </ul>
+ *
  * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
 public class BoundedContextShould {
 
@@ -350,6 +360,14 @@ public class BoundedContextShould {
         boundedContext.getAggregateRepository(Project.class);
     }
 
+    @Test
+    public void do_not_expose_invisible_aggregate() {
+        boundedContext.register(new SecretProjectRepository(boundedContext));
+
+        assertFalse(boundedContext.getAggregateRepository(SecretProject.class)
+                                  .isPresent());
+    }
+
     private static class TestResponseObserver implements StreamObserver<Response> {
 
         private Response responseHandled;
@@ -454,6 +472,25 @@ public class BoundedContextShould {
 
         @Subscribe
         public void on(ProjectStarted event, EventContext context) {
+        }
+    }
+
+    private static class SecretProjectAggregate
+            extends Aggregate<String, SecretProject, SecretProject.Builder> {
+        private SecretProjectAggregate(String id) {
+            super(id);
+        }
+
+        @Assign
+        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
+            return Lists.newArrayList();
+        }
+    }
+
+    private static class SecretProjectRepository
+            extends AggregateRepository<String, SecretProjectAggregate> {
+        private SecretProjectRepository(BoundedContext boundedContext) {
+            super(boundedContext);
         }
     }
 
