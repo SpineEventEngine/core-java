@@ -30,7 +30,6 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandDispatcher;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
@@ -150,15 +149,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
-    }
-
-    /**
-     * Obtains the class of the aggregate state.
-     */
-    public Class<? extends Message> getAggregateStateClass() {
-        final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
-        final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(aggregateClass);
-        return stateClass;
     }
 
     /**
