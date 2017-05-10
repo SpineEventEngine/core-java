@@ -22,7 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
 
 import javax.annotation.Nullable;
