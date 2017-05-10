@@ -70,8 +70,9 @@ public final class EntityQueries {
     }
 
     private static Map<Column<?>, Object> toQueryParams(EntityFilters entityFilters,
-                                                             Class<? extends Entity> entityClass) {
-        final Map<Column<?>, Object> queryParams = new HashMap<>(entityFilters.getColumnFilterCount());
+                                                        Class<? extends Entity> entityClass) {
+        final Map<Column<?>, Object> queryParams =
+                new HashMap<>(entityFilters.getColumnFilterCount());
         final Map<String, Any> columnValues = entityFilters.getColumnFilterMap();
         for (Map.Entry<String, Any> filter : columnValues.entrySet()) {
             final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
