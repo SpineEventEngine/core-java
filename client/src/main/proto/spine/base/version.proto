@@ -29,8 +29,7 @@ option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 // A version number with timestamp of the version creation.
 message Version {

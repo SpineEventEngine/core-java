@@ -22,7 +22,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.Lists;
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.projection.ProjectionRepository;

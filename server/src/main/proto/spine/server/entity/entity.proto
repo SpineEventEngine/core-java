@@ -31,7 +31,7 @@ option java_package = "org.spine3.server.entity";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/base/version.proto";
 
 // The record for passing information about an entity.
@@ -76,7 +76,7 @@ message LifecycleFlags {
 // Enumeration of possible entity state validation errors.
 //
 // Contains the reasons of an errors, that are exclusively technical
-// and haven't relation to a business errors.
+// and have no relation to business errors.
 //
 enum EntityStateValidationError {
 

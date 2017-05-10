@@ -29,7 +29,7 @@ option java_package = "org.spine3.server.event";
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/server/event/event_filter.proto";
 
 // The query specifies event to return from the event store.

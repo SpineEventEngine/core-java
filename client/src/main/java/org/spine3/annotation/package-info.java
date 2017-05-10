@@ -24,6 +24,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.annotations;
+package org.spine3.annotation;
 
 import javax.annotation.ParametersAreNonnullByDefault;

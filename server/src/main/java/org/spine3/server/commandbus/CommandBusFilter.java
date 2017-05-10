@@ -21,7 +21,7 @@
 package org.spine3.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.base.Command;
 import org.spine3.base.Response;
 import org.spine3.envelope.CommandEnvelope;

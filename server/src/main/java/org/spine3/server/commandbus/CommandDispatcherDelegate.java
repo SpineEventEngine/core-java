@@ -20,7 +20,7 @@
 package org.spine3.server.commandbus;
 
 
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.type.CommandClass;
 

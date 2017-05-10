@@ -22,7 +22,7 @@ package org.spine3.client;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeName;
 

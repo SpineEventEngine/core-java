@@ -26,7 +26,7 @@ option java_package="org.spine3.test.aggregate.event";
 option java_outer_classname = "AggregateEventsProto";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/test/aggregate/project.proto";
 
 message ProjectCreated {

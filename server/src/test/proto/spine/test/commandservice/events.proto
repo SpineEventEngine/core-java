@@ -26,7 +26,7 @@ option java_package="org.spine3.test.commandservice.event";
 option java_outer_classname = "CommandServiceEventsProto";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/test/commandservice/project.proto";
 
 message ProjectCreated {

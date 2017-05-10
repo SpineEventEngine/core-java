@@ -30,7 +30,7 @@ option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/users/user_id.proto";
 
 // Details about online status of a user.

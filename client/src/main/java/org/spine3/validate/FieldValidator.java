@@ -29,8 +29,8 @@ import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.FieldPath;
-import org.spine3.validate.internal.IfMissingOption;
-import org.spine3.validate.internal.ValidationProto;
+import org.spine3.option.IfMissingOption;
+import org.spine3.option.OptionsProto;
 
 import java.util.List;
 
@@ -88,8 +88,8 @@ abstract class FieldValidator<V> {
         final FileDescriptor file = fieldDescriptor.getFile();
         this.isCommandsFile = isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
-        this.required = getFieldOption(ValidationProto.required);
-        this.ifMissingOption = getFieldOption(ValidationProto.ifMissing);
+        this.required = getFieldOption(OptionsProto.required);
+        this.ifMissingOption = getFieldOption(OptionsProto.ifMissing);
     }
 
     @SuppressWarnings({"unchecked", "IfMayBeConditional"})
@@ -227,7 +227,7 @@ abstract class FieldValidator<V> {
      */
     protected String getErrorMsgFormat(Message option, String customMsg) {
         final String defaultMsg = option.getDescriptorForType()
-                                        .getOptions().getExtension(ValidationProto.defaultMessage);
+                                        .getOptions().getExtension(OptionsProto.defaultMessage);
         final String msg = customMsg.isEmpty() ? defaultMsg : customMsg;
         return msg;
     }

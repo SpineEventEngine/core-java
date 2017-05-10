@@ -29,7 +29,7 @@ option java_package = "org.spine3.base";
 
 import "google/protobuf/empty.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/base/error.proto";
 import "spine/base/failure.proto";
 

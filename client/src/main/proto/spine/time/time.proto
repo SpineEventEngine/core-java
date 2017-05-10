@@ -30,8 +30,7 @@ option java_package = "org.spine3.time";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 import "spine/time/zone_offset.proto";
 
 // Enum representing the 12 months of the year.

@@ -27,7 +27,7 @@ option java_multiple_files = true;
 option java_outer_classname = "ValidationErrorProto";
 option java_package = "org.spine3.validate";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/validate/constraint_violation.proto";
 
 // An error indicating that a message did not pass validation.

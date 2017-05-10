@@ -24,7 +24,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 
 import java.io.Closeable;
 import java.io.IOException;

@@ -29,7 +29,7 @@ option java_outer_classname = "IdentifiersShouldProto";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 // Only for usage in `IdentifiersShould` class.
 

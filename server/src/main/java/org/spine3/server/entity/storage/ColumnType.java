@@ -20,7 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 
 /**
  * An interface for handling type conversion for the {@link Column Columns}.

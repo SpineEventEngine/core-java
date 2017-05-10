@@ -22,7 +22,7 @@ package org.spine3.server.outbus;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.envelope.MessageEnvelope;
