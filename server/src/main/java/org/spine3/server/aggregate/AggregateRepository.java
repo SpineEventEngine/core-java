@@ -28,7 +28,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.option.EntityOption;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.Entity;
@@ -89,9 +88,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
 
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
-
-    /** Visibility of aggregates managed by this repository. */
-    private EntityOption.Visibility aggregateVisibility;
 
     /** The EventBus to which we post events produced by aggregates. */
     private final EventBus eventBus;
