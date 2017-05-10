@@ -49,9 +49,9 @@ public class EntityQueryMatcherShould {
     public void match_everything_except_null_to_empty_query() {
         final Collection<Object> idFilter = Collections.emptyList();
         final Map<Column<?>, Object> params = ImmutableMap.of();
-        final EntityQuery query = EntityQuery.of(idFilter, params);
+        final EntityQuery<?> query = EntityQuery.of(idFilter, params);
 
-        final EntityQueryMatcher matcher = new EntityQueryMatcher(query);
+        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
         assertFalse(matcher.apply(null));
         assertTrue(matcher.apply(of(EntityRecord.getDefaultInstance())));
@@ -63,9 +63,9 @@ public class EntityQueryMatcherShould {
         final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
         final Any entityId = AnyPacker.pack(genericId);
         final Map<Column<?>, Object> params = ImmutableMap.of();
-        final EntityQuery query = EntityQuery.of(idFilter, params);
+        final EntityQuery<?> query = EntityQuery.of(idFilter, params);
 
-        final EntityQueryMatcher matcher = new EntityQueryMatcher(query);
+        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         final EntityRecord matching = EntityRecord.newBuilder()
                                                   .setEntityId(entityId)
                                                   .build();
@@ -92,12 +92,12 @@ public class EntityQueryMatcherShould {
         final Collection<Object> ids = Collections.emptyList();
         final Map<Column<?>, Object> params =
                 ImmutableMap.<Column<?>, Object>of(target, acceptedValue);
-        final EntityQuery query = EntityQuery.of(ids, params);
+        final EntityQuery<?> query = EntityQuery.of(ids, params);
 
         final Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
         final Any nonMatchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));
 
-        final EntityQueryMatcher matcher = new EntityQueryMatcher(query);
+        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         final EntityRecord matching = EntityRecord.newBuilder()
                                                   .setEntityId(matchingId)
                                                   .build();

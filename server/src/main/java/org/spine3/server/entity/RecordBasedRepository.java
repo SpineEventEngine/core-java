@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -260,13 +259,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * <p>The field paths in the Column field filters are specified to contain a single path
      * member - the name of the Entity Column.
      *
-     * <p>All the filtering is delegates to the underlying {@link RecordStorage}.
+     * <p>The filtering process is delegated to the underlying {@link RecordStorage}.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param filters   entity filters
      * @param fieldMask mask to apply to the entities
-     * @return all the entities in this repository passed the filters
+     * @return all the entities in this repository passed through the filters
      * @see EntityQuery
      */
     @CheckReturnValue
@@ -274,7 +273,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
-        final EntityQuery entityQuery = EntityQueries.from(filters, getEntityClass());
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final Map<I, EntityRecord> records = recordStorage().readAll(entityQuery, fieldMask);
         final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
                                                             .transform(storageRecordToEntity())

@@ -57,15 +57,15 @@ public final class EntityQueries {
      * @param entityClass   the Entity class specifying the query target
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
-    public static EntityQuery from(EntityFilters entityFilters,
+    public static <I> EntityQuery<I> from(EntityFilters entityFilters,
                                    Class<? extends Entity> entityClass) {
         checkNotNull(entityFilters);
         checkNotNull(entityClass);
 
         final Map<Column<?>, Object> queryParams = toQueryParams(entityFilters, entityClass);
-        final Collection<Object> ids = toGenericIdValues(entityFilters);
+        final Collection<I> ids = toGenericIdValues(entityFilters);
 
-        final EntityQuery result = EntityQuery.of(ids, queryParams);
+        final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
@@ -74,19 +74,20 @@ public final class EntityQueries {
         final Map<Column<?>, Object> queryParams = new HashMap<>(entityFilters.getColumnFilterCount());
         final Map<String, Any> columnValues = entityFilters.getColumnFilterMap();
         for (Map.Entry<String, Any> filter : columnValues.entrySet()) {
-            final Column<?> column = Columns.metadata(entityClass, filter.getKey());
+            final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
             final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
             queryParams.put(column, filterValues);
         }
         return queryParams;
     }
 
-    private static Collection<Object> toGenericIdValues(EntityFilters entityFilters) {
+    private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
         final EntityIdFilter idFilter = entityFilters.getIdFilter();
-        final Collection<Object> ids = new LinkedList<>();
+        final Collection<I> ids = new LinkedList<>();
         for (EntityId entityId : idFilter.getIdsList()) {
             final Any wrappedMessageId = entityId.getId();
-            final Object genericId = Identifiers.idFromAny(wrappedMessageId);
+            @SuppressWarnings("unchecked") // Checked at runtime
+            final I genericId = (I) Identifiers.idFromAny(wrappedMessageId);
             ids.add(genericId);
         }
         return ids;

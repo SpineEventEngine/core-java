@@ -69,7 +69,7 @@ public class EntityQueriesShould {
     public void construct_empty_queries() {
         final EntityFilters filters = EntityFilters.getDefaultInstance();
         final Class<? extends Entity> entityClass = AbstractEntity.class;
-        final EntityQuery query = EntityQueries.from(filters, entityClass);
+        final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
         assertEmpty(query.getParameters());
         assertTrue(query.getIds().isEmpty());
@@ -99,11 +99,11 @@ public class EntityQueriesShould {
                                                                     AnyPacker.pack(archivedValue))
                                                    .build();
         final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
-        final EntityQuery query = EntityQueries.from(filters, entityClass);
+        final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
         assertSize(2, query.getParameters());
 
-        final Collection<Object> ids = query.getIds();
+        final Collection<?> ids = query.getIds();
         assertFalse(ids.isEmpty());
         assertSize(1, ids);
         final Object singleId = ids.iterator().next();

@@ -55,9 +55,9 @@ public class EntityQueryShould {
         final ProjectId someIdCopy = ProjectId.newBuilder(someId)
                                               .build();
         final ProjectId otherId = Sample.messageOfType(ProjectId.class);
-        final Collection<Object> idsA = Arrays.asList(someId, defaultId);
-        final Collection<Object> idsB = Collections.emptyList();
-        final Collection<Object> idsC = Arrays.<Object>asList(otherId, someIdCopy);
+        final Collection<?> idsA = Arrays.asList(someId, defaultId);
+        final Collection<?> idsB = Collections.emptyList();
+        final Collection<?> idsC = Arrays.<Object>asList(otherId, someIdCopy);
         final Column<?> someColumn = mock(Column.class);
         final Column<?> otherColumn = mock(Column.class);
 
@@ -77,12 +77,12 @@ public class EntityQueryShould {
         final Map<Column<?>, Object> paramsCCopy = new HashMap<>(1);
         paramsA.put(otherColumn, someValue);
 
-        final EntityQuery queryA = EntityQuery.of(idsA, paramsA);
-        final EntityQuery queryB = EntityQuery.of(idsB, paramsB);
-        final EntityQuery queryC = EntityQuery.of(idsC, paramsC);
-        final EntityQuery queryD = EntityQuery.of(idsA, paramsC);
-        final EntityQuery queryE = EntityQuery.of(idsB, paramsB);
-        final EntityQuery queryF = EntityQuery.of(idsC, paramsCCopy);
+        final EntityQuery<?> queryA = EntityQuery.of(idsA, paramsA);
+        final EntityQuery<?> queryB = EntityQuery.of(idsB, paramsB);
+        final EntityQuery<?> queryC = EntityQuery.of(idsC, paramsC);
+        final EntityQuery<?> queryD = EntityQuery.of(idsA, paramsC);
+        final EntityQuery<?> queryE = EntityQuery.of(idsB, paramsB);
+        final EntityQuery<?> queryF = EntityQuery.of(idsC, paramsCCopy);
 
         new EqualsTester()
                 .addEqualityGroup(queryA)

@@ -27,10 +27,9 @@ import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import javax.annotation.Nullable;
 
 /**
- * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord} by
- * calling {@link EntityRecordWithColumns#getRecord()}.
+ * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord}.
  *
- * <p>The {@code null} values are mapped into {@code null} values of type {@code EntityRecord}.
+ * <p>The {@code null} input is always converted to {@code null}.
  *
  * @author Dmytro Dashenkov
  */

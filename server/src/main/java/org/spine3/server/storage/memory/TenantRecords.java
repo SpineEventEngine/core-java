@@ -91,10 +91,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return result;
     }
 
-    Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+    Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         final Map<I, EntityRecordWithColumns> filtered =
                 filterValues(filtered(),
-                             new EntityQueryMatcher(query));
+                             new EntityQueryMatcher<>(query));
         final Map<I, EntityRecord> records = transformValues(filtered,
                                                              EntityRecordUnpacker.INSTANCE);
         final Function<EntityRecord, EntityRecord> fieldMaskApplier =
@@ -164,6 +164,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
         return filtered.isEmpty();
     }
 
+    /**
+     * A {@link Function} transforming the {@link EntityRecord} state by applying the given
+     * {@link FieldMask} to it.
+     *
+     * <p>The resulting {@link EntityRecord} has the same fields as the given one except
+     * the {@code state} field, which is masked.
+     */
     private static class FieldMaskApplier implements Function<EntityRecord, EntityRecord> {
 
         private final FieldMask fieldMask;

@@ -131,7 +131,7 @@ class InMemoryStandStorage extends StandStorage {
     }
 
     @Override
-    protected Map<AggregateStateId, EntityRecord> readAllRecords(EntityQuery query,
+    protected Map<AggregateStateId, EntityRecord> readAllRecords(EntityQuery<AggregateStateId> query,
                                                                  FieldMask fieldMask) {
         return recordStorage.readAll(query, fieldMask);
     }

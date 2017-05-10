@@ -58,12 +58,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain EntityQuery#getParameters() query parameters} are empty, all the records are
  * considered matching.
  *
+ * @param <I> the type of the IDs of the query target
+ *
  * @author Dmytro Dashenkov
  * @see EntityRecordWithColumns
  */
-public final class EntityQuery {
+public final class EntityQuery<I> {
 
-    private final ImmutableSet<Object> ids;
+    private final ImmutableSet<I> ids;
     private final ImmutableMap<Column<?>, Object> parameters;
 
     /**
@@ -75,13 +77,13 @@ public final class EntityQuery {
      *                   no values, all the values are matched upon such Column
      * @return new instance of {@code EntityQuery}
      */
-    static EntityQuery of(Collection<?> ids, Map<Column<?>, Object> parameters) {
+    static <I> EntityQuery<I> of(Collection<I> ids, Map<Column<?>, Object> parameters) {
         checkNotNull(ids);
         checkNotNull(parameters);
-        return new EntityQuery(ids, parameters);
+        return new EntityQuery<>(ids, parameters);
     }
 
-    private EntityQuery(Collection<?> ids, Map<Column<?>, Object> parameters) {
+    private EntityQuery(Collection<I> ids, Map<Column<?>, Object> parameters) {
         this.ids = ImmutableSet.copyOf(ids);
         this.parameters = ImmutableMap.copyOf(parameters);
     }
@@ -90,7 +92,7 @@ public final class EntityQuery {
      * @return a set of accepted ID values
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableSet<Object> getIds() {
+    public ImmutableSet<I> getIds() {
         return ids;
     }
 
@@ -110,14 +112,14 @@ public final class EntityQuery {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        EntityQuery that = (EntityQuery) o;
-        return Objects.equal(ids, that.ids) &&
-                Objects.equal(getParameters(), that.getParameters());
+        EntityQuery<?> query = (EntityQuery<?>) o;
+        return Objects.equal(getIds(), query.getIds()) &&
+                Objects.equal(getParameters(), query.getParameters());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(ids, getParameters());
+        return Objects.hashCode(getIds(), getParameters());
     }
 
     @Override

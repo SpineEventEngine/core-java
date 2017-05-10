@@ -95,7 +95,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+    protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         return getStorage().readAllRecords(query, fieldMask);
     }
 

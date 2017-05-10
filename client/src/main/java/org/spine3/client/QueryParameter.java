@@ -34,9 +34,10 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  * <p>This class may be considered a filter for the query. An instance contains the name of
  * the Entity Column to filter by and the value of the Column.
  *
- * <p>The supported types for querying are {@link Message} and Protobuf primitives.
+ * <p>The supported types for querying are {@linkplain Message Message types} and Protobuf
+ * primitives.
  *
- * @see org.spine3.protobuf.TypeConverter for the explanation of the supported type constraints
+ * @see org.spine3.protobuf.TypeConverter for the list of supported types
  */
 public final class QueryParameter {
 

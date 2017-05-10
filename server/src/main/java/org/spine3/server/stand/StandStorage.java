@@ -83,13 +83,15 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return all the records with the {@link FieldMask} applied
      */
     @Override
-    public Map<AggregateStateId, EntityRecord> readAll(EntityQuery query, FieldMask fieldMask) {
+    public Map<AggregateStateId, EntityRecord> readAll(EntityQuery<AggregateStateId> query,
+                                                       FieldMask fieldMask) {
         return readAll(fieldMask);
     }
 
     @Override
-    protected Map<AggregateStateId, EntityRecord> readAllRecords(EntityQuery query,
-                                                                 FieldMask fieldMask) {
+    protected Map<AggregateStateId, EntityRecord> readAllRecords(
+            EntityQuery<AggregateStateId> query,
+            FieldMask fieldMask) {
         throw new IllegalStateException("Call #readAll(EntityQuery, FieldMask) instead.");
     }
 }

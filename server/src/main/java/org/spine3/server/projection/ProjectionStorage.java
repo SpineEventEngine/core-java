@@ -68,7 +68,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(EntityQuery query, FieldMask fieldMask) {
+    protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         return storage.readAll(query, fieldMask);
     }

@@ -227,8 +227,8 @@ public final class TypeConverter {
      * <p>It's sufficient to override methods {@link #pack(Object) pack(T)} and
      * {@link #unpack(Message) unpack(M)} when extending this class.
      *
-     * <p>Since the Protobuf and java primitives differ, there may be more then one
-     * {@code PrimitiveHandler} for a Java primitive type. In this case, if the result Protobuf
+     * <p>Since the Protobuf and Java primitives differ, there may be more then one
+     * {@code PrimitiveHandler} for a Java primitive type. In this case, if the resulting Protobuf
      * value type is not specified explicitly, the closest type is selected as a target for
      * the conversion. The closeness of two types is determined by the lexicographic closeness.
      *

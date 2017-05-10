@@ -125,14 +125,14 @@ class Columns {
      * <p>If the given Entity class has not yet been added to the Column cache, it's added upon this
      * operation.
      *
-     * <p>If no column is found, an exception is thrown.
+     * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
      *
      * @param entityClass the class containing the {@link Column} definition
      * @param columnName  the name of the {@link Column}
      * @return an instance of {@link Column} with the given name
-     * @throws IllegalStateException if the {@link Column} is not found
+     * @throws IllegalArgumentException if the {@link Column} is not found
      */
-    static Column<?> metadata(Class<? extends Entity> entityClass, String columnName) {
+    static Column<?> findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkNotNull(columnName);
         ensureRegistered(entityClass);
@@ -145,7 +145,7 @@ class Columns {
             }
         }
 
-        throw new IllegalStateException(
+        throw new IllegalArgumentException(
                 format("Could not find a Column description for %s.%s.",
                        entityClass.getCanonicalName(),
                        columnName));

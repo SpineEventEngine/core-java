@@ -36,38 +36,48 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
  * {@link EntityQuery}.
  *
+ * @param <I> the type of the IDs of the matched records
  * @author Dmytro Dashenkov
  * @see EntityQuery for the matching contract
  */
 @Internal
-public final class EntityQueryMatcher implements Predicate<EntityRecordWithColumns> {
+public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> {
 
-    private final Collection<Object> acceptedIds;
+    private final Collection<I> acceptedIds;
     private final Map<Column<?>, Object> queryParams;
 
-    public EntityQueryMatcher(EntityQuery query) {
+    public EntityQueryMatcher(EntityQuery<I> query) {
         checkNotNull(query);
         this.acceptedIds = query.getIds();
         this.queryParams = query.getParameters();
     }
 
-    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK for a predicate method
     @Override
     public boolean apply(@Nullable EntityRecordWithColumns input) {
         if (input == null) {
             return false;
         }
+        final boolean result = idMatches(input) && columnValuesMatch(input);
+        return result;
+    }
+
+    private boolean idMatches(EntityRecordWithColumns record) {
         if (!acceptedIds.isEmpty()) {
-            final Any entityId = input.getRecord()
-                                      .getEntityId();
+            final Any entityId = record.getRecord()
+                                       .getEntityId();
             final Object genericId = Identifiers.idFromAny(entityId);
+            @SuppressWarnings("SuspiciousMethodCalls")
+            // The Collection.contains behavior about the non-assignable types is acceptable
             final boolean idMatches = acceptedIds.contains(genericId);
             if (!idMatches) {
                 return false;
             }
         }
+        return true;
+    }
 
-        final Map<String, Column.MemoizedValue<?>> entityColumns = input.getColumnValues();
+    private boolean columnValuesMatch(EntityRecordWithColumns record) {
+        final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
         if (!queryParams.isEmpty()) {
             for (Map.Entry<Column<?>, Object> param : queryParams.entrySet()) {
                 final Column<?> column = param.getKey();
@@ -86,7 +96,6 @@ public final class EntityQueryMatcher implements Predicate<EntityRecordWithColum
                 }
             }
         }
-
         return true;
     }
 }

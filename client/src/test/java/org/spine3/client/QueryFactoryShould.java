@@ -227,7 +227,7 @@ public class QueryFactoryShould extends ActorRequestFactoryShould {
         final Collection<EntityId> entityIdsFromFactory = idFilterFromFactory.getIdsList();
         final Collection<EntityId> entityIdsFromBuilder = idFilterFromBuilder.getIdsList();
 
-        // Order may differ byt all the elements are the same
+        // Order may differ but all the elements are the same
         assertEquals(entityIdsFromFactory.size(), entityIdsFromBuilder.size());
         assertContainsAll(entityIdsFromBuilder, entityIdsFromFactory.toArray(
                 new EntityId[entityIdsFromBuilder.size()]));

@@ -37,7 +37,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
-
 import static org.spine3.protobuf.AnyPacker.unpack;
 
 /**
@@ -88,9 +87,10 @@ public final class QueryBuilder {
     private final QueryFactory queryFactory;
     private final Class<? extends Message> targetType;
 
-    // All the optional fields are initialized only when and if set
-    // The empty collections make effectively no influence, but null values allow us to create
-    // the query `Target` more efficiently
+    /* All the optional fields are initialized only when and if set
+       The empty collections make effectively no influence, but null values allow us to create
+       the query `Target` more efficiently.
+     */
 
     @Nullable
     private Set<?> ids;
@@ -111,11 +111,13 @@ public final class QueryBuilder {
      *
      * <p>Though it's not prohibited at compile-time, please make sure to pass instances of the
      * same type to the argument of this method. Moreover, the instances must be of the type of
-     * the query target type identifier. This method or any of its overload do not check these
+     * the query target type identifier.
+     *
+     * <p>This method or any of its overload do not check these
      * constrains an assume they are followed by the caller.
      *
-     * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query will
-     * retrieve all the records regardless their IDs.
+     * <p>If there are no IDs (i.e. and empty {@link Iterable} is passed), the query retrieves all
+     * the records regardless their IDs.
      *
      * @param ids the values of the IDs to look up
      * @return self for method chaining

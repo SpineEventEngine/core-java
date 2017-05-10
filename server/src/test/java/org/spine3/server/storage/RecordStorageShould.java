@@ -392,7 +392,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                    .putColumnFilter("counterVersion",
                                                                     AnyPacker.pack(versionValue))
                                                    .build();
-        final EntityQuery query = EntityQueries.from(filters, TestCounterEntity.class);
+        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
         final I idMatching = newId();
         final I idWrong1 = newId();
         final I idWrong2 = newId();
@@ -477,7 +477,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .build();
-        final EntityQuery query = EntityQueries.from(filters, TestCounterEntity.class);
+        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
 
         // Perform the query
         final Map<I, EntityRecord> readRecords =  storage.readAll(query,
