@@ -29,6 +29,7 @@ import org.slf4j.LoggerFactory;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.Response;
+import org.spine3.option.EntityOption.Visibility;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandBus;
@@ -50,9 +51,11 @@ import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantIndex;
+import org.spine3.type.TypeName;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -158,7 +161,9 @@ public final class BoundedContext
         return name + " closed.";
     }
 
-
+    /**
+     * Closes all repositories and clears {@link TenantIndex}.
+     */
     private void shutDownRepositories() throws Exception {
         guard.shutDownRepositories();
 
@@ -287,27 +292,31 @@ public final class BoundedContext
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public CommandBus getCommandBus() {
         return this.commandBus;
     }
 
     /** Obtains instance of {@link EventBus} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public EventBus getEventBus() {
         return this.eventBus;
     }
 
     /** Obtains instance of {@link FailureBus} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public FailureBus getFailureBus() {
         return this.commandBus.failureBus();
     }
 
     /** Obtains instance of {@link Stand} of this {@code BoundedContext}. */
-    @CheckReturnValue
     public Stand getStand() {
         return stand;
+    }
+
+    /**
+     * Obtains a set of entity type names by their visibility.
+     */
+    public Set<TypeName> getEntityTypes(Visibility visibility) {
+        final Set<TypeName> result = guard.getEntityTypes(visibility);
+        return result;
     }
 
     /**

@@ -58,10 +58,16 @@ public final class VisibilityGuard {
         // Prevent instantiation from outside.
     }
 
+    /**
+     * Creates a new instance of the guard.
+     */
     public static VisibilityGuard newInstance() {
         return new VisibilityGuard();
     }
 
+    /**
+     * Registers the passed repository with the guard.
+     */
     public void register(Repository repository) {
         checkNotNull(repository);
         final Class stateClass = repository.getEntityStateClass();
@@ -78,11 +84,25 @@ public final class VisibilityGuard {
         }
     }
 
+    /**
+     * Verifies if there is a registered repository for the passed entity state class.
+     */
     public boolean hasRepository(Class<? extends Message> stateClass) {
         final boolean result = repositories.containsKey(stateClass);
         return result;
     }
 
+    /**
+     * Obtains the repository for the passed entity state class.
+     *
+     * @param stateClass the class of the state of entities managed by the repository
+     * @return the repository wrapped into {@code Optional} or {@code Optional#absent()} if the
+     * entity state is {@linkplain Visibility#NONE not visible}
+     * @throws IllegalArgumentException if the repository for the passed state class was not
+     *                                  {@linkplain #register(Repository) registered} with the guard
+     *                                  prior to this call, or if all repositories were
+     *                                  {@linkplain #shutDownRepositories() shut down}
+     */
     public Optional<Repository> getRepository(Class<? extends Message> stateClass) {
         final RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
@@ -93,6 +113,9 @@ public final class VisibilityGuard {
         return repositoryAccess.get();
     }
 
+    /**
+     * Obtains a set of entity type names by their visibility.
+     */
     public Set<TypeName> getEntityTypes(final Visibility visibility) {
         checkNotNull(visibility);
 
@@ -115,7 +138,7 @@ public final class VisibilityGuard {
                               public TypeName apply(@Nullable RepositoryAccess input) {
                                   checkNotNull(input);
                                   @SuppressWarnings("unchecked")
-                                        // Safe as it's bounded by Repository class definition.
+                                  // Safe as it's bounded by Repository class definition.
                                   final Class<? extends Message> cls =
                                           input.repository.getEntityStateClass();
                                   final TypeName result = TypeName.of(cls);

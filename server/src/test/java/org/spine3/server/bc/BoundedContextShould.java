@@ -31,6 +31,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.base.Subscribe;
+import org.spine3.option.EntityOption;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
@@ -66,6 +67,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -156,6 +158,7 @@ public class BoundedContextShould {
             super(id);
         }
     }
+
     private static class AnotherProjectAggregateRepository
                    extends AggregateRepository<ProjectId, AnotherProjectAggregate> {
         private AnotherProjectAggregateRepository(BoundedContext boundedContext) {
@@ -321,6 +324,24 @@ public class BoundedContextShould {
 
         assertEquals(bc.isMultitenant(), bc.getStand()
                                            .isMultitenant());
+    }
+
+    /**
+     * Simply checks that the result isn't empty to cover the integration with
+     * {@link org.spine3.server.entity.VisibilityGuard VisibilityGuard}.
+     *
+     * <p>See {@linkplain org.spine3.server.entity.VisibilityGuardShould tests of VisibilityGuard}
+     * for how visibility filtering works.
+     */
+    @Test
+    public void obtain_entity_types_by_visibility() {
+        assertTrue(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
+                                  .isEmpty());
+
+        registerAll();
+
+        assertFalse(boundedContext.getEntityTypes(EntityOption.Visibility.FULL)
+                                 .isEmpty());
     }
 
     private static class TestResponseObserver implements StreamObserver<Response> {
