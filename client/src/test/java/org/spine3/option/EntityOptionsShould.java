@@ -20,6 +20,7 @@
 
 package org.spine3.option;
 
+import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.option.EntityOption.Visibility;
 import org.spine3.test.Tests;
@@ -49,5 +50,12 @@ public class EntityOptionsShould {
     @Test
     public void get_defined_visibility_value() {
         assertEquals(Visibility.SUBSCRIBE, getVisibility(SubscribableAggregate.class));
+    }
+
+    @Test
+    public void pass_null_tolerance_test() {
+        new NullPointerTester()
+                .setDefault(Visibility.class, Visibility.NONE)
+                .testAllPublicStaticMethods(EntityOptions.class);
     }
 }

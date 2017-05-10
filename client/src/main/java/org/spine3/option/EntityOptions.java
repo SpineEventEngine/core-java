@@ -26,6 +26,8 @@ import org.spine3.annotation.Internal;
 import org.spine3.option.EntityOption.Visibility;
 import org.spine3.type.TypeName;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * Utilities for working with {@link EntityOption}s.
  *
@@ -39,6 +41,7 @@ public class EntityOptions {
     }
 
     public static Visibility getVisibility(Class<? extends Message> stateClass) {
+        checkNotNull(stateClass);
         final Descriptors.Descriptor descriptor = TypeName.of(stateClass).getDescriptor();
         final EntityOption entityOption = descriptor.getOptions()
                                                     .getExtension(OptionsProto.entity);
