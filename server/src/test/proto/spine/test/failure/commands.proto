@@ -36,3 +36,17 @@ message UpdateProjectName {
 
     spine.change.StringChange name_update = 2;
 }
+
+message RemoveOwner {
+
+    ProjectId id = 1;
+
+    string owner_user_id = 2;
+}
+
+message AddUser {
+
+    ProjectId id = 1;
+
+    string user_id = 2;
+}

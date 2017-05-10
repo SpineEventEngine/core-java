@@ -29,8 +29,15 @@ import org.spine3.base.Failures;
 import org.spine3.base.Subscribe;
 import org.spine3.change.StringChange;
 import org.spine3.envelope.FailureEnvelope;
-import org.spine3.test.failure.ProjectFailures;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.test.failure.ProjectFailures.AmbiguousOwner;
+import org.spine3.test.failure.ProjectFailures.InvalidPersistenceFolder;
+import org.spine3.test.failure.ProjectFailures.InvalidProjectName;
+import org.spine3.test.failure.ProjectFailures.MissingOwner;
+import org.spine3.test.failure.ProjectFailures.QuotaOverusage;
 import org.spine3.test.failure.ProjectId;
+import org.spine3.test.failure.command.AddUser;
+import org.spine3.test.failure.command.RemoveOwner;
 import org.spine3.test.failure.command.UpdateProjectName;
 import org.spine3.type.FailureClass;
 
@@ -126,7 +133,7 @@ public class FailureBusShould {
         failureBus.register(subscriberOne);
         failureBus.register(subscriberTwo);
 
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         assertTrue(failureBus.hasDispatchers(failureClass));
 
         final Collection<FailureDispatcher> dispatchers = failureBus.getDispatchers(failureClass);
@@ -141,7 +148,7 @@ public class FailureBusShould {
         failureBus.register(subscriberOne);
         failureBus.register(subscriberTwo);
         final FailureClass failureClass = FailureClass.of(
-                ProjectFailures.InvalidProjectName.class);
+                InvalidProjectName.class);
 
         failureBus.unregister(subscriberOne);
 
@@ -189,7 +196,7 @@ public class FailureBusShould {
 
         failureBus.register(dispatcher);
 
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         assertTrue(failureBus.getDispatchers(failureClass)
                              .contains(dispatcher));
     }
@@ -229,7 +236,7 @@ public class FailureBusShould {
         failureBusWithPostponedExecution.post(failure);
         final Set<FailureEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
         final FailureEnvelope postponedFailure = postponedFailures.iterator()
-                                                                .next();
+                                                                  .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
         postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
         assertTrue(dispatcher.isDispatchCalled());
@@ -240,7 +247,7 @@ public class FailureBusShould {
     public void unregister_dispatchers() {
         final FailureDispatcher dispatcherOne = new BareDispatcher();
         final FailureDispatcher dispatcherTwo = new BareDispatcher();
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         failureBus.register(dispatcherOne);
         failureBus.register(dispatcherTwo);
 
@@ -272,7 +279,7 @@ public class FailureBusShould {
                                                 .build();
         failureBus.register(new BareDispatcher());
         failureBus.register(new InvalidProjectNameSubscriber());
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
 
         failureBus.close();
 
@@ -281,18 +288,29 @@ public class FailureBusShould {
     }
 
     @Test
+    public void support_short_form_handler_methods() {
+        final ShortFormSubscriber subscriber = new ShortFormSubscriber();
+
+        final Failure failure = ambiguousOwnerFailure();
+
+        failureBus.register(subscriber);
+        failureBus.post(failure);
+
+        assertTrue(subscriber.isMethodCalled());
+        assertEquals(AnyPacker.unpack(failure.getMessage()), subscriber.failure);
+    }
+
+    @Test
     public void have_log() {
         assertNotNull(FailureBus.log());
     }
 
     private static Failure invalidProjectNameFailure() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(newUuid())
-                                             .build();
-        final ProjectFailures.InvalidProjectName invalidProjectName =
-                ProjectFailures.InvalidProjectName.newBuilder()
-                                                  .setProjectId(projectId)
-                                                  .build();
+        final ProjectId projectId = newProjectId();
+        final InvalidProjectName invalidProjectName =
+                InvalidProjectName.newBuilder()
+                                  .setProjectId(projectId)
+                                  .build();
         final StringChange nameChange = StringChange.newBuilder()
                                                     .setNewValue("Too short")
                                                     .build();
@@ -305,6 +323,23 @@ public class FailureBusShould {
         return Failures.createFailure(invalidProjectName, command);
     }
 
+    private static Failure ambiguousOwnerFailure() {
+        final ProjectId projectId = newProjectId();
+        final AmbiguousOwner msg = AmbiguousOwner.newBuilder()
+                                                 .setProjectId(projectId)
+                                                 .build();
+        final Command command = Commands.createCommand(RemoveOwner.getDefaultInstance(),
+                                                       CommandContext.getDefaultInstance());
+        return Failures.createFailure(msg, command);
+    }
+
+    private static ProjectId newProjectId() {
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(newUuid())
+                                             .build();
+        return projectId;
+    }
+
     /**
      * A simple dispatcher class, which only dispatch and does not have own failure
      * subscribing methods.
@@ -315,7 +350,7 @@ public class FailureBusShould {
 
         @Override
         public Set<FailureClass> getMessageClasses() {
-            return FailureClass.setOf(ProjectFailures.InvalidProjectName.class);
+            return FailureClass.setOf(InvalidProjectName.class);
         }
 
         @Override
@@ -333,7 +368,7 @@ public class FailureBusShould {
         private Failure failureHandled;
 
         @Subscribe
-        public void on(ProjectFailures.InvalidProjectName failure,
+        public void on(InvalidProjectName failure,
                        UpdateProjectName commandMessage,
                        CommandContext context) {
             final Command command = Commands.createCommand(commandMessage, context);
@@ -366,7 +401,7 @@ public class FailureBusShould {
                     envelope);
             final boolean failurePostponed = actualClass != null;
             final boolean dispatcherMatches = failurePostponed && dispatcher.getClass()
-                                                                          .equals(actualClass);
+                                                                            .equals(actualClass);
             return dispatcherMatches;
         }
 
@@ -376,22 +411,100 @@ public class FailureBusShould {
         }
     }
 
-    /** The subscriber which throws exception from the subscriber method. */
-    private static class FaultySubscriber extends FailureSubscriber {
+    private static class MemoizeSubscriber extends FailureSubscriber {
 
         private boolean methodCalled = false;
 
-        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-        @Subscribe
-        public void on(ProjectFailures.InvalidProjectName failure, CommandContext context) {
+        protected void triggerCall() {
             methodCalled = true;
-            throw new UnsupportedOperationException(
-                    "Faulty subscriber should have failed: " +
-                    FaultySubscriber.class.getSimpleName());
         }
 
-        private boolean isMethodCalled() {
-            return this.methodCalled;
+        public boolean isMethodCalled() {
+            return methodCalled;
+        }
+    }
+
+    /** The subscriber which throws exception from the subscriber method. */
+    private static class FaultySubscriber extends MemoizeSubscriber {
+
+        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
+        @Subscribe
+        public void on(InvalidProjectName failure, CommandContext context) {
+            triggerCall();
+            throw new UnsupportedOperationException(
+                    "Faulty subscriber should have failed: " +
+                            FaultySubscriber.class.getSimpleName());
+        }
+    }
+
+    private static class ShortFormSubscriber extends MemoizeSubscriber {
+
+        private AmbiguousOwner failure;
+
+        @Subscribe
+        public void on(AmbiguousOwner failure) {
+            triggerCall();
+            this.failure = failure;
+        }
+    }
+
+    private static class ContextAwareSubscriber extends MemoizeSubscriber {
+
+        private InvalidPersistenceFolder failure;
+        private CommandContext context;
+
+        @Subscribe
+        public void on(InvalidPersistenceFolder failure, CommandContext context) {
+            triggerCall();
+            this.failure = failure;
+            this.context = context;
+        }
+    }
+
+    private static class CommandMessageAwareSubscriber extends MemoizeSubscriber {
+
+        private MissingOwner failure;
+        private RemoveOwner command;
+
+        @Subscribe
+        public void on(MissingOwner failure, RemoveOwner command) {
+            triggerCall();
+            this.failure = failure;
+            this.command = command;
+        }
+    }
+
+    private static class CommandAwareSubscriber extends MemoizeSubscriber {
+
+        private QuotaOverusage failure;
+        private AddUser command;
+        private CommandContext context;
+
+        @Subscribe
+        public void on(QuotaOverusage failure,
+                       AddUser command,
+                       CommandContext context) {
+            triggerCall();
+            this.failure = failure;
+            this.command = command;
+            this.context = context;
+        }
+    }
+
+    private static class InvalidOrderSubscriber extends MemoizeSubscriber {
+
+        private QuotaOverusage failure;
+        private AddUser command;
+        private CommandContext context;
+
+        @Subscribe
+        public void on(QuotaOverusage failure,
+                       CommandContext context,
+                       AddUser command) {
+            triggerCall();
+            this.failure = failure;
+            this.command = command;
+            this.context = context;
         }
     }
 }
