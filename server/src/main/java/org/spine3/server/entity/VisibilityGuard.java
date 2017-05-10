@@ -52,7 +52,7 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
 @Internal
 public final class VisibilityGuard {
 
-    private final Map<Class, RepositoryAccess> repositories = newHashMap();
+    private final Map<Class<? extends Message>, RepositoryAccess> repositories = newHashMap();
 
     private VisibilityGuard() {
         // Prevent instantiation from outside.
@@ -70,7 +70,8 @@ public final class VisibilityGuard {
      */
     public void register(Repository repository) {
         checkNotNull(repository);
-        final Class stateClass = repository.getEntityStateClass();
+        @SuppressWarnings("unchecked") // The type is ensured by the called method.
+        final Class<? extends Message> stateClass = repository.getEntityStateClass();
         checkNotAlreadyRegistered(stateClass);
         repositories.put(stateClass, new RepositoryAccess(repository));
     }

@@ -56,7 +56,7 @@ public class VisibilityGuardShould {
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
-                                                            .build();
+                                       .build();
         repositories = Lists.newArrayList();
 
         guard = VisibilityGuard.newInstance();
