@@ -89,6 +89,7 @@ public final class VisibilityGuard {
      * Verifies if there is a registered repository for the passed entity state class.
      */
     public boolean hasRepository(Class<? extends Message> stateClass) {
+        checkNotNull(stateClass);
         final boolean result = repositories.containsKey(stateClass);
         return result;
     }
@@ -105,6 +106,7 @@ public final class VisibilityGuard {
      *                                  {@linkplain #shutDownRepositories() shut down}
      */
     public Optional<Repository> getRepository(Class<? extends Message> stateClass) {
+        checkNotNull(stateClass);
         final RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
             throw newIllegalArgumentException(

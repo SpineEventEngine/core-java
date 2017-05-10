@@ -21,6 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.common.collect.Lists;
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import org.junit.After;
 import org.junit.Before;
@@ -121,6 +122,15 @@ public class VisibilityGuardShould {
     @Test(expected = IllegalArgumentException.class)
     public void reject_unregistered_state_class() {
         guard.getRepository(Empty.class);
+    }
+
+    @Test
+    public void do_not_allow_null_inputs() {
+        new NullPointerTester()
+                .setDefault(Repository.class, new ExposedRepository(boundedContext))
+                .setDefault(Class.class, FullAccessAggregate.class)
+                .setDefault(Visibility.class, Visibility.NONE)
+                .testAllPublicInstanceMethods(guard);
     }
 
     private static class Exposed
