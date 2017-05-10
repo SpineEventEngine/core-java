@@ -21,6 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.common.collect.Lists;
+import com.google.protobuf.Empty;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -50,10 +51,11 @@ public class VisibilityGuardShould {
 
     private VisibilityGuard guard;
     private List<Repository> repositories;
+    private BoundedContext boundedContext;
 
     @Before
     public void setUp() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder()
+        boundedContext = BoundedContext.newBuilder()
                                                             .build();
         repositories = Lists.newArrayList();
 
@@ -69,8 +71,8 @@ public class VisibilityGuardShould {
     }
 
     @After
-    public void shutDown() {
-        guard.shutDownRepositories();
+    public void shutDown() throws Exception {
+        boundedContext.close();
         repositories.clear();
     }
 
@@ -109,6 +111,16 @@ public class VisibilityGuardShould {
         for (Repository repository : repositories) {
             assertFalse(repository.isOpen());
         }
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void do_not_allow_double_registration() {
+        register(new ExposedRepository(boundedContext));
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_unregistered_state_class() {
+        guard.getRepository(Empty.class);
     }
 
     private static class Exposed
