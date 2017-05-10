@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.collect.Lists;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.option.EntityOption.Visibility;
@@ -31,6 +33,7 @@ import org.spine3.test.options.HiddenAggregate;
 import org.spine3.test.options.SubscribableAggregate;
 import org.spine3.type.TypeName;
 
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -46,15 +49,29 @@ import static org.junit.Assert.assertTrue;
 public class VisibilityGuardShould {
 
     private VisibilityGuard guard;
+    private List<Repository> repositories;
 
     @Before
     public void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
+        repositories = Lists.newArrayList();
+
         guard = VisibilityGuard.newInstance();
-        guard.register(new ExposedRepository(boundedContext));
-        guard.register(new SubscribableRepository(boundedContext));
-        guard.register(new HiddenRepository(boundedContext));
+        register(new ExposedRepository(boundedContext));
+        register(new SubscribableRepository(boundedContext));
+        register(new HiddenRepository(boundedContext));
+    }
+
+    private void register(Repository repository) {
+        guard.register(repository);
+        repositories.add(repository);
+    }
+
+    @After
+    public void shutDown() {
+        guard.shutDownRepositories();
+        repositories.clear();
     }
 
     @Test
@@ -83,6 +100,15 @@ public class VisibilityGuardShould {
         final Set<TypeName> hidden = guard.getEntityTypes(Visibility.NONE);
         assertEquals(1, hidden.size());
         assertTrue(hidden.contains(TypeName.of(HiddenAggregate.class)));
+    }
+
+    @Test
+    public void shut_down_repositories() {
+        guard.shutDownRepositories();
+
+        for (Repository repository : repositories) {
+            assertFalse(repository.isOpen());
+        }
     }
 
     private static class Exposed
