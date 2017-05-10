@@ -19,6 +19,7 @@
  */
 package org.spine3.server.reflect;
 
+import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
@@ -27,6 +28,7 @@ import org.spine3.base.Subscribe;
 import org.spine3.type.FailureClass;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -184,8 +186,9 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         return PREDICATE;
     }
 
-    /** The factory for filtering methods that match
-     * {@code FailureSubscriberMethod} specification. */
+    /**
+     * The factory for filtering methods that match {@code FailureSubscriberMethod} specification.
+     */
     private static class Factory implements HandlerMethod.Factory<FailureSubscriberMethod> {
 
         @Override
@@ -196,11 +199,8 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         @Override
         public FailureSubscriberMethod create(Method method) {
             final Class[] paramTypes = method.getParameterTypes();
-            final int paramsCount = paramTypes.length;
-            final FailureSubscriberMethod result =
-                    paramsCount == 2
-                            ? new ShortFailureSubscriberMethod(method)
-                            : new CommandAwareFailureSubscriberMethod(method);
+            final MethodWrapper wrapper = MethodWrapper.forParamSet(paramTypes);
+            final FailureSubscriberMethod result = wrapper.apply(method);
             return result;
         }
 
@@ -226,6 +226,67 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         private static Factory getInstance() {
             return Singleton.INSTANCE.value;
         }
+    }
+
+    private enum MethodWrapper implements Function<Method, FailureSubscriberMethod> {
+
+        SHORT {
+            @Override
+            FailureSubscriberMethod wrap(Method method) {
+                return new ShortFailureSubscriberMethod(method);
+            }
+        },
+        COMMAND_CONTEXT_AWARE {
+            @Override
+            FailureSubscriberMethod wrap(Method method) {
+                return new CommandContextAwareFailureSubscriberMethod(method);
+            }
+        },
+        COMMAND_MESSAGE_AWARE {
+            @Override
+            FailureSubscriberMethod wrap(Method method) {
+                return new CommandMessageAwareFailureSubscriberMethod(method);
+            }
+        },
+        COMMAND_AWARE {
+            @Override
+            FailureSubscriberMethod wrap(Method method) {
+                return new CommandAwareFailureSubscriberMethod(method);
+            }
+        };
+
+        private static MethodWrapper forParamSet(Class[] paramTypes) {
+            checkNotNull(paramTypes);
+            final int paramCount = paramTypes.length;
+            final MethodWrapper methodWrapper;
+            switch (paramCount) {
+                case 1:
+                    methodWrapper = SHORT;
+                    break;
+                case 2:
+                    final Class<?> secondParamType = paramTypes[1];
+                    methodWrapper = secondParamType == CommandContext.class
+                                    ? COMMAND_CONTEXT_AWARE
+                                    : COMMAND_MESSAGE_AWARE;
+                    break;
+                case 3:
+                    methodWrapper = COMMAND_AWARE;
+                    break;
+                default:
+                    throw new IllegalArgumentException(
+                            format("Invalid Failure handler method parameter count: %s.",
+                                    paramCount));
+            }
+            return methodWrapper;
+        }
+
+        @Override
+        public FailureSubscriberMethod apply(@Nullable Method method) {
+            checkNotNull(method);
+            return wrap(method);
+        }
+
+        abstract FailureSubscriberMethod wrap(Method method);
     }
 
     /**

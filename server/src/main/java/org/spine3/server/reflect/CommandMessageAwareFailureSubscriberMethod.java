@@ -29,14 +29,14 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
+public class CommandMessageAwareFailureSubscriberMethod extends FailureSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    ShortFailureSubscriberMethod(Method method) {
+    CommandMessageAwareFailureSubscriberMethod(Method method) {
         super(method);
     }
 
@@ -44,16 +44,16 @@ class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
      * {@inheritDoc}
      *
      * <p>Invokes the wrapped {@link Method} upon all the passed params as follows:
-     * {@code invoke(target, failureMessage)} ignoring the Command {@linkplain Message} and
-     * {@link CommandContext} arguments.
+     * {@code invoke(target, failureMessage, commandMessage)} ignoring the Command
+     * {@linkplain Message} argument.
      */
     @Override
     protected void doInvoke(Object target,
                             Message failureMessage,
-                            CommandContext ignoredContext,
-                            Message ignoredCommandMsg) throws IllegalArgumentException,
+                            CommandContext context,
+                            Message commandMessage) throws IllegalArgumentException,
                                                            IllegalAccessException,
                                                            InvocationTargetException {
-        getMethod().invoke(target, failureMessage);
+        getMethod().invoke(target, failureMessage, commandMessage);
     }
 }
