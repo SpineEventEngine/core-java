@@ -46,7 +46,7 @@ import java.lang.annotation.Target;
  * <h2>Subscribing to Failures</h2>
  *
  * <p>A failure subscriber method:
- * <ul>
+ * <ul> // TODO:2017-05-10:dmytro.dashenkov: Update.
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
