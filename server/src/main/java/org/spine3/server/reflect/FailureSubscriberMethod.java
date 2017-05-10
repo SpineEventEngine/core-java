@@ -39,8 +39,9 @@ import static java.lang.String.format;
  * A wrapper for a failure subscriber method.
  *
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
+public abstract class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter failure subscriber methods of a class. */
     private static final MethodPredicate PREDICATE = new FilterPredicate();
@@ -50,9 +51,29 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
      *
      * @param method subscriber method
      */
-    private FailureSubscriberMethod(Method method) {
+    FailureSubscriberMethod(Method method) {
         super(method);
     }
+
+    /**
+     * Invokes the underlying {@link Method} with the specified set of params.
+     *
+     * <p>Depending on the implementation, some parameters may be omitted.
+     *
+     * @param target         the invocation target
+     * @param failureMessage the failure message parameter of the handler method
+     * @param context        the {@link CommandContext} parameter of the handler method
+     * @param commandMessage the command message parameter of the handler method
+     * @throws IllegalArgumentException  if thrown by the handler method invocation
+     * @throws IllegalAccessException    if thrown by the handler method invocation
+     * @throws InvocationTargetException if thrown by the handler method invocation
+     */
+    protected abstract void doInvoke(Object target,
+                                     Message failureMessage,
+                                     CommandContext context,
+                                     Message commandMessage) throws IllegalArgumentException,
+                                                                    IllegalAccessException,
+                                                                    InvocationTargetException;
 
     /**
      * Invokes the wrapped subscriber method to handle {@code failureMessage},
@@ -77,12 +98,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         checkNotNull(commandMessage);
         checkNotNull(context);
         try {
-            final int paramCount = getParamCount();
-            if (paramCount == 2) {
-                getMethod().invoke(target, failureMessage, commandMessage);
-            } else {
-                getMethod().invoke(target, failureMessage, commandMessage, context);
-            }
+            doInvoke(target, failureMessage, context, commandMessage);
         } catch (IllegalArgumentException | IllegalAccessException e) {
             throwIfUnchecked(e);
             throw new IllegalStateException(e);
@@ -141,10 +157,6 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         return method;
     }
 
-    static FailureSubscriberMethod from(Method method) {
-        return new FailureSubscriberMethod(method);
-    }
-
     private static IllegalStateException missingFailureHandler(
             Class<?> cls, Class<? extends Message> failureClass) {
         final String msg = format(
@@ -183,7 +195,13 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
 
         @Override
         public FailureSubscriberMethod create(Method method) {
-            return from(method);
+            final Class[] paramTypes = method.getParameterTypes();
+            final int paramsCount = paramTypes.length;
+            final FailureSubscriberMethod result =
+                    paramsCount == 2
+                            ? new ShortFailureSubscriberMethod(method)
+                            : new CommandAwareFailureSubscriberMethod(method);
+            return result;
         }
 
         @Override
@@ -202,8 +220,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
         private enum Singleton {
             INSTANCE;
             @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final FailureSubscriberMethod.Factory value =
-                    new FailureSubscriberMethod.Factory();
+            private final Factory value = new Factory();
         }
 
         private static Factory getInstance() {
@@ -236,6 +253,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
             if (!isParamCountCorrect) {
                 return false;
             }
+            // TODO:2017-05-10:dmytro.dashenkov: Update according to the new changes.
             final boolean isFirstParamMsg = Message.class.isAssignableFrom(paramTypes[0]);
             final boolean isSecondParamMsg = Message.class.isAssignableFrom(paramTypes[1]);
             if (paramCount == 2) {
