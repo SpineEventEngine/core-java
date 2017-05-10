@@ -51,7 +51,9 @@ import static com.google.common.base.Preconditions.checkState;
  *     <li>Java primitives - the passed {@link Any} is unpacked into one of the types
  *         {@code Int32Value, Int64Value, UInt32Value, UInt64Value, FloatValue, DoubleValue,
  *         BoolValue, StringValue, BytesValue} and then transformed into the corresponding Java
- *         type, either a primitive value, or {@code String} of {@link ByteString}.
+ *         type, either a primitive value, or {@code String} of {@link ByteString}. For more info
+ *         see <a href="https://developers.google.com/protocol-buffers/docs/proto3#scalar">
+ *         the official doc</a>.
  * </ul>
  *
  * @author Dmytro Dashenkov

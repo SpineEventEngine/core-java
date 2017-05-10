@@ -48,8 +48,24 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * <p>Calling any of the methods is optional. Call {@link #build() build()} to retrieve
  * the instance of {@link Query}.
  *
- * <p>Calling of any of the builder methods overrides the previous call of the given method of
- * any of its overloads.
+ * <p>Calling any of the builder methods overrides the previous call of the given method of
+ * any of its overloads. For example, calling sequentially
+ * <pre>
+ *     {@code
+ *     builder.withMask(mask1)
+ *            .withMask(mask2)
+ *            // optionally some other invocations
+ *            .withMask(mask3)
+ *            .build();
+ *     }
+ * </pre>
+ * is equivalent to calling
+ * <pre>
+ *     {@code
+ *     builder.withMask(mask3)
+ *            .build();
+ *     }
+ * </pre>
  *
  * <p>Usage example:
  * <pre>
@@ -65,7 +81,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  *     }
  * </pre>
  *
- * @see QueryFactory#select(Class) for the intialization
+ * @see QueryFactory#select(Class)
  */
 public final class QueryBuilder {
 

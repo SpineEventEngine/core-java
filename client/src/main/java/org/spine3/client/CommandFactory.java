@@ -30,6 +30,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
  * configuration.
+ *
+ * @see ActorRequestFactory#command()
  */
 public final class CommandFactory {
 

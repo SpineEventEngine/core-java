@@ -32,13 +32,16 @@ import static org.spine3.client.Targets.composeTarget;
 /**
  * Public API for creating {@link Topic} instances, using the {@code ActorRequestFactory}
  * configuration.
+ *
+ * @see ActorRequestFactory#topic()
  */
 public final class TopicFactory {
 
     private final ActorContext actorContext;
 
-    TopicFactory(ActorContext actorContext) {
-        this.actorContext = checkNotNull(actorContext);
+    TopicFactory(ActorRequestFactory actorRequestFactory) {
+        checkNotNull(actorRequestFactory);
+        this.actorContext = actorRequestFactory.actorContext();
     }
 
     /**

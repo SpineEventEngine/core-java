@@ -39,6 +39,8 @@ import static org.spine3.client.Queries.queryBuilderFor;
 /**
  * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}
  * configuration.
+ *
+ * @see ActorRequestFactory#query()
  */
 public final class QueryFactory {
 
@@ -51,8 +53,9 @@ public final class QueryFactory {
 
     private final ActorContext actorContext;
 
-    QueryFactory(ActorContext actorContext) {
-        this.actorContext = checkNotNull(actorContext);
+    QueryFactory(ActorRequestFactory actorRequestFactory) {
+        checkNotNull(actorRequestFactory);
+        this.actorContext = actorRequestFactory.actorContext();
     }
 
     private static QueryId newQueryId() {

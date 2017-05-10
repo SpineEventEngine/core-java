@@ -94,11 +94,11 @@ public class ActorRequestFactory {
     }
 
     public QueryFactory query() {
-        return new QueryFactory(actorContext());
+        return new QueryFactory(this);
     }
 
     public TopicFactory topic() {
-        return new TopicFactory(actorContext());
+        return new TopicFactory(this);
     }
 
     public CommandFactory command() {
@@ -119,7 +119,6 @@ public class ActorRequestFactory {
      * <p>Sets the timestamp value to the
      * {@linkplain org.spine3.time.Time#getCurrentTime() current time}.
      */
-    @VisibleForTesting
     ActorContext actorContext() {
         final ActorContext.Builder builder = ActorContext.newBuilder()
                                                          .setActor(actor)

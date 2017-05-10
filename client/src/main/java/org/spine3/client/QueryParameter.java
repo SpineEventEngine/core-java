@@ -23,10 +23,10 @@ package org.spine3.client;
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.protobuf.TypeConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.protobuf.TypeConverter.toAny;
 
 /**
  * A parameter of a {@link Query}.
@@ -35,6 +35,8 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * the Entity Column to filter by and the value of the Column.
  *
  * <p>The supported types for querying are {@link Message} and Protobuf primitives.
+ *
+ * @see org.spine3.protobuf.TypeConverter for the explanation of the supported type constraints
  */
 public final class QueryParameter {
 
@@ -57,7 +59,7 @@ public final class QueryParameter {
     public static QueryParameter eq(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
-        final Any wrappedValue = TypeConverter.toAny(value);
+        final Any wrappedValue = toAny(value);
         final QueryParameter parameter = new QueryParameter(columnName, wrappedValue);
         return parameter;
     }
