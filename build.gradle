@@ -146,6 +146,10 @@ subprojects {
             threshold = 0
             reportType = "warn"
         }
+
+        rightMarginWrappingChecker {
+            threshold = 100
+        }
     }
 
     sourceCompatibility = 1.7
