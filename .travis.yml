@@ -14,6 +14,7 @@ before_install:
   # Manually downloading the latest version from the Maven Central, since the jpm4j stopped working.
   - curl -sL  http://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar >> codacy-coverage-reporter.jar
   # END of Codacy setup.
+  - openssl aes-256-cbc -in gcs-auth-key.json.enc -out gcs-auth-key.json -d
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
@@ -24,7 +25,9 @@ after_success:
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 
-script: ./gradlew check --stacktrace
+script:
+  - ./gradlew check --stacktrace
+  - ./gradlew cleanGCS --info
 
 after_script:
   # Installation of https://github.com/travis-ci/dpl.
@@ -33,7 +36,7 @@ after_script:
   - mkdir reports
   - zip -r reports/test-reports.zip **/build/reports
   - zip -r reports/jacoco-reports.zip **/build/jacoco
-  #Upload the prepared reports to GCS.
+  # Upload the prepared reports to GCS.
   - dpl --provider=gcs
         --access-key-id=GOOGX66ER6DXLZH7IKQF
         --secret-access-key=${GCS_SECRET}

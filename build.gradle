@@ -1,3 +1,5 @@
+import groovy.time.TimeCategory
+
 //
 // Copyright 2017, TeamDev Ltd. All rights reserved.
 //
@@ -38,7 +40,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.8.15-SNAPSHOT'
+        spineToolsVersion = '0.9.3-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.
@@ -60,6 +62,7 @@ buildscript {
 
         classpath group: 'org.spine3.tools', name: 'spine-codestyle-checker',
                                              version: spineToolsVersion
+        classpath group: 'org.spine3.tools', name: 'gcs-plugin', version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -296,3 +299,12 @@ idea.project.ipr {
 apply from: "${rootDir}/scripts/jacoco.gradle"
 
 apply from: publishPlugin
+
+apply plugin: 'org.spine3.tools.gcs-plugin'
+
+cleanGCS {
+    authKeyPath = "gcs-auth-key.json"
+    bucketName = "spine-dev.appspot.com"
+    targetFolder = "core-java/builds"
+    threshold = TimeCategory.getDays(30)
+}
