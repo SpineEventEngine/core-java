@@ -14,7 +14,7 @@ before_install:
   # Manually downloading the latest version from the Maven Central, since the jpm4j stopped working.
   - curl -sL  http://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar >> codacy-coverage-reporter.jar
   # END of Codacy setup.
-  - openssl aes-256-cbc -in gcs-auth-key.json.enc -out gcs-auth-key.json -d
+  - openssl aes-256-cbc -K $encrypted_ab43945a5b81_key -iv $encrypted_ab43945a5b81_iv -in gcs-auth-key.json.enc -out gcs-auth-key.json -d
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
