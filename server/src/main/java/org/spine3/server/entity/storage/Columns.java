@@ -71,8 +71,12 @@ import static java.lang.String.format;
  */
 class Columns {
 
+    private static final String SPINE_PACKAGE = "org.spine3.";
     private static final String NON_PUBLIC_CLASS_WARNING =
             "Passed entity class %s is not public. Storage fields won't be extracted.";
+    private static final String NON_PUBLIC_INTERNAL_CLASS_WARNING =
+            "Passed entity class %s is probably a Spine internal non-public entity. " +
+                    "Storage fields won't be extracted.";
 
     /**
      * A one to many container of the {@link Class} to {@link Column} relations.
@@ -106,9 +110,7 @@ class Columns {
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
         if (!Modifier.isPublic(modifiers)) {
-            log().warn(
-                    format(NON_PUBLIC_CLASS_WARNING,
-                           entityType.getCanonicalName()));
+            logNonPublicClass(entityType);
             return Collections.emptyMap();
         }
         ensureRegistered(entityType);
@@ -165,6 +167,20 @@ class Columns {
                 final Column<?> storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
+        }
+    }
+
+    /**
+     * Writes the non-public {@code Entity} class warning into the log unless the passed class
+     * represents one of the Spine internal {@link Entity} implementations.
+     */
+    private static void logNonPublicClass(Class<? extends Entity> cls) {
+        final String className = cls.getCanonicalName();
+        final boolean internal = className.startsWith(SPINE_PACKAGE);
+        if (internal) {
+            log().trace(format(NON_PUBLIC_INTERNAL_CLASS_WARNING, className));
+        } else {
+            log().warn(format(NON_PUBLIC_CLASS_WARNING, className));
         }
     }
 

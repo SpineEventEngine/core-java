@@ -30,7 +30,7 @@ option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/net/url.proto";
 import "spine/net/internet_domain.proto";
 import "spine/people/person_name.proto";

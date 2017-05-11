@@ -20,7 +20,7 @@
 package org.spine3.server.outbus;
 
 import com.google.common.base.Function;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 import org.spine3.envelope.MessageEnvelope;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.type.MessageClass;

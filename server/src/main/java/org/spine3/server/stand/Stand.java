@@ -19,6 +19,7 @@
  */
 package org.spine3.server.stand;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableSet;
@@ -26,6 +27,8 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.annotation.Internal;
+import org.spine3.base.CommandContext;
 import org.spine3.base.Response;
 import org.spine3.base.Version;
 import org.spine3.client.Queries;
@@ -51,6 +54,7 @@ import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
+import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
@@ -65,7 +69,7 @@ import static org.spine3.io.StreamObservers.ack;
  *
  * <p>Provides an optimal way to access the latest state of published aggregates
  * for read-side services. The aggregate states are delivered to the instance of {@code Stand}
- * through {@link StandFunnel} from {@link AggregateRepository} instances.
+ * from {@link AggregateRepository} instances.
  *
  * <p>In order to provide a flexibility in defining data access policies,
  * {@code Stand} contains only the states of published aggregates.
@@ -103,9 +107,14 @@ public class Stand implements AutoCloseable {
     private final TypeRegistry typeRegistry;
 
     /**
-     * An instance of executor used to invoke callbacks
+     * An instance of executor used to invoke callbacks.
      */
     private final Executor callbackExecutor;
+
+    /**
+     * The delivery strategy to propagate the {@code Entity} state to the instance of {@code Stand}.
+     */
+    private final StandUpdateDelivery delivery;
 
     private final boolean multitenant;
 
@@ -115,13 +124,34 @@ public class Stand implements AutoCloseable {
 
     private Stand(Builder builder) {
         storage = builder.getStorage();
+        delivery = builder.getDelivery()
+                          .get();
         callbackExecutor = builder.getCallbackExecutor();
-        multitenant = builder.isMultitenant();
+        multitenant = builder.multitenant != null
+                ? builder.multitenant
+                : false;
         subscriptionRegistry = builder.getSubscriptionRegistry();
         typeRegistry = builder.getTypeRegistry();
         topicValidator = builder.getTopicValidator();
         queryValidator = builder.getQueryValidator();
         subscriptionValidator = builder.getSubscriptionValidator();
+    }
+
+    private void init() {
+        delivery.setStand(this);
+    }
+
+    /**
+     * Posts the state of an {@link VersionableEntity} to this {@link Stand}.
+     *
+     * @param entity         the entity which state should be delivered to the {@code Stand}
+     * @param commandContext the context of the command, which triggered the entity state update.
+     */
+    public void post(final VersionableEntity entity, CommandContext commandContext) {
+        final TenantId tenantId = commandContext.getActorContext()
+                                                .getTenantId();
+        final EntityStateEnvelope envelope = EntityStateEnvelope.of(entity, tenantId);
+        delivery.deliver(envelope);
     }
 
     public static Builder newBuilder() {
@@ -189,6 +219,8 @@ public class Stand implements AutoCloseable {
         op.execute();
     }
 
+    @Internal
+    @VisibleForTesting
     public boolean isMultitenant() {
         return multitenant;
     }
@@ -269,7 +301,6 @@ public class Stand implements AutoCloseable {
 
             @Override
             public void run() {
-
                 subscriptionRegistry.remove(subscription);
                 ack(responseObserver);
             }
@@ -437,11 +468,32 @@ public class Stand implements AutoCloseable {
     }
 
     public static class Builder {
+
+        /**
+         * The multi-tenancy flag for the {@code Stand} to build.
+         *
+         * <p>The value of this field should be equal to that of corresponding
+         * {@linkplain org.spine3.server.BoundedContext.Builder BoundedContext.Builder} and is not
+         * supposed to be {@linkplain #setMultitenant(Boolean) set directly}.
+         *
+         * <p>If set directly, the value would be matched to the multi-tenancy flag of aggregating
+         * {@code BoundedContext}.
+         */
+        @Nullable
+        private Boolean multitenant;
+
+        /**
+         * Optional {@code StandUpdateDelivery} for propagating the data to {@code Stand}.
+         *
+         * <p>If not set, a {@link StandUpdateDelivery#directDelivery() directDelivery()}
+         * value will be set by the builder.
+         */
+        private StandUpdateDelivery delivery;
+
         private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
         private TypeRegistry typeRegistry;
-        private boolean multitenant;
         private TopicValidator topicValidator;
         private QueryValidator queryValidator;
         private SubscriptionValidator subscriptionValidator;
@@ -484,12 +536,15 @@ public class Stand implements AutoCloseable {
             return storage;
         }
 
-        public Builder setMultitenant(boolean multitenant) {
+        @Internal
+        public Builder setMultitenant(@Nullable Boolean multitenant) {
             this.multitenant = multitenant;
             return this;
         }
 
-        public boolean isMultitenant() {
+        @Internal
+        @Nullable
+        public Boolean isMultitenant() {
             return multitenant;
         }
 
@@ -513,15 +568,46 @@ public class Stand implements AutoCloseable {
             return typeRegistry;
         }
 
+        public Optional<StandUpdateDelivery> getDelivery() {
+            return Optional.fromNullable(delivery);
+        }
+
+        /**
+         * Sets the {@code StandUpdateDelivery} instance for this {@code StandFunnel}.
+         *
+         * <p>The value must not be {@code null}.
+         *
+         * <p> If this method is not used, a
+         * {@link StandUpdateDelivery#directDelivery() directDelivery()} value will be used.
+         *
+         * @param delivery the instance of {@code StandUpdateDelivery}.
+         * @return {@code this} instance of {@code Builder}
+         */
+        public Builder setDelivery(StandUpdateDelivery delivery) {
+            this.delivery = checkNotNull(delivery);
+            return this;
+        }
+
         /**
          * Builds an instance of {@code Stand}.
          *
-         * @return the instance of Stand
+         * <p>This method is supposed to be called internally when building aggregating
+         * {@code BoundedContext}.
+         *
+         * @return new instance of Stand
          */
+        @Internal
         public Stand build() {
+            if (delivery == null) {
+                delivery = StandUpdateDelivery.directDelivery();
+            }
+
+            final boolean multitenant = this.multitenant == null
+                    ? false
+                    : this.multitenant;
+
             if (storage == null) {
-                storage = StorageFactorySwitch.getInstance(multitenant)
-                                              .get()
+                storage = StorageFactorySwitch.get(multitenant)
                                               .createStandStorage();
             }
             if (callbackExecutor == null) {
@@ -536,8 +622,10 @@ public class Stand implements AutoCloseable {
             queryValidator = new QueryValidator(typeRegistry);
             subscriptionValidator = new SubscriptionValidator(subscriptionRegistry);
 
-            final Stand result = new Stand(this);
-            return result;
+            final Stand product = new Stand(this);
+            product.init();
+
+            return product;
         }
     }
 }

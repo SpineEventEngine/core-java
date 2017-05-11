@@ -30,13 +30,12 @@ import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandDispatcher;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.server.event.EventBus;
-import org.spine3.server.stand.StandFunnel;
+import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.CommandOperation;
@@ -92,8 +91,8 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The EventBus to which we post events produced by aggregates. */
     private final EventBus eventBus;
 
-    /** The funnel for sending updated aggregate states to Stand. */
-    private final StandFunnel standFunnel;
+    /** The Stand instance for sending updated aggregate states. */
+    private final Stand stand;
 
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
@@ -110,7 +109,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     protected AggregateRepository(BoundedContext boundedContext) {
         super();
         this.eventBus = boundedContext.getEventBus();
-        this.standFunnel = boundedContext.getStandFunnel();
+        this.stand = boundedContext.getStand();
     }
 
     /**
@@ -150,15 +149,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     Class<? extends Aggregate<I, ?, ?>> getAggregateClass() {
         return getEntityClass();
-    }
-
-    /**
-     * Obtains the class of the aggregate state.
-     */
-    public Class<? extends Message> getAggregateStateClass() {
-        final Class<? extends Aggregate<I, ?, ?>> aggregateClass = getAggregateClass();
-        final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(aggregateClass);
-        return stateClass;
     }
 
     /**
@@ -221,7 +211,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 final List<Event> events = aggregate.getUncommittedEvents();
 
                 store(aggregate);
-                standFunnel.post(aggregate, command.getContext());
+                stand.post(aggregate, command.getContext());
 
                 postEvents(events);
             }

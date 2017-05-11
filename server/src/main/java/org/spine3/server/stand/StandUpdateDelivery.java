@@ -22,7 +22,7 @@
 package org.spine3.server.stand;
 
 import com.google.common.collect.Lists;
-import org.spine3.annotations.SPI;
+import org.spine3.annotation.SPI;
 import org.spine3.server.delivery.Delivery;
 import org.spine3.server.entity.EntityStateEnvelope;
 import org.spine3.server.projection.ProjectionRepository;
@@ -37,8 +37,6 @@ import java.util.concurrent.Executor;
  * <p>Common delivery sources are
  * {@link org.spine3.server.aggregate.AggregateRepository AggregateRepository}
  * and {@link ProjectionRepository}.
- *
- * <p>Delivery is performed via {@link StandFunnel}.
  *
  * @author Alex Tymchenko
  */

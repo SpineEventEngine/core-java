@@ -25,7 +25,7 @@ option (type_url_prefix) = "type.spine3.org";
 option java_package="org.spine3.test.bc";
 option java_multiple_files = true;
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 message ProjectId {
     string id = 1;
@@ -57,4 +57,12 @@ message Task {
     TaskId task_id = 1;
     string title = 2;
     string description = 3;
+}
+
+message SecretProject {
+    option (entity).kind = AGGREGATE;
+    option (entity).visibility = NONE;
+
+    string id = 1;
+    string name = 2;
 }

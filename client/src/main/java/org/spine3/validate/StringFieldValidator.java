@@ -22,9 +22,9 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import org.spine3.base.FieldPath;
+import org.spine3.option.OptionsProto;
+import org.spine3.option.PatternOption;
 import org.spine3.protobuf.Wrapper;
-import org.spine3.validate.internal.PatternOption;
-import org.spine3.validate.internal.ValidationProto;
 
 import java.util.List;
 
@@ -51,7 +51,7 @@ class StringFieldValidator extends FieldValidator<String> {
                          FieldPath rootFieldPath,
                          boolean strict) {
         super(descriptor, FieldValidator.<String>toValueList(fieldValues), rootFieldPath, strict);
-        this.patternOption = getFieldOption(ValidationProto.pattern);
+        this.patternOption = getFieldOption(OptionsProto.pattern);
         this.regex = patternOption.getRegex();
     }
 

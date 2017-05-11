@@ -22,7 +22,7 @@ package org.spine3.time;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotations.Internal;
+import org.spine3.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;

@@ -19,11 +19,11 @@
  */
 
 /**
- * This package contains common annotation types for Java code and
- * generated classes for annotations of Proto types.
+ * This package provides generated classes and interfaces for Spine Options, and utilities for
+ * working with these options.
  */
 
 @ParametersAreNonnullByDefault
-package org.spine3.annotations;
+package org.spine3.option;
 
 import javax.annotation.ParametersAreNonnullByDefault;

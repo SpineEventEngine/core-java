@@ -32,7 +32,7 @@ option java_generate_equals_and_hash = true;
 
 import "google/protobuf/field_mask.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/users/user_id.proto";
 import "spine/users/user_account.proto";
 

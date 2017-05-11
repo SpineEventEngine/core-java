@@ -30,6 +30,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.FailureThrowable;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.commandbus.CommandException;
+import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.Log;
 import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.storage.StorageFactory;
@@ -233,7 +234,8 @@ public class CommandStore implements AutoCloseable {
             @Override
             public Iterator<Command> apply(@Nullable final CommandStatus input) {
                 checkNotNull(input);
-                final Iterator<Command> commands = Records.toCommandIterator(storage.iterator(status));
+                final Iterator<CommandRecord> recordIterator = storage.iterator(status);
+                final Iterator<Command> commands = Records.toCommandIterator(recordIterator);
                 return commands;
             }
         };

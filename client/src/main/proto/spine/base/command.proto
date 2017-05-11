@@ -31,9 +31,8 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/base/actor_context.proto";
-import "spine/validate.proto";
 
 // Command identifier.
 message CommandId {

@@ -30,8 +30,7 @@ option java_package = "org.spine3.test.validate.msg";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/wrappers.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 // Messages for general validation tests.
 

@@ -28,8 +28,7 @@ option java_outer_classname = "TimeChangeProto";
 option java_package = "org.spine3.time.change";
 
 import "spine/time/time.proto";
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 //
 // This file provides messages that define changes of date/time fields in other messages.
