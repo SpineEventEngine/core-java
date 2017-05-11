@@ -14,10 +14,6 @@ before_install:
   # Manually downloading the latest version from the Maven Central, since the jpm4j stopped working.
   - curl -sL  http://repo1.maven.org/maven2/com/codacy/codacy-coverage-reporter/1.0.13/codacy-coverage-reporter-1.0.13-assembly.jar >> codacy-coverage-reporter.jar
   # END of Codacy setup.
-  # Decrypt and unarchive Maven and Google Cloud Storage credentials.
-  - openssl aes-256-cbc -K $encrypted_ab43945a5b81_key -iv $encrypted_ab43945a5b81_iv
-    -in credentials.tar.enc -out credentials.tar -d
-  - tar xvf credentials.tar
 
 after_success:
   # See: https://github.com/codecov/example-java/blob/master/.travis.yml
@@ -30,6 +26,9 @@ after_success:
 
 script:
   - ./gradlew check --stacktrace
+    # Decrypt and unarchive Maven and Google Cloud Storage credentials.
+  - openssl aes-256-cbc -K $encrypted_98c791cdf535_key -iv $encrypted_98c791cdf535_iv -in credentials.tar.enc -out credentials.tar -d
+  - tar xvf credentials.tar
   - ./gradlew cleanGCS --info
 
 after_script:
