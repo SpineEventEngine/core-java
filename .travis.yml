@@ -24,7 +24,12 @@ after_success:
   - chmod +x ./scripts/publish-artifacts.sh
   - ./scripts/publish-artifacts.sh
 
-script: ./gradlew check --stacktrace
+script:
+  - ./gradlew check --stacktrace
+    # Decrypt and unarchive Maven and Google Cloud Storage credentials.
+  - openssl aes-256-cbc -K $encrypted_98c791cdf535_key -iv $encrypted_98c791cdf535_iv -in credentials.tar.enc -out credentials.tar -d
+  - tar xvf credentials.tar
+  - ./gradlew cleanGCS --info
 
 after_script:
   # Installation of https://github.com/travis-ci/dpl.
@@ -33,7 +38,7 @@ after_script:
   - mkdir reports
   - zip -r reports/test-reports.zip **/build/reports
   - zip -r reports/jacoco-reports.zip **/build/jacoco
-  #Upload the prepared reports to GCS.
+  # Upload the prepared reports to GCS.
   - dpl --provider=gcs
         --access-key-id=GOOGX66ER6DXLZH7IKQF
         --secret-access-key=${GCS_SECRET}
