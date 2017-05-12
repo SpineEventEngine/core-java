@@ -32,4 +32,5 @@ script:
   - ./gradlew cleanGCS --info
 
 after_script:
+  - chmod +x ./scripts/upload-artifacts.sh
   - ./scripts/upload-artifacts.sh

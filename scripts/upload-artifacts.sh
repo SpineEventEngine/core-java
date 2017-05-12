@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# This script uploads the Travis artifacts to Google Cloud Storage.
+
 # Installation of https://github.com/travis-ci/dpl.
 gem instal dpl
 # Prepare the test and coverage reports for the upload.
