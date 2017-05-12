@@ -22,6 +22,8 @@ package org.spine3.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 
+import java.io.Serializable;
+
 /**
  * Obtains an entity ID based on an event/command message and context.
  *
@@ -31,7 +33,7 @@ import com.google.protobuf.Message;
  *          {@link org.spine3.base.CommandContext CommandContext} type
  * @see org.spine3.server.entity.Entity Entity
  */
-interface IdFunction<I, M extends Message, C extends Message> {
+interface IdFunction<I, M extends Message, C extends Message> extends Serializable {
 
     /**
      * Obtains an entity ID based on the passed message and its context.

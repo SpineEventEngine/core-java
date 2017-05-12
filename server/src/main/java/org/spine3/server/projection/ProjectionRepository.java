@@ -34,6 +34,7 @@ import org.spine3.base.EventContext;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EventDispatchingRepository;
+import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
@@ -162,6 +163,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     EventStore getEventStore() {
         return boundedContext.getEventBus()
                              .getEventStore();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open the method to the package.
+     */
+    @Override
+    protected EventTargetsFunction<I, Message> getIdSetFunction() {
+        return super.getIdSetFunction();
     }
 
     /**

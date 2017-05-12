@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -38,7 +39,9 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  * @author Mikhail Mikhaylov
  * @author Alexander Yevsyukov
  */
-public abstract class MessageField {
+public abstract class MessageField implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /** The prefix of generated getter methods for fields. */
     private static final String GETTER_METHOD_PREFIX = "get";

@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.server.entity.idfunc.IdSetEventFunction;
+import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.entity.idfunc.Producers;
 import org.spine3.server.tenant.EventOperation;
 
@@ -45,16 +45,24 @@ public abstract class EventDispatchingRepository<I,
         extends DefaultRecordBasedRepository<I, E, S>
         implements EntityEventDispatcher<I> {
 
-    private final IdSetFunctions<I> idSetFunctions;
+    private final CompositeEventTargetsFunction<I> idSetFunctions;
 
     /**
      * Creates new repository instance.
      *
      * @param defaultFunction the default function for getting an target entity IDs
      */
-    protected EventDispatchingRepository(IdSetEventFunction<I, Message> defaultFunction) {
+    protected EventDispatchingRepository(EventTargetsFunction<I, Message> defaultFunction) {
         super();
-        this.idSetFunctions = new IdSetFunctions<>(defaultFunction);
+        this.idSetFunctions = new CompositeEventTargetsFunction<>(defaultFunction);
+    }
+
+    /**
+     * Obtains the {@link EventTargetsFunction} used by the repository for calculating identifiers of
+     * event targets.
+     */
+    protected EventTargetsFunction<I, Message> getIdSetFunction() {
+        return idSetFunctions;
     }
 
     /**
@@ -78,7 +86,7 @@ public abstract class EventDispatchingRepository<I,
      * @param <M> the type of the event message handled by the function
      */
     public <M extends Message> void addIdSetFunction(Class<M> eventClass,
-                                                     IdSetEventFunction<I, M> func) {
+                                                     EventTargetsFunction<I, M> func) {
         idSetFunctions.put(eventClass, func);
     }
 
@@ -92,15 +100,15 @@ public abstract class EventDispatchingRepository<I,
         idSetFunctions.remove(eventClass);
     }
 
-    @Override
     public <M extends Message>
-           Optional<IdSetEventFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
+           Optional<EventTargetsFunction<I, M>> getIdSetFunction(Class<M> eventClass) {
         return idSetFunctions.get(eventClass);
     }
 
+    @Override
     @CheckReturnValue
-    protected Set<I> findIds(Message event, EventContext context) {
-        return idSetFunctions.findAndApply(event, context);
+    public Set<I> getTargetIds(EventEnvelope envelope) {
+        return idSetFunctions.apply(envelope.getMessage(), envelope.getEventContext());
     }
 
     /**
@@ -112,7 +120,7 @@ public abstract class EventDispatchingRepository<I,
     public void dispatch(EventEnvelope envelope) {
         final Message eventMessage = envelope.getMessage();
         final EventContext context = envelope.getEventContext();
-        final Set<I> ids = findIds(eventMessage, context);
+        final Set<I> ids = getTargetIds(envelope);
         final EventOperation op = new EventOperation(envelope.getOuterObject()) {
             @Override
             public void run() {
@@ -140,11 +148,11 @@ public abstract class EventDispatchingRepository<I,
      * @param <I> the type of the event producer
      * @return {@code IdSetFunction} instance that returns a set with a single element
      */
-    protected static <I> IdSetEventFunction<I, Message> producerFromContext() {
-        return Producers.producerFromContext();
+    protected static <I> EventTargetsFunction<I, Message> producerFromContext() {
+        return Producers.fromContext();
     }
 
-    protected static <I> IdSetEventFunction<I, Message> producerFromFirstMessageField() {
-        return Producers.producerFromFirstMessageField();
+    protected static <I> EventTargetsFunction<I, Message> producerFromFirstMessageField() {
+        return Producers.fromFirstMessageField();
     }
 }

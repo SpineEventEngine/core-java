@@ -36,6 +36,8 @@ import org.spine3.base.EventContext;
  */
 class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
+    private static final long serialVersionUID = 1L;
+
     private GetProducerIdFromEvent(int idIndex) {
         super(idIndex);
     }

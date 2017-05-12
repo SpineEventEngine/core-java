@@ -20,13 +20,22 @@
 
 package org.spine3.server.projection;
 
+import com.google.protobuf.Message;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PCollection;
+import org.spine3.base.Event;
+import org.spine3.envelope.EventEnvelope;
+import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.event.EventStreamQuery;
 import org.spine3.users.TenantId;
 
 import java.util.Set;
@@ -34,16 +43,17 @@ import java.util.Set;
 /**
  * The operation of catching up projections with the specified state class.
  *
+ * @param <I> the type of projection identifiers
  * @author Alexander Yevsyukov
  */
-public class CatchupOp {
+public class CatchupOp<I> {
 
-    private final ProjectionRepository<?, ?, ?> repository;
+    private final ProjectionRepository<I, ?, ?> repository;
     private final EventStore eventStore;
     private final Set<EventFilter> eventFilters;
     private final PipelineOptions options;
 
-    public CatchupOp(ProjectionRepository<?, ?, ?> repository,
+    public CatchupOp(ProjectionRepository<I, ?, ?> repository,
                      PipelineOptions options) {
         this.repository = repository;
         this.options = options;
@@ -57,14 +67,22 @@ public class CatchupOp {
         Pipeline pipeline = Pipeline.create(options);
 
         // Get tenant IDs.
-        pipeline.apply(readAllTenantIdentifiers());
+        final PCollection<TenantId> allTenants = pipeline.apply(
+                "ReadAllTenantIdentifiers", readAllTenantIdentifiers());
 
         // Compose Event Stream Query
+        final EventStreamQuery query = repository.createStreamQuery();
 
-        // PCollection<Event> events = ;
+        // Read events matching the query for each tenants.
+        final PCollection<PCollection<Event>> eventsByTenants =
+                allTenants.apply("ReadEvents", ParDo.of(new ReadEvents(query)));
 
-        // For each tenant ID get
-        // PCollection eventStream = ;
+        // Group events by projections.
+        final GetProjectionIdentifiers<I> getIdentifiers =
+                new GetProjectionIdentifiers<>(repository.getIdSetFunction());
+
+
+        // Apply events to projections and store them.
 
         return pipeline;
     }
@@ -82,5 +100,45 @@ public class CatchupOp {
         final Pipeline pipeline = createPipeline();
         final PipelineResult result = pipeline.run();
         return result;
+    }
+
+    private static class ReadEvents extends DoFn<TenantId, PCollection<Event>> {
+
+        private static final long serialVersionUID = 1L;
+
+        private final EventStreamQuery query;
+
+        private ReadEvents(EventStreamQuery query) {
+            this.query = query;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final TenantId tenantId = c.element();
+
+            //TODO:2017-05-12:alexander.yevsyukov: Read events in a tenant operation.
+            // Get record storage from EventStore as a constructor parameter.
+
+            final PCollection<Event> events = null;
+
+            c.output(events);
+        }
+    }
+
+    private static class GetProjectionIdentifiers<I>
+            extends DoFn<Event, KV<Event, PCollection<I>>> {
+
+        private static final long serialVersionUID = 1L;
+        private final EventTargetsFunction<I, Message> function;
+
+        private GetProjectionIdentifiers(EventTargetsFunction<I, Message> function) {
+            this.function = function;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final EventEnvelope event = EventEnvelope.of(c.element());
+            final Set<I> idSet = function.apply(event.getMessage(), event.getEventContext());
+        }
     }
 }

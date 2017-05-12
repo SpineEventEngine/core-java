@@ -20,10 +20,10 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import org.spine3.server.entity.idfunc.IdSetEventFunction;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.EventDispatcher;
+
+import java.util.Set;
 
 /**
  * Delivers events to handlers (which are supposed to be entities).
@@ -35,10 +35,10 @@ import org.spine3.server.event.EventDispatcher;
 public interface EntityEventDispatcher<I> extends EventDispatcher {
 
     /**
-     * Returns a function which can obtain an ID using a message of the passed class.
+     * Obtains a set of entity identifiers to which dispatch the passed event.
      *
-     * @param eventClass a class of any event handled by the entity
-     * @return an ID function
+     * @param envelope the envelope with the event to dispatch
+     * @return non-empty set of event identifiers
      */
-    <E extends Message> Optional<IdSetEventFunction<I, E>> getIdSetFunction(Class<E> eventClass);
+    Set<I> getTargetIds(EventEnvelope envelope);
 }

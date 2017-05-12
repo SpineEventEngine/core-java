@@ -37,7 +37,7 @@ import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
-import org.spine3.server.entity.idfunc.IdSetEventFunction;
+import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
@@ -108,8 +108,10 @@ public class ProjectionRepositoryShould
     /**
      * {@code IdSetFunction} used for testing add/get/remove.
      */
-    private static final IdSetEventFunction<ProjectId, ProjectCreated> idSetForCreateProject =
-            new IdSetEventFunction<ProjectId, ProjectCreated>() {
+    private static final EventTargetsFunction<ProjectId, ProjectCreated> idSetForCreateProject =
+            new EventTargetsFunction<ProjectId, ProjectCreated>() {
+                private static final long serialVersionUID = 1L;
+
                 @Override
                 public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                     return newHashSet();
@@ -363,16 +365,18 @@ public class ProjectionRepositoryShould
     }
 
     @Test
+    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass") // OK for this test.
     public void use_id_set_function() {
-        final IdSetEventFunction<ProjectId, ProjectCreated> delegateFn =
-                new IdSetEventFunction<ProjectId, ProjectCreated>() {
+        final EventTargetsFunction<ProjectId, ProjectCreated> delegateFn =
+                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+                    private static final long serialVersionUID = 1L;
                     @Override
                     public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                         return newHashSet();
                     }
                 };
 
-        final IdSetEventFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
+        final EventTargetsFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
         repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
 
         final Event event = createEvent(PRODUCER_ID, projectCreated());
@@ -383,21 +387,21 @@ public class ProjectionRepositoryShould
         verify(idSetFunction).apply(eq(expectedEventMessage), eq(context));
     }
 
+    @Test
     @SuppressWarnings("OptionalGetWithoutIsPresent")
         // because the test checks that the function is present.
-    @Test
     public void obtain_id_set_function_after_put() {
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
-        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> func =
+        final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> func =
                 repository().getIdSetFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
         assertEquals(idSetForCreateProject, func.get());
     }
 
-    @SuppressWarnings("unchecked") // Due to mockito matcher usage
     @Test
+    @SuppressWarnings("unchecked") // Due to mockito matcher usage
     public void perform_bulk_catch_up_if_required() {
         final ProjectId projectId = ProjectId.newBuilder()
                                              .setId("mock-project-id")
@@ -456,7 +460,7 @@ public class ProjectionRepositoryShould
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
 
         repository().removeIdSetFunction(ProjectCreated.class);
-        final Optional<IdSetEventFunction<ProjectId, ProjectCreated>> out =
+        final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> out =
                 repository().getIdSetFunction(ProjectCreated.class);
 
         assertFalse(out.isPresent());

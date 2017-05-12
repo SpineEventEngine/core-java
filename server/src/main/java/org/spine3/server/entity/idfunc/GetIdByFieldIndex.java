@@ -37,6 +37,7 @@ import org.spine3.protobuf.MessageField;
 abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
          implements IdFunction<I, M, C> {
 
+    private static final long serialVersionUID = 1L;
     private final EntityIdField idField;
 
     /**
@@ -64,6 +65,8 @@ abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
 
     /** Accessor object for entity ID fields. */
     private static class EntityIdField extends MessageField {
+
+        private static final long serialVersionUID = 1L;
 
         private EntityIdField(int index) {
             super(index);

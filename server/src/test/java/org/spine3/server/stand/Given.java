@@ -38,7 +38,7 @@ import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
 import org.spine3.server.command.EventFactory;
-import org.spine3.server.entity.idfunc.IdSetEventFunction;
+import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.test.TestActorRequestFactory;
@@ -109,32 +109,26 @@ class Given {
         return aggregateRepo(boundedContext);
     }
 
-    static BoundedContext boundedContext(Stand.Builder stand, StandUpdateDelivery delivery) {
-        return boundedContextBuilder(stand)
-                .setStand(Stand.newBuilder()
-                               .setDelivery(delivery))
-                .build();
-    }
-
-    private static BoundedContext.Builder boundedContextBuilder(Stand.Builder stand) {
-        return BoundedContext.newBuilder()
-                             .setStand(stand);
-    }
-
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
+
+        private static final EventTargetsFunction<ProjectId, ProjectCreated> ID_FUNC =
+                new EventTargetsFunction<ProjectId, ProjectCreated>() {
+
+            private static final long serialVersionUID = 1L;
+
+            @Override
+            public Set<ProjectId> apply(ProjectCreated message,
+                                        EventContext context) {
+                return ImmutableSet.of(ProjectId.newBuilder()
+                                                .setId(PROJECT_UUID)
+                                                .build());
+            }
+        };
+
         StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);
-            addIdSetFunction(ProjectCreated.class,
-                             new IdSetEventFunction<ProjectId, ProjectCreated>() {
-                                 @Override
-                                 public Set<ProjectId> apply(ProjectCreated message,
-                                                             EventContext context) {
-                                     return ImmutableSet.of(ProjectId.newBuilder()
-                                                                     .setId(PROJECT_UUID)
-                                                                     .build());
-                                 }
-                             });
+            addIdSetFunction(ProjectCreated.class, ID_FUNC);
         }
     }
 

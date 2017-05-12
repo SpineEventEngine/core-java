@@ -33,6 +33,6 @@ import org.spine3.base.EventContext;
  * @param <M> the type of messages to get IDs from
  * @author Alexander Yevsyukov
  */
-public interface IdSetEventFunction<I, M extends Message>
+public interface EventTargetsFunction<I, M extends Message>
         extends IdSetFunction<I, M, EventContext> {
 }
