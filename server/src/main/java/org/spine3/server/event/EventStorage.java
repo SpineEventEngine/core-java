@@ -20,7 +20,6 @@
 
 package org.spine3.server.event;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
@@ -65,11 +64,6 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return result;
     }
 
-    @VisibleForTesting
-    static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
-        return new EventEntityMatchesStreamQuery(query);
-    }
-
     void store(Event event) {
         final EventEntity entity = new EventEntity(event);
         store(entity);
@@ -77,6 +71,10 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     static Function<EventEntity, Event> getEventFunc() {
         return GET_EVENT;
+    }
+
+    private static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
+        return new EventEntityMatchesStreamQuery(query);
     }
 
     private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
