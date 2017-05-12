@@ -22,13 +22,14 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.ImmutableMap.copyOf;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
 
 /**
  * A query to a {@link org.spine3.server.storage.RecordStorage RecordStorage} for the records
@@ -59,14 +60,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * considered matching.
  *
  * @param <I> the type of the IDs of the query target
- *
  * @author Dmytro Dashenkov
  * @see EntityRecordWithColumns
  */
 public final class EntityQuery<I> {
 
     private final ImmutableSet<I> ids;
-    private final ImmutableMap<Column<?>, Object> parameters;
+    private final QueryParameters parameters;
 
     /**
      * Creates new instance of {@code EntityQuery}.
@@ -77,15 +77,25 @@ public final class EntityQuery<I> {
      *                   no values, all the values are matched upon such Column
      * @return new instance of {@code EntityQuery}
      */
-    static <I> EntityQuery<I> of(Collection<I> ids, Map<Column<?>, Object> parameters) {
+    static <I> EntityQuery<I> of(Collection<I> ids, QueryParameters parameters) {
         checkNotNull(ids);
         checkNotNull(parameters);
         return new EntityQuery<>(ids, parameters);
     }
 
-    private EntityQuery(Collection<I> ids, Map<Column<?>, Object> parameters) {
+    @Deprecated
+    static <I> EntityQuery<I> of(Collection<I> ids, Map<Column<?>, Object> parameters) {
+        checkNotNull(ids);
+        checkNotNull(parameters);
+        final QueryParameters params = QueryParameters.newBuilder()
+                                                      .putAll(EQUAL, copyOf(parameters))
+                                                      .build();
+        return new EntityQuery<>(ids, params);
+    }
+
+    private EntityQuery(Collection<I> ids, QueryParameters parameters) {
         this.ids = ImmutableSet.copyOf(ids);
-        this.parameters = ImmutableMap.copyOf(parameters);
+        this.parameters = parameters;
     }
 
     /**
@@ -100,7 +110,7 @@ public final class EntityQuery<I> {
      * @return a {@link Map} of the {@linkplain Column Column metadata} to the column required value
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<Column<?>, Object> getParameters() {
+    public QueryParameters getParameters() {
         return parameters;
     }
 

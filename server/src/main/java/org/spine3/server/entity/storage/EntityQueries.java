@@ -26,11 +26,11 @@ import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.client.QueryParameter;
 import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.Map;
 
@@ -58,28 +58,30 @@ public final class EntityQueries {
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                   Class<? extends Entity> entityClass) {
+                                          Class<? extends Entity> entityClass) {
         checkNotNull(entityFilters);
         checkNotNull(entityClass);
 
-        final Map<Column<?>, Object> queryParams = toQueryParams(entityFilters, entityClass);
+        final QueryParameters queryParams = toQueryParams(entityFilters, entityClass);
         final Collection<I> ids = toGenericIdValues(entityFilters);
 
         final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
-    private static Map<Column<?>, Object> toQueryParams(EntityFilters entityFilters,
-                                                        Class<? extends Entity> entityClass) {
-        final Map<Column<?>, Object> queryParams =
-                new HashMap<>(entityFilters.getColumnFilterCount());
-        final Map<String, Any> columnValues = entityFilters.getColumnFilterMap();
-        for (Map.Entry<String, Any> filter : columnValues.entrySet()) {
+    private static QueryParameters toQueryParams(EntityFilters entityFilters,
+                                                 Class<? extends Entity> entityClass) {
+        final QueryParameters.Builder builder = QueryParameters.newBuilder();
+
+        for (Map.Entry<String, Any> filter : entityFilters.getColumnFilterMap()
+                                                          .entrySet()) {
             final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
             final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
-            queryParams.put(column, filterValues);
+            final QueryParameter.Operator operator = QueryParameter.Operator.EQUAL; // TODO:2017-05-12:dmytro.dashenkov: Use all the operators.
+            builder.put(operator, column, filterValues);
         }
-        return queryParams;
+
+        return builder.build();
     }
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {

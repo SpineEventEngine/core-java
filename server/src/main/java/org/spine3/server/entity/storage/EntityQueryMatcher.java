@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -44,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> {
 
     private final Collection<I> acceptedIds;
-    private final Map<Column<?>, Object> queryParams;
+    private final QueryParameters queryParams;
 
     public EntityQueryMatcher(EntityQuery<I> query) {
         checkNotNull(query);
@@ -78,8 +79,9 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
-        if (!queryParams.isEmpty()) {
-            for (Map.Entry<Column<?>, Object> param : queryParams.entrySet()) {
+        final Map<Column<?>, Object> equalityParams = queryParams.getParams(EQUAL);
+        if (!equalityParams.isEmpty()) {
+            for (Map.Entry<Column<?>, Object> param : equalityParams.entrySet()) {
                 final Column<?> column = param.getKey();
                 final String columnName = column.getName();
 

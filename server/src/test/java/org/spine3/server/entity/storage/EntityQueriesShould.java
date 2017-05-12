@@ -43,6 +43,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
@@ -71,7 +72,7 @@ public class EntityQueriesShould {
         final Class<? extends Entity> entityClass = AbstractEntity.class;
         final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
-        assertEmpty(query.getParameters());
+        assertEmpty(query.getParameters().getParams(EQUAL));
         assertTrue(query.getIds().isEmpty());
     }
 
@@ -101,7 +102,8 @@ public class EntityQueriesShould {
         final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
         final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
-        assertSize(2, query.getParameters());
+        final Map<Column<?>, Object> params = query.getParameters().getParams(EQUAL);
+        assertSize(2, params);
 
         final Collection<?> ids = query.getIds();
         assertFalse(ids.isEmpty());
@@ -109,7 +111,6 @@ public class EntityQueriesShould {
         final Object singleId = ids.iterator().next();
         assertEquals(someGenericId, singleId);
 
-        final Map<Column<?>, Object> params = query.getParameters();
         final Collection<Object> values = params.values();
         assertContains(versionValue, values);
         assertContains(archivedValue.getValue(), values);
