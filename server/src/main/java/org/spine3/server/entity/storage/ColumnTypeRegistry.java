@@ -117,7 +117,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
 
     @SuppressWarnings("unchecked")
         // Unchecked copying from the src instance
-        // Never leads to a failure, since checke while writing into the instance itself
+        // Never leads to a failure, since checked while writing into the instance itself
     public static <C extends ColumnType> Builder<C> newBuilder(ColumnTypeRegistry<C> src) {
         final Builder<C> builder = newBuilder();
         for (Map.Entry<Class, C> typeMapping : src.columnTypeMap.entrySet()) {

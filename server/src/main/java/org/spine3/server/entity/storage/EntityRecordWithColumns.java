@@ -46,11 +46,11 @@ public final class EntityRecordWithColumns {
     /**
      * Creates a new instance of the {@code EntityRecordWithColumns}.
      *
-     * @param record        {@link EntityRecord} to pack
+     * @param record  {@link EntityRecord} to pack
      * @param columns {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
-                                          Map<String, Column.MemoizedValue<?>> columns) {
+                                    Map<String, Column.MemoizedValue<?>> columns) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(columns);
         this.hasStorageFields = true;

@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nonnull;
@@ -39,6 +38,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
 
 /**
@@ -52,10 +52,6 @@ public class FieldMasks {
 
     private static final String CONSTRUCTOR_INVOCATION_ERROR_LOGGING_PATTERN =
             "Constructor for type %s could not be found or called: ";
-
-    private static final String BUILDER_CLASS_ERROR_LOGGING_PATTERN =
-            "Class for name %s could not be found. Try to rebuild the project. " +
-            "Make sure \"known_types.properties\" exists.";
 
     private static final String TYPE_CAST_ERROR_LOGGING_PATTERN =
             "Class %s must be assignable from com.google.protobuf.Message. " +
@@ -105,6 +101,10 @@ public class FieldMasks {
     Collection<M> applyMask(FieldMask mask,
                             Collection<M> messages,
                             TypeUrl type) {
+        checkNotNull(mask);
+        checkNotNull(messages);
+        checkNotNull(type);
+
         final List<M> filtered = new LinkedList<>();
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
@@ -158,6 +158,10 @@ public class FieldMasks {
     private static <M extends Message, B extends Message.Builder> M doApply(FieldMask mask,
                                                                             M message,
                                                                             TypeUrl type) {
+        checkNotNull(mask);
+        checkNotNull(message);
+        checkNotNull(type);
+
         final ProtocolStringList filter = mask.getPathsList();
         final Class<B> builderClass = getBuilderForType(type);
 
@@ -204,25 +208,17 @@ public class FieldMasks {
     }
 
     @SuppressWarnings("unchecked")
-    // We assume that {@code KnownTypes#getClassName(TypeUrl) works properly.
+        // We assume that TypeUrl.getJavaClass() works properly.
     @Nullable
     private static <B extends Message.Builder> Class<B> getBuilderForType(TypeUrl typeUrl) {
+        final Class<? extends Message> msgClass = typeUrl.getJavaClass();
         Class<B> builderClass;
-        final String className = KnownTypes.getClassName(typeUrl)
-                                           .value();
         try {
-            builderClass = (Class<B>) Class.forName(className)
-                                           .getClasses()[0];
-        } catch (ClassNotFoundException e) {
-            final String message = format(
-                    BUILDER_CLASS_ERROR_LOGGING_PATTERN,
-                    className);
-            log().warn(message, e);
-            builderClass = null;
+            builderClass = (Class<B>) msgClass.getClasses()[0];
         } catch (ClassCastException e) {
             final String message = format(
                     TYPE_CAST_ERROR_LOGGING_PATTERN,
-                    className);
+                    msgClass.getCanonicalName());
             log().warn(message, e);
             builderClass = null;
         }
