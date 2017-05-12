@@ -18,39 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.net;
-
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+package org.spine3.server.entity;
 
 /**
- * @author Mikhail Mikhaylov
+ * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
+ * {@link RecordBasedRepository}.
+ *
+ * @author Dmytro Dashenkov
+ * @see RecordBasedRepositoryShould
  */
-public class SchemasShould {
+public interface TestEntityWithStringColumn {
 
-    @Test
-    public void return_valid_schemas_on_valid_args() {
-        assertEquals(Url.Record.Schema.FILE, Schemas.parse("file"));
-        assertEquals(Url.Record.Schema.FILE, Schemas.parse("FILE"));
-    }
-
-    @Test
-    public void return_undefined_schema_on_invalid_args() {
-        assertEquals(Url.Record.Schema.UNDEFINED, Schemas.parse("someunknownschema"));
-    }
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Schemas.class);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Url.Record.Schema.class, Url.Record.Schema.UNDEFINED)
-                .testAllPublicStaticMethods(Schemas.class);
-    }
+    @SuppressWarnings("unused") // Reflective access
+    String getIdString();
 }

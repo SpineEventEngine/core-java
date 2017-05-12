@@ -65,10 +65,10 @@ message Url {
             HTTP = 1;
             HTTPS = 2;
             FTP = 3;
-            SSL = 4;
-            SSH = 5;
-            DNS = 6;
-            SOAP = 7;
+            MAILTO = 4;
+            FILE = 5;
+            DATA = 6;
+            IRC = 7;
             RTP = 8;
         }
 

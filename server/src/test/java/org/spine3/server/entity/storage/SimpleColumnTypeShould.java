@@ -18,39 +18,35 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.net;
+package org.spine3.server.entity.storage;
 
-import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertSame;
 
 /**
- * @author Mikhail Mikhaylov
+ * @author Dmytro Dashenkov
  */
-public class SchemasShould {
+public class SimpleColumnTypeShould {
 
     @Test
-    public void return_valid_schemas_on_valid_args() {
-        assertEquals(Url.Record.Schema.FILE, Schemas.parse("file"));
-        assertEquals(Url.Record.Schema.FILE, Schemas.parse("FILE"));
+    public void perform_identity_conversion_of_given_value() {
+        final ColumnType<Object, ?, ?, ?> columnType = new ColumnTypeImpl<>();
+        final Object input = new Object();
+        final Object output = columnType.convertColumnValue(input);
+        assertSame(input, output);
     }
 
-    @Test
-    public void return_undefined_schema_on_invalid_args() {
-        assertEquals(Url.Record.Schema.UNDEFINED, Schemas.parse("someunknownschema"));
-    }
+    private static class ColumnTypeImpl<T, R, C> extends SimpleColumnType<T, R, C> {
 
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Schemas.class);
-    }
+        @Override
+        public void setColumnValue(Object storageRecord, Object value, Object columnIdentifier) {
+            // NOP
+        }
 
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Url.Record.Schema.class, Url.Record.Schema.UNDEFINED)
-                .testAllPublicStaticMethods(Schemas.class);
+        @Override
+        public void setNull(Object storageRecord, Object columnIdentifier) {
+            // NOP
+        }
     }
 }

@@ -18,39 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.net;
+package org.spine3.server.storage.memory;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import com.google.common.base.Function;
+import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 
-import static org.junit.Assert.assertEquals;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import javax.annotation.Nullable;
 
 /**
- * @author Mikhail Mikhaylov
+ * The {@link Function} converting the {@link EntityRecordWithColumns} into {@link EntityRecord}.
+ *
+ * <p>The {@code null} input is always converted to {@code null}.
+ *
+ * @author Dmytro Dashenkov
  */
-public class SchemasShould {
+enum EntityRecordUnpacker implements Function<EntityRecordWithColumns, EntityRecord> {
+    INSTANCE;
 
-    @Test
-    public void return_valid_schemas_on_valid_args() {
-        assertEquals(Url.Record.Schema.FILE, Schemas.parse("file"));
-        assertEquals(Url.Record.Schema.FILE, Schemas.parse("FILE"));
-    }
-
-    @Test
-    public void return_undefined_schema_on_invalid_args() {
-        assertEquals(Url.Record.Schema.UNDEFINED, Schemas.parse("someunknownschema"));
-    }
-
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Schemas.class);
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Url.Record.Schema.class, Url.Record.Schema.UNDEFINED)
-                .testAllPublicStaticMethods(Schemas.class);
+    @Nullable
+    @Override
+    public EntityRecord apply(@Nullable EntityRecordWithColumns input) {
+        if (input == null) {
+            return null;
+        }
+        return input.getRecord();
     }
 }
