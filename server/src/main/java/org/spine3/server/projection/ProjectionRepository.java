@@ -154,8 +154,30 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /** Returns the {@link BoundedContext} in which this repository works. */
-    private BoundedContext getBoundedContext() {
+    BoundedContext getBoundedContext() {
         return boundedContext;
+    }
+
+    /** Obtains {@link EventStore} from which to get events during catch-up. */
+    EventStore getEventStore() {
+        return boundedContext.getEventBus()
+                             .getEventStore();
+    }
+
+    /**
+     * Obtains event filters for event classes handled by projections of this repository.
+     */
+    Set<EventFilter> getEventFilters() {
+        final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
+        final Set<EventClass> eventClasses = getMessageClasses();
+        for (EventClass eventClass : eventClasses) {
+            final String typeName = TypeName.of(eventClass.value())
+                                            .value();
+            builder.add(EventFilter.newBuilder()
+                                   .setEventType(typeName)
+                                   .build());
+        }
+        return builder.build();
     }
 
     @VisibleForTesting
@@ -342,28 +364,28 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         setStatus(Status.CATCHING_UP);
 
         final AllTenantOperation op = new AllTenantOperation(boundedContext.getTenantIndex()) {
-
-            private final EventStore eventStore = getBoundedContext().getEventBus()
-                                                                     .getEventStore();
-            private final Set<EventFilter> eventFilters = getEventFilters();
-
             @Override
             public void run() {
-                // Get the timestamp of the last event. This also ensures we have the storage.
-                final Timestamp timestamp = nullToDefault(
-                        projectionStorage().readLastHandledEventTime());
-                final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                               .setAfter(timestamp)
-                                                               .addAllFilter(eventFilters)
-                                                               .build();
-
-                eventStore.read(query, new EventStreamObserver(ProjectionRepository.this));
+                final EventStreamQuery query = createStreamQuery();
+                getEventStore().read(query, new EventStreamObserver(ProjectionRepository.this));
             }
         };
         op.execute();
 
         completeCatchUp();
         logCatchUpComplete();
+    }
+
+    EventStreamQuery createStreamQuery() {
+        final Set<EventFilter> eventFilters = getEventFilters();
+
+        // Get the timestamp of the last event. This also ensures we have the storage.
+        final Timestamp timestamp = nullToDefault(
+                projectionStorage().readLastHandledEventTime());
+        return EventStreamQuery.newBuilder()
+                               .setAfter(timestamp)
+                               .addAllFilter(eventFilters)
+                               .build();
     }
 
     private void completeCatchUp() {
@@ -375,22 +397,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             final Class<? extends ProjectionRepository> repositoryClass = getClass();
             log().info("{} catch-up complete", repositoryClass.getName());
         }
-    }
-
-    /**
-     * Obtains event filters for event classes handled by projections of this repository.
-     */
-    private Set<EventFilter> getEventFilters() {
-        final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
-        final Set<EventClass> eventClasses = getMessageClasses();
-        for (EventClass eventClass : eventClasses) {
-            final String typeName = TypeName.of(eventClass.value())
-                                            .value();
-            builder.add(EventFilter.newBuilder()
-                                   .setEventType(typeName)
-                                   .build());
-        }
-        return builder.build();
     }
 
     /**
