@@ -23,8 +23,12 @@ package org.spine3.client;
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
+import org.spine3.protobuf.AnyPacker;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
+import static org.spine3.client.QueryParameter.Operator.GREATER_THEN;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.TypeConverter.toAny;
 
@@ -32,7 +36,8 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  * A parameter of a {@link Query}.
  *
  * <p>This class may be considered a filter for the query. An instance contains the name of
- * the Entity Column to filter by and the value of the Column.
+ * the Entity Column to filter by, the value of the Column and
+ * the {@linkplain Operator comparison operator}.
  *
  * <p>The supported types for querying are {@linkplain Message Message types} and Protobuf
  * primitives.
@@ -43,10 +48,12 @@ public final class QueryParameter {
 
     private final String columnName;
     private final Any value;
+    private final Operator operator;
 
-    private QueryParameter(String columnName, Any value) {
+    private QueryParameter(String columnName, Any value, Operator operator) {
         this.columnName = columnName;
         this.value = value;
+        this.operator = operator;
     }
 
     /**
@@ -55,13 +62,32 @@ public final class QueryParameter {
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of the QueryParameter
+     * @return new instance of QueryParameter
      */
     public static QueryParameter eq(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
         final Any wrappedValue = toAny(value);
-        final QueryParameter parameter = new QueryParameter(columnName, wrappedValue);
+        final QueryParameter parameter = new QueryParameter(columnName, wrappedValue, EQUAL);
+        return parameter;
+    }
+
+    /**
+     * Creates new {@code QueryParameter} stating that the stored {@link Timestamp} value represents
+     * the time which is later then the given value.
+     *
+     * <p>The instances created with this method have {@link Operator#GREATER_THEN} operator.
+     *
+     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     *                   name with no type info
+     * @param value      the value to compere upon
+     * @return new instance of QueryParameter
+     */
+    public static QueryParameter laterThen(String columnName, Timestamp value) {
+        checkNotNull(columnName);
+        checkNotNull(value);
+        final Any wrappedValue = AnyPacker.pack(value);
+        final QueryParameter parameter = new QueryParameter(columnName, wrappedValue, GREATER_THEN);
         return parameter;
     }
 
@@ -79,6 +105,19 @@ public final class QueryParameter {
         return value;
     }
 
+    /**
+     * Retrieves the comparison operator of this {@code QueryParameter}.
+     *
+     * <p>At the moment, all the parameters have the {@link Operator#EQUAL equality comparison}
+     * except those that {@link #laterThen compare} two {@link Timestamp} instances. Though,
+     * this behavior is a subject of change.
+     *
+     * @return the comparison operator
+     */
+    public Operator getOperator() {
+        return operator;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -89,12 +128,13 @@ public final class QueryParameter {
         }
         QueryParameter parameter = (QueryParameter) o;
         return Objects.equal(getColumnName(), parameter.getColumnName()) &&
-                Objects.equal(getValue(), parameter.getValue());
+                Objects.equal(getValue(), parameter.getValue()) &&
+                getOperator() == parameter.getOperator();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getColumnName(), getValue());
+        return Objects.hashCode(getColumnName(), getValue(), getOperator());
     }
 
     @Override
@@ -102,9 +142,39 @@ public final class QueryParameter {
         final StringBuilder sb = new StringBuilder();
         sb.append('(')
           .append(columnName)
-          .append(" = ")
+          .append(' ')
+          .append(operator)
+          .append(' ')
           .append(unpack(value))
           .append(')');
         return sb.toString();
+    }
+
+    /**
+     * An enumeration of all supported value comparison operators applicable to the Entity Columns.
+     */
+    public enum Operator {
+
+        /**
+         * Equality operator ({@code =}).
+         */
+        EQUAL("="),
+
+        /**
+         * Comparison operator stating that the stored value is greater then ({@code >})
+         * the passed value.
+         */
+        GREATER_THEN(">");
+
+        private final String representation;
+
+        Operator(String repr) {
+            this.representation = repr;
+        }
+
+        @Override
+        public String toString() {
+            return representation;
+        }
     }
 }
