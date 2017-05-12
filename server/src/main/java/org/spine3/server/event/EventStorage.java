@@ -22,25 +22,32 @@ package org.spine3.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
+import com.google.protobuf.Any;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.client.EntityFilters;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 
 import javax.annotation.Nullable;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.event.EventEntity.comparator;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
  *
- * <p>This class allows to hide implementation details of storing commands.
+ * <p>This class allows to hide implementation details of storing events.
  * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
  * is a {@code Repository}.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
 class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Event> {
 
@@ -57,10 +64,22 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
             };
 
     Iterator<Event> iterator(EventStreamQuery query) {
-        final Iterator<EventEntity> filtered = iterator(createEntityFilter(query));
-        final List<EventEntity> entities = Lists.newArrayList(filtered);
-        Collections.sort(entities, EventEntity.comparator());
-        final Iterator<Event> result = Iterators.transform(entities.iterator(), getEventFunc());
+        checkNotNull(query);
+
+        final EntityFilters filters = toEntityFilters(query);
+        final Iterable<EventEntity> entities = find(filters, FieldMask.getDefaultInstance());
+
+        // Optimize the filtering by excluding the `after` timestamp
+        final EventStreamQuery queryRegardlessTime = query.toBuilder()
+                                                          .clearAfter()
+                                                          .build();
+        final Predicate<EventEntity> detailedLookupFilter = createEntityFilter(queryRegardlessTime);
+
+        final Iterator<EventEntity> entityIterator = FluentIterable.from(entities)
+                                                                   .filter(detailedLookupFilter)
+                                                                   .toSortedList(comparator())
+                                                                   .iterator();
+        final Iterator<Event> result = Iterators.transform(entityIterator, getEventFunc());
         return result;
     }
 
@@ -75,6 +94,25 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     private static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
         return new EventEntityMatchesStreamQuery(query);
+    }
+
+    /**
+     * Creates an instance of {@link EntityFilters} from the given {@link EventStreamQuery}.
+     *
+     * <p>The resulting filters only contain the filtering by the {@code after} field of the source
+     * query compared to the {@link EventEntity#getTime()} column.
+     *
+     * @param query the source {@link EventStreamQuery} to get the info from
+     * @return new instance of {@link EntityFilters} filtering the events by their timestamp
+     */
+    private static EntityFilters toEntityFilters(EventStreamQuery query) {
+        final Timestamp timestamp = query.getAfter();
+        final Any wrappedTimestamp = AnyPacker.pack(timestamp);
+        final EntityFilters entityFilters =
+                EntityFilters.newBuilder()
+                             .putColumnFilter(EventEntity.TIME_COLUMN, wrappedTimestamp)
+                             .build();
+        return entityFilters;
     }
 
     private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
