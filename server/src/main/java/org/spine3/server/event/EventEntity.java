@@ -20,6 +20,7 @@
 
 package org.spine3.server.event;
 
+import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
@@ -30,9 +31,14 @@ import java.util.Comparator;
 /**
  * Stores an event.
  *
+ * <p>{@code EventEntity} is a Spine internal {@link org.spine3.server.entity.Entity Entity} type,
+ * which is not designed for the direct usage. Both API and behaviour of this class may are subjects
+ * of change.
+ *
  * @author Alexander Yevsyukov
  */
-class EventEntity extends AbstractEntity<EventId, Event> {
+@Internal
+public class EventEntity extends AbstractEntity<EventId, Event> {
 
     /**
      * Compares event entities by timestamps of events.
