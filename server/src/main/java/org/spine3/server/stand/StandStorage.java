@@ -74,13 +74,18 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
                                                                     FieldMask fieldMask);
 
     /**
-     * The {@code StandStorage} is specified not to satisfy the {@link EntityQuery}.
+     * Reads all the state records from the storage.
+     *
+     * <p>This method overrides the behaviour of the superclass. Since {@code StandStorage} does not
+     * support Entity Columns, the passed {@link EntityQuery} does not affect the resulting
+     * {@code Map} in any way.
      *
      * <p>Calling this method is equivalent to calling {@code readAll(fieldMask)}.
      *
      * @param query     ignored
      * @param fieldMask the fields to retrieve
      * @return all the records with the {@link FieldMask} applied
+     * @see #readAll(FieldMask)
      */
     @Override
     public Map<AggregateStateId, EntityRecord> readAll(EntityQuery<AggregateStateId> query,
