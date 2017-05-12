@@ -23,12 +23,17 @@ package org.spine3.client;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
-import static java.lang.String.*;
+import static java.lang.String.valueOf;
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.spine3.client.QueryParameter.eq;
+import static org.spine3.client.QueryParameter.laterThen;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov
@@ -37,28 +42,37 @@ public class QueryParameterShould {
 
     @Test
     public void not_accept_nulls() {
-        new NullPointerTester().testAllPublicStaticMethods(QueryParameter.class);
+        new NullPointerTester()
+                .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
+                .testAllPublicStaticMethods(QueryParameter.class);
     }
 
     @Test
     public void support_equality() {
         final String param1 = "param1";
         final String param2 = "param2";
+        final String param3 = "param3";
         final String foobar = "foobar";
         final String baz = "baz";
         final StringValue foobarValue = StringValue.newBuilder()
                                                    .setValue(foobar)
                                                    .build();
+        final Timestamp timestampValue = getCurrentTime();
 
         final QueryParameter parameter1 = eq(param1, foobar);
         final QueryParameter parameter2 = eq(param1, foobarValue);
         final QueryParameter parameter3 = eq(param1, baz);
         final QueryParameter parameter4 = eq(param2, foobar);
+        final QueryParameter parameter5 = laterThen(param3, timestampValue);
+        final QueryParameter parameter6 = eq(param3, timestampValue);
+        final QueryParameter parameter7 = eq(param1, foobar);
 
         new EqualsTester()
-                .addEqualityGroup(parameter1, parameter2)
+                .addEqualityGroup(parameter1, parameter2, parameter7)
                 .addEqualityGroup(parameter3)
                 .addEqualityGroup(parameter4)
+                .addEqualityGroup(parameter5)
+                .addEqualityGroup(parameter6)
                 .testEquals();
     }
 
@@ -71,6 +85,31 @@ public class QueryParameterShould {
         final String stringRepr = param.toString();
 
         assertThat(stringRepr, containsString(name));
+        assertThat(stringRepr, containsString(param.getOperator().toString()));
         assertThat(stringRepr, containsString(valueOf(value)));
+    }
+
+    @Test
+    public void create_EQUALS_instances() {
+        final String name = "preciseColumn";
+        final Timestamp value = getCurrentTime();
+
+        final QueryParameter param = eq(name, value);
+
+        assertEquals(name, param.getColumnName());
+        assertEquals(pack(value), param.getValue());
+        assertEquals(QueryParameter.Operator.EQUAL, param.getOperator());
+    }
+
+    @Test
+    public void create_LATER_THEN_instances() {
+        final String name = "blurryColumn";
+        final Timestamp value = getCurrentTime();
+
+        final QueryParameter param = laterThen(name, value);
+
+        assertEquals(name, param.getColumnName());
+        assertEquals(pack(value), param.getValue());
+        assertEquals(QueryParameter.Operator.GREATER_THEN, param.getOperator());
     }
 }
