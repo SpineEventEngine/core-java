@@ -66,8 +66,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     }
 
     @VisibleForTesting
-    static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
-        return new EventEntityMatchesStreamQuery(query);
+    private static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
+        return new EventEntityMatchesStreamQuery(query).toEntityPredicate();
     }
 
     void store(Event event) {
@@ -75,12 +75,13 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         store(entity);
     }
 
-    static Function<EventEntity, Event> getEventFunc() {
+    private static Function<EventEntity, Event> getEventFunc() {
         return GET_EVENT;
     }
 
-    private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
+    private static class EventEntityMatchesStreamQuery implements EventPredicate{
 
+        private static final long serialVersionUID = 0L;
         private final EventPredicate filter;
 
         private EventEntityMatchesStreamQuery(EventStreamQuery query) {
@@ -88,13 +89,21 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         }
 
         @Override
-        public boolean apply(@Nullable EventEntity input) {
-            if (input == null) {
-                return false;
-            }
-            final Event event = input.getState();
-            final boolean result = filter.apply(event);
+        public Boolean apply(Event input) {
+            final boolean result = filter.apply(input);
             return result;
+        }
+
+        private Predicate<EventEntity> toEntityPredicate() {
+            return new Predicate<EventEntity>() {
+                @Override
+                public boolean apply(@Nullable EventEntity input) {
+                    if (input == null) {
+                        return false;
+                    }
+                    return EventEntityMatchesStreamQuery.this.apply(input.getState());
+                }
+            };
         }
     }
 }
