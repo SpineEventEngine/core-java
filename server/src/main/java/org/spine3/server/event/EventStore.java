@@ -192,7 +192,8 @@ public abstract class EventStore implements AutoCloseable {
          *
          * @see EventStore#log()
          */
-        public AbstractBuilder withDefaultLogger() {
+        @SuppressWarnings("UnusedReturnValue") // OK as overloaded in descendants
+        protected AbstractBuilder withDefaultLogger() {
             setLogger(log());
             return this;
         }
@@ -229,7 +230,7 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        public AbstractBuilder withDefaultLogger() {
+        public Builder withDefaultLogger() {
             super.withDefaultLogger();
             return this;
         }
@@ -396,5 +397,4 @@ public abstract class EventStore implements AutoCloseable {
     public static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
 }
