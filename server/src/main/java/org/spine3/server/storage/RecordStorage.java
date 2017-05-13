@@ -280,6 +280,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     public abstract PTransform<PBegin, PCollection<EntityRecord>>
     readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter);
 
+    /**
+     * Obtains a {@link ReadFn} which reads an {@link EntityRecord} with the passed ID
+     * in the data slice of the passed tenant.
+     */
     public abstract ReadFn<I> readFn(TenantId tenantId, I id);
 
     /**

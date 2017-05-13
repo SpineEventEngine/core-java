@@ -118,12 +118,14 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
      * Beam support
      */
 
+    /** {@inheritDoc} */
     @Override
     public PTransform<PBegin, PCollection<EntityRecord>>
     readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter) {
         return recordStorage.readTransform(tenantId, filter);
     }
 
+    /** {@inheritDoc} */
     @Override
     public ReadFn<I> readFn(TenantId tenantId, I id) {
         return recordStorage.readFn(tenantId, id);

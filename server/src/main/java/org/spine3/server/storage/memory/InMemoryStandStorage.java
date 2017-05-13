@@ -182,12 +182,14 @@ class InMemoryStandStorage extends StandStorage {
      * Beam support
      */
 
+    /** {@inheritDoc} */
     @Override
     public PTransform<PBegin, PCollection<EntityRecord>>
     readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter) {
         return recordStorage.readTransform(tenantId, filter);
     }
 
+    /** {@inheritDoc} */
     @Override
     public ReadFn<AggregateStateId> readFn(TenantId tenantId, AggregateStateId id) {
         return recordStorage.readFn(tenantId, id);
