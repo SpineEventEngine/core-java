@@ -119,7 +119,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *                version of the entity
      * @see #validate(S)
      */
-    protected void updateState(S state, Version version) {
+    void updateState(S state, Version version) {
         updateState(state);
         updateVersion(version);
     }
@@ -207,7 +207,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @param newState a new state to set
      */
-    protected void incrementState(S newState) {
+    void incrementState(S newState) {
         updateState(newState, incrementedVersion());
     }
 
@@ -232,7 +232,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @return new version number
      */
-    protected int incrementVersion() {
+    /*protected*/ int incrementVersion() {
         setVersion(incrementedVersion());
         return version.getNumber();
     }

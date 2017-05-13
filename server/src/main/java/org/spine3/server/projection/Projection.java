@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.EventPlayingEntity;
+import org.spine3.server.entity.Transaction;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ValidatingBuilder;
@@ -63,27 +64,23 @@ public abstract class Projection<I,
     }
 
     protected void handle(Message event, EventContext ctx) {
-        dispatch(event, ctx);
+        apply(event, ctx);
     }
 
-    private void dispatch(Message eventMessage, EventContext ctx) {
-        createBuilder();
 
+    private void apply(Message eventMessage,
+                         EventContext eventContext)  {
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
-            method.invoke(this, eventMessage, ctx);
-            updateState();
+            method.invoke(this, eventMessage, eventContext);
         } catch (InvocationTargetException e) {
             throw new IllegalStateException(e);
-        } finally {
-            releaseBuilder();
         }
     }
 
     @Override
-    protected void apply(Message eventMessage,
-                         EventContext eventContext) throws InvocationTargetException {
-        dispatch(eventMessage, eventContext);
+    protected Transaction createFromBuilder(B builder) {
+        return new ProjectionTransaction(builder, this);
     }
 
     /**
@@ -94,8 +91,20 @@ public abstract class Projection<I,
      */
     @Override               // Overridden to expose this method to tests.
     @VisibleForTesting
-    protected void injectState(M stateToRestore, Version versionFromSnapshot) {
-        super.injectState(stateToRestore, versionFromSnapshot);
+    protected void injectState(M stateToRestore, Version version) {
+        super.injectState(stateToRestore, version);
+    }
+
+    private class ProjectionTransaction extends Transaction<Projection<I, M, B>, M, B> {
+        private ProjectionTransaction(B builder, Projection<I, M, B> entity) {
+            super(builder, entity);
+        }
+
+        @Override
+        protected void apply(Message eventMessage, EventContext context) throws
+                                                                         InvocationTargetException {
+            Projection.this.apply(eventMessage, context);
+        }
     }
 
     static class TypeInfo {

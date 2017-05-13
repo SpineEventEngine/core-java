@@ -66,6 +66,8 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     @Nullable
     private T originalState;
 
+    private Modifications modifications;
+
     protected AbstractValidatingBuilder() {
         this.messageClass = TypeInfo.getMessageClass(getClass());
         this.messageBuilder = createBuilder();
@@ -193,6 +195,31 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
             throws ConstraintViolationThrowable {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationThrowable(violations);
+        }
+    }
+
+    public Modifications getModifications() {
+        return modifications;
+    }
+
+    public static class Modifications {
+
+        private volatile int modificationCount = 0;
+
+        private final Object lock = new Object();
+
+        public void commitModification() {
+            synchronized (lock) {
+                modificationCount++;
+            }
+        }
+
+        public int getAndClear() {
+            synchronized (lock) {
+                final int result = modificationCount;
+                modificationCount = 0;
+                return result;
+            }
         }
     }
 }

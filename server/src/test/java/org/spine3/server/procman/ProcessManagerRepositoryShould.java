@@ -357,7 +357,7 @@ public class ProcessManagerRepositoryShould
                                                .setId(projectId)
                                                .setStatus(Project.Status.CREATED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -372,7 +372,7 @@ public class ProcessManagerRepositoryShould
             final Project newState = getState().toBuilder()
                                                .addTask(task)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -386,7 +386,7 @@ public class ProcessManagerRepositoryShould
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber

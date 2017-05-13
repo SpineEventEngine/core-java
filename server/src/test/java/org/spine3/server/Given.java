@@ -268,7 +268,7 @@ public class Given {
 
         @Apply
         private void event(CustomerCreated event) {
-            incrementState(event.getCustomer());
+            getBuilder().mergeFrom(event.getCustomer());
         }
     }
 }

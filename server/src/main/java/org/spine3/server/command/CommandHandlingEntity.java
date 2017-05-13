@@ -60,7 +60,7 @@ import static org.spine3.base.Identifiers.idToAny;
  */
 public abstract class CommandHandlingEntity<I,
                                             S extends Message,
-                                            B extends ValidatingBuilder<S, ?>>
+                                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
                         extends EventPlayingEntity<I, S, B> {
 
     /** Cached value of the ID in the form of {@code Any} instance. */

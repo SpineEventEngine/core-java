@@ -28,6 +28,7 @@ import org.spine3.base.Command;
 import org.spine3.base.EventContext;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.entity.Transaction;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.util.Environment;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
@@ -105,9 +106,17 @@ public class CommandHandlingEntityShould {
         }
 
         @Override
-        protected void apply(Message eventMessage,
-                             EventContext ctx) throws InvocationTargetException {
-            // do nothing
+        protected Transaction createFromBuilder(
+                StringValueValidatingBuilder builder) {
+            return new Transaction<HandlingEntity,
+                                   StringValue,
+                                   StringValueValidatingBuilder>(builder, this) {
+                @Override
+                protected void apply(Message eventMessage,
+                                     EventContext context) throws InvocationTargetException {
+                    // do nothing
+                }
+            };
         }
     }
 }

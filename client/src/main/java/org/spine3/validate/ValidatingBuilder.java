@@ -83,7 +83,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
     void setOriginalState(T state);
 
     /**
-     * Determines if the message being built has been modified from its original state.
+     * Determines if the current message state has been modified comparing to its original state.
      *
      * @return {@code true} if it is modified, {@code false} otherwise
      */

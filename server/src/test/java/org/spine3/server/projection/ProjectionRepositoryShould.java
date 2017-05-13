@@ -531,7 +531,7 @@ public class ProjectionRepositoryShould
                                                .setId(event.getProjectId())
                                                .setStatus(Project.Status.CREATED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -540,7 +540,7 @@ public class ProjectionRepositoryShould
             final Project newState = getState().toBuilder()
                                                .addTask(event.getTask())
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
 
@@ -558,7 +558,7 @@ public class ProjectionRepositoryShould
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
     }
 

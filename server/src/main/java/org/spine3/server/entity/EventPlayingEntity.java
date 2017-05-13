@@ -25,7 +25,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.reflect.GenericTypeIndex;
-import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
@@ -49,24 +48,13 @@ public abstract class EventPlayingEntity <I,
                       extends AbstractVersionableEntity<I, S> {
 
     /**
-     * The builder for the entity state.
-     *
-     * <p>This field is non-null only when the entity changes its state
-     * during command handling or playing events.
-     *
-     * @see #createBuilder()
-     * @see #getBuilder()
-     * @see #updateState()
-     */
-    @Nullable
-    private volatile B builder;
-
-    /**
-     * The flag, which becomes {@code true}, if the state of the entity
-     * {@linkplain #updateState() has been changed} since it has been
-     * {@linkplain RecordBasedRepository#findOrCreate(Object)} loaded or created.
+     * The flag, which becomes {@code true}, if the state of the entity has been changed
+     * since it has been {@linkplain RecordBasedRepository#findOrCreate(Object) loaded or created}.
      */
     private volatile boolean stateChanged;
+
+    @Nullable
+    private volatile Transaction<EventPlayingEntity<I, S, B>, S, B> transaction;
 
     /**
      * Creates a new instance.
@@ -79,8 +67,21 @@ public abstract class EventPlayingEntity <I,
         super(id);
     }
 
-    protected abstract void apply(Message eventMessage,
-                                  EventContext context) throws InvocationTargetException;
+//    protected void apply(Message eventMessage,
+//                         EventContext context) throws InvocationTargetException {
+//        checkNotNull(context);
+//        checkNotNull(eventMessage);
+//
+//        final Transaction transaction = startTransaction();
+//        try {
+//            transaction.apply(eventMessage, context);
+//            transaction.commit();
+//        } catch (InvocationTargetException e) {
+//            //TODO:5/10/17:alex.tymchenko: handle the exception;
+//        } finally {
+//            releaseTransaction();
+//        }
+//    }
 
     /**
      * Determines whether the state of this entity or its lifecycle flags have been modified
@@ -110,7 +111,9 @@ public abstract class EventPlayingEntity <I,
                     "Builder is not available. Make sure to call getBuilder() " +
                             "only from an event applier method.");
         }
-        return builder;
+
+        checkNotNull(transaction);
+        return transaction.getBuilder();
     }
 
     /**
@@ -119,71 +122,21 @@ public abstract class EventPlayingEntity <I,
      * @return {@code true} if it is active, {@code false} otherwise
      */
     protected boolean isUpdateStateInProgress() {
-        final boolean result = this.builder != null;
+        final boolean result = this.transaction != null;
         return result;
-    }
-
-    /**
-     * Updates the entity state and closes the update phase of the entity.
-     */
-    protected void updateState() {
-        try {
-            final B builder = getBuilder();
-
-            // The state is only updated, if at least some changes were made to the builder.
-            if(builder.isDirty()) {
-                final S newState = builder.build();
-
-                final Version version = getVersion();
-                updateState(newState, version);
-            }
-        } catch (ConstraintViolationThrowable violation) {
-            // should not happen, as the `Builder` validates the input in its setters.
-            throw illegalStateWithCauseOf(violation);
-        } finally {
-            releaseBuilder();
-        }
-    }
-
-    /**
-     * Sets the new state of the entity.
-     *
-     * <p>This method is called during the entity update phase.
-     * It is not not supposed to be called from outside of this class.
-     *
-     * @param state   the state object to set
-     * @param version the entity version to set
-     * @throws IllegalStateException if the method is called from outside
-     */
-    @Internal
-    @Override
-    protected final void updateState(S state, Version version) {
-        if (builder == null) {
-            throw new IllegalStateException(
-                    "setState() is called from outside of the entity update phase.");
-        }
-        super.updateState(state, version);
-        markStateChanged();
-    }
-
-    private void markStateChanged() {
-        this.stateChanged = true;
     }
 
     protected void play(Iterable<Event> events) {
 
-        if(!isUpdateStateInProgress()) {
-            createBuilder();
-        }
+        final Transaction transaction = startTransaction();
 
         try {
             for (Event event : events) {
                 final Message message = getMessage(event);
                 final EventContext context = event.getContext();
                 try {
-                    apply(message, context);
-                    final Version newVersion = context.getVersion();
-                    advanceVersion(newVersion);
+                    transaction.applyAnd(message, context)
+                               .thenAdvanceVersionFrom(context.getVersion());
                 } catch (InvocationTargetException e) {
                     throw illegalStateWithCauseOf(e);
                 }
@@ -202,50 +155,48 @@ public abstract class EventPlayingEntity <I,
                 The exception thrown from an applier still will be seen because we
                 re-throw its cause in the `catch` block above.
              */
-            updateState();
+            transaction.commit();
+            releaseTransaction();
         }
     }
 
-    /**
-     * This method starts the phase of updating the entity state.
-     *
-     * <p>The update phase is closed by the {@link #updateState()}.
-     */
-    protected void createBuilder() {
+    protected Transaction startTransaction() {
+        if(transaction == null) {
+            createTransaction();
+        }
+        return transaction;
+    }
+
+
+    protected void releaseTransaction() {
+        checkNotNull(transaction);
+
+        this.stateChanged = transaction.isStateChanged();
+        this.transaction = null;
+    }
+
+    private void createTransaction() {
         final B builder = newBuilderInstance();
         builder.mergeFrom(getState());
-        this.builder = builder;
+        this.transaction = createFromBuilder(builder);
     }
 
-    /**
-     * Sets the passed state and version.
-     *
-     * <p>The method circumvents the protection in the {@link #updateState(Message, Version)
-     * setState()} method by creating a fake builder instance, which is cleared
-     * after the call.
-     *
-     * <p>The {@linkplain #isChanged()} return value is not affected by this method.
-     */
-    protected void injectState(S stateToRestore, Version versionFromSnapshot) {
-        try {
-            // Remember the current flag value.
-            final boolean wasStateChanged = this.stateChanged;
+    protected abstract Transaction createFromBuilder(B builder);
 
-            @SuppressWarnings("unchecked")
-            // The cast is safe as we checked the type on the construction.
-            final B fakeBuilder = newBuilderInstance();
-            this.builder = fakeBuilder;
-            updateState(stateToRestore, versionFromSnapshot);
+//    /**
+//     * Sets the passed state and version.
+//     *
+//     * <p>The method circumvents the protection in the {@link #updateState(Message, Version)
+//     * setState()} method by creating a fake builder instance, which is cleared
+//     * after the call.
+//     *
+//     * <p>The {@linkplain #isChanged()} return value is not affected by this method.
+//     */
+//TODO:5/11/17:alex.tymchenko: try to hide it at all!
+    protected void injectState(S stateToRestore, Version version) {
 
-            // Restore the previously memoized value.
-            this.stateChanged = wasStateChanged;
-        } finally {
-            releaseBuilder();
-        }
-    }
+        updateState(stateToRestore, version);
 
-    protected void releaseBuilder() {
-        this.builder = null;
     }
 
     private B newBuilderInstance() {
@@ -256,8 +207,6 @@ public abstract class EventPlayingEntity <I,
         final B builder = ValidatingBuilders.newInstance(builderClass);
         return builder;
     }
-
-
 
     /**
      * Enumeration of generic type parameters of this class.

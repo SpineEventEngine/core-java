@@ -30,6 +30,7 @@ import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.commandbus.CommandBus;
+import org.spine3.server.entity.Transaction;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.CommandClass;
@@ -107,16 +108,16 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-        createBuilder();
+//        createBuilder();
 
-        try {
+//        try {
             final List<? extends Message> messages = super.dispatchCommand(envelope);
             final List<Event> result = toEvents(messages, envelope);
-            updateState();
+//            updateState();
             return result;
-        } finally {
-            releaseBuilder();
-        }
+//        } finally {
+//            releaseBuilder();
+//        }
     }
 
     /**
@@ -140,27 +141,17 @@ public abstract class ProcessManager<I,
      * @param eventMessage the event to be handled by the process manager
      * @param context of the event
      */
-    protected void dispatchEvent(Message eventMessage, EventContext context) {
+    void dispatchEvent(Message eventMessage,
+                       EventContext context)  {
         checkNotNull(context);
         checkNotNull(eventMessage);
-
-        createBuilder();
 
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
             method.invoke(this, eventMessage, context);
-            updateState();
         } catch (InvocationTargetException e) {
             throw illegalStateWithCauseOf(e);
-        } finally {
-            releaseBuilder();
         }
-    }
-
-    @Override
-    protected void apply(Message eventMessage,
-                         EventContext context) throws InvocationTargetException {
-        dispatchEvent(eventMessage, context);
     }
 
     /**
@@ -171,8 +162,13 @@ public abstract class ProcessManager<I,
      */
     @Override               // Overridden to expose this method to tests.
     @VisibleForTesting
-    protected void injectState(S stateToRestore, Version versionFromSnapshot) {
-        super.injectState(stateToRestore, versionFromSnapshot);
+    protected void injectState(S stateToRestore, Version version) {
+        super.injectState(stateToRestore, version);
+    }
+
+    @Override
+    protected ProcessManagerTransaction createFromBuilder(B builder) {
+        return new ProcessManagerTransaction(builder, this);
     }
 
     /**
@@ -257,6 +253,18 @@ public abstract class ProcessManager<I,
         final CommandBus commandBus = getCommandBus();
         checkState(commandBus != null, "CommandBus must be initialized");
         return commandBus;
+    }
+
+    private class ProcessManagerTransaction extends Transaction<ProcessManager<I, S, B>, S, B> {
+        public ProcessManagerTransaction(B builder, ProcessManager<I, S, B> entity) {
+            super(builder, entity);
+        }
+
+        @Override
+        protected void apply(Message eventMessage, EventContext context) throws
+                                                                         InvocationTargetException {
+            ProcessManager.this.dispatchEvent(eventMessage, context);
+        }
     }
 
     /**

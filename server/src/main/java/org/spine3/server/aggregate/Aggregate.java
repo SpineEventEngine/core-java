@@ -25,15 +25,16 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.annotation.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.command.EventFactory;
+import org.spine3.server.entity.Transaction;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 import org.spine3.type.CommandClass;
@@ -45,6 +46,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.time.Time.getCurrentTime;
@@ -118,6 +121,7 @@ public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
+//        extends EventPlayingEntity<I, S, B> {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -152,6 +156,11 @@ public abstract class Aggregate<I,
     @VisibleForTesting      // Overridden to expose this method to tests.
     protected B getBuilder() {
         return super.getBuilder();
+    }
+
+    @Override
+    protected AggregateTransaction createFromBuilder(B builder) {
+        return new AggregateTransaction(builder, this);
     }
 
     /**
@@ -194,13 +203,10 @@ public abstract class Aggregate<I,
      *                               the {@code cause} for the thrown instance
      */
     void play(AggregateStateRecord aggregateStateRecord) {
-        createBuilder();
-
         final Snapshot snapshot = aggregateStateRecord.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-
         final List<Event> events = aggregateStateRecord.getEventList();
 
         play(events);
@@ -215,12 +221,7 @@ public abstract class Aggregate<I,
      */
     private void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope)
             throws InvocationTargetException {
-        createBuilder();
-        try {
-            applyMessages(eventMessages, envelope);
-        } finally {
-            updateState();
-        }
+        applyMessages(eventMessages, envelope);
     }
 
     /**
@@ -233,23 +234,30 @@ public abstract class Aggregate<I,
      */
     private void applyMessages(Iterable<? extends Message> eventMessages,
                                CommandEnvelope envelope) throws InvocationTargetException {
-        final List<? extends Message> messages = Lists.newArrayList(eventMessages);
+        final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory = createEventFactory(envelope, messages.size());
+
+        final List<Event> events = newArrayListWithCapacity(messages.size());
+
+        Version currentVersion = getVersion();
 
         for (Message eventOrMessage : messages) {
             final Message eventMessage = ensureEventMessage(eventOrMessage);
 
-            apply(eventMessage, null);
-            incrementVersion();
-
             final Event event;
             if (eventOrMessage instanceof Event) {
-                event = importEvent((Event) eventOrMessage, envelope.getCommandContext());
+                event = importEvent((Event) eventOrMessage,
+                                    envelope.getCommandContext(),
+                                    currentVersion);
             } else {
-                event = eventFactory.createEvent(eventMessage, getVersion());
+                event = eventFactory.createEvent(eventMessage, currentVersion);
             }
-            uncommittedEvents.add(event);
+            events.add(event);
+
+            currentVersion = Versions.increment(currentVersion);;
         }
+        play(events);
+        uncommittedEvents.addAll(events);
     }
 
     /**
@@ -259,12 +267,12 @@ public abstract class Aggregate<I,
      * @param commandContext the context of the import command
      * @return an event with updated command context and entity version
      */
-    private Event importEvent(Event event, CommandContext commandContext) {
+    private static Event importEvent(Event event, CommandContext commandContext, Version version) {
         final EventContext eventContext = event.getContext()
                                                .toBuilder()
                                                .setCommandContext(commandContext)
                                                .setTimestamp(getCurrentTime())
-                                               .setVersion(getVersion())
+                                               .setVersion(version)
                                                .build();
         final Event result = event.toBuilder()
                                   .setContext(eventContext)
@@ -306,17 +314,16 @@ public abstract class Aggregate<I,
         return eventMsg;
     }
 
-    /**
-     * Applies an event to the aggregate.
-     *
-     * @param eventMessage an event message
-     * @throws InvocationTargetException    if an exception occurred when calling event applier
-     */
-    @Override
-    protected void apply(Message eventMessage,
-                         @Nullable EventContext ignored) throws InvocationTargetException {
-        invokeApplier(eventMessage);
-    }
+//    /**
+//     * Applies an event to the aggregate.
+//     *
+//     * @param eventMessage an event message
+//     * @throws InvocationTargetException    if an exception occurred when calling event applier
+//     */
+//    protected void apply(Message eventMessage,
+//                         @Nullable EventContext ignored) throws InvocationTargetException {
+//        invokeApplier(eventMessage);
+//    }
 
     /**
      * Restores the state and version from the passed snapshot.
@@ -354,8 +361,8 @@ public abstract class Aggregate<I,
      */
     @Override               // Overrides to expose to the test code.
     @VisibleForTesting
-    protected void injectState(S stateToRestore, Version versionFromSnapshot) {
-        super.injectState(stateToRestore, versionFromSnapshot);
+    protected void injectState(S stateToRestore, Version version) {
+        super.injectState(stateToRestore, version);
     }
 
     /**
@@ -403,6 +410,19 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
+    }
+
+    class AggregateTransaction extends Transaction<Aggregate<I, S, B>, S, B> {
+
+        public AggregateTransaction(B builder, Aggregate aggregate) {
+            super(builder, aggregate);
+        }
+
+        @Override
+        protected void apply(Message eventMessage, @Nullable EventContext ignored) throws
+                                                                         InvocationTargetException {
+            invokeApplier(eventMessage);
+        }
     }
 
     /**
