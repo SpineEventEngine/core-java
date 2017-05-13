@@ -36,14 +36,14 @@ import static org.spine3.server.event.EventPredicate.Time.isBetween;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
-public class MatchesStreamQuery implements EventPredicate {
+class MatchesStreamQuery implements EventPredicate {
 
     private static final long serialVersionUID = 0L;
     private final EventStreamQuery query;
     private final EventPredicate timePredicate;
 
     @SuppressWarnings("IfMayBeConditional")
-    public MatchesStreamQuery(EventStreamQuery query) {
+    MatchesStreamQuery(EventStreamQuery query) {
         this.query = query;
         final Timestamp after = query.getAfter();
         final Timestamp before = query.getBefore();
