@@ -36,7 +36,7 @@ import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
  */
 final class LocalDateStringifier extends Stringifier<LocalDate> implements Serializable {
 
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 0L;
     private static final LocalDateStringifier INSTANCE = new LocalDateStringifier();
 
     static LocalDateStringifier getInstance() {

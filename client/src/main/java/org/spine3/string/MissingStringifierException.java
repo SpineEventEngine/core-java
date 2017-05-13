@@ -30,7 +30,7 @@ package org.spine3.string;
  */
 public class MissingStringifierException extends RuntimeException {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     public MissingStringifierException(String message) {
         super(message);

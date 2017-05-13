@@ -29,6 +29,8 @@ import java.util.Iterator;
 /**
  * The base interface for storages.
  *
+ * @param <I> the type of identifiers
+ * @param <R> the type of records
  * @author Alexander Yevsyukov
  */
 @SPI

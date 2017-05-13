@@ -37,7 +37,7 @@ import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
  */
 final class ZoneOffsetStringifier extends Stringifier<ZoneOffset> implements Serializable {
 
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 0L;
     private static final ZoneOffsetStringifier INSTANCE = new ZoneOffsetStringifier();
 
     static ZoneOffsetStringifier getInstance() {

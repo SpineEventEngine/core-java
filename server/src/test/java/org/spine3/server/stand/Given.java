@@ -115,7 +115,7 @@ class Given {
         private static final EventTargetsFunction<ProjectId, ProjectCreated> ID_FUNC =
                 new EventTargetsFunction<ProjectId, ProjectCreated>() {
 
-            private static final long serialVersionUID = 1L;
+            private static final long serialVersionUID = 0L;
 
             @Override
             public Set<ProjectId> apply(ProjectCreated message,

@@ -271,7 +271,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
      ********************/
 
     private static class TestFailure extends FailureThrowable {
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
 
         private TestFailure() {
             super(Wrapper.forString(TestFailure.class.getName()));

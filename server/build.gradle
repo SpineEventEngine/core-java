@@ -17,11 +17,19 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
+
+ext {
+    beamVersion = '0.6.0'
+}
+
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
 
     compile project(path: ':client')
     compile project(path: ':values')
+
+    compile group: 'org.apache.beam', name: 'beam-sdks-java-core', version: beamVersion
+    compile group: 'org.apache.beam', name: 'beam-runners-direct-java', version: beamVersion
 
     testCompile project(path: ":client", configuration: 'testArtifacts')
     testCompile project(path: ":testutil")

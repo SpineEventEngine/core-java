@@ -39,7 +39,7 @@ import java.util.Set;
  */
 class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Message> {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     /**
      * The map from event class to a function that generates a set of project IDs

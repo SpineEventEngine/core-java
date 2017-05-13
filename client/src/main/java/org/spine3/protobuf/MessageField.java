@@ -41,7 +41,7 @@ import static com.google.protobuf.Descriptors.FieldDescriptor;
  */
 public abstract class MessageField implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     /** The prefix of generated getter methods for fields. */
     private static final String GETTER_METHOD_PREFIX = "get";

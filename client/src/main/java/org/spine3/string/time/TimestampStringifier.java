@@ -36,7 +36,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  */
 final class TimestampStringifier extends Stringifier<Timestamp> implements Serializable {
 
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 0L;
     private static final TimestampStringifier INSTANCE = new TimestampStringifier();
 
     static TimestampStringifier getInstance() {

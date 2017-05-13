@@ -110,7 +110,7 @@ public class ProjectionRepositoryShould
      */
     private static final EventTargetsFunction<ProjectId, ProjectCreated> idSetForCreateProject =
             new EventTargetsFunction<ProjectId, ProjectCreated>() {
-                private static final long serialVersionUID = 1L;
+                private static final long serialVersionUID = 0L;
 
                 @Override
                 public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
@@ -369,7 +369,7 @@ public class ProjectionRepositoryShould
     public void use_id_set_function() {
         final EventTargetsFunction<ProjectId, ProjectCreated> delegateFn =
                 new EventTargetsFunction<ProjectId, ProjectCreated>() {
-                    private static final long serialVersionUID = 1L;
+                    private static final long serialVersionUID = 0L;
                     @Override
                     public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                         return newHashSet();

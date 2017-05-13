@@ -23,12 +23,11 @@ package org.spine3.server.projection;
 import com.google.protobuf.Message;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
-import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.KV;
+import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
 import org.spine3.envelope.EventEnvelope;
@@ -48,13 +47,16 @@ import java.util.Set;
  */
 public class CatchupOp<I> {
 
+    private final TenantId tenantId;
     private final ProjectionRepository<I, ?, ?> repository;
     private final EventStore eventStore;
     private final Set<EventFilter> eventFilters;
     private final PipelineOptions options;
 
-    public CatchupOp(ProjectionRepository<I, ?, ?> repository,
+    public CatchupOp(TenantId tenantId,
+                     ProjectionRepository<I, ?, ?> repository,
                      PipelineOptions options) {
+        this.tenantId = tenantId;
         this.repository = repository;
         this.options = options;
 
@@ -66,16 +68,13 @@ public class CatchupOp<I> {
     private Pipeline createPipeline() {
         Pipeline pipeline = Pipeline.create(options);
 
-        // Get tenant IDs.
-        final PCollection<TenantId> allTenants = pipeline.apply(
-                "ReadAllTenantIdentifiers", readAllTenantIdentifiers());
-
         // Compose Event Stream Query
         final EventStreamQuery query = repository.createStreamQuery();
 
-        // Read events matching the query for each tenants.
-        final PCollection<PCollection<Event>> eventsByTenants =
-                allTenants.apply("ReadEvents", ParDo.of(new ReadEvents(query)));
+        // Read events matching the query.
+        final PCollection<Event> events =
+                pipeline.apply("ReadEvents", (new ReadEvents(tenantId, query)));
+
 
         // Group events by projections.
         final GetProjectionIdentifiers<I> getIdentifiers =
@@ -87,48 +86,34 @@ public class CatchupOp<I> {
         return pipeline;
     }
 
-    private Create.Values<TenantId> readAllTenantIdentifiers() {
-        Set<TenantId> tenants = repository.getBoundedContext()
-                                          .getTenantIndex()
-                                          .getAll();
-        final Create.Values<TenantId> values = Create.of(tenants)
-                                                     .withCoder(ProtoCoder.of(TenantId.class));
-        return values;
-    }
-
     public PipelineResult run() {
         final Pipeline pipeline = createPipeline();
         final PipelineResult result = pipeline.run();
         return result;
     }
 
-    private static class ReadEvents extends DoFn<TenantId, PCollection<Event>> {
+    private static class ReadEvents extends PTransform<PBegin, PCollection<Event>> {
 
-        private static final long serialVersionUID = 1L;
-
+        private static final long serialVersionUID = 0L;
+        private final TenantId tenantId;
         private final EventStreamQuery query;
 
-        private ReadEvents(EventStreamQuery query) {
+        private ReadEvents(TenantId tenantId, EventStreamQuery query) {
+            this.tenantId = tenantId;
             this.query = query;
         }
 
-        @ProcessElement
-        public void processElement(ProcessContext c) {
-            final TenantId tenantId = c.element();
+        @Override
+        public PCollection<Event> expand(PBegin input) {
 
-            //TODO:2017-05-12:alexander.yevsyukov: Read events in a tenant operation.
-            // Get record storage from EventStore as a constructor parameter.
-
-            final PCollection<Event> events = null;
-
-            c.output(events);
+            return null;
         }
     }
 
     private static class GetProjectionIdentifiers<I>
             extends DoFn<Event, KV<Event, PCollection<I>>> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private final EventTargetsFunction<I, Message> function;
 
         private GetProjectionIdentifiers(EventTargetsFunction<I, Message> function) {

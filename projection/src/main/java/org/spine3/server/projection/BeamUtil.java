@@ -51,7 +51,7 @@ public class BeamUtil {
      */
     private static class AssignTimestamp extends DoFn<Event, Event> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
 
         public void processElement(ProcessContext c) {
             // Extract the timestamp from an event we're currently processing.

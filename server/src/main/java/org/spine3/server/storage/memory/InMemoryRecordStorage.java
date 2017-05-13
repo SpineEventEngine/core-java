@@ -21,14 +21,25 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.protobuf.FieldMask;
+import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
+import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.tenant.TenantAwareFunction0;
+import org.spine3.users.TenantId;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,6 +63,10 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
+    protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
+        return new InMemoryRecordStorage<>(multitenant);
+    }
+
     @Override
     public Iterator<I> index() {
         return getStorage().index();
@@ -60,6 +75,16 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     public boolean delete(I id) {
         return getStorage().delete(id);
+    }
+
+    @Override
+    protected Optional<EntityRecord> readRecord(I id) {
+        return getStorage().get(id);
+    }
+
+    @Override
+    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+        return readMultipleRecords(ids, FieldMask.getDefaultInstance());
     }
 
     @Override
@@ -79,11 +104,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return readMultipleRecords(ids, FieldMask.getDefaultInstance());
-    }
-
-    @Override
     protected Map<I, EntityRecord> readAllRecords() {
         return getStorage().readAllRecords();
     }
@@ -91,19 +111,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return getStorage().readAllRecords(fieldMask);
-    }
-
-    protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
-        return new InMemoryRecordStorage<>(multitenant);
-    }
-
-    private TenantRecords<I> getStorage() {
-        return multitenantStorage.getStorage();
-    }
-
-    @Override
-    protected Optional<EntityRecord> readRecord(I id) {
-        return getStorage().get(id);
     }
 
     @Override
@@ -115,7 +122,64 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     protected void writeRecords(Map<I, EntityRecordWithColumns> records) {
         final TenantRecords<I> storage = getStorage();
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
-            storage.put(record.getKey(), record.getValue().getRecord());
+            storage.put(record.getKey(), record.getValue()
+                                               .getRecord());
+        }
+    }
+
+    private TenantRecords<I> getStorage() {
+        return multitenantStorage.getStorage();
+    }
+
+    @Override
+    protected PTransform<PBegin, PCollection<EntityRecord>>
+    readTransform(TenantId tenantId, final SerializableFunction<EntityRecord, Boolean> filter) {
+
+        /**
+         * The code below reads all records one by one (instead of obtaining them via
+         * {@link readAllRecords()}) in the hope that Beam-based implementation would allow removing
+         * {@link readAllRecords()} and {@link readAllRecords(FieldMask).
+         */
+        final TenantAwareFunction0<List<EntityRecord>> func =
+                new TenantAwareFunction0<List<EntityRecord>>(tenantId) {
+            @Override
+            public List<EntityRecord> apply() {
+                final List<I> index = Lists.newArrayList(index());
+                final List<EntityRecord> result = Lists.newArrayListWithExpectedSize(index.size());
+                for (I id : index) {
+                    final EntityRecord record = readRecord(id).get();
+                    if (filter.apply(record)) {
+                        result.add(record);
+                    }
+                }
+                return result;
+            }
+        };
+        List<EntityRecord> records = func.apply();
+
+        return new AsTransform(records);
+    }
+
+    private static class AsTransform extends PTransform<PBegin, PCollection<EntityRecord>> {
+
+        private static final long serialVersionUID = 0L;
+        private final ImmutableList<EntityRecord> records;
+
+        private AsTransform(List<EntityRecord> records) {
+            this.records = ImmutableList.copyOf(records);
+        }
+
+        @Override
+        public PCollection<EntityRecord> expand(PBegin input) {
+            final PCollection<EntityRecord> result =
+                    input.apply(Create.of(records)
+                                      .withCoder(ProtoCoder.of(EntityRecord.class)));
+            return result;
+        }
+
+        @Override
+        public String toString() {
+            return "InMemoryRecordStorage.readTransform()";
         }
     }
 }

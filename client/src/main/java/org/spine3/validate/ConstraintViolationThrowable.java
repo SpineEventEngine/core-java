@@ -31,7 +31,7 @@ import static java.util.Collections.unmodifiableList;
  */
 public class ConstraintViolationThrowable extends Throwable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private final List<ConstraintViolation> constraintViolations;
 

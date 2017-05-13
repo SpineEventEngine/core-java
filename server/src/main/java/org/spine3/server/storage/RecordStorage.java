@@ -24,6 +24,10 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -31,6 +35,7 @@ import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.TenantId;
 
 import java.util.Map;
 
@@ -264,4 +269,11 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param records an ID to record map with the entries to store
      */
     protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
+
+
+    /**
+     * Obtains {@link PTransform} for reading all records in the storage passing the predicate.
+     */
+    protected abstract PTransform<PBegin, PCollection<EntityRecord>>
+    readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter);
 }

@@ -22,9 +22,14 @@ package org.spine3.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.users.TenantId;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -107,5 +112,11 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         final Map<I, EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
+    }
+
+    @Override
+    protected PTransform<PBegin, PCollection<EntityRecord>>
+    readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter) {
+        return recordStorage.readTransform(tenantId, filter);
     }
 }
