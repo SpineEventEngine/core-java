@@ -24,13 +24,11 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.google.common.base.Predicates.alwaysTrue;
-import static org.spine3.base.EventPredicates.isAfter;
-import static org.spine3.base.EventPredicates.isBefore;
-import static org.spine3.base.EventPredicates.isBetween;
+import static org.spine3.server.event.EventPredicate.Time.isAfter;
+import static org.spine3.server.event.EventPredicate.Time.isBefore;
+import static org.spine3.server.event.EventPredicate.Time.isBetween;
 
 /**
  * The predicate for filtering {@code Event} instances by {@link EventStreamQuery}.
@@ -38,10 +36,11 @@ import static org.spine3.base.EventPredicates.isBetween;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
-public class MatchesStreamQuery implements Predicate<Event> {
+public class MatchesStreamQuery implements EventPredicate {
 
+    private static final long serialVersionUID = 0L;
     private final EventStreamQuery query;
-    private final Predicate<Event> timePredicate;
+    private final EventPredicate timePredicate;
 
     @SuppressWarnings("IfMayBeConditional")
     public MatchesStreamQuery(EventStreamQuery query) {
@@ -58,12 +57,12 @@ public class MatchesStreamQuery implements Predicate<Event> {
         } else if (afterSpecified /* && beforeSpecified is `true` here too */) {
             this.timePredicate = isBetween(after, before);
         } else { // No timestamps specified.
-            this.timePredicate = alwaysTrue();
+            this.timePredicate = EventPredicate.Always.isTrue();
         }
     }
 
     @Override
-    public boolean apply(@Nullable Event input) {
+    public Boolean apply(Event input) {
         if (!timePredicate.apply(input)) {
             return false;
         }

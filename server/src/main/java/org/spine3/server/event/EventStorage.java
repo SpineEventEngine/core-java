@@ -81,7 +81,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
 
-        private final Predicate<Event> filter;
+        private final EventPredicate filter;
 
         private EventEntityMatchesStreamQuery(EventStreamQuery query) {
             this.filter = new MatchesStreamQuery(query);
