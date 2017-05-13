@@ -28,6 +28,7 @@ import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
@@ -131,8 +132,12 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         return multitenantStorage.getStorage();
     }
 
+    /*
+     * Beam support
+     */
+
     @Override
-    protected PTransform<PBegin, PCollection<EntityRecord>>
+    public PTransform<PBegin, PCollection<EntityRecord>>
     readTransform(TenantId tenantId, final SerializableFunction<EntityRecord, Boolean> filter) {
 
         /**
@@ -158,6 +163,40 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         List<EntityRecord> records = func.apply();
 
         return new AsTransform(records);
+    }
+
+    @Override
+    public ReadFn<I> readFn(TenantId tenantId, final I id) {
+        final TenantAwareFunction0<EntityRecord> func =
+                new TenantAwareFunction0<EntityRecord>(tenantId) {
+                    @Override
+                    public EntityRecord apply() {
+                        return readRecord(id).get();
+                    }
+                };
+
+        final EntityRecord record = func.apply();
+        return new ReadRecordFn<>(record);
+    }
+
+    /**
+     * A fake reading function which remembers the passed record and emits it when
+     * {@linkplain #processElement(ProcessContext, BoundedWindow) called}.
+     *
+     * @param <I> the type of identifiers of the storage
+     */
+    private static class ReadRecordFn<I> extends ReadFn<I> {
+        private static final long serialVersionUID = 0L;
+        private final EntityRecord record;
+
+        private ReadRecordFn(EntityRecord record) {
+            this.record = record;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c, BoundedWindow window) {
+            c.output(record);
+        }
     }
 
     private static class AsTransform extends PTransform<PBegin, PCollection<EntityRecord>> {
