@@ -25,10 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -292,13 +289,12 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
          *
          * @param tenantId the ID of the tenant for whom records belong
          */
-        public abstract PTransform<PBegin, PCollection<EntityRecord>> readAll(TenantId tenantId);
+        public abstract ReadRecords readAll(TenantId tenantId);
 
         /**
          * Obtains a transformation for reading entity records with the passed indexes.
          */
-        public abstract PTransform<PBegin, PCollection<EntityRecord>> read(TenantId tenantId,
-                                                                           Iterable<I> ids);
+        public abstract ReadRecords read(TenantId tenantId, Iterable<I> ids);
 
         /**
          * Obtains transformation for extracting an entity state from {@link EntityRecord}s.
@@ -319,9 +315,13 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
             @ProcessElement
             public void processElement(ProcessContext c, BoundedWindow window) {
-                final EntityRecord record = c.element();
-                final S entityState = AnyPacker.unpack(record.getState());
+                final S entityState = doUnpack(c);
                 c.output(entityState);
+            }
+
+            protected S doUnpack(ProcessContext c) {
+                final EntityRecord record = c.element();
+                return AnyPacker.unpack(record.getState());
             }
         }
     }

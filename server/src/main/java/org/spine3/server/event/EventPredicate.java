@@ -70,36 +70,59 @@ public interface EventPredicate extends SerializableFunction<Event, Boolean> {
             // Prevent instantiation of this utility class.
         }
 
+        /**
+         * Obtains a predicate that accepts all the events.
+         */
         public static EventPredicate isTrue() {
             return Value.ALWAYS_TRUE;
         }
 
+        /**
+         * Obtains a predicate that rejects all the events.
+         */
         public static EventPredicate isFalse() {
             return Value.ALWAYS_FALSE;
         }
     }
 
+    /**
+     * Provides time-related predicates.
+     */
     class Time {
         private Time() {
             // Prevent instantiation of this utility class.
         }
 
+        /**
+         * Obtains a predicate that accepts events with timestamps after the passed.
+         */
         public static IsAfter isAfter(Timestamp timestamp) {
             checkValid(timestamp);
             return new IsAfter(timestamp);
         }
 
+        /**
+         * Obtains a predicate that accepts events with timestamps before the passed.
+         */
         public static IsBefore isBefore(Timestamp timestamp) {
             checkValid(timestamp);
             return new IsBefore(timestamp);
         }
 
+        /**
+         * Obtains a predicate that accepts events which timestamp is
+         * {@linkplain Timestamps2#isBetween(Timestamp, Timestamp, Timestamp) within} the passed
+         * timestamp range.
+         */
         public static IsBetween isBetween(Timestamp start, Timestamp finish) {
             checkArguments(start, finish);
             return new IsBetween(start, finish);
         }
     }
 
+    /**
+     * Abstract base for time-related event predicates.
+     */
     abstract class TimePredicate implements EventPredicate {
         private static final long serialVersionUID = 0L;
         static Timestamp timeOf(Event input) {
@@ -107,6 +130,9 @@ public interface EventPredicate extends SerializableFunction<Event, Boolean> {
         }
     }
 
+    /**
+     * Accepts events with the timestamp after the passed.
+     */
     class IsAfter extends TimePredicate {
         private static final long serialVersionUID = 0L;
         private final Timestamp timestamp;
@@ -123,6 +149,9 @@ public interface EventPredicate extends SerializableFunction<Event, Boolean> {
         }
     }
 
+    /**
+     * Accepts events that are before the passed timestamp.
+     */
     class IsBefore extends TimePredicate {
         private static final long serialVersionUID = 0L;
         private final Timestamp timestamp;
@@ -139,6 +168,11 @@ public interface EventPredicate extends SerializableFunction<Event, Boolean> {
         }
     }
 
+    /**
+     * Accepts events which timestamp is
+     * {@linkplain Timestamps2#isBetween(Timestamp, Timestamp, Timestamp) within} the passed
+     * timestamp range.
+     */
     class IsBetween extends TimePredicate {
         private static final long serialVersionUID = 0L;
         private final Timestamp start;
@@ -153,6 +187,31 @@ public interface EventPredicate extends SerializableFunction<Event, Boolean> {
         public Boolean apply(Event input) {
             final Timestamp ts = timeOf(input);
             final boolean result = Timestamps2.isBetween(ts, start, finish);
+            return result;
+        }
+    }
+
+    /**
+     * Filters events matching a {@link EventStreamQuery}.
+     */
+    class Query implements EventPredicate {
+        private static final long serialVersionUID = 0L;
+        private final EventPredicate filter;
+
+        /**
+         * Creates a new predicate for the passed query.
+         */
+        public static Query of(EventStreamQuery query) {
+            return new Query(query);
+        }
+
+        private Query(EventStreamQuery query) {
+            this.filter = new MatchesStreamQuery(query);
+        }
+
+        @Override
+        public Boolean apply(Event input) {
+            final boolean result = filter.apply(input);
             return result;
         }
     }

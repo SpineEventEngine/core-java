@@ -24,12 +24,17 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.storage.ReadRecords;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -80,22 +85,64 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return GET_EVENT;
     }
 
-    /**
-     * Filters {@link EntityRecord} containing event by the passed event filter.
+    /*
+     * Beam Support
      */
-    private static class EntityRecordFilter implements SerializableFunction<EntityRecord, Boolean> {
-        private static final long serialVersionUID = 0L;
-        private final SerializableFunction<Event, Boolean> filter;
+    ReadEvents query(TenantId tenantId, EventPredicate predicate) {
+        final ReadRecords readAll = recordStorage().getIO()
+                                                   .readAll(tenantId);
+        return new QueryEvents(readAll, predicate);
+    }
 
-        private EntityRecordFilter(SerializableFunction<Event, Boolean> filter) {
-            this.filter = filter;
+    /**
+     * Reads events matching the passed predicate.
+     */
+    private static class QueryEvents extends ReadEvents {
+
+        private static final long serialVersionUID = 0L;
+        private final ReadRecords readAll;
+        private final EventPredicate predicate;
+
+        private QueryEvents(ReadRecords readAll, EventPredicate predicate) {
+            this.readAll = readAll;
+            this.predicate = predicate;
         }
 
         @Override
-        public Boolean apply(EntityRecord input) {
-            final Event event = AnyPacker.unpack(input.getState());
-            final boolean result = filter.apply(event);
-            return result;
+        public PCollection<Event> expand(PBegin input) {
+            final PCollection<EntityRecord> allRecords = input.apply(readAll);
+            final PCollection<Event> matching = allRecords.apply(ParDo.of(FilterFn.of(predicate)));
+            return matching;
+        }
+    }
+
+    /**
+     * An {@link org.spine3.server.storage.RecordStorage.BeamIO.UnpackFn UnpackFn} that extracts
+     * events and accepts those matching the passed predicate.
+     */
+    public static class FilterFn extends RecordStorage.BeamIO.UnpackFn<Event> {
+
+        private static final long serialVersionUID = 0L;
+        private final EventPredicate predicate;
+
+        /**
+         * Creates a new instance that accepts events matching the passed predicate.
+         */
+        public static FilterFn of(EventPredicate predicate) {
+            return new FilterFn(predicate);
+        }
+
+        private FilterFn(EventPredicate predicate) {
+            this.predicate = predicate;
+        }
+
+        @Override
+        @ProcessElement
+        public void processElement(ProcessContext c, BoundedWindow window) {
+            final Event event = doUnpack(c);
+            if (predicate.apply(event)) {
+                c.output(event);
+            }
         }
     }
 

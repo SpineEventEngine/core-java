@@ -25,11 +25,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
 import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
 import org.apache.beam.sdk.transforms.Create;
-import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
+import org.spine3.server.storage.ReadRecords;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.users.TenantId;
@@ -151,15 +151,14 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         }
 
         @Override
-        public PTransform<PBegin, PCollection<EntityRecord>> readAll(TenantId tenantId) {
+        public ReadRecords readAll(TenantId tenantId) {
             final List<I> index = readIndex();
             final ImmutableList<EntityRecord> records = readMany(tenantId, index);
             return new AsTransform(records);
         }
 
         @Override
-        public PTransform<PBegin, PCollection<EntityRecord>> read(TenantId tenantId,
-                                                                  Iterable<I> ids) {
+        public ReadRecords read(TenantId tenantId, Iterable<I> ids) {
             final ImmutableList<EntityRecord> records = readMany(tenantId, ids);
             return new AsTransform(records);
         }
@@ -195,7 +194,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         /**
          * Transforms passed records into {@link PCollection}.
          */
-        private static class AsTransform extends PTransform<PBegin, PCollection<EntityRecord>> {
+        private static class AsTransform extends ReadRecords {
             private static final long serialVersionUID = 0L;
             private final ImmutableList<EntityRecord> records;
 

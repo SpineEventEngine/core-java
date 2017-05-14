@@ -23,6 +23,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
@@ -32,6 +35,7 @@ import org.spine3.server.event.grpc.EventStoreGrpc;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.EventOperation;
 import org.spine3.server.tenant.TenantAwareOperation;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -275,6 +279,15 @@ public abstract class EventStore implements AutoCloseable {
         public void close() throws Exception {
             storage.close();
         }
+
+        /*
+         * Beam support
+         */
+
+        @Override
+        public ReadEvents query(TenantId tenantId, EventPredicate query) {
+            return storage.query(tenantId, query);
+        }
     }
 
     /**
@@ -351,9 +364,9 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    //
-    // Logging methods
-    //------------------------------------------
+    /*
+     * Logging methods
+     */
 
     private void logStored(Event request) {
         if (logger == null) {
@@ -393,8 +406,16 @@ public abstract class EventStore implements AutoCloseable {
         private final Logger value = LoggerFactory.getLogger(EventStore.class);
     }
 
-    /** Returns default logger of {EventStore} class. */
+    /** Returns default logger for the class. */
     public static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
+
+    /*
+     * Beam support
+     */
+
+    /** Obtains query transform. */
+    public abstract PTransform<PBegin, PCollection<Event>> query(TenantId tenantId,
+                                                                 EventPredicate query);
 }

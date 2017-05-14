@@ -25,14 +25,12 @@ import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.values.KV;
-import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.entity.idfunc.EventTargetsFunction;
-import org.spine3.server.event.EventFilter;
+import org.spine3.server.event.EventPredicate;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.users.TenantId;
@@ -50,7 +48,6 @@ public class CatchupOp<I> {
     private final TenantId tenantId;
     private final ProjectionRepository<I, ?, ?> repository;
     private final EventStore eventStore;
-    private final Set<EventFilter> eventFilters;
     private final PipelineOptions options;
 
     public CatchupOp(TenantId tenantId,
@@ -61,25 +58,22 @@ public class CatchupOp<I> {
         this.options = options;
 
         this.eventStore = repository.getEventStore();
-        this.eventFilters = repository.getEventFilters();
-
     }
 
     private Pipeline createPipeline() {
         Pipeline pipeline = Pipeline.create(options);
 
-        // Compose Event Stream Query
-        final EventStreamQuery query = repository.createStreamQuery();
-
         // Read events matching the query.
-        final PCollection<Event> events =
-                pipeline.apply("ReadEvents", (new ReadEvents(tenantId, query)));
-
+        final EventStreamQuery query = repository.createStreamQuery();
+        final EventPredicate.Query predicate = EventPredicate.Query.of(query);
+        final PCollection<Event> events = pipeline.apply("QueryEvents",
+                                                         eventStore.query(tenantId, predicate));
 
         // Group events by projections.
         final GetProjectionIdentifiers<I> getIdentifiers =
                 new GetProjectionIdentifiers<>(repository.getIdSetFunction());
 
+        //TODO:2017-05-14:alexander.yevsyukov: Group events
 
         // Apply events to projections and store them.
 
@@ -90,24 +84,6 @@ public class CatchupOp<I> {
         final Pipeline pipeline = createPipeline();
         final PipelineResult result = pipeline.run();
         return result;
-    }
-
-    private static class ReadEvents extends PTransform<PBegin, PCollection<Event>> {
-
-        private static final long serialVersionUID = 0L;
-        private final TenantId tenantId;
-        private final EventStreamQuery query;
-
-        private ReadEvents(TenantId tenantId, EventStreamQuery query) {
-            this.tenantId = tenantId;
-            this.query = query;
-        }
-
-        @Override
-        public PCollection<Event> expand(PBegin input) {
-            //TODO:2017-05-13:alexander.yevsyukov: Implement
-            return null;
-        }
     }
 
     private static class GetProjectionIdentifiers<I>
