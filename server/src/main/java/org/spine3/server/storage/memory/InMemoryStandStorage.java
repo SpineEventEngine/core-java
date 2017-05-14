@@ -25,16 +25,11 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
-import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.SerializableFunction;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.type.TypeUrl;
-import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -182,16 +177,4 @@ class InMemoryStandStorage extends StandStorage {
      * Beam support
      */
 
-    /** {@inheritDoc} */
-    @Override
-    public PTransform<PBegin, PCollection<EntityRecord>>
-    readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter) {
-        return recordStorage.readTransform(tenantId, filter);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public ReadFn<AggregateStateId> readFn(TenantId tenantId, AggregateStateId id) {
-        return recordStorage.readFn(tenantId, id);
-    }
 }

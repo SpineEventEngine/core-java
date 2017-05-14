@@ -21,16 +21,11 @@
 package org.spine3.server.storage;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.transforms.SerializableFunction;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -38,9 +33,7 @@ import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
-import org.spine3.users.TenantId;
 
-import java.util.List;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -275,54 +268,17 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
 
     /**
-     * Obtains {@link PTransform} for reading all records in the storage passing the predicate.
-     */
-    public abstract PTransform<PBegin, PCollection<EntityRecord>>
-    readTransform(TenantId tenantId, SerializableFunction<EntityRecord, Boolean> filter);
-
-    /**
-     * Obtains a {@link ReadFn} which reads an {@link EntityRecord} with the passed ID
-     * in the data slice of the passed tenant.
-     */
-    public abstract ReadFn<I> readFn(TenantId tenantId, I id);
-
-    /**
-     * Creates transforms for identifiers in a storage.
+     * Extracts the state of an entity from a {@link EntityRecord}.
      *
-     * <p>Identifiers {@linkplain org.spine3.base.Identifiers#checkSupported(Class) can be}
-     * {@code Integer}, {@code String}, {@code Long}, or {@code Messages}.
-     * All these types have standard coders registered in
-     * {@link org.apache.beam.sdk.coders.CoderRegistry CoderRegistry}. {@code Messages} are handled
-     * by {@link org.apache.beam.sdk.coders.protobuf.ProtoCoder ProtoCoder}.
-     *
-     * <p>In an unlikely case of having options defined in custom {@code message} types for
-     * identifiers, and needing these options in pipeline processing, it will be needed to
-     * {@linkplain org.apache.beam.sdk.coders.protobuf.ProtoCoder#withExtensionsFrom(Iterable)
-     * register} coders for this {@code Message} types to handle extensions.
+     * @param <S> the type of the entity state
      */
-    public static class Index {
-
-        private Index() {
-            // Prevent instantiation of this utility class.
-        }
-
-        public static <I> Create.Values<I> of(RecordStorage<I> storage) {
-            final List<I> index = Lists.newArrayList(storage.index());
-            return of(index);
-        }
-
-        public static <I> Create.Values<I> of(Iterable<I> ids) {
-            final Create.Values<I> values = Create.of(ids);
-            return values;
-        }
-    }
-
-    /**
-     * Reads a record from a {@link RecordStorage}.
-     *
-     * @param <I> the type of record identifiers
-     */
-    public abstract static class ReadFn<I> extends DoFn<I, EntityRecord> {
+    public static class UnpackFn<S extends Message> extends DoFn<EntityRecord, S> {
         private static final long serialVersionUID = 0L;
+        @ProcessElement
+        public void processElement(ProcessContext c, BoundedWindow window) {
+            final EntityRecord record = c.element();
+            final S entityState = AnyPacker.unpack(record.getState());
+            c.output(entityState);
+        }
     }
 }

@@ -24,16 +24,12 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.SerializableFunction;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -84,23 +80,14 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return GET_EVENT;
     }
 
-    PTransform<PBegin, PCollection<Event>>
-    readTransform(TenantId tenantId, SerializableFunction<Event, Boolean> filter) {
-        final PTransform<PBegin, PCollection<EntityRecord>> recordTransform =
-                recordStorage().readTransform(tenantId, new FilterEntityRecord(filter));
-
-        //TODO:2017-05-13:alexander.yevsyukov: Finish.
-        return null;
-    }
-
     /**
      * Filters {@link EntityRecord} containing event by the passed event filter.
      */
-    private static class FilterEntityRecord implements SerializableFunction<EntityRecord, Boolean> {
+    private static class EntityRecordFilter implements SerializableFunction<EntityRecord, Boolean> {
         private static final long serialVersionUID = 0L;
         private final SerializableFunction<Event, Boolean> filter;
 
-        private FilterEntityRecord(SerializableFunction<Event, Boolean> filter) {
+        private EntityRecordFilter(SerializableFunction<Event, Boolean> filter) {
             this.filter = filter;
         }
 
@@ -109,15 +96,6 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
             final Event event = AnyPacker.unpack(input.getState());
             final boolean result = filter.apply(event);
             return result;
-        }
-    }
-
-    private static class FilterEventsTransform extends PTransform<PBegin, PCollection<Event>> {
-
-        @Override
-        public PCollection<Event> expand(PBegin input) {
-            //TODO:2017-05-13:alexander.yevsyukov: Finish.
-            return null;
         }
     }
 
