@@ -40,12 +40,16 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableList.builder;
+import static com.google.common.collect.ImmutableList.copyOf;
+
 /**
  * Memory-based implementation of {@link RecordStorage}.
  *
  * @param <I> the type of entity IDs
  * @author Alexander Litus
  * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
@@ -166,8 +170,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
                     new TenantAwareFunction0<ImmutableList<EntityRecord>>(tenantId) {
                         @Override
                         public ImmutableList<EntityRecord> apply() {
-                            final ImmutableList.Builder<EntityRecord> records =
-                                    ImmutableList.builder();
+                            final ImmutableList.Builder<EntityRecord> records = builder();
                             for (I id : index) {
                                 final EntityRecord record = storage.readRecord(id).get();
                                 records.add(record);
@@ -183,12 +186,15 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
                     new TenantAwareFunction0<ImmutableList<I>>() {
                         @Override
                         public ImmutableList<I> apply() {
-                            return ImmutableList.copyOf(storage.index());
+                            return copyOf(storage.index());
                         }
                     };
             return func.execute();
         }
 
+        /**
+         * Transforms passed records into {@link PCollection}.
+         */
         private static class AsTransform extends PTransform<PBegin, PCollection<EntityRecord>> {
             private static final long serialVersionUID = 0L;
             private final ImmutableList<EntityRecord> records;
