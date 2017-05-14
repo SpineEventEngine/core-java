@@ -21,14 +21,23 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
+import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
+import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.values.PBegin;
+import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.tenant.TenantAwareFunction0;
+import org.spine3.users.TenantId;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -124,4 +133,77 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
      * Beam support
      */
 
+    @Override
+    public RecordStorage.BeamIO<I> getIO() {
+        return new BeamIO<>(this);
+    }
+
+    private static class BeamIO<I> extends RecordStorage.BeamIO<I> {
+
+        private final InMemoryRecordStorage<I> storage;
+
+        private BeamIO(InMemoryRecordStorage<I> storage) {
+            this.storage = storage;
+        }
+
+        @Override
+        public PTransform<PBegin, PCollection<EntityRecord>> readAll(TenantId tenantId) {
+            final List<I> index = readIndex();
+            final ImmutableList<EntityRecord> records = readMany(tenantId, index);
+            return new AsTransform(records);
+        }
+
+        @Override
+        public PTransform<PBegin, PCollection<EntityRecord>> read(TenantId tenantId,
+                                                                  Iterable<I> ids) {
+            final ImmutableList<EntityRecord> records = readMany(tenantId, ids);
+            return new AsTransform(records);
+        }
+
+        private ImmutableList<EntityRecord> readMany(final TenantId tenantId,
+                                                     final Iterable<I> index) {
+            final TenantAwareFunction0<ImmutableList<EntityRecord>> func =
+                    new TenantAwareFunction0<ImmutableList<EntityRecord>>(tenantId) {
+                        @Override
+                        public ImmutableList<EntityRecord> apply() {
+                            final ImmutableList.Builder<EntityRecord> records =
+                                    ImmutableList.builder();
+                            for (I id : index) {
+                                final EntityRecord record = storage.readRecord(id).get();
+                                records.add(record);
+                            }
+                            return records.build();
+                        }
+                    };
+            return func.execute();
+        }
+
+        private ImmutableList<I> readIndex() {
+            final TenantAwareFunction0<ImmutableList<I>> func =
+                    new TenantAwareFunction0<ImmutableList<I>>() {
+                        @Override
+                        public ImmutableList<I> apply() {
+                            return ImmutableList.copyOf(storage.index());
+                        }
+                    };
+            return func.execute();
+        }
+
+        private static class AsTransform extends PTransform<PBegin, PCollection<EntityRecord>> {
+            private static final long serialVersionUID = 0L;
+            private final ImmutableList<EntityRecord> records;
+
+            private AsTransform(ImmutableList<EntityRecord> records) {
+                this.records = records;
+            }
+
+            @Override
+            public PCollection<EntityRecord> expand(PBegin input) {
+                final PCollection<EntityRecord> result =
+                        input.apply(Create.of(records)
+                                          .withCoder(ProtoCoder.of(EntityRecord.class)));
+                return result;
+            }
+        }
+    }
 }
