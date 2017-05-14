@@ -23,9 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
-import org.apache.beam.sdk.transforms.PTransform;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
@@ -416,6 +413,5 @@ public abstract class EventStore implements AutoCloseable {
      */
 
     /** Obtains query transform. */
-    public abstract PTransform<PBegin, PCollection<Event>> query(TenantId tenantId,
-                                                                 EventPredicate query);
+    public abstract ReadEvents query(TenantId tenantId, EventPredicate query);
 }

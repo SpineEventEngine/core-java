@@ -118,8 +118,7 @@ class Given {
             private static final long serialVersionUID = 0L;
 
             @Override
-            public Set<ProjectId> apply(ProjectCreated message,
-                                        EventContext context) {
+            public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
                 return ImmutableSet.of(ProjectId.newBuilder()
                                                 .setId(PROJECT_UUID)
                                                 .build());

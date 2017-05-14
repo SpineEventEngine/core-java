@@ -100,6 +100,7 @@ public class CatchupOp<I> {
         public void processElement(ProcessContext c) {
             final EventEnvelope event = EventEnvelope.of(c.element());
             final Set<I> idSet = function.apply(event.getMessage(), event.getEventContext());
+            //TODO:2017-05-14:alexander.yevsyukov: Finish
         }
     }
 }
