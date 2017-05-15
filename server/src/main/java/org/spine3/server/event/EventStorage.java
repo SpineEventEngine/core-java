@@ -25,7 +25,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
@@ -138,7 +137,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
         @Override
         @ProcessElement
-        public void processElement(ProcessContext c, BoundedWindow window) {
+        public void processElement(ProcessContext c) {
             final Event event = doUnpack(c);
             if (predicate.apply(event)) {
                 c.output(event);

@@ -25,7 +25,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.apache.beam.sdk.transforms.DoFn;
-import org.apache.beam.sdk.transforms.windowing.BoundedWindow;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -314,7 +313,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
             private static final long serialVersionUID = 0L;
 
             @ProcessElement
-            public void processElement(ProcessContext c, BoundedWindow window) {
+            public void processElement(ProcessContext c) {
                 final S entityState = doUnpack(c);
                 c.output(entityState);
             }
