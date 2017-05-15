@@ -54,6 +54,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.validate.Validate.isDefault;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -352,11 +353,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 // Get the timestamp of the last event. This also ensures we have the storage.
                 final Timestamp timestamp = nullToDefault(
                         projectionStorage().readLastHandledEventTime());
-                final EventStreamQuery query = EventStreamQuery.newBuilder()
-                                                               .setAfter(timestamp)
-                                                               .addAllFilter(eventFilters)
-                                                               .build();
-
+                final EventStreamQuery.Builder builder = EventStreamQuery.newBuilder();
+                if (!isDefault(timestamp)) {
+                    builder.setAfter(timestamp);
+                }
+                builder.addAllFilter(eventFilters)
+                       .build();
+                final EventStreamQuery query = builder.build();
                 eventStore.read(query, new EventStreamObserver(ProjectionRepository.this));
             }
         };
