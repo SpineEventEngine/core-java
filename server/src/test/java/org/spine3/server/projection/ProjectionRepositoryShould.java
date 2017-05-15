@@ -23,6 +23,7 @@ package org.spine3.server.projection;
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -428,19 +429,8 @@ public class ProjectionRepositoryShould
         // Set up bounded context
         final BoundedContext boundedContext =
                 TestBoundedContextFactory.MultiTenant.newBoundedContext();
-        final int eventsCount = 10;
-        final EventStore eventStore = boundedContext.getEventBus()
-                                                    .getEventStore();
-        for (int i = 0; i < eventsCount; i++) {
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(valueOf(i))
-                                                 .build();
-            final Message eventMessage = ProjectCreated.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build();
-            final Event event = createEvent(pack(projectId), eventMessage);
-            appendEvent(eventStore, event);
-        }
+        final int eventCount = 10;
+        setUpEvents(boundedContext, eventCount);
         // Set up repository
         final Duration duration = Durations2.nanos(1L);
         final ProjectionRepository repository =
@@ -450,6 +440,13 @@ public class ProjectionRepositoryShould
 
         // Check bulk write
         verify(repository, never()).store(any(Projection.class));
+    }
+
+    @Test
+    public void catch_up_only_with_the_freshest_events() {
+        final int oldEventsCount = 10;
+        final Collection<ProjectId> ids = setUpEvents(boundedContext, oldEventsCount);
+        // TODO:2017-05-15:dmytro.dashenkov: Finish this test case.
     }
 
     @Test
@@ -477,8 +474,35 @@ public class ProjectionRepositoryShould
         return repo;
     }
 
+    @CanIgnoreReturnValue
+    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext, int eventCount) {
+        // Set up bounded context
+        final EventStore eventStore = boundedContext.getEventBus()
+                                                    .getEventStore();
+        final Collection<ProjectId> ids = new LinkedList<>();
+        for (int i = 0; i < eventCount; i++) {
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(valueOf(i))
+                                                 .build();
+            final Message eventMessage = ProjectCreated.newBuilder()
+                                                       .setProjectId(projectId)
+                                                       .build();
+            final Event event = createEvent(pack(projectId), eventMessage);
+            appendEvent(eventStore, event);
+        }
+        return ids;
+    }
+
     private StorageFactory storageFactory() {
         return StorageFactorySwitch.get(boundedContext.isMultitenant());
+    }
+
+    private static void await(long millis) {
+        try {
+            Thread.sleep(millis);
+        } catch (InterruptedException e) {
+            throw new AssertionError(e);
+        }
     }
 
     /** The projection stub used in tests. */
