@@ -22,15 +22,22 @@ package org.spine3.client;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotation.Internal;
 
 import javax.annotation.Nullable;
 
-import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.base.Preconditions.checkArgument;
 import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
  * An enumeration of all supported value comparison operators applicable to the Entity Columns.
+ *
+ * <p>Usage of this enumeration when building a {@link Query} is unnecessary. It's effectively
+ * {@linkplain org.spine3.annotation.Internal internal} except the case if you want to implement
+ * you're a {@linkplain org.spine3.annotation.SPI service provider interface implementor}.
+ *
+ * <p>Even though the type provides an interface for performing the in-memory comparisons by the
+ * listed operators, the main purpose is to show the strategy of the comparison, not implement it.
+ * That's why it's recommended to
  */
 public enum QueryOperator {
 
@@ -38,8 +45,14 @@ public enum QueryOperator {
      * Equality operator ({@code =}).
      */
     EQUAL("=") {
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Equality operator supports {@code null} values and returns {@code true} if both
+         * the operands are equal to {@code null}.
+         */
         @Override
-        public <T> boolean matches(@Nullable T left, @Nullable T right) {
+        <T> boolean compare(@Nullable T left, @Nullable T right) {
             return Objects.equal(left, right);
         }
     },
@@ -48,30 +61,68 @@ public enum QueryOperator {
      * Comparison operator stating that the stored value is greater then ({@code >})
      * the passed value.
      */
-    @Internal
     GREATER_THEN(">") {
+        /**
+         * {@inheritDoc}
+         *
+         * <p>The comparison works properly only is the operands are instances of {@link Timestamp}.
+         * Otherwise an {@link IllegalArgumentException} will be thrown.
+         *
+         * <p>Returns {@code false} if at lease one of the operands is {@link null}.
+         */
         @Override
-        public <T> boolean matches(@Nullable T left, @Nullable T right) {
+        <T> boolean compare(@Nullable T left, @Nullable T right) {
             if (left == null || right == null) {
                 return false;
             }
-            checkState(left instanceof Timestamp,
-                       "Invalid comparison %s %s %s." ,
-                       left.toString(), this, right);
+            checkArgument(left instanceof Timestamp,
+                          "Invalid comparison %s %s %s.",
+                          left.toString(), this, right);
             final Timestamp tsLeft = (Timestamp) left;
             final Timestamp tsRight = (Timestamp) right;
-            return isLaterThan(tsLeft, tsRight);
+            return isLaterThan(tsRight, tsLeft);
         }
     };
 
     private final String label;
 
+    /**
+     * Compares two given objects and returns the result of the comparison.
+     *
+     * <p>The method provides the natural order of the tokens when writing down a comparison
+     * expression e.g. {@code 42 > 8}.
+     *
+     * <p>The {@code null} handling policy is specific for each operator.
+     *
+     * @param left     the left operand in the comparison
+     * @param operator the comparison strategy to use
+     * @param right    the right operand in the comparison
+     * @param <T>      the type of the operands
+     * @return {@code true} is the operands match the given operator, {@code false} otherwise
+     */
+    public static <T> boolean compare(@Nullable T left, QueryOperator operator, @Nullable T right) {
+        return operator.compare(left, right);
+    }
+
     QueryOperator(String repr) {
         this.label = repr;
     }
 
-    public abstract <T> boolean matches(@Nullable T left, @Nullable T right);
+    /**
+     * Compares two given objects and returns the result of the comparison.
+     *
+     * @param left  the left operand in the comparison
+     * @param right the right operand in the comparison
+     * @param <T>   the type of the operands
+     * @return {@code true} is the operands match the given operator, {@code false} otherwise
+     */
+    abstract <T> boolean compare(@Nullable T left, @Nullable T right);
 
+    /**
+     * {@inheritDoc}
+     *
+     * @return a short symbolic representation of the operator.
+     */
     @Override
     public String toString() {
         return label;
