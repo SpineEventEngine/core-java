@@ -49,7 +49,7 @@ public class EntityQueryMatcherShould {
     @Test
     public void match_everything_except_null_to_empty_query() {
         final Collection<Object> idFilter = Collections.emptyList();
-        final EntityQuery<?> query = EntityQuery.of(idFilter, QueryParameters.getDefaultInstance());
+        final EntityQuery<?> query = EntityQuery.of(idFilter, defaultQueryParameters());
 
         final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
@@ -62,7 +62,7 @@ public class EntityQueryMatcherShould {
         final Message genericId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
         final Any entityId = AnyPacker.pack(genericId);
-        final EntityQuery<?> query = EntityQuery.of(idFilter, QueryParameters.getDefaultInstance());
+        final EntityQuery<?> query = EntityQuery.of(idFilter, defaultQueryParameters());
 
         final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         final EntityRecord matching = EntityRecord.newBuilder()
@@ -114,5 +114,10 @@ public class EntityQueryMatcherShould {
 
         assertTrue(matcher.apply(matchingRecord));
         assertFalse(matcher.apply(nonMatchingRecord));
+    }
+
+    private static QueryParameters defaultQueryParameters() {
+        return QueryParameters.newBuilder()
+                              .build();
     }
 }

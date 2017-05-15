@@ -47,7 +47,7 @@ public enum QueryOperator {
         /**
          * {@inheritDoc}
          *
-         * <p>Equality operator supports {@code null} values and returns {@code true} if both
+         * <p>Equality operator supports {@code null} values and also returns {@code true} if both
          * the operands are equal to {@code null}.
          */
         @Override
@@ -89,7 +89,8 @@ public enum QueryOperator {
      * Compares two given objects and returns the result of the comparison.
      *
      * <p>The method provides the natural order of the tokens when writing down a comparison
-     * expression e.g. {@code 42 > 8}.
+     * expression e.g. {@code 42 > 8}, where {@code 42} and {@code 8} are the left and right
+     * operands and {@code <} is the operator.
      *
      * <p>The {@code null} handling policy is specific for each operator.
      *

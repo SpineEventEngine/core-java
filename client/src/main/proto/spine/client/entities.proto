@@ -88,10 +88,10 @@ message EntityFilters {
 // This filter has a general purpose and may be used e.g. for advanced comparison.
 message TimestampFilter {
 
-    // The value of the Timestamp to filter by
+    // The value of the Timestamp to filter by.
     google.protobuf.Timestamp value = 1;
 
-    // The name of the filter target Entity Column
+    // The name of the filter target Entity Column.
     string column_name = 2;
 
 }

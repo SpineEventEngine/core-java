@@ -85,7 +85,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
     }
 
     /**
-     * A stateful parameter processor matchi g the given Entity Columns to a number of
+     * A stateful parameter processor matching the given Entity Columns to a number of
      * {@linkplain QueryParameters Query parameters}.
      */
     private static class ColumnValueMatcher implements QueryParameters.ParameterConsumer {
@@ -116,6 +116,17 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
                                && compare(actualValue.getValue(), operator, value);
         }
 
+        /**
+         * Shows if the given Entity Columns match all the consumed parameters.
+         *
+         * <p>The default value is {@link true}.
+         *
+         * <p>Once {@link #consume} has been called at least once, the value may change to
+         * {@code false}. Once changed, it can never become {@code true} again.
+         *
+         * @return {@code true} if the given Entity Columns match all the passed Query parameters,
+         * {@code false} otherwise.
+         */
         public boolean matches() {
             return currentlyMatches;
         }

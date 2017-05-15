@@ -37,6 +37,7 @@ import java.util.Comparator;
  * of change.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
 @Internal
 public class EventEntity extends AbstractEntity<EventId, Event> {

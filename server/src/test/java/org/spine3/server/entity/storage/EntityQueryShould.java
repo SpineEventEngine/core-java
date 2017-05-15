@@ -46,7 +46,8 @@ public class EntityQueryShould {
     public void not_accept_nulls() {
         new NullPointerTester()
                 .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
-                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
+                .setDefault(QueryParameters.class, QueryParameters.newBuilder()
+                                                                  .build())
                 .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
     }
 

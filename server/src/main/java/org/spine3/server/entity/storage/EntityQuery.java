@@ -97,7 +97,6 @@ public final class EntityQuery<I> {
     /**
      * @return a {@link Map} of the {@linkplain Column Column metadata} to the column required value
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public QueryParameters getParameters() {
         return parameters;
     }

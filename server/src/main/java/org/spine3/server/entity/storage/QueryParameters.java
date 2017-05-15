@@ -109,11 +109,6 @@ public final class QueryParameters {
         return Objects.hashCode(parameters);
     }
 
-    @VisibleForTesting // Should not be used in the production code
-    static QueryParameters getDefaultInstance() {
-        return newBuilder().build();
-    }
-
     public static Builder newBuilder() {
         return new Builder();
     }
@@ -163,9 +158,10 @@ public final class QueryParameters {
      * An interface simplifying the iteration over the Query parameters.
      *
      * <p>The only usage is passing an instance of {@code ParameterConsumer} into
-     * {@link QueryParameters#forEach}. As the only method of the interface {@link #consume}
-     * aggregates all the information about a single Query parameter, there is no need in creating
-     * a special data class for that information.
+     * {@link QueryParameters#forEach}.
+     *
+     * <p>The only method of the interface {@link #consume} aggregates all the information about
+     * a single Query parameter.
      */
     @SPI
     public interface ParameterConsumer {

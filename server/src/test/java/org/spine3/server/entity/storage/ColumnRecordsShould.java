@@ -63,13 +63,17 @@ public class ColumnRecordsShould {
 
     @Test
     public void not_accept_nulls() {
+        final EntityRecordWithColumns record = EntityRecordWithColumns.of(
+                EntityRecord.getDefaultInstance());
+        final ColumnTypeRegistry columnTypeRegistry = ColumnTypeRegistry.newBuilder()
+                                                                        .build();
+        final EntityQuery entityQuery = EntityQuery.of(Collections.emptyList(),
+                                                       QueryParameters.newBuilder()
+                                                                      .build());
         new NullPointerTester()
-                .setDefault(EntityRecordWithColumns.class,
-                            EntityRecordWithColumns.of(EntityRecord.getDefaultInstance()))
-                .setDefault(ColumnTypeRegistry.class, ColumnTypeRegistry.newBuilder().build())
-                .setDefault(EntityQuery.class,
-                            EntityQuery.of(Collections.emptyList(),
-                                           QueryParameters.getDefaultInstance()))
+                .setDefault(EntityRecordWithColumns.class, record)
+                .setDefault(ColumnTypeRegistry.class, columnTypeRegistry)
+                .setDefault(EntityQuery.class, entityQuery)
                 .testAllPublicStaticMethods(ColumnRecords.class);
     }
 
@@ -136,7 +140,7 @@ public class ColumnRecordsShould {
 
         @Override
         public void setColumnValue(Collection<Object> storageRecord, Object value,
-                Object columnIdentifier) {
+                                   Object columnIdentifier) {
             storageRecord.add(value);
         }
 
