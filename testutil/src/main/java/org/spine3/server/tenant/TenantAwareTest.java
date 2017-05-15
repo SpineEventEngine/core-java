@@ -25,7 +25,7 @@ import com.google.common.base.Optional;
 import org.spine3.annotation.Internal;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
-import org.spine3.util.Environment;
+import org.spine3.server.Environment;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
