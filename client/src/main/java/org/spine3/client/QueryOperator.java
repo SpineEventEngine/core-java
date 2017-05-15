@@ -32,12 +32,11 @@ import static org.spine3.time.Timestamps2.isLaterThan;
  * An enumeration of all supported value comparison operators applicable to the Entity Columns.
  *
  * <p>Usage of this enumeration when building a {@link Query} is unnecessary. It's effectively
- * {@linkplain org.spine3.annotation.Internal internal} except the case if you want to implement
- * you're a {@linkplain org.spine3.annotation.SPI service provider interface implementor}.
+ * {@linkplain org.spine3.annotation.Internal internal} except for the
+ * {@linkplain org.spine3.annotation.SPI service provider interface implementors}.
  *
  * <p>Even though the type provides an interface for performing the in-memory comparisons by the
  * listed operators, the main purpose is to show the strategy of the comparison, not implement it.
- * That's why it's recommended to
  */
 public enum QueryOperator {
 
@@ -104,8 +103,8 @@ public enum QueryOperator {
         return operator.compare(left, right);
     }
 
-    QueryOperator(String repr) {
-        this.label = repr;
+    QueryOperator(String label) {
+        this.label = label;
     }
 
     /**

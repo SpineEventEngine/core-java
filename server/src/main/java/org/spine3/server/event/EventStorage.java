@@ -110,7 +110,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
             final Timestamp timestamp = query.getAfter();
             final TimestampFilter timestampFilter =
                     TimestampFilter.newBuilder()
-                                   .setColumnsName(EventEntity.TIME_COLUMN)
+                                   .setColumnName(EventEntity.TIME_COLUMN)
                                    .setValue(timestamp)
                                    .build();
             builder.setTimeAfter(timestampFilter);

@@ -83,7 +83,7 @@ public final class EntityQueries {
         }
         if (entityFilters.hasTimeAfter()) {
             final TimestampFilter timestampFilter = entityFilters.getTimeAfter();
-            final String columnName = timestampFilter.getColumnsName();
+            final String columnName = timestampFilter.getColumnName();
             final Column<?> column = Columns.findColumn(entityClass, columnName);
             builder.put(GREATER_THEN, column, timestampFilter.getValue());
         }
