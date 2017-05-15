@@ -49,6 +49,8 @@ public abstract class Transaction<I,
 
     private volatile Version version;
 
+    private volatile LifecycleFlags lifecycleFlags;
+
     /**
      * The flag, which becomes {@code true}, if the state of the entity
      * {@linkplain #commit() has been changed} since it has been
@@ -68,6 +70,7 @@ public abstract class Transaction<I,
         this.entity = entity;
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
+        this.lifecycleFlags = entity.getLifecycleFlags();
         final Transaction<I, E, S, B> tx = this;
         entity.injectTransaction(tx);
     }
@@ -125,6 +128,15 @@ public abstract class Transaction<I,
     void setVersion(Version version) {
         checkNotNull(version);
         this.version = version;
+    }
+
+    LifecycleFlags getLifecycleFlags() {
+        return lifecycleFlags;
+    }
+
+    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
+        checkNotNull(lifecycleFlags);
+        this.lifecycleFlags = lifecycleFlags;
     }
 
     protected E getEntity() {

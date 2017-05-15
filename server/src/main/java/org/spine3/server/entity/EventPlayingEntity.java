@@ -78,10 +78,12 @@ public abstract class EventPlayingEntity <I,
      */
     @Internal
     public boolean isChanged() {
-        if(transaction != null) {
-            return transaction.isStateChanged();
-        }
-        return this.stateChanged || lifecycleFlagsChanged();
+        final boolean lifecycleFlagsChanged = lifecycleFlagsChanged();
+        final boolean stateChanged = transaction != null
+                ? transaction.isStateChanged()
+                : this.stateChanged;
+
+        return stateChanged || lifecycleFlagsChanged;
     }
 
     /**
@@ -93,17 +95,19 @@ public abstract class EventPlayingEntity <I,
      * @throws IllegalStateException if the method is called from outside an event applier
      */
     protected B getBuilder() {
-        if (!isUpdateStateInProgress()) {
-            throw new IllegalStateException(
-                    "Builder is not available. Make sure to call getBuilder() " +
-                            "only from an event applier method.");
-        }
-
         return tx().getBuilder();
     }
 
+    private void ensureTransaction() {
+        if (!isTransactionInProgress()) {
+            throw new IllegalStateException(
+                    "Builder and lifecycle operations are not available. Make sure to call those " +
+                            "only from an event applier method.");
+        }
+    }
+
     private Transaction<I, ? extends EventPlayingEntity<I,S,B>, S, B> tx() {
-        checkNotNull(transaction);
+        ensureTransaction();
         return transaction;
     }
 
@@ -112,7 +116,7 @@ public abstract class EventPlayingEntity <I,
      *
      * @return {@code true} if it is active, {@code false} otherwise
      */
-    protected boolean isUpdateStateInProgress() {
+    private boolean isTransactionInProgress() {
         final boolean result = this.transaction != null;
         return result;
     }
@@ -136,14 +140,13 @@ public abstract class EventPlayingEntity <I,
     }
 
     void releaseTransaction() {
-        this.stateChanged = tx().isStateChanged();
+        final boolean stateChanged = tx().isStateChanged();
+        final LifecycleFlags lifecycleFlags = tx().getLifecycleFlags();
         this.transaction = null;
-    }
 
-//    @Override
-//    protected void initVersion(Version version) {
-//        tx().setVersion(version);
-//    }
+        this.stateChanged = stateChanged;
+        setLifecycleFlags(lifecycleFlags);
+    }
 
     B builderFromState() {
         final B builder = newBuilderInstance();
@@ -161,17 +164,45 @@ public abstract class EventPlayingEntity <I,
 //     *
 //     * <p>The {@linkplain #isChanged()} return value is not affected by this method.
 //     */
-//TODO:5/11/17:alex.tymchenko: try to hide it at all!
     void injectState(S stateToRestore, Version version) {
         updateState(stateToRestore, version);
     }
 
-    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and version was null.
+    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
     protected void setInitialState(S stateToRestore, Version version) {
         tx().setVersion(version);
         final B builder = tx().getBuilder();
         builder.clear();
         builder.mergeFrom(stateToRestore);
+    }
+
+    @Override
+    public LifecycleFlags getLifecycleFlags() {
+        if(isTransactionInProgress()) {
+            return tx().getLifecycleFlags();
+        }
+        return super.getLifecycleFlags();
+    }
+
+    @Override
+    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
+        if(isTransactionInProgress()) {
+            tx().setLifecycleFlags(lifecycleFlags);
+        } else {
+            super.setLifecycleFlags(lifecycleFlags);
+        }
+    }
+
+    @Override
+    protected void setArchived(boolean archived) {
+        ensureTransaction();
+        super.setArchived(archived);
+    }
+
+    @Override
+    protected void setDeleted(boolean deleted) {
+        ensureTransaction();
+        super.setDeleted(deleted);
     }
 
     private B newBuilderInstance() {

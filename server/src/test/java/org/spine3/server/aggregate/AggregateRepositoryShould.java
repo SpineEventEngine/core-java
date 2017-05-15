@@ -220,11 +220,13 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void marks_aggregate_archived() {
+    public void mark_aggregate_archived() {
         final ProjectAggregate aggregate = createAndStoreAggregate();
 
+        final AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
         // archive the aggregate.
         aggregate.setArchived(true);
+        tx.commit();
         repository.store(aggregate);
 
         assertFalse(repository.find(aggregate.getId())
@@ -235,7 +237,10 @@ public class AggregateRepositoryShould {
     public void mark_aggregate_deleted() {
         final ProjectAggregate aggregate = createAndStoreAggregate();
 
+        final AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
         aggregate.setDeleted(true);
+        tx.commit();
+
         repository.store(aggregate);
 
         assertFalse(repository.find(aggregate.getId())
