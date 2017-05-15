@@ -57,10 +57,10 @@ public class ProjectionShould {
     @Test
     public void handle_events() {
         final String stringValue = newUuid();
-        assertFalse(projection.isChanged());
 
         ProjectionTransaction<?, ?, ?> tx;
-        tx        = start(projection);
+        tx = start(projection);
+        assertFalse(projection.isChanged());
         projection.handle(Wrapper.forString(stringValue), EventContext.getDefaultInstance());
         tx.commit();
         assertTrue(projection.getState()
@@ -72,6 +72,7 @@ public class ProjectionShould {
         final Integer integerValue = 1024;
 
         tx = start(projection);
+        assertFalse(projection.isChanged());
         projection.handle(forInteger(integerValue), EventContext.getDefaultInstance());
         tx.commit();
         assertTrue(projection.getState()

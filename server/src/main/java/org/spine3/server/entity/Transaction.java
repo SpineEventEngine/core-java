@@ -23,12 +23,14 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
+import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 
-import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.server.entity.InvalidEntityStateException.onConstraintViolations;
 
 /**
  * @author Alex Tymchenko
@@ -40,15 +42,12 @@ public abstract class Transaction<I,
 
     /**
      * The builder for the entity state.
-     *
-     * <p>This field is non-null only when the entity changes its state
-     * during command handling or playing events.
-     *
-     * @see #getBuilder()
      */
     private final B builder;
 
     private final E entity;
+
+    private volatile Version version;
 
     /**
      * The flag, which becomes {@code true}, if the state of the entity
@@ -57,21 +56,32 @@ public abstract class Transaction<I,
      */
     private volatile boolean stateChanged;
 
-    protected Transaction(B builder, E entity) {
-        this.builder = builder;
-        this.entity = entity;
-    }
 
+    /**
+     * Creates a new instance of {@code Transaction} and
+     * {@linkplain EventPlayingEntity#injectTransaction(Transaction) injects} the newly created
+     * transaction into the given {@code entity}.
+     *
+     * @param entity the entity to create the transaction for
+     */
     protected Transaction(E entity) {
-        this(entity.builderFromState(), entity);
+        this.entity = entity;
+        this.builder = entity.builderFromState();
+        this.version = entity.getVersion();
         final Transaction<I, E, S, B> tx = this;
         entity.injectTransaction(tx);
+    }
+
+    protected Transaction(E entity, S state, Version version) {
+        this(entity);
+        entity.getBuilder().mergeFrom(state);
+        setVersion(version);
     }
 
     protected abstract void apply(Message eventMessage, EventContext context)
             throws InvocationTargetException;
 
-    protected void commit() {
+    protected void commit() throws InvalidEntityStateException {
 
         final B builder = getBuilder();
 
@@ -81,11 +91,12 @@ public abstract class Transaction<I,
                 final S newState = builder.build();
 
                 markStateChanged();
-                final Version version = entity.getVersion();
                 entity.updateState(newState, version);
-            } catch (ConstraintViolationThrowable violation) {
-                // should not happen, as the `Builder` validates the input in its setters.
-                throw illegalStateWithCauseOf(violation);
+            } catch (ConstraintViolationThrowable exception) {
+                // should only happen if someone is injecting the state not using the builder.
+
+                final Message invalidState = ((AbstractValidatingBuilder) builder).internalBuild();
+                throw onConstraintViolations(invalidState, exception.getConstraintViolations());
             } finally {
                 entity.releaseTransaction();
             }
@@ -110,6 +121,12 @@ public abstract class Transaction<I,
         return stateChanged;
     }
 
+
+    void setVersion(Version version) {
+        checkNotNull(version);
+        this.version = version;
+    }
+
     protected E getEntity() {
         return entity;
     }
@@ -123,9 +140,7 @@ public abstract class Transaction<I,
         }
 
         Phase thenAdvanceVersionFrom(Version current) {
-            final Version newVersion = Versions.increment(current);
-            underlyingTransaction.getEntity()
-                                 .advanceVersion(newVersion);
+            underlyingTransaction.setVersion(Versions.increment(current));
             return this;
         }
 

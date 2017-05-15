@@ -352,31 +352,8 @@ public abstract class Aggregate<I,
      */
     void restore(Snapshot snapshot) {
         final S stateToRestore = AnyPacker.unpack(snapshot.getState());
-
-        // See if we're in the state update cycle.
-         boolean updateStateInProgress = isUpdateStateInProgress();
-
         final Version versionFromSnapshot = snapshot.getVersion();
-        if (updateStateInProgress) {
-            final B builder = getBuilder();
-            builder.clear();
-            builder.mergeFrom(stateToRestore);
-            initVersion(versionFromSnapshot);
-        } else {
-            injectState(stateToRestore, versionFromSnapshot);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>This method has protected access to be accessible by the
-     * {@code AggregateBuilder} test utility classes from the {@code testutil} module.
-     */
-    @Override               // Overrides to expose to the test code.
-    @VisibleForTesting
-    protected void injectState(S stateToRestore, Version version) {
-        super.injectState(stateToRestore, version);
+        setInitialState(stateToRestore, versionFromSnapshot);
     }
 
     /**

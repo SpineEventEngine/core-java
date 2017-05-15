@@ -31,7 +31,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Event;
-import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.InvalidEntityStateException;
@@ -373,7 +372,10 @@ public class AggregateShould {
 
         final TestAggregate anotherAggregate = newAggregate(aggregate.getId());
 
+        final AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
+        tx.commit();
+
         assertEquals(aggregate.getState(), anotherAggregate.getState());
         assertEquals(aggregate.getVersion(), anotherAggregate.getVersion());
         assertEquals(aggregate.getLifecycleFlags(), anotherAggregate.getLifecycleFlags());
@@ -552,13 +554,15 @@ public class AggregateShould {
             this.brokenApplier = brokenApplier;
         }
 
-        /**
-         * This method attempts to call {@link #updateState(Message, Version) setState()}
-         * directly, which should result in {@link IllegalStateException}.
-         */
-        void tryToUpdateStateDirectly() {
-            injectState(Project.getDefaultInstance(), Version.getDefaultInstance());
-        }
+        //TODO:5/15/17:alex.tymchenko: remove this method.
+
+//        /**
+//         * This method attempts to call {@link #updateState(Message, Version) setState()}
+//         * directly, which should result in {@link IllegalStateException}.
+//         */
+//        void tryToUpdateStateDirectly() {
+//            injectState(Project.getDefaultInstance(), Version.getDefaultInstance());
+//        }
 
         @Assign
         ProjectCreated handle(CreateProject cmd, CommandContext ctx) {

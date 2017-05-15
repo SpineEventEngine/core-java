@@ -23,6 +23,7 @@ package org.spine3.server.procman;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
 import org.spine3.validate.ValidatingBuilder;
 
@@ -36,12 +37,12 @@ class ProcManTransaction<I,
                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
-    ProcManTransaction(B builder, ProcessManager<I, S, B> entity) {
-        super(builder, entity);
-    }
-
     private ProcManTransaction(ProcessManager<I, S, B> entity) {
         super(entity);
+    }
+
+    private ProcManTransaction(ProcessManager<I, S, B> entity, S state, Version version) {
+        super(entity, state, version);
     }
 
     @Override
@@ -61,6 +62,16 @@ class ProcManTransaction<I,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     ProcManTransaction<I, S, B> start(ProcessManager<I, S, B> entity) {
         final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(entity);
+        return tx;
+    }
+
+    static <I,
+            S extends Message,
+            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    ProcManTransaction<I, S, B> startWith(ProcessManager<I, S, B> entity,
+                                          S state,
+                                          Version version) {
+        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(entity, state, version);
         return tx;
     }
 }

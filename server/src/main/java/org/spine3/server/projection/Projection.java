@@ -20,11 +20,9 @@
 
 package org.spine3.server.projection;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.base.Version;
 import org.spine3.server.entity.EventPlayingEntity;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.EventClass;
@@ -75,18 +73,6 @@ public abstract class Projection<I,
         } catch (InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>This method has protected access to be accessible by the
-     * {@code ProjectionBuilder} test utility classes from the {@code testutil} module.
-     */
-    @Override               // Overridden to expose this method to tests.
-    @VisibleForTesting
-    protected void injectState(M stateToRestore, Version version) {
-        super.injectState(stateToRestore, version);
     }
 
     static class TypeInfo {

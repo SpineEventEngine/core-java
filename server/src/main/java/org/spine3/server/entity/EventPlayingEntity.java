@@ -78,6 +78,9 @@ public abstract class EventPlayingEntity <I,
      */
     @Internal
     public boolean isChanged() {
+        if(transaction != null) {
+            return transaction.isStateChanged();
+        }
         return this.stateChanged || lifecycleFlagsChanged();
     }
 
@@ -137,6 +140,10 @@ public abstract class EventPlayingEntity <I,
         this.transaction = null;
     }
 
+//    @Override
+//    protected void initVersion(Version version) {
+//        tx().setVersion(version);
+//    }
 
     B builderFromState() {
         final B builder = newBuilderInstance();
@@ -155,10 +162,16 @@ public abstract class EventPlayingEntity <I,
 //     * <p>The {@linkplain #isChanged()} return value is not affected by this method.
 //     */
 //TODO:5/11/17:alex.tymchenko: try to hide it at all!
-    protected void injectState(S stateToRestore, Version version) {
-
+    void injectState(S stateToRestore, Version version) {
         updateState(stateToRestore, version);
+    }
 
+    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and version was null.
+    protected void setInitialState(S stateToRestore, Version version) {
+        tx().setVersion(version);
+        final B builder = tx().getBuilder();
+        builder.clear();
+        builder.mergeFrom(stateToRestore);
     }
 
     private B newBuilderInstance() {

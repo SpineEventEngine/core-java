@@ -21,6 +21,7 @@ package org.spine3.server.projection;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
 import org.spine3.validate.ValidatingBuilder;
 
@@ -34,12 +35,12 @@ class ProjectionTransaction<I,
                             B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends Transaction<I, Projection<I, M, B>, M, B> {
 
-    ProjectionTransaction(B builder, Projection<I, M, B> entity) {
-        super(builder, entity);
-    }
-
     private ProjectionTransaction(Projection<I, M, B> entity) {
         super(entity);
+    }
+
+    private ProjectionTransaction(Projection<I, M, B> entity, M state, Version version) {
+        super(entity, state, version);
     }
 
     @Override
@@ -59,6 +60,16 @@ class ProjectionTransaction<I,
             B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> entity) {
         final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity);
+        return tx;
+    }
+
+    static <I,
+            M extends Message,
+            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+    ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> entity, M state, Version version) {
+        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity,
+                                                                              state,
+                                                                              version);
         return tx;
     }
 }

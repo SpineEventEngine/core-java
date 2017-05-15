@@ -20,13 +20,11 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.commandbus.CommandBus;
@@ -144,18 +142,6 @@ public abstract class ProcessManager<I,
         } catch (InvocationTargetException e) {
             throw illegalStateWithCauseOf(e);
         }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>This method has protected access to be accessible by the
-     * {@code ProcessManagerBuilder} test utility classes from the {@code testutil} module.
-     */
-    @Override               // Overridden to expose this method to tests.
-    @VisibleForTesting
-    protected void injectState(S stateToRestore, Version version) {
-        super.injectState(stateToRestore, version);
     }
 
     /**

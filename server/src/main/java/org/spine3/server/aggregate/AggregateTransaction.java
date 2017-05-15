@@ -21,6 +21,7 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
+import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
 import org.spine3.validate.ValidatingBuilder;
 
@@ -35,20 +36,19 @@ class AggregateTransaction<I,
                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
-    AggregateTransaction(B builder, Aggregate<I, S, B> aggregate) {
-        super(builder, aggregate);
-    }
-
     private AggregateTransaction(Aggregate<I, S, B> entity) {
         super(entity);
     }
 
-    @Override
-    protected void apply(Message eventMessage, @Nullable EventContext ignored) throws
-                                                                               InvocationTargetException {
-        getEntity().invokeApplier(eventMessage);
+    private AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version) {
+        super(entity, state, version);
     }
 
+    @Override
+    protected void apply(Message eventMessage,
+                         @Nullable EventContext ignored) throws InvocationTargetException {
+        getEntity().invokeApplier(eventMessage);
+    }
 
     @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
     @Override
@@ -61,6 +61,12 @@ class AggregateTransaction<I,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
     AggregateTransaction<I, S, B> start(Aggregate<I, S, B> entity) {
         final AggregateTransaction<I, S, B> tx = new AggregateTransaction<>(entity);
+        return tx;
+    }
+
+    //TODO:5/15/17:alex.tymchenko: try to deal with the warnings.
+    static AggregateTransaction startWith(Aggregate entity, Message state, Version version) {
+        final AggregateTransaction tx = new AggregateTransaction<>(entity, state, version);
         return tx;
     }
 }

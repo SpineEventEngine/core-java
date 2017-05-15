@@ -23,6 +23,7 @@ package org.spine3.validate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import org.spine3.annotation.Internal;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
 import org.spine3.protobuf.Messages;
@@ -155,9 +156,12 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     /**
      * Builds a message without triggering its validation.
      *
+     * <p>Exposed to those who wish to obtain the state anyway, e.g. for reporting.
+     *
      * @return the message built from the values set by the user
      */
-    private T internalBuild() {
+    @Internal
+    public T internalBuild() {
         final B resultBuilder = createBuilder();
         if(getOriginalState().isPresent()) {
             resultBuilder.mergeFrom(getOriginalState().get());

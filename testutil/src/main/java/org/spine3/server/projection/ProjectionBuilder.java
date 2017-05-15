@@ -53,6 +53,6 @@ public class ProjectionBuilder<P extends Projection<I, S, B>,
 
     @Override
     protected void setState(P result, S state, Version version) {
-        result.injectState(state, version);
+        ProjectionTransaction.startWith(result, state, version).commit();
     }
 }
