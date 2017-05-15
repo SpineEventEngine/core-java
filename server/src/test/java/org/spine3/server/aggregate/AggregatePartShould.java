@@ -24,14 +24,23 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.command.Assign;
 import org.spine3.server.entity.InvalidEntityStateException;
+import org.spine3.test.aggregate.Task;
+import org.spine3.test.aggregate.command.AddTask;
+import org.spine3.test.aggregate.command.CreateProject;
+import org.spine3.test.aggregate.event.ProjectCreated;
+import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
 import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static org.spine3.base.Identifiers.newUuid;
@@ -48,12 +57,22 @@ public class AggregatePartShould {
 
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
+    private TaskPart taskPart;
+    private TaskDescriptionPart taskDescriptionPart;
+    private TaskRepository taskRepository;
+    private TaskDescriptionRepository taskDescriptionRepository;
 
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
                                        .build();
         root = new AnAggregateRoot(boundedContext, newUuid());
+        taskPart = new TaskPart(root);
+        taskDescriptionPart = new TaskDescriptionPart(root);
+        taskRepository = new TaskRepository(boundedContext);
+        boundedContext.register(taskRepository);
+        taskDescriptionRepository = new TaskDescriptionRepository(boundedContext);
+        boundedContext.register(taskDescriptionRepository);
     }
 
     @Test
@@ -73,6 +92,18 @@ public class AggregatePartShould {
                 AnAggregatePart.class.getDeclaredConstructor(AnAggregateRoot.class);
         final AggregatePart aggregatePart = create(constructor, root);
         assertNotNull(aggregatePart);
+    }
+
+    @Test
+    public void return_aggregate_part_state_by_class() {
+        final Task newTask = Task.newBuilder().setDescription("Description").build();
+        final Version version = Versions.create();
+        final TaskAdded taskAdded = taskPart.handle(AddTask.getDefaultInstance());
+        taskPart.apply(taskAdded);
+        taskPart.injectState(newTask, version);
+        taskRepository.store(taskPart);
+        final Task task = taskDescriptionPart.getPartState(Task.class);
+        assertEquals("Description", task.getDescription());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -163,6 +194,67 @@ public class AggregatePartShould {
 
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
+        }
+    }
+
+    private static class TaskPart extends AggregatePart<String,
+            Task,
+            Task.Builder,
+            AnAggregateRoot> {
+
+        private TaskPart(AnAggregateRoot root) {
+            super(root);
+        }
+
+        @Assign
+        TaskAdded handle(AddTask msg) {
+            final TaskAdded result = TaskAdded.newBuilder()
+                                              .build();
+            return result;
+        }
+
+        @Apply
+        private void apply(TaskAdded event) {
+            getBuilder().setDescription("Description").build();
+        }
+    }
+
+    private static class TaskDescriptionPart extends AggregatePart<String,
+            StringValue,
+            StringValue.Builder,
+            AnAggregateRoot> {
+
+        protected TaskDescriptionPart(AnAggregateRoot root) {
+            super(root);
+        }
+
+        @Assign
+        ProjectCreated handle(CreateProject msg) {
+            final ProjectCreated result = ProjectCreated.newBuilder()
+                                                        .setProjectId(msg.getProjectId())
+                                                        .setName(msg.getName())
+                                                        .build();
+            return result;
+        }
+
+        @Apply
+        private void apply(TaskAdded event) {
+            getBuilder().setValue("Description value");
+        }
+    }
+
+    private static class TaskRepository
+            extends AggregatePartRepository<String, TaskPart, AnAggregateRoot> {
+
+        private TaskRepository(BoundedContext boundedContext) {
+            super(boundedContext);
+        }
+    }
+    private static class TaskDescriptionRepository
+            extends AggregatePartRepository<String, TaskDescriptionPart, AnAggregateRoot> {
+
+        private TaskDescriptionRepository(BoundedContext boundedContext) {
+            super(boundedContext);
         }
     }
 }
