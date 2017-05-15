@@ -40,6 +40,8 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import static org.spine3.server.storage.RecordStorage.BeamIO.toInstant;
+
 /**
  * A storage used by {@link EventStore} for keeping event data.
  *
@@ -140,7 +142,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         public void processElement(ProcessContext c) {
             final Event event = doUnpack(c);
             if (predicate.apply(event)) {
-                c.output(event);
+                c.outputWithTimestamp(event, toInstant(event.getContext()
+                                                            .getTimestamp()));
             }
         }
     }

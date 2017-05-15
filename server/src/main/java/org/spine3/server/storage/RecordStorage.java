@@ -24,7 +24,9 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.joda.time.Instant;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -38,6 +40,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.toMillis;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -302,6 +305,17 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
          */
         public static <S extends Message> UnpackFn<S> unpack() {
             return new UnpackFn<>();
+        }
+
+        /**
+         * Converts Protobuf {@link Timestamp} instance to Joda Time {@link Instant}.
+         *
+         * <p>Nanoseconds are lost during the conversion as {@code Instant} keeps time with the
+         * millis precision.
+         */
+        public static Instant toInstant(Timestamp timestamp) {
+            final long millis = toMillis(timestamp);
+            return new Instant(millis);
         }
 
         /**

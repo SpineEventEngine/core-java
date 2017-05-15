@@ -20,11 +20,14 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.options.PipelineOptions;
-import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.FlatMapElements;
+import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
@@ -36,6 +39,8 @@ import org.spine3.server.event.EventStreamQuery;
 import org.spine3.users.TenantId;
 
 import java.util.Set;
+
+import static com.google.common.collect.ImmutableList.builder;
 
 /**
  * The operation of catching up projections with the specified state class.
@@ -66,16 +71,24 @@ public class CatchupOp<I> {
         // Read events matching the query.
         final EventStreamQuery query = repository.createStreamQuery();
         final EventPredicate.Query predicate = EventPredicate.Query.of(query);
-        final PCollection<Event> events = pipeline.apply("QueryEvents",
-                                                         eventStore.query(tenantId, predicate));
+        final PCollection<Event> events =
+                pipeline.apply("QueryEvents",
+                               eventStore.query(tenantId, predicate));
 
-        // Group events by projections.
-        final GetProjectionIdentifiers<I> getIdentifiers =
-                new GetProjectionIdentifiers<>(repository.getIdSetFunction());
+        // Compose a flat map where a key is a projection ID and a value is an event to apply.
+        final PCollection<KV<I, Event>> flatMap =
+                events.apply("GetProjectionIds",
+                             FlatMapElements.via(new GetIds<>(repository.getIdSetFunction())));
 
-        //TODO:2017-05-14:alexander.yevsyukov: Group events
+        // Group events by projection IDs.
+        final PCollection<KV<I, Iterable<Event>>> groupped =
+                flatMap.apply("GroupEvents", GroupByKey.<I, Event>create());
 
-        // Apply events to projections and store them.
+        // Apply events to projections.
+        //TODO:2017-05-15:alexander.yevsyukov: Implement.
+
+        // Store projections.
+        //TODO:2017-05-15:alexander.yevsyukov: Implement.
 
         return pipeline;
     }
@@ -86,21 +99,25 @@ public class CatchupOp<I> {
         return result;
     }
 
-    private static class GetProjectionIdentifiers<I>
-            extends DoFn<Event, KV<Event, PCollection<I>>> {
+    /** Obtains projection IDs for an event via supplied function. */
+    private static class GetIds<I> extends SimpleFunction<Event, Iterable<KV<I, Event>>> {
 
         private static final long serialVersionUID = 0L;
-        private final EventTargetsFunction<I, Message> function;
+        private final EventTargetsFunction<I, Message> fn;
 
-        private GetProjectionIdentifiers(EventTargetsFunction<I, Message> function) {
-            this.function = function;
+        private GetIds(EventTargetsFunction<I, Message> fn) {
+            this.fn = fn;
         }
 
-        @ProcessElement
-        public void processElement(ProcessContext c) {
-            final EventEnvelope event = EventEnvelope.of(c.element());
-            final Set<I> idSet = function.apply(event.getMessage(), event.getEventContext());
-            //TODO:2017-05-14:alexander.yevsyukov: Finish
+        @Override
+        public Iterable<KV<I, Event>> apply(Event input) {
+            final EventEnvelope event = EventEnvelope.of(input);
+            final Set<I> idSet = fn.apply(event.getMessage(), event.getEventContext());
+            final ImmutableList.Builder<KV<I, Event>> builder = builder();
+            for (I id : idSet) {
+                builder.add(KV.of(id, input));
+            }
+            return builder.build();
         }
     }
 }
