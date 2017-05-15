@@ -310,8 +310,12 @@ apply from: publishPlugin
 apply plugin: 'org.spine3.tools.gcs-plugin'
 
 cleanGCS {
+    final Properties properties = new Properties()
+    final File gcsProperties = project.file("gcs.properties")
+    properties.load(gcsProperties.newDataInputStream())
+
     authKeyPath = "gcs-auth-key.json"
-    bucketName = "spine-dev.appspot.com"
-    targetFolder = "core-java/builds"
+    bucketName = properties.getProperty("artifacts.bucket")
+    targetFolder = properties.getProperty("artifacts.folder")
     threshold = TimeCategory.getDays(30)
 }
