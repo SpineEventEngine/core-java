@@ -140,10 +140,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
             final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
 
-            final AggregateTransaction<?, ?, ?> tx =
-                    AggregateTransaction.start((Aggregate<?, ? , ?>) aggregate);
             aggregate.dispatchCommand(envelope);
-            tx.commit();
 
             // Update status only if the command was handled successfully.
             final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();

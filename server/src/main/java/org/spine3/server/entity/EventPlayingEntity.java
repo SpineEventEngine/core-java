@@ -96,7 +96,7 @@ public abstract class EventPlayingEntity <I,
                             "only from an event applier method.");
         }
 
-        return  tx().getBuilder();
+        return tx().getBuilder();
     }
 
     private Transaction<I, ? extends EventPlayingEntity<I,S,B>, S, B> tx() {
@@ -133,10 +133,6 @@ public abstract class EventPlayingEntity <I,
     }
 
     void releaseTransaction() {
-        if(transaction == null) {
-            return;     // no worries.
-        }
-
         this.stateChanged = tx().isStateChanged();
         this.transaction = null;
     }

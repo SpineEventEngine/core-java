@@ -213,13 +213,13 @@ public abstract class Aggregate<I,
      */
     void play(AggregateStateRecord aggregateStateRecord) {
         final AggregateTransaction<I, S, B> tx = AggregateTransaction.start(this);
-        final Snapshot snapshot = aggregateStateRecord.getSnapshot();
-        if (isNotDefault(snapshot)) {
-            restore(snapshot);
-        }
-        final List<Event> events = aggregateStateRecord.getEventList();
-
         try {
+            final Snapshot snapshot = aggregateStateRecord.getSnapshot();
+            if (isNotDefault(snapshot)) {
+                restore(snapshot);
+            }
+            final List<Event> events = aggregateStateRecord.getEventList();
+
             play(events);
         } finally {
             tx.commit();

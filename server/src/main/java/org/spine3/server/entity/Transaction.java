@@ -73,22 +73,22 @@ public abstract class Transaction<I,
 
     protected void commit() {
 
-        try {
-            final B builder = getBuilder();
+        final B builder = getBuilder();
 
-            // The state is only updated, if at least some changes were made to the builder.
-            if (builder.isDirty()) {
+        // The state is only updated, if at least some changes were made to the builder.
+        if (builder.isDirty()) {
+            try {
                 final S newState = builder.build();
 
                 markStateChanged();
                 final Version version = entity.getVersion();
                 entity.updateState(newState, version);
+            } catch (ConstraintViolationThrowable violation) {
+                // should not happen, as the `Builder` validates the input in its setters.
+                throw illegalStateWithCauseOf(violation);
+            } finally {
+                entity.releaseTransaction();
             }
-        } catch (ConstraintViolationThrowable violation) {
-            // should not happen, as the `Builder` validates the input in its setters.
-            throw illegalStateWithCauseOf(violation);
-        } finally {
-            entity.releaseTransaction();
         }
     }
 
