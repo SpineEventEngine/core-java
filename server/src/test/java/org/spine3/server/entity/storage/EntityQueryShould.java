@@ -34,6 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.mockito.Mockito.mock;
+import static org.spine3.server.entity.storage.QueryParameters.fromValues;
 import static org.spine3.test.Verify.assertContains;
 
 /**
@@ -78,12 +79,12 @@ public class EntityQueryShould {
         final Map<Column<?>, Object> paramsCCopy = new HashMap<>(1);
         paramsA.put(otherColumn, someValue);
 
-        final EntityQuery<?> queryA = EntityQuery.of(idsA, paramsA);
-        final EntityQuery<?> queryB = EntityQuery.of(idsB, paramsB);
-        final EntityQuery<?> queryC = EntityQuery.of(idsC, paramsC);
-        final EntityQuery<?> queryD = EntityQuery.of(idsA, paramsC);
-        final EntityQuery<?> queryE = EntityQuery.of(idsB, paramsB);
-        final EntityQuery<?> queryF = EntityQuery.of(idsC, paramsCCopy);
+        final EntityQuery<?> queryA = EntityQuery.of(idsA, fromValues(paramsA));
+        final EntityQuery<?> queryB = EntityQuery.of(idsB, fromValues(paramsB));
+        final EntityQuery<?> queryC = EntityQuery.of(idsC, fromValues(paramsC));
+        final EntityQuery<?> queryD = EntityQuery.of(idsA, fromValues(paramsC));
+        final EntityQuery<?> queryE = EntityQuery.of(idsB, fromValues(paramsB));
+        final EntityQuery<?> queryF = EntityQuery.of(idsC, fromValues(paramsCCopy));
 
         new EqualsTester()
                 .addEqualityGroup(queryA)
@@ -103,7 +104,7 @@ public class EntityQueryShould {
         final Map<Column<?>, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        final EntityQuery query = EntityQuery.of(ids, params);
+        final EntityQuery query = EntityQuery.of(ids, fromValues(params));
         final String repr = query.toString();
 
         assertContains(query.getIds()

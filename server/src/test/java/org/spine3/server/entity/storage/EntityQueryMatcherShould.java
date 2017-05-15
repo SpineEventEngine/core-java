@@ -38,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
 
 /**
@@ -48,8 +49,7 @@ public class EntityQueryMatcherShould {
     @Test
     public void match_everything_except_null_to_empty_query() {
         final Collection<Object> idFilter = Collections.emptyList();
-        final Map<Column<?>, Object> params = ImmutableMap.of();
-        final EntityQuery<?> query = EntityQuery.of(idFilter, params);
+        final EntityQuery<?> query = EntityQuery.of(idFilter, QueryParameters.getDefaultInstance());
 
         final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
 
@@ -62,8 +62,7 @@ public class EntityQueryMatcherShould {
         final Message genericId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> idFilter = Collections.<Object>singleton(genericId);
         final Any entityId = AnyPacker.pack(genericId);
-        final Map<Column<?>, Object> params = ImmutableMap.of();
-        final EntityQuery<?> query = EntityQuery.of(idFilter, params);
+        final EntityQuery<?> query = EntityQuery.of(idFilter, QueryParameters.getDefaultInstance());
 
         final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
         final EntityRecord matching = EntityRecord.newBuilder()
@@ -90,8 +89,9 @@ public class EntityQueryMatcherShould {
         final Object acceptedValue = true;
 
         final Collection<Object> ids = Collections.emptyList();
-        final Map<Column<?>, Object> params =
-                ImmutableMap.<Column<?>, Object>of(target, acceptedValue);
+        final QueryParameters params = QueryParameters.newBuilder()
+                                                      .put(EQUAL, target, acceptedValue)
+                                                      .build();
         final EntityQuery<?> query = EntityQuery.of(ids, params);
 
         final Any matchingId = AnyPacker.pack(Sample.messageOfType(TaskId.class));

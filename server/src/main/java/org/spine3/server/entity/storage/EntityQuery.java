@@ -28,8 +28,6 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMap.copyOf;
-import static org.spine3.client.QueryParameter.Operator.EQUAL;
 
 /**
  * A query to a {@link org.spine3.server.storage.RecordStorage RecordStorage} for the records
@@ -81,16 +79,6 @@ public final class EntityQuery<I> {
         checkNotNull(ids);
         checkNotNull(parameters);
         return new EntityQuery<>(ids, parameters);
-    }
-
-    @Deprecated
-    static <I> EntityQuery<I> of(Collection<I> ids, Map<Column<?>, Object> parameters) {
-        checkNotNull(ids);
-        checkNotNull(parameters);
-        final QueryParameters params = QueryParameters.newBuilder()
-                                                      .putAll(EQUAL, copyOf(parameters))
-                                                      .build();
-        return new EntityQuery<>(ids, params);
     }
 
     private EntityQuery(Collection<I> ids, QueryParameters parameters) {

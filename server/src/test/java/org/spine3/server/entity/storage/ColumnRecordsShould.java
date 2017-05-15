@@ -69,7 +69,7 @@ public class ColumnRecordsShould {
                 .setDefault(ColumnTypeRegistry.class, ColumnTypeRegistry.newBuilder().build())
                 .setDefault(EntityQuery.class,
                             EntityQuery.of(Collections.emptyList(),
-                                           Collections.<Column<?>, Object>emptyMap()))
+                                           QueryParameters.getDefaultInstance()))
                 .testAllPublicStaticMethods(ColumnRecords.class);
     }
 

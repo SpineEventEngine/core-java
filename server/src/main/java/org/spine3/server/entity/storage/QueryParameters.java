@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import org.spine3.client.QueryParameter.Operator;
@@ -32,6 +33,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
 
 /**
  * The parameters of an {@link EntityQuery}.
@@ -47,6 +49,11 @@ public final class QueryParameters {
 
     private QueryParameters(Map<Operator, Map<Column<?>, Object>> parameters) {
         this.parameters = copyOf(parameters);
+    }
+
+    @VisibleForTesting // Should not be used in the production code
+    static QueryParameters fromValues(Map<Column<?>, Object> values) {
+        return new QueryParameters(ImmutableMap.of(EQUAL, values));
     }
 
     public ImmutableMap<Column<?>, Object> getParams(Operator operator) {
@@ -76,6 +83,11 @@ public final class QueryParameters {
     @Override
     public int hashCode() {
         return Objects.hashCode(parameters);
+    }
+
+    @VisibleForTesting // Should not be used in the production code
+    static QueryParameters getDefaultInstance() {
+        return newBuilder().build();
     }
 
     public static Builder newBuilder() {
