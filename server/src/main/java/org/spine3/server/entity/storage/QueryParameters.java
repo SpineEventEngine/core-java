@@ -34,6 +34,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
 
 /**
+ * The parameters of an {@link EntityQuery}.
+ *
+ * <p>The values of the parameters are mapped to the operators they are declared with.
+ * // TODO:2017-05-15:dmytro.dashenkov: Improve javadoc.
+ *
  * @author Dmytro Dashenkov
  */
 public final class QueryParameters {
