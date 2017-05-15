@@ -24,14 +24,14 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
+import org.spine3.client.QueryOperator;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spine3.client.QueryOperator;
+import static org.spine3.client.QueryOperator.compare;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -80,10 +80,10 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
         for (Map.Entry<QueryOperator, Map<Column<?>, Object>> operation : queryParams.entrySet()) {
-            final boolean operationSuccied = checkParams(operation.getValue(),
-                                                         entityColumns,
-                                                         operation.getKey());
-            if (!operationSuccied) {
+            final boolean operationSuccessful = checkParams(operation.getValue(),
+                                                            entityColumns,
+                                                            operation.getKey());
+            if (!operationSuccessful) {
                 return false;
             }
         }
@@ -106,7 +106,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
                 return false;
             }
             final Object actualValue = actualValueWithMetadata.getValue();
-            final boolean matches = operator.matches(actualValue, requiredValue);
+            final boolean matches = compare(actualValue, operator, requiredValue);
             if (!matches) {
                 return false;
             }
