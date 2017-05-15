@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.EventPlayingEntity;
-import org.spine3.server.entity.Transaction;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.EventClass;
 import org.spine3.validate.ValidatingBuilder;
@@ -68,7 +67,7 @@ public abstract class Projection<I,
     }
 
 
-    private void apply(Message eventMessage,
+    void apply(Message eventMessage,
                          EventContext eventContext)  {
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
@@ -79,8 +78,8 @@ public abstract class Projection<I,
     }
 
     @Override
-    protected Transaction createFromBuilder(B builder) {
-        return new ProjectionTransaction(builder, this);
+    protected ProjectionTransaction<I, M, B> createFromBuilder(B builder) {
+        return new ProjectionTransaction<>(builder, this);
     }
 
     /**
@@ -93,18 +92,6 @@ public abstract class Projection<I,
     @VisibleForTesting
     protected void injectState(M stateToRestore, Version version) {
         super.injectState(stateToRestore, version);
-    }
-
-    private class ProjectionTransaction extends Transaction<Projection<I, M, B>, M, B> {
-        private ProjectionTransaction(B builder, Projection<I, M, B> entity) {
-            super(builder, entity);
-        }
-
-        @Override
-        protected void apply(Message eventMessage, EventContext context) throws
-                                                                         InvocationTargetException {
-            Projection.this.apply(eventMessage, context);
-        }
     }
 
     static class TypeInfo {

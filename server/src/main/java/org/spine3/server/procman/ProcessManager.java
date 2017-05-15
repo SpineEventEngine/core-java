@@ -30,7 +30,6 @@ import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.commandbus.CommandBus;
-import org.spine3.server.entity.Transaction;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.CommandClass;
@@ -167,8 +166,8 @@ public abstract class ProcessManager<I,
     }
 
     @Override
-    protected ProcessManagerTransaction createFromBuilder(B builder) {
-        return new ProcessManagerTransaction(builder, this);
+    protected ProcManTransaction<I, S, B> createFromBuilder(B builder) {
+        return new ProcManTransaction<>(builder, this);
     }
 
     /**
@@ -253,18 +252,6 @@ public abstract class ProcessManager<I,
         final CommandBus commandBus = getCommandBus();
         checkState(commandBus != null, "CommandBus must be initialized");
         return commandBus;
-    }
-
-    private class ProcessManagerTransaction extends Transaction<ProcessManager<I, S, B>, S, B> {
-        public ProcessManagerTransaction(B builder, ProcessManager<I, S, B> entity) {
-            super(builder, entity);
-        }
-
-        @Override
-        protected void apply(Message eventMessage, EventContext context) throws
-                                                                         InvocationTargetException {
-            ProcessManager.this.dispatchEvent(eventMessage, context);
-        }
     }
 
     /**

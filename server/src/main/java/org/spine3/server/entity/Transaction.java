@@ -51,7 +51,7 @@ public abstract class Transaction<E extends EventPlayingEntity<?, S, B>,
 
     /**
      * The flag, which becomes {@code true}, if the state of the entity
-     * {@linkplain #updateState() has been changed} since it has been
+     * {@linkplain #commit() has been changed} since it has been
      * {@linkplain RecordBasedRepository#findOrCreate(Object)} loaded or created.
      */
     private volatile boolean stateChanged;
@@ -97,11 +97,11 @@ public abstract class Transaction<E extends EventPlayingEntity<?, S, B>,
         this.stateChanged = true;
     }
 
-    public boolean isStateChanged() {
+    protected boolean isStateChanged() {
         return stateChanged;
     }
 
-    public E getEntity() {
+    protected E getEntity() {
         return entity;
     }
 

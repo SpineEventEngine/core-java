@@ -34,14 +34,12 @@ import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.command.EventFactory;
-import org.spine3.server.entity.Transaction;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
@@ -159,8 +157,8 @@ public abstract class Aggregate<I,
     }
 
     @Override
-    protected AggregateTransaction createFromBuilder(B builder) {
-        return new AggregateTransaction(builder, this);
+    protected AggregateTransaction<I, S, B> createFromBuilder(B builder) {
+        return new AggregateTransaction<>(builder, this);
     }
 
     /**
@@ -186,7 +184,7 @@ public abstract class Aggregate<I,
      * @param eventMessage the event message to apply
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
-    private void invokeApplier(Message eventMessage) throws InvocationTargetException {
+    void invokeApplier(Message eventMessage) throws InvocationTargetException {
         final EventApplierMethod method = forEventMessage(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }
@@ -254,7 +252,7 @@ public abstract class Aggregate<I,
             }
             events.add(event);
 
-            currentVersion = Versions.increment(currentVersion);;
+            currentVersion = Versions.increment(currentVersion);
         }
         play(events);
         uncommittedEvents.addAll(events);
@@ -410,19 +408,6 @@ public abstract class Aggregate<I,
     @VisibleForTesting
     protected int versionNumber() {
         return super.versionNumber();
-    }
-
-    class AggregateTransaction extends Transaction<Aggregate<I, S, B>, S, B> {
-
-        public AggregateTransaction(B builder, Aggregate aggregate) {
-            super(builder, aggregate);
-        }
-
-        @Override
-        protected void apply(Message eventMessage, @Nullable EventContext ignored) throws
-                                                                         InvocationTargetException {
-            invokeApplier(eventMessage);
-        }
     }
 
     /**
