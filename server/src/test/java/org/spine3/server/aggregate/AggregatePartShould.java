@@ -182,7 +182,6 @@ public class AggregatePartShould {
         protected AnAggregateRoot(BoundedContext boundedContext, String id) {
             super(boundedContext, id);
         }
-
     }
 
     private static CommandEnvelope env(Message commandMessage) {
