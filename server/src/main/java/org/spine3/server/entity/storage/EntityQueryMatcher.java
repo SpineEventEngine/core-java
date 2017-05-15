@@ -84,6 +84,10 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         return columnValueMatcher.matches();
     }
 
+    /**
+     * A stateful parameter processor matchi g the given Entity Columns to a number of
+     * {@linkplain QueryParameters Query parameters}.
+     */
     private static class ColumnValueMatcher implements QueryParameters.ParameterConsumer {
 
         private final Map<String, Column.MemoizedValue<?>> entityColumns;
@@ -93,8 +97,16 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
             this.entityColumns = entityColumns;
         }
 
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Each next call to this method will execute differently depending on the previous
+         * calls. If at least one of the previous calls upon a single instance has failed to match
+         * the Entity Columns to a given parameter, then all the subsequent calls will exit at
+         * the beginning and won't try to match the remaining parameters.
+         */
         @Override
-        public void consume(QueryOperator operator, Column<?> column, Object value) {
+        public void consume(QueryOperator operator, Column<?> column, @Nullable Object value) {
             if (!currentlyMatches) {
                 return;
             }

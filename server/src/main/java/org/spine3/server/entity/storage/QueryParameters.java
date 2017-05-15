@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableMap;
 import org.spine3.annotation.SPI;
 import org.spine3.client.QueryOperator;
 
+import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -117,6 +118,9 @@ public final class QueryParameters {
         return new Builder();
     }
 
+    /**
+     * The builder for the {@code QueryParameters}.
+     */
     public static class Builder {
 
         private final Map<QueryOperator, Map<Column<?>, Object>> parameters
@@ -126,7 +130,16 @@ public final class QueryParameters {
             // Prevent direct initialization
         }
 
-        public Builder put(QueryOperator operator, Column<?> column, Object value) {
+        /**
+         * Put the Query parameter represented by the arguments into the resulting instance of
+         * {@code QueryParameters}.
+         *
+         * @param operator the parameter comparison operator
+         * @param column   the parameter target {@link Column}
+         * @param value    the parameter value
+         * @return self for method chaining
+         */
+        public Builder put(QueryOperator operator, Column<?> column, @Nullable Object value) {
             checkNotNull(operator);
             checkNotNull(column);
 
@@ -166,10 +179,10 @@ public final class QueryParameters {
          * totally safe.
          *
          * @param operator the operator of the parameter
-         * @param column the parameter target {@link Column}
-         * @param value the right operand in the comparison represented by the given parameter,
-         *              i.e. the parameter value
+         * @param column   the parameter target {@link Column}
+         * @param value    the right operand in the comparison represented by the given parameter, i.e.
+         *                 the parameter value
          */
-        void consume(QueryOperator operator, Column<?> column, Object value);
+        void consume(QueryOperator operator, Column<?> column, @Nullable Object value);
     }
 }
