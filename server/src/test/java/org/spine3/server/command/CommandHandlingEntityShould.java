@@ -27,7 +27,7 @@ import org.spine3.base.Command;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.TestActorRequestFactory;
-import org.spine3.util.Environment;
+import org.spine3.server.Environment;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.newUuidValue;
