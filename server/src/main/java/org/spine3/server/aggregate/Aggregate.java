@@ -156,11 +156,6 @@ public abstract class Aggregate<I,
         return super.getBuilder();
     }
 
-    @Override
-    protected AggregateTransaction<I, S, B> createFromBuilder(B builder) {
-        return new AggregateTransaction<>(builder, this);
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -170,10 +165,26 @@ public abstract class Aggregate<I,
     @Override
     protected List<? extends Message> dispatchCommand(CommandEnvelope envelope) {
         final List<? extends Message> eventMessages = super.dispatchCommand(envelope);
+        final AggregateTransaction<I, S, B> tx = AggregateTransaction.start(this);
         try {
             apply(eventMessages, envelope);
         } catch (InvocationTargetException e) {
             throw illegalStateWithCauseOf(e);
+        } finally {
+             /*
+                We perform updating the state of the aggregate in this `finally`
+                block (even if there was an exception in one of the appliers)
+                because we want to transit the aggregate out of the “applying events” mode
+                anyway. We do this to minimize the damage to the aggregate
+                in the case of an exception caused by an applier method.
+
+                In general, applier methods must not throw. Command handlers can
+                in case of business failures.
+
+                The exception thrown from an applier still will be seen because we
+                re-throw its cause in the `catch` block above.
+             */
+            tx.commit();
         }
         return eventMessages;
     }
@@ -201,13 +212,18 @@ public abstract class Aggregate<I,
      *                               the {@code cause} for the thrown instance
      */
     void play(AggregateStateRecord aggregateStateRecord) {
+        final AggregateTransaction<I, S, B> tx = AggregateTransaction.start(this);
         final Snapshot snapshot = aggregateStateRecord.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
         final List<Event> events = aggregateStateRecord.getEventList();
 
-        play(events);
+        try {
+            play(events);
+        } finally {
+            tx.commit();
+        }
     }
 
     /**

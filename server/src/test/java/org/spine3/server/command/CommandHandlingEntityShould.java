@@ -20,20 +20,15 @@
 
 package org.spine3.server.command;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.EventContext;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.entity.Transaction;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.util.Environment;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
-
-import java.lang.reflect.InvocationTargetException;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.newUuidValue;
@@ -103,21 +98,6 @@ public class CommandHandlingEntityShould {
                                                                       StringValueValidatingBuilder> {
         private HandlingEntity(Long id) {
             super(id);
-        }
-
-        @Override
-        protected Transaction<Long, HandlingEntity, StringValue, StringValueValidatingBuilder>
-        createFromBuilder(StringValueValidatingBuilder builder) {
-            return new Transaction<Long,
-                                   HandlingEntity,
-                                   StringValue,
-                                   StringValueValidatingBuilder>(builder, this) {
-                @Override
-                protected void apply(Message eventMessage,
-                                     EventContext context) throws InvocationTargetException {
-                    // do nothing
-                }
-            };
         }
     }
 }

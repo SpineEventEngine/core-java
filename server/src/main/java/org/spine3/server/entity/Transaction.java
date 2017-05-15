@@ -63,9 +63,9 @@ public abstract class Transaction<I,
     }
 
     protected Transaction(E entity) {
-        this(entity.newBuilderInstance(), entity);
-        final Transaction<I, E, S, B> esbTransaction = this;
-        entity.injectTransaction(esbTransaction);
+        this(entity.builderFromState(), entity);
+        final Transaction<I, E, S, B> tx = this;
+        entity.injectTransaction(tx);
     }
 
     protected abstract void apply(Message eventMessage, EventContext context)

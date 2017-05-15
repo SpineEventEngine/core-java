@@ -67,22 +67,6 @@ public abstract class EventPlayingEntity <I,
         super(id);
     }
 
-//    protected void apply(Message eventMessage,
-//                         EventContext context) throws InvocationTargetException {
-//        checkNotNull(context);
-//        checkNotNull(eventMessage);
-//
-//        final Transaction transaction = startTransaction();
-//        try {
-//            transaction.apply(eventMessage, context);
-//            transaction.commit();
-//        } catch (InvocationTargetException e) {
-//            //TODO:5/10/17:alex.tymchenko: handle the exception;
-//        } finally {
-//            releaseTransaction();
-//        }
-//    }
-
     /**
      * Determines whether the state of this entity or its lifecycle flags have been modified
      * since this entity instance creation.
@@ -112,8 +96,12 @@ public abstract class EventPlayingEntity <I,
                             "only from an event applier method.");
         }
 
+        return  tx().getBuilder();
+    }
+
+    private Transaction<I, ? extends EventPlayingEntity<I,S,B>, S, B> tx() {
         checkNotNull(transaction);
-        return transaction.getBuilder();
+        return transaction;
     }
 
     /**
@@ -127,44 +115,16 @@ public abstract class EventPlayingEntity <I,
     }
 
     protected void play(Iterable<Event> events) {
-
-        final Transaction transaction = startTransaction();
-
-        try {
-            for (Event event : events) {
-                final Message message = getMessage(event);
-                final EventContext context = event.getContext();
-                try {
-                    transaction.applyAnd(message, context)
-                               .thenAdvanceVersionFrom(context.getVersion());
-                } catch (InvocationTargetException e) {
-                    throw illegalStateWithCauseOf(e);
-                }
+        for (Event event : events) {
+            final Message message = getMessage(event);
+            final EventContext context = event.getContext();
+            try {
+                tx().applyAnd(message, context)
+                           .thenAdvanceVersionFrom(context.getVersion());
+            } catch (InvocationTargetException e) {
+                throw illegalStateWithCauseOf(e);
             }
-        } finally {
-            /*
-                We perform updating the state of the entity in this `finally`
-                block (even if there was an exception in one of the appliers)
-                because we want to transit the entity out of the “applying events” mode
-                anyway. We do this to minimize the damage to the entity
-                in the case of an exception caused by an applier method.
-
-                In general, applier methods must not throw. Command handlers can
-                in case of business failures.
-
-                The exception thrown from an applier still will be seen because we
-                re-throw its cause in the `catch` block above.
-             */
-            transaction.commit();
-            releaseTransaction();
         }
-    }
-
-    protected Transaction startTransaction() {
-        if(transaction == null) {
-            createTransaction();
-        }
-        return transaction;
     }
 
     void injectTransaction(Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx) {
@@ -172,28 +132,24 @@ public abstract class EventPlayingEntity <I,
         this.transaction = tx;
     }
 
-    protected void releaseTransaction() {
+    void releaseTransaction() {
         if(transaction == null) {
             return;     // no worries.
         }
-        checkNotNull(transaction);
 
-        this.stateChanged = transaction.isStateChanged();
+        this.stateChanged = tx().isStateChanged();
         this.transaction = null;
     }
 
-    private void createTransaction() {
+
+    B builderFromState() {
         final B builder = newBuilderInstance();
-        builder.mergeFrom(getState());
-        this.transaction = createFromBuilder(builder);
+        @SuppressWarnings("unchecked")      // the cast is safe by `mergeFrom` design.
+        final B result = (B) builder.mergeFrom(getState());
+        return result;
     }
 
-    protected abstract Transaction<I,
-                                   ? extends EventPlayingEntity<I, S, B>,
-                                   S,
-                                   B> createFromBuilder(B builder);
-
-//    /**
+    //    /**
 //     * Sets the passed state and version.
 //     *
 //     * <p>The method circumvents the protection in the {@link #updateState(Message, Version)
@@ -209,7 +165,7 @@ public abstract class EventPlayingEntity <I,
 
     }
 
-    B newBuilderInstance() {
+    private B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
         final Class<? extends EventPlayingEntity<I, S, B>> aClass =
                 (Class<? extends EventPlayingEntity<I, S, B>>)getClass();

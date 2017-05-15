@@ -107,16 +107,9 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-//        createBuilder();
-
-//        try {
             final List<? extends Message> messages = super.dispatchCommand(envelope);
             final List<Event> result = toEvents(messages, envelope);
-//            updateState();
             return result;
-//        } finally {
-//            releaseBuilder();
-//        }
     }
 
     /**
@@ -163,11 +156,6 @@ public abstract class ProcessManager<I,
     @VisibleForTesting
     protected void injectState(S stateToRestore, Version version) {
         super.injectState(stateToRestore, version);
-    }
-
-    @Override
-    protected ProcManTransaction<I, S, B> createFromBuilder(B builder) {
-        return new ProcManTransaction<>(builder, this);
     }
 
     /**

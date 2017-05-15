@@ -77,11 +77,6 @@ public abstract class Projection<I,
         }
     }
 
-    @Override
-    protected ProjectionTransaction<I, M, B> createFromBuilder(B builder) {
-        return new ProjectionTransaction<>(builder, this);
-    }
-
     /**
      * {@inheritDoc}
      *
