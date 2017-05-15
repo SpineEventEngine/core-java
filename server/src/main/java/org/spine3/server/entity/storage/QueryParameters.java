@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
@@ -49,6 +50,10 @@ public final class QueryParameters {
                 ? Collections.<Column<?>, Object>emptyMap()
                 : params;
         return copyOf(params);
+    }
+
+    public Set<Map.Entry<Operator, Map<Column<?>, Object>>> entrySet() {
+        return parameters.entrySet();
     }
 
     @Override

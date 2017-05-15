@@ -26,7 +26,7 @@ import org.spine3.base.Identifiers;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.client.QueryParameter;
+import org.spine3.client.TimestampFilter;
 import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.Entity;
 
@@ -35,6 +35,8 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.QueryParameter.Operator.EQUAL;
+import static org.spine3.client.QueryParameter.Operator.GREATER_THEN;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -77,10 +79,14 @@ public final class EntityQueries {
                                                           .entrySet()) {
             final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
             final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
-            final QueryParameter.Operator operator = QueryParameter.Operator.EQUAL; // TODO:2017-05-12:dmytro.dashenkov: Use all the operators.
-            builder.put(operator, column, filterValues);
+            builder.put(EQUAL, column, filterValues);
         }
-
+        if (entityFilters.hasTimeAfter()) {
+            final TimestampFilter timestampFilter = entityFilters.getTimeAfter();
+            final String columnName = timestampFilter.getColumnsName();
+            final Column<?> column = Columns.findColumn(entityClass, columnName);
+            builder.put(GREATER_THEN, column, timestampFilter.getValue());
+        }
         return builder.build();
     }
 

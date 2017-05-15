@@ -31,6 +31,7 @@ import "google/protobuf/any.proto";
 
 import "spine/options.proto";
 import "spine/base/field_filter.proto";
+import "google/protobuf/timestamp.proto";
 
 // Represents an ID of an entity.
 //
@@ -73,8 +74,17 @@ message EntityFilters {
     // Match the entities by the value of the Entity Columns.
     map<string, google.protobuf.Any> column_filter = 2;
 
+    TimestampFilter time_after = 3;
+
     // Reserved for more filter types
-    reserved 3 to 40;
+    reserved 4 to 40;
+}
+
+message TimestampFilter {
+
+    google.protobuf.Timestamp value = 1;
+    string columns_name = 2;
+
 }
 
 // Allows to add an ID filter for the read operations.

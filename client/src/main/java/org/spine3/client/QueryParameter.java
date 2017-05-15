@@ -26,11 +26,15 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.protobuf.AnyPacker;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.client.QueryParameter.Operator.EQUAL;
 import static org.spine3.client.QueryParameter.Operator.GREATER_THEN;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.TypeConverter.toAny;
+import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
  * A parameter of a {@link Query}.
@@ -158,19 +162,39 @@ public final class QueryParameter {
         /**
          * Equality operator ({@code =}).
          */
-        EQUAL("="),
+        EQUAL("=") {
+            @Override
+            public <T> boolean matches(@Nullable T left, @Nullable T right) {
+                return Objects.equal(left, right);
+            }
+        },
 
         /**
          * Comparison operator stating that the stored value is greater then ({@code >})
          * the passed value.
          */
-        GREATER_THEN(">");
+        GREATER_THEN(">") {
+            @Override
+            public <T> boolean matches(@Nullable T left, @Nullable T right) {
+                if (left == null || right == null) {
+                    return false;
+                }
+                checkState(left instanceof Timestamp,
+                           "Invalid comparison %s %s %s." ,
+                           left.toString(), this, right);
+                final Timestamp tsLeft = (Timestamp) left;
+                final Timestamp tsRight = (Timestamp) right;
+                return isLaterThan(tsLeft, tsRight);
+            }
+        };
 
         private final String representation;
 
         Operator(String repr) {
             this.representation = repr;
         }
+
+        public abstract <T> boolean matches(@Nullable T left, @Nullable T right);
 
         @Override
         public String toString() {

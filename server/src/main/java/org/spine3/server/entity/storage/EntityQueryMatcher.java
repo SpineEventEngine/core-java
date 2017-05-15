@@ -28,10 +28,9 @@ import org.spine3.base.Identifiers;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
-import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.QueryParameter.Operator.EQUAL;
+import static org.spine3.client.QueryParameter.Operator;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -79,23 +78,36 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
-        final Map<Column<?>, Object> equalityParams = queryParams.getParams(EQUAL);
-        if (!equalityParams.isEmpty()) {
-            for (Map.Entry<Column<?>, Object> param : equalityParams.entrySet()) {
-                final Column<?> column = param.getKey();
-                final String columnName = column.getName();
+        for (Map.Entry<Operator, Map<Column<?>, Object>> operation : queryParams.entrySet()) {
+            final boolean operationSuccied = checkParams(operation.getValue(),
+                                                         entityColumns,
+                                                         operation.getKey());
+            if (!operationSuccied) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-                final Object requiredValue = param.getValue();
-                final Column.MemoizedValue<?> actualValueWithMetadata =
-                        entityColumns.get(columnName);
-                if (actualValueWithMetadata == null) {
-                    return false;
-                }
-                final Object actualValue = actualValueWithMetadata.getValue();
-                final boolean matches = Objects.equals(requiredValue, actualValue);
-                if (!matches) {
-                    return false;
-                }
+    private static boolean checkParams(Map<Column<?>, Object> params,
+                                Map<String, Column.MemoizedValue<?>> entityColumns,
+                                Operator operator) {
+        if (params.isEmpty()) {
+            return true;
+        }
+        for (Map.Entry<Column<?>, Object> param : params.entrySet()) {
+            final Column<?> column = param.getKey();
+            final String columnName = column.getName();
+
+            final Object requiredValue = param.getValue();
+            final Column.MemoizedValue<?> actualValueWithMetadata = entityColumns.get(columnName);
+            if (actualValueWithMetadata == null) {
+                return false;
+            }
+            final Object actualValue = actualValueWithMetadata.getValue();
+            final boolean matches = operator.matches(actualValue, requiredValue);
+            if (!matches) {
+                return false;
             }
         }
         return true;
