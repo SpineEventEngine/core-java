@@ -35,6 +35,14 @@ import static org.spine3.base.Versions.checkIsIncrement;
 import static org.spine3.server.entity.InvalidEntityStateException.onConstraintViolations;
 
 /**
+ * The abstract class for the {@linkplain EventPlayingEntity} transactions.
+ *
+ * <p>The transaction is a set of changes made to an entity state or entity attributes
+ * (e.g. version, lifecycle flags etc).
+ *
+ * <p>Serves as a buffer, accumulating the changes, intended for the enclosed {@code Entity};
+ * the changes are only applied to the actual object upon {@linkplain #commit() commit}.
+ *
  * @author Alex Tymchenko
  */
 public abstract class Transaction<I,
@@ -43,22 +51,38 @@ public abstract class Transaction<I,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
-     * The builder for the entity state.
-     */
-    private final B builder;
-
-    /**
      * The entity, which state is modified in this transaction.
      */
     private final E entity;
 
     /**
+     * The builder for the entity state.
+     *
+     * <p>All the state changes made within the transaction go to this {@code Builder},
+     * and not to the {@code Entity} itself.
+     *
+     * <p>The state of the builder is merged to the entity state
+     * upon the {@linkplain #commit() commit()}.
+     */
+    private final B builder;
+
+    /**
      * The version of the entity, modified within this transaction.
+     *
+     * <p>All the version changes made within the transaction are stored in this variable,
+     * and not in the {@code Entity} itself.
+     *
+     * <p>This value is set to the entity upon the {@linkplain #commit() commit()}.
      */
     private volatile Version version;
 
     /**
      * The lifecycle flags of the entity, modified within this transaction.
+     *
+     * <p>All the entity lifecycle changes made within the transaction are stored in this variable,
+     * and not in the {@code Entity} itself.
+     *
+     * <p>This value is set to the entity upon the {@linkplain #commit() commit()}.
      */
     private volatile LifecycleFlags lifecycleFlags;
 
@@ -68,6 +92,14 @@ public abstract class Transaction<I,
      * {@linkplain RecordBasedRepository#findOrCreate(Object)} loaded or created.
      */
     private volatile boolean stateChanged;
+
+    /**
+     * Allows to understand whether this transaction is active.
+     *
+     * <p>Has {@code true} value since the transaction instance creation
+     * until {@linkplain #commit() commit()} is performed.
+     */
+    private volatile boolean active = false;
 
     /**
      * Creates a new instance of {@code Transaction} and
@@ -81,6 +113,7 @@ public abstract class Transaction<I,
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
+        this.active = true;
 
         injectTo(entity);
     }
@@ -101,6 +134,28 @@ public abstract class Transaction<I,
      */
     protected abstract void apply(Message eventMessage, EventContext context)
             throws InvocationTargetException;
+
+    /**
+     * Allows to understand whether this transaction is active.
+     *
+     * @return {@code true} if the transaction is active, {@code false} otherwise
+     */
+    boolean isActive() {
+        return active;
+    }
+
+    LifecycleFlags getLifecycleFlags() {
+        return lifecycleFlags;
+    }
+
+    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
+        checkNotNull(lifecycleFlags);
+        this.lifecycleFlags = lifecycleFlags;
+    }
+
+    protected E getEntity() {
+        return entity;
+    }
 
     /**
      * Applies all the outstanding state modififcations to the state of enclosed entity.
@@ -124,9 +179,42 @@ public abstract class Transaction<I,
                 final Message invalidState = ((AbstractValidatingBuilder) builder).internalBuild();
                 throw onConstraintViolations(invalidState, exception.getConstraintViolations());
             } finally {
+                this.active = false;
+                commitAttributeChanges();
+
                 entity.releaseTransaction();
             }
         }
+    }
+
+    private void commitAttributeChanges() {
+        entity.setLifecycleFlags(lifecycleFlags);
+        entity.setStateChanged(this.stateChanged);
+    }
+
+    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
+    void initAll(S state, Version version) {
+        final B builder = getBuilder();
+        builder.clear();
+        builder.mergeFrom(state);
+        initVersion(version);
+    }
+
+    Phase applyAnd(Message eventMessage, EventContext context) throws InvocationTargetException {
+        apply(eventMessage, context);
+        return new Phase(this);
+    }
+
+    B getBuilder() {
+        return builder;
+    }
+
+    boolean isStateChanged() {
+        return stateChanged;
+    }
+
+    private void markStateChanged() {
+        this.stateChanged = true;
     }
 
     private void injectTo(E entity) {
@@ -141,31 +229,6 @@ public abstract class Transaction<I,
         checkIsIncrement(this.version, newVersion);
         setVersion(newVersion);
     }
-
-    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
-    void initAll(S state, Version version) {
-        getBuilder().clear();
-        getBuilder().mergeFrom(state);
-        initVersion(version);
-    }
-
-    Phase applyAnd(Message eventMessage, EventContext context) throws InvocationTargetException {
-        apply(eventMessage, context);
-        return new Phase(this);
-    }
-
-    B getBuilder() {
-        return builder;
-    }
-
-    private void markStateChanged() {
-        this.stateChanged = true;
-    }
-
-    boolean isStateChanged() {
-        return stateChanged;
-    }
-
 
     private void setVersion(Version version) {
         checkNotNull(version);
@@ -200,19 +263,6 @@ public abstract class Transaction<I,
         setVersion(version);
     }
 
-    LifecycleFlags getLifecycleFlags() {
-        return lifecycleFlags;
-    }
-
-    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
-        checkNotNull(lifecycleFlags);
-        this.lifecycleFlags = lifecycleFlags;
-    }
-
-    protected E getEntity() {
-        return entity;
-    }
-
     protected static class Phase {
 
         private final Transaction underlyingTransaction;
@@ -228,7 +278,7 @@ public abstract class Transaction<I,
 
         protected Phase thenApply(Message eventMessage,
                                   EventContext context) throws
-                                                                   InvocationTargetException {
+                                                        InvocationTargetException {
             underlyingTransaction.apply(eventMessage, context);
             return this;
         }

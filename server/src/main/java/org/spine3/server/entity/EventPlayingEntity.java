@@ -117,7 +117,7 @@ public abstract class EventPlayingEntity <I,
      * @return {@code true} if it is active, {@code false} otherwise
      */
     private boolean isTransactionInProgress() {
-        final boolean result = this.transaction != null;
+        final boolean result = this.transaction != null && this.transaction.isActive();
         return result;
     }
 
@@ -140,12 +140,11 @@ public abstract class EventPlayingEntity <I,
     }
 
     void releaseTransaction() {
-        final boolean stateChanged = tx().isStateChanged();
-        final LifecycleFlags lifecycleFlags = tx().getLifecycleFlags();
         this.transaction = null;
+    }
 
+    void setStateChanged(boolean stateChanged) {
         this.stateChanged = stateChanged;
-        setLifecycleFlags(lifecycleFlags);
     }
 
     B builderFromState() {
