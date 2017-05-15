@@ -30,6 +30,8 @@ import org.spine3.validate.ValidatingBuilder;
 import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
+import static org.spine3.base.Versions.checkIsIncrement;
 import static org.spine3.server.entity.InvalidEntityStateException.onConstraintViolations;
 
 /**
@@ -45,10 +47,19 @@ public abstract class Transaction<I,
      */
     private final B builder;
 
+    /**
+     * The entity, which state is modified in this transaction.
+     */
     private final E entity;
 
+    /**
+     * The version of the entity, modified within this transaction.
+     */
     private volatile Version version;
 
+    /**
+     * The lifecycle flags of the entity, modified within this transaction.
+     */
     private volatile LifecycleFlags lifecycleFlags;
 
     /**
@@ -57,7 +68,6 @@ public abstract class Transaction<I,
      * {@linkplain RecordBasedRepository#findOrCreate(Object)} loaded or created.
      */
     private volatile boolean stateChanged;
-
 
     /**
      * Creates a new instance of {@code Transaction} and
@@ -71,19 +81,32 @@ public abstract class Transaction<I,
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
-        final Transaction<I, E, S, B> tx = this;
-        entity.injectTransaction(tx);
+
+        injectTo(entity);
     }
 
     protected Transaction(E entity, S state, Version version) {
         this(entity);
-        entity.getBuilder().mergeFrom(state);
-        setVersion(version);
+        initAll(state, version);
     }
 
+    /**
+     * Applies the given event message with its context to the currently modified entity.
+     *
+     * <p>This operation is always performed in scope of an active transaction.
+     *
+     * @param eventMessage the event message
+     * @param context      the event context
+     * @throws InvocationTargetException if case of any issues while applying the event
+     */
     protected abstract void apply(Message eventMessage, EventContext context)
             throws InvocationTargetException;
 
+    /**
+     * Applies all the outstanding state modififcations to the state of enclosed entity.
+     *
+     * @throws InvalidEntityStateException in case the new entity state is not valid
+     */
     protected void commit() throws InvalidEntityStateException {
 
         final B builder = getBuilder();
@@ -106,6 +129,25 @@ public abstract class Transaction<I,
         }
     }
 
+    private void injectTo(E entity) {
+        // assigning `this` to a variable to explicitly specify
+        // the generic bounds for Java compiler.
+        final Transaction<I, E, S, B> tx = this;
+        entity.injectTransaction(tx);
+    }
+
+    private void advanceVersion(Version newVersion) {
+        checkNotNull(newVersion);
+        checkIsIncrement(this.version, newVersion);
+        setVersion(newVersion);
+    }
+
+    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
+    void initAll(S state, Version version) {
+        getBuilder().clear();
+        getBuilder().mergeFrom(state);
+        initVersion(version);
+    }
 
     Phase applyAnd(Message eventMessage, EventContext context) throws InvocationTargetException {
         apply(eventMessage, context);
@@ -120,14 +162,42 @@ public abstract class Transaction<I,
         this.stateChanged = true;
     }
 
-    protected boolean isStateChanged() {
+    boolean isStateChanged() {
         return stateChanged;
     }
 
 
-    void setVersion(Version version) {
+    private void setVersion(Version version) {
         checkNotNull(version);
         this.version = version;
+    }
+
+    /**
+     * Initializes the entity with the passed version.
+     *
+     * <p>This method assumes that the entity version is zero.
+     * If this is not so, {@code IllegalStateException} will be thrown.
+     *
+     * <p>One of the usages for this method is for creating an entity instance
+     * from a storage.
+     *
+     * <p>To set a new version which is several numbers ahead please use
+     * {@link #advanceVersion(Version)}.
+     *
+     * @param version the version to set.
+     */
+    private void initVersion(Version version) {
+        checkNotNull(version);
+
+        final int versionNumber = this.version.getNumber();
+        if (versionNumber > 0) {
+            final String errMsg = format(
+                    "initVersion() called on an entity with non-zero version number (%d).",
+                    versionNumber
+            );
+            throw new IllegalStateException(errMsg);
+        }
+        setVersion(version);
     }
 
     LifecycleFlags getLifecycleFlags() {
@@ -147,12 +217,12 @@ public abstract class Transaction<I,
 
         private final Transaction underlyingTransaction;
 
-        public Phase(Transaction transaction) {
+        private Phase(Transaction transaction) {
             this.underlyingTransaction = transaction;
         }
 
         Phase thenAdvanceVersionFrom(Version current) {
-            underlyingTransaction.setVersion(Versions.increment(current));
+            underlyingTransaction.advanceVersion(Versions.increment(current));
             return this;
         }
 

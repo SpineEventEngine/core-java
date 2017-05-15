@@ -168,12 +168,8 @@ public abstract class EventPlayingEntity <I,
         updateState(stateToRestore, version);
     }
 
-    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
     protected void setInitialState(S stateToRestore, Version version) {
-        tx().setVersion(version);
-        final B builder = tx().getBuilder();
-        builder.clear();
-        builder.mergeFrom(stateToRestore);
+        tx().initAll(stateToRestore, version);
     }
 
     @Override
