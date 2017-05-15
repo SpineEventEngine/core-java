@@ -79,38 +79,33 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
-        for (Map.Entry<QueryOperator, Map<Column<?>, Object>> operation : queryParams.entrySet()) {
-            final boolean operationSuccessful = checkParams(operation.getValue(),
-                                                            entityColumns,
-                                                            operation.getKey());
-            if (!operationSuccessful) {
-                return false;
-            }
-        }
-        return true;
+        final ColumnValueMatcher columnValueMatcher = new ColumnValueMatcher(entityColumns);
+        queryParams.forEach(columnValueMatcher);
+        return columnValueMatcher.matches();
     }
 
-    private static boolean checkParams(Map<Column<?>, Object> params,
-                                Map<String, Column.MemoizedValue<?>> entityColumns,
-                                QueryOperator operator) {
-        if (params.isEmpty()) {
-            return true;
-        }
-        for (Map.Entry<Column<?>, Object> param : params.entrySet()) {
-            final Column<?> column = param.getKey();
-            final String columnName = column.getName();
+    private static class ColumnValueMatcher implements QueryParameters.ParameterConsumer {
 
-            final Object requiredValue = param.getValue();
-            final Column.MemoizedValue<?> actualValueWithMetadata = entityColumns.get(columnName);
-            if (actualValueWithMetadata == null) {
-                return false;
-            }
-            final Object actualValue = actualValueWithMetadata.getValue();
-            final boolean matches = compare(actualValue, operator, requiredValue);
-            if (!matches) {
-                return false;
-            }
+        private final Map<String, Column.MemoizedValue<?>> entityColumns;
+        private boolean currentlyMatches = true;
+
+        private ColumnValueMatcher(Map<String, Column.MemoizedValue<?>> entityColumns) {
+            this.entityColumns = entityColumns;
         }
-        return true;
+
+        @Override
+        public void consume(QueryOperator operator, Column<?> column, Object value) {
+            if (!currentlyMatches) {
+                return;
+            }
+            final String columnName = column.getName();
+            final Column.MemoizedValue<?> actualValue = entityColumns.get(columnName);
+            currentlyMatches = actualValue != null
+                               && compare(actualValue.getValue(), operator, value);
+        }
+
+        public boolean matches() {
+            return currentlyMatches;
+        }
     }
 }

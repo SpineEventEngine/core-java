@@ -23,13 +23,13 @@ package org.spine3.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
+import org.spine3.annotation.SPI;
 import org.spine3.client.QueryOperator;
 
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
@@ -37,9 +37,6 @@ import static org.spine3.client.QueryOperator.EQUAL;
 
 /**
  * The parameters of an {@link EntityQuery}.
- *
- * <p>The values of the parameters are mapped to the operators they are declared with.
- * // TODO:2017-05-15:dmytro.dashenkov: Improve javadoc.
  *
  * @author Dmytro Dashenkov
  */
@@ -56,6 +53,13 @@ public final class QueryParameters {
         return new QueryParameters(ImmutableMap.of(EQUAL, values));
     }
 
+    /**
+     * Retrieves the Query parameters which are compared with the given operator.
+     *
+     * @param operator the {@linkplain QueryOperator operator} of the parameter comparison
+     * @return a {@link Map} of the {@linkplain Column Entity Column meta information} to their
+     * values
+     */
     public ImmutableMap<Column<?>, Object> getParams(QueryOperator operator) {
         Map<Column<?>, Object> params = parameters.get(operator);
         params = params == null
@@ -64,8 +68,27 @@ public final class QueryParameters {
         return copyOf(params);
     }
 
-    public Set<Map.Entry<QueryOperator, Map<Column<?>, Object>>> entrySet() {
-        return parameters.entrySet();
+    /**
+     * Iterates over the Query parameters.
+     *
+     * <p>The iteration is performed synchronously to guarantee no unexpected behaviour when
+     * performing closure-based information within the {@code consumer}.
+     *
+     * @param consumer the {@link ParameterConsumer} processing each parameter separately.
+     */
+    public void forEach(ParameterConsumer consumer) {
+        for (Map.Entry<QueryOperator, Map<Column<?>, Object>> param : parameters.entrySet()) {
+            final QueryOperator operator = param.getKey();
+            applyConsumer(consumer, operator, param.getValue());
+        }
+    }
+
+    private static void applyConsumer(ParameterConsumer consumer,
+                                      QueryOperator operator,
+                                      Map<Column<?>, Object> paramValues) {
+        for (Map.Entry<Column<?>, Object> parameterValue : paramValues.entrySet()) {
+            consumer.consume(operator, parameterValue.getKey(), parameterValue.getValue());
+        }
     }
 
     @Override
@@ -118,22 +141,35 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder putAll(QueryOperator operator, Map<Column<?>, Object> values) {
-            checkNotNull(operator);
-            checkNotNull(values);
-
-            Map<Column<?>, Object> params = parameters.get(operator);
-            if (params == null) {
-                params = new HashMap<>();
-                params.putAll(values);
-                parameters.put(operator, params);
-            } else {
-                params.putAll(values);
-            }
-            return this;
-        }
         public QueryParameters build() {
             return new QueryParameters(parameters);
         }
+    }
+
+    /**
+     * An interface simplifying the iteration over the Query parameters.
+     *
+     * <p>The only usage is passing an instance of {@code ParameterConsumer} into
+     * {@link QueryParameters#forEach}. As the only method of the interface {@link #consume}
+     * aggregates all the information about a single Query parameter, there is no need in creating
+     * a special data class for that information.
+     */
+    @SPI
+    public interface ParameterConsumer {
+
+        /**
+         * Performs actions upon a parameter represented by the method arguments.
+         *
+         * <p>All the usages of this method are specified to be either synchronised. Also,
+         * no instances of {@code ParameterConsumer} are persisted in any context, which in
+         * conjunction with synchronization means that any closure based information exchange is
+         * totally safe.
+         *
+         * @param operator the operator of the parameter
+         * @param column the parameter target {@link Column}
+         * @param value the right operand in the comparison represented by the given parameter,
+         *              i.e. the parameter value
+         */
+        void consume(QueryOperator operator, Column<?> column, Object value);
     }
 }
