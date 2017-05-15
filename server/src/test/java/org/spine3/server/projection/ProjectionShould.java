@@ -38,6 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Wrapper.forInteger;
+import static org.spine3.server.projection.ProjectionTransaction.start;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ProjectionShould {
@@ -58,17 +59,25 @@ public class ProjectionShould {
         final String stringValue = newUuid();
         assertFalse(projection.isChanged());
 
+        ProjectionTransaction<?, ?, ?> tx;
+        tx        = start(projection);
         projection.handle(Wrapper.forString(stringValue), EventContext.getDefaultInstance());
+        tx.commit();
         assertTrue(projection.getState()
                              .getValue()
                              .contains(stringValue));
+
         assertTrue(projection.isChanged());
 
         final Integer integerValue = 1024;
+
+        tx = start(projection);
         projection.handle(forInteger(integerValue), EventContext.getDefaultInstance());
+        tx.commit();
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
+
         assertTrue(projection.isChanged());
     }
 

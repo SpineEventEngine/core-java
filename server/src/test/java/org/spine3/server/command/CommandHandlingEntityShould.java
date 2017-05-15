@@ -106,9 +106,10 @@ public class CommandHandlingEntityShould {
         }
 
         @Override
-        protected Transaction createFromBuilder(
-                StringValueValidatingBuilder builder) {
-            return new Transaction<HandlingEntity,
+        protected Transaction<Long, HandlingEntity, StringValue, StringValueValidatingBuilder>
+        createFromBuilder(StringValueValidatingBuilder builder) {
+            return new Transaction<Long,
+                                   HandlingEntity,
                                    StringValue,
                                    StringValueValidatingBuilder>(builder, this) {
                 @Override

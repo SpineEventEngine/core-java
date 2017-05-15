@@ -72,6 +72,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.procman.ProcManTransaction.start;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("OverlyCoupledClass")
@@ -123,7 +124,9 @@ public class ProcessManagerShould {
     }
 
     private void testDispatchEvent(Message event) {
+        final ProcManTransaction<?, ?, ?> tx = start(processManager);
         processManager.dispatchEvent(event, EVENT_CONTEXT);
+        tx.commit();
         assertEquals(AnyPacker.pack(event), processManager.getState());
     }
 
@@ -145,7 +148,9 @@ public class ProcessManagerShould {
     private List<Event> testDispatchCommand(Message commandMsg) {
         final CommandEnvelope envelope = CommandEnvelope.of(requestFactory.command()
                                                                           .create(commandMsg));
+        final ProcManTransaction<?, ?, ?> tx = start(processManager);
         final List<Event> events = processManager.dispatchCommand(envelope);
+        tx.commit();
         assertEquals(AnyPacker.pack(commandMsg), processManager.getState());
         return events;
     }

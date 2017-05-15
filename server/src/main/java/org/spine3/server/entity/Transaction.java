@@ -33,9 +33,10 @@ import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 /**
  * @author Alex Tymchenko
  */
-public abstract class Transaction<E extends EventPlayingEntity<?, S, B>,
+public abstract class Transaction<I,
+                                  E extends EventPlayingEntity<I, S, B>,
                                   S extends Message,
-                                  B extends ValidatingBuilder<S, ?>> {
+                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
      * The builder for the entity state.
@@ -56,15 +57,21 @@ public abstract class Transaction<E extends EventPlayingEntity<?, S, B>,
      */
     private volatile boolean stateChanged;
 
-    public Transaction(B builder, E entity) {
+    protected Transaction(B builder, E entity) {
         this.builder = builder;
         this.entity = entity;
+    }
+
+    protected Transaction(E entity) {
+        this(entity.newBuilderInstance(), entity);
+        final Transaction<I, E, S, B> esbTransaction = this;
+        entity.injectTransaction(esbTransaction);
     }
 
     protected abstract void apply(Message eventMessage, EventContext context)
             throws InvocationTargetException;
 
-    void commit() {
+    protected void commit() {
 
         try {
             final B builder = getBuilder();
@@ -80,6 +87,8 @@ public abstract class Transaction<E extends EventPlayingEntity<?, S, B>,
         } catch (ConstraintViolationThrowable violation) {
             // should not happen, as the `Builder` validates the input in its setters.
             throw illegalStateWithCauseOf(violation);
+        } finally {
+            entity.releaseTransaction();
         }
     }
 

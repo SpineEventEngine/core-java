@@ -32,15 +32,33 @@ import java.lang.reflect.InvocationTargetException;
 class ProjectionTransaction<I,
                             M extends Message,
                             B extends ValidatingBuilder<M, ? extends Message.Builder>>
-        extends Transaction<Projection<I, M, B>, M, B> {
+        extends Transaction<I, Projection<I, M, B>, M, B> {
 
     ProjectionTransaction(B builder, Projection<I, M, B> entity) {
         super(builder, entity);
+    }
+
+    private ProjectionTransaction(Projection<I, M, B> entity) {
+        super(entity);
     }
 
     @Override
     protected void apply(Message eventMessage, EventContext context) throws
                                                                      InvocationTargetException {
         getEntity().apply(eventMessage, context);
+    }
+
+    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
+    @Override
+    protected void commit() {
+        super.commit();
+    }
+
+    static <I,
+            M extends Message,
+            B extends ValidatingBuilder<M, ? extends Message.Builder>>
+    ProjectionTransaction<I, M, B> start(Projection<I, M, B> entity) {
+        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity);
+        return tx;
     }
 }

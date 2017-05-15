@@ -34,15 +34,33 @@ import java.lang.reflect.InvocationTargetException;
 class ProcManTransaction<I,
                          S extends Message,
                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        extends Transaction<ProcessManager<I, S, B>, S, B> {
+        extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
     ProcManTransaction(B builder, ProcessManager<I, S, B> entity) {
         super(builder, entity);
+    }
+
+    private ProcManTransaction(ProcessManager<I, S, B> entity) {
+        super(entity);
     }
 
     @Override
     protected void apply(Message eventMessage, EventContext context) throws
                                                                      InvocationTargetException {
         getEntity().dispatchEvent(eventMessage, context);
+    }
+
+    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
+    @Override
+    protected void commit() {
+        super.commit();
+    }
+
+    static <I,
+            S extends Message,
+            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    ProcManTransaction<I, S, B> start(ProcessManager<I, S, B> entity) {
+        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(entity);
+        return tx;
     }
 }

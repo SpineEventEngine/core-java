@@ -54,7 +54,7 @@ public abstract class EventPlayingEntity <I,
     private volatile boolean stateChanged;
 
     @Nullable
-    private volatile Transaction<EventPlayingEntity<I, S, B>, S, B> transaction;
+    private volatile Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> transaction;
 
     /**
      * Creates a new instance.
@@ -167,8 +167,15 @@ public abstract class EventPlayingEntity <I,
         return transaction;
     }
 
+    void injectTransaction(Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx) {
+        checkNotNull(tx);
+        this.transaction = tx;
+    }
 
     protected void releaseTransaction() {
+        if(transaction == null) {
+            return;     // no worries.
+        }
         checkNotNull(transaction);
 
         this.stateChanged = transaction.isStateChanged();
@@ -181,7 +188,10 @@ public abstract class EventPlayingEntity <I,
         this.transaction = createFromBuilder(builder);
     }
 
-    protected abstract Transaction createFromBuilder(B builder);
+    protected abstract Transaction<I,
+                                   ? extends EventPlayingEntity<I, S, B>,
+                                   S,
+                                   B> createFromBuilder(B builder);
 
 //    /**
 //     * Sets the passed state and version.
@@ -199,7 +209,7 @@ public abstract class EventPlayingEntity <I,
 
     }
 
-    private B newBuilderInstance() {
+    B newBuilderInstance() {
         @SuppressWarnings("unchecked")   // it's safe, as we rely on the definition of this class.
         final Class<? extends EventPlayingEntity<I, S, B>> aClass =
                 (Class<? extends EventPlayingEntity<I, S, B>>)getClass();

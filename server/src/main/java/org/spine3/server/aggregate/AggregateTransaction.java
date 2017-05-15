@@ -33,15 +33,34 @@ import java.lang.reflect.InvocationTargetException;
 class AggregateTransaction<I,
                            S extends Message,
                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
-        extends Transaction<Aggregate<I, S, B>, S, B> {
+        extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
     AggregateTransaction(B builder, Aggregate<I, S, B> aggregate) {
         super(builder, aggregate);
+    }
+
+    private AggregateTransaction(Aggregate<I, S, B> entity) {
+        super(entity);
     }
 
     @Override
     protected void apply(Message eventMessage, @Nullable EventContext ignored) throws
                                                                                InvocationTargetException {
         getEntity().invokeApplier(eventMessage);
+    }
+
+
+    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
+    @Override
+    protected void commit() {
+        super.commit();
+    }
+
+    static <I,
+            S extends Message,
+            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    AggregateTransaction<I, S, B> start(Aggregate<I, S, B> entity) {
+        final AggregateTransaction<I, S, B> tx = new AggregateTransaction<>(entity);
+        return tx;
     }
 }

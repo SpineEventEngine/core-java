@@ -285,9 +285,12 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = findOrCreate(id);
+        final ProjectionTransaction<I, ?, ?> tx =
+                ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         projection.handle(eventMessage, context);
+        tx.commit();
 
-        if(projection.isChanged()) {
+        if (projection.isChanged()) {
             final Timestamp eventTime = context.getTimestamp();
 
             if (isBulkWriteInProgress()) {
