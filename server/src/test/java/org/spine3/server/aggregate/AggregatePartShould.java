@@ -21,20 +21,23 @@
 package org.spine3.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Version;
-import org.spine3.base.Versions;
+import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.InvalidEntityStateException;
+import org.spine3.test.TestActorRequestFactory;
+import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
+import org.spine3.testdata.Sample;
 import org.spine3.validate.ConstraintViolation;
 
 import java.lang.reflect.Constructor;
@@ -60,7 +63,9 @@ public class AggregatePartShould {
     private TaskPart taskPart;
     private TaskDescriptionPart taskDescriptionPart;
     private TaskRepository taskRepository;
-    private TaskDescriptionRepository taskDescriptionRepository;
+    private static final String TASK_DESCRIPTION = "Description";
+    private static final TestActorRequestFactory factory =
+            TestActorRequestFactory.newInstance(AggregatePartShould.class);
 
     @Before
     public void setUp() {
@@ -68,10 +73,12 @@ public class AggregatePartShould {
                                        .build();
         root = new AnAggregateRoot(boundedContext, newUuid());
         taskPart = new TaskPart(root);
+        setAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository(boundedContext);
+        final TaskDescriptionRepository taskDescriptionRepository =
+                new TaskDescriptionRepository(boundedContext);
         boundedContext.register(taskRepository);
-        taskDescriptionRepository = new TaskDescriptionRepository(boundedContext);
         boundedContext.register(taskDescriptionRepository);
     }
 
@@ -96,14 +103,16 @@ public class AggregatePartShould {
 
     @Test
     public void return_aggregate_part_state_by_class() {
-        final Task newTask = Task.newBuilder().setDescription("Description").build();
-        final Version version = Versions.create();
-        final TaskAdded taskAdded = taskPart.handle(AddTask.getDefaultInstance());
-        taskPart.apply(taskAdded);
-        taskPart.injectState(newTask, version);
         taskRepository.store(taskPart);
         final Task task = taskDescriptionPart.getPartState(Task.class);
-        assertEquals("Description", task.getDescription());
+        assertEquals(TASK_DESCRIPTION, task.getDescription());
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void throw_exception_when_trying_to_getpartstate_from_null_aggregate_part() {
+        taskRepository.store(taskPart);
+        final Task task = taskDescriptionPart.getPartState(null);
+        assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -169,17 +178,27 @@ public class AggregatePartShould {
     /*
      Test environment classes
     ***************************/
-
     private static class AnAggregateRoot extends AggregateRoot<String> {
         protected AnAggregateRoot(BoundedContext boundedContext, String id) {
             super(boundedContext, id);
         }
+
     }
 
-    private static class WrongAggregatePart extends AggregatePart<String,
-            StringValue,
-            StringValue.Builder,
-            AnAggregateRoot> {
+    private static CommandEnvelope env(Message commandMessage) {
+        return CommandEnvelope.of(factory.command().create(commandMessage));
+    }
+
+    private void setAggregatePart() {
+        final AddTask addTask =
+                ((AddTask.Builder) Sample.builderForType(AddTask.class))
+                        .setProjectId(ProjectId.getDefaultInstance())
+                        .build();
+        taskPart.dispatchForTest(env(addTask));
+    }
+
+    private static class WrongAggregatePart
+            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
         protected WrongAggregatePart() {
@@ -187,20 +206,16 @@ public class AggregatePartShould {
         }
     }
 
-    private static class AnAggregatePart extends AggregatePart<String,
-            User,
-            User.Builder,
-            AnAggregateRoot> {
+    private static class AnAggregatePart
+            extends AggregatePart<String, User, User.Builder, AnAggregateRoot> {
 
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
         }
     }
 
-    private static class TaskPart extends AggregatePart<String,
-            Task,
-            Task.Builder,
-            AnAggregateRoot> {
+    private static class TaskPart
+            extends AggregatePart<String, Task, Task.Builder, AnAggregateRoot> {
 
         private TaskPart(AnAggregateRoot root) {
             super(root);
@@ -215,14 +230,12 @@ public class AggregatePartShould {
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setDescription("Description").build();
+            getBuilder().setDescription(TASK_DESCRIPTION).build();
         }
     }
 
-    private static class TaskDescriptionPart extends AggregatePart<String,
-            StringValue,
-            StringValue.Builder,
-            AnAggregateRoot> {
+    private static class TaskDescriptionPart
+            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
 
         protected TaskDescriptionPart(AnAggregateRoot root) {
             super(root);
@@ -239,7 +252,7 @@ public class AggregatePartShould {
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setValue("Description value");
+            getBuilder().setValue("Description value").build();
         }
     }
 
@@ -250,6 +263,7 @@ public class AggregatePartShould {
             super(boundedContext);
         }
     }
+
     private static class TaskDescriptionRepository
             extends AggregatePartRepository<String, TaskDescriptionPart, AnAggregateRoot> {
 
