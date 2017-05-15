@@ -30,7 +30,8 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.QueryParameter.Operator;
+
+import org.spine3.client.QueryOperator;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -78,7 +79,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
-        for (Map.Entry<Operator, Map<Column<?>, Object>> operation : queryParams.entrySet()) {
+        for (Map.Entry<QueryOperator, Map<Column<?>, Object>> operation : queryParams.entrySet()) {
             final boolean operationSuccied = checkParams(operation.getValue(),
                                                          entityColumns,
                                                          operation.getKey());
@@ -91,7 +92,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
 
     private static boolean checkParams(Map<Column<?>, Object> params,
                                 Map<String, Column.MemoizedValue<?>> entityColumns,
-                                Operator operator) {
+                                QueryOperator operator) {
         if (params.isEmpty()) {
             return true;
         }

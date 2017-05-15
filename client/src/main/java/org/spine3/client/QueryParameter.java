@@ -20,28 +20,22 @@
 
 package org.spine3.client;
 
+import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.spine3.protobuf.AnyPacker;
-
-import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.client.QueryParameter.Operator.EQUAL;
-import static org.spine3.client.QueryParameter.Operator.GREATER_THEN;
+import static org.spine3.client.QueryOperator.EQUAL;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.TypeConverter.toAny;
-import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
  * A parameter of a {@link Query}.
  *
  * <p>This class may be considered a filter for the query. An instance contains the name of
  * the Entity Column to filter by, the value of the Column and
- * the {@linkplain Operator comparison operator}.
+ * the {@linkplain QueryOperator comparison operator}.
  *
  * <p>The supported types for querying are {@linkplain Message Message types} and Protobuf
  * primitives.
@@ -52,9 +46,9 @@ public final class QueryParameter {
 
     private final String columnName;
     private final Any value;
-    private final Operator operator;
+    private final QueryOperator operator;
 
-    private QueryParameter(String columnName, Any value, Operator operator) {
+    private QueryParameter(String columnName, Any value, QueryOperator operator) {
         this.columnName = columnName;
         this.value = value;
         this.operator = operator;
@@ -77,25 +71,6 @@ public final class QueryParameter {
     }
 
     /**
-     * Creates new {@code QueryParameter} stating that the stored {@link Timestamp} value represents
-     * the time which is later then the given value.
-     *
-     * <p>The instances created with this method have {@link Operator#GREATER_THEN} operator.
-     *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the value to compere upon
-     * @return new instance of QueryParameter
-     */
-    public static QueryParameter laterThen(String columnName, Timestamp value) {
-        checkNotNull(columnName);
-        checkNotNull(value);
-        final Any wrappedValue = AnyPacker.pack(value);
-        final QueryParameter parameter = new QueryParameter(columnName, wrappedValue, GREATER_THEN);
-        return parameter;
-    }
-
-    /**
      * @return the name of the Entity Column to query by
      */
     public String getColumnName() {
@@ -112,13 +87,13 @@ public final class QueryParameter {
     /**
      * Retrieves the comparison operator of this {@code QueryParameter}.
      *
-     * <p>At the moment, all the parameters have the {@link Operator#EQUAL equality comparison}
-     * except those that {@link #laterThen compare} two {@link Timestamp} instances. Though,
-     * this behavior is a subject of change.
+     * <p>At the moment, all the parameters aim only
+     * the {@link QueryOperator#EQUAL equality comparison}.
      *
      * @return the comparison operator
      */
-    public Operator getOperator() {
+    @Beta
+    public QueryOperator getOperator() {
         return operator;
     }
 
@@ -154,51 +129,4 @@ public final class QueryParameter {
         return sb.toString();
     }
 
-    /**
-     * An enumeration of all supported value comparison operators applicable to the Entity Columns.
-     */
-    public enum Operator {
-
-        /**
-         * Equality operator ({@code =}).
-         */
-        EQUAL("=") {
-            @Override
-            public <T> boolean matches(@Nullable T left, @Nullable T right) {
-                return Objects.equal(left, right);
-            }
-        },
-
-        /**
-         * Comparison operator stating that the stored value is greater then ({@code >})
-         * the passed value.
-         */
-        GREATER_THEN(">") {
-            @Override
-            public <T> boolean matches(@Nullable T left, @Nullable T right) {
-                if (left == null || right == null) {
-                    return false;
-                }
-                checkState(left instanceof Timestamp,
-                           "Invalid comparison %s %s %s." ,
-                           left.toString(), this, right);
-                final Timestamp tsLeft = (Timestamp) left;
-                final Timestamp tsRight = (Timestamp) right;
-                return isLaterThan(tsLeft, tsRight);
-            }
-        };
-
-        private final String representation;
-
-        Operator(String repr) {
-            this.representation = repr;
-        }
-
-        public abstract <T> boolean matches(@Nullable T left, @Nullable T right);
-
-        @Override
-        public String toString() {
-            return representation;
-        }
-    }
 }

@@ -23,7 +23,7 @@ package org.spine3.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
-import org.spine3.client.QueryParameter.Operator;
+import org.spine3.client.QueryOperator;
 
 import java.util.Collections;
 import java.util.EnumMap;
@@ -33,7 +33,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
-import static org.spine3.client.QueryParameter.Operator.EQUAL;
+import static org.spine3.client.QueryOperator.EQUAL;
 
 /**
  * The parameters of an {@link EntityQuery}.
@@ -45,9 +45,9 @@ import static org.spine3.client.QueryParameter.Operator.EQUAL;
  */
 public final class QueryParameters {
 
-    private final ImmutableMap<Operator, Map<Column<?>, Object>> parameters;
+    private final ImmutableMap<QueryOperator, Map<Column<?>, Object>> parameters;
 
-    private QueryParameters(Map<Operator, Map<Column<?>, Object>> parameters) {
+    private QueryParameters(Map<QueryOperator, Map<Column<?>, Object>> parameters) {
         this.parameters = copyOf(parameters);
     }
 
@@ -56,7 +56,7 @@ public final class QueryParameters {
         return new QueryParameters(ImmutableMap.of(EQUAL, values));
     }
 
-    public ImmutableMap<Column<?>, Object> getParams(Operator operator) {
+    public ImmutableMap<Column<?>, Object> getParams(QueryOperator operator) {
         Map<Column<?>, Object> params = parameters.get(operator);
         params = params == null
                 ? Collections.<Column<?>, Object>emptyMap()
@@ -64,7 +64,7 @@ public final class QueryParameters {
         return copyOf(params);
     }
 
-    public Set<Map.Entry<Operator, Map<Column<?>, Object>>> entrySet() {
+    public Set<Map.Entry<QueryOperator, Map<Column<?>, Object>>> entrySet() {
         return parameters.entrySet();
     }
 
@@ -96,14 +96,14 @@ public final class QueryParameters {
 
     public static class Builder {
 
-        private final Map<Operator, Map<Column<?>, Object>> parameters
-                = new EnumMap<>(Operator.class);
+        private final Map<QueryOperator, Map<Column<?>, Object>> parameters
+                = new EnumMap<>(QueryOperator.class);
 
         private Builder() {
             // Prevent direct initialization
         }
 
-        public Builder put(Operator operator, Column<?> column, Object value) {
+        public Builder put(QueryOperator operator, Column<?> column, Object value) {
             checkNotNull(operator);
             checkNotNull(column);
 
@@ -118,7 +118,7 @@ public final class QueryParameters {
             return this;
         }
 
-        public Builder putAll(Operator operator, Map<Column<?>, Object> values) {
+        public Builder putAll(QueryOperator operator, Map<Column<?>, Object> values) {
             checkNotNull(operator);
             checkNotNull(values);
 

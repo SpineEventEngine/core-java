@@ -31,7 +31,6 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.spine3.client.QueryParameter.eq;
-import static org.spine3.client.QueryParameter.laterThen;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -63,16 +62,14 @@ public class QueryParameterShould {
         final QueryParameter parameter2 = eq(param1, foobarValue);
         final QueryParameter parameter3 = eq(param1, baz);
         final QueryParameter parameter4 = eq(param2, foobar);
-        final QueryParameter parameter5 = laterThen(param3, timestampValue);
-        final QueryParameter parameter6 = eq(param3, timestampValue);
-        final QueryParameter parameter7 = eq(param1, foobar);
+        final QueryParameter parameter5 = eq(param3, timestampValue);
+        final QueryParameter parameter6 = eq(param1, foobar);
 
         new EqualsTester()
-                .addEqualityGroup(parameter1, parameter2, parameter7)
+                .addEqualityGroup(parameter1, parameter2, parameter6)
                 .addEqualityGroup(parameter3)
                 .addEqualityGroup(parameter4)
                 .addEqualityGroup(parameter5)
-                .addEqualityGroup(parameter6)
                 .testEquals();
     }
 
@@ -98,18 +95,6 @@ public class QueryParameterShould {
 
         assertEquals(name, param.getColumnName());
         assertEquals(pack(value), param.getValue());
-        assertEquals(QueryParameter.Operator.EQUAL, param.getOperator());
-    }
-
-    @Test
-    public void create_LATER_THEN_instances() {
-        final String name = "blurryColumn";
-        final Timestamp value = getCurrentTime();
-
-        final QueryParameter param = laterThen(name, value);
-
-        assertEquals(name, param.getColumnName());
-        assertEquals(pack(value), param.getValue());
-        assertEquals(QueryParameter.Operator.GREATER_THEN, param.getOperator());
+        assertEquals(QueryOperator.EQUAL, param.getOperator());
     }
 }
