@@ -24,13 +24,12 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.client.EntityFilters;
-import org.spine3.protobuf.AnyPacker;
+import org.spine3.client.TimestampFilter;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 
 import javax.annotation.Nullable;
@@ -106,12 +105,17 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      * @return new instance of {@link EntityFilters} filtering the events by their timestamp
      */
     private static EntityFilters toEntityFilters(EventStreamQuery query) {
-        final Timestamp timestamp = query.getAfter();
-        final Any wrappedTimestamp = AnyPacker.pack(timestamp);
-        final EntityFilters entityFilters =
-                EntityFilters.newBuilder()
-                             .putColumnFilter(EventEntity.TIME_COLUMN, wrappedTimestamp)
-                             .build();
+        final EntityFilters.Builder builder = EntityFilters.newBuilder();
+        if (query.hasAfter()) {
+            final Timestamp timestamp = query.getAfter();
+            final TimestampFilter timestampFilter =
+                    TimestampFilter.newBuilder()
+                                   .setColumnsName(EventEntity.TIME_COLUMN)
+                                   .setValue(timestamp)
+                                   .build();
+            builder.setTimeAfter(timestampFilter);
+        }
+        final EntityFilters entityFilters = builder.build();
         return entityFilters;
     }
 
