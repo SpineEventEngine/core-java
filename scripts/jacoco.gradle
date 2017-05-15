@@ -147,7 +147,7 @@ class CodebaseFilter {
     }
 }
 
-// Create an aggregate coverage report across modules, exluding the generated content from the coverage stats.
+// Create an aggregate coverage report across modules, excluding the generated content from the coverage stats.
 //
 task jacocoRootReport(dependsOn: subprojects.test, type: JacocoReport) {
     additionalSourceDirs = CodebaseFilter.nonGeneratedOnly(files(subprojects.sourceSets.main.java.srcDirs))

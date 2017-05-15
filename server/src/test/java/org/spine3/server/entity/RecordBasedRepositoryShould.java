@@ -26,13 +26,16 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.tenant.TenantAwareTest;
+import org.spine3.test.Given;
 import org.spine3.test.Tests;
 
 import java.util.Collection;
@@ -45,15 +48,18 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Verify.assertContains;
+import static org.spine3.test.Verify.assertNotContains;
 import static org.spine3.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ConstantConditions")
-public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>,
+public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>
+                                                          & TestEntityWithStringColumn,
                                                   I,
-                                                  S extends Message> extends TenantAwareTest {
+                                                  S extends Message>
+                                                  extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -117,8 +123,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         return repository.findOrCreate(id);
     }
 
-    private ImmutableCollection<E> find(final EntityFilters filters,
-                                        final FieldMask firstFieldOnly) {
+    private ImmutableCollection<E> find(EntityFilters filters,
+                                        FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }
 
@@ -181,6 +187,33 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     }
 
     @Test
+    public void find_entities_by_query() {
+        final I id1 = createId(271);
+        final I id2 = createId(314);
+        final Class<E> entityClass = repository.getEntityClass();
+        final E entity1 = Given.entityOfClass(entityClass)
+                               .withId(id1)
+                               .build();
+        final E entity2 = Given.entityOfClass(entityClass)
+                               .withId(id2)
+                               .build();
+        repository.store(entity1);
+        repository.store(entity2);
+
+        final String fieldPath = "idString";
+        final StringValue fieldValue = StringValue.newBuilder()
+                                                  .setValue(id1.toString())
+                                                  .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .putColumnFilter(fieldPath, AnyPacker.pack(fieldValue))
+                                                   .build();
+        final Collection<E> found = repository.find(filters, FieldMask.getDefaultInstance());
+        assertSize(1, found);
+        assertContains(entity1, found);
+        assertNotContains(entity2, found);
+    }
+
+    @Test
     public void find_no_entities_if_empty() {
         final Collection<E> found = loadAll();
         assertSize(0, found);
@@ -208,7 +241,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
             ids.add(entities.get(i)
                             .getId());
         }
-        final Entity<I,S> sideEntity = createEntity();
+        final Entity<I, S> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
         final Collection<E> found = loadMany(ids);

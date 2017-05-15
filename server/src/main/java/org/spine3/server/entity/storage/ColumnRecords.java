@@ -65,6 +65,7 @@ public class ColumnRecords {
         checkNotNull(destination);
         checkNotNull(recordWithColumns);
         checkNotNull(columnTypeRegistry);
+        checkNotNull(mapColumnIdentifier);
         checkArgument(recordWithColumns.hasColumns(),
                       "Passed record has no Entity Columns.");
 

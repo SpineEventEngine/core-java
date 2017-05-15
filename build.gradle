@@ -35,7 +35,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.9.3-SNAPSHOT'
+        spineVersion = '0.9.4-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
@@ -310,8 +310,12 @@ apply from: publishPlugin
 apply plugin: 'org.spine3.tools.gcs-plugin'
 
 cleanGCS {
+    final Properties properties = new Properties()
+    final File gcsProperties = project.file("gcs.properties")
+    properties.load(gcsProperties.newDataInputStream())
+
     authKeyPath = "gcs-auth-key.json"
-    bucketName = "spine-dev.appspot.com"
-    targetFolder = "core-java/builds"
+    bucketName = properties.getProperty("artifacts.bucket")
+    targetFolder = properties.getProperty("artifacts.folder")
     threshold = TimeCategory.getDays(30)
 }
