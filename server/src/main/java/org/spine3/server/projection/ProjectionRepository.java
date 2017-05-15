@@ -328,7 +328,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             storeNow(projection, eventTime);
         }
 
-        stand.post(projection, context.getCommandContext());
+        // Do not post to stand during CatchUp.
+        if (getStatus() != Status.CATCHING_UP) {
+            stand.post(projection, context.getCommandContext());
+        }
     }
 
     /**
