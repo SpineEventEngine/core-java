@@ -253,22 +253,24 @@ public abstract class Aggregate<I,
 
         final List<Event> events = newArrayListWithCapacity(messages.size());
 
-        Version currentVersion = getVersion();
+        Version projectedEventVersion = getVersion();
 
         for (Message eventOrMessage : messages) {
+
+            // Applying each message would increment the entity version.
+            // Therefore we should simulate this behaviour.
+            projectedEventVersion = Versions.increment(projectedEventVersion);
             final Message eventMessage = ensureEventMessage(eventOrMessage);
 
             final Event event;
             if (eventOrMessage instanceof Event) {
                 event = importEvent((Event) eventOrMessage,
                                     envelope.getCommandContext(),
-                                    currentVersion);
+                                    projectedEventVersion);
             } else {
-                event = eventFactory.createEvent(eventMessage, currentVersion);
+                event = eventFactory.createEvent(eventMessage, projectedEventVersion);
             }
             events.add(event);
-
-            currentVersion = Versions.increment(currentVersion);
         }
         play(events);
         uncommittedEvents.addAll(events);
@@ -327,17 +329,6 @@ public abstract class Aggregate<I,
         }
         return eventMsg;
     }
-
-//    /**
-//     * Applies an event to the aggregate.
-//     *
-//     * @param eventMessage an event message
-//     * @throws InvocationTargetException    if an exception occurred when calling event applier
-//     */
-//    protected void apply(Message eventMessage,
-//                         @Nullable EventContext ignored) throws InvocationTargetException {
-//        invokeApplier(eventMessage);
-//    }
 
     /**
      * Restores the state and version from the passed snapshot.

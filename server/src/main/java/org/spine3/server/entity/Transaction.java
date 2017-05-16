@@ -23,7 +23,6 @@ import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
-import org.spine3.base.Versions;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -310,8 +309,8 @@ public abstract class Transaction<I,
             this.underlyingTransaction = transaction;
         }
 
-        Phase thenAdvanceVersionFrom(Version current) {
-            underlyingTransaction.advanceVersion(Versions.increment(current));
+        Phase thenAdvanceVersionTo(Version version) {
+            underlyingTransaction.advanceVersion(version);
             return this;
         }
 

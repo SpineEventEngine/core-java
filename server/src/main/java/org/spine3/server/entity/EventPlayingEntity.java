@@ -127,7 +127,7 @@ public abstract class EventPlayingEntity <I,
             final EventContext context = event.getContext();
             try {
                 tx().applyAnd(message, context)
-                           .thenAdvanceVersionFrom(context.getVersion());
+                           .thenAdvanceVersionTo(context.getVersion());
             } catch (InvocationTargetException e) {
                 throw illegalStateWithCauseOf(e);
             }

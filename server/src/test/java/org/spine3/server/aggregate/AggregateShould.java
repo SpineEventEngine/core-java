@@ -133,18 +133,17 @@ public class AggregateShould {
         assertEquals(version + 1, aggregate.versionNumber());
     }
 
-    //TODO:5/13/17:alex.tymchenko: clarify this behaviour
-//    @Test
-//    public void write_its_version_into_event_context() {
-//        aggregate.dispatchForTest(env(createProject));
-//
-//        // Get the first event since the command handler produces only one event message.
-//        final Event event = aggregate.getUncommittedEvents()
-//                                     .get(0);
-//
-//        assertEquals(aggregate.getVersion(), event.getContext()
-//                                                  .getVersion());
-//    }
+    @Test
+    public void write_its_version_into_event_context() {
+        aggregate.dispatchForTest(env(createProject));
+
+        // Get the first event since the command handler produces only one event message.
+        final Event event = aggregate.getUncommittedEvents()
+                                     .get(0);
+
+        assertEquals(aggregate.getVersion(), event.getContext()
+                                                  .getVersion());
+    }
 
     @Test
     public void handle_only_dispatched_command() {
