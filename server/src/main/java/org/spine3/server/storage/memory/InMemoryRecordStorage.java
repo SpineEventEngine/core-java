@@ -23,14 +23,15 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
+import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
-import org.spine3.server.storage.ReadRecords;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.users.TenantId;
 
@@ -138,11 +139,11 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
      ******************/
 
     @Override
-    public RecordStorage.BeamIO<I> getIO() {
+    public RecordStorageIO<I> getIO() {
         return new BeamIO<>(this);
     }
 
-    private static class BeamIO<I> extends RecordStorage.BeamIO<I> {
+    private static class BeamIO<I> extends RecordStorageIO<I> {
 
         private final InMemoryRecordStorage<I> storage;
 
@@ -151,16 +152,16 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         }
 
         @Override
-        public ReadRecords<I> readAll(TenantId tenantId) {
+        public Read<I> readAll(TenantId tenantId) {
             final List<I> index = readIndex();
             final ImmutableList<KV<I, EntityRecord>> records = readMany(tenantId, index);
-            return new AsTransform<>(records);
+            return new AsTransform<>(tenantId, records);
         }
 
         @Override
-        public ReadRecords<I> read(TenantId tenantId, Iterable<I> ids) {
+        public Read<I> read(TenantId tenantId, Iterable<I> ids) {
             final ImmutableList<KV<I, EntityRecord>> records = readMany(tenantId, ids);
-            return new AsTransform<>(records);
+            return new AsTransform<>(tenantId, records);
         }
 
         private ImmutableList<KV<I, EntityRecord>> readMany(final TenantId tenantId,
@@ -195,11 +196,12 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         /**
          * Transforms passed records into {@link PCollection}.
          */
-        private static class AsTransform<I> extends ReadRecords<I> {
+        private static class AsTransform<I> extends Read<I> {
             private static final long serialVersionUID = 0L;
             private final ImmutableList<KV<I, EntityRecord>> records;
 
-            private AsTransform(ImmutableList<KV<I, EntityRecord>> records) {
+            private AsTransform(TenantId tenantId, ImmutableList<KV<I, EntityRecord>> records) {
+                super(StaticValueProvider.of(tenantId), null);
                 this.records = records;
             }
 

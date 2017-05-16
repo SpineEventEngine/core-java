@@ -282,7 +282,7 @@ public abstract class EventStore implements AutoCloseable {
          *****************/
 
         @Override
-        public ReadEvents query(TenantId tenantId, EventPredicate query) {
+        public EventStoreIO.Read query(TenantId tenantId, EventPredicate query) {
             return storage.query(tenantId, query);
         }
     }
@@ -413,5 +413,6 @@ public abstract class EventStore implements AutoCloseable {
      ******************/
 
     /** Obtains query transform. */
-    public abstract ReadEvents query(TenantId tenantId, EventPredicate query);
+    public abstract EventStoreIO.Read query(TenantId tenantId, EventPredicate query);
+
 }

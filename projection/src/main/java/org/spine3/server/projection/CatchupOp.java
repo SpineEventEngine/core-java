@@ -21,15 +21,18 @@
 package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.transforms.Combine;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.FlatMapElements;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.Keys;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
@@ -44,6 +47,8 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.users.TenantId;
 
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.builder;
@@ -90,7 +95,15 @@ public class CatchupOp<I> {
         final PCollection<KV<I, Iterable<Event>>> groupped =
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create());
 
+        // Get IDs for all the projections.
         final PCollection<I> ids = groupped.apply(Keys.<I>create());
+        final PCollection<List<I>> idList = ids.apply(Combine.globally(new GatherIds<I>()));
+
+        final PCollection<KV<I, EntityRecord>> recordsById = idList.apply(
+                ParDo.of(new DoFn<List<I>, KV<I, EntityRecord>>() {
+                    private static final long serialVersionUID = 0L;
+                    //TODO:2017-05-16:alexander.yevsyukov: Load map by ID.
+                }));
 
         // Apply events to projections.
         //TODO:2017-05-15:alexander.yevsyukov: Implement.
@@ -103,6 +116,56 @@ public class CatchupOp<I> {
         // Sort last timestamps of last events and #writeLastHandledEventTime().
 
         return pipeline;
+    }
+
+    private static class ReadProjectionRecords<I> extends DoFn<List<I>, KV<I, EntityRecord>> {
+        private static final long serialVersionUID = 0L;
+        private final TenantId tenantId;
+
+        private ReadProjectionRecords(TenantId tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final List<I> ids = c.element();
+
+        }
+
+    }
+
+    private static class GatherIds<I> extends Combine.CombineFn<I, GatherIds.Accum<I>, List<I>> {
+
+        private static final long serialVersionUID = 0L;
+
+        @Override
+        public Accum<I> createAccumulator() {
+            return new Accum<>();
+        }
+
+        @Override
+        public Accum<I> addInput(Accum<I> accumulator, I input) {
+            accumulator.list.add(input);
+            return accumulator;
+        }
+
+        @Override
+        public Accum<I> mergeAccumulators(Iterable<Accum<I>> accumulators) {
+            final Accum<I> result = new Accum<>();
+            for (Accum<I> accumulator : accumulators) {
+                result.list.addAll(accumulator.list);
+            }
+            return result;
+        }
+
+        @Override
+        public List<I> extractOutput(Accum<I> accumulator) {
+            return accumulator.list;
+        }
+
+        static class Accum<I> {
+            private final LinkedList<I> list = Lists.newLinkedList();
+        }
     }
 
     public PipelineResult run() {
@@ -151,7 +214,6 @@ public class CatchupOp<I> {
 
             final Projection<I, ?> projection = null; //TODO:2017-05-15:alexander.yevsyukov: Load projection
             // Apply events
-
 
         }
     }

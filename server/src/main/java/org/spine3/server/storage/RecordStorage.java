@@ -24,9 +24,6 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import org.apache.beam.sdk.transforms.DoFn;
-import org.joda.time.Instant;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -34,13 +31,11 @@ import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
-import org.spine3.users.TenantId;
 
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.protobuf.util.Timestamps.toMillis;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -275,67 +270,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      ******************/
 
     /**
-     * Obtains {@link BeamIO} instance for read/write operations with this record storage.
+     * Obtains {@link RecordStorageIO} instance for read/write operations with this record storage.
      */
-    public abstract BeamIO<I> getIO();
-
-    /**
-     * Abstract base for I/O operations based on Apache Beam.
-     *
-     * @param <I> the type of indexes in the storage.
-     */
-    public abstract static class BeamIO<I> {
-
-        /**
-         * Obtains a transformation for reading all the records in the storage.
-         *
-         * @param tenantId the ID of the tenant for whom records belong
-         */
-        public abstract ReadRecords<I> readAll(TenantId tenantId);
-
-        /**
-         * Obtains a transformation for reading entity records with the passed indexes.
-         */
-        public abstract ReadRecords<I> read(TenantId tenantId, Iterable<I> ids);
-
-        /**
-         * Obtains transformation for extracting an entity state from {@link EntityRecord}s.
-         *
-         * @param <S> the type of the entity state.
-         */
-        public static <S extends Message> UnpackFn<S> unpack() {
-            return new UnpackFn<>();
-        }
-
-        /**
-         * Converts Protobuf {@link Timestamp} instance to Joda Time {@link Instant}.
-         *
-         * <p>Nanoseconds are lost during the conversion as {@code Instant} keeps time with the
-         * millis precision.
-         */
-        public static Instant toInstant(Timestamp timestamp) {
-            final long millis = toMillis(timestamp);
-            return new Instant(millis);
-        }
-
-        /**
-         * Extracts the state of an entity from a {@link EntityRecord}.
-         *
-         * @param <S> the type of the entity state
-         */
-        public static class UnpackFn<S extends Message> extends DoFn<EntityRecord, S> {
-            private static final long serialVersionUID = 0L;
-
-            @ProcessElement
-            public void processElement(ProcessContext c) {
-                final S entityState = doUnpack(c);
-                c.output(entityState);
-            }
-
-            protected S doUnpack(ProcessContext c) {
-                final EntityRecord record = c.element();
-                return AnyPacker.unpack(record.getState());
-            }
-        }
-    }
+    public abstract RecordStorageIO<I> getIO();
 }

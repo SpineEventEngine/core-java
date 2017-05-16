@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.RecordStorageIO;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -114,7 +115,7 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
      ******************/
 
     @Override
-    public BeamIO<I> getIO() {
+    public RecordStorageIO<I> getIO() {
         return recordStorage.getIO();
     }
 }

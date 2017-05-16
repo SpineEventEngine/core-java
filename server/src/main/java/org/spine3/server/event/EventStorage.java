@@ -24,25 +24,16 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
-import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.Values;
-import org.apache.beam.sdk.values.KV;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
-import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.storage.ReadRecords;
-import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-
-import static org.spine3.server.storage.RecordStorage.BeamIO.toInstant;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -96,65 +87,10 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      * Obtains transform for loading all events (from the tenant's slice) matching
      * the passed predicate.
      */
-    ReadEvents query(TenantId tenantId, EventPredicate predicate) {
-        final ReadRecords<EventId> readAll = recordStorage().getIO()
-                                                            .readAll(tenantId);
-        return new QueryEvents(readAll, predicate);
-    }
-
-    /**
-     * Reads events matching the passed predicate.
-     */
-    private static class QueryEvents extends ReadEvents {
-
-        private static final long serialVersionUID = 0L;
-        private final ReadRecords<EventId> readAll;
-        private final EventPredicate predicate;
-
-        private QueryEvents(ReadRecords<EventId> readAll, EventPredicate predicate) {
-            this.readAll = readAll;
-            this.predicate = predicate;
-        }
-
-        @Override
-        public PCollection<Event> expand(PBegin input) {
-            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(readAll);
-            final PCollection<EntityRecord> allRecords =
-                    withKeys.apply(Values.<EntityRecord>create());
-            final PCollection<Event> matching = allRecords.apply(ParDo.of(FilterFn.of(predicate)));
-            return matching;
-        }
-    }
-
-    /**
-     * An {@link org.spine3.server.storage.RecordStorage.BeamIO.UnpackFn UnpackFn} that extracts
-     * events and accepts those matching the passed predicate.
-     */
-    public static class FilterFn extends RecordStorage.BeamIO.UnpackFn<Event> {
-
-        private static final long serialVersionUID = 0L;
-        private final EventPredicate predicate;
-
-        /**
-         * Creates a new instance that accepts events matching the passed predicate.
-         */
-        public static FilterFn of(EventPredicate predicate) {
-            return new FilterFn(predicate);
-        }
-
-        private FilterFn(EventPredicate predicate) {
-            this.predicate = predicate;
-        }
-
-        @Override
-        @ProcessElement
-        public void processElement(ProcessContext c) {
-            final Event event = doUnpack(c);
-            if (predicate.apply(event)) {
-                c.outputWithTimestamp(event, toInstant(event.getContext()
-                                                            .getTimestamp()));
-            }
-        }
+    EventStoreIO.Read query(TenantId tenantId, EventPredicate predicate) {
+        final RecordStorageIO.Read<EventId> readAll = recordStorage().getIO()
+                                                                     .readAll(tenantId);
+        return new EventStoreIO.Query(readAll, predicate);
     }
 
     /**
