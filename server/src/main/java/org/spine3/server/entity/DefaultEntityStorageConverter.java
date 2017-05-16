@@ -44,9 +44,10 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     private final FieldMask fieldMask;
 
     static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(RecordBasedRepository<I, E, ?> repository) {
-        return new DefaultEntityStorageConverter<>(repository.getEntityStateType(),
-                                                   repository.<I, E>entityFactory(),
+    EntityStorageConverter<I, E, S> forAllFields(TypeUrl entityStateType,
+                                                 EntityFactory<I, E> factory) {
+        return new DefaultEntityStorageConverter<>(entityStateType,
+                                                   factory,
                                                    FieldMask.getDefaultInstance());
     }
 

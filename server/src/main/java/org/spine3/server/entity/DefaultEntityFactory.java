@@ -52,9 +52,9 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
     @Nullable
     private transient Constructor<E> entityConstructor;
 
-    DefaultEntityFactory(Repository<I, E> repository) {
-        this.entityClass = repository.getEntityClass();
-        idClass = repository.getIdClass();
+    DefaultEntityFactory(Class<E> entityClass, Class<I> idClass) {
+        this.entityClass = entityClass;
+        this.idClass = idClass;
     }
 
     private Constructor<E> getEntityConstructor() {

@@ -48,7 +48,7 @@ public class DefaultEntityStorageConverterShould {
     @Test
     public void create_instance_for_for_all_fields() throws Exception {
         final EntityStorageConverter<Long, TestEntity, StringValue> converter =
-                forAllFields(repository);
+                forAllFields(repository.getEntityStateType(), repository.entityFactory());
 
         assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
     }
@@ -60,7 +60,8 @@ public class DefaultEntityStorageConverterShould {
                                              .build();
 
         final EntityStorageConverter<Long, TestEntity, StringValue> converter =
-                forAllFields(repository).withFieldMask(fieldMask);
+                forAllFields(repository.getEntityStateType(), repository.entityFactory())
+                        .withFieldMask(fieldMask);
 
         assertEquals(fieldMask, converter.getFieldMask());
     }
@@ -76,7 +77,7 @@ public class DefaultEntityStorageConverterShould {
         final TestEntity entity = createEntity(100L, Wrapper.forString("back and forth"));
 
         final EntityStorageConverter<Long, TestEntity, StringValue> converter =
-                forAllFields(repository);
+                forAllFields(repository.getEntityStateType(), repository.entityFactory());
 
         final EntityRecord out = converter.convert(entity);
         final TestEntity back = converter.reverse()

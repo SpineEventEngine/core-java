@@ -29,6 +29,7 @@ import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.FlatMapElements;
 import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.Keys;
 import org.apache.beam.sdk.transforms.SimpleFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
@@ -36,6 +37,7 @@ import org.apache.beam.sdk.values.TupleTag;
 import org.spine3.base.Event;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.EntityStorageConverter;
 import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.event.EventPredicate;
 import org.spine3.server.event.EventStore;
@@ -88,6 +90,7 @@ public class CatchupOp<I> {
         final PCollection<KV<I, Iterable<Event>>> groupped =
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create());
 
+        final PCollection<I> ids = groupped.apply(Keys.<I>create());
 
         // Apply events to projections.
         //TODO:2017-05-15:alexander.yevsyukov: Implement.
@@ -132,9 +135,12 @@ public class CatchupOp<I> {
 
     private static class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, EntityRecord> {
 
+        private final EntityStorageConverter<I, ?, ?> entityConverter;
         private final TupleTag<Timestamp> timestampTag;
 
-        private ApplyEvents(TupleTag<Timestamp> timestampTag) {
+        private ApplyEvents(EntityStorageConverter<I, ?, ?> entityConverter,
+                            TupleTag<Timestamp> timestampTag) {
+            this.entityConverter = entityConverter;
             this.timestampTag = timestampTag;
         }
 
