@@ -58,12 +58,12 @@ import static org.spine3.test.Verify.assertSize;
  */
 public class AggregatePartShould {
 
+    private static final String TASK_DESCRIPTION = "Description";
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
     private TaskPart taskPart;
     private TaskDescriptionPart taskDescriptionPart;
     private TaskRepository taskRepository;
-    private static final String TASK_DESCRIPTION = "Description";
     private static final TestActorRequestFactory factory =
             TestActorRequestFactory.newInstance(AggregatePartShould.class);
 
@@ -73,7 +73,7 @@ public class AggregatePartShould {
                                        .build();
         root = new AnAggregateRoot(boundedContext, newUuid());
         taskPart = new TaskPart(root);
-        setAggregatePart();
+        prepareAggregatePart();
         taskDescriptionPart = new TaskDescriptionPart(root);
         taskRepository = new TaskRepository(boundedContext);
         final TaskDescriptionRepository taskDescriptionRepository =
@@ -84,13 +84,14 @@ public class AggregatePartShould {
 
     @Test
     public void not_accept_nulls_as_parameter_values() throws NoSuchMethodException {
-        final Constructor constructor = AnAggregateRoot.class
-                .getDeclaredConstructor(BoundedContext.class, String.class);
-        final NullPointerTester tester = new NullPointerTester();
-        tester.setDefault(Constructor.class, constructor)
-              .setDefault(BoundedContext.class, boundedContext)
-              .setDefault(AggregateRoot.class, root)
-              .testStaticMethods(AggregatePart.class, NullPointerTester.Visibility.PACKAGE);
+        createNullPointerTester()
+                .testStaticMethods(AggregatePart.class, NullPointerTester.Visibility.PACKAGE);
+    }
+
+    @Test
+    public void not_accept_nulls_as_parameter_values_for_instance_methods()
+            throws NoSuchMethodException {
+        createNullPointerTester().testAllPublicInstanceMethods(taskPart);
     }
 
     @Test
@@ -105,13 +106,6 @@ public class AggregatePartShould {
     public void return_aggregate_part_state_by_class() {
         taskRepository.store(taskPart);
         final Task task = taskDescriptionPart.getPartState(Task.class);
-        assertEquals(TASK_DESCRIPTION, task.getDescription());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void throw_exception_when_trying_to_getpartstate_from_null_aggregate_part() {
-        taskRepository.store(taskPart);
-        final Task task = taskDescriptionPart.getPartState(null);
         assertEquals(TASK_DESCRIPTION, task.getDescription());
     }
 
@@ -188,11 +182,21 @@ public class AggregatePartShould {
         return CommandEnvelope.of(factory.command().create(commandMessage));
     }
 
-    private void setAggregatePart() {
+    private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
+        final Constructor constructor = AnAggregateRoot.class
+                .getDeclaredConstructor(BoundedContext.class, String.class);
+        final NullPointerTester tester = new NullPointerTester();
+        tester.setDefault(Constructor.class, constructor)
+              .setDefault(BoundedContext.class, boundedContext)
+              .setDefault(AggregateRoot.class, root);
+        return tester;
+    }
+
+    private void prepareAggregatePart() {
         final AddTask addTask =
                 ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                        .setProjectId(ProjectId.getDefaultInstance())
-                        .build();
+                                         .setProjectId(ProjectId.getDefaultInstance())
+                                         .build();
         taskPart.dispatchForTest(env(addTask));
     }
 
@@ -224,12 +228,13 @@ public class AggregatePartShould {
         TaskAdded handle(AddTask msg) {
             final TaskAdded result = TaskAdded.newBuilder()
                                               .build();
+            //
             return result;
         }
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setDescription(TASK_DESCRIPTION).build();
+            getBuilder().setDescription(TASK_DESCRIPTION);
         }
     }
 
@@ -251,7 +256,7 @@ public class AggregatePartShould {
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setValue("Description value").build();
+            getBuilder().setValue("Description value");
         }
     }
 
