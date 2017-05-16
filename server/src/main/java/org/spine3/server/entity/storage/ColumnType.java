@@ -43,10 +43,8 @@ import org.spine3.annotation.SPI;
  *             }
  *
  *             \@Override
- *             public void setColumnValue(PreparedStatement storageRecord,
- *                                        String value,
- *                                        Integer columnIdentifier) {
- *                 storageRecord.setString(columnIdentifier, value);
+ *             public void setColumnValue(PreparedStatement record, String value, Integer column) {
+ *                 record.setString(column, value);
  *             }
  *
  *             \@Override

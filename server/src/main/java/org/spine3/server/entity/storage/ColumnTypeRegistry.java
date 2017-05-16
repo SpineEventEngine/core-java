@@ -37,10 +37,10 @@ import static com.google.common.base.Preconditions.checkState;
  * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
  * <code>
  *     <pre>
- *         final ColumnTypeRegistry registry =
- *                  ColumnTypeRegistry.newBuilder()
- *                                    .put(Date.class, new VarcharDateType())
- *                                    .build();
+ *         final VarcharDateType varcharType = new VarcharDateType();
+ *         final ColumnTypeRegistry registry = ColumnTypeRegistry.newBuilder()
+ *                                                               .put(Date.class, varcharType)
+ *                                                               .build();
  *
  *         MyJdbcBasedStorageFactory.newBuilder()
  *                                  // ...
