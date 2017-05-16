@@ -75,7 +75,11 @@ public final class QueryParameters {
      * <p>The iteration is performed synchronously to guarantee no unexpected behaviour when
      * performing closure-based information within the {@code consumer}.
      *
-     * @param consumer the {@link ParameterConsumer} processing each parameter separately.
+     * <p>The {@link ParameterConsumer#consume(QueryOperator, Column, Object)} is called exactly
+     * once per each Query parameter available in current instance.
+     *
+     * @param consumer the {@link ParameterConsumer} processing each parameter separately
+     * @see ParameterConsumer
      */
     public void forEach(ParameterConsumer consumer) {
         for (Map.Entry<QueryOperator, Map<Column<?>, Object>> param : parameters.entrySet()) {
@@ -155,13 +159,13 @@ public final class QueryParameters {
     }
 
     /**
-     * An interface simplifying the iteration over the Query parameters.
+     * A functional interface consuming the information about a single Query parameter.
      *
-     * <p>The only usage is passing an instance of {@code ParameterConsumer} into
-     * {@link QueryParameters#forEach}.
-     *
-     * <p>The only method of the interface {@link #consume} aggregates all the information about
-     * a single Query parameter.
+     * <p>Since there is no special data type representing a single Query parameter, there is no
+     * convenient way to iterate over all of the parameters outside of {@code QueryParameters}. To
+     * provide the client of class possibility to iterate over the parameters not writing two nested
+     * loops, we declare a special {@link QueryParameters#forEach(ParameterConsumer)} method which
+     * accepts an instance of {@code ParameterConsumer}.
      */
     @SPI
     public interface ParameterConsumer {
@@ -176,8 +180,8 @@ public final class QueryParameters {
          *
          * @param operator the operator of the parameter
          * @param column   the parameter target {@link Column}
-         * @param value    the right operand in the comparison represented by the given parameter, i.e.
-         *                 the parameter value
+         * @param value    the right operand in the comparison represented by the given parameter,
+         *                 i.e. the parameter value
          */
         void consume(QueryOperator operator, Column<?> column, @Nullable Object value);
     }

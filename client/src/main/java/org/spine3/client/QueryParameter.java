@@ -20,7 +20,6 @@
 
 package org.spine3.client;
 
-import com.google.common.annotations.Beta;
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
@@ -87,15 +86,8 @@ public final class QueryParameter {
     /**
      * Retrieves the comparison operator of this {@code QueryParameter}.
      *
-     * <p>At the moment, all the parameters aim only
-     * the {@link QueryOperator#EQUAL equality comparison}.
-     *
-     * <p>Note that this method is still in its {@link Beta} stage. The behaviour described above is
-     * a subject of change.
-     *
      * @return the comparison operator
      */
-    @Beta
     public QueryOperator getOperator() {
         return operator;
     }

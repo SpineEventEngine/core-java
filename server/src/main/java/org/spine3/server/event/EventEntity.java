@@ -46,7 +46,7 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
      * The name of the Entity Column representing the time, when the event was fired.
      * @see #getTime()
      */
-    static final String TIME_COLUMN = "time";
+    static final String CREATED_TIME_COLUMN = "created";
 
     /**
      * Compares event entities by timestamps of events.
@@ -77,7 +77,7 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
      * <p>This method represents an Entity Column {@code time}.
      *
      * @return the time when the underlying event was fired
-     * @see #TIME_COLUMN
+     * @see #CREATED_TIME_COLUMN
      */
     public Timestamp getTime() {
         return getState().getContext()
