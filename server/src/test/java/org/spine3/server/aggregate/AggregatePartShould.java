@@ -59,13 +59,13 @@ import static org.spine3.test.Verify.assertSize;
 public class AggregatePartShould {
 
     private static final String TASK_DESCRIPTION = "Description";
+    private static final TestActorRequestFactory factory =
+            TestActorRequestFactory.newInstance(AggregatePartShould.class);
     private BoundedContext boundedContext;
     private AnAggregateRoot root;
     private TaskPart taskPart;
     private TaskDescriptionPart taskDescriptionPart;
     private TaskRepository taskRepository;
-    private static final TestActorRequestFactory factory =
-            TestActorRequestFactory.newInstance(AggregatePartShould.class);
 
     @Before
     public void setUp() {
