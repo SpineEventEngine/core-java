@@ -30,6 +30,7 @@ import static java.lang.String.valueOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.client.QueryParameter.eq;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.time.Time.getCurrentTime;
@@ -95,6 +96,6 @@ public class QueryParameterShould {
 
         assertEquals(name, param.getColumnName());
         assertEquals(pack(value), param.getValue());
-        assertEquals(QueryOperator.EQUAL, param.getOperator());
+        assertEquals(EQUAL, param.getOperator());
     }
 }

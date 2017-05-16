@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import org.spine3.annotation.SPI;
-import org.spine3.client.QueryOperator;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -34,7 +33,8 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMap.copyOf;
-import static org.spine3.client.QueryOperator.EQUAL;
+import static org.spine3.client.ColumnFilter.Operator;
+import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 
 /**
  * The parameters of an {@link EntityQuery}.
@@ -43,9 +43,9 @@ import static org.spine3.client.QueryOperator.EQUAL;
  */
 public final class QueryParameters {
 
-    private final ImmutableMap<QueryOperator, Map<Column<?>, Object>> parameters;
+    private final ImmutableMap<Operator, Map<Column<?>, Object>> parameters;
 
-    private QueryParameters(Map<QueryOperator, Map<Column<?>, Object>> parameters) {
+    private QueryParameters(Map<Operator, Map<Column<?>, Object>> parameters) {
         this.parameters = copyOf(parameters);
     }
 
@@ -57,11 +57,11 @@ public final class QueryParameters {
     /**
      * Retrieves the Query parameters which are compared with the given operator.
      *
-     * @param operator the {@linkplain QueryOperator operator} of the parameter comparison
+     * @param operator the {@linkplain Operator operator} of the parameter comparison
      * @return a {@link Map} of the {@linkplain Column Entity Column meta information} to their
      * values
      */
-    public ImmutableMap<Column<?>, Object> getParams(QueryOperator operator) {
+    public ImmutableMap<Column<?>, Object> getParams(Operator operator) {
         Map<Column<?>, Object> params = parameters.get(operator);
         params = params == null
                 ? Collections.<Column<?>, Object>emptyMap()
@@ -75,21 +75,21 @@ public final class QueryParameters {
      * <p>The iteration is performed synchronously to guarantee no unexpected behaviour when
      * performing closure-based information within the {@code consumer}.
      *
-     * <p>The {@link ParameterConsumer#consume(QueryOperator, Column, Object)} is called exactly
+     * <p>The {@link ParameterConsumer#consume(Operator, Column, Object)} is called exactly
      * once per each Query parameter available in current instance.
      *
      * @param consumer the {@link ParameterConsumer} processing each parameter separately
      * @see ParameterConsumer
      */
     public void forEach(ParameterConsumer consumer) {
-        for (Map.Entry<QueryOperator, Map<Column<?>, Object>> param : parameters.entrySet()) {
-            final QueryOperator operator = param.getKey();
+        for (Map.Entry<Operator, Map<Column<?>, Object>> param : parameters.entrySet()) {
+            final Operator operator = param.getKey();
             applyConsumer(consumer, operator, param.getValue());
         }
     }
 
     private static void applyConsumer(ParameterConsumer consumer,
-                                      QueryOperator operator,
+                                      Operator operator,
                                       Map<Column<?>, Object> paramValues) {
         for (Map.Entry<Column<?>, Object> parameterValue : paramValues.entrySet()) {
             consumer.consume(operator, parameterValue.getKey(), parameterValue.getValue());
@@ -122,8 +122,8 @@ public final class QueryParameters {
      */
     public static class Builder {
 
-        private final Map<QueryOperator, Map<Column<?>, Object>> parameters
-                = new EnumMap<>(QueryOperator.class);
+        private final Map<Operator, Map<Column<?>, Object>> parameters
+                = new EnumMap<>(Operator.class);
 
         private Builder() {
             // Prevent direct initialization
@@ -138,7 +138,7 @@ public final class QueryParameters {
          * @param value    the parameter value
          * @return self for method chaining
          */
-        public Builder put(QueryOperator operator, Column<?> column, @Nullable Object value) {
+        public Builder put(Operator operator, Column<?> column, @Nullable Object value) {
             checkNotNull(operator);
             checkNotNull(column);
 
@@ -183,6 +183,6 @@ public final class QueryParameters {
          * @param value    the right operand in the comparison represented by the given parameter,
          *                 i.e. the parameter value
          */
-        void consume(QueryOperator operator, Column<?> column, @Nullable Object value);
+        void consume(Operator operator, Column<?> column, @Nullable Object value);
     }
 }

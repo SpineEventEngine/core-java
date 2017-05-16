@@ -25,7 +25,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.QueryOperator.EQUAL;
+import static org.spine3.client.ColumnFilter.*;
+import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.TypeConverter.toAny;
 
@@ -34,7 +35,7 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  *
  * <p>This class may be considered a filter for the query. An instance contains the name of
  * the Entity Column to filter by, the value of the Column and
- * the {@linkplain QueryOperator comparison operator}.
+ * the {@linkplain Operator comparison operator}.
  *
  * <p>The supported types for querying are {@linkplain Message Message types} and Protobuf
  * primitives.
@@ -45,9 +46,9 @@ public final class QueryParameter {
 
     private final String columnName;
     private final Any value;
-    private final QueryOperator operator;
+    private final Operator operator;
 
-    private QueryParameter(String columnName, Any value, QueryOperator operator) {
+    private QueryParameter(String columnName, Any value, Operator operator) {
         this.columnName = columnName;
         this.value = value;
         this.operator = operator;
@@ -88,7 +89,7 @@ public final class QueryParameter {
      *
      * @return the comparison operator
      */
-    public QueryOperator getOperator() {
+    public Operator getOperator() {
         return operator;
     }
 

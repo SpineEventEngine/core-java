@@ -35,8 +35,8 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.QueryOperator.EQUAL;
-import static org.spine3.client.QueryOperator.GREATER_THAN;
+import static org.spine3.client.ColumnFilter.Operator.EQUAL;
+import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.

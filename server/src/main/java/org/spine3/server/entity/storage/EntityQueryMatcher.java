@@ -24,14 +24,14 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
-import org.spine3.client.QueryOperator;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.QueryOperator.compare;
+import static org.spine3.client.ColumnFilter.Operator;
+import static org.spine3.client.QueryOperators.compare;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -106,7 +106,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
          * the beginning and won't try to match the remaining parameters.
          */
         @Override
-        public void consume(QueryOperator operator, Column<?> column, @Nullable Object value) {
+        public void consume(Operator operator, Column<?> column, @Nullable Object value) {
             if (!currentlyMatches) {
                 return;
             }
