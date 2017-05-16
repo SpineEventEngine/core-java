@@ -183,8 +183,9 @@ public class AggregatePartShould {
     }
 
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
-        final Constructor constructor = AnAggregateRoot.class
-                .getDeclaredConstructor(BoundedContext.class, String.class);
+        final Constructor constructor =
+                AnAggregateRoot.class
+                               .getDeclaredConstructor(BoundedContext.class, String.class);
         final NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
@@ -228,7 +229,7 @@ public class AggregatePartShould {
         TaskAdded handle(AddTask msg) {
             final TaskAdded result = TaskAdded.newBuilder()
                                               .build();
-            //
+            //This command can be empty since we use apply method to setup aggregate part.
             return result;
         }
 
