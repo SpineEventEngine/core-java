@@ -44,12 +44,13 @@ class ProjectionTransaction<I,
     }
 
     @Override
-    protected void apply(Message eventMessage, EventContext context) throws
-                                                                     InvocationTargetException {
-        getEntity().apply(eventMessage, context);
+    protected void invokeApplier(Projection entity,
+                                 Message eventMessage,
+                                 EventContext context) throws InvocationTargetException {
+        entity.apply(eventMessage, context);
     }
 
-    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
+    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
     @Override
     protected void commit() {
         super.commit();

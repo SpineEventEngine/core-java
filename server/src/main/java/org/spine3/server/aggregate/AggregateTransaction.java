@@ -45,12 +45,13 @@ class AggregateTransaction<I,
     }
 
     @Override
-    protected void apply(Message eventMessage,
-                         @Nullable EventContext ignored) throws InvocationTargetException {
-        getEntity().invokeApplier(eventMessage);
+    protected void invokeApplier(Aggregate entity,
+                                 Message eventMessage,
+                                 @Nullable EventContext ignored) throws InvocationTargetException {
+        entity.invokeApplier(eventMessage);
     }
 
-    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
+    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
     @Override
     protected void commit() {
         super.commit();

@@ -46,12 +46,13 @@ class ProcManTransaction<I,
     }
 
     @Override
-    protected void apply(Message eventMessage, EventContext context) throws
-                                                                     InvocationTargetException {
-        getEntity().dispatchEvent(eventMessage, context);
+    protected void invokeApplier(ProcessManager entity,
+                                 Message eventMessage,
+                                 EventContext context) throws InvocationTargetException {
+        entity.dispatchEvent(eventMessage, context);
     }
 
-    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to `ProjectionRepository`.
+    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
     @Override
     protected void commit() {
         super.commit();

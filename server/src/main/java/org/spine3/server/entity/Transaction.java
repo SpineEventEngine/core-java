@@ -149,18 +149,17 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Applies the given event message with its context to the currently modified entity.
+     * Invokes the event applier method for the current entity-in-transaction,
+     * passing the event message along its context.
      *
      * <p>This operation is always performed in scope of an active transaction.
      *
-     * <p>By implementing this method, descendants specify how exactly the event message
-     * should be applied to the particular entity.
-     *
+     * @param entity       the target entity
      * @param eventMessage the event message
      * @param context      the event context
      * @throws InvocationTargetException if case of any issues while applying the event
      */
-    protected abstract void apply(Message eventMessage, EventContext context)
+    protected abstract void invokeApplier(E entity, Message eventMessage, EventContext context)
             throws InvocationTargetException;
 
     /**
@@ -181,7 +180,7 @@ public abstract class Transaction<I,
         this.lifecycleFlags = lifecycleFlags;
     }
 
-    protected E getEntity() {
+    private E getEntity() {
         return entity;
     }
 
@@ -229,9 +228,10 @@ public abstract class Transaction<I,
         initVersion(version);
     }
 
-    Phase applyAnd(Message eventMessage, EventContext context) throws InvocationTargetException {
-        apply(eventMessage, context);
-        return new Phase(this);
+    Phase<I, E, S, B> apply(Message eventMessage,
+                            EventContext context) throws InvocationTargetException {
+        final Phase<I, E, S, B> phase = new Phase<>(this);
+        return phase.andApply(eventMessage, context);
     }
 
     /**
@@ -301,33 +301,31 @@ public abstract class Transaction<I,
         setVersion(version);
     }
 
-    protected static class Phase {
+    protected static class Phase<I, E extends EventPlayingEntity<I, S, B>, S extends Message,
+                                 B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
-        private final Transaction underlyingTransaction;
+        private final Transaction<I, E, S, B> underlyingTransaction;
 
-        private Phase(Transaction transaction) {
+        private Phase(Transaction<I, E, S, B> transaction) {
             this.underlyingTransaction = transaction;
         }
 
-        Phase thenAdvanceVersionTo(Version version) {
+        Phase<I, E, S, B> andAdvanceVersionTo(Version version) {
             underlyingTransaction.advanceVersion(version);
             return this;
         }
 
-        protected Phase thenApply(Message eventMessage,
-                                  EventContext context) throws
-                                                        InvocationTargetException {
-            underlyingTransaction.apply(eventMessage, context);
+        Phase<I, E, S, B> andApply(Message eventMessage,
+                                   EventContext context) throws InvocationTargetException {
+            underlyingTransaction.invokeApplier(underlyingTransaction.getEntity(),
+                                                eventMessage,
+                                                context);
             return this;
         }
 
-        protected Phase thenCommit() {
+        Phase<I, E, S, B> andCommit() {
             underlyingTransaction.commit();
             return this;
-        }
-
-        public Transaction getTransaction() {
-            return underlyingTransaction;
         }
     }
 }
