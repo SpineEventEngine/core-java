@@ -60,7 +60,7 @@ public enum QueryOperator {
      * Comparison operator stating that the stored value is greater then ({@code >})
      * the passed value.
      */
-    GREATER_THEN(">") {
+    GREATER_THAN(">") {
         /**
          * {@inheritDoc}
          *

@@ -36,7 +36,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.client.QueryOperator.EQUAL;
-import static org.spine3.client.QueryOperator.GREATER_THEN;
+import static org.spine3.client.QueryOperator.GREATER_THAN;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -85,7 +85,7 @@ public final class EntityQueries {
             final TimestampFilter timestampFilter = entityFilters.getTimeAfter();
             final String columnName = timestampFilter.getColumnName();
             final Column<?> column = Columns.findColumn(entityClass, columnName);
-            builder.put(GREATER_THEN, column, timestampFilter.getValue());
+            builder.put(GREATER_THAN, column, timestampFilter.getValue());
         }
         return builder.build();
     }
