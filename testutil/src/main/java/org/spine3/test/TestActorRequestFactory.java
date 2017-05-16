@@ -66,7 +66,8 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(newUserId(testClass.getName()), ZoneOffsets.UTC, tenantId);
+        return new TestActorRequestFactory(newUserId(testClass.getName()),
+                                           ZoneOffsets.UTC, tenantId);
     }
 
     /** Creates new command with the passed timestamp. */

@@ -265,7 +265,8 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * @see #readAll(EntityQuery, FieldMask)
      */
-    protected abstract Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask);
+    protected abstract Map<I, EntityRecord> readAllRecords(EntityQuery<I> query,
+                                                           FieldMask fieldMask);
 
     /**
      * Writes a record and the associated
