@@ -66,6 +66,8 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.junit.Assert.assertEquals;
@@ -172,6 +174,10 @@ public class ProjectionRepositoryShould
 
     private Event createEvent(Any producerId, Message eventMessage) {
         return newEventFactory(producerId).createEvent(eventMessage);
+    }
+
+    private Event createEvent(Any producerId, Message eventMessage, Timestamp when) {
+        return newEventFactory(producerId).createEvent(eventMessage, null, when);
     }
 
     private void appendEvent(EventStore eventStore, Event event) {
@@ -451,13 +457,15 @@ public class ProjectionRepositoryShould
     @Test
     public void catch_up_only_with_the_freshest_events() {
         final int oldEventsCount = 7;
-        setUpEvents(boundedContext, oldEventsCount);
-        await(100);
         final Timestamp lastCatchUpTime = getCurrentTime();
-        await(100);
+        final Duration delta = Durations2.seconds(1);
+        final Timestamp oldEventsTime = subtract(lastCatchUpTime, delta);
+        final Timestamp newEventsTime = add(lastCatchUpTime, delta);
+        setUpEvents(boundedContext, oldEventsCount, oldEventsTime);
         final int newEventsCount = 11;
-        final Collection<ProjectId> ids = setUpEvents(boundedContext, newEventsCount);
-
+        final Collection<ProjectId> ids = setUpEvents(boundedContext,
+                                                      newEventsCount,
+                                                      newEventsTime);
         final ManualCatchupProjectionRepository repo =
                 spy(new ManualCatchupProjectionRepository(boundedContext));
         repo.initStorage(storageFactory());
@@ -494,7 +502,9 @@ public class ProjectionRepositoryShould
     }
 
     @CanIgnoreReturnValue
-    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext, int eventCount) {
+    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext,
+                                              int eventCount,
+                                              Timestamp when) {
         // Set up bounded context
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
@@ -507,22 +517,19 @@ public class ProjectionRepositoryShould
             final Message eventMessage = ProjectCreated.newBuilder()
                                                        .setProjectId(projectId)
                                                        .build();
-            final Event event = createEvent(pack(projectId), eventMessage);
+            final Event event = createEvent(pack(projectId), eventMessage, when);
             appendEvent(eventStore, event);
         }
         return ids;
     }
 
-    private StorageFactory storageFactory() {
-        return StorageFactorySwitch.get(boundedContext.isMultitenant());
+    @CanIgnoreReturnValue
+    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext, int eventCount) {
+        return setUpEvents(boundedContext, eventCount, getCurrentTime());
     }
 
-    private static void await(long millis) {
-        try {
-            Thread.sleep(millis);
-        } catch (InterruptedException e) {
-            throw new AssertionError(e);
-        }
+    private StorageFactory storageFactory() {
+        return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
     private static ArgumentMatcher<ProjectId> in(final Collection<ProjectId> expectedValues) {
