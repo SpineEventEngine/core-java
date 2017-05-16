@@ -223,7 +223,7 @@ public final class BoundedContext
      * @see Repository#initStorage(StorageFactory)
      */
     @SuppressWarnings("ChainOfInstanceofChecks")
-    // OK here since ways of registering are way too different
+    //    OK here since ways of registering are way too different
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkStorageAssigned(repository);
         guard.register(repository);
