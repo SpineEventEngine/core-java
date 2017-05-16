@@ -99,7 +99,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      * Creates an instance of {@link EntityFilters} from the given {@link EventStreamQuery}.
      *
      * <p>The resulting filters only contain the filtering by the {@code after} field of the source
-     * query compared to the {@link EventEntity#getTime()} column.
+     * query compared to the {@link EventEntity#getCreated()} column.
      *
      * @param query the source {@link EventStreamQuery} to get the info from
      * @return new instance of {@link EntityFilters} filtering the events by their timestamp
@@ -113,7 +113,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
                                    .setColumnName(EventEntity.CREATED_TIME_COLUMN)
                                    .setValue(timestamp)
                                    .build();
-            builder.setTimeAfter(timestampFilter);
+            builder.setCreatedAfter(timestampFilter);
         }
         final EntityFilters entityFilters = builder.build();
         return entityFilters;

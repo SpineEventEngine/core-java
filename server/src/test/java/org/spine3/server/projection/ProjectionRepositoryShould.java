@@ -36,7 +36,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
-import org.spine3.client.EntityFilters;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -672,22 +671,6 @@ public class ProjectionRepositoryShould
         @Override
         protected TestProjection findOrCreate(ProjectId id) {
             return super.findOrCreate(id);
-        }
-    }
-
-    private static class EntityQueryWithTimestamp implements ArgumentMatcher<EntityFilters> {
-
-        private final Timestamp expected;
-
-        private EntityQueryWithTimestamp(Timestamp expected) {
-            this.expected = expected;
-        }
-
-        @Override
-        public boolean matches(EntityFilters argument) {
-            final Timestamp actual = argument.getTimeAfter()
-                                             .getValue();
-            return expected.equals(actual);
         }
     }
 }

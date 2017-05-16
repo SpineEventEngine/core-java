@@ -81,8 +81,8 @@ public final class EntityQueries {
             final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
             builder.put(EQUAL, column, filterValues);
         }
-        if (entityFilters.hasTimeAfter()) {
-            final TimestampFilter timestampFilter = entityFilters.getTimeAfter();
+        if (entityFilters.hasCreatedAfter()) {
+            final TimestampFilter timestampFilter = entityFilters.getCreatedAfter();
             final String columnName = timestampFilter.getColumnName();
             final Column<?> column = Columns.findColumn(entityClass, columnName);
             builder.put(GREATER_THAN, column, timestampFilter.getValue());

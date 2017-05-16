@@ -77,7 +77,7 @@ message EntityFilters {
     // Match the entities which are created later then the given time.
     //
     // Used for the Event querying.
-    TimestampFilter time_after = 3;
+    TimestampFilter created_after = 3;
 
     // Reserved for more filter types
     reserved 4 to 40;
