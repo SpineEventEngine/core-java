@@ -44,6 +44,16 @@ import static org.spine3.server.entity.InvalidEntityStateException.onConstraintV
  * <p>Serves as a buffer, accumulating the changes, intended for the enclosed {@code Entity};
  * the changes are only applied to the actual object upon {@linkplain #commit() commit}.
  *
+ * <p>The transaction is injected to the entity, which state should be modified. By doing so,
+ * the {@linkplain Transaction#getBuilder() "buffering" builder} is exposed to concrete
+ * {@code EventPlayingEntity} subclasses. In turn, they receive an ability to change the entity
+ * state by modifying {@link EventPlayingEntity#getBuilder() entity state builder}.
+ *
+ * <p>Same applies to the entity lifecycle flags.
+ *
+ * <p>Version management is performed automatically by the transaction itself. Each event message
+ * applied leads to the version increment.
+ *
  * @author Alex Tymchenko
  */
 @Internal
@@ -143,6 +153,9 @@ public abstract class Transaction<I,
      * Applies the given event message with its context to the currently modified entity.
      *
      * <p>This operation is always performed in scope of an active transaction.
+     *
+     * <p>By implementing this method, descendants specify how exactly the event message
+     * should be applied to the particular entity.
      *
      * @param eventMessage the event message
      * @param context      the event context
