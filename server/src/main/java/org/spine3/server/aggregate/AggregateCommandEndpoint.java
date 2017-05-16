@@ -108,8 +108,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
          *
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
          * concurrent actor changes, the event count from the last snapshot should remain the same
-         * during the {@linkplain AggregateRepository#find(Object) loading}
-         * and {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope) command dispatching}.
+         * during the {@linkplain AggregateRepository#find(Object) loading} and
+         * {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope) command dispatching}.
          *
          * <p>In case the new events are detected, the loading and command
          * dispatching is repeated from scratch.
