@@ -113,7 +113,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
             final String columnName = column.getName();
             final Column.MemoizedValue<?> actualValue = entityColumns.get(columnName);
             currentlyMatches = actualValue != null
-                               && compare(actualValue.getValue(), operator, value);
+                               && compare(value, operator, actualValue.getValue());
         }
 
         /**

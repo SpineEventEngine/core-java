@@ -31,10 +31,12 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
 import org.spine3.base.Subscribe;
+import org.spine3.client.EntityFilters;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -56,7 +58,6 @@ import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.time.Durations2;
-import org.spine3.time.Time;
 import org.spine3.type.EventClass;
 import org.spine3.users.TenantId;
 
@@ -73,9 +74,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.server.projection.ProjectionRepository.Status.CATCHING_UP;
@@ -85,6 +88,7 @@ import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Litus
@@ -93,8 +97,8 @@ import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBound
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
-                                            ProjectId,
-                                            Project> {
+        ProjectId,
+        Project> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("p-123")
@@ -138,8 +142,8 @@ public class ProjectionRepositoryShould
 
         for (int i = 0; i < count; i++) {
             final TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                                                   .withId(createId(i))
-                                                                   .build();
+                                                   .withId(createId(i))
+                                                   .build();
             projections.add(projection);
         }
 
@@ -243,7 +247,8 @@ public class ProjectionRepositoryShould
                                        .getActorContext()
                                        .getTenantId();
         if (boundedContext.isMultitenant()) {
-            boundedContext.getTenantIndex().keep(tenantId);
+            boundedContext.getTenantIndex()
+                          .keep(tenantId);
         }
     }
 
@@ -283,7 +288,8 @@ public class ProjectionRepositoryShould
 
     @Test
     public void have_CREATED_status_by_default() {
-        final TestProjectionRepository repository = new TestProjectionRepository(newBoundedContext());
+        final TestProjectionRepository repository = new TestProjectionRepository(
+                newBoundedContext());
 
         assertEquals(CREATED, repository.getStatus());
     }
@@ -386,7 +392,7 @@ public class ProjectionRepositoryShould
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // because the test checks that the function is present.
+    // because the test checks that the function is present.
     @Test
     public void obtain_id_set_function_after_put() {
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
@@ -442,11 +448,25 @@ public class ProjectionRepositoryShould
         verify(repository, never()).store(any(Projection.class));
     }
 
+    @SuppressWarnings("ConstantConditions") // argument matcher always returns null
     @Test
     public void catch_up_only_with_the_freshest_events() {
-        final int oldEventsCount = 10;
-        final Collection<ProjectId> ids = setUpEvents(boundedContext, oldEventsCount);
-        // TODO:2017-05-15:dmytro.dashenkov: Finish this test case.
+        final int oldEventsCount = 7;
+        setUpEvents(boundedContext, oldEventsCount);
+        await(100);
+        final Timestamp lastCatchUpTime = getCurrentTime();
+        await(100);
+        final int newEventsCount = 11;
+        final Collection<ProjectId> ids = setUpEvents(boundedContext, newEventsCount);
+
+        final ManualCatchupProjectionRepository repo =
+                spy(new ManualCatchupProjectionRepository(boundedContext));
+        repo.initStorage(storageFactory());
+        repo.projectionStorage().writeLastHandledEventTime(lastCatchUpTime);
+
+        repo.catchUp();
+
+        verify(repo, times(newEventsCount)).findOrCreate(argThat(in(ids)));
     }
 
     @Test
@@ -462,7 +482,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void convert_null_timestamp_to_default() {
-        final Timestamp timestamp = Time.getCurrentTime();
+        final Timestamp timestamp = getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
@@ -484,6 +504,7 @@ public class ProjectionRepositoryShould
             final ProjectId projectId = ProjectId.newBuilder()
                                                  .setId(valueOf(i))
                                                  .build();
+            ids.add(projectId);
             final Message eventMessage = ProjectCreated.newBuilder()
                                                        .setProjectId(projectId)
                                                        .build();
@@ -503,6 +524,15 @@ public class ProjectionRepositoryShould
         } catch (InterruptedException e) {
             throw new AssertionError(e);
         }
+    }
+
+    private static ArgumentMatcher<ProjectId> in(final Collection<ProjectId> expectedValues) {
+        return new ArgumentMatcher<ProjectId>() {
+            @Override
+            public boolean matches(ProjectId argument) {
+                return expectedValues.contains(argument);
+            }
+        };
     }
 
     /** The projection stub used in tests. */
@@ -550,7 +580,6 @@ public class ProjectionRepositoryShould
                                                .build();
             incrementState(newState);
         }
-
 
         /**
          * Handles the {@link ProjectStarted} event.
@@ -623,6 +652,42 @@ public class ProjectionRepositoryShould
         @Subscribe
         public void apply(ProjectCreated event, EventContext eventContext) {
             // NOP
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overrides to expose the method into this test class.
+         */
+        @Override
+        protected ProjectionStorage<ProjectId> projectionStorage() {
+            return super.projectionStorage();
+        }
+
+        /**
+         * {@inheritDoc}
+         *
+         * <p>Overrides to expose the method into this test class.
+         */
+        @Override
+        protected TestProjection findOrCreate(ProjectId id) {
+            return super.findOrCreate(id);
+        }
+    }
+
+    private static class EntityQueryWithTimestamp implements ArgumentMatcher<EntityFilters> {
+
+        private final Timestamp expected;
+
+        private EntityQueryWithTimestamp(Timestamp expected) {
+            this.expected = expected;
+        }
+
+        @Override
+        public boolean matches(EntityFilters argument) {
+            final Timestamp actual = argument.getTimeAfter()
+                                             .getValue();
+            return expected.equals(actual);
         }
     }
 }
