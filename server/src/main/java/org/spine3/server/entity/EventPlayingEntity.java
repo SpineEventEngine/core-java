@@ -29,12 +29,10 @@ import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
 import javax.annotation.Nullable;
-import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
-import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
@@ -121,16 +119,22 @@ public abstract class EventPlayingEntity <I,
         return result;
     }
 
+    /**
+     * Plays the given events upon this entity.
+     *
+     * <p>Please note that the entity version is set according to the version of the event context.
+     * Therefore, if the passed event(s) are in fact so called "integration" events and originated
+     * from another application, they should be properly imported first.
+     * Otherwise, the version conflict is possible.
+     *
+     * @param events the events to play
+     */
     protected void play(Iterable<Event> events) {
         for (Event event : events) {
             final Message message = getMessage(event);
             final EventContext context = event.getContext();
-            try {
-                tx().apply(message, context)
-                           .andAdvanceVersionTo(context.getVersion());
-            } catch (InvocationTargetException e) {
-                throw illegalStateWithCauseOf(e);
-            }
+
+            tx().apply(message, context);
         }
     }
 

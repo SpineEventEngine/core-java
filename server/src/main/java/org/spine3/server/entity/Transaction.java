@@ -28,8 +28,10 @@ import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
 import static org.spine3.base.Versions.checkIsIncrement;
 import static org.spine3.server.entity.InvalidEntityStateException.onConstraintViolations;
@@ -111,6 +113,8 @@ public abstract class Transaction<I,
      * until {@linkplain #commit() commit()} is performed.
      */
     private volatile boolean active = false;
+
+    private final List<Phase<I, E, S, B>> phases = newLinkedList();
 
     /**
      * Creates a new instance of {@code Transaction} and
@@ -228,10 +232,19 @@ public abstract class Transaction<I,
         initVersion(version);
     }
 
-    Phase<I, E, S, B> apply(Message eventMessage,
-                            EventContext context) throws InvocationTargetException {
-        final Phase<I, E, S, B> phase = new Phase<>(this);
-        return phase.andApply(eventMessage, context);
+    Transaction<I, E, S, B> apply(Message eventMessage,
+                            EventContext context) {
+        final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
+
+        final Phase<I, E, S, B> apply;
+        try {
+            apply = phase.apply();
+        } catch (InvocationTargetException e) {
+            //TODO:5/16/17:alex.tymchenko: implement on-failure resolution.
+            throw new RuntimeException(e);
+        }
+        phases.add(apply);
+        return this;
     }
 
     /**
@@ -305,27 +318,41 @@ public abstract class Transaction<I,
                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
         private final Transaction<I, E, S, B> underlyingTransaction;
+        private final Message eventMessage;
+        private final EventContext context;
 
-        private Phase(Transaction<I, E, S, B> transaction) {
+        private boolean successful = false;
+
+        private Phase(Transaction<I, E, S, B> transaction, Message eventMessage,
+                      EventContext context) {
             this.underlyingTransaction = transaction;
+            this.eventMessage = eventMessage;
+            this.context = context;
         }
 
-        Phase<I, E, S, B> andAdvanceVersionTo(Version version) {
-            underlyingTransaction.advanceVersion(version);
-            return this;
-        }
-
-        Phase<I, E, S, B> andApply(Message eventMessage,
-                                   EventContext context) throws InvocationTargetException {
+        private Phase<I, E, S, B> apply() throws InvocationTargetException {
             underlyingTransaction.invokeApplier(underlyingTransaction.getEntity(),
                                                 eventMessage,
                                                 context);
+            underlyingTransaction.advanceVersion(context.getVersion());
+            markSuccessful();
             return this;
         }
 
-        Phase<I, E, S, B> andCommit() {
-            underlyingTransaction.commit();
-            return this;
+        private void markSuccessful() {
+            this.successful = true;
+        }
+
+        protected boolean isSuccessful() {
+            return successful;
+        }
+
+        protected Message getEventMessage() {
+            return eventMessage;
+        }
+
+        protected EventContext getContext() {
+            return context;
         }
     }
 }
