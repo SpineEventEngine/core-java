@@ -31,8 +31,12 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.IdentityHashMap;
 import java.util.Map;
 
+import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.spine3.server.entity.storage.QueryParameters.fromValues;
 import static org.spine3.test.Verify.assertContains;
@@ -53,52 +57,56 @@ public class EntityQueryShould {
 
     @Test
     public void support_equality() {
-        final Object defaultId = 0;
-        final ProjectId someId = Sample.messageOfType(ProjectId.class);
-        final ProjectId someIdCopy = ProjectId.newBuilder(someId)
-                                              .build();
-        final ProjectId otherId = Sample.messageOfType(ProjectId.class);
-        final Collection<?> idsA = Arrays.asList(someId, defaultId);
-        final Collection<?> idsB = Collections.emptyList();
-        final Collection<?> idsC = Arrays.<Object>asList(otherId, someIdCopy);
-        final Column<?> someColumn = mock(Column.class);
-        final Column<?> otherColumn = mock(Column.class);
+        final EqualsTester tester = new EqualsTester();
+        addEqualityGroupA(tester);
+        addEqualityGroupB(tester);
+        addEqualityGroupC(tester);
+        addEqualityGroupD(tester);
+        tester.testEquals();
+    }
 
-        final Object someValue = "anything";
-        final Object otherValue = 5;
+    private static void addEqualityGroupA(EqualsTester tester) {
+        final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
+        final Map<Column<?>, Object> params = new IdentityHashMap<>(2);
+        params.put(mock(Column.class), "anything");
+        params.put(mock(Column.class), 5);
+        final EntityQuery<?> query = EntityQuery.of(ids, fromValues(params));
+        tester.addEqualityGroup(query);
+    }
 
-        final Map<Column<?>, Object> paramsA = new HashMap<>(2);
-        paramsA.put(someColumn, someValue);
-        paramsA.put(otherColumn, otherValue);
+    private static void addEqualityGroupB(EqualsTester tester) {
+        final Collection<?> ids = emptyList();
+        final Map<Column<?>, Object> params = new HashMap<>(1);
+        params.put(mock(Column.class), 5);
+        final EntityQuery<?> query1 = EntityQuery.of(ids, fromValues(params));
+        final EntityQuery<?> query2 = EntityQuery.of(ids, fromValues(params));
+        tester.addEqualityGroup(query1, query2);
+    }
 
-        final Map<Column<?>, Object> paramsB = new HashMap<>(1);
-        paramsB.put(someColumn, otherValue);
+    private static void addEqualityGroupC(EqualsTester tester) {
+        final Collection<?> ids = emptySet();
+        final Column<?> column = mock(Column.class);
+        final Object value = 42;
+        final Map<Column<?>, Object> params1 = new HashMap<>(1);
+        params1.put(column, value);
+        final Map<Column<?>, Object> params2 = new HashMap<>(1);
+        params2.put(column, value);
+        final EntityQuery<?> query1 = EntityQuery.of(ids, fromValues(params1));
+        final EntityQuery<?> query2 = EntityQuery.of(ids, fromValues(params2));
+        tester.addEqualityGroup(query1, query2);
+    }
 
-        final Map<Column<?>, Object> paramsC = new HashMap<>(1);
-        paramsA.put(otherColumn, someValue);
-
-        final Map<Column<?>, Object> paramsCCopy = new HashMap<>(1);
-        paramsA.put(otherColumn, someValue);
-
-        final EntityQuery<?> queryA = EntityQuery.of(idsA, fromValues(paramsA));
-        final EntityQuery<?> queryB = EntityQuery.of(idsB, fromValues(paramsB));
-        final EntityQuery<?> queryC = EntityQuery.of(idsC, fromValues(paramsC));
-        final EntityQuery<?> queryD = EntityQuery.of(idsA, fromValues(paramsC));
-        final EntityQuery<?> queryE = EntityQuery.of(idsB, fromValues(paramsB));
-        final EntityQuery<?> queryF = EntityQuery.of(idsC, fromValues(paramsCCopy));
-
-        new EqualsTester()
-                .addEqualityGroup(queryA)
-                .addEqualityGroup(queryB, queryE)
-                .addEqualityGroup(queryC, queryF)
-                .addEqualityGroup(queryD)
-                .testEquals();
+    private static void addEqualityGroupD(EqualsTester tester) {
+        final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
+        final Map<Column<?>, Object> columns = Collections.emptyMap();
+        final EntityQuery<?> query = EntityQuery.of(ids, fromValues(columns));
+        tester.addEqualityGroup(query);
     }
 
     @Test
     public void support_toString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
-        final Collection<Object> ids = Collections.singleton(someId);
+        final Collection<Object> ids = singleton(someId);
         final Column<?> someColumn = mock(Column.class);
         final Object someValue = "something";
 
