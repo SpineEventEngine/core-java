@@ -232,7 +232,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * @return storage instance
      * @throws IllegalStateException if the storage is null
      */
-    @Nonnull
     protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked")
         // It is safe to cast as we control the creation in createStorage().
