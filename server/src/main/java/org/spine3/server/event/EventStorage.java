@@ -25,6 +25,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.Values;
+import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.base.Event;
@@ -88,10 +90,15 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     /*
      * Beam Support
+     *********************/
+
+    /**
+     * Obtains transform for loading all events (from the tenant's slice) matching
+     * the passed predicate.
      */
     ReadEvents query(TenantId tenantId, EventPredicate predicate) {
-        final ReadRecords readAll = recordStorage().getIO()
-                                                   .readAll(tenantId);
+        final ReadRecords<EventId> readAll = recordStorage().getIO()
+                                                            .readAll(tenantId);
         return new QueryEvents(readAll, predicate);
     }
 
@@ -101,17 +108,19 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     private static class QueryEvents extends ReadEvents {
 
         private static final long serialVersionUID = 0L;
-        private final ReadRecords readAll;
+        private final ReadRecords<EventId> readAll;
         private final EventPredicate predicate;
 
-        private QueryEvents(ReadRecords readAll, EventPredicate predicate) {
+        private QueryEvents(ReadRecords<EventId> readAll, EventPredicate predicate) {
             this.readAll = readAll;
             this.predicate = predicate;
         }
 
         @Override
         public PCollection<Event> expand(PBegin input) {
-            final PCollection<EntityRecord> allRecords = input.apply(readAll);
+            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(readAll);
+            final PCollection<EntityRecord> allRecords =
+                    withKeys.apply(Values.<EntityRecord>create());
             final PCollection<Event> matching = allRecords.apply(ParDo.of(FilterFn.of(predicate)));
             return matching;
         }

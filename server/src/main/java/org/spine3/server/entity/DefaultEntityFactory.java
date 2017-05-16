@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 
 import static org.spine3.server.entity.AbstractEntity.createEntity;
@@ -33,29 +34,40 @@ import static org.spine3.server.entity.AbstractEntity.getConstructor;
  * @param <E> the type of entities to create
  * @author Alexander Yevsyukov
  */
-class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>>
-        implements EntityFactory<I, E> {
+class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityFactory<I, E> {
 
-    private final Repository<I, E> repository;
+    private static final long serialVersionUID = 0L;
 
-    /** The constructor for creating entity instances. */
-    private final Constructor<E> entityConstructor;
+    /** The class of entities to create. */
+    private final Class<E> entityClass;
+
+    /** The class of entity IDs. */
+    private final Class<I> idClass;
+
+    /**
+     * The constructor for creating entity instances.
+     *
+     * <p>Is {@code null} upon deserialization.
+     */
+    @Nullable
+    private transient Constructor<E> entityConstructor;
 
     DefaultEntityFactory(Repository<I, E> repository) {
-        this.repository = repository;
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
+        this.entityClass = repository.getEntityClass();
+        idClass = repository.getIdClass();
     }
 
     private Constructor<E> getEntityConstructor() {
-        final Class<E> entityClass = repository.getEntityClass();
-        final Class<I> idClass = repository.getIdClass();
         final Constructor<E> result = getConstructor(entityClass, idClass);
+        result.setAccessible(true);
         return result;
     }
 
     @Override
     public E create(I id) {
+        if (entityConstructor == null) {
+            entityConstructor = getEntityConstructor();
+        }
         return createEntity(this.entityConstructor, id);
     }
 }

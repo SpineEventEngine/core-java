@@ -29,7 +29,6 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
-import org.spine3.server.storage.RecordStorage;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -176,7 +175,7 @@ class InMemoryStandStorage extends StandStorage {
 
     /*
      * Beam support
-     */
+     ******************/
 
     @Override
     public BeamIO<AggregateStateId> getIO() {

@@ -23,8 +23,8 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.FieldMask;
-import org.apache.beam.sdk.coders.protobuf.ProtoCoder;
 import org.apache.beam.sdk.transforms.Create;
+import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
@@ -135,7 +135,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     /*
      * Beam support
-     */
+     ******************/
 
     @Override
     public RecordStorage.BeamIO<I> getIO() {
@@ -151,28 +151,29 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         }
 
         @Override
-        public ReadRecords readAll(TenantId tenantId) {
+        public ReadRecords<I> readAll(TenantId tenantId) {
             final List<I> index = readIndex();
-            final ImmutableList<EntityRecord> records = readMany(tenantId, index);
-            return new AsTransform(records);
+            final ImmutableList<KV<I, EntityRecord>> records = readMany(tenantId, index);
+            return new AsTransform<>(records);
         }
 
         @Override
-        public ReadRecords read(TenantId tenantId, Iterable<I> ids) {
-            final ImmutableList<EntityRecord> records = readMany(tenantId, ids);
-            return new AsTransform(records);
+        public ReadRecords<I> read(TenantId tenantId, Iterable<I> ids) {
+            final ImmutableList<KV<I, EntityRecord>> records = readMany(tenantId, ids);
+            return new AsTransform<>(records);
         }
 
-        private ImmutableList<EntityRecord> readMany(final TenantId tenantId,
-                                                     final Iterable<I> index) {
-            final TenantAwareFunction0<ImmutableList<EntityRecord>> func =
-                    new TenantAwareFunction0<ImmutableList<EntityRecord>>(tenantId) {
+        private ImmutableList<KV<I, EntityRecord>> readMany(final TenantId tenantId,
+                                                            final Iterable<I> index) {
+            final TenantAwareFunction0<ImmutableList<KV<I, EntityRecord>>> func =
+                    new TenantAwareFunction0<ImmutableList<KV<I, EntityRecord>>>(tenantId) {
                         @Override
-                        public ImmutableList<EntityRecord> apply() {
-                            final ImmutableList.Builder<EntityRecord> records = builder();
+                        public ImmutableList<KV<I, EntityRecord>> apply() {
+                            final ImmutableList.Builder<KV<I, EntityRecord>> records = builder();
                             for (I id : index) {
-                                final EntityRecord record = storage.readRecord(id).get();
-                                records.add(record);
+                                final EntityRecord record = storage.readRecord(id)
+                                                                   .get();
+                                records.add(KV.of(id, record));
                             }
                             return records.build();
                         }
@@ -194,19 +195,18 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         /**
          * Transforms passed records into {@link PCollection}.
          */
-        private static class AsTransform extends ReadRecords {
+        private static class AsTransform<I> extends ReadRecords<I> {
             private static final long serialVersionUID = 0L;
-            private final ImmutableList<EntityRecord> records;
+            private final ImmutableList<KV<I, EntityRecord>> records;
 
-            private AsTransform(ImmutableList<EntityRecord> records) {
+            private AsTransform(ImmutableList<KV<I, EntityRecord>> records) {
                 this.records = records;
             }
 
             @Override
-            public PCollection<EntityRecord> expand(PBegin input) {
-                final PCollection<EntityRecord> result =
-                        input.apply(Create.of(records)
-                                          .withCoder(ProtoCoder.of(EntityRecord.class)));
+            public PCollection<KV<I, EntityRecord>> expand(PBegin input) {
+                final PCollection<KV<I, EntityRecord>> result =
+                        input.apply(Create.of(records));
                 return result;
             }
         }

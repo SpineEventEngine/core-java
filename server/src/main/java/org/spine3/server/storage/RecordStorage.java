@@ -272,7 +272,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
     /*
      * Beam support
-     */
+     ******************/
 
     /**
      * Obtains {@link BeamIO} instance for read/write operations with this record storage.
@@ -291,12 +291,12 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
          *
          * @param tenantId the ID of the tenant for whom records belong
          */
-        public abstract ReadRecords readAll(TenantId tenantId);
+        public abstract ReadRecords<I> readAll(TenantId tenantId);
 
         /**
          * Obtains a transformation for reading entity records with the passed indexes.
          */
-        public abstract ReadRecords read(TenantId tenantId, Iterable<I> ids);
+        public abstract ReadRecords<I> read(TenantId tenantId, Iterable<I> ids);
 
         /**
          * Obtains transformation for extracting an entity state from {@link EntityRecord}s.

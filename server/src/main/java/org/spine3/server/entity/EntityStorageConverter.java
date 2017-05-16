@@ -24,6 +24,8 @@ import com.google.common.base.Converter;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 
+import java.io.Serializable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -32,8 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 public abstract class EntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
-        extends Converter<E, EntityRecord> {
+        extends Converter<E, EntityRecord> implements Serializable {
 
+    private static final long serialVersionUID = 0L;
     private final FieldMask fieldMask;
 
     protected EntityStorageConverter(FieldMask fieldMask) {

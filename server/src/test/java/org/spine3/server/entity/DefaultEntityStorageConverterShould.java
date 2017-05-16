@@ -35,20 +35,20 @@ import static org.spine3.server.entity.DefaultEntityStorageConverter.forAllField
  */
 public class DefaultEntityStorageConverterShould {
 
-    private Repository<Long, TestEntity> repository;
+    private RecordBasedRepository<Long, TestEntity, StringValue> repository;
 
     @Before
     public void setUp() {
         final BoundedContext bc = BoundedContext.newBuilder().build();
-        repository = new TestRepository(bc);
+        repository = new TestRepository();
         bc.register(repository);
 
     }
 
     @Test
     public void create_instance_for_for_all_fields() throws Exception {
-        final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
-                repository);
+        final EntityStorageConverter<Long, TestEntity, StringValue> converter =
+                forAllFields(repository);
 
         assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
     }
@@ -59,8 +59,8 @@ public class DefaultEntityStorageConverterShould {
                                              .addPaths("foo.bar")
                                              .build();
 
-        final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
-                repository).withFieldMask(fieldMask);
+        final EntityStorageConverter<Long, TestEntity, StringValue> converter =
+                forAllFields(repository).withFieldMask(fieldMask);
 
         assertEquals(fieldMask, converter.getFieldMask());
     }
@@ -75,8 +75,8 @@ public class DefaultEntityStorageConverterShould {
     public void convert_forward_and_backward() throws Exception {
         final TestEntity entity = createEntity(100L, Wrapper.forString("back and forth"));
 
-        final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
-                repository);
+        final EntityStorageConverter<Long, TestEntity, StringValue> converter =
+                forAllFields(repository);
 
         final EntityRecord out = converter.convert(entity);
         final TestEntity back = converter.reverse()
@@ -98,8 +98,5 @@ public class DefaultEntityStorageConverterShould {
      */
     private static class TestRepository
             extends DefaultRecordBasedRepository<Long, TestEntity, StringValue> {
-        private TestRepository(BoundedContext boundedContext) {
-            super();
-        }
     }
 }

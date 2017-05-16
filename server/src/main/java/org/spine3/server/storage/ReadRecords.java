@@ -21,6 +21,7 @@
 package org.spine3.server.storage;
 
 import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
@@ -30,6 +31,6 @@ import org.spine3.server.entity.EntityRecord;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class ReadRecords extends PTransform<PBegin, PCollection<EntityRecord>> {
+public abstract class ReadRecords<I> extends PTransform<PBegin, PCollection<KV<I, EntityRecord>>> {
     private static final long serialVersionUID = 0L;
 }

@@ -279,7 +279,7 @@ public abstract class EventStore implements AutoCloseable {
 
         /*
          * Beam support
-         */
+         *****************/
 
         @Override
         public ReadEvents query(TenantId tenantId, EventPredicate query) {
@@ -410,7 +410,7 @@ public abstract class EventStore implements AutoCloseable {
 
     /*
      * Beam support
-     */
+     ******************/
 
     /** Obtains query transform. */
     public abstract ReadEvents query(TenantId tenantId, EventPredicate query);

@@ -111,7 +111,7 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     /*
      * Beam support
-     */
+     ******************/
 
     @Override
     public BeamIO<I> getIO() {

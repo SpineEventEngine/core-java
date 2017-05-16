@@ -484,16 +484,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      */
     private static class EventStreamObserver implements StreamObserver<Event> {
 
-        private final ProjectionRepository projectionRepository;
+        private final ProjectionRepository repository;
         private BulkWriteOperation operation;
 
-        private EventStreamObserver(ProjectionRepository projectionRepository) {
-            this.projectionRepository = projectionRepository;
+        private EventStreamObserver(ProjectionRepository repository) {
+            this.repository = repository;
         }
 
         @Override
         public void onNext(Event event) {
-            if (projectionRepository.status != Status.CATCHING_UP) {
+            if (repository.status != Status.CATCHING_UP) {
                 // The repository is catching up.
                 // Skip all the events and perform {@code #onCompleted}.
                 log().info("The catch-up is completing due to an overtime. Skipping event {}.",
@@ -501,10 +501,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 return;
             }
 
-            if (projectionRepository.isBulkWriteRequired()) {
-                if (!projectionRepository.isBulkWriteInProgress()) {
-                    operation = projectionRepository.startBulkWrite(
-                            projectionRepository.catchUpMaxDuration);
+            if (repository.isBulkWriteRequired()) {
+                if (!repository.isBulkWriteInProgress()) {
+                    operation = repository.startBulkWrite(
+                            repository.catchUpMaxDuration);
                 }
                 // `flush` the data if the operation expires.
                 operation.checkExpiration();
@@ -514,7 +514,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 }
             }
 
-            projectionRepository.internalDispatch(EventEnvelope.of(event));
+            repository.internalDispatch(EventEnvelope.of(event));
         }
 
         @Override
@@ -524,7 +524,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
         @Override
         public void onCompleted() {
-            if (projectionRepository.isBulkWriteInProgress()) {
+            if (repository.isBulkWriteInProgress()) {
                 operation.complete();
             }
         }
@@ -537,18 +537,18 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>
             implements BulkWriteOperation.FlushCallback<P> {
 
-        private final ProjectionRepository<I, P, S> projectionRepository;
+        private final ProjectionRepository<I, P, S> repository;
 
-        private PendingDataFlushTask(ProjectionRepository<I, P, S> projectionRepository) {
-            this.projectionRepository = projectionRepository;
+        private PendingDataFlushTask(ProjectionRepository<I, P, S> repository) {
+            this.repository = repository;
         }
 
         @Override
         public void onFlushResults(Set<P> projections, Timestamp lastHandledEventTime) {
-            projectionRepository.store(projections);
-            projectionRepository.projectionStorage()
-                                .writeLastHandledEventTime(lastHandledEventTime);
-            projectionRepository.completeCatchUp();
+            repository.store(projections);
+            repository.projectionStorage()
+                      .writeLastHandledEventTime(lastHandledEventTime);
+            repository.completeCatchUp();
         }
     }
 }

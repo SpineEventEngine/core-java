@@ -38,23 +38,30 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
-    private final Repository<I, E> repository;
+    private static final long serialVersionUID = 0L;
+    private final EntityFactory<I, E> entityFactory;
+    private final TypeUrl entityStateType;
     private final FieldMask fieldMask;
 
     static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(Repository<I, E> repository) {
-        return new DefaultEntityStorageConverter<>(repository, FieldMask.getDefaultInstance());
+    EntityStorageConverter<I, E, S> forAllFields(RecordBasedRepository<I, E, ?> repository) {
+        return new DefaultEntityStorageConverter<>(repository.getEntityStateType(),
+                                                   repository.<I, E>entityFactory(),
+                                                   FieldMask.getDefaultInstance());
     }
 
-    private DefaultEntityStorageConverter(Repository<I, E> repository, FieldMask fieldMask) {
+    private DefaultEntityStorageConverter(TypeUrl entityStateType,
+                                          EntityFactory<I, E> factory,
+                                          FieldMask fieldMask) {
         super(fieldMask);
-        this.repository = repository;
+        this.entityStateType = entityStateType;
+        this.entityFactory = factory;
         this.fieldMask = fieldMask;
     }
 
     @Override
     public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        return new DefaultEntityStorageConverter<>(this.repository, fieldMask);
+        return new DefaultEntityStorageConverter<>(entityStateType, entityFactory, fieldMask);
     }
 
     @Override
@@ -79,11 +86,10 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     @SuppressWarnings("unchecked")
     protected E doBackward(EntityRecord entityRecord) {
         final Message unpacked = unpack(entityRecord.getState());
-        final TypeUrl entityStateType = repository.getEntityStateType();
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
 
         final I id = (I) idFromAny(entityRecord.getEntityId());
-        final E entity = repository.create(id);
+        final E entity = entityFactory.create(id);
 
         if (entity != null) {
             if (entity instanceof AbstractVersionableEntity) {
