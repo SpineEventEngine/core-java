@@ -20,6 +20,7 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
+import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
@@ -45,13 +46,14 @@ import static org.spine3.server.entity.InvalidEntityStateException.onConstraintV
  *
  * @author Alex Tymchenko
  */
+@Internal
 public abstract class Transaction<I,
                                   E extends EventPlayingEntity<I, S, B>,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
-     * The entity, which state is modified in this transaction.
+     * The entity, which state and attributes are modified in this transaction.
      */
     private final E entity;
 
@@ -72,7 +74,7 @@ public abstract class Transaction<I,
      * <p>All the version changes made within the transaction are stored in this variable,
      * and not in the {@code Entity} itself.
      *
-     * <p>This value is set to the entity upon the {@linkplain #commit() commit()}.
+     * <p>This value is propagated to the entity upon the {@linkplain #commit() commit()}.
      */
     private volatile Version version;
 
@@ -106,6 +108,8 @@ public abstract class Transaction<I,
      * {@linkplain EventPlayingEntity#injectTransaction(Transaction) injects} the newly created
      * transaction into the given {@code entity}.
      *
+     * <p>The entity state and attributes are set as starting values for this transaction.
+     *
      * @param entity the entity to create the transaction for
      */
     protected Transaction(E entity) {
@@ -118,6 +122,18 @@ public abstract class Transaction<I,
         injectTo(entity);
     }
 
+    /**
+     * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity) an overloaded ctor},
+     * but instead of using the original entity state and version, this transaction will have
+     * the passed state and version as a starting point.
+     *
+     * <p>Note, that the given {@code state} and {@code version} are applied to the actual entity
+     * upon commit.
+     *
+     * @param entity  the target entity to modify within this transaction
+     * @param state   the entity state to set
+     * @param version the entity version to set
+     */
     protected Transaction(E entity, S state, Version version) {
         this(entity);
         initAll(state, version);
@@ -158,10 +174,11 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Applies all the outstanding state modififcations to the state of enclosed entity.
+     * Applies all the outstanding state modifications to the state of enclosed entity.
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
      */
+    @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException") // it is NOT ignored.
     protected void commit() throws InvalidEntityStateException {
 
         final B builder = getBuilder();
@@ -174,7 +191,7 @@ public abstract class Transaction<I,
                 markStateChanged();
                 entity.updateState(newState, version);
             } catch (ConstraintViolationThrowable exception) {
-                // should only happen if someone is injecting the state not using the builder.
+                // should only happen if the state has been injected not using the builder methods.
 
                 final Message invalidState = ((AbstractValidatingBuilder) builder).internalBuild();
                 throw onConstraintViolations(invalidState, exception.getConstraintViolations());
@@ -205,10 +222,16 @@ public abstract class Transaction<I,
         return new Phase(this);
     }
 
+    /**
+     * Obtains the builder for the current transaction.
+     */
     B getBuilder() {
         return builder;
     }
 
+    /**
+     * Allows to determine, whether this transaction is active or not.
+     */
     boolean isStateChanged() {
         return stateChanged;
     }
@@ -217,6 +240,9 @@ public abstract class Transaction<I,
         this.stateChanged = true;
     }
 
+    /**
+     * Injects the current transaction instance into an entity.
+     */
     private void injectTo(E entity) {
         // assigning `this` to a variable to explicitly specify
         // the generic bounds for Java compiler.
