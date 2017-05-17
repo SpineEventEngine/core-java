@@ -227,8 +227,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void write_none_storage_fields_is_none_passed() {
         final RecordStorage<I> storage = spy(getStorage());
         final I id = newId();
-        final Any state = pack(
-                Sample.messageOfType(Project.class));
+        final Any state = pack(Sample.messageOfType(Project.class));
         final EntityRecord record =
                 Sample.<EntityRecord, EntityRecord.Builder>builderForType(EntityRecord.class)
                         .setState(state)

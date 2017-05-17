@@ -44,11 +44,23 @@ public final class QueryParameters implements Iterable<ColumnFilter> {
                                  .build();
     }
 
+    /**
+     * Returns the {@link ColumnFilter} targeted at the given {@link Column}, or
+     * {@link Optional#absent()} is there is no such {@link ColumnFilter}.
+     *
+     * @param column the target {@link Column} of the result {@link ColumnFilter}
+     * @return the corresponding {@link ColumnFilter}
+     */
     public Optional<ColumnFilter> get(Column<?> column) {
         final ColumnFilter filter = parameters.get(column);
         return fromNullable(filter);
     }
 
+    /**
+     * Returns an iterator over the {@linkplain ColumnFilter column filters}.
+     *
+     * @return an {@link Iterator}.
+     */
     @Override
     public Iterator<ColumnFilter> iterator() {
         return parameters.values()
@@ -106,6 +118,11 @@ public final class QueryParameters implements Iterable<ColumnFilter> {
             return parameters;
         }
 
+        /**
+         * Creates a new instance of {@code QueryParameters} with the collected parameters.
+         *
+         * @return a new instance of {@code QueryParameters}
+         */
         public QueryParameters build() {
             return new QueryParameters(this);
         }

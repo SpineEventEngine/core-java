@@ -99,8 +99,8 @@ import static org.spine3.time.Time.getCurrentTime;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
-        ProjectId,
-        Project> {
+                                            ProjectId,
+                                            Project> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("p-123")
@@ -296,7 +296,6 @@ public class ProjectionRepositoryShould
     public void have_CREATED_status_by_default() {
         final TestProjectionRepository repository = new TestProjectionRepository(
                 newBoundedContext());
-
         assertEquals(CREATED, repository.getStatus());
     }
 
@@ -458,7 +457,7 @@ public class ProjectionRepositoryShould
     @Test
     public void catch_up_only_with_the_freshest_events() {
         final int oldEventsCount = 7;
-        final int newEventsCount = 11; // Values chosen so that their GCD == 1
+        final int newEventsCount = 11;
         final Timestamp lastCatchUpTime = getCurrentTime();
         final Duration delta = seconds(1);
         final Timestamp oldEventsTime = subtract(lastCatchUpTime, delta);

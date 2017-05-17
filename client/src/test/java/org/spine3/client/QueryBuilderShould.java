@@ -303,11 +303,8 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
                                               .select(testEntityClass)
                                               .withMask(fieldName)
                                               .byId(id1, id2)
-                                              .where(eq(columnName1,
-                                                        columnValue1),
-                                                     eq(columnName2,
-                                                        columnValue2));
-
+                                              .where(eq(columnName1, columnValue1),
+                                                     eq(columnName2, columnValue2));
         final String stringRepr = builder.toString();
 
         assertThat(stringRepr, containsString(testEntityClass.getSimpleName()));
@@ -350,6 +347,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
             }
         }
         fail(format("No ColumnFilter found for %s.", name));
+        // avoid returning `null`
         throw new RuntimeException("never happens unless JUnit is broken");
     }
 }
