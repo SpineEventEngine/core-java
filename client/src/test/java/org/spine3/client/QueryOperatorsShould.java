@@ -36,6 +36,7 @@ import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
 import static org.spine3.client.QueryOperators.compare;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.time.Durations2.seconds;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -44,6 +45,11 @@ import static org.spine3.time.Time.getCurrentTime;
  */
 @SuppressWarnings("Duplicates")     // Comparison tests are similar but cannot be simplified to one
 public class QueryOperatorsShould { // effectively and keeping the 8
+
+    @Test
+    public void have_private_util_ctor() {
+        assertHasPrivateParameterlessCtor(QueryOperators.class);
+    }
 
     @Test
     public void not_accept_nulls() {
