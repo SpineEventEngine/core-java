@@ -285,7 +285,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
             /*
                 We perform updating the state of the aggregate in this `finally`
                 block (even if there was an exception in one of the appliers)
-                because we want to transit the aggregate out of the “applying events” mode
+                because we want to transit the aggregate out of the "applying events" mode
                 anyway. We do this to minimize the damage to the aggregate
                 in the case of an exception caused by an applier method.
 

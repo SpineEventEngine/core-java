@@ -123,7 +123,7 @@ public class TimeTests {
         }
 
         /**
-         * Rewinds the {@linkplain #getCurrentTime() “current time”} forward
+         * Rewinds the {@linkplain #getCurrentTime() "current time"} forward
          * by the passed amount of hours.
          */
         public synchronized Timestamp forward(long hoursDelta) {
@@ -134,7 +134,7 @@ public class TimeTests {
         }
 
         /**
-         * Rewinds the {@linkplain #getCurrentTime() “current time”} backward
+         * Rewinds the {@linkplain #getCurrentTime() "current time"} backward
          * by the passed amount of hours.
          */
         public synchronized Timestamp backward(long hoursDelta) {
@@ -214,8 +214,8 @@ public class TimeTests {
             final Timestamp currentSystemTime = systemTime();
 
             // NOTE: we have the risk of having these two timestamps too close to each other
-            // so that the passed timestamp becomes “the past” around the time of this call.
-            // To avoid this, select some time in the “distant” future.
+            // so that the passed timestamp becomes "the past" around the time of this call.
+            // To avoid this, select some time in the "distant" future.
             final boolean result = Timestamps.comparator()
                                              .compare(currentSystemTime, timestamp) < 0;
             return result;
