@@ -38,6 +38,7 @@ public class ColumnFiltersShould {
     @Test
     public void not_accept_nulls() {
         new NullPointerTester()
+                .setDefault(Timestamp.class, Timestamp.getDefaultInstance())
                 .testAllPublicStaticMethods(ColumnFilters.class);
     }
 

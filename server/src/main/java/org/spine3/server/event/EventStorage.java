@@ -24,7 +24,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
@@ -38,7 +37,6 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.server.event.EventEntity.CREATED_TIME_COLUMN;
 import static org.spine3.server.event.EventEntity.comparator;
 
@@ -112,8 +110,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         final EntityFilters.Builder builder = EntityFilters.newBuilder();
         if (query.hasAfter()) {
             final Timestamp timestamp = query.getAfter();
-            final Any wrappedTimestamp = pack(timestamp);
-            final ColumnFilter filter = ColumnFilters.gt(CREATED_TIME_COLUMN, wrappedTimestamp);
+            final ColumnFilter filter = ColumnFilters.gt(CREATED_TIME_COLUMN, timestamp);
             builder.addColumnFilter(filter);
         }
         final EntityFilters entityFilters = builder.build();
