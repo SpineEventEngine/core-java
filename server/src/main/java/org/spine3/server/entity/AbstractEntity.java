@@ -191,7 +191,7 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
      *
      * @param state the new state to set
      * @throws InvalidEntityStateException if the passed state is not
-     *                                     {@linkplain #validate(S) valid}
+     *                                     {@linkplain #validate(Message) valid}
      */
     protected final void updateState(S state) {
         validate(state);
