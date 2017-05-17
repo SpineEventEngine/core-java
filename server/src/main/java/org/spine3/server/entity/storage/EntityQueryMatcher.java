@@ -33,6 +33,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.client.QueryOperators.compare;
+import static org.spine3.protobuf.TypeConverter.toObject;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -93,9 +94,19 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
 
     private static boolean checkSingleParameter(ColumnFilter filter,
                                                 @Nullable MemoizedValue<?> actualValue) {
-        final boolean result = actualValue != null && compare(actualValue.getValue(),
-                                                              filter.getOperator(),
-                                                              filter.getValue());
+        if (actualValue == null) {
+            return false;
+        }
+        final Object value;
+        final Any wrappedValue = filter.getValue();
+        final Class<?> sourceClass = actualValue.getSourceColumn()
+                                                .getType();
+        if (sourceClass != Any.class) {
+            value = toObject(wrappedValue, sourceClass);
+        } else {
+            value = wrappedValue;
+        }
+        final boolean result = compare(actualValue.getValue(), filter.getOperator(), value);
         return result;
     }
 }

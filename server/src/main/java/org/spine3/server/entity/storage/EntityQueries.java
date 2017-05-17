@@ -31,7 +31,6 @@ import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
 import java.util.LinkedList;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -72,10 +71,9 @@ public final class EntityQueries {
                                                  Class<? extends Entity> entityClass) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
-        for (Map.Entry<String, ColumnFilter> filter : entityFilters.getColumnFilterMap()
-                                                                   .entrySet()) {
-            final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
-            builder.put(column, filter.getValue());
+        for (ColumnFilter filter : entityFilters.getColumnFilterList()) {
+            final Column<?> column = Columns.findColumn(entityClass, filter.getColumnName());
+            builder.put(column, filter);
         }
         return builder.build();
     }

@@ -56,7 +56,6 @@ import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
-import org.spine3.time.Durations2;
 import org.spine3.type.EventClass;
 import org.spine3.users.TenantId;
 
@@ -89,6 +88,8 @@ import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
+import static org.spine3.time.Durations2.nanos;
+import static org.spine3.time.Durations2.seconds;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -423,7 +424,7 @@ public class ProjectionRepositoryShould
         appendEvent(boundedContext.getEventBus()
                                   .getEventStore(), event);
         // Set up repository
-        final Duration duration = Durations2.seconds(10L);
+        final Duration duration = seconds(10L);
         final ProjectionRepository repository = spy(
                 new ManualCatchupProjectionRepository(boundedContext, duration));
         repository.initStorage(storageFactory());
@@ -443,7 +444,7 @@ public class ProjectionRepositoryShould
         final int eventCount = 10;
         setUpEvents(boundedContext, eventCount);
         // Set up repository
-        final Duration duration = Durations2.nanos(1L);
+        final Duration duration = nanos(1L);
         final ProjectionRepository repository =
                 spy(new ManualCatchupProjectionRepository(boundedContext, duration));
         repository.initStorage(storageFactory());
@@ -457,12 +458,12 @@ public class ProjectionRepositoryShould
     @Test
     public void catch_up_only_with_the_freshest_events() {
         final int oldEventsCount = 7;
+        final int newEventsCount = 11; // Values chosen so that their GCD == 1
         final Timestamp lastCatchUpTime = getCurrentTime();
-        final Duration delta = Durations2.seconds(1);
+        final Duration delta = seconds(1);
         final Timestamp oldEventsTime = subtract(lastCatchUpTime, delta);
         final Timestamp newEventsTime = add(lastCatchUpTime, delta);
         setUpEvents(boundedContext, oldEventsCount, oldEventsTime);
-        final int newEventsCount = 11;
         final Collection<ProjectId> ids = setUpEvents(boundedContext,
                                                       newEventsCount,
                                                       newEventsTime);

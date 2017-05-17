@@ -27,7 +27,6 @@ import org.spine3.base.Identifiers;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -176,7 +175,7 @@ public final class QueryFactory {
 
     Query composeQuery(Class<? extends Message> entityClass,
                        @Nullable Set<? extends Message> ids,
-                       @Nullable Map<String, ColumnFilter> columnFilters,
+                       @Nullable Set<ColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 

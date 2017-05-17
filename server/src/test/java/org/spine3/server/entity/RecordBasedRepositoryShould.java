@@ -30,10 +30,11 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.client.ColumnFilter;
+import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.tenant.TenantAwareTest;
 import org.spine3.test.Given;
 import org.spine3.test.Tests;
@@ -204,8 +205,9 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final StringValue fieldValue = StringValue.newBuilder()
                                                   .setValue(id1.toString())
                                                   .build();
+        final ColumnFilter filter = ColumnFilters.eq(fieldPath, fieldValue);
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .putColumnFilter(fieldPath, AnyPacker.pack(fieldValue))
+                                                   .addColumnFilter(filter)
                                                    .build();
         final Collection<E> found = repository.find(filters, FieldMask.getDefaultInstance());
         assertSize(1, found);

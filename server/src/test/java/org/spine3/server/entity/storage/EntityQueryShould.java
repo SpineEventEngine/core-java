@@ -23,6 +23,7 @@ package org.spine3.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.client.ColumnFilter;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
@@ -38,7 +39,9 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
-import static org.spine3.server.entity.storage.QueryParameters.fromValues;
+import static org.mockito.Mockito.when;
+import static org.spine3.client.ColumnFilter.Operator.EQUAL;
+import static org.spine3.protobuf.TypeConverter.toAny;
 import static org.spine3.test.Verify.assertContains;
 
 /**
@@ -68,38 +71,38 @@ public class EntityQueryShould {
     private static void addEqualityGroupA(EqualsTester tester) {
         final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
         final Map<Column<?>, Object> params = new IdentityHashMap<>(2);
-        params.put(mock(Column.class), "anything");
-        params.put(mock(Column.class), 5);
-        final EntityQuery<?> query = EntityQuery.of(ids, fromValues(params));
+        params.put(mockColumn(), "anything");
+        params.put(mockColumn(), 5);
+        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query);
     }
 
     private static void addEqualityGroupB(EqualsTester tester) {
         final Collection<?> ids = emptyList();
         final Map<Column<?>, Object> params = new HashMap<>(1);
-        params.put(mock(Column.class), 5);
-        final EntityQuery<?> query1 = EntityQuery.of(ids, fromValues(params));
-        final EntityQuery<?> query2 = EntityQuery.of(ids, fromValues(params));
+        params.put(mockColumn(), 5);
+        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
+        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
         tester.addEqualityGroup(query1, query2);
     }
 
     private static void addEqualityGroupC(EqualsTester tester) {
         final Collection<?> ids = emptySet();
-        final Column<?> column = mock(Column.class);
+        final Column<?> column = mockColumn();
         final Object value = 42;
         final Map<Column<?>, Object> params1 = new HashMap<>(1);
         params1.put(column, value);
         final Map<Column<?>, Object> params2 = new HashMap<>(1);
         params2.put(column, value);
-        final EntityQuery<?> query1 = EntityQuery.of(ids, fromValues(params1));
-        final EntityQuery<?> query2 = EntityQuery.of(ids, fromValues(params2));
+        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params1));
+        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params2));
         tester.addEqualityGroup(query1, query2);
     }
 
     private static void addEqualityGroupD(EqualsTester tester) {
         final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
         final Map<Column<?>, Object> columns = Collections.emptyMap();
-        final EntityQuery<?> query = EntityQuery.of(ids, fromValues(columns));
+        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
 
@@ -107,18 +110,39 @@ public class EntityQueryShould {
     public void support_toString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> ids = singleton(someId);
-        final Column<?> someColumn = mock(Column.class);
+        final Column<?> someColumn = mockColumn();
         final Object someValue = "something";
 
         final Map<Column<?>, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
-        final EntityQuery query = EntityQuery.of(ids, fromValues(params));
+        final EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
         final String repr = query.toString();
 
         assertContains(query.getIds()
                             .toString(), repr);
         assertContains(query.getParameters()
                             .toString(), repr);
+    }
+
+    private static <T> Column<T> mockColumn() {
+        @SuppressWarnings("unchecked") // Mock cannot have type parameters
+        final Column<T> column = mock(Column.class);
+        when(column.getName()).thenReturn("mockColumn");
+        return column;
+    }
+
+    private static QueryParameters paramsFromValues(Map<Column<?>, Object> values) {
+        final QueryParameters.Builder builder = QueryParameters.newBuilder();
+        for (Map.Entry<Column<?>, Object> param : values.entrySet()) {
+            final Column<?> column = param.getKey();
+            final ColumnFilter filter = ColumnFilter.newBuilder()
+                                                    .setOperator(EQUAL)
+                                                    .setValue(toAny(param.getValue()))
+                                                    .setColumnName(column.getName())
+                                                    .build();
+            builder.put(column, filter);
+        }
+        return builder.build();
     }
 }

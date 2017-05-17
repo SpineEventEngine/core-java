@@ -21,7 +21,6 @@
 package org.spine3.client;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -31,7 +30,6 @@ import org.spine3.json.Json;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -96,7 +94,7 @@ public final class QueryBuilder {
     private Set<?> ids;
 
     @Nullable
-    private Map<String, ColumnFilter> columns;
+    private Set<ColumnFilter> columns;
 
     @Nullable
     private Set<String> fieldMask;
@@ -203,11 +201,11 @@ public final class QueryBuilder {
      * @see ColumnFilter
      */
     public QueryBuilder where(ColumnFilter... predicate) {
-        final ImmutableMap.Builder<String, ColumnFilter> mapBuilder = ImmutableMap.builder();
+        final ImmutableSet.Builder<ColumnFilter> builder = ImmutableSet.builder();
         for (ColumnFilter param : predicate) {
-            mapBuilder.put(param.getColumnName(), param);
+            builder.add(param);
         }
-        columns = mapBuilder.build();
+        columns = builder.build();
         return this;
     }
 
@@ -314,7 +312,7 @@ public final class QueryBuilder {
               .append(valueSeparator);
         }
         if (columns != null && !columns.isEmpty()) {
-            for (ColumnFilter filter : columns.values()) {
+            for (ColumnFilter filter : columns) {
                 sb.append(filter.getColumnName())
                   .append(QueryOperators.toString(filter.getOperator()))
                   .append(Json.toCompactJson(unpack(filter.getValue())))

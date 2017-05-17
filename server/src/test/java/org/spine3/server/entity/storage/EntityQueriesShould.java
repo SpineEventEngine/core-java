@@ -20,12 +20,15 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Version;
+import org.spine3.client.ColumnFilter;
+import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -37,16 +40,14 @@ import org.spine3.test.storage.ProjectId;
 import org.spine3.testdata.Sample;
 
 import java.util.Collection;
-import java.util.Map;
 
+import static com.google.common.collect.Iterators.size;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContains;
-import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertSize;
 
 /**
@@ -72,7 +73,7 @@ public class EntityQueriesShould {
         final Class<? extends Entity> entityClass = AbstractEntity.class;
         final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
-        assertEmpty(query.getParameters().getParams(EQUAL));
+        assertEquals(0, size(query.getParameters().iterator()));
         assertTrue(query.getIds().isEmpty());
     }
 
@@ -92,18 +93,16 @@ public class EntityQueriesShould {
         final BoolValue archivedValue = BoolValue.newBuilder()
                                                  .setValue(true)
                                                  .build();
+        final ColumnFilter versionFilter = ColumnFilters.eq("version", versionValue);
+        final ColumnFilter archivedFilter = ColumnFilters.eq("archived", archivedValue);
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
-                                                   .putColumnFilter("version",
-                                                                    AnyPacker.pack(versionValue))
-                                                   .putColumnFilter("archived",
-                                                                    AnyPacker.pack(archivedValue))
+                                                   .addColumnFilter(versionFilter)
+                                                   .addColumnFilter(archivedFilter)
                                                    .build();
         final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
         final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
         assertNotNull(query);
-        final Map<Column<?>, Object> params = query.getParameters().getParams(EQUAL);
-        assertSize(2, params);
 
         final Collection<?> ids = query.getIds();
         assertFalse(ids.isEmpty());
@@ -111,8 +110,8 @@ public class EntityQueriesShould {
         final Object singleId = ids.iterator().next();
         assertEquals(someGenericId, singleId);
 
-        final Collection<Object> values = params.values();
-        assertContains(versionValue, values);
-        assertContains(archivedValue.getValue(), values);
+        final Collection<ColumnFilter> values = Lists.newArrayList(query.getParameters());
+        assertContains(versionFilter, values);
+        assertContains(archivedFilter, values);
     }
 }

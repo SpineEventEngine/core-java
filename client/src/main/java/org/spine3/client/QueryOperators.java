@@ -20,9 +20,15 @@
 
 package org.spine3.client;
 
+import com.google.protobuf.Timestamp;
 import org.spine3.client.ColumnFilter.Operator;
+import org.spine3.time.Timestamps2;
 
 import javax.annotation.Nullable;
+import java.util.Objects;
+
+import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 
 /**
  * @author Dmytro Dashenkov
@@ -34,10 +40,83 @@ public final class QueryOperators {
     }
 
     public static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right) {
-        return false;
+        checkNotNull(operator);
+        final MetaOperator op = getMetaInstance(operator);
+        final boolean result = op.compare(left, right);
+        return result;
     }
 
     public static String toString(Operator operator) {
-        return "=";
+        checkNotNull(operator);
+        final MetaOperator op = getMetaInstance(operator);
+        return op.toString();
+    }
+
+    private static MetaOperator getMetaInstance(Operator operator) {
+        final String name = operator.name();
+        try {
+            final MetaOperator metaOperator = MetaOperator.valueOf(name);
+            return metaOperator;
+        } catch (@SuppressWarnings("ProhibitedExceptionCaught") // Thrown by Enum on missing value
+                NullPointerException npe) {
+            throw new IllegalArgumentException(
+                    format("Cannot recognize query operator %s.", name),
+                    npe
+            );
+        }
+    }
+
+    private enum MetaOperator {
+        EQUAL("=") {
+            @Override
+            <T> boolean compare(@Nullable T left, @Nullable T right) {
+                return Objects.equals(left, right);
+            }
+        },
+        GREATER_THAN(">") {
+            @Override
+            <T> boolean compare(@Nullable T left, @Nullable T right) {
+                // null values are handled within the instanceof check
+                if (left instanceof Timestamp && right instanceof Timestamp) {
+                    final Timestamp tsLeft = (Timestamp) left;
+                    final Timestamp tsRight = (Timestamp) right;
+                    return Timestamps2.isLaterThan(tsRight, tsLeft);
+                }
+                return false;
+            }
+        },
+        LESS_THAN("<") {
+            @Override
+            <T> boolean compare(@Nullable T left, @Nullable T right) {
+                return GREATER_THAN.compare(right, left);
+            }
+        },
+        GREATER_OR_EQUAL(">=") {
+            @Override
+            <T> boolean compare(@Nullable T left, @Nullable T right) {
+                return GREATER_THAN.compare(left, right)
+                        || EQUAL.compare(left, right);
+            }
+        },
+        LESS_OR_EQUAL("<=") {
+            @Override
+            <T> boolean compare(@Nullable T left, @Nullable T right) {
+                return LESS_THAN.compare(left, right)
+                        || EQUAL.compare(left, right);
+            }
+        };
+
+        private final String label;
+
+        MetaOperator(String label) {
+            this.label = label;
+        }
+
+        abstract <T> boolean compare(@Nullable T left, @Nullable T right);
+
+        @Override
+        public String toString() {
+            return label;
+        }
     }
 }

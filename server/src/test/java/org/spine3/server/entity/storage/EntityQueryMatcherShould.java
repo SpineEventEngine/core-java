@@ -38,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
+import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
 
 /**
@@ -90,7 +90,7 @@ public class EntityQueryMatcherShould {
 
         final Collection<Object> ids = Collections.emptyList();
         final QueryParameters params = QueryParameters.newBuilder()
-                                                      .put(EQUAL, target, acceptedValue)
+                                                      .put(target, eq(targetName, acceptedValue))
                                                       .build();
         final EntityQuery<?> query = EntityQuery.of(ids, params);
 

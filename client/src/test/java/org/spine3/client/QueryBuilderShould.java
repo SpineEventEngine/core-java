@@ -37,9 +37,10 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -52,9 +53,10 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.QueryParameter.eq;
+import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.test.Verify.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -136,9 +138,9 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final Map<String, Any> columnFilters = entityFilters.getColumnFilterMap();
+        final List<ColumnFilter> columnFilters = entityFilters.getColumnFilterList();
         assertSize(1, columnFilters);
-        final Any actualValue = columnFilters.get(columnName);
+        final Any actualValue = findByName(columnFilters, columnName).getValue();
         assertNotNull(columnValue);
         final Int32Value messageValue = AnyPacker.unpack(actualValue);
         final int actualGenericValue = messageValue.getValue();
@@ -162,15 +164,15 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final Map<String, Any> columnFilters = entityFilters.getColumnFilterMap();
+        final List<ColumnFilter> columnFilters = entityFilters.getColumnFilterList();
         assertSize(2, columnFilters);
 
-        final Any actualValue1 = columnFilters.get(columnName1);
+        final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
         final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
-        final Any actualValue2 = columnFilters.get(columnName2);
+        final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
         assertNotNull(actualValue2);
         final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
@@ -217,15 +219,15 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
         // Check query params
-        final Map<String, Any> columnFilters = entityFilters.getColumnFilterMap();
+        final List<ColumnFilter> columnFilters = entityFilters.getColumnFilterList();
         assertSize(2, columnFilters);
 
-        final Any actualValue1 = columnFilters.get(columnName1);
+        final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
         final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
-        final Any actualValue2 = columnFilters.get(columnName2);
+        final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
         assertNotNull(actualValue2);
         final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
@@ -302,9 +304,9 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
                                               .withMask(fieldName)
                                               .byId(id1, id2)
                                               .where(eq(columnName1,
-                                                                            columnValue1),
-                                                                         eq(columnName2,
-                                                                            columnValue2));
+                                                        columnValue1),
+                                                     eq(columnName2,
+                                                        columnValue2));
 
         final String stringRepr = builder.toString();
 
@@ -339,5 +341,15 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
             final T actual = TypeConverter.toObject(value, targetClass);
             return actual;
         }
+    }
+
+    private static ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
+        for (ColumnFilter filter : filters) {
+            if (filter.getColumnName().equals(name)) {
+                return filter;
+            }
+        }
+        fail(format("No ColumnFilter found for %s.", name));
+        throw new RuntimeException("never happens unless JUnit is broken");
     }
 }

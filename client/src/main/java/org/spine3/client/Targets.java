@@ -28,7 +28,6 @@ import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -78,11 +77,11 @@ public final class Targets {
 
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
-                                @Nullable Map<String, ColumnFilter> columnFilters) {
+                                @Nullable Set<ColumnFilter> columnFilters) {
         final boolean includeAll = (ids == null && columnFilters == null);
 
         final Set<? extends Message> entityIds = nullToEmpty(ids);
-        final Map<String, ColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
+        final Set<ColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 
@@ -98,7 +97,7 @@ public final class Targets {
         final EntityIdFilter idFilter = idFilterBuilder.build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
-                                                   .putAllColumnFilter(entityColumnValues)
+                                                   .addAllColumnFilter(entityColumnValues)
                                                    .build();
         final String typeName = TypeName.of(entityClass)
                                         .value();
@@ -118,14 +117,6 @@ public final class Targets {
             return Collections.emptySet();
         } else {
             return Sets.newHashSet(input);
-        }
-    }
-
-    private static <K, V> Map<K, V> nullToEmpty(@Nullable Map<K, V> input) {
-        if (input == null) {
-            return Collections.emptyMap();
-        } else {
-            return input;
         }
     }
 }

@@ -114,7 +114,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
             final Timestamp timestamp = query.getAfter();
             final Any wrappedTimestamp = pack(timestamp);
             final ColumnFilter filter = ColumnFilters.eq(CREATED_TIME_COLUMN, wrappedTimestamp);
-            builder.putColumnFilter(CREATED_TIME_COLUMN, filter);
+            builder.addColumnFilter(filter);
         }
         final EntityFilters entityFilters = builder.build();
         return entityFilters;

@@ -33,10 +33,11 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
+import org.spine3.client.ColumnFilter;
+import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
@@ -67,6 +68,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Tests.archived;
@@ -104,7 +106,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     private static EntityRecord newStorageRecord(Message state) {
-        final Any wrappedState = AnyPacker.pack(state);
+        final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
@@ -113,7 +115,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     private EntityRecord newStorageRecord(I id, Message state) {
-        final Any wrappedState = AnyPacker.pack(state);
+        final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setEntityId(idToAny(id))
                                                 .setState(wrappedState)
@@ -225,7 +227,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void write_none_storage_fields_is_none_passed() {
         final RecordStorage<I> storage = spy(getStorage());
         final I id = newId();
-        final Any state = AnyPacker.pack(
+        final Any state = pack(
                 Sample.messageOfType(Project.class));
         final EntityRecord record =
                 Sample.<EntityRecord, EntityRecord.Builder>builderForType(EntityRecord.class)
@@ -386,11 +388,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Version versionValue = Version.newBuilder()
                                             .setNumber(2) // Value of the counter after one columns
                                             .build();     // scan (incremented 2 times internally)
+
+        final ColumnFilter status = ColumnFilters.eq("projectStatusValue", wrappedValue);
+        final ColumnFilter version = ColumnFilters.eq("counterVersion", versionValue);
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .putColumnFilter("projectStatusValue",
-                                                                    AnyPacker.pack(wrappedValue))
-                                                   .putColumnFilter("counterVersion",
-                                                                    AnyPacker.pack(versionValue))
+                                                   .addColumnFilter(status)
+                                                   .addColumnFilter(version)
                                                    .build();
         final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
         final I idMatching = newId();
@@ -454,7 +457,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
         final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
-
         final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
         final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
         final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
@@ -480,8 +482,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
 
         // Perform the query
-        final Map<I, EntityRecord> readRecords =  storage.readAll(query,
-                                                                  FieldMask.getDefaultInstance());
+        final Map<I, EntityRecord> readRecords = storage.readAll(query,
+                                                                 FieldMask.getDefaultInstance());
         // Check results
         assertSize(1, readRecords);
         final EntityRecord actualRecord = readRecords.get(idMatching);

@@ -72,9 +72,7 @@ message EntityFilters {
     EntityIdFilter id_filter = 1;
 
     // Match the entities by the value of the Entity Columns.
-    //
-    // Note that the ColumnFilter.columnName value is always the same as the key in this map.
-    map<string, ColumnFilter> column_filter = 2;
+    repeated ColumnFilter column_filter = 2;
 
     // Reserved for more filter types
     reserved 4 to 40;
