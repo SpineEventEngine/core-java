@@ -24,13 +24,14 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
+import org.spine3.client.ColumnFilter;
+import org.spine3.server.entity.storage.Column.MemoizedValue;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.ColumnFilter.Operator;
 import static org.spine3.client.QueryOperators.compare;
 
 /**
@@ -78,57 +79,23 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
     }
 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
-        final Map<String, Column.MemoizedValue<?>> entityColumns = record.getColumnValues();
-        final ColumnValueMatcher columnValueMatcher = new ColumnValueMatcher(entityColumns);
-        queryParams.forEach(columnValueMatcher);
-        return columnValueMatcher.matches();
+        final Map<String, MemoizedValue<?>> entityColumns = record.getColumnValues();
+        for (ColumnFilter filter : queryParams) {
+            final String columnName = filter.getColumnName();
+            final MemoizedValue<?> memoizedValue = entityColumns.get(columnName);
+            final boolean matches = checkSingleParameter(filter, memoizedValue);
+            if (!matches) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    /**
-     * A stateful parameter processor matching the given Entity Columns to a number of
-     * {@linkplain QueryParameters Query parameters}.
-     */
-    private static class ColumnValueMatcher implements QueryParameters.ParameterConsumer {
-
-        private final Map<String, Column.MemoizedValue<?>> entityColumns;
-        private boolean currentlyMatches = true;
-
-        private ColumnValueMatcher(Map<String, Column.MemoizedValue<?>> entityColumns) {
-            this.entityColumns = entityColumns;
-        }
-
-        /**
-         * {@inheritDoc}
-         *
-         * <p>Each following call to this method is executed differently depending on the previous
-         * calls. If at least one of the previous calls upon a single instance has failed to match
-         * the Entity Columns to a given parameter, then all the subsequent calls will exit at
-         * the beginning and won't try to match the remaining parameters.
-         */
-        @Override
-        public void consume(Operator operator, Column<?> column, @Nullable Object value) {
-            if (!currentlyMatches) {
-                return;
-            }
-            final String columnName = column.getName();
-            final Column.MemoizedValue<?> actualValue = entityColumns.get(columnName);
-            currentlyMatches = actualValue != null
-                               && compare(value, operator, actualValue.getValue());
-        }
-
-        /**
-         * Shows if the given Entity Columns match all the consumed parameters.
-         *
-         * <p>The default value is {@link true}.
-         *
-         * <p>Once {@link #consume} has been called at least once, the value may change to
-         * {@code false}. Once changed, it can never become {@code true} again.
-         *
-         * @return {@code true} if the given Entity Columns match all the passed Query parameters,
-         * {@code false} otherwise.
-         */
-        public boolean matches() {
-            return currentlyMatches;
-        }
+    private static boolean checkSingleParameter(ColumnFilter filter,
+                                                @Nullable MemoizedValue<?> actualValue) {
+        final boolean result = actualValue != null && compare(actualValue.getValue(),
+                                                              filter.getOperator(),
+                                                              filter.getValue());
+        return result;
     }
 }

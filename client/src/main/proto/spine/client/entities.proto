@@ -72,12 +72,9 @@ message EntityFilters {
     EntityIdFilter id_filter = 1;
 
     // Match the entities by the value of the Entity Columns.
-    map<string, google.protobuf.Any> column_filter = 2;
-
-    // Match the entities which are created later then the given time.
     //
-    // Used for the Event querying.
-    TimestampFilter created_after = 3;
+    // Note that the ColumnFilter.columnName value is always the same as the key in this map.
+    map<string, ColumnFilter> column_filter = 2;
 
     // Reserved for more filter types
     reserved 4 to 40;
@@ -85,11 +82,16 @@ message EntityFilters {
 
 message ColumnFilter {
 
-    string column_name = 1;
-    google.protobuf.Any value = 2;
-    Operator operator = 3;
+    // The name of the Entity Column which is campared.
+    string column_name = 1[(required) = true];
 
-    // An enumeration of all supported value comparison operators applicable to the Entity Columns.
+    // The value to campare upon.
+    google.protobuf.Any value = 2[(required) = true];
+
+    // The compasison operator.
+    Operator operator = 3[(required) = true];
+
+    // An enumeration of all supported comparison operators applicable to the Entity Columns.
     enum Operator {
 
         // Error value
@@ -110,17 +112,6 @@ message ColumnFilter {
         // Comparison operator stating that the stored value is less then or equal to (`<=`) the passed value.
         LESS_OR_EQUAL = 6;
     }
-}
-
-// An entity filter by a Timestamp.
-message TimestampFilter {
-
-    // The value of the Timestamp to filter by.
-    google.protobuf.Timestamp value = 1[(required) = true, (valid) = true];
-
-    // The name of the filter target Entity Column.
-    string column_name = 2[(required) = true, (valid) = true];
-
 }
 
 // Allows to add an ID filter for the read operations.

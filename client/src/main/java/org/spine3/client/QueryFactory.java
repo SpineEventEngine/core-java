@@ -20,7 +20,6 @@
 
 package org.spine3.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.base.ActorContext;
@@ -177,7 +176,7 @@ public final class QueryFactory {
 
     Query composeQuery(Class<? extends Message> entityClass,
                        @Nullable Set<? extends Message> ids,
-                       @Nullable Map<String, Any> columnFilters,
+                       @Nullable Map<String, ColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 

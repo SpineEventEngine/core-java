@@ -24,18 +24,22 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.client.ColumnFilter;
+import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
-import org.spine3.client.TimestampFilter;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.protobuf.AnyPacker.pack;
+import static org.spine3.server.event.EventEntity.CREATED_TIME_COLUMN;
 import static org.spine3.server.event.EventEntity.comparator;
 
 /**
@@ -108,12 +112,9 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         final EntityFilters.Builder builder = EntityFilters.newBuilder();
         if (query.hasAfter()) {
             final Timestamp timestamp = query.getAfter();
-            final TimestampFilter timestampFilter =
-                    TimestampFilter.newBuilder()
-                                   .setColumnName(EventEntity.CREATED_TIME_COLUMN)
-                                   .setValue(timestamp)
-                                   .build();
-            builder.setCreatedAfter(timestampFilter);
+            final Any wrappedTimestamp = pack(timestamp);
+            final ColumnFilter filter = ColumnFilters.eq(CREATED_TIME_COLUMN, wrappedTimestamp);
+            builder.putColumnFilter(CREATED_TIME_COLUMN, filter);
         }
         final EntityFilters entityFilters = builder.build();
         return entityFilters;

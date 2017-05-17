@@ -20,80 +20,39 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
-import org.spine3.annotation.SPI;
+import org.spine3.client.ColumnFilter;
 
-import javax.annotation.Nullable;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Iterator;
 
+import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMap.copyOf;
-import static org.spine3.client.ColumnFilter.Operator;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 
 /**
  * The parameters of an {@link EntityQuery}.
  *
  * @author Dmytro Dashenkov
  */
-public final class QueryParameters {
+public final class QueryParameters implements Iterable<ColumnFilter> {
 
-    private final ImmutableMap<Operator, Map<Column<?>, Object>> parameters;
+    private final ImmutableMap<Column<?>, ColumnFilter> parameters;
 
-    private QueryParameters(Map<Operator, Map<Column<?>, Object>> parameters) {
-        this.parameters = copyOf(parameters);
+    private QueryParameters(Builder builder) {
+        this.parameters = builder.getParameters()
+                                 .build();
     }
 
-    @VisibleForTesting // Should not be used in the production code
-    static QueryParameters fromValues(Map<Column<?>, Object> values) {
-        return new QueryParameters(ImmutableMap.of(EQUAL, values));
+    public Optional<ColumnFilter> get(Column<?> column) {
+        final ColumnFilter filter = parameters.get(column);
+        return fromNullable(filter);
     }
 
-    /**
-     * Retrieves the Query parameters which are compared with the given operator.
-     *
-     * @param operator the {@linkplain Operator operator} of the parameter comparison
-     * @return a {@link Map} of the {@linkplain Column Entity Column meta information} to their
-     * values
-     */
-    public ImmutableMap<Column<?>, Object> getParams(Operator operator) {
-        Map<Column<?>, Object> params = parameters.get(operator);
-        params = params == null
-                ? Collections.<Column<?>, Object>emptyMap()
-                : params;
-        return copyOf(params);
-    }
-
-    /**
-     * Iterates over the Query parameters.
-     *
-     * <p>The iteration is performed synchronously to guarantee no unexpected behaviour when
-     * performing closure-based information within the {@code consumer}.
-     *
-     * <p>The {@link ParameterConsumer#consume(Operator, Column, Object)} is called exactly
-     * once per each Query parameter available in current instance.
-     *
-     * @param consumer the {@link ParameterConsumer} processing each parameter separately
-     * @see ParameterConsumer
-     */
-    public void forEach(ParameterConsumer consumer) {
-        for (Map.Entry<Operator, Map<Column<?>, Object>> param : parameters.entrySet()) {
-            final Operator operator = param.getKey();
-            applyConsumer(consumer, operator, param.getValue());
-        }
-    }
-
-    private static void applyConsumer(ParameterConsumer consumer,
-                                      Operator operator,
-                                      Map<Column<?>, Object> paramValues) {
-        for (Map.Entry<Column<?>, Object> parameterValue : paramValues.entrySet()) {
-            consumer.consume(operator, parameterValue.getKey(), parameterValue.getValue());
-        }
+    @Override
+    public Iterator<ColumnFilter> iterator() {
+        return parameters.values()
+                         .iterator();
     }
 
     @Override
@@ -122,67 +81,33 @@ public final class QueryParameters {
      */
     public static class Builder {
 
-        private final Map<Operator, Map<Column<?>, Object>> parameters
-                = new EnumMap<>(Operator.class);
+        private final ImmutableMap.Builder<Column<?>, ColumnFilter> parameters;
 
         private Builder() {
-            // Prevent direct initialization
+            parameters = ImmutableMap.builder();
         }
 
         /**
          * Put the Query parameter represented by the arguments into the resulting instance of
          * {@code QueryParameters}.
          *
-         * @param operator the parameter comparison operator
-         * @param column   the parameter target {@link Column}
-         * @param value    the parameter value
          * @return self for method chaining
          */
-        public Builder put(Operator operator, Column<?> column, @Nullable Object value) {
-            checkNotNull(operator);
+        public Builder put(Column<?> column, ColumnFilter columnFilter) {
             checkNotNull(column);
+            checkNotNull(columnFilter);
 
-            Map<Column<?>, Object> params = parameters.get(operator);
-            if (params == null) {
-                params = new HashMap<>();
-                params.put(column, value);
-                parameters.put(operator, params);
-            } else {
-                params.put(column, value);
-            }
+            parameters.put(column, columnFilter);
+
             return this;
         }
 
-        public QueryParameters build() {
-            return new QueryParameters(parameters);
+        private ImmutableMap.Builder<Column<?>, ColumnFilter> getParameters() {
+            return parameters;
         }
-    }
 
-    /**
-     * A functional interface consuming the information about a single Query parameter.
-     *
-     * <p>Since there is no special data type representing a single Query parameter, there is no
-     * convenient way to iterate over all of the parameters outside of {@code QueryParameters}. To
-     * provide the client of class possibility to iterate over the parameters not writing two nested
-     * loops, we declare a special {@link QueryParameters#forEach(ParameterConsumer)} method which
-     * accepts an instance of {@code ParameterConsumer}.
-     */
-    @SPI
-    public interface ParameterConsumer {
-
-        /**
-         * Performs actions upon a parameter represented by the method arguments.
-         *
-         * <p>All the usages of this method are specified to be either synchronised. Also,
-         * no instances of {@code ParameterConsumer} are persisted in any context, which in
-         * conjunction with synchronization means that any closure based information exchange is
-         * totally safe.
-         *
-         * @param operator the operator of the parameter
-         * @param column   the parameter target {@link Column}
-         * @param value    the right operand in the comparison represented by the given parameter,
-         *                 i.e. the parameter value
-         */
-        void consume(Operator operator, Column<?> column, @Nullable Object value);
+        public QueryParameters build() {
+            return new QueryParameters(this);
+        }
     }
 }

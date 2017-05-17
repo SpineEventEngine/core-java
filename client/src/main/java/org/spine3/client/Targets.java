@@ -78,11 +78,11 @@ public final class Targets {
 
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
-                                @Nullable Map<String, Any> columnFilters) {
+                                @Nullable Map<String, ColumnFilter> columnFilters) {
         final boolean includeAll = (ids == null && columnFilters == null);
 
         final Set<? extends Message> entityIds = nullToEmpty(ids);
-        final Map<String, Any> entityColumnValues = nullToEmpty(columnFilters);
+        final Map<String, ColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 

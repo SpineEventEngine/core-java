@@ -36,4 +36,8 @@ public final class QueryOperators {
     public static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right) {
         return false;
     }
+
+    public static String toString(Operator operator) {
+        return "=";
+    }
 }

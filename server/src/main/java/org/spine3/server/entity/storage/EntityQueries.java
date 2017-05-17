@@ -23,11 +23,10 @@ package org.spine3.server.entity.storage;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
+import org.spine3.client.ColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
-import org.spine3.client.TimestampFilter;
-import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
@@ -35,8 +34,6 @@ import java.util.LinkedList;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -75,17 +72,10 @@ public final class EntityQueries {
                                                  Class<? extends Entity> entityClass) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
-        for (Map.Entry<String, Any> filter : entityFilters.getColumnFilterMap()
-                                                          .entrySet()) {
+        for (Map.Entry<String, ColumnFilter> filter : entityFilters.getColumnFilterMap()
+                                                                   .entrySet()) {
             final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
-            final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
-            builder.put(EQUAL, column, filterValues);
-        }
-        if (entityFilters.hasCreatedAfter()) {
-            final TimestampFilter timestampFilter = entityFilters.getCreatedAfter();
-            final String columnName = timestampFilter.getColumnName();
-            final Column<?> column = Columns.findColumn(entityClass, columnName);
-            builder.put(GREATER_THAN, column, timestampFilter.getValue());
+            builder.put(column, filter.getValue());
         }
         return builder.build();
     }

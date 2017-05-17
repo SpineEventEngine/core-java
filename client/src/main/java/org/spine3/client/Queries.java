@@ -19,7 +19,6 @@
  */
 package org.spine3.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
@@ -79,7 +78,7 @@ public final class Queries {
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
-                                         @Nullable Map<String, Any> columnFilters,
+                                         @Nullable Map<String, ColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 

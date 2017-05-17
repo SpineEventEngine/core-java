@@ -73,7 +73,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  *                                  .select(Customer.class)
  *                                  .byId(getWestCostCustomersIds())
  *                                  .withMask("name", "address", "email")
- *                                  .where({@link QueryParameter#eq eq}("type", "permanent"),
+ *                                  .where({@link ColumnFilters#eq eq}("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
  *                                  .build();
@@ -96,7 +96,7 @@ public final class QueryBuilder {
     private Set<?> ids;
 
     @Nullable
-    private Map<String, Any> columns;
+    private Map<String, ColumnFilter> columns;
 
     @Nullable
     private Set<String> fieldMask;
@@ -189,23 +189,23 @@ public final class QueryBuilder {
     /**
      * Sets the Entity Column predicate to the {@linkplain Query}.
      *
-     * <p>If there are no {@link QueryParameter}s (i.e. the passed array is empty), all
+     * <p>If there are no {@link ColumnFilters}s (i.e. the passed array is empty), all
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
      * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches
      * all of these parameters.
-     *
+     // TODO:2017-05-17:dmytro.dashenkov: Fix Javadoc.
      * <p>The disjunctive filters currently are not supported.
      *
-     * @param predicate the {@link QueryParameter}s to filter the requested entities by
+     * @param predicate the {@link ColumnFilter}s to filter the requested entities by
      * @return self for method chaining
-     * @see QueryParameter
+     * @see ColumnFilter
      */
-    public QueryBuilder where(QueryParameter... predicate) {
-        final ImmutableMap.Builder<String, Any> mapBuilder = ImmutableMap.builder();
-        for (QueryParameter param : predicate) {
-            mapBuilder.put(param.getColumnName(), param.getValue());
+    public QueryBuilder where(ColumnFilter... predicate) {
+        final ImmutableMap.Builder<String, ColumnFilter> mapBuilder = ImmutableMap.builder();
+        for (ColumnFilter param : predicate) {
+            mapBuilder.put(param.getColumnName(), param);
         }
         columns = mapBuilder.build();
         return this;
@@ -314,10 +314,10 @@ public final class QueryBuilder {
               .append(valueSeparator);
         }
         if (columns != null && !columns.isEmpty()) {
-            for (Map.Entry<String, Any> column : columns.entrySet()) {
-                sb.append(column.getKey())
-                  .append('=')
-                  .append(Json.toCompactJson(unpack(column.getValue())))
+            for (ColumnFilter filter : columns.values()) {
+                sb.append(filter.getColumnName())
+                  .append(QueryOperators.toString(filter.getOperator()))
+                  .append(Json.toCompactJson(unpack(filter.getValue())))
                   .append(valueSeparator);
             }
         }
