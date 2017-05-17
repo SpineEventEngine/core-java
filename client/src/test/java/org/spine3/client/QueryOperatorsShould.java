@@ -37,6 +37,7 @@ import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
 import static org.spine3.client.QueryOperators.compare;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.nullRef;
 import static org.spine3.time.Durations2.seconds;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -103,6 +104,7 @@ public class QueryOperatorsShould { // effectively and keeping the 8
 
         assertFalse(compare(small, GREATER_THAN, small));
         assertFalse(compare(small, GREATER_THAN, big));
+        assertFalse(compare(nullRef(), GREATER_THAN, small));
     }
 
     @Test
@@ -118,6 +120,7 @@ public class QueryOperatorsShould { // effectively and keeping the 8
         assertTrue(compare(small, GREATER_OR_EQUAL, small));
 
         assertFalse(compare(small, GREATER_OR_EQUAL, big));
+        assertFalse(compare(nullRef(), GREATER_OR_EQUAL, small));
     }
 
     @Test
@@ -133,6 +136,7 @@ public class QueryOperatorsShould { // effectively and keeping the 8
 
         assertFalse(compare(big, LESS_THAN, big));
         assertFalse(compare(big, LESS_THAN, small));
+        assertFalse(compare(nullRef(), LESS_THAN, nullRef()));
     }
 
     @Test
@@ -148,6 +152,7 @@ public class QueryOperatorsShould { // effectively and keeping the 8
 
         assertTrue(compare(medium, LESS_OR_EQUAL, medium));
         assertFalse(compare(big, LESS_OR_EQUAL, small));
+        assertFalse(compare(medium, LESS_OR_EQUAL, nullRef()));
     }
 
     @Test(expected = UnsupportedOperationException.class)
