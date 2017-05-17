@@ -22,10 +22,15 @@ package org.spine3.client;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.client.ColumnFilter.Operator;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
+import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
+import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
+import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
+import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
 import static org.spine3.protobuf.TypeConverter.toAny;
 
 /**
@@ -58,11 +63,40 @@ public final class ColumnFilters {
     public static ColumnFilter eq(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
+        return createFilter(columnName, value, EQUAL);
+    }
+
+
+    public static ColumnFilter gt(String columnName, Timestamp value) {
+        checkNotNull(columnName);
+        checkNotNull(value);
+        return createFilter(columnName, value, GREATER_THAN);
+    }
+
+    public static ColumnFilter lt(String columnName, Timestamp value) {
+        checkNotNull(columnName);
+        checkNotNull(value);
+        return createFilter(columnName, value, LESS_THAN);
+    }
+
+    public static ColumnFilter ge(String columnName, Timestamp value) {
+        checkNotNull(columnName);
+        checkNotNull(value);
+        return createFilter(columnName, value, GREATER_OR_EQUAL);
+    }
+
+    public static ColumnFilter le(String columnName, Timestamp value) {
+        checkNotNull(columnName);
+        checkNotNull(value);
+        return createFilter(columnName, value, LESS_OR_EQUAL);
+    }
+
+    private static ColumnFilter createFilter(String columnName, Object value, Operator operator) {
         final Any wrappedValue = toAny(value);
         final ColumnFilter filter = ColumnFilter.newBuilder()
                                                 .setColumnName(columnName)
                                                 .setValue(wrappedValue)
-                                                .setOperator(EQUAL)
+                                                .setOperator(operator)
                                                 .build();
         return filter;
     }

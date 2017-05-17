@@ -22,13 +22,13 @@ package org.spine3.client;
 
 import com.google.protobuf.Timestamp;
 import org.spine3.client.ColumnFilter.Operator;
-import org.spine3.time.Timestamps2;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
+import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
  * @author Dmytro Dashenkov
@@ -80,7 +80,7 @@ public final class QueryOperators {
                 if (left instanceof Timestamp && right instanceof Timestamp) {
                     final Timestamp tsLeft = (Timestamp) left;
                     final Timestamp tsRight = (Timestamp) right;
-                    return Timestamps2.isLaterThan(tsRight, tsLeft);
+                    return isLaterThan(tsLeft, tsRight);
                 }
                 return false;
             }
