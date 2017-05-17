@@ -19,10 +19,13 @@
  */
 package org.spine3.server.entity;
 
+import com.google.common.base.Optional;
+import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
+import org.spine3.server.entity.TransactionalListener.NoOpListener;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -55,6 +58,10 @@ import static org.spine3.server.entity.InvalidEntityStateException.onConstraintV
  * <p>Version management is performed automatically by the transaction itself. Each event message
  * applied leads to the version increment.
  *
+ * @param <I> the type of entity IDs
+ * @param <E> the type of entity
+ * @param <S> the type of entity state
+ * @param <B> the type of a {@code ValidatingBuilder} for the entity state
  * @author Alex Tymchenko
  */
 @Internal
@@ -63,6 +70,7 @@ public abstract class Transaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
+    private final NoOpListener<I, E, S, B> defaultListener = new NoOpListener<>();
     /**
      * The entity, which state and attributes are modified in this transaction.
      */
@@ -136,9 +144,9 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity) an overloaded ctor},
-     * but instead of using the original entity state and version, this transaction will have
-     * the passed state and version as a starting point.
+     * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity)
+     * an overloaded ctor}, but instead of using the original entity state and version,
+     * this transaction will have the passed state and version as a starting point.
      *
      * <p>Note, that the given {@code state} and {@code version} are applied to the actual entity
      * upon commit.
@@ -188,40 +196,70 @@ public abstract class Transaction<I,
         return entity;
     }
 
+    private Version getVersion() {
+        return version;
+    }
+
+    public List<Phase<I, E, S, B>> getPhases() {
+        return ImmutableList.copyOf(phases);
+    }
+
     /**
-     * Applies all the outstanding state modifications to the state of enclosed entity.
+     * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
      */
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException") // it is NOT ignored.
-    protected void commit() throws InvalidEntityStateException {
+    protected void commit()  {
 
         final B builder = getBuilder();
+        S newState = getEntity().getState();
 
         // The state is only updated, if at least some changes were made to the builder.
         if (builder.isDirty()) {
             try {
-                final S newState = builder.build();
-
+                newState = builder.build();
                 markStateChanged();
-                entity.updateState(newState, version);
-            } catch (ConstraintViolationThrowable exception) {
-                // should only happen if the state has been injected not using the builder methods.
+
+                getListener().onBeforeCommit(getEntity(), newState,
+                                             getVersion(), getLifecycleFlags());
+
+                entity.updateState(newState, getVersion());
+                commitAttributeChanges();
+            } catch (ConstraintViolationThrowable exception) {  /* Should only happen if the state
+                                                                   has been injected not using
+                                                                   the builder methods. */
 
                 final Message invalidState = ((AbstractValidatingBuilder) builder).internalBuild();
-                throw onConstraintViolations(invalidState, exception.getConstraintViolations());
-            } finally {
-                this.active = false;
-                commitAttributeChanges();
+                final InvalidEntityStateException constraintViolation = onConstraintViolations(
+                        invalidState, exception.getConstraintViolations());
 
-                entity.releaseTransaction();
+                final Optional<RuntimeException> callbackResult =
+                        getListener().onCommitFail(
+                                constraintViolation, getEntity(),
+                                newState, getVersion(), getLifecycleFlags());
+                throwIfPresent(callbackResult);
+            } finally {
+                afterCommit();
             }
+        } else {
+
+            // The state isn't modified, but other attributes may have been modified.
+            getListener().onBeforeCommit(getEntity(), getEntity().getState(),
+                                         getVersion(), getLifecycleFlags());
+            commitAttributeChanges();
+            afterCommit();
         }
     }
 
+    private void afterCommit() {
+        this.active = false;
+        entity.releaseTransaction();
+    }
+
     private void commitAttributeChanges() {
-        entity.setLifecycleFlags(lifecycleFlags);
-        entity.setStateChanged(this.stateChanged);
+        entity.setLifecycleFlags(getLifecycleFlags());
+        entity.setStateChanged(isStateChanged());
     }
 
     //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
@@ -235,16 +273,28 @@ public abstract class Transaction<I,
     Transaction<I, E, S, B> apply(Message eventMessage,
                             EventContext context) {
         final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
+        getListener().onBeforePhase(phase);
 
-        final Phase<I, E, S, B> apply;
+        Phase<I, E, S, B> appliedPhase = null;
         try {
-            apply = phase.apply();
+            appliedPhase = phase.apply();
         } catch (InvocationTargetException e) {
-            //TODO:5/16/17:alex.tymchenko: implement on-failure resolution.
-            throw new RuntimeException(e);
+            Optional<RuntimeException> callbackResult = getListener().onPhaseFail(e, phase, getPhases());
+            throwIfPresent(callbackResult);
         }
-        phases.add(apply);
+
+        final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
+        phases.add(phaseToAdd);
+
+        getListener().onAfterPhase(phaseToAdd);
         return this;
+    }
+
+    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "ProhibitedExceptionThrown"})
+    private static void throwIfPresent(Optional<RuntimeException> callbackResult) {
+        if (callbackResult.isPresent()) {
+            throw callbackResult.get();
+        }
     }
 
     /**
@@ -313,6 +363,18 @@ public abstract class Transaction<I,
         }
         setVersion(version);
     }
+
+    /**
+     * Obtains an instance of the {@code TransactionalListener} for this transaction.
+     *
+     * <p>By default, the returned listener {@linkplain TransactionalListener.NoOpListener
+     * does nothing}.
+     *
+     * <p>Descendant classes may override this method to specify a custom listener implementation.
+     */
+    protected TransactionalListener<I, E, S, B> getListener() {
+        return defaultListener;
+    };
 
     protected static class Phase<I, E extends EventPlayingEntity<I, S, B>, S extends Message,
                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {

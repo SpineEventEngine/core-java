@@ -29,6 +29,14 @@ import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 
 /**
+ * A transaction, within which {@linkplain Aggregate Aggregate instances} are modified.
+ *
+ * <p>The propagation of each transaction phase is NOT required for this type of transactions.
+ * If a transaction phase fails, the next phase is executed anyway.
+ *
+ * @param <I> the type of aggregate IDs
+ * @param <S> the type of aggregate state
+ * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
  * @author Alex Tymchenko
  */
 class AggregateTransaction<I,
@@ -57,6 +65,12 @@ class AggregateTransaction<I,
         super.commit();
     }
 
+    /**
+     * Creates a new transaction for a given {@code entity}.
+     *
+     * @param entity the entity to start the transaction for.
+     * @return the new transaction instance
+     */
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
@@ -65,6 +79,19 @@ class AggregateTransaction<I,
         return tx;
     }
 
+    /**
+     * Creates a new transaction for a given {@code entity} and sets the given {@code state}
+     * and {@code version} as a starting point for the transaction.
+     *
+     * <p>Please note that the state and version specified are not applied to the given entity
+     * directly and require a {@linkplain Transaction#commit() transaction commit} in order
+     * to be applied.
+     *
+     * @param entity  the entity to start the transaction for.
+     * @param state   the starting state to set
+     * @param version the starting version to set
+     * @return the new transaction instance
+     */
     //TODO:5/15/17:alex.tymchenko: try to deal with the warnings.
     static AggregateTransaction startWith(Aggregate entity, Message state, Version version) {
         final AggregateTransaction tx = new AggregateTransaction<>(entity, state, version);

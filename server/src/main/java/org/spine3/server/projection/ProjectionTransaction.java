@@ -23,11 +23,23 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
+import org.spine3.server.entity.TransactionalListener;
+import org.spine3.server.entity.TransactionalListener.PropagationRequiredListener;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
+ * A transaction, within which {@linkplain Projection projection instances} are modified.
+ *
+ * <p>The propagation of each transaction phase is required for this type of transactions.
+ * If a transaction phase fails, the failure exception is rethrown.
+ *
+ * @param <I> the type of projection IDs
+ * @param <M> the type of projection state
+ * @param <B> the type of a {@code ValidatingBuilder} for the projection state
  * @author Alex Tymchenko
  */
 class ProjectionTransaction<I,
@@ -56,18 +68,48 @@ class ProjectionTransaction<I,
         super.commit();
     }
 
+    @Override
+    protected TransactionalListener<I, Projection<I, M, B>, M, B> getListener() {
+        return new PropagationRequiredListener<>();
+    }
+
+    /**
+     * Creates a new transaction for a given {@code entity}.
+     *
+     * @param entity the entity to start the transaction for.
+     * @return the new transaction instance
+     */
     static <I,
             M extends Message,
             B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> start(Projection<I, M, B> entity) {
+        checkNotNull(entity);
+
         final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity);
         return tx;
     }
 
+    /**
+     * Creates a new transaction for a given {@code entity} and sets the given {@code state}
+     * and {@code version} as a starting point for the transaction.
+     *
+     * <p>Please note that the state and version specified are not applied to the given entity
+     * directly and require a {@linkplain Transaction#commit() transaction commit} in order
+     * to be applied.
+     *
+     * @param entity  the entity to start the transaction for.
+     * @param state   the starting state to set
+     * @param version the starting version to set
+     * @return the new transaction instance
+     */
     static <I,
             M extends Message,
             B extends ValidatingBuilder<M, ? extends Message.Builder>>
     ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> entity, M state, Version version) {
+        checkNotNull(entity);
+        checkNotNull(state);
+        checkNotNull(version);
+
         final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity,
                                                                               state,
                                                                               version);
