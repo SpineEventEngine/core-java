@@ -41,7 +41,7 @@ import static org.spine3.time.Timestamps2.isLaterThan;
  *
  * <p>Not all the data types are supported for all the operations:
  * <ol>
- *     <li>{@link Operator#EQUAL EQUAL} supports all the types; the behaviod is equivalent to
+ *     <li>{@link Operator#EQUAL EQUAL} supports all the types; the behaviour is equivalent to
  *         {@link Objects#equals(Object, Object)};
  *     <li>other operators currently support only {@link Timestamp} instances comparison; if any of
  *         the operands is {@code null}, the comparison returns {@code false}.

@@ -106,7 +106,7 @@ public final class StringifierRegistry {
      *
      * @param typeOfT the type to stringify
      * @param <T>     the type of the values to convert
-     * @return the found {@code Stringifer} or empty {@code Optional}
+     * @return the found {@code Stringifier} or empty {@code Optional}
      */
     public <T> Optional<Stringifier<T>> get(Type typeOfT) {
         checkNotNull(typeOfT);
