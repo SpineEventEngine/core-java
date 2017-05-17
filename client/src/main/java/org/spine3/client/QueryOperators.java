@@ -21,6 +21,7 @@
 package org.spine3.client;
 
 import com.google.protobuf.Timestamp;
+import org.spine3.annotation.Internal;
 import org.spine3.client.ColumnFilter.Operator;
 
 import javax.annotation.Nullable;
@@ -31,21 +32,60 @@ import static java.lang.String.format;
 import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
+ * A utility class for working with the {@link ColumnFilter.Operator} enum.
+ *
+ * <p>The main facility of this class is executing the {@linkplain #compare comparison} operations
+ * represented by an {@link Operator} enum value and two operands of a certain type.
+ *
+ * <a name="supported_types"/>
+ *
+ * <p>Not all the data types are supported for all the operations:
+ * <ol>
+ * <li>{@link Operator#EQUAL EQUAL} supports all the types; the behaviod is equivalent to
+ * {@link Objects#equals(Object, Object)};
+ * <li>other operators currently support only {@link Timestamp} instances comparison; if any of
+ * the operands is {@code null}, the comparison returns {@code false}.
+ * </ol>
+ *
+ * <p>Support for some other data types may be added in future.
+ *
  * @author Dmytro Dashenkov
  */
+@Internal
 public final class QueryOperators {
 
     private QueryOperators() {
         // Prevent this static class from being initialized.
     }
 
-    public static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right) {
+    /**
+     * Compares the given operands with the given operator.
+     *
+     * <p>For example, if operands where {@code 42} and {@link 9} (exactly in that order) and
+     * the operator was {@link Operator#GREATER_THAN GREATER_THAN}, then this function could be
+     * expressed as {@code 42 > 8}. The function returns {@code true} if the expression is
+     * mathematically correct.
+     *
+     * @param left     the left operand
+     * @param operator the comparison operator
+     * @param right    the right operand
+     * @param <T>      the type of the compared values
+     * @return {@code true} if the operands match the operator, {@code false} otherwise
+     * @throws UnsupportedOperationException if the operation is
+     *                                       <a href="supported_types">not supported</a> for
+     *                                       the given data types
+     */
+    public static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
+            throws UnsupportedOperationException {
         checkNotNull(operator);
         final MetaOperator op = getMetaInstance(operator);
         final boolean result = op.compare(left, right);
         return result;
     }
 
+    /**
+     * @return a symbolic representation of the given {@link Operator}
+     */
     public static String toString(Operator operator) {
         checkNotNull(operator);
         final MetaOperator op = getMetaInstance(operator);
@@ -66,6 +106,15 @@ public final class QueryOperators {
         }
     }
 
+    /**
+     * A reflected {@link Operator} enum facilitated by custom methods.
+     *
+     * <p>Since {@link Operator} is defined in Protobuf, we cannot add custom methods to this type
+     * in Java. The way abound is using this type, whose enum constants have the same name as
+     * the {@link Operator} constants do.
+     *
+     * @see QueryOperators#getMetaInstance(Operator)
+     */
     private enum MetaOperator {
         EQUAL("=") {
             @Override
@@ -76,13 +125,20 @@ public final class QueryOperators {
         GREATER_THAN(">") {
             @Override
             <T> boolean compare(@Nullable T left, @Nullable T right) {
-                // null values are handled within the instanceof check
+                if (left == null || right == null) {
+                    return false;
+                }
                 if (left instanceof Timestamp && right instanceof Timestamp) {
                     final Timestamp tsLeft = (Timestamp) left;
                     final Timestamp tsRight = (Timestamp) right;
                     return isLaterThan(tsLeft, tsRight);
                 }
-                return false;
+                throw new UnsupportedOperationException(
+                        format("Operation \'%s\' is not supported for type %s.",
+                               this,
+                               left.getClass()
+                                   .getCanonicalName()
+                        ));
             }
         },
         LESS_THAN("<") {
@@ -112,8 +168,18 @@ public final class QueryOperators {
             this.label = label;
         }
 
+        /**
+         * Compares the given operands by the rules of the operator.
+         *
+         * @see QueryOperators#compare(Object, Operator, Object) for the detailed behaiour
+         * description
+         */
         abstract <T> boolean compare(@Nullable T left, @Nullable T right);
 
+        /**
+         * @return a symbolic of the operator
+         * @see QueryOperators#toString(Operator)
+         */
         @Override
         public String toString() {
             return label;

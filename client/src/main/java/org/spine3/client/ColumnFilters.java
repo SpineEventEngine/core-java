@@ -21,7 +21,6 @@
 package org.spine3.client;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -34,17 +33,12 @@ import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
 import static org.spine3.protobuf.TypeConverter.toAny;
 
 /**
- * A parameter of a {@link Query}.
- * // TODO:2017-05-17:dmytro.dashenkov: Fix the Javadoc.
+ * A factory of {@link ColumnFilter} instances.
  *
- * <p>This class may be considered a filter for the query. An instance contains the name of
- * the Entity Column to filter by, the value of the Column and
- * the {@linkplain Operator comparison operator}.
+ * <p>The public methods of this class represent the recommended way to create
+ * a {@link ColumnFilter}.
  *
- * <p>The supported types for querying are {@linkplain Message Message types} and Protobuf
- * primitives.
- *
- * @see org.spine3.protobuf.TypeConverter for the list of supported types
+ * @see QueryBuilder for the application
  */
 public final class ColumnFilters {
 
@@ -53,7 +47,7 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new equality {@code QueryParameter}.
+     * Creates new equality {@link ColumnFilter}.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
@@ -66,25 +60,56 @@ public final class ColumnFilters {
         return createFilter(columnName, value, EQUAL);
     }
 
-
+    /**
+     * Creates new "greater than" {@link ColumnFilter}.
+     *
+     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     *                   name with no type info
+     * @param value      the requested value of the Entity Column
+     * @return new instance of QueryParameter
+     */
     public static ColumnFilter gt(String columnName, Timestamp value) {
         checkNotNull(columnName);
         checkNotNull(value);
         return createFilter(columnName, value, GREATER_THAN);
     }
 
+    /**
+     * Creates new "less than" {@link ColumnFilter}.
+     *
+     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     *                   name with no type info
+     * @param value      the requested value of the Entity Column
+     * @return new instance of QueryParameter
+     */
     public static ColumnFilter lt(String columnName, Timestamp value) {
         checkNotNull(columnName);
         checkNotNull(value);
         return createFilter(columnName, value, LESS_THAN);
     }
 
+    /**
+     * Creates new "greater or equal" {@link ColumnFilter}.
+     *
+     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     *                   name with no type info
+     * @param value      the requested value of the Entity Column
+     * @return new instance of QueryParameter
+     */
     public static ColumnFilter ge(String columnName, Timestamp value) {
         checkNotNull(columnName);
         checkNotNull(value);
         return createFilter(columnName, value, GREATER_OR_EQUAL);
     }
 
+    /**
+     * Creates new "less or equal" {@link ColumnFilter}.
+     *
+     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     *                   name with no type info
+     * @param value      the requested value of the Entity Column
+     * @return new instance of QueryParameter
+     */
     public static ColumnFilter le(String columnName, Timestamp value) {
         checkNotNull(columnName);
         checkNotNull(value);

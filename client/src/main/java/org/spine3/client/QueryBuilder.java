@@ -79,6 +79,7 @@ import static org.spine3.protobuf.AnyPacker.unpack;
  * </pre>
  *
  * @see QueryFactory#select(Class)
+ * @see ColumnFilters for the query parameters
  */
 public final class QueryBuilder {
 
@@ -187,18 +188,17 @@ public final class QueryBuilder {
     /**
      * Sets the Entity Column predicate to the {@linkplain Query}.
      *
-     * <p>If there are no {@link ColumnFilters}s (i.e. the passed array is empty), all
+     * <p>If there are no {@link ColumnFilter}s (i.e. the passed array is empty), all
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
      * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches
      * all of these parameters.
-     // TODO:2017-05-17:dmytro.dashenkov: Fix Javadoc.
      * <p>The disjunctive filters currently are not supported.
      *
      * @param predicate the {@link ColumnFilter}s to filter the requested entities by
      * @return self for method chaining
-     * @see ColumnFilter
+     * @see ColumnFilters for a conviniant way to create {@link ColumnFilter} instances
      */
     public QueryBuilder where(ColumnFilter... predicate) {
         final ImmutableSet.Builder<ColumnFilter> builder = ImmutableSet.builder();
