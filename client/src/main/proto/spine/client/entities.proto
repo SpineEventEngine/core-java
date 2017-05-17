@@ -75,7 +75,7 @@ message EntityFilters {
     repeated ColumnFilter column_filter = 2;
 
     // Reserved for more filter types
-    reserved 4 to 40;
+    reserved 3 to 40;
 }
 
 message ColumnFilter {
