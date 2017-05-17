@@ -41,10 +41,10 @@ import static org.spine3.time.Timestamps2.isLaterThan;
  *
  * <p>Not all the data types are supported for all the operations:
  * <ol>
- * <li>{@link Operator#EQUAL EQUAL} supports all the types; the behaviod is equivalent to
- * {@link Objects#equals(Object, Object)};
- * <li>other operators currently support only {@link Timestamp} instances comparison; if any of
- * the operands is {@code null}, the comparison returns {@code false}.
+ *     <li>{@link Operator#EQUAL EQUAL} supports all the types; the behaviod is equivalent to
+ *         {@link Objects#equals(Object, Object)};
+ *     <li>other operators currently support only {@link Timestamp} instances comparison; if any of
+ *         the operands is {@code null}, the comparison returns {@code false}.
  * </ol>
  *
  * <p>Support for some other data types may be added in future.
@@ -101,8 +101,7 @@ public final class QueryOperators {
                 NullPointerException npe) {
             throw new IllegalArgumentException(
                     format("Cannot recognize query operator %s.", name),
-                    npe
-            );
+                    npe);
         }
     }
 
