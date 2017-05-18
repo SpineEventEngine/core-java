@@ -40,6 +40,13 @@ public class ValidatingBuilders {
         // Prevent instantiation of this utility class.
     }
 
+    /**
+     * Creates an instance of {@code ValidatingBuilder} by its type.
+     *
+     * @param builderClass the type of the {@code ValidatingBuilder} to instantiate
+     * @param <B>          the generic type of returned value
+     * @return the new instance of the builder
+     */
     @SuppressWarnings("OverlyBroadCatchBlock")   // OK, as the exception handling is the same.
     public static <B extends ValidatingBuilder<?, ?>> B newInstance(Class<B> builderClass) {
         try {
@@ -57,11 +64,15 @@ public class ValidatingBuilders {
         }
     }
 
+    /**
+     * Validating builder for {@linkplain StringValue} messages.
+     */
     public static final class StringValueValidatingBuilder
             extends AbstractValidatingBuilder<StringValue, StringValue.Builder> {
 
+        // Prevent instantiation from the outside.
         private StringValueValidatingBuilder() {
-            // Prevent instantiation from the outside.
+            super();
         }
 
         public static StringValueValidatingBuilder newBuilder() {
@@ -74,11 +85,15 @@ public class ValidatingBuilders {
         }
     }
 
+    /**
+     * Validating builder for {@linkplain Timestamp} messages.
+     */
     public static final class TimestampValidatingBuilder
             extends AbstractValidatingBuilder<Timestamp, Timestamp.Builder> {
 
+        // Prevent instantiation from the outside.
         private TimestampValidatingBuilder() {
-            // Prevent instantiation from the outside.
+            super();
         }
 
         public static TimestampValidatingBuilder newBuilder() {
@@ -86,11 +101,15 @@ public class ValidatingBuilders {
         }
     }
 
+    /**
+     * Validating builder for {@linkplain UInt32Value} messages.
+     */
     public static final class UInt32ValueValidatingBuilder
             extends AbstractValidatingBuilder<UInt32Value, UInt32Value.Builder> {
 
+        // Prevent instantiation from the outside.
         private UInt32ValueValidatingBuilder() {
-            // Prevent instantiation from the outside.
+            super();
         }
 
         public static UInt32ValueValidatingBuilder newBuilder() {
@@ -103,11 +122,15 @@ public class ValidatingBuilders {
         }
     }
 
+    /**
+     * Validating builder for {@linkplain Any} messages.
+     */
     public static final class AnyValidatingBuilder
             extends AbstractValidatingBuilder<Any, Any.Builder> {
 
+        // Prevent instantiation from the outside.
         private AnyValidatingBuilder() {
-            // Prevent instantiation from the outside.
+            super();
         }
 
         public static AnyValidatingBuilder newBuilder() {
@@ -115,11 +138,15 @@ public class ValidatingBuilders {
         }
     }
 
+    /**
+     * Validating builder for {@linkplain Empty} messages.
+     */
     public static final class EmptyValidatingBuilder
             extends AbstractValidatingBuilder<Empty, Empty.Builder> {
 
+        // Prevent instantiation from the outside.
         private EmptyValidatingBuilder() {
-            // Prevent instantiation from the outside.
+            super();
         }
 
         public static EmptyValidatingBuilder newBuilder() {
