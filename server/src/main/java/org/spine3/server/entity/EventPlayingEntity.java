@@ -19,6 +19,7 @@
  */
 package org.spine3.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
@@ -37,6 +38,10 @@ import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A base for entities, which can play {@linkplain org.spine3.base.Event events}.
+ *
+ * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
+ *
+ * <p>Exposes {@linkplain ValidatingBuilder validating builder} as an only way to modify the state.
  *
  * @author Alex Tymchenko
  */
@@ -114,7 +119,8 @@ public abstract class EventPlayingEntity <I,
      *
      * @return {@code true} if it is active, {@code false} otherwise
      */
-    private boolean isTransactionInProgress() {
+    @VisibleForTesting
+    boolean isTransactionInProgress() {
         final boolean result = this.transaction != null && this.transaction.isActive();
         return result;
     }
@@ -150,8 +156,17 @@ public abstract class EventPlayingEntity <I,
         this.transaction = null;
     }
 
-    void setStateChanged(boolean stateChanged) {
-        this.stateChanged = stateChanged;
+    @Nullable
+    @VisibleForTesting
+    Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> getTransaction() {
+        return transaction;
+    }
+
+    /**
+     * Updates own {@code stateChanged} flag from the underlying transaction.
+     */
+    void updateStateChanged() {
+        this.stateChanged = tx().isStateChanged();
     }
 
     B builderFromState() {

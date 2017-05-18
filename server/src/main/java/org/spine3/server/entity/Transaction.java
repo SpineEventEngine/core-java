@@ -19,6 +19,7 @@
  */
 package org.spine3.server.entity;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
@@ -185,7 +186,8 @@ public abstract class Transaction<I,
      *
      * @return {@code true} if the transaction is active, {@code false} otherwise
      */
-    boolean isActive() {
+    @VisibleForTesting
+    public boolean isActive() {
         return active;
     }
 
@@ -279,7 +281,7 @@ public abstract class Transaction<I,
 
     private void commitAttributeChanges() {
         entity.setLifecycleFlags(getLifecycleFlags());
-        entity.setStateChanged(isStateChanged());
+        entity.updateStateChanged();
     }
 
     //TODO:5/15/17:alex.tymchenko: make it work only
