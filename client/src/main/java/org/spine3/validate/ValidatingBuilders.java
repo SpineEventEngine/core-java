@@ -27,6 +27,7 @@ import com.google.protobuf.UInt32Value;
 
 import java.lang.reflect.Method;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -49,6 +50,8 @@ public class ValidatingBuilders {
      */
     @SuppressWarnings("OverlyBroadCatchBlock")   // OK, as the exception handling is the same.
     public static <B extends ValidatingBuilder<?, ?>> B newInstance(Class<B> builderClass) {
+        checkNotNull(builderClass);
+
         try {
             final Method newBuilderMethod =
                     ValidatingBuilder.TypeInfo.getNewBuilderMethod(builderClass);
