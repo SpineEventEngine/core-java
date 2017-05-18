@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public class ColumnRecords {
+public final class ColumnRecords {
 
     private ColumnRecords() {
         // Prevent initialization of the utility class

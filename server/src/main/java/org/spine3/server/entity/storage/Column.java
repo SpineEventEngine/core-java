@@ -129,7 +129,7 @@ import static java.lang.String.format;
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
-public class Column implements Serializable {
+public /*final*/ class Column implements Serializable {
 
     private static final long serialVersionUID = 8200711636725154347L;
 
@@ -297,7 +297,9 @@ public class Column implements Serializable {
      * @see Column#memoizeFor(Entity)
      */
     @Internal
-    static class MemoizedValue {
+    static class MemoizedValue implements Serializable {
+
+        private static final long serialVersionUID = -6041163252051925293L;
 
         private final Column sourceColumn;
 

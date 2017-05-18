@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import org.spine3.client.ColumnFilter;
 
+import java.io.Serializable;
 import java.util.Iterator;
 
 import static com.google.common.base.Optional.fromNullable;
@@ -35,7 +36,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public final class QueryParameters implements Iterable<ColumnFilter> {
+public final class QueryParameters implements Iterable<ColumnFilter>, Serializable {
+
+    private static final long serialVersionUID = 526400152015141524L;
 
     private final ImmutableMap<Column, ColumnFilter> parameters;
 

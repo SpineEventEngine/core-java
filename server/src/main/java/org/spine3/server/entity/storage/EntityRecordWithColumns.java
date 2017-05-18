@@ -27,6 +27,7 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.EntityRecord;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,10 +37,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public final class EntityRecordWithColumns {
+public final class EntityRecordWithColumns implements Serializable {
+
+    private static final long serialVersionUID = 1576133534602043154L;
 
     private final EntityRecord record;
-
     private final ImmutableMap<String, Column.MemoizedValue> storageFields;
     private final boolean hasStorageFields;
 
