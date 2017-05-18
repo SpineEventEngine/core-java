@@ -26,6 +26,7 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.test.entity.Project;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.TaskId;
 import org.spine3.testdata.Sample;
@@ -35,6 +36,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static java.util.Collections.emptySet;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -115,6 +118,32 @@ public class EntityQueryMatcherShould {
 
         assertTrue(matcher.apply(matchingRecord));
         assertFalse(matcher.apply(nonMatchingRecord));
+    }
+
+    @Test
+    public void match_Any_instances() {
+        final String columnName = "column";
+
+        final Project someMessage = Sample.messageOfType(Project.class);
+        final Any actualValue = AnyPacker.pack(someMessage);
+
+        final Column column = mock(Column.class);
+        when(column.getType()).thenReturn(Any.class);
+        final Column.MemoizedValue value = mock(Column.MemoizedValue.class);
+        when(value.getSourceColumn()).thenReturn(column);
+        when(value.getValue()).thenReturn(actualValue);
+
+        final EntityRecord record = Sample.messageOfType(EntityRecord.class);
+        final Map<String, Column.MemoizedValue> columns = singletonMap(columnName, value);
+        final EntityRecordWithColumns recordWithColumns = of(record, columns);
+
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                                                          .put(column, eq(columnName, actualValue))
+                                                          .build();
+        final EntityQuery<?> query = EntityQuery.of(emptySet(), parameters);
+
+        final EntityQueryMatcher<?> matcher = new EntityQueryMatcher<>(query);
+        assertTrue(matcher.apply(recordWithColumns));
     }
 
     private static QueryParameters defaultQueryParameters() {

@@ -70,7 +70,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
                                        .getEntityId();
             final Object genericId = Identifiers.idFromAny(entityId);
             @SuppressWarnings("SuspiciousMethodCalls")
-            // The Collection.contains behavior about the non-assignable types is acceptable
+                // The Collection.contains behavior about the non-assignable types is acceptable
             final boolean idMatches = acceptedIds.contains(genericId);
             if (!idMatches) {
                 return false;
