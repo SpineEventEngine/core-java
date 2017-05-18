@@ -83,15 +83,6 @@ public final class QueryOperators {
         return result;
     }
 
-    /**
-     * @return a symbolic representation of the given {@link Operator}
-     */
-    public static String toString(Operator operator) {
-        checkNotNull(operator);
-        final MetaOperator op = getMetaInstance(operator);
-        return op.toString();
-    }
-
     private static MetaOperator getMetaInstance(Operator operator) {
         final String name = operator.name();
         try {
@@ -115,13 +106,13 @@ public final class QueryOperators {
      * @see QueryOperators#getMetaInstance(Operator)
      */
     private enum MetaOperator {
-        EQUAL("=") {
+        EQUAL {
             @Override
             <T> boolean compare(@Nullable T left, @Nullable T right) {
                 return Objects.equals(left, right);
             }
         },
-        GREATER_THAN(">") {
+        GREATER_THAN {
             @Override
             <T> boolean compare(@Nullable T left, @Nullable T right) {
                 if (left == null || right == null) {
@@ -140,32 +131,26 @@ public final class QueryOperators {
                         ));
             }
         },
-        LESS_THAN("<") {
+        LESS_THAN {
             @Override
             <T> boolean compare(@Nullable T left, @Nullable T right) {
                 return GREATER_THAN.compare(right, left);
             }
         },
-        GREATER_OR_EQUAL(">=") {
+        GREATER_OR_EQUAL {
             @Override
             <T> boolean compare(@Nullable T left, @Nullable T right) {
                 return GREATER_THAN.compare(left, right)
                         || EQUAL.compare(left, right);
             }
         },
-        LESS_OR_EQUAL("<=") {
+        LESS_OR_EQUAL {
             @Override
             <T> boolean compare(@Nullable T left, @Nullable T right) {
                 return LESS_THAN.compare(left, right)
                         || EQUAL.compare(left, right);
             }
         };
-
-        private final String label;
-
-        MetaOperator(String label) {
-            this.label = label;
-        }
 
         /**
          * Compares the given operands by the rules of the operator.
@@ -174,14 +159,5 @@ public final class QueryOperators {
          * description
          */
         abstract <T> boolean compare(@Nullable T left, @Nullable T right);
-
-        /**
-         * @return a symbolic of the operator
-         * @see QueryOperators#toString(Operator)
-         */
-        @Override
-        public String toString() {
-            return label;
-        }
     }
 }

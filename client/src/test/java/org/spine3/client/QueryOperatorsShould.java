@@ -24,10 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.client.ColumnFilter.Operator;
 
 import static com.google.protobuf.util.Timestamps.add;
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
@@ -55,15 +53,6 @@ public class QueryOperatorsShould { // effectively and keeping the 8
     @Test
     public void not_accept_nulls() {
         new NullPointerTester().testAllPublicStaticMethods(QueryOperators.class);
-    }
-
-    @Test
-    public void retrieve_operator_symbolic_repr() {
-        assertSymbol(EQUAL, "=");
-        assertSymbol(GREATER_THAN, ">");
-        assertSymbol(LESS_THAN, "<");
-        assertSymbol(GREATER_OR_EQUAL, ">=");
-        assertSymbol(LESS_OR_EQUAL, "<=");
     }
 
     @SuppressWarnings("RedundantStringConstructorCall") // We need an equal but not the same object
@@ -176,9 +165,5 @@ public class QueryOperatorsShould { // effectively and keeping the 8
     public void fail_to_compare_unsupported_types_by_LE() {
         compare("bfo", LESS_OR_EQUAL, "oar");
 
-    }
-
-    private static void assertSymbol(Operator operator, String symbol) {
-        assertEquals(symbol, QueryOperators.toString(operator));
     }
 }

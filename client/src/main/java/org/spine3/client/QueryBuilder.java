@@ -314,7 +314,9 @@ public final class QueryBuilder {
         if (columns != null && !columns.isEmpty()) {
             for (ColumnFilter filter : columns) {
                 sb.append(filter.getColumnName())
-                  .append(QueryOperators.toString(filter.getOperator()))
+                  .append(' ')
+                  .append(filter.getOperator())
+                  .append(' ')
                   .append(Json.toCompactJson(unpack(filter.getValue())))
                   .append(valueSeparator);
             }
