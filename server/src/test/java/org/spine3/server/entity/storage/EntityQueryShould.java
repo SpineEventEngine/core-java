@@ -70,7 +70,7 @@ public class EntityQueryShould {
 
     private static void addEqualityGroupA(EqualsTester tester) {
         final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
-        final Map<Column<?>, Object> params = new IdentityHashMap<>(2);
+        final Map<Column, Object> params = new IdentityHashMap<>(2);
         params.put(mockColumn(), "anything");
         params.put(mockColumn(), 5);
         final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
@@ -79,7 +79,7 @@ public class EntityQueryShould {
 
     private static void addEqualityGroupB(EqualsTester tester) {
         final Collection<?> ids = emptyList();
-        final Map<Column<?>, Object> params = new HashMap<>(1);
+        final Map<Column, Object> params = new HashMap<>(1);
         params.put(mockColumn(), 5);
         final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
         final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
@@ -88,11 +88,11 @@ public class EntityQueryShould {
 
     private static void addEqualityGroupC(EqualsTester tester) {
         final Collection<?> ids = emptySet();
-        final Column<?> column = mockColumn();
+        final Column column = mockColumn();
         final Object value = 42;
-        final Map<Column<?>, Object> params1 = new HashMap<>(1);
+        final Map<Column, Object> params1 = new HashMap<>(1);
         params1.put(column, value);
-        final Map<Column<?>, Object> params2 = new HashMap<>(1);
+        final Map<Column, Object> params2 = new HashMap<>(1);
         params2.put(column, value);
         final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params1));
         final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params2));
@@ -101,7 +101,7 @@ public class EntityQueryShould {
 
     private static void addEqualityGroupD(EqualsTester tester) {
         final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
-        final Map<Column<?>, Object> columns = Collections.emptyMap();
+        final Map<Column, Object> columns = Collections.emptyMap();
         final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
         tester.addEqualityGroup(query);
     }
@@ -110,10 +110,10 @@ public class EntityQueryShould {
     public void support_toString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> ids = singleton(someId);
-        final Column<?> someColumn = mockColumn();
+        final Column someColumn = mockColumn();
         final Object someValue = "something";
 
-        final Map<Column<?>, Object> params = new HashMap<>(1);
+        final Map<Column, Object> params = new HashMap<>(1);
         params.put(someColumn, someValue);
 
         final EntityQuery query = EntityQuery.of(ids, paramsFromValues(params));
@@ -125,17 +125,17 @@ public class EntityQueryShould {
                             .toString(), repr);
     }
 
-    private static <T> Column<T> mockColumn() {
+    private static <T> Column mockColumn() {
         @SuppressWarnings("unchecked") // Mock cannot have type parameters
-        final Column<T> column = mock(Column.class);
+        final Column column = mock(Column.class);
         when(column.getName()).thenReturn("mockColumn");
         return column;
     }
 
-    private static QueryParameters paramsFromValues(Map<Column<?>, Object> values) {
+    private static QueryParameters paramsFromValues(Map<Column, Object> values) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
-        for (Map.Entry<Column<?>, Object> param : values.entrySet()) {
-            final Column<?> column = param.getKey();
+        for (Map.Entry<Column, Object> param : values.entrySet()) {
+            final Column column = param.getKey();
             final ColumnFilter filter = ColumnFilter.newBuilder()
                                                     .setOperator(EQUAL)
                                                     .setValue(toAny(param.getValue()))

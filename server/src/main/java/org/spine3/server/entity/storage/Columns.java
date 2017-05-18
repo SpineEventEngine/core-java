@@ -84,9 +84,9 @@ class Columns {
      *
      * <p>This container is mutable and thread safe.
      */
-    private static final Multimap<Class<? extends Entity>, Column<?>> knownEntityProperties =
+    private static final Multimap<Class<? extends Entity>, Column> knownEntityProperties =
             synchronizedListMultimap(
-                    LinkedListMultimap.<Class<? extends Entity>, Column<?>>create());
+                    LinkedListMultimap.<Class<? extends Entity>, Column>create());
 
     private Columns() {
         // Prevent initialization of a utility class
@@ -106,7 +106,7 @@ class Columns {
      * {@linkplain Column.MemoizedValue memoized values}.
      * @see Column.MemoizedValue
      */
-    static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue<?>> from(E entity) {
+    static <E extends Entity<?, ?>> Map<String, Column.MemoizedValue> from(E entity) {
         checkNotNull(entity);
         final Class<? extends Entity> entityType = entity.getClass();
         final int modifiers = entityType.getModifiers();
@@ -116,7 +116,7 @@ class Columns {
         }
         ensureRegistered(entityType);
 
-        final Map<String, Column.MemoizedValue<?>> fields = extractColumns(entityType, entity);
+        final Map<String, Column.MemoizedValue> fields = extractColumns(entityType, entity);
         return fields;
     }
 
@@ -133,13 +133,13 @@ class Columns {
      * @return an instance of {@link Column} with the given name
      * @throws IllegalArgumentException if the {@link Column} is not found
      */
-    static Column<?> findColumn(Class<? extends Entity> entityClass, String columnName) {
+    static Column findColumn(Class<? extends Entity> entityClass, String columnName) {
         checkNotNull(entityClass);
         checkNotNull(columnName);
         ensureRegistered(entityClass);
 
-        final Collection<Column<?>> cachedColumns = knownEntityProperties.get(entityClass);
-        for (Column<?> column : cachedColumns) {
+        final Collection<Column> cachedColumns = knownEntityProperties.get(entityClass);
+        for (Column column : cachedColumns) {
             if (column.getName()
                       .equals(columnName)) {
                 return column;
@@ -160,17 +160,17 @@ class Columns {
      * @param entity     the object which to take the values from
      * @return a {@link Map} of the {@link Column Columns}
      */
-    private static Map<String, Column.MemoizedValue<?>> extractColumns(
+    private static Map<String, Column.MemoizedValue> extractColumns(
             Class<? extends Entity> entityType,
             Entity entity) {
-        final Collection<Column<?>> storageFieldProperties =
+        final Collection<Column> storageFieldProperties =
                 knownEntityProperties.get(entityType);
-        final Map<String, Column.MemoizedValue<?>> values =
+        final Map<String, Column.MemoizedValue> values =
                 new HashMap<>(storageFieldProperties.size());
 
-        for (Column<?> column : storageFieldProperties) {
+        for (Column column : storageFieldProperties) {
             final String name = column.getName();
-            final Column.MemoizedValue<?> value = column.memoizeFor(entity);
+            final Column.MemoizedValue value = column.memoizeFor(entity);
             values.put(name, value);
         }
         return values;
@@ -197,7 +197,7 @@ class Columns {
         for (PropertyDescriptor property : entityDescriptor.getPropertyDescriptors()) {
             final Method getter = property.getReadMethod();
             if (!ExcludedMethod.contain(getter.getName())) {
-                final Column<?> storageField = Column.from(getter);
+                final Column storageField = Column.from(getter);
                 knownEntityProperties.put(entityType, storageField);
             }
         }

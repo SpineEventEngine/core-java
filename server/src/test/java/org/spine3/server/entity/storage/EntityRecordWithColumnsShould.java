@@ -47,7 +47,7 @@ public class EntityRecordWithColumnsShould {
     public void initialize_with_record_and_storage_fields() {
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(),
-                                           Collections.<String, Column.MemoizedValue<?>>emptyMap());
+                                           Collections.<String, Column.MemoizedValue>emptyMap());
         assertNotNull(record);
     }
 
@@ -74,35 +74,35 @@ public class EntityRecordWithColumnsShould {
 
     @Test
     public void store_column_values() {
-        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
-        final Map<String, Column.MemoizedValue<?>> columnsExpected =
-                Collections.<String, Column.MemoizedValue<?>>singletonMap("some-key", mockValue);
+        final Column.MemoizedValue mockValue = mock(Column.MemoizedValue.class);
+        final Map<String, Column.MemoizedValue> columnsExpected =
+                Collections.<String, Column.MemoizedValue>singletonMap("some-key", mockValue);
 
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
                                            columnsExpected);
         assertTrue(record.hasColumns());
 
-        final Map<String, Column.MemoizedValue<?>> columnsActual =
+        final Map<String, Column.MemoizedValue> columnsActual =
                 record.getColumnValues();
         assertMapsEqual(columnsExpected, columnsActual, "column values");
     }
 
     @Test
     public void store_column_definitions() {
-        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
+        final Column.MemoizedValue mockValue = mock(Column.MemoizedValue.class);
         final Column mockColumn = mock(Column.class);
         when(mockValue.getSourceColumn()).thenReturn(mockColumn);
 
         final String key = "arbitrary";
-        final Map<String, Column.MemoizedValue<?>> columnsExpected =
-                Collections.<String, Column.MemoizedValue<?>>singletonMap(key, mockValue);
+        final Map<String, Column.MemoizedValue> columnsExpected =
+                Collections.<String, Column.MemoizedValue>singletonMap(key, mockValue);
 
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
                                            columnsExpected);
         assertTrue(record.hasColumns());
-        final Map<String, Column<?>> columnsActual = record.getColumns();
+        final Map<String, Column> columnsActual = record.getColumns();
         assertContainsKeyValue(key, mockColumn, columnsActual);
     }
 
@@ -112,25 +112,25 @@ public class EntityRecordWithColumnsShould {
         final EntityRecordWithColumns record =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
         assertFalse(record.hasColumns());
-        final Map<String, Column.MemoizedValue<?>> fields = record.getColumnValues();
+        final Map<String, Column.MemoizedValue> fields = record.getColumnValues();
         assertEmpty(fields);
     }
 
     @Test
     public void have_equals() {
-        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
+        final Column.MemoizedValue mockValue = mock(Column.MemoizedValue.class);
         final EntityRecordWithColumns noFieldsEnvelope =
                 EntityRecordWithColumns.of(EntityRecord.getDefaultInstance()
                 );
         final EntityRecordWithColumns emptyFieldsEnvelope =
                 EntityRecordWithColumns.of(
                         EntityRecord.getDefaultInstance(),
-                        Collections.<String, Column.MemoizedValue<?>>emptyMap()
+                        Collections.<String, Column.MemoizedValue>emptyMap()
                 );
         final EntityRecordWithColumns notEmptyFieldsEnvelope =
                 EntityRecordWithColumns.of(
                         EntityRecord.getDefaultInstance(),
-                        Collections.<String, Column.MemoizedValue<?>>singletonMap("key", mockValue)
+                        Collections.<String, Column.MemoizedValue>singletonMap("key", mockValue)
                 );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
@@ -141,6 +141,6 @@ public class EntityRecordWithColumnsShould {
 
     private static EntityRecordWithColumns newRecord() {
         return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                                          Collections.<String, Column.MemoizedValue<?>>emptyMap());
+                                          Collections.<String, Column.MemoizedValue>emptyMap());
     }
 }

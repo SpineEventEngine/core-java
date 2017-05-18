@@ -82,7 +82,7 @@ public class ColumnRecordsShould {
         // Set up mocks and arguments
         final List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
 
-        final Map<String, Column.MemoizedValue<?>> columns = setupMockColumnsAllowingNulls();
+        final Map<String, Column.MemoizedValue> columns = setupMockColumnsAllowingNulls();
 
         final CollectAnyColumnType type = spy(CollectAnyColumnType.class);
         final ColumnTypeRegistry<CollectAnyColumnType> registry =
@@ -108,10 +108,10 @@ public class ColumnRecordsShould {
         assertContainsAll(destination, getNonNullColumnValues().toArray());
     }
 
-    private static Map<String, Column.MemoizedValue<?>> setupMockColumnsAllowingNulls() {
+    private static Map<String, Column.MemoizedValue> setupMockColumnsAllowingNulls() {
         final Column mockColumn = mock(Column.class);
         when(mockColumn.getType()).thenReturn(Object.class);
-        final Map<String, Column.MemoizedValue<?>> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
+        final Map<String, Column.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
             final Integer columnValueToPersist = (i % 2 != 0) ? null : i;
 

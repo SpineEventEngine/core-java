@@ -37,7 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class QueryParameters implements Iterable<ColumnFilter> {
 
-    private final ImmutableMap<Column<?>, ColumnFilter> parameters;
+    private final ImmutableMap<Column, ColumnFilter> parameters;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
@@ -51,7 +51,7 @@ public final class QueryParameters implements Iterable<ColumnFilter> {
      * @param column the target {@link Column} of the result {@link ColumnFilter}
      * @return the corresponding {@link ColumnFilter}
      */
-    public Optional<ColumnFilter> get(Column<?> column) {
+    public Optional<ColumnFilter> get(Column column) {
         final ColumnFilter filter = parameters.get(column);
         return fromNullable(filter);
     }
@@ -93,7 +93,7 @@ public final class QueryParameters implements Iterable<ColumnFilter> {
      */
     public static class Builder {
 
-        private final ImmutableMap.Builder<Column<?>, ColumnFilter> parameters;
+        private final ImmutableMap.Builder<Column, ColumnFilter> parameters;
 
         private Builder() {
             parameters = ImmutableMap.builder();
@@ -105,7 +105,7 @@ public final class QueryParameters implements Iterable<ColumnFilter> {
          *
          * @return self for method chaining
          */
-        public Builder put(Column<?> column, ColumnFilter columnFilter) {
+        public Builder put(Column column, ColumnFilter columnFilter) {
             checkNotNull(column);
             checkNotNull(columnFilter);
 
@@ -114,7 +114,7 @@ public final class QueryParameters implements Iterable<ColumnFilter> {
             return this;
         }
 
-        private ImmutableMap.Builder<Column<?>, ColumnFilter> getParameters() {
+        private ImmutableMap.Builder<Column, ColumnFilter> getParameters() {
             return parameters;
         }
 

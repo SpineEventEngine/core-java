@@ -129,7 +129,7 @@ import static java.lang.String.format;
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
-public class Column<T> implements Serializable {
+public class Column implements Serializable {
 
     private static final long serialVersionUID = 8200711636725154347L;
 
@@ -138,7 +138,7 @@ public class Column<T> implements Serializable {
 
     private /*final*/ transient Method getter;
 
-    private final Class<T> type;
+    private final Class<?> type;
 
     private final String getterMethodName;
 
@@ -146,10 +146,9 @@ public class Column<T> implements Serializable {
 
     private final boolean nullable;
 
-    @SuppressWarnings("unchecked")
     private Column(Method getter, String name, boolean nullable) {
         this.getter = getter;
-        this.type = (Class<T>) getter.getReturnType();
+        this.type = getter.getReturnType();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.nullable = nullable;
@@ -159,14 +158,13 @@ public class Column<T> implements Serializable {
      * Creates new instance of the {@code Column} from the given getter method.
      *
      * @param getter the getter of the Column
-     * @param <T>    the type of the Column
      * @return new instance of the {@code Column} reflecting the given property
      */
-    public static <T> Column<T> from(Method getter) {
+    public static Column from(Method getter) {
         checkNotNull(getter);
         final String name = nameFromGetterName(getter.getName());
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final Column<T> result = new Column<>(getter, name, nullable);
+        final Column result = new Column(getter, name, nullable);
 
         return result;
     }
@@ -212,10 +210,10 @@ public class Column<T> implements Serializable {
      * @param source the {@link Entity} to get the Columns from
      * @return the value of the Column represented by this instance of {@code Column}
      */
-    public T getFor(Entity<?, ?> source) {
+    public Serializable getFor(Entity<?, ?> source) {
         try {
             @SuppressWarnings("unchecked")
-            final T result = (T) getter.invoke(source);
+            final Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
@@ -240,16 +238,16 @@ public class Column<T> implements Serializable {
      * into {@link MemoizedValue}
      * @see MemoizedValue
      */
-    public MemoizedValue<T> memoizeFor(Entity<?, ?> source) {
-        final T value = getFor(source);
-        final MemoizedValue<T> result = new MemoizedValue<>(this, value);
+    public MemoizedValue memoizeFor(Entity<?, ?> source) {
+        final Serializable value = getFor(source);
+        final MemoizedValue result = new MemoizedValue(this, value);
         return result;
     }
 
     /**
      * @return the type of the Column
      */
-    public Class<T> getType() {
+    public Class getType() {
         return type;
     }
 
@@ -262,7 +260,7 @@ public class Column<T> implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        Column<?> column = (Column<?>) o;
+        Column column = (Column) o;
         return Objects.equal(getter, column.getter);
     }
 
@@ -296,24 +294,23 @@ public class Column<T> implements Serializable {
      *
      * <p>The class associates the Column value with its metadata i.e. {@linkplain Column}.
      *
-     * @param <T> the type of the Column
      * @see Column#memoizeFor(Entity)
      */
     @Internal
-    static class MemoizedValue<T> {
+    static class MemoizedValue {
 
-        private final Column<T> sourceColumn;
+        private final Column sourceColumn;
 
         @Nullable
-        private final T value;
+        private final Serializable value;
 
-        private MemoizedValue(Column<T> sourceColumn, @Nullable T value) {
+        private MemoizedValue(Column sourceColumn, @Nullable Serializable value) {
             this.sourceColumn = sourceColumn;
             this.value = value;
         }
 
         @Nullable
-        public T getValue() {
+        public Serializable getValue() {
             return value;
         }
 
@@ -324,7 +321,7 @@ public class Column<T> implements Serializable {
         /**
          * @return the {@link Column} representing this Column
          */
-        Column<T> getSourceColumn() {
+        Column getSourceColumn() {
             return sourceColumn;
         }
     }
