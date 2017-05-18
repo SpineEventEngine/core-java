@@ -175,6 +175,11 @@ public abstract class EventPlayingEntity <I,
         tx().initAll(stateToRestore, version);
     }
 
+    /**
+     * Obtains the current state of the entity lifecycle flags.
+     *
+     * <p>If the transaction is in progress, returns the lifecycle flags value for the transaction.
+     */
     @Override
     public LifecycleFlags getLifecycleFlags() {
         if(isTransactionInProgress()) {
@@ -184,24 +189,13 @@ public abstract class EventPlayingEntity <I,
     }
 
     @Override
-    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
-        if(isTransactionInProgress()) {
-            tx().setLifecycleFlags(lifecycleFlags);
-        } else {
-            super.setLifecycleFlags(lifecycleFlags);
-        }
-    }
-
-    @Override
     protected void setArchived(boolean archived) {
-        ensureTransaction();
-        super.setArchived(archived);
+        tx().setArchived(archived);
     }
 
     @Override
     protected void setDeleted(boolean deleted) {
-        ensureTransaction();
-        super.setDeleted(deleted);
+        tx().setDeleted(deleted);
     }
 
     private B newBuilderInstance() {

@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
-import org.spine3.server.entity.TransactionalListener.NoOpListener;
+import org.spine3.server.entity.TransactionWatcher.SilentListener;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -70,7 +70,7 @@ public abstract class Transaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
-    private final NoOpListener<I, E, S, B> defaultListener = new NoOpListener<>();
+    private final TransactionWatcher<I, E, S, B> defaultWatcher = new SilentListener<>();
     /**
      * The entity, which state and attributes are modified in this transaction.
      */
@@ -122,6 +122,11 @@ public abstract class Transaction<I,
      */
     private volatile boolean active = false;
 
+    /**
+     * An ordered collection of the phases that were propagated in scope of this transaction.
+     *
+     * <p>Contains all the phases, including failed.
+     */
     private final List<Phase<I, E, S, B>> phases = newLinkedList();
 
     /**
@@ -187,11 +192,6 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
-    void setLifecycleFlags(LifecycleFlags lifecycleFlags) {
-        checkNotNull(lifecycleFlags);
-        this.lifecycleFlags = lifecycleFlags;
-    }
-
     private E getEntity() {
         return entity;
     }
@@ -212,44 +212,49 @@ public abstract class Transaction<I,
     @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException") // it is NOT ignored.
     protected void commit()  {
 
+        final TransactionWatcher<I, E, S, B> watcher = getWatcher();
         final B builder = getBuilder();
-        S newState = getEntity().getState();
 
         // The state is only updated, if at least some changes were made to the builder.
         if (builder.isDirty()) {
             try {
-                newState = builder.build();
+                final S newState = builder.build();
                 markStateChanged();
 
-                getListener().onBeforeCommit(getEntity(), newState,
+                watcher.onBeforeCommit(getEntity(), newState,
                                              getVersion(), getLifecycleFlags());
 
                 entity.updateState(newState, getVersion());
                 commitAttributeChanges();
-            } catch (ConstraintViolationThrowable exception) {  /* Should only happen if the state
+            } catch (ConstraintViolationThrowable exception) {  /* Could only happen if the state
                                                                    has been injected not using
-                                                                   the builder methods. */
+                                                                   the builder setters. */
+                final InvalidEntityStateException invalidStateException = of(builder, exception);
 
-                final Message invalidState = ((AbstractValidatingBuilder) builder).internalBuild();
-                final InvalidEntityStateException constraintViolation = onConstraintViolations(
-                        invalidState, exception.getConstraintViolations());
+                @SuppressWarnings("unchecked")  // OK, the state is received from the typed builder.
+                final S invalidState = (S) invalidStateException.getEntityState();
+                watcher.onCommitFail(invalidStateException, getEntity(),
+                                           invalidState, getVersion(), getLifecycleFlags());
 
-                final Optional<RuntimeException> callbackResult =
-                        getListener().onCommitFail(
-                                constraintViolation, getEntity(),
-                                newState, getVersion(), getLifecycleFlags());
-                throwIfPresent(callbackResult);
+                throw invalidStateException;
             } finally {
                 afterCommit();
             }
         } else {
 
             // The state isn't modified, but other attributes may have been modified.
-            getListener().onBeforeCommit(getEntity(), getEntity().getState(),
+            watcher.onBeforeCommit(getEntity(), getEntity().getState(),
                                          getVersion(), getLifecycleFlags());
             commitAttributeChanges();
             afterCommit();
         }
+    }
+
+    private static InvalidEntityStateException of(ValidatingBuilder builder,
+                                                  ConstraintViolationThrowable exception) {
+        final AbstractValidatingBuilder abstractBuilder = (AbstractValidatingBuilder) builder;
+        final Message invalidState = abstractBuilder.internalBuild();
+        return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
     private void afterCommit() {
@@ -270,23 +275,37 @@ public abstract class Transaction<I,
         initVersion(version);
     }
 
+    /**
+     * Creates a new {@linkplain Phase transaction phase} for the given
+     * {@code eventMessage} and {@code context} and propagates the phase.
+     *
+     * <p>In case an exception is thrown during the phase propagation,
+     * {@linkplain TransactionWatcher#phaseFailed(Exception, Phase, Iterable) informs
+     * the watcher} and potentially stops the transaction execution upon the watcher decision.
+     *
+     * @param eventMessage the message of an event to apply
+     * @param context      the context of an event to apply
+     * @return this instance of transaction
+     * @see Phase#apply(Message, EventContext)
+     */
     Transaction<I, E, S, B> apply(Message eventMessage,
-                            EventContext context) {
+                                  EventContext context) {
         final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
-        getListener().onBeforePhase(phase);
+        getWatcher().onBeforePhase(phase);
 
         Phase<I, E, S, B> appliedPhase = null;
         try {
-            appliedPhase = phase.apply();
+            appliedPhase = phase.propagate();
         } catch (InvocationTargetException e) {
-            Optional<RuntimeException> callbackResult = getListener().onPhaseFail(e, phase, getPhases());
+            final Optional<RuntimeException> callbackResult =
+                    getWatcher().phaseFailed(e, phase, getPhases());
             throwIfPresent(callbackResult);
         }
 
         final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
         phases.add(phaseToAdd);
 
-        getListener().onAfterPhase(phaseToAdd);
+        getWatcher().onAfterPhase(phaseToAdd);
         return this;
     }
 
@@ -365,17 +384,38 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Obtains an instance of the {@code TransactionalListener} for this transaction.
+     * Obtains an instance of the {@code TransactionWatcher} for this transaction.
      *
-     * <p>By default, the returned listener {@linkplain TransactionalListener.NoOpListener
+     * <p>By default, the returned watcher {@linkplain SilentListener
      * does nothing}.
      *
-     * <p>Descendant classes may override this method to specify a custom listener implementation.
+     * <p>Descendant classes may override this method to specify a custom watcher implementation.
      */
-    protected TransactionalListener<I, E, S, B> getListener() {
-        return defaultListener;
+    protected TransactionWatcher<I, E, S, B> getWatcher() {
+        return defaultWatcher;
     };
 
+    public void setArchived(boolean archived) {
+        lifecycleFlags = lifecycleFlags.toBuilder().setArchived(archived).build();
+    }
+
+    public void setDeleted(boolean deleted) {
+        lifecycleFlags = lifecycleFlags.toBuilder().setDeleted(deleted).build();
+    }
+
+    /**
+     * A stage of transaction, which is created by applying a single event (i.e. its message along
+     * with the context) to the entity.
+     *
+     * <p>Invokes an event applier method for the entity modified in scope of the underlying
+     * transaction, passing the event data to it. If such an invocation is successful,
+     * an entity version is incremented in scope of the transaction.
+     *
+     * @param <I> the type of entity IDs
+     * @param <E> the type of entity
+     * @param <S> the type of entity state
+     * @param <B> the type of a {@code ValidatingBuilder} for the entity state
+     */
     protected static class Phase<I, E extends EventPlayingEntity<I, S, B>, S extends Message,
                                  B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
@@ -392,7 +432,14 @@ public abstract class Transaction<I,
             this.context = context;
         }
 
-        private Phase<I, E, S, B> apply() throws InvocationTargetException {
+        /**
+         * Invokes the event applier method and, if the invocation is successful, increments the
+         * current entity version for this transaction. Also marks the current phase as successful.
+         *
+         * @return this instance of {@code Phase}
+         * @throws InvocationTargetException if the event listener invocation encountered an error
+         */
+        private Phase<I, E, S, B> propagate() throws InvocationTargetException {
             underlyingTransaction.invokeApplier(underlyingTransaction.getEntity(),
                                                 eventMessage,
                                                 context);

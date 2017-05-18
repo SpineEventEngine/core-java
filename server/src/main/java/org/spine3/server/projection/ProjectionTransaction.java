@@ -23,8 +23,8 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
-import org.spine3.server.entity.TransactionalListener;
-import org.spine3.server.entity.TransactionalListener.PropagationRequiredListener;
+import org.spine3.server.entity.TransactionWatcher;
+import org.spine3.server.entity.TransactionWatcher.PhasePropagationRequiredWatcher;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -69,8 +69,8 @@ class ProjectionTransaction<I,
     }
 
     @Override
-    protected TransactionalListener<I, Projection<I, M, B>, M, B> getListener() {
-        return new PropagationRequiredListener<>();
+    protected TransactionWatcher<I, Projection<I, M, B>, M, B> getWatcher() {
+        return new PhasePropagationRequiredWatcher<>();
     }
 
     /**

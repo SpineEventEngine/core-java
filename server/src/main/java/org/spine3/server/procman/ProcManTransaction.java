@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
-import org.spine3.server.entity.TransactionalListener;
-import org.spine3.server.entity.TransactionalListener.PropagationRequiredListener;
+import org.spine3.server.entity.TransactionWatcher;
+import org.spine3.server.entity.TransactionWatcher.PhasePropagationRequiredWatcher;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -69,10 +69,9 @@ class ProcManTransaction<I,
     }
 
     @Override
-    protected TransactionalListener<I, ProcessManager<I, S, B>, S, B> getListener() {
-        return new PropagationRequiredListener<>();
+    protected TransactionWatcher<I, ProcessManager<I, S, B>, S, B> getWatcher() {
+        return new PhasePropagationRequiredWatcher<>();
     }
-
 
     /**
      * Creates a new transaction for a given {@code entity}.
