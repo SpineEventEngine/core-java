@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import org.spine3.annotation.Internal;
 import org.spine3.server.entity.Entity;
@@ -306,7 +307,8 @@ public /*final*/ class Column implements Serializable {
         @Nullable
         private final Serializable value;
 
-        private MemoizedValue(Column sourceColumn, @Nullable Serializable value) {
+        @VisibleForTesting
+        MemoizedValue(Column sourceColumn, @Nullable Serializable value) {
             this.sourceColumn = sourceColumn;
             this.value = value;
         }
@@ -325,6 +327,24 @@ public /*final*/ class Column implements Serializable {
          */
         Column getSourceColumn() {
             return sourceColumn;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            MemoizedValue value1 = (MemoizedValue) o;
+            return Objects.equal(getSourceColumn(), value1.getSourceColumn()) &&
+                    Objects.equal(getValue(), value1.getValue());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getSourceColumn(), getValue());
         }
     }
 }
