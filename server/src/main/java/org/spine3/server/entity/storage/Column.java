@@ -133,13 +133,19 @@ import static java.lang.String.format;
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
-public /*final*/ class Column implements Serializable {
+public class Column implements Serializable {
 
     private static final long serialVersionUID = 8200711636725154347L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
 
+    /**
+     * This field is left non-final for serialization purposes.
+     *
+     * <p>The only place where this field is updated, except the constructor, is
+     * {@link #readObject(ObjectInputStream)} method.
+     */
     private /*final*/ transient Method getter;
 
     private final Class<?> entityType;
