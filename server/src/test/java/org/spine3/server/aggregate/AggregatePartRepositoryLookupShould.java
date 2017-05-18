@@ -37,7 +37,6 @@ import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -129,7 +128,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Apply
-        private void apply(ProjectCreated event) throws ConstraintViolationThrowable {
+        private void apply(ProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -171,7 +170,7 @@ public class AggregatePartRepositoryLookupShould {
         }
 
         @Apply
-        public void apply(TaskAdded event) throws ConstraintViolationThrowable {
+        public void apply(TaskAdded event) {
             final Task task = event.getTask();
             getBuilder().setTitle(task.getTitle())
                         .setDescription(task.getDescription())

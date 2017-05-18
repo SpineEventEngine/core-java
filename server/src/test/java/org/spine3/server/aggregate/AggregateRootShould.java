@@ -36,7 +36,6 @@ import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
-import org.spine3.validate.ConstraintViolationThrowable;
 
 import java.lang.reflect.Constructor;
 
@@ -160,7 +159,7 @@ public class AggregateRootShould {
         }
 
         @Apply
-        private void apply(ProjectCreated event) throws ConstraintViolationThrowable {
+        private void apply(ProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -186,7 +185,7 @@ public class AggregateRootShould {
         }
 
         @Apply
-        private void apply(ProjectStarted event) throws ConstraintViolationThrowable {
+        private void apply(ProjectStarted event) {
             getBuilder().setStatus(Status.STARTED);
         }
     }

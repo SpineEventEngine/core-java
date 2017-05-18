@@ -66,7 +66,6 @@ import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
-import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilders.EmptyValidatingBuilder;
 
 import java.util.List;
@@ -431,7 +430,7 @@ public class BoundedContextShould {
         }
 
         @Apply
-        private void event(ProjectCreated event) throws ConstraintViolationThrowable {
+        private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
@@ -445,7 +444,7 @@ public class BoundedContextShould {
         }
 
         @Apply
-        private void event(ProjectStarted event) throws ConstraintViolationThrowable {
+        private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)

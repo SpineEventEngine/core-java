@@ -53,7 +53,6 @@ import org.spine3.test.aggregate.user.UserValidatingBuilder;
 import org.spine3.time.Time;
 import org.spine3.type.CommandClass;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolationThrowable;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -453,7 +452,7 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(ProjectCreated event) throws ConstraintViolationThrowable {
+        private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED);
@@ -467,7 +466,7 @@ public class AggregateShould {
         }
 
         @Apply
-        private void event(ProjectStarted event) throws ConstraintViolationThrowable {
+        private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED);

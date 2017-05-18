@@ -41,7 +41,6 @@ import org.spine3.test.aggregate.user.User;
 import org.spine3.test.aggregate.user.UserValidatingBuilder;
 import org.spine3.testdata.Sample;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import java.lang.reflect.Constructor;
@@ -244,7 +243,7 @@ public class AggregatePartShould {
         }
 
         @Apply
-        private void apply(TaskAdded event) throws ConstraintViolationThrowable {
+        private void apply(TaskAdded event) {
             getBuilder().setDescription(TASK_DESCRIPTION);
         }
     }

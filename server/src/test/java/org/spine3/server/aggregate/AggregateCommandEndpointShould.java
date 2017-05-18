@@ -46,8 +46,6 @@ import org.spine3.test.aggregate.command.StartProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
-import org.spine3.testdata.Sample;
-import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
@@ -212,7 +210,7 @@ public class AggregateCommandEndpointShould {
         }
 
         @Apply
-        private void apply(ProjectCreated event) throws ConstraintViolationThrowable {
+        private void apply(ProjectCreated event) {
             getBuilder().setId(event.getProjectId())
                         .setName(event.getName());
         }
@@ -226,7 +224,7 @@ public class AggregateCommandEndpointShould {
         }
 
         @Apply
-        private void apply(TaskAdded event) throws ConstraintViolationThrowable {
+        private void apply(TaskAdded event) {
             getBuilder().setId(event.getProjectId());
         }
 

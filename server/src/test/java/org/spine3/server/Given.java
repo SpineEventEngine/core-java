@@ -52,7 +52,6 @@ import org.spine3.test.commandservice.customer.event.CustomerCreated;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
 import org.spine3.users.UserId;
-import org.spine3.validate.ConstraintViolationThrowable;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -221,7 +220,7 @@ public class Given {
         }
 
         @Apply
-        private void event(ProjectCreated event) throws ConstraintViolationThrowable {
+        private void event(ProjectCreated event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.CREATED)
@@ -233,7 +232,7 @@ public class Given {
         }
 
         @Apply
-        private void event(ProjectStarted event) throws ConstraintViolationThrowable {
+        private void event(ProjectStarted event) {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Status.STARTED)
