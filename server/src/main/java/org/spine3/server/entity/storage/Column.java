@@ -23,7 +23,6 @@ package org.spine3.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.gson.internal.Primitives;
-import org.spine3.annotation.Internal;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
@@ -103,7 +102,7 @@ import static java.lang.String.format;
  * and pass the instance of the registry into the
  * {@link org.spine3.server.storage.StorageFactory StorageFactory} on creation.
  *
- * <p>Note that the type of a Column must be either primitive or implement {@link Serializable}.
+ * <p>Note that the type of a Column must either be primitive or implement {@link Serializable}.
  *
  * <h2>Nullability</h2>
  *
@@ -316,7 +315,6 @@ public class Column implements Serializable {
      *
      * @see Column#memoizeFor(Entity)
      */
-    @Internal
     static class MemoizedValue implements Serializable {
 
         private static final long serialVersionUID = -6041163252051925293L;

@@ -70,7 +70,7 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     /**
      * Retrieves the time of the event occurrence.
      *
-     * <p>This method represents an Entity Column {@code time}.
+     * <p>This method represents an Entity Column {@code created}.
      *
      * @return the time when the underlying event was fired
      * @see #CREATED_TIME_COLUMN
