@@ -20,16 +20,21 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.base.Objects;
 import org.spine3.annotation.Internal;
 import org.spine3.server.entity.Entity;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
@@ -124,19 +129,28 @@ import static java.lang.String.format;
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
-public class Column<T> {
+public class Column<T> implements Serializable {
+
+    private static final long serialVersionUID = 8200711636725154347L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
 
-    private final Method getter;
+    private /*final*/ transient Method getter;
+
+    private final Class<T> type;
+
+    private final String getterMethodName;
 
     private final String name;
 
     private final boolean nullable;
 
+    @SuppressWarnings("unchecked")
     private Column(Method getter, String name, boolean nullable) {
         this.getter = getter;
+        this.type = (Class<T>) getter.getReturnType();
+        this.getterMethodName = getter.getName();
         this.name = name;
         this.nullable = nullable;
     }
@@ -235,11 +249,11 @@ public class Column<T> {
     /**
      * @return the type of the Column
      */
-    @SuppressWarnings("unchecked")
     public Class<T> getType() {
-        return (Class<T>) getter.getReturnType();
+        return type;
     }
 
+    @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -248,15 +262,33 @@ public class Column<T> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-
         Column<?> column = (Column<?>) o;
-
-        return getter.equals(column.getter);
+        return Objects.equal(getter, column.getter);
     }
 
+    @SuppressWarnings("NonFinalFieldReferencedInHashCode") // `getter` field is effectively final
     @Override
     public int hashCode() {
-        return getter.hashCode();
+        return Objects.hashCode(getter);
+    }
+
+    private void readObject(ObjectInputStream inputStream) throws IOException,
+                                                                  ClassNotFoundException {
+        inputStream.defaultReadObject();
+        getter = restoreGetter();
+    }
+
+    private Method restoreGetter() {
+        checkState(getter == null, "Getter method is already restored.");
+        try {
+            final Method method = type.getMethod(getterMethodName);
+            return method;
+        } catch (NoSuchMethodException e) {
+            final String errorMsg = format("Cannot find method %s.%s().",
+                                           type.getCanonicalName(),
+                                           getterMethodName);
+            throw new IllegalStateException(errorMsg, e);
+        }
     }
 
     /**
