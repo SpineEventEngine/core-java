@@ -77,54 +77,6 @@ public class EntityQueryShould {
     }
 
     @Test
-    public void support_equality() {
-        final EqualsTester tester = new EqualsTester();
-        addEqualityGroupA(tester);
-        addEqualityGroupB(tester);
-        addEqualityGroupC(tester);
-        addEqualityGroupD(tester);
-        tester.testEquals();
-    }
-
-    private static void addEqualityGroupA(EqualsTester tester) {
-        final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
-        final Map<Column, Object> params = new IdentityHashMap<>(2);
-        params.put(mockColumn(), "anything");
-        params.put(mockColumn(), 5);
-        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
-        tester.addEqualityGroup(query);
-    }
-
-    private static void addEqualityGroupB(EqualsTester tester) {
-        final Collection<?> ids = emptyList();
-        final Map<Column, Object> params = new HashMap<>(1);
-        params.put(mockColumn(), 5);
-        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
-        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
-        tester.addEqualityGroup(query1, query2);
-    }
-
-    private static void addEqualityGroupC(EqualsTester tester) {
-        final Collection<?> ids = emptySet();
-        final Column column = mockColumn();
-        final Object value = 42;
-        final Map<Column, Object> params1 = new HashMap<>(1);
-        params1.put(column, value);
-        final Map<Column, Object> params2 = new HashMap<>(1);
-        params2.put(column, value);
-        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params1));
-        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params2));
-        tester.addEqualityGroup(query1, query2);
-    }
-
-    private static void addEqualityGroupD(EqualsTester tester) {
-        final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
-        final Map<Column, Object> columns = Collections.emptyMap();
-        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
-        tester.addEqualityGroup(query);
-    }
-
-    @Test
     public void support_toString() {
         final Object someId = Sample.messageOfType(ProjectId.class);
         final Collection<Object> ids = singleton(someId);
@@ -141,6 +93,71 @@ public class EntityQueryShould {
                             .toString(), repr);
         assertContains(query.getParameters()
                             .toString(), repr);
+    }
+
+    @Test
+    public void support_equality() {
+        final EqualsTester tester = new EqualsTester();
+        addEqualityGroupA(tester);
+        addEqualityGroupB(tester);
+        addEqualityGroupC(tester);
+        addEqualityGroupD(tester);
+        tester.testEquals();
+    }
+
+    /**
+     * Adds an equality group containing a single Query of 2 IDs and 2 Query parameters to the given
+     * {@link EqualsTester}.
+     */
+    private static void addEqualityGroupA(EqualsTester tester) {
+        final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
+        final Map<Column, Object> params = new IdentityHashMap<>(2);
+        params.put(mockColumn(), "anything");
+        params.put(mockColumn(), 5);
+        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(params));
+        tester.addEqualityGroup(query);
+    }
+
+    /**
+     * Adds an equality group containing a 2 Queries with noo IDs and with a single Query parameter
+     * to the given {@link EqualsTester}.
+     */
+    private static void addEqualityGroupB(EqualsTester tester) {
+        final Collection<?> ids = emptyList();
+        final Map<Column, Object> params = new HashMap<>(1);
+        params.put(mockColumn(), 5);
+        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
+        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
+        tester.addEqualityGroup(query1, query2);
+    }
+
+    /**
+     * Adds an equality group containing a 2 Queries with noo IDs and with a single Query parameter
+     * to the given {@link EqualsTester}.
+     *
+     * <p>The values of Query parameters are different than in
+     * {@linkplain #addEqualityGroupB(EqualsTester) group C}.
+     */
+    private static void addEqualityGroupC(EqualsTester tester) {
+        final Collection<?> ids = emptySet();
+        final Column column = mockColumn();
+        final Object value = 42;
+        final Map<Column, Object> params = new HashMap<>(1);
+        params.put(column, value);
+        final EntityQuery<?> query1 = EntityQuery.of(ids, paramsFromValues(params));
+        final EntityQuery<?> query2 = EntityQuery.of(ids, paramsFromValues(params));
+        tester.addEqualityGroup(query1, query2);
+    }
+
+    /**
+     * Adds an equality group containing a single Query with a single ID and no Query parameters
+     * to the given {@link EqualsTester}.
+     */
+    private static void addEqualityGroupD(EqualsTester tester) {
+        final Collection<ProjectId> ids = singleton(Sample.messageOfType(ProjectId.class));
+        final Map<Column, Object> columns = Collections.emptyMap();
+        final EntityQuery<?> query = EntityQuery.of(ids, paramsFromValues(columns));
+        tester.addEqualityGroup(query);
     }
 
     private static Column mockColumn() {
