@@ -58,6 +58,7 @@ import org.spine3.test.bc.Project;
 import org.spine3.test.bc.ProjectId;
 import org.spine3.test.bc.ProjectValidatingBuilder;
 import org.spine3.test.bc.SecretProject;
+import org.spine3.test.bc.SecretProjectValidatingBuilder;
 import org.spine3.test.bc.command.AddTask;
 import org.spine3.test.bc.command.CreateProject;
 import org.spine3.test.bc.command.StartProject;
@@ -65,7 +66,6 @@ import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
-import org.spine3.testdata.TestBoundedContextFactory.SingleTenant;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilders.EmptyValidatingBuilder;
 
@@ -482,7 +482,7 @@ public class BoundedContextShould {
     }
 
     private static class SecretProjectAggregate
-            extends Aggregate<String, SecretProject, SecretProject.Builder> {
+            extends Aggregate<String, SecretProject, SecretProjectValidatingBuilder> {
         private SecretProjectAggregate(String id) {
             super(id);
         }

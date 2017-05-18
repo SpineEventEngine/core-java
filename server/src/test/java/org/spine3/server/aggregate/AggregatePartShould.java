@@ -32,14 +32,16 @@ import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
+import org.spine3.test.aggregate.TaskValidatingBuilder;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
-import org.spine3.testdata.Sample;
 import org.spine3.test.aggregate.user.UserValidatingBuilder;
+import org.spine3.testdata.Sample;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import java.lang.reflect.Constructor;
@@ -51,6 +53,7 @@ import static org.junit.Assert.fail;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePart.create;
 import static org.spine3.server.aggregate.AggregatePart.getConstructor;
+import static org.spine3.server.aggregate.CommandTestDispatcher.dispatch;
 import static org.spine3.test.Given.aggregatePartOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
@@ -191,7 +194,7 @@ public class AggregatePartShould {
                 ((AddTask.Builder) Sample.builderForType(AddTask.class))
                         .setProjectId(ProjectId.getDefaultInstance())
                         .build();
-        taskPart.dispatchForTest(env(addTask));
+        dispatch(taskPart, env(addTask));
     }
 
     /*
@@ -226,7 +229,7 @@ public class AggregatePartShould {
     }
 
     private static class TaskPart
-            extends AggregatePart<String, Task, Task.Builder, AnAggregateRoot> {
+            extends AggregatePart<String, Task, TaskValidatingBuilder, AnAggregateRoot> {
 
         private TaskPart(AnAggregateRoot root) {
             super(root);
@@ -241,13 +244,15 @@ public class AggregatePartShould {
         }
 
         @Apply
-        private void apply(TaskAdded event) {
+        private void apply(TaskAdded event) throws ConstraintViolationThrowable {
             getBuilder().setDescription(TASK_DESCRIPTION);
         }
     }
 
-    private static class TaskDescriptionPart
-            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
+    private static class TaskDescriptionPart extends AggregatePart<String,
+                                                                   StringValue,
+                                                                   StringValueValidatingBuilder,
+                                                                   AnAggregateRoot> {
 
         protected TaskDescriptionPart(AnAggregateRoot root) {
             super(root);
