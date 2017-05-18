@@ -99,10 +99,10 @@ public interface TransactionWatcher<I,
      * <p>Using this type of watcher means that the phase failure is ignored and the
      * ongoing transaction execution is continued.
      */
-    class SilentListener<I,
-                       E extends EventPlayingEntity<I, S, B>,
-                       S extends Message,
-                       B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    class SilentWitness<I,
+                        E extends EventPlayingEntity<I, S, B>,
+                        S extends Message,
+                        B extends ValidatingBuilder<S, ? extends Message.Builder>>
             implements TransactionWatcher<I, E, S, B> {
 
         @Override
@@ -143,7 +143,7 @@ public interface TransactionWatcher<I,
                                    E extends EventPlayingEntity<I, S, B>,
                                    S extends Message,
                                    B extends ValidatingBuilder<S, ? extends Message.Builder>>
-            extends SilentListener<I, E, S, B> {
+            extends SilentWitness<I, E, S, B> {
 
         /**
          * Returns the exception, caused the failure of the phase, to be re-thrown.

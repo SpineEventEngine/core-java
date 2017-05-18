@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
-import org.spine3.server.entity.TransactionWatcher.SilentListener;
+import org.spine3.server.entity.TransactionWatcher.SilentWitness;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -70,7 +70,7 @@ public abstract class Transaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
-    private final TransactionWatcher<I, E, S, B> defaultWatcher = new SilentListener<>();
+    private final TransactionWatcher<I, E, S, B> defaultWatcher = new SilentWitness<>();
     /**
      * The entity, which state and attributes are modified in this transaction.
      */
@@ -386,7 +386,7 @@ public abstract class Transaction<I,
     /**
      * Obtains an instance of the {@code TransactionWatcher} for this transaction.
      *
-     * <p>By default, the returned watcher {@linkplain SilentListener
+     * <p>By default, the returned watcher {@linkplain SilentWitness
      * does nothing}.
      *
      * <p>Descendant classes may override this method to specify a custom watcher implementation.
