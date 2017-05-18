@@ -20,12 +20,14 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.base.Predicate;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
@@ -35,9 +37,11 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
+import java.util.Set;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.toMillis;
-import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for I/O operations based on Apache Beam.
@@ -46,54 +50,6 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  * @author Alexander Yevsyukov
  */
 public abstract class RecordStorageIO<I> {
-
-    public abstract static class Read<I>
-            extends PTransform<PBegin, PCollection<KV<I, EntityRecord>>> {
-
-        private static final long serialVersionUID = 0L;
-        private final ValueProvider<TenantId> tenantId;
-
-        /** The IDs to read. All if {@code null}. */
-        @Nullable
-        private final ValueProvider<Iterable<I>> ids;
-
-        protected Read(ValueProvider<TenantId> tenantId,
-                       @Nullable ValueProvider<Iterable<I>> ids) {
-            this.tenantId = tenantId;
-            this.ids = ids;
-        }
-
-        protected TenantId getTenantId() {
-            final TenantId result = tenantId.get();
-            return result;
-        }
-
-        protected Iterable<? super I> getIds() {
-            if (ids == null) {
-                return ImmutableList.of();
-            } else {
-                if (!ids.isAccessible()) {
-                    throw newIllegalStateException(
-                            "Unable to obtain IDs from a provider (class: %s) passed to %s",
-                            ids.getClass().getName(),
-                            getClass().getName());
-                }
-                return ids.get();
-            }
-        }
-    }
-
-    /**
-     * Obtains a transformation for reading all the records in the storage.
-     *
-     * @param tenantId the ID of the tenant for whom records belong
-     */
-    public abstract Read<I> readAll(TenantId tenantId);
-
-    /**
-     * Obtains a transformation for reading entity records with the passed indexes.
-     */
-    public abstract Read<I> read(TenantId tenantId, Iterable<I> ids);
 
     /**
      * Obtains transformation for extracting an entity state from {@link EntityRecord}s.
@@ -113,6 +69,138 @@ public abstract class RecordStorageIO<I> {
     public static Instant toInstant(Timestamp timestamp) {
         final long millis = toMillis(timestamp);
         return new Instant(millis);
+    }
+
+    /**
+     * Obtains a function for loading query results.
+     */
+    public abstract FindByQuery<I> findFn(TenantId tenantId);
+
+    /**
+     * Obtains a transformation for reading records matching the query.
+     *
+     * @param tenantId the ID of the tenant for whom records belong
+     * @param query    the query to obtain records
+     */
+    public abstract Read<I> read(TenantId tenantId, Query<I> query);
+
+    /**
+     * Abstract base for functions loading query results.
+     *
+     * @param <I> the type of IDs
+     */
+    public abstract static class FindByQuery<I>
+            implements SerializableFunction<Query<I>, Iterable<EntityRecord>> {
+        private static final long serialVersionUID = 0L;
+    }
+
+    /**
+     * A query to get multiple records from a storage.
+     *
+     * @param <I> the type of IDs
+     */
+    public abstract static class Query<I> implements Serializable {
+        private static final long serialVersionUID = 0L;
+
+        public static <I> Query<I> singleRecord(I id) {
+            return new SingleRecord<>(id);
+        }
+
+        public static <I> Query byIdsAndPredicate(Iterable<I> ids, RecordPredicate predicate) {
+            return new ByIdsAndPredicate<>(ids, predicate);
+        }
+
+        public abstract Set<I> getIds();
+
+        public abstract RecordPredicate getRecordPredicate();
+
+        public Predicate<KV<I, EntityRecord>> toPredicate() {
+            return new Predicate<KV<I, EntityRecord>>() {
+                @Override
+                public boolean apply(@Nullable KV<I, EntityRecord> input) {
+                    checkNotNull(input);
+                    if (!getIds().isEmpty()) {
+                        if (!getIds().contains(input.getKey())) {
+                            return false;
+                        }
+                    }
+                    final Boolean result = getRecordPredicate().apply(input.getValue());
+                    return result;
+                }
+            };
+        }
+
+        private static class SingleRecord<I> extends Query<I> {
+            private static final long serialVersionUID = 0L;
+            private final ImmutableSet<I> oneSet;
+
+            private SingleRecord(I id) {
+                oneSet = ImmutableSet.of(id);
+            }
+
+            @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as returning immutable impl.
+            @Override
+            public Set<I> getIds() {
+                return oneSet;
+            }
+
+            @Override
+            public RecordPredicate getRecordPredicate() {
+                return RecordPredicate.Always.isTrue();
+            }
+        }
+
+        /**
+         * A simple query containing a limiting list of IDs and a record predicate.
+         *
+         * <p>If the set of IDs is empty, the query does not limit the result by IDs.
+         *
+         * @param <I> the type of IDs
+         */
+        private static class ByIdsAndPredicate<I> extends Query<I> {
+
+            private static final long serialVersionUID = 0L;
+            private final ImmutableSet<I> ids;
+            private final RecordPredicate predicate;
+
+            private ByIdsAndPredicate(Iterable<I> ids, RecordPredicate predicate) {
+                this.ids = ImmutableSet.copyOf(ids);
+                this.predicate = predicate;
+            }
+
+            @Override
+            @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
+            public Set<I> getIds() {
+                return ids;
+            }
+
+            @Override
+            public RecordPredicate getRecordPredicate() {
+                return predicate;
+            }
+        }
+    }
+
+    public abstract static class Read<I>
+            extends PTransform<PBegin, PCollection<KV<I, EntityRecord>>> {
+
+        private static final long serialVersionUID = 0L;
+        private final ValueProvider<TenantId> tenantId;
+        private final Query<I> query;
+
+        protected Read(ValueProvider<TenantId> tenantId, Query<I> query) {
+            this.tenantId = tenantId;
+            this.query = query;
+        }
+
+        protected TenantId getTenantId() {
+            final TenantId result = tenantId.get();
+            return result;
+        }
+
+        protected Query<I> getQuery() {
+            return query;
+        }
     }
 
     /**

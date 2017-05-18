@@ -32,13 +32,17 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.server.storage.RecordStorageIO.FindByQuery;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
+import org.spine3.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -51,6 +55,7 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
+import static org.spine3.server.storage.RecordStorageIO.Query.singleRecord;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
@@ -362,6 +367,66 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             if (!classIsSame) {
                 throw newIllegalStateException("Unexpected ID class encountered: %s. Expected: %s",
                                                messageClass, expectedIdClass);
+            }
+        }
+    }
+
+    /*
+     * Beam support
+     ******************/
+
+    public BeamIO<I, E, S> getIO() {
+        return new BeamIO<>(recordStorage().getIO(), entityConverter());
+    }
+
+    public static class BeamIO<I, E extends Entity<I, S>, S extends Message> {
+
+        private final RecordStorageIO<I> storageIO;
+        private final EntityStorageConverter<I, E, S> converter;
+
+        private BeamIO(RecordStorageIO<I> storageIO,
+                       EntityStorageConverter<I, E, S> converter) {
+            this.storageIO = storageIO;
+            this.converter = converter;
+        }
+
+        public ReadFunction<I, E, S> loadOrCreate(TenantId tenantId) {
+            return new LoadOrCreate<>(tenantId, storageIO, converter);
+        }
+
+        public interface ReadFunction<I, E extends Entity<I, S>, S extends Message>
+               extends SerializableFunction<I, E> {
+
+            EntityStorageConverter<I, E, S> getConverter();
+        }
+
+        private static class LoadOrCreate<I, E extends Entity<I, S>, S extends Message>
+                implements ReadFunction<I, E, S> {
+
+            private static final long serialVersionUID = 0L;
+            private final FindByQuery<I> queryFn;
+            private final EntityStorageConverter<I, E, S> converter;
+
+            private LoadOrCreate(TenantId tenantId,
+                                 RecordStorageIO<I> storageIO,
+                                 EntityStorageConverter<I, E, S> converter) {
+                this.queryFn = storageIO.findFn(tenantId);
+                this.converter = converter;
+            }
+
+            @Override
+            public E apply(I input) {
+                final Iterable<EntityRecord> queryResult = queryFn.apply(singleRecord(input));
+                final EntityRecord record = FluentIterable.from(queryResult)
+                                                          .get(0);
+                final E result = converter.reverse()
+                                          .convert(record);
+                return result;
+            }
+
+            @Override
+            public EntityStorageConverter<I, E, S> getConverter() {
+                return converter;
             }
         }
     }

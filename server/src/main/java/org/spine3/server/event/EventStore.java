@@ -26,9 +26,11 @@ import io.grpc.stub.StreamObserver;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
+import org.spine3.base.EventId;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.event.grpc.EventStoreGrpc;
+import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.EventOperation;
 import org.spine3.server.tenant.TenantAwareOperation;
@@ -282,8 +284,9 @@ public abstract class EventStore implements AutoCloseable {
          *****************/
 
         @Override
-        public EventStoreIO.Read query(TenantId tenantId, EventPredicate query) {
-            return storage.query(tenantId, query);
+        public EventStoreIO.Read query(TenantId tenantId, EventStreamQuery query) {
+            final RecordStorageIO.Read<EventId> readRecords = storage.query(tenantId, query);
+            return new EventStoreIO.Read(readRecords);
         }
     }
 
@@ -413,6 +416,6 @@ public abstract class EventStore implements AutoCloseable {
      ******************/
 
     /** Obtains query transform. */
-    public abstract EventStoreIO.Read query(TenantId tenantId, EventPredicate query);
+    public abstract EventStoreIO.Read query(TenantId tenantId, EventStreamQuery query);
 
 }

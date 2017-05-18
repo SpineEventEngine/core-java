@@ -49,31 +49,21 @@ public class EventStoreIO {
      *
      * @author Alexander Yevsyukov
      */
-    public abstract static class Read extends PTransform<PBegin, PCollection<Event>> {
+    public static class Read extends PTransform<PBegin, PCollection<Event>> {
         private static final long serialVersionUID = 0L;
-    }
+        private final RecordStorageIO.Read<EventId> read;
 
-    /**
-     * Reads events matching the passed predicate.
-     */
-    static class Query extends Read {
-
-        private static final long serialVersionUID = 0L;
-        private final RecordStorageIO.Read<EventId> readAll;
-        private final EventPredicate predicate;
-
-        Query(RecordStorageIO.Read<EventId> readAll, EventPredicate predicate) {
-            this.readAll = readAll;
-            this.predicate = predicate;
+        Read(RecordStorageIO.Read<EventId> read) {
+            this.read = read;
         }
 
         @Override
         public PCollection<Event> expand(PBegin input) {
-            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(readAll);
+            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(read);
             final PCollection<EntityRecord> allRecords =
                     withKeys.apply(Values.<EntityRecord>create());
             final PCollection<Event> matching = allRecords.apply(
-                    ParDo.of(FilterFn.of(predicate)));
+                    ParDo.of(new UnpackWithTimestamp()));
             return matching;
         }
     }
@@ -82,30 +72,16 @@ public class EventStoreIO {
      * An {@link RecordStorageIO.UnpackFn UnpackFn} that extracts
      * events and accepts those matching the passed predicate.
      */
-    public static class FilterFn extends RecordStorageIO.UnpackFn<Event> {
+    private static class UnpackWithTimestamp extends RecordStorageIO.UnpackFn<Event> {
 
         private static final long serialVersionUID = 0L;
-        private final EventPredicate predicate;
-
-        /**
-         * Creates a new instance that accepts events matching the passed predicate.
-         */
-        public static FilterFn of(EventPredicate predicate) {
-            return new FilterFn(predicate);
-        }
-
-        private FilterFn(EventPredicate predicate) {
-            this.predicate = predicate;
-        }
 
         @Override
         @ProcessElement
         public void processElement(ProcessContext c) {
             final Event event = doUnpack(c);
-            if (predicate.apply(event)) {
-                c.outputWithTimestamp(event, toInstant(event.getContext()
-                                                            .getTimestamp()));
-            }
+            c.outputWithTimestamp(event, toInstant(event.getContext()
+                                                        .getTimestamp()));
         }
     }
 }

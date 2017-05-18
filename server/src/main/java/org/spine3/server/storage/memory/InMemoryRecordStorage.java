@@ -21,7 +21,9 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
 import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.Create;
@@ -38,11 +40,7 @@ import org.spine3.users.TenantId;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 import java.util.Map;
-
-import static com.google.common.collect.ImmutableList.builder;
-import static com.google.common.collect.ImmutableList.copyOf;
 
 /**
  * Memory-based implementation of {@link RecordStorage}.
@@ -56,7 +54,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    protected InMemoryRecordStorage(boolean multitenant) {
+    InMemoryRecordStorage(boolean multitenant) {
         super(multitenant);
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
@@ -152,45 +150,52 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         }
 
         @Override
-        public Read<I> readAll(TenantId tenantId) {
-            final List<I> index = readIndex();
-            final ImmutableList<KV<I, EntityRecord>> records = readMany(tenantId, index);
-            return new AsTransform<>(tenantId, records);
+        public FindByQuery<I> findFn(TenantId tenantId) {
+            return new InMemFindByQuery<>(readAll(tenantId));
         }
 
         @Override
-        public Read<I> read(TenantId tenantId, Iterable<I> ids) {
-            final ImmutableList<KV<I, EntityRecord>> records = readMany(tenantId, ids);
-            return new AsTransform<>(tenantId, records);
+        public Read<I> read(TenantId tenantId, Query<I> query) {
+            final Map<I, EntityRecord> all = readAll(tenantId);
+            final Map<I, EntityRecord> filtered = filter(all, query);
+            final ImmutableList.Builder<KV<I, EntityRecord>> records = ImmutableList.builder();
+            for (Map.Entry<I, EntityRecord> entry : filtered.entrySet()) {
+                records.add(KV.of(entry.getKey(), entry.getValue()));
+            }
+            return new AsTransform<>(tenantId, query, records.build());
         }
 
-        private ImmutableList<KV<I, EntityRecord>> readMany(final TenantId tenantId,
-                                                            final Iterable<I> index) {
-            final TenantAwareFunction0<ImmutableList<KV<I, EntityRecord>>> func =
-                    new TenantAwareFunction0<ImmutableList<KV<I, EntityRecord>>>(tenantId) {
-                        @Override
-                        public ImmutableList<KV<I, EntityRecord>> apply() {
-                            final ImmutableList.Builder<KV<I, EntityRecord>> records = builder();
-                            for (I id : index) {
-                                final EntityRecord record = storage.readRecord(id)
-                                                                   .get();
-                                records.add(KV.of(id, record));
-                            }
-                            return records.build();
-                        }
-                    };
-            return func.execute();
+        private ImmutableMap<I, EntityRecord> readAll(TenantId tenantId) {
+            final TenantAwareFunction0<ImmutableMap<I, EntityRecord>> func =
+                    new ReadAllRecordsFunc<>(tenantId, storage);
+            final ImmutableMap<I, EntityRecord> allRecords = func.execute();
+            return allRecords;
         }
 
-        private ImmutableList<I> readIndex() {
-            final TenantAwareFunction0<ImmutableList<I>> func =
-                    new TenantAwareFunction0<ImmutableList<I>>() {
-                        @Override
-                        public ImmutableList<I> apply() {
-                            return copyOf(storage.index());
-                        }
-                    };
-            return func.execute();
+        private static  <I> Map<I, EntityRecord> filter(Map<I, EntityRecord> map, Query<I> query) {
+            final ImmutableMap.Builder<I, EntityRecord> filtered = ImmutableMap.builder();
+            final Predicate<KV<I, EntityRecord>> predicate = query.toPredicate();
+            for (Map.Entry<I, EntityRecord> entry : map.entrySet()) {
+                if (predicate.apply(KV.of(entry.getKey(), entry.getValue()))) {
+                    filtered.put(entry);
+                }
+            }
+            return filtered.build();
+        }
+
+        private static class InMemFindByQuery<I> extends RecordStorageIO.FindByQuery<I> {
+
+            private static final long serialVersionUID = 0L;
+            private final ImmutableMap<I, EntityRecord> records;
+
+            private InMemFindByQuery(ImmutableMap<I, EntityRecord> records) {
+                this.records = records;
+            }
+
+            @Override
+            public Iterable<EntityRecord> apply(Query<I> input) {
+                return filter(records, input).values();
+            }
         }
 
         /**
@@ -200,16 +205,41 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
             private static final long serialVersionUID = 0L;
             private final ImmutableList<KV<I, EntityRecord>> records;
 
-            private AsTransform(TenantId tenantId, ImmutableList<KV<I, EntityRecord>> records) {
-                super(StaticValueProvider.of(tenantId), null);
+            private AsTransform(TenantId tenantId,
+                                Query<I> query,
+                                ImmutableList<KV<I, EntityRecord>> records) {
+                super(StaticValueProvider.of(tenantId), query);
                 this.records = records;
             }
 
             @Override
             public PCollection<KV<I, EntityRecord>> expand(PBegin input) {
-                final PCollection<KV<I, EntityRecord>> result =
-                        input.apply(Create.of(records));
+                final PCollection<KV<I, EntityRecord>> result = input.apply(Create.of(records));
                 return result;
+            }
+        }
+
+        private static class ReadAllRecordsFunc<I>
+                extends TenantAwareFunction0<ImmutableMap<I, EntityRecord>> {
+
+            private final InMemoryRecordStorage<I> storage;
+
+            private ReadAllRecordsFunc(TenantId tenantId, InMemoryRecordStorage<I> storage) {
+                super(tenantId);
+                this.storage = storage;
+            }
+
+            @Override
+            public ImmutableMap<I, EntityRecord> apply() {
+                ImmutableMap.Builder<I, EntityRecord> result = ImmutableMap.builder();
+                final Iterator<I> index = storage.index();
+                while (index.hasNext()) {
+                    I id = index.next();
+                    final EntityRecord record = storage.readRecord(id)
+                                                       .get();
+                    result.put(id, record);
+                }
+                return result.build();
             }
         }
     }

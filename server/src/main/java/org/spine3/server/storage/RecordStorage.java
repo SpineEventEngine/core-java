@@ -220,9 +220,9 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return readAllRecords(fieldMask);
     }
 
-    //
-    // Internal storage methods
-    //---------------------------
+    /*
+     * Internal storage methods
+     *****************************/
 
     /**
      * Reads a record from the storage by the passed ID.

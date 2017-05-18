@@ -26,7 +26,10 @@ import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
+import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.storage.RecordPredicate;
 import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.users.TenantId;
 
@@ -34,6 +37,7 @@ import javax.annotation.Nullable;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -87,10 +91,44 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      * Obtains transform for loading all events (from the tenant's slice) matching
      * the passed predicate.
      */
-    EventStoreIO.Read query(TenantId tenantId, EventPredicate predicate) {
-        final RecordStorageIO.Read<EventId> readAll = recordStorage().getIO()
-                                                                     .readAll(tenantId);
-        return new EventStoreIO.Query(readAll, predicate);
+    RecordStorageIO.Read<EventId> query(TenantId tenantId, EventStreamQuery query) {
+        final RecordStorageIO.Query<EventId> recordQuery = new EventRecordQuery(query);
+        final RecordStorageIO.Read<EventId> readRecords = recordStorage().getIO()
+                                                                         .read(tenantId,
+                                                                               recordQuery);
+        return readRecords;
+    }
+
+    private static class EventRecordQuery extends RecordStorageIO.Query<EventId> {
+
+        private static final long serialVersionUID = 0L;
+        private final EventStreamQuery query;
+
+        private EventRecordQuery(EventStreamQuery query) {
+            this.query = query;
+        }
+
+        /**
+         * Returns empty set to instruct to get all the events matching the query.
+         */
+        @Override
+        public Set<EventId> getIds() {
+            return Collections.emptySet();
+        }
+
+        @Override
+        public RecordPredicate getRecordPredicate() {
+            return new RecordPredicate() {
+                private static final long serialVersionUID = 0L;
+                private final MatchesStreamQuery query = new MatchesStreamQuery(
+                        EventRecordQuery.this.query);
+
+                @Override
+                public Boolean apply(EntityRecord input) {
+                    return query.apply(AnyPacker.<Event>unpack(input.getState()));
+                }
+            };
+        }
     }
 
     /**
