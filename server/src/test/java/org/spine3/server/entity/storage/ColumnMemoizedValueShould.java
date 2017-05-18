@@ -50,6 +50,15 @@ public class ColumnMemoizedValueShould {
 
     @Test
     public void support_equality() {
+        /*
+        4 equality groups represent following cases:
+            A - 3 values of the same Column memoized on the same instance of Entity;
+            A-mutated - the value of the same Column on the same object but after the field change
+            B - the value of a different Column on the same instance
+            C - the value of a mock Column (used to ensure that MemoizedValue#equals is decoupled
+                from the Column#equals)
+         */
+
         final Column columnA = findColumn(TestEntity.class, MUTABLE_STATE_COLUMN);
         final Column columnB = findColumn(TestEntity.class, ARCHIVED_COLUMN);
         final Column columnC = mock(Column.class);

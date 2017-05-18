@@ -107,14 +107,14 @@ public class QueryParametersShould {
     @Test
     public void support_equality() {
         // --- Group A ---
-        // Represents 2 empty instances
+        // Consists of 2 empty instances
         final QueryParameters paramsA1 = newBuilder().build();
         final QueryParameters paramsA2 = newBuilder().build();
 
         // --- Group B ---
-        // Represents 3 instances with a single filter
+        // Consists of 3 instances with a single filter targeting a String Column
         final Column bColumn = mockColumn();
-        final ColumnFilter bFilter = ColumnFilters.eq("c", "d");
+        final ColumnFilter bFilter = ColumnFilters.eq("b", "c");
         final QueryParameters paramsB1 = newBuilder().put(bColumn, bFilter)
                                                      .build();
         final QueryParameters paramsB2 = newBuilder().put(bColumn, bFilter)
@@ -123,9 +123,9 @@ public class QueryParametersShould {
                                                      .build();
 
         // --- Group C ---
-        // Represents an instance with a single filter different from the one in group B
+        // Consists of an instance with a single filter targeting an integer number Column
         final Column cColumn = mockColumn();
-        final ColumnFilter cFilter = ColumnFilters.eq("a", "b");
+        final ColumnFilter cFilter = ColumnFilters.eq("a", 42);
         final QueryParameters paramsC = newBuilder().put(cColumn, cFilter)
                                                     .build();
 
