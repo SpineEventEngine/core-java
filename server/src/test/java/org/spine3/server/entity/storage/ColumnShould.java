@@ -23,8 +23,9 @@ package org.spine3.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import org.junit.Test;
+import org.spine3.base.Version;
 import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityWithLifecycle;
 import org.spine3.server.entity.VersionableEntity;
 import org.spine3.test.Given;
 
@@ -59,19 +60,21 @@ public class ColumnShould {
     @Test
     public void invoke_getter() {
         final String entityId = "entity-id";
-        final Column column = forMethod("getId", Entity.class);
+        final int version = 2;
+        final Column column = forMethod("getVersion", VersionableEntity.class);
         final TestEntity entity = Given.entityOfClass(TestEntity.class)
                                        .withId(entityId)
+                                       .withVersion(version)
                                        .build();
-        final String actualId = (String) column.getFor(entity);
-        assertEquals(entityId, actualId);
+        final Version actualVersion = (Version) column.getFor(entity);
+        assertEquals(version, actualVersion.getNumber());
     }
 
     @Test
     public void have_equals_and_hashCode() {
-        final Column col1 = forMethod("getId", Entity.class);
-        final Column col2 = forMethod("getId", Entity.class);
-        final Column col3 = forMethod("getState", Entity.class);
+        final Column col1 = forMethod("getVersion", VersionableEntity.class);
+        final Column col2 = forMethod("getVersion", VersionableEntity.class);
+        final Column col3 = forMethod("isDeleted", EntityWithLifecycle.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)
                 .addEqualityGroup(col3)
@@ -187,12 +190,12 @@ public class ColumnShould {
             return 42L;
         }
 
-        public Object getNotNull() {
+        public String getNotNull() {
             return null;
         }
 
         @Nullable
-        public Object getNull() {
+        public String getNull() {
             return null;
         }
     }

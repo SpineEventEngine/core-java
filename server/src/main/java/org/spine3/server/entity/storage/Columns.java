@@ -49,6 +49,10 @@ import static java.lang.String.format;
  * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
  * the Java Bean</a> getter spec are considered {@link Column Columns}.
  *
+ * <p>Note that the returned type of a {@link Column} getter must either be primitive or
+ * serializable, otherwise a runtime exception is thrown when trying to get an instance of
+ * {@link Column}.
+ *
  * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
  * from a cache and are not updated.
  *

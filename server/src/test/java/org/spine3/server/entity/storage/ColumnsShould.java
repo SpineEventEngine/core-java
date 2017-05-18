@@ -22,7 +22,6 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.server.entity.AbstractEntity;
@@ -168,7 +167,7 @@ public class ColumnsShould {
     @SuppressWarnings("unused")  // Reflective access
     public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
 
-        private final Message someMessage = Sample.messageOfType(Project.class);
+        private final Project someMessage = Sample.messageOfType(Project.class);
 
         protected EntityWithManyGetters(String id) {
             super(id);
@@ -183,7 +182,7 @@ public class ColumnsShould {
             return null;
         }
 
-        public Message getSomeMessage() {
+        public Project getSomeMessage() {
             return someMessage;
         }
 

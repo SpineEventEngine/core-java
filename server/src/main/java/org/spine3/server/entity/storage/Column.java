@@ -22,6 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
+import com.google.gson.internal.Primitives;
 import org.spine3.annotation.Internal;
 import org.spine3.server.entity.Entity;
 
@@ -102,6 +103,8 @@ import static java.lang.String.format;
  * and pass the instance of the registry into the
  * {@link org.spine3.server.storage.StorageFactory StorageFactory} on creation.
  *
+ * <p>Note that the type of a Column must be either primitive or implement {@link Serializable}.
+ *
  * <h2>Nullability</h2>
  *
  * <p>A Column may turn into {@code null} value if the getter which declares it is annotated as
@@ -163,6 +166,7 @@ public /*final*/ class Column implements Serializable {
      */
     public static Column from(Method getter) {
         checkNotNull(getter);
+        checkType(getter);
         final String name = nameFromGetterName(getter.getName());
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
         final Column result = new Column(getter, name, nullable);
@@ -181,6 +185,15 @@ public /*final*/ class Column implements Serializable {
         }
         result = Character.toLowerCase(result.charAt(0)) + result.substring(1);
         return result;
+    }
+
+    private static void checkType(Method getter) {
+        final Class<?> returnType = getter.getReturnType();
+        final Class<?> wrapped = Primitives.wrap(returnType);
+        checkState(Serializable.class.isAssignableFrom(wrapped),
+                   format("Cannot create Column of non-serializable type %s by method %s.",
+                          returnType,
+                          getter));
     }
 
     /**
