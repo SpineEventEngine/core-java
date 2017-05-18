@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
 import org.spine3.server.storage.memory.InMemoryStorageFactory;
-import org.spine3.util.Environment;
+import org.spine3.server.Environment;
 
 import javax.annotation.Nullable;
 

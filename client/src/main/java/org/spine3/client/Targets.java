@@ -19,6 +19,7 @@
  */
 package org.spine3.client;
 
+import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
@@ -26,6 +27,8 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeName;
 
 import javax.annotation.Nullable;
+import java.util.Collections;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -56,7 +59,7 @@ public final class Targets {
         checkNotNull(entityClass);
         checkNotNull(ids);
 
-        final Target result = composeTarget(entityClass, ids);
+        final Target result = composeTarget(entityClass, ids, null);
         return result;
     }
 
@@ -69,18 +72,22 @@ public final class Targets {
     public static Target allOf(Class<? extends Message> entityClass) {
         checkNotNull(entityClass);
 
-        final Target result = composeTarget(entityClass, null);
+        final Target result = composeTarget(entityClass, null, null);
         return result;
     }
 
     static Target composeTarget(Class<? extends Message> entityClass,
-                                @Nullable Set<? extends Message> ids) {
-        final boolean includeAll = (ids == null);
+                                @Nullable Set<? extends Message> ids,
+                                @Nullable Map<String, Any> columnFilters) {
+        final boolean includeAll = (ids == null && columnFilters == null);
+
+        final Set<? extends Message> entityIds = nullToEmpty(ids);
+        final Map<String, Any> entityColumnValues = nullToEmpty(columnFilters);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 
         if (!includeAll) {
-            for (Message rawId : ids) {
+            for (Message rawId : entityIds) {
                 final Any packedId = AnyPacker.pack(rawId);
                 final EntityId entityId = EntityId.newBuilder()
                                                   .setId(packedId)
@@ -91,6 +98,7 @@ public final class Targets {
         final EntityIdFilter idFilter = idFilterBuilder.build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
+                                                   .putAllColumnFilter(entityColumnValues)
                                                    .build();
         final String typeName = TypeName.of(entityClass)
                                         .value();
@@ -103,5 +111,21 @@ public final class Targets {
         }
 
         return builder.build();
+    }
+
+    private static <T> Set<T> nullToEmpty(@Nullable Iterable<T> input) {
+        if (input == null) {
+            return Collections.emptySet();
+        } else {
+            return Sets.newHashSet(input);
+        }
+    }
+
+    private static <K, V> Map<K, V> nullToEmpty(@Nullable Map<K, V> input) {
+        if (input == null) {
+            return Collections.emptyMap();
+        } else {
+            return input;
+        }
     }
 }

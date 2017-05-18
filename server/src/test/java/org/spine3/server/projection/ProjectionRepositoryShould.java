@@ -38,6 +38,7 @@ import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.entity.idfunc.IdSetEventFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -499,7 +500,9 @@ public class ProjectionRepositoryShould
     }
 
     /** The projection stub used in tests. */
-    static class TestProjection extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
+    public static class TestProjection
+            extends Projection<ProjectId, Project, ProjectValidatingBuilder>
+            implements TestEntityWithStringColumn {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered =
@@ -559,6 +562,11 @@ public class ProjectionRepositoryShould
                                                .setStatus(Project.Status.STARTED)
                                                .build();
             getBuilder().mergeFrom(newState);
+        }
+
+        @Override
+        public String getIdString() {
+            return getId().toString();
         }
     }
 

@@ -1428,10 +1428,9 @@ public final class Verify extends Assert {
         } catch (Exception ex) {
             try {
 
-                assertSame(
-                        msgCaughtButExpectedWithMessage(ex, exceptionClass),
-                        exceptionClass,
-                        ex.getClass());
+                assertSame(msgCaughtButExpectedWithMessage(ex, exceptionClass),
+                           exceptionClass,
+                           ex.getClass());
                 return;
             } catch (AssertionError e) {
                 throw mangledException(e);
@@ -1446,8 +1445,8 @@ public final class Verify extends Assert {
     }
 
     private static String msgCaughtButExpectedWithMessage(Exception actual,
-                                                          Class<? extends Exception> expectedClass) {
-        return msgCaughtButExpected(actual, expectedClass)
+                                                          Class<? extends Exception> expected) {
+        return msgCaughtButExpected(actual, expected)
                + LINE_SEPARATOR
                + "Exception Message: " + actual.getMessage()
                + LINE_SEPARATOR;
@@ -1483,10 +1482,9 @@ public final class Verify extends Assert {
             code.run();
         } catch (RuntimeException ex) {
             try {
-                assertSame(
-                        msgCaughtButExpectedWithMessage(ex, expectedClass),
-                        expectedClass,
-                        ex.getClass());
+                assertSame(msgCaughtButExpectedWithMessage(ex, expectedClass),
+                           expectedClass,
+                           ex.getClass());
                 return;
             } catch (AssertionError e) {
                 throw mangledException(e);

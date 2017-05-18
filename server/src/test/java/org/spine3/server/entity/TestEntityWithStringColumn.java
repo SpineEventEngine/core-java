@@ -18,11 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/**
- * This package contains utilities that can be used by the client code, server code,
- * and business model compiler.
- */
-@ParametersAreNonnullByDefault
-package org.spine3.util;
+package org.spine3.server.entity;
 
-import javax.annotation.ParametersAreNonnullByDefault;
+/**
+ * The contract for the test {@linkplain Entity entities} which serve for testing the subclasses of
+ * {@link RecordBasedRepository}.
+ *
+ * @author Dmytro Dashenkov
+ * @see RecordBasedRepositoryShould
+ */
+public interface TestEntityWithStringColumn {
+
+    @SuppressWarnings("unused") // Reflective access
+    String getIdString();
+}

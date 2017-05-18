@@ -33,8 +33,8 @@ public class SchemasShould {
 
     @Test
     public void return_valid_schemas_on_valid_args() {
-        assertEquals(Url.Record.Schema.DNS, Schemas.parse("dns"));
-        assertEquals(Url.Record.Schema.DNS, Schemas.parse("DNS"));
+        assertEquals(Url.Record.Schema.FILE, Schemas.parse("file"));
+        assertEquals(Url.Record.Schema.FILE, Schemas.parse("FILE"));
     }
 
     @Test

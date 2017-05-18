@@ -192,7 +192,8 @@ class Storage extends DefaultRecordBasedRepository<CommandId, Entity, CommandRec
         }
     }
 
-    boolean isOpen() {
+    @Override
+    public boolean isOpen() {
         return storageAssigned();
     }
 
