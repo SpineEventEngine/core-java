@@ -23,11 +23,8 @@ package org.spine3.server.command;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.Command;
 import org.spine3.client.ActorRequestFactory;
-import org.spine3.envelope.CommandEnvelope;
 import org.spine3.test.TestActorRequestFactory;
-import org.spine3.util.Environment;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
@@ -63,20 +60,20 @@ public class CommandHandlingEntityShould {
         assertEquals(version, entity.unexpectedValue(str(), str(), str()).getVersion());
     }
 
-    @Test(expected = IllegalStateException.class)
-    public void do_not_allow_calling_dispatchForTest_from_production() {
-        final Environment environment = Environment.getInstance();
-        try {
-            // Simulate the production mode.
-            environment.setToProduction();
-
-            final Command cmd = requestFactory.command().create(msg());
-            entity.dispatchForTest(CommandEnvelope.of(cmd));
-
-        } finally {
-            environment.setToTests();
-        }
-    }
+//    @Test(expected = IllegalStateException.class)
+//    public void do_not_allow_calling_dispatchForTest_from_production() {
+//        final Environment environment = Environment.getInstance();
+//        try {
+//            // Simulate the production mode.
+//            environment.setToProduction();
+//
+//            final Command cmd = requestFactory.command().create(msg());
+//            entity.dispatchForTest(CommandEnvelope.of(cmd));
+//
+//        } finally {
+//            environment.setToTests();
+//        }
+//    }
 
     /**
      * @return generated {@code StringValue} based on generated UUID

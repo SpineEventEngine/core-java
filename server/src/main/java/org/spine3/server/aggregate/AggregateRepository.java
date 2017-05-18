@@ -283,7 +283,9 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
         if (eventsFromStorage.isPresent()) {
             final AggregateStateRecord aggregateStateRecord = eventsFromStorage.get();
             checkAggregateStateRecord(aggregateStateRecord);
+            final AggregateTransaction tx = AggregateTransaction.start(result);
             result.play(aggregateStateRecord);
+            tx.commit();
         }
 
         return result;

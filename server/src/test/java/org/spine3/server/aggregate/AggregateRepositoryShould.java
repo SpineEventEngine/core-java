@@ -64,6 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.spine3.server.aggregate.CommandTestDispatcher.dispatch;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -297,9 +298,10 @@ public class AggregateRepositoryShould {
                         .setProjectId(id)
                         .build();
 
-        aggregate.dispatchForTest(env(createProject));
-        aggregate.dispatchForTest(env(addTask));
-        aggregate.dispatchForTest(env(startProject));
+        dispatch(aggregate, env(createProject));
+        dispatch(aggregate, env(addTask));
+        dispatch(aggregate, env(startProject));
+
         return aggregate;
     }
 

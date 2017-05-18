@@ -49,7 +49,6 @@ import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.time.Time.getCurrentTime;
-import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -156,37 +155,9 @@ public abstract class Aggregate<I,
         return super.getBuilder();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to apply generated events to the state.
-     * @param envelope
-     */
-    @Override
+    @Override               // Overridden to expose this method to `AggregateCommandEndpoint`.
     protected List<? extends Message> dispatchCommand(CommandEnvelope envelope) {
-        final List<? extends Message> eventMessages = super.dispatchCommand(envelope);
-        final AggregateTransaction<I, S, B> tx = AggregateTransaction.start(this);
-        try {
-            apply(eventMessages, envelope);
-        } catch (InvocationTargetException e) {
-            throw illegalStateWithCauseOf(e);
-        } finally {
-             /*
-                We perform updating the state of the aggregate in this `finally`
-                block (even if there was an exception in one of the appliers)
-                because we want to transit the aggregate out of the “applying events” mode
-                anyway. We do this to minimize the damage to the aggregate
-                in the case of an exception caused by an applier method.
-
-                In general, applier methods must not throw. Command handlers can
-                in case of business failures.
-
-                The exception thrown from an applier still will be seen because we
-                re-throw its cause in the `catch` block above.
-             */
-            tx.commit();
-        }
-        return eventMessages;
+        return super.dispatchCommand(envelope);
     }
 
     /**
@@ -212,18 +183,13 @@ public abstract class Aggregate<I,
      *                               the {@code cause} for the thrown instance
      */
     void play(AggregateStateRecord aggregateStateRecord) {
-        final AggregateTransaction<I, S, B> tx = AggregateTransaction.start(this);
-        try {
-            final Snapshot snapshot = aggregateStateRecord.getSnapshot();
-            if (isNotDefault(snapshot)) {
-                restore(snapshot);
-            }
-            final List<Event> events = aggregateStateRecord.getEventList();
-
-            play(events);
-        } finally {
-            tx.commit();
+        final Snapshot snapshot = aggregateStateRecord.getSnapshot();
+        if (isNotDefault(snapshot)) {
+            restore(snapshot);
         }
+        final List<Event> events = aggregateStateRecord.getEventList();
+
+        play(events);
     }
 
     /**
@@ -231,10 +197,8 @@ public abstract class Aggregate<I,
      *
      * @param eventMessages the event message to apply
      * @param envelope      the envelope of the command which caused the events
-     * @throws InvocationTargetException if an exception occurs during event applying
      */
-    private void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope)
-            throws InvocationTargetException {
+    void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope) {
         applyMessages(eventMessages, envelope);
     }
 
@@ -243,11 +207,10 @@ public abstract class Aggregate<I,
      *
      * @param eventMessages the event messages or events to apply
      * @param envelope      the envelope of the command which generated the events
-     * @throws InvocationTargetException if the applier method throws an exception
      * @see #ensureEventMessage(Message)
      */
     private void applyMessages(Iterable<? extends Message> eventMessages,
-                               CommandEnvelope envelope) throws InvocationTargetException {
+                               CommandEnvelope envelope) {
         final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory = createEventFactory(envelope, messages.size());
 

@@ -99,8 +99,8 @@ public abstract class EventPlayingEntity <I,
     private void ensureTransaction() {
         if (!isTransactionInProgress()) {
             throw new IllegalStateException(
-                    "Builder and lifecycle operations are not available. Make sure to call those " +
-                            "only from an event applier method.");
+                    "Modification of state and lifecycle is not available. " +
+                            "Make sure to modify those only from an event applier method.");
         }
     }
 
@@ -126,6 +126,9 @@ public abstract class EventPlayingEntity <I,
      * Therefore, if the passed event(s) are in fact so called "integration" events and originated
      * from another application, they should be properly imported first.
      * Otherwise, the version conflict is possible.
+     *
+     * <p>Execution of this method requires the {@linkplain #isTransactionInProgress()
+     * presence of active transaction}.
      *
      * @param events the events to play
      */
@@ -158,6 +161,7 @@ public abstract class EventPlayingEntity <I,
         return result;
     }
 
+    //TODO:5/18/17:alex.tymchenko: update the documentation.
     //    /**
 //     * Sets the passed state and version.
 //     *
@@ -171,8 +175,14 @@ public abstract class EventPlayingEntity <I,
         updateState(stateToRestore, version);
     }
 
-    protected void setInitialState(S stateToRestore, Version version) {
-        tx().initAll(stateToRestore, version);
+    /**
+     * Sets an initial state for the entity.
+     *
+     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
+     * of active transaction}.
+     */
+    protected void setInitialState(S initialState, Version version) {
+        tx().initAll(initialState, version);
     }
 
     /**
@@ -188,11 +198,23 @@ public abstract class EventPlayingEntity <I,
         return super.getLifecycleFlags();
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
+     * of active transaction}.
+     */
     @Override
     protected void setArchived(boolean archived) {
         tx().setArchived(archived);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>The execution of this method requires a {@linkplain #isTransactionInProgress() presence
+     * of active transaction}.
+     */
     @Override
     protected void setDeleted(boolean deleted) {
         tx().setDeleted(deleted);

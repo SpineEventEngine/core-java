@@ -71,11 +71,8 @@ class AggregateTransaction<I,
      * @param entity the entity to start the transaction for.
      * @return the new transaction instance
      */
-    static <I,
-            S extends Message,
-            B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    AggregateTransaction<I, S, B> start(Aggregate<I, S, B> entity) {
-        final AggregateTransaction<I, S, B> tx = new AggregateTransaction<>(entity);
+    static AggregateTransaction start(Aggregate entity) {
+        final AggregateTransaction tx = new AggregateTransaction(entity);
         return tx;
     }
 
@@ -94,7 +91,7 @@ class AggregateTransaction<I,
      */
     //TODO:5/15/17:alex.tymchenko: try to deal with the warnings.
     static AggregateTransaction startWith(Aggregate entity, Message state, Version version) {
-        final AggregateTransaction tx = new AggregateTransaction<>(entity, state, version);
+        final AggregateTransaction tx = new AggregateTransaction(entity, state, version);
         return tx;
     }
 }
