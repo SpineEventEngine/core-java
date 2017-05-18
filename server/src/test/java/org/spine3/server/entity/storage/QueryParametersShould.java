@@ -20,13 +20,14 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.Iterators;
 import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.server.entity.VersionableEntity;
+
+import java.util.Collection;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertArrayEquals;
@@ -39,6 +40,7 @@ import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.server.entity.storage.QueryParameters.newBuilder;
 import static org.spine3.server.storage.EntityField.version;
+import static org.spine3.test.Verify.assertSize;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -90,9 +92,10 @@ public class QueryParametersShould {
                                                        .build();
         for (int i = 0; i < columns.length; i++) {
             final Column column = columns[i];
-            final Optional<ColumnFilter> filter = parameters.get(column);
-            assertTrue(filter.isPresent());
-            assertEquals(filters[i], filter.get());
+            final Collection<ColumnFilter> readFilters = parameters.get(column);
+            assertFalse(readFilters.isEmpty());
+            assertSize(1, readFilters);
+            assertEquals(filters[i], readFilters.iterator().next());
         }
     }
 
@@ -100,8 +103,8 @@ public class QueryParametersShould {
     public void retrieve_absent_value_for_unknown_columns() {
         final QueryParameters parameters = newBuilder().build();
         final Column unknownColumn = mockColumn();
-        final Optional<ColumnFilter> filter = parameters.get(unknownColumn);
-        assertFalse(filter.isPresent());
+        final Collection<ColumnFilter> filter = parameters.get(unknownColumn);
+        assertTrue(filter.isEmpty());
     }
 
     @Test
