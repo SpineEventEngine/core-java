@@ -22,13 +22,13 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableMultimap;
 import org.spine3.client.ColumnFilter;
 
 import java.io.Serializable;
 import java.util.Iterator;
 
-import static com.google.common.base.Optional.fromNullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -40,7 +40,7 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
 
     private static final long serialVersionUID = 526400152015141524L;
 
-    private final ImmutableMap<Column, ColumnFilter> parameters;
+    private final ImmutableMultimap<Column, ColumnFilter> parameters;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
@@ -54,9 +54,9 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
      * @param column the target {@link Column} of the result {@link ColumnFilter}
      * @return the corresponding {@link ColumnFilter}
      */
-    public Optional<ColumnFilter> get(Column column) {
-        final ColumnFilter filter = parameters.get(column);
-        return fromNullable(filter);
+    public ImmutableCollection<ColumnFilter> get(Column column) {
+        final ImmutableCollection<ColumnFilter> filters = parameters.get(column);
+        return filters;
     }
 
     /**
@@ -96,10 +96,10 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
      */
     public static class Builder {
 
-        private final ImmutableMap.Builder<Column, ColumnFilter> parameters;
+        private final ImmutableMultimap.Builder<Column, ColumnFilter> parameters;
 
         private Builder() {
-            parameters = ImmutableMap.builder();
+            parameters = ImmutableMultimap.builder();
         }
 
         /**
@@ -117,7 +117,7 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
             return this;
         }
 
-        private ImmutableMap.Builder<Column, ColumnFilter> getParameters() {
+        private ImmutableMultimap.Builder<Column, ColumnFilter> getParameters() {
             return parameters;
         }
 

@@ -72,6 +72,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
         // Optimize the filtering by excluding the `after` timestamp.
         final EventStreamQuery queryRegardlessTime = query.toBuilder()
+                                                          .clearBefore()
                                                           .clearAfter()
                                                           .build();
         final Predicate<EventEntity> detailedLookupFilter = createEntityFilter(queryRegardlessTime);
@@ -111,6 +112,11 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         if (query.hasAfter()) {
             final Timestamp timestamp = query.getAfter();
             final ColumnFilter filter = ColumnFilters.gt(CREATED_TIME_COLUMN, timestamp);
+            builder.addColumnFilter(filter);
+        }
+        if (query.hasBefore()) {
+            final Timestamp timestamp = query.getBefore();
+            final ColumnFilter filter = ColumnFilters.lt(CREATED_TIME_COLUMN, timestamp);
             builder.addColumnFilter(filter);
         }
         final EntityFilters entityFilters = builder.build();

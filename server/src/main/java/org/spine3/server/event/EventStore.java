@@ -229,7 +229,7 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
-        public AbstractBuilder withDefaultLogger() {
+        public Builder withDefaultLogger() {
             super.withDefaultLogger();
             return this;
         }
