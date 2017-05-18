@@ -26,7 +26,9 @@ import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
+import org.spine3.server.entity.VersionableEntity;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -42,6 +44,17 @@ import static org.spine3.time.Time.getCurrentTime;
  * @author Dmytro Dashenkov
  */
 public class QueryParametersShould {
+
+    @Test
+    public void be_serializable() {
+        final String columnName = "version";
+        final Column column = Columns.findColumn(VersionableEntity.class, columnName);
+        final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                                                          .put(column, filter)
+                                                          .build();
+        reserializeAndAssert(parameters);
+    }
 
     @Test
     public void construct_from_empty_builder() {

@@ -24,7 +24,9 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.client.ColumnFilter;
+import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.server.entity.EntityWithLifecycle;
 import org.spine3.test.entity.ProjectId;
 import org.spine3.testdata.Sample;
 
@@ -34,7 +36,9 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.Set;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
@@ -48,6 +52,19 @@ import static org.spine3.test.Verify.assertContains;
  * @author Dmytro Dashenkov
  */
 public class EntityQueryShould {
+
+    @Test
+    public void be_serializable() {
+        final String columnName = "deleted";
+        final Column column = Columns.findColumn(EntityWithLifecycle.class, columnName);
+        final ColumnFilter filter = ColumnFilters.eq(columnName, false);
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                                                          .put(column, filter)
+                                                          .build();
+        final Set<String> ids = singleton("my-awesome-id");
+        final EntityQuery<String> query = EntityQuery.of(ids, parameters);
+        reserializeAndAssert(query);
+    }
 
     @Test
     public void not_accept_nulls() {

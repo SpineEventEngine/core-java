@@ -143,9 +143,9 @@ public final class EntityRecordWithColumns implements Serializable {
             return false;
         }
 
-        EntityRecordWithColumns envelope = (EntityRecordWithColumns) o;
+        EntityRecordWithColumns other = (EntityRecordWithColumns) o;
 
-        return getRecord().equals(envelope.getRecord());
+        return getRecord().equals(other.getRecord());
     }
 
     @Override
