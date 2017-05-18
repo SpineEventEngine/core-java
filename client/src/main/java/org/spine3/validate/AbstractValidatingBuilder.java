@@ -67,8 +67,6 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     @Nullable
     private T originalState;
 
-    private Modifications modifications;
-
     protected AbstractValidatingBuilder() {
         this.messageClass = TypeInfo.getMessageClass(getClass());
         this.messageBuilder = createBuilder();
@@ -156,7 +154,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     /**
      * Builds a message without triggering its validation.
      *
-     * <p>Exposed to those who wish to obtain the state anyway, e.g. for reporting.
+     * <p>Exposed to those who wish to obtain the state anyway, e.g. for logging.
      *
      * @return the message built from the values set by the user
      */
@@ -167,7 +165,11 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
             resultBuilder.mergeFrom(getOriginalState().get());
         }
         resultBuilder.mergeFrom(getMessageBuilder().build());
-        return (T) resultBuilder.build();
+
+        @SuppressWarnings("unchecked")  // OK, as real types of `B`
+                                        // are always generated to be compatible with `T`.
+        final T result = (T) resultBuilder.build();
+        return result;
     }
 
     /**
@@ -199,31 +201,6 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
             throws ConstraintViolationThrowable {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationThrowable(violations);
-        }
-    }
-
-    public Modifications getModifications() {
-        return modifications;
-    }
-
-    public static class Modifications {
-
-        private volatile int modificationCount = 0;
-
-        private final Object lock = new Object();
-
-        public void commitModification() {
-            synchronized (lock) {
-                modificationCount++;
-            }
-        }
-
-        public int getAndClear() {
-            synchronized (lock) {
-                final int result = modificationCount;
-                modificationCount = 0;
-                return result;
-            }
         }
     }
 }
