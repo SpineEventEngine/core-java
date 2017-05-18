@@ -47,6 +47,9 @@ class ProcManTransaction<I,
                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
+    private final TransactionWatcher<I, ProcessManager<I, S, B>, S, B> watcher =
+            new PhasePropagationRequiredWatcher<>();
+
     private ProcManTransaction(ProcessManager<I, S, B> entity) {
         super(entity);
     }
@@ -70,7 +73,7 @@ class ProcManTransaction<I,
 
     @Override
     protected TransactionWatcher<I, ProcessManager<I, S, B>, S, B> getWatcher() {
-        return new PhasePropagationRequiredWatcher<>();
+        return watcher;
     }
 
     /**

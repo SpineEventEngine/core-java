@@ -47,6 +47,9 @@ class ProjectionTransaction<I,
                             B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends Transaction<I, Projection<I, M, B>, M, B> {
 
+    private final TransactionWatcher<I, Projection<I, M, B>, M, B> watcher =
+            new PhasePropagationRequiredWatcher<>();
+
     private ProjectionTransaction(Projection<I, M, B> entity) {
         super(entity);
     }
@@ -70,7 +73,7 @@ class ProjectionTransaction<I,
 
     @Override
     protected TransactionWatcher<I, Projection<I, M, B>, M, B> getWatcher() {
-        return new PhasePropagationRequiredWatcher<>();
+        return watcher;
     }
 
     /**
