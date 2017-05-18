@@ -198,7 +198,7 @@ public final class QueryBuilder {
      *
      * @param predicate the {@link ColumnFilter}s to filter the requested entities by
      * @return self for method chaining
-     * @see ColumnFilters for a conviniant way to create {@link ColumnFilter} instances
+     * @see ColumnFilters for a convinient way to create {@link ColumnFilter} instances
      */
     public QueryBuilder where(ColumnFilter... predicate) {
         final ImmutableSet.Builder<ColumnFilter> builder = ImmutableSet.builder();

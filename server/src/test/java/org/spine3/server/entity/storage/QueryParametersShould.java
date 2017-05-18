@@ -38,6 +38,7 @@ import static org.mockito.Mockito.mock;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.server.entity.storage.QueryParameters.newBuilder;
+import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -47,7 +48,7 @@ public class QueryParametersShould {
 
     @Test
     public void be_serializable() {
-        final String columnName = "version";
+        final String columnName = version.name();
         final Column column = Columns.findColumn(VersionableEntity.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
         final QueryParameters parameters = QueryParameters.newBuilder()

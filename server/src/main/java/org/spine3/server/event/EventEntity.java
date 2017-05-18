@@ -32,10 +32,6 @@ import java.util.Comparator;
 /**
  * Stores an event.
  *
- * <p>{@code EventEntity} is a Spine internal {@link org.spine3.server.entity.Entity Entity} type,
- * which is not designed for the direct usage. Both API and behaviour of this class may are subjects
- * of change.
- *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */

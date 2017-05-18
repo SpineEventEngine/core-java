@@ -46,6 +46,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.protobuf.TypeConverter.toAny;
+import static org.spine3.server.storage.LifecycleFlagField.deleted;
 import static org.spine3.test.Verify.assertContains;
 
 /**
@@ -55,7 +56,7 @@ public class EntityQueryShould {
 
     @Test
     public void be_serializable() {
-        final String columnName = "deleted";
+        final String columnName = deleted.name();
         final Column column = Columns.findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
         final QueryParameters parameters = QueryParameters.newBuilder()
@@ -142,7 +143,7 @@ public class EntityQueryShould {
                             .toString(), repr);
     }
 
-    private static <T> Column mockColumn() {
+    private static Column mockColumn() {
         @SuppressWarnings("unchecked") // Mock cannot have type parameters
         final Column column = mock(Column.class);
         when(column.getName()).thenReturn("mockColumn");

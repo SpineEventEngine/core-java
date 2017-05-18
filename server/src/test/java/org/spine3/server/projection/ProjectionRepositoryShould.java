@@ -663,7 +663,7 @@ public class ProjectionRepositoryShould
         /**
          * {@inheritDoc}
          *
-         * <p>Overrides to expose the method into this test class.
+         * <p>Overrides to expose the method to this test class.
          */
         @Override
         protected ProjectionStorage<ProjectId> projectionStorage() {
@@ -673,7 +673,7 @@ public class ProjectionRepositoryShould
         /**
          * {@inheritDoc}
          *
-         * <p>Overrides to expose the method into this test class.
+         * <p>Overrides to expose the method to this test class.
          */
         @Override
         protected TestProjection findOrCreate(ProjectId id) {

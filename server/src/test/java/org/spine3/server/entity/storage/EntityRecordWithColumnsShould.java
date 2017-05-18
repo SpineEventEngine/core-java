@@ -42,6 +42,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.spine3.server.entity.storage.Column.MemoizedValue;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
+import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.test.Verify.assertContainsKeyValue;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertMapsEqual;
@@ -57,7 +58,7 @@ public class EntityRecordWithColumnsShould {
         final VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
                                                     .withVersion(1)
                                                     .build();
-        final String columnName = "version";
+        final String columnName = version.name();
         final Column column = Columns.findColumn(VersionableEntity.class, columnName);
         final MemoizedValue value = column.memoizeFor(entity);
 

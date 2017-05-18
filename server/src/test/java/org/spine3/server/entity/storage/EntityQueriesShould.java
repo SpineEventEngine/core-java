@@ -46,6 +46,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.server.storage.EntityField.version;
+import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -93,8 +95,8 @@ public class EntityQueriesShould {
         final BoolValue archivedValue = BoolValue.newBuilder()
                                                  .setValue(true)
                                                  .build();
-        final ColumnFilter versionFilter = ColumnFilters.eq("version", versionValue);
-        final ColumnFilter archivedFilter = ColumnFilters.eq("archived", archivedValue);
+        final ColumnFilter versionFilter = ColumnFilters.eq(version.name(), versionValue);
+        final ColumnFilter archivedFilter = ColumnFilters.eq(archived.name(), archivedValue);
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
                                                    .addColumnFilter(versionFilter)

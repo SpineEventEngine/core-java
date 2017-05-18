@@ -41,6 +41,9 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.spine3.server.storage.EntityField.version;
+import static org.spine3.server.storage.LifecycleFlagField.archived;
+import static org.spine3.server.storage.LifecycleFlagField.deleted;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertEmpty;
@@ -135,17 +138,17 @@ public class ColumnsShould {
 
         assertSize(5, storageFieldNames);
 
-        assertContains("archived", storageFieldNames);
-        assertContains("deleted", storageFieldNames);
+        assertContains(archived.name(), storageFieldNames);
+        assertContains(deleted.name(), storageFieldNames);
         assertContains("visible", storageFieldNames);
-        assertContains("version", storageFieldNames);
+        assertContains(version.name(), storageFieldNames);
         assertContains("someTime", storageFieldNames);
     }
 
     @Test
     public void retrieve_column_metadata_from_given_class() {
         final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
-        final String existingColumnName = "archived";
+        final String existingColumnName = archived.name();
         final Column archivedColumn = Columns.findColumn(entityClass, existingColumnName);
         assertNotNull(archivedColumn);
         assertEquals(existingColumnName, archivedColumn.getName());
