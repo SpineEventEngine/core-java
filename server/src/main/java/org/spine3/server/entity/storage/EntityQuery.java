@@ -24,6 +24,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
@@ -61,7 +62,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Dmytro Dashenkov
  * @see EntityRecordWithColumns
  */
-public final class EntityQuery<I> {
+public final class EntityQuery<I> implements Serializable {
+
+    private static final long serialVersionUID = 7007336125384634462L;
 
     private final ImmutableSet<I> ids;
     private final QueryParameters parameters;

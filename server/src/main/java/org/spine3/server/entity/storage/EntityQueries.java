@@ -72,7 +72,7 @@ public final class EntityQueries {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (ColumnFilter filter : entityFilters.getColumnFilterList()) {
-            final Column<?> column = Columns.findColumn(entityClass, filter.getColumnName());
+            final Column column = Columns.findColumn(entityClass, filter.getColumnName());
             builder.put(column, filter);
         }
         return builder.build();

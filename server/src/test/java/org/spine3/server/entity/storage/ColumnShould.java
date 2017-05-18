@@ -23,15 +23,19 @@ package org.spine3.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import org.junit.Test;
+import org.spine3.base.Version;
 import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.EntityWithLifecycle;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.test.Given;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -42,27 +46,35 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many string literals for method names
 public class ColumnShould {
 
+    @Test
+    public void be_serializable() {
+        final Column column = forMethod("getVersion", VersionableEntity.class);
+        reserializeAndAssert(column);
+    }
+
     @Test(expected = IllegalArgumentException.class)
-    public void costruct_for_getter_method_only() {
+    public void construct_for_getter_method_only() {
         forMethod("toString", Object.class);
     }
 
     @Test
     public void invoke_getter() {
         final String entityId = "entity-id";
-        final Column<String> column = forMethod("getId", Entity.class);
+        final int version = 2;
+        final Column column = forMethod("getVersion", VersionableEntity.class);
         final TestEntity entity = Given.entityOfClass(TestEntity.class)
                                        .withId(entityId)
+                                       .withVersion(version)
                                        .build();
-        final String actualId = column.getFor(entity);
-        assertEquals(entityId, actualId);
+        final Version actualVersion = (Version) column.getFor(entity);
+        assertEquals(version, actualVersion.getNumber());
     }
 
     @Test
     public void have_equals_and_hashCode() {
-        final Column<?> col1 = forMethod("getId", Entity.class);
-        final Column<?> col2 = forMethod("getId", Entity.class);
-        final Column<?> col3 = forMethod("getState", Entity.class);
+        final Column col1 = forMethod("getVersion", VersionableEntity.class);
+        final Column col2 = forMethod("getVersion", VersionableEntity.class);
+        final Column col3 = forMethod("isDeleted", EntityWithLifecycle.class);
         new EqualsTester()
                 .addEqualityGroup(col1, col2)
                 .addEqualityGroup(col3)
@@ -71,55 +83,56 @@ public class ColumnShould {
 
     @Test
     public void memoize_value_at_at_point_in_time() {
-        final Column<Integer> mutableColumn = forMethod("getMutableState", TestEntity.class);
+        final Column mutableColumn = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
         final int initialState = 1;
         final int changedState = 42;
         entity.setMutableState(initialState);
-        final Column.MemoizedValue<Integer> memoizedState = mutableColumn.memoizeFor(entity);
+        final Column.MemoizedValue memoizedState = mutableColumn.memoizeFor(entity);
         entity.setMutableState(changedState);
-        final int extractedState = mutableColumn.getFor(entity);
+        final int extractedState = (int) mutableColumn.getFor(entity);
 
-        assertEquals(initialState, memoizedState.getValue()
-                                                .intValue());
+        final Integer value = (Integer) memoizedState.getValue();
+        assertNotNull(value);
+        assertEquals(initialState, value.intValue());
         assertEquals(changedState, extractedState);
     }
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_get_value_from_private_method() {
-        final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
+        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
         column.getFor(new TestEntity(""));
     }
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_memoize_value_from_private_method() {
-        final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
+        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
         column.memoizeFor(new TestEntity(""));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_get_value_from_wrong_object() {
-        final Column<Long> column = forMethod("getMutableState", TestEntity.class);
+        final Column column = forMethod("getMutableState", TestEntity.class);
         column.getFor(new DifferentTestEntity(""));
     }
 
     @Test(expected = NullPointerException.class)
     public void check_value_if_getter_is_not_null() {
-        final Column<?> column = forMethod("getNotNull", TestEntity.class);
+        final Column column = forMethod("getNotNull", TestEntity.class);
         column.getFor(new TestEntity(""));
     }
 
     @Test
     public void allow_nulls_if_getter_is_nullable() {
-        final Column<?> column = forMethod("getNull", TestEntity.class);
+        final Column column = forMethod("getNull", TestEntity.class);
         final Object value = column.getFor(new TestEntity(""));
         assertNull(value);
     }
 
     @Test
     public void tell_if_property_is_nullable() {
-        final Column<?> notNullColumn = forMethod("getNotNull", TestEntity.class);
-        final Column<?> nullableColumn = forMethod("getNull", TestEntity.class);
+        final Column notNullColumn = forMethod("getNotNull", TestEntity.class);
+        final Column nullableColumn = forMethod("getNull", TestEntity.class);
 
         assertFalse(notNullColumn.isNullable());
         assertTrue(nullableColumn.isNullable());
@@ -127,32 +140,32 @@ public class ColumnShould {
 
     @Test
     public void contain_property_type() {
-        final Column<Long> column = forMethod("getFortyTwoLong", TestEntity.class);
+        final Column column = forMethod("getFortyTwoLong", TestEntity.class);
         assertEquals(Long.TYPE, column.getType());
     }
 
     @Test
     public void memoize_value_regarding_nulls() {
-        final Column<?> nullableColumn = forMethod("getNull", TestEntity.class);
-        final Column.MemoizedValue<?> memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
+        final Column nullableColumn = forMethod("getNull", TestEntity.class);
+        final Column.MemoizedValue memoizedNull = nullableColumn.memoizeFor(new TestEntity(""));
         assertTrue(memoizedNull.isNull());
         assertNull(memoizedNull.getValue());
     }
 
     @Test
     public void memoize_value_which_has_reference_on_Column_itself() {
-        final Column<Long> column = forMethod("getMutableState", TestEntity.class);
+        final Column column = forMethod("getMutableState", TestEntity.class);
         final TestEntity entity = new TestEntity("");
-        final Column.MemoizedValue<Long> memoizedValue = column.memoizeFor(entity);
+        final Column.MemoizedValue memoizedValue = column.memoizeFor(entity);
         assertSame(column, memoizedValue.getSourceColumn());
     }
 
-    private static <T> Column<T> forMethod(String name, Class<?> enclosingClass) {
+    private static Column forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
             return Column.from(result);
         } catch (NoSuchMethodException e) {
-            throw new AssertionError(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
@@ -177,12 +190,12 @@ public class ColumnShould {
             return 42L;
         }
 
-        public Object getNotNull() {
+        public String getNotNull() {
             return null;
         }
 
         @Nullable
-        public Object getNull() {
+        public String getNull() {
             return null;
         }
     }

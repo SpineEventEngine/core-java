@@ -30,6 +30,7 @@ import org.spine3.test.entity.ProjectId;
 import org.spine3.test.entity.TaskId;
 import org.spine3.testdata.Sample;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
@@ -82,11 +83,11 @@ public class EntityQueryMatcherShould {
     @Test
     public void match_columns() {
         final String targetName = "feature";
-        final Column<?> target = mock(Column.class);
+        final Column target = mock(Column.class);
         when(target.isNullable()).thenReturn(true);
         when(target.getName()).thenReturn(targetName);
-        when(target.getType()).thenReturn((Class) Boolean.class);
-        final Object acceptedValue = true;
+        when(target.getType()).thenReturn(Boolean.class);
+        final Serializable acceptedValue = true;
 
         final Collection<Object> ids = Collections.emptyList();
         final QueryParameters params = QueryParameters.newBuilder()
@@ -107,8 +108,8 @@ public class EntityQueryMatcherShould {
         final Column.MemoizedValue storedValue = mock(Column.MemoizedValue.class);
         when(storedValue.getSourceColumn()).thenReturn(target);
         when(storedValue.getValue()).thenReturn(acceptedValue);
-        final Map<String, Column.MemoizedValue<?>> matchingColumns =
-                ImmutableMap.<String, Column.MemoizedValue<?>>of(targetName, storedValue);
+        final Map<String, Column.MemoizedValue> matchingColumns =
+                ImmutableMap.<String, Column.MemoizedValue>of(targetName, storedValue);
         final EntityRecordWithColumns nonMatchingRecord = of(nonMatching);
         final EntityRecordWithColumns matchingRecord = of(matching, matchingColumns);
 
