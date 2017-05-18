@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
@@ -88,7 +89,9 @@ public class ColumnShould {
         entity.setMutableState(changedState);
         final int extractedState = (int) mutableColumn.getFor(entity);
 
-        assertEquals(initialState, ((Integer) memoizedState.getValue()).intValue());
+        final Integer value = (Integer) memoizedState.getValue();
+        assertNotNull(value);
+        assertEquals(initialState, value.intValue());
         assertEquals(changedState, extractedState);
     }
 
