@@ -282,7 +282,8 @@ public abstract class Transaction<I,
         entity.setStateChanged(isStateChanged());
     }
 
-    //TODO:5/15/17:alex.tymchenko: make it work only if the state was empty before and its version was zero.
+    //TODO:5/15/17:alex.tymchenko: make it work only
+    // if the state was empty before and its version was zero.
     void initAll(S state, Version version) {
         final B builder = getBuilder();
         builder.clear();
