@@ -138,7 +138,7 @@ public /*final*/ class Column implements Serializable {
 
     private /*final*/ transient Method getter;
 
-    private final Class<?> type;
+    private final Class<?> entityType;
 
     private final String getterMethodName;
 
@@ -148,7 +148,7 @@ public /*final*/ class Column implements Serializable {
 
     private Column(Method getter, String name, boolean nullable) {
         this.getter = getter;
-        this.type = getter.getReturnType();
+        this.entityType = getter.getDeclaringClass();
         this.getterMethodName = getter.getName();
         this.name = name;
         this.nullable = nullable;
@@ -248,7 +248,7 @@ public /*final*/ class Column implements Serializable {
      * @return the type of the Column
      */
     public Class getType() {
-        return type;
+        return getter.getReturnType();
     }
 
     @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
@@ -279,11 +279,11 @@ public /*final*/ class Column implements Serializable {
     private Method restoreGetter() {
         checkState(getter == null, "Getter method is already restored.");
         try {
-            final Method method = type.getMethod(getterMethodName);
+            final Method method = entityType.getMethod(getterMethodName);
             return method;
         } catch (NoSuchMethodException e) {
             final String errorMsg = format("Cannot find method %s.%s().",
-                                           type.getCanonicalName(),
+                                           entityType.getCanonicalName(),
                                            getterMethodName);
             throw new IllegalStateException(errorMsg, e);
         }
