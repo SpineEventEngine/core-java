@@ -118,9 +118,9 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     }
 
     /**
-     * Checks whether any modifications has been made to the fields of message being built.
+     * Checks whether any modifications have been made to the fields of message being built.
      *
-     * @return {@code true} if any modifications has been made, {@code false} otherwise.
+     * @return {@code true} if any modifications have been made, {@code false} otherwise.
      */
     @Override
     public boolean isDirty() {
