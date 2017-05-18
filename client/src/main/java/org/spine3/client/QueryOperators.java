@@ -28,8 +28,6 @@ import javax.annotation.Nullable;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.spine3.time.Timestamps2.isLaterThan;
 
 /**
  * A utility class for working with the {@link ColumnFilter.Operator} enum.
@@ -78,86 +76,8 @@ public final class QueryOperators {
     public static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
-        final MetaOperator op = getMetaInstance(operator);
-        final boolean result = op.compare(left, right);
+        final OperatorComparator comparator = OperatorComparators.of(operator);
+        final boolean result = comparator.compare(left, right);
         return result;
-    }
-
-    private static MetaOperator getMetaInstance(Operator operator) {
-        final String name = operator.name();
-        try {
-            final MetaOperator metaOperator = MetaOperator.valueOf(name);
-            return metaOperator;
-        } catch (@SuppressWarnings("ProhibitedExceptionCaught") // Thrown by Enum on missing value
-                NullPointerException npe) {
-            throw new IllegalArgumentException(
-                    format("Cannot recognize query operator %s.", name),
-                    npe);
-        }
-    }
-
-    /**
-     * A reflected {@link Operator} enum facilitated by custom methods.
-     *
-     * <p>Since {@link Operator} is defined in Protobuf, we cannot add custom methods to this type
-     * in Java. The way abound is using this type, whose enum constants have the same name as
-     * the {@link Operator} constants do.
-     *
-     * @see QueryOperators#getMetaInstance(Operator)
-     */
-    private enum MetaOperator {
-        EQUAL {
-            @Override
-            <T> boolean compare(@Nullable T left, @Nullable T right) {
-                return Objects.equals(left, right);
-            }
-        },
-        GREATER_THAN {
-            @Override
-            <T> boolean compare(@Nullable T left, @Nullable T right) {
-                if (left == null || right == null) {
-                    return false;
-                }
-                if (left instanceof Timestamp && right instanceof Timestamp) {
-                    final Timestamp tsLeft = (Timestamp) left;
-                    final Timestamp tsRight = (Timestamp) right;
-                    return isLaterThan(tsLeft, tsRight);
-                }
-                throw new UnsupportedOperationException(
-                        format("Operation \'%s\' is not supported for type %s.",
-                               this,
-                               left.getClass()
-                                   .getCanonicalName()
-                        ));
-            }
-        },
-        LESS_THAN {
-            @Override
-            <T> boolean compare(@Nullable T left, @Nullable T right) {
-                return GREATER_THAN.compare(right, left);
-            }
-        },
-        GREATER_OR_EQUAL {
-            @Override
-            <T> boolean compare(@Nullable T left, @Nullable T right) {
-                return GREATER_THAN.compare(left, right)
-                        || EQUAL.compare(left, right);
-            }
-        },
-        LESS_OR_EQUAL {
-            @Override
-            <T> boolean compare(@Nullable T left, @Nullable T right) {
-                return LESS_THAN.compare(left, right)
-                        || EQUAL.compare(left, right);
-            }
-        };
-
-        /**
-         * Compares the given operands by the rules of the operator.
-         *
-         * @see QueryOperators#compare(Object, Operator, Object) for the detailed behaiour
-         * description
-         */
-        abstract <T> boolean compare(@Nullable T left, @Nullable T right);
     }
 }
