@@ -140,9 +140,9 @@ public interface TransactionWatcher<I,
      */
     @SuppressWarnings("ProhibitedExceptionThrown")
     class PhasePropagationRequiredWatcher<I,
-                                   E extends EventPlayingEntity<I, S, B>,
-                                   S extends Message,
-                                   B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                                          E extends EventPlayingEntity<I, S, B>,
+                                          S extends Message,
+                                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
             extends SilentWitness<I, E, S, B> {
 
         /**
