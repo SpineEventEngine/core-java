@@ -25,11 +25,13 @@ import com.google.protobuf.Any;
 import org.junit.Test;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.Entity;
+import org.spine3.server.entity.VersionableEntity;
 import org.spine3.test.Given;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -42,8 +44,14 @@ import static org.junit.Assert.assertTrue;
 @SuppressWarnings("DuplicateStringLiteralInspection") // Many string literals for method names
 public class ColumnShould {
 
+    @Test
+    public void be_serializable() {
+        final Column column = forMethod("getVersion", VersionableEntity.class);
+        reserializeAndAssert(column);
+    }
+
     @Test(expected = IllegalArgumentException.class)
-    public void costruct_for_getter_method_only() {
+    public void construct_for_getter_method_only() {
         forMethod("toString", Object.class);
     }
 
@@ -146,12 +154,12 @@ public class ColumnShould {
         assertSame(column, memoizedValue.getSourceColumn());
     }
 
-    private static <T> Column forMethod(String name, Class<?> enclosingClass) {
+    private static Column forMethod(String name, Class<?> enclosingClass) {
         try {
             final Method result = enclosingClass.getDeclaredMethod(name);
             return Column.from(result);
         } catch (NoSuchMethodException e) {
-            throw new AssertionError(e.getMessage());
+            throw new RuntimeException(e);
         }
     }
 
