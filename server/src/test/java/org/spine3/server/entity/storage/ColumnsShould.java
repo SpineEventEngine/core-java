@@ -22,7 +22,6 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.server.entity.AbstractEntity;
@@ -68,7 +67,7 @@ public class ColumnsShould {
 
     @Test
     public void return_empty_map() {
-        final Map<String, Column.MemoizedValue<?>> emptyFields = Collections.emptyMap();
+        final Map<String, Column.MemoizedValue> emptyFields = Collections.emptyMap();
         assertNotNull(emptyFields);
         assertEmpty(emptyFields);
     }
@@ -76,7 +75,7 @@ public class ColumnsShould {
     @Test
     public void extract_no_fields_if_none_defined() {
         final Entity entity = new EntityWithNoStorageFields(STRING_ID);
-        final Map<String, Column.MemoizedValue<?>> fields = Columns.from(entity);
+        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
         assertEmpty(fields);
     }
@@ -84,14 +83,14 @@ public class ColumnsShould {
     @Test
     public void put_non_null_fields_to_fields_maps() {
         final EntityWithManyGetters entity = new EntityWithManyGetters(STRING_ID);
-        final Map<String, Column.MemoizedValue<?>> fields = Columns.from(entity);
+        final Map<String, Column.MemoizedValue> fields = Columns.from(entity);
         assertNotNull(fields);
 
         assertSize(3, fields);
 
         final String floatNullKey = "floatNull";
-        @SuppressWarnings("unchecked") final Column.MemoizedValue<Float> floatMemoizedNull =
-                (Column.MemoizedValue<Float>) fields.get(floatNullKey);
+        @SuppressWarnings("unchecked") final Column.MemoizedValue floatMemoizedNull =
+                (Column.MemoizedValue) fields.get(floatNullKey);
         assertNotNull(floatMemoizedNull);
         assertNull(floatMemoizedNull.getValue());
 
@@ -108,9 +107,9 @@ public class ColumnsShould {
 
     @Test
     public void ignore_static_members() {
-        final Map<String, Column.MemoizedValue<?>> fields =
+        final Map<String, Column.MemoizedValue> fields =
                 Columns.from(new EntityWithManyGetters(STRING_ID));
-        final Column.MemoizedValue<?> staticValue = fields.get("staticMember");
+        final Column.MemoizedValue staticValue = fields.get("staticMember");
         assertNull(staticValue);
     }
 
@@ -147,7 +146,7 @@ public class ColumnsShould {
     public void retrieve_column_metadata_from_given_class() {
         final Class<? extends Entity<?, ?>> entityClass = RealLifeEntity.class;
         final String existingColumnName = "archived";
-        final Column<?> archivedColumn = Columns.findColumn(entityClass, existingColumnName);
+        final Column archivedColumn = Columns.findColumn(entityClass, existingColumnName);
         assertNotNull(archivedColumn);
         assertEquals(existingColumnName, archivedColumn.getName());
     }
@@ -168,7 +167,7 @@ public class ColumnsShould {
     @SuppressWarnings("unused")  // Reflective access
     public static class EntityWithManyGetters extends AbstractEntity<String, Any> {
 
-        private final Message someMessage = Sample.messageOfType(Project.class);
+        private final Project someMessage = Sample.messageOfType(Project.class);
 
         protected EntityWithManyGetters(String id) {
             super(id);
@@ -183,7 +182,7 @@ public class ColumnsShould {
             return null;
         }
 
-        public Message getSomeMessage() {
+        public Project getSomeMessage() {
             return someMessage;
         }
 

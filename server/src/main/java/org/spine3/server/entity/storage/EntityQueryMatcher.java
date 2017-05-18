@@ -80,10 +80,10 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
     }
 
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
-        final Map<String, MemoizedValue<?>> entityColumns = record.getColumnValues();
+        final Map<String, MemoizedValue> entityColumns = record.getColumnValues();
         for (ColumnFilter filter : queryParams) {
             final String columnName = filter.getColumnName();
-            final MemoizedValue<?> memoizedValue = entityColumns.get(columnName);
+            final MemoizedValue memoizedValue = entityColumns.get(columnName);
             final boolean matches = checkSingleParameter(filter, memoizedValue);
             if (!matches) {
                 return false;
@@ -93,7 +93,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
     }
 
     private static boolean checkSingleParameter(ColumnFilter filter,
-                                                @Nullable MemoizedValue<?> actualValue) {
+                                                @Nullable MemoizedValue actualValue) {
         if (actualValue == null) {
             return false;
         }

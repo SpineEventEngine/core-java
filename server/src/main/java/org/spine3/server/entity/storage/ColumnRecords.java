@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public class ColumnRecords {
+public final class ColumnRecords {
 
     private ColumnRecords() {
         // Prevent initialization of the utility class
@@ -55,8 +55,8 @@ public class ColumnRecords {
      * @param mapColumnIdentifier a {@linkplain Function} mapping
      *                            the {@linkplain Column#getName() column name} to the database
      *                            specific column identifier
-     * @param <D> the type of the database record
-     * @param <I> the type of the column identifier
+     * @param <D>                 the type of the database record
+     * @param <I>                 the type of the column identifier
      */
     public static <D, I> void feedColumnsTo(
             D destination,
@@ -70,14 +70,12 @@ public class ColumnRecords {
         checkArgument(recordWithColumns.hasColumns(),
                       "Passed record has no Entity Columns.");
 
-        for (Map.Entry<String, MemoizedValue<?>> column : recordWithColumns.getColumnValues()
-                                                                                  .entrySet()) {
+        for (Map.Entry<String, MemoizedValue> column : recordWithColumns.getColumnValues()
+                                                                        .entrySet()) {
             final I columnIdentifier = mapColumnIdentifier.apply(column.getKey());
             checkNotNull(columnIdentifier);
-            @SuppressWarnings("unchecked") // We don't know the exact type of the value
-            final MemoizedValue<Object> columnValue =
-                    (MemoizedValue<Object>) column.getValue();
-            final Column<?> columnMetadata = columnValue.getSourceColumn();
+            final MemoizedValue columnValue = column.getValue();
+            final Column columnMetadata = columnValue.getSourceColumn();
             @SuppressWarnings("unchecked") // We don't know the exact types of the value
             final ColumnType<Object, Object, D, I> columnType =
                     (ColumnType<Object, Object, D, I>) columnTypeRegistry.get(columnMetadata);
@@ -89,11 +87,12 @@ public class ColumnRecords {
         }
     }
 
-    private static <J, S, D, I> void setValue(MemoizedValue<J> columnValue,
+    private static <J, S, D, I> void setValue(MemoizedValue columnValue,
                                               D destination,
                                               I columnIdentifier,
                                               ColumnType<J, S, D, I> columnType) {
-        final J initialValue = columnValue.getValue();
+        @SuppressWarnings("unchecked") // Checked at runtime
+        final J initialValue = (J) columnValue.getValue();
         if (initialValue == null) {
             columnType.setNull(destination, columnIdentifier);
         } else {

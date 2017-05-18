@@ -23,17 +23,25 @@ package org.spine3.server.entity.storage;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.VersionableEntity;
+import org.spine3.test.Given;
+import org.spine3.test.entity.Project;
 import org.spine3.testdata.Sample;
 
 import java.util.Collections;
 import java.util.Map;
 
+import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.server.entity.storage.Column.MemoizedValue;
+import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
 import static org.spine3.test.Verify.assertContainsKeyValue;
 import static org.spine3.test.Verify.assertEmpty;
 import static org.spine3.test.Verify.assertMapsEqual;
@@ -44,17 +52,31 @@ import static org.spine3.test.Verify.assertMapsEqual;
 public class EntityRecordWithColumnsShould {
 
     @Test
+    public void be_serializable() {
+        final EntityRecord record = Sample.messageOfType(EntityRecord.class);
+        final VersionableEntity<?, ?> entity = Given.entityOfClass(TestEntity.class)
+                                                    .withVersion(1)
+                                                    .build();
+        final String columnName = "version";
+        final Column column = Columns.findColumn(VersionableEntity.class, columnName);
+        final MemoizedValue value = column.memoizeFor(entity);
+
+        final Map<String, Column.MemoizedValue> columns = singletonMap(columnName, value);
+        final EntityRecordWithColumns recordWithColumns = of(record, columns);
+        reserializeAndAssert(recordWithColumns);
+    }
+
+    @Test
     public void initialize_with_record_and_storage_fields() {
-        final EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance(),
-                                           Collections.<String, Column.MemoizedValue<?>>emptyMap());
+        final EntityRecordWithColumns record = of(EntityRecord.getDefaultInstance(),
+                                                  Collections.<String, MemoizedValue>emptyMap());
         assertNotNull(record);
     }
 
     @Test
     public void initialize_with_record_only() {
         final EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
+                of(EntityRecord.getDefaultInstance());
         assertNotNull(record);
     }
 
@@ -74,63 +96,62 @@ public class EntityRecordWithColumnsShould {
 
     @Test
     public void store_column_values() {
-        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
-        final Map<String, Column.MemoizedValue<?>> columnsExpected =
-                Collections.<String, Column.MemoizedValue<?>>singletonMap("some-key", mockValue);
+        final MemoizedValue mockValue = mock(MemoizedValue.class);
+        final Map<String, Column.MemoizedValue> columnsExpected =
+                Collections.<String, MemoizedValue>singletonMap("some-key", mockValue);
 
         final EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                                           columnsExpected);
+                of(Sample.messageOfType(EntityRecord.class),
+                   columnsExpected);
         assertTrue(record.hasColumns());
 
-        final Map<String, Column.MemoizedValue<?>> columnsActual =
+        final Map<String, Column.MemoizedValue> columnsActual =
                 record.getColumnValues();
         assertMapsEqual(columnsExpected, columnsActual, "column values");
     }
 
     @Test
     public void store_column_definitions() {
-        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
+        final MemoizedValue mockValue = mock(MemoizedValue.class);
         final Column mockColumn = mock(Column.class);
         when(mockValue.getSourceColumn()).thenReturn(mockColumn);
 
         final String key = "arbitrary";
-        final Map<String, Column.MemoizedValue<?>> columnsExpected =
-                Collections.<String, Column.MemoizedValue<?>>singletonMap(key, mockValue);
+        final Map<String, Column.MemoizedValue> columnsExpected =
+                Collections.<String, MemoizedValue>singletonMap(key, mockValue);
 
         final EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                                           columnsExpected);
+                of(Sample.messageOfType(EntityRecord.class),
+                   columnsExpected);
         assertTrue(record.hasColumns());
-        final Map<String, Column<?>> columnsActual = record.getColumns();
+        final Map<String, Column> columnsActual = record.getColumns();
         assertContainsKeyValue(key, mockColumn, columnsActual);
     }
-
 
     @Test
     public void return_empty_map_if_no_storage_fields() {
         final EntityRecordWithColumns record =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance());
+                of(EntityRecord.getDefaultInstance());
         assertFalse(record.hasColumns());
-        final Map<String, Column.MemoizedValue<?>> fields = record.getColumnValues();
+        final Map<String, Column.MemoizedValue> fields = record.getColumnValues();
         assertEmpty(fields);
     }
 
     @Test
     public void have_equals() {
-        final Column.MemoizedValue<?> mockValue = mock(Column.MemoizedValue.class);
+        final MemoizedValue mockValue = mock(MemoizedValue.class);
         final EntityRecordWithColumns noFieldsEnvelope =
-                EntityRecordWithColumns.of(EntityRecord.getDefaultInstance()
+                of(EntityRecord.getDefaultInstance()
                 );
         final EntityRecordWithColumns emptyFieldsEnvelope =
-                EntityRecordWithColumns.of(
+                of(
                         EntityRecord.getDefaultInstance(),
-                        Collections.<String, Column.MemoizedValue<?>>emptyMap()
+                        Collections.<String, MemoizedValue>emptyMap()
                 );
         final EntityRecordWithColumns notEmptyFieldsEnvelope =
-                EntityRecordWithColumns.of(
+                of(
                         EntityRecord.getDefaultInstance(),
-                        Collections.<String, Column.MemoizedValue<?>>singletonMap("key", mockValue)
+                        Collections.<String, MemoizedValue>singletonMap("key", mockValue)
                 );
         new EqualsTester()
                 .addEqualityGroup(noFieldsEnvelope, emptyFieldsEnvelope, notEmptyFieldsEnvelope)
@@ -140,7 +161,14 @@ public class EntityRecordWithColumnsShould {
     }
 
     private static EntityRecordWithColumns newRecord() {
-        return EntityRecordWithColumns.of(Sample.messageOfType(EntityRecord.class),
-                                          Collections.<String, Column.MemoizedValue<?>>emptyMap());
+        return of(Sample.messageOfType(EntityRecord.class),
+                  Collections.<String, MemoizedValue>emptyMap());
+    }
+
+    public static class TestEntity extends AbstractVersionableEntity<String, Project> {
+
+        protected TestEntity(String id) {
+            super(id);
+        }
     }
 }
