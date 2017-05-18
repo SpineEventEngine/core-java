@@ -22,11 +22,14 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.collect.Iterators;
 import com.google.common.testing.EqualsTester;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.server.entity.VersionableEntity;
 
+import java.text.ParseException;
 import java.util.Collection;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
@@ -38,8 +41,10 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
+import static org.spine3.client.ColumnFilters.le;
 import static org.spine3.server.entity.storage.QueryParameters.newBuilder;
 import static org.spine3.server.storage.EntityField.version;
+import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -97,6 +102,25 @@ public class QueryParametersShould {
             assertSize(1, readFilters);
             assertEquals(filters[i], readFilters.iterator().next());
         }
+    }
+
+    @Test
+    public void keep_multiple_filters_for_single_column() throws ParseException {
+        final String columnName = "time";
+        final Column column = mock(Column.class);
+
+        // Some valid Timestamp values
+        final Timestamp startTime = Timestamps.parse("2000-01-01T10:00:00.000-05:00");
+        final Timestamp deadline = Timestamps.parse("2017-01-01T10:00:00.000-05:00");
+
+        final ColumnFilter startTimeFilter = gt(columnName, startTime);
+        final ColumnFilter deadlineFilter = le(columnName, deadline);
+        final QueryParameters parameters = newBuilder().put(column, startTimeFilter)
+                                                       .put(column, deadlineFilter)
+                                                       .build();
+        final Collection<ColumnFilter> timeFilters = parameters.get(column);
+        assertSize(2, timeFilters);
+        assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);
     }
 
     @Test
