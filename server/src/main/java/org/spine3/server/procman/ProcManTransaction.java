@@ -25,8 +25,6 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
-import org.spine3.server.entity.TransactionWatcher;
-import org.spine3.server.entity.TransactionWatcher.PhasePropagationRequiredWatcher;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -47,9 +45,6 @@ class ProcManTransaction<I,
                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
-    private final TransactionWatcher<I, ProcessManager<I, S, B>, S, B> watcher =
-            new PhasePropagationRequiredWatcher<>();
-
     private ProcManTransaction(ProcessManager<I, S, B> entity) {
         super(entity);
     }
@@ -69,11 +64,6 @@ class ProcManTransaction<I,
     @Override
     protected void commit() {
         super.commit();
-    }
-
-    @Override
-    protected TransactionWatcher<I, ProcessManager<I, S, B>, S, B> getWatcher() {
-        return watcher;
     }
 
     /**

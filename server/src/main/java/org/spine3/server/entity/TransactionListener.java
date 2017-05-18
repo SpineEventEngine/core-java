@@ -19,7 +19,6 @@
  */
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Version;
@@ -27,32 +26,17 @@ import org.spine3.server.entity.Transaction.Phase;
 import org.spine3.validate.ValidatingBuilder;
 
 /**
- * A common contract for the {@linkplain Transaction transaction} watchers.
+ * A common contract for the {@linkplain Transaction transaction} listeners.
  *
  * <p>Provides an ability to add callbacks to the transaction execution stages.
  *
  * @author Alex Tymchenko
  */
 @Internal
-public interface TransactionWatcher<I,
+public interface TransactionListener<I,
                                     E extends EventPlayingEntity<I, S, B>,
                                     S extends Message,
                                     B extends ValidatingBuilder<S, ? extends Message.Builder>> {
-
-    /**
-     * A callback invoked upon a {@linkplain Phase transaction phase} failure.
-     *
-     * <p>Optionally allows to return an exception, which is thrown after the callback execution,
-     * effectively leading to the transaction rollback.
-     *
-     * @param e              the {@code Throwable} which caused the failure
-     * @param failedPhase    the failed phase
-     * @param previousPhases the phases executed within the same transaction before the failed one
-     * @return an optional exception to throw
-     */
-    Optional<RuntimeException> phaseFailed(Exception e,
-                                           Phase<I, E, S, B> failedPhase,
-                                           Iterable<Phase<I, E, S, B>> previousPhases);
 
     /**
      * A callback invoked before applying a {@linkplain Phase transaction phase} .
@@ -89,27 +73,18 @@ public interface TransactionWatcher<I,
      * @param version        a version to set to the entity during the commit
      * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
      */
-    void onCommitFail(Exception e, E entity, S state,
-                      Version version, LifecycleFlags lifecycleFlags);
+    void onTransactionFailed(Exception e, E entity, S state,
+                             Version version, LifecycleFlags lifecycleFlags);
 
     /**
-     * An implementation of a {@code TransactionWatcher} which does not set any behavior for its
+     * An implementation of a {@code TransactionListener} which does not set any behavior for its
      * callbacks.
-     *
-     * <p>Using this type of watcher means that the phase failure is ignored and the
-     * ongoing transaction execution is continued.
      */
     class SilentWitness<I,
                         E extends EventPlayingEntity<I, S, B>,
                         S extends Message,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
-            implements TransactionWatcher<I, E, S, B> {
-
-        @Override
-        public Optional<RuntimeException> phaseFailed(Exception e, Phase<I, E, S, B> failedPhase,
-                                                      Iterable<Phase<I, E, S, B>> previousPhases) {
-            return Optional.absent();
-        }
+            implements TransactionListener<I, E, S, B> {
 
         @Override
         public void onBeforePhase(Phase<I, E, S, B> failedPhase) {
@@ -128,33 +103,9 @@ public interface TransactionWatcher<I,
         }
 
         @Override
-        public void onCommitFail(Exception e, E entity, S state,
-                                 Version version, LifecycleFlags lifecycleFlags) {
+        public void onTransactionFailed(Exception e, E entity, S state,
+                                        Version version, LifecycleFlags lifecycleFlags) {
             // do nothing.
-        }
-    }
-
-    /**
-     * An implementation of a {@code TransactionWatcher} which requires propagation for each
-     * transaction phase.
-     */
-    @SuppressWarnings("ProhibitedExceptionThrown")
-    class PhasePropagationRequiredWatcher<I,
-                                          E extends EventPlayingEntity<I, S, B>,
-                                          S extends Message,
-                                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
-            extends SilentWitness<I, E, S, B> {
-
-        /**
-         * Returns the exception, caused the failure of the phase, to be re-thrown.
-         */
-        @Override
-        public Optional<RuntimeException> phaseFailed(Exception e, Phase<I, E, S, B> failedPhase,
-                                                      Iterable<Phase<I, E, S, B>> previousPhases) {
-            if (e instanceof RuntimeException) {
-                return Optional.of((RuntimeException) e);
-            }
-            return Optional.of(new RuntimeException(e));
         }
     }
 }

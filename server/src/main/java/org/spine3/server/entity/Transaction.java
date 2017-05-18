@@ -19,13 +19,12 @@
  */
 package org.spine3.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
-import org.spine3.server.entity.TransactionWatcher.SilentWitness;
+import org.spine3.server.entity.TransactionListener.SilentWitness;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -38,6 +37,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 import static java.lang.String.format;
 import static org.spine3.base.Versions.checkIsIncrement;
 import static org.spine3.server.entity.InvalidEntityStateException.onConstraintViolations;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * The abstract class for the {@linkplain EventPlayingEntity} transactions.
@@ -70,7 +70,8 @@ public abstract class Transaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
-    private final TransactionWatcher<I, E, S, B> defaultWatcher = new SilentWitness<>();
+    private final TransactionListener<I, E, S, B> defaultListener = new SilentWitness<>();
+
     /**
      * The entity, which state and attributes are modified in this transaction.
      */
@@ -200,7 +201,7 @@ public abstract class Transaction<I,
         return version;
     }
 
-    public List<Phase<I, E, S, B>> getPhases() {
+    List<Phase<I, E, S, B>> getPhases() {
         return ImmutableList.copyOf(phases);
     }
 
@@ -209,10 +210,9 @@ public abstract class Transaction<I,
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
      */
-    @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException") // it is NOT ignored.
     protected void commit()  {
 
-        final TransactionWatcher<I, E, S, B> watcher = getWatcher();
+        final TransactionListener<I, E, S, B> listener = getListener();
         final B builder = getBuilder();
 
         // The state is only updated, if at least some changes were made to the builder.
@@ -221,7 +221,7 @@ public abstract class Transaction<I,
                 final S newState = builder.build();
                 markStateChanged();
 
-                watcher.onBeforeCommit(getEntity(), newState,
+                listener.onBeforeCommit(getEntity(), newState,
                                              getVersion(), getLifecycleFlags());
 
                 entity.updateState(newState, getVersion());
@@ -229,35 +229,50 @@ public abstract class Transaction<I,
             } catch (ConstraintViolationThrowable exception) {  /* Could only happen if the state
                                                                    has been injected not using
                                                                    the builder setters. */
-                final InvalidEntityStateException invalidStateException = of(builder, exception);
-
-                @SuppressWarnings("unchecked")  // OK, the state is received from the typed builder.
-                final S invalidState = (S) invalidStateException.getEntityState();
-                watcher.onCommitFail(invalidStateException, getEntity(),
-                                           invalidState, getVersion(), getLifecycleFlags());
+                final InvalidEntityStateException invalidStateException = of(exception);
+                rollback(invalidStateException);
 
                 throw invalidStateException;
             } finally {
-                afterCommit();
+                releaseTx();
             }
         } else {
 
             // The state isn't modified, but other attributes may have been modified.
-            watcher.onBeforeCommit(getEntity(), getEntity().getState(),
+            listener.onBeforeCommit(getEntity(), getEntity().getState(),
                                          getVersion(), getLifecycleFlags());
             commitAttributeChanges();
-            afterCommit();
+            releaseTx();
         }
     }
 
-    private static InvalidEntityStateException of(ValidatingBuilder builder,
-                                                  ConstraintViolationThrowable exception) {
-        final AbstractValidatingBuilder abstractBuilder = (AbstractValidatingBuilder) builder;
-        final Message invalidState = abstractBuilder.internalBuild();
+    /**
+     * Cancels the changes made within this transaction and removes the injected transaction object
+     * from the enclosed entity.
+     *
+     * @param cause the reason of the rollback
+     */
+    void rollback(Exception cause) {
+        final S currentState = currentBuilderState();
+        getListener().onTransactionFailed(cause, getEntity(), currentState,
+                                          getVersion(), getLifecycleFlags());
+        this.active = false;
+        entity.releaseTransaction();
+    }
+
+    private InvalidEntityStateException of(ConstraintViolationThrowable exception) {
+        final Message invalidState = currentBuilderState();
         return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }
 
-    private void afterCommit() {
+    private S currentBuilderState() {
+        @SuppressWarnings("unchecked")  // OK, as `AbstractValidatingBuilder` is the only subclass.
+        final AbstractValidatingBuilder<S, ?> abstractBuilder =
+                (AbstractValidatingBuilder<S, ?>) builder;
+        return abstractBuilder.internalBuild();
+    }
+
+    private void releaseTx() {
         this.active = false;
         entity.releaseTransaction();
     }
@@ -279,9 +294,8 @@ public abstract class Transaction<I,
      * Creates a new {@linkplain Phase transaction phase} for the given
      * {@code eventMessage} and {@code context} and propagates the phase.
      *
-     * <p>In case an exception is thrown during the phase propagation,
-     * {@linkplain TransactionWatcher#phaseFailed(Exception, Phase, Iterable) informs
-     * the watcher} and potentially stops the transaction execution upon the watcher decision.
+     * <p>If case of an exception, the {@linkplain #rollback(Exception) transaction rollback}
+     * is performed.
      *
      * @param eventMessage the message of an event to apply
      * @param context      the context of an event to apply
@@ -291,29 +305,22 @@ public abstract class Transaction<I,
     Transaction<I, E, S, B> apply(Message eventMessage,
                                   EventContext context) {
         final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
-        getWatcher().onBeforePhase(phase);
+        getListener().onBeforePhase(phase);
 
         Phase<I, E, S, B> appliedPhase = null;
         try {
             appliedPhase = phase.propagate();
         } catch (InvocationTargetException e) {
-            final Optional<RuntimeException> callbackResult =
-                    getWatcher().phaseFailed(e, phase, getPhases());
-            throwIfPresent(callbackResult);
+            rollback(e);
+            throw illegalStateWithCauseOf(e);
+        } finally {
+            final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
+            phases.add(phaseToAdd);
+
+            getListener().onAfterPhase(phaseToAdd);
         }
 
-        final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
-        phases.add(phaseToAdd);
-
-        getWatcher().onAfterPhase(phaseToAdd);
         return this;
-    }
-
-    @SuppressWarnings({"OptionalUsedAsFieldOrParameterType", "ProhibitedExceptionThrown"})
-    private static void throwIfPresent(Optional<RuntimeException> callbackResult) {
-        if (callbackResult.isPresent()) {
-            throw callbackResult.get();
-        }
     }
 
     /**
@@ -384,15 +391,14 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Obtains an instance of the {@code TransactionWatcher} for this transaction.
+     * Obtains an instance of the {@code TransactionListener} for this transaction.
      *
-     * <p>By default, the returned watcher {@linkplain SilentWitness
-     * does nothing}.
+     * <p>By default, the returned listener {@linkplain SilentWitness does nothing}.
      *
-     * <p>Descendant classes may override this method to specify a custom watcher implementation.
+     * <p>Descendant classes may override this method to specify a custom listener implementation.
      */
-    protected TransactionWatcher<I, E, S, B> getWatcher() {
-        return defaultWatcher;
+    protected TransactionListener<I, E, S, B> getListener() {
+        return defaultListener;
     };
 
     public void setArchived(boolean archived) {

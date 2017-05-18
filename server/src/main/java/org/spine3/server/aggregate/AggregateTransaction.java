@@ -71,6 +71,7 @@ class AggregateTransaction<I,
      * @param entity the entity to start the transaction for.
      * @return the new transaction instance
      */
+    @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction start(Aggregate entity) {
         final AggregateTransaction tx = new AggregateTransaction(entity);
         return tx;
@@ -89,7 +90,7 @@ class AggregateTransaction<I,
      * @param version the starting version to set
      * @return the new transaction instance
      */
-    //TODO:5/15/17:alex.tymchenko: try to deal with the warnings.
+    @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
     static AggregateTransaction startWith(Aggregate entity, Message state, Version version) {
         final AggregateTransaction tx = new AggregateTransaction(entity, state, version);
         return tx;
