@@ -19,18 +19,31 @@
  */
 package org.spine3.server.entity;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.spine3.base.Event;
+import org.spine3.base.Version;
 import org.spine3.test.TestEventFactory;
+import org.spine3.test.Tests;
+import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Tests.newUuidValue;
 
 /**
  * @author Alex Tymchenko
@@ -42,6 +55,11 @@ public class EventPlayingEntityShould {
 
     protected EventPlayingEntity getEntity() {
         return new EpeEntity(1L);
+    }
+
+    @Test
+    public void have_private_ctor_for_TypeInfo() {
+        assertHasPrivateParameterlessCtor(EventPlayingEntity.TypeInfo.class);
     }
 
     @Test
@@ -135,6 +153,68 @@ public class EventPlayingEntityShould {
         getEntity().play(newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance())));
     }
 
+    @Test
+    public void delegate_applying_events_to_tx_when_playing() {
+        final EventPlayingEntity entity = entityWithActiveTx(false);
+        final Transaction txMock = entity.getTransaction();
+        assertNotNull(txMock);
+        final Event firstEvent = eventFactory.createEvent(Tests.newUuidValue());
+        final Event secondEvent = eventFactory.createEvent(Tests.newUuidValue());
+
+        entity.play(newArrayList(firstEvent, secondEvent));
+
+        verifyEventApplied(txMock, firstEvent);
+        verifyEventApplied(txMock, secondEvent);
+    }
+
+    private static void verifyEventApplied(Transaction txMock, Event event) {
+        final Message actualMessage = unpack(event.getMessage());
+        verify(txMock).apply(eq(actualMessage),
+                             eq(event.getContext()));
+    }
+
+    @Test
+    public void return_tx_lifecycleFlags_if_tx_is_active() {
+        final EventPlayingEntity entity = entityWithInactiveTx();
+        final LifecycleFlags originalFlags = entity.getLifecycleFlags();
+
+        final LifecycleFlags modifiedFlags = originalFlags.toBuilder()
+                                                          .setDeleted(true)
+                                                          .build();
+
+        assertNotEquals(originalFlags, modifiedFlags);
+
+        final Transaction txMock = entity.getTransaction();
+        assertNotNull(txMock);
+        when(txMock.isActive()).thenReturn(true);
+        when(txMock.getLifecycleFlags()).thenReturn(modifiedFlags);
+
+        final LifecycleFlags actual = entity.getLifecycleFlags();
+        assertEquals(modifiedFlags, actual);
+    }
+
+    @Test
+    public void return_non_null_builder_from_state() {
+        final ValidatingBuilder builder = getEntity().builderFromState();
+        assertNotNull(builder);
+    }
+
+    @Test
+    public void return_builder_reflecting_current_state() {
+        final EventPlayingEntity entity = getEntity();
+        final Message originalState = entity.builderFromState()
+                                            .build();
+
+        final StringValue newState = newUuidValue();
+        assertNotEquals(originalState, newState);
+
+        TestTransaction.injectState(entity, newState, Version.getDefaultInstance());
+        final Message modifiedState = entity.builderFromState()
+                                            .build();
+
+        assertEquals(newState, modifiedState);
+    }
+
     @SuppressWarnings("unchecked")  // OK for the test code.
     private EventPlayingEntity entityWithInactiveTx() {
         final EventPlayingEntity entity = getEntity();
@@ -148,7 +228,7 @@ public class EventPlayingEntityShould {
     @SuppressWarnings("unchecked")  // OK for the test.
     private EventPlayingEntity entityWithActiveTx(boolean txChanged) {
         final EventPlayingEntity entity = getEntity();
-        final Transaction tx = mock(Transaction.class);
+        final Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
 
