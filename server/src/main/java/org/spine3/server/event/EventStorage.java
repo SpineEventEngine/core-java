@@ -23,16 +23,26 @@ package org.spine3.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
+import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.StorageFactory;
+import org.spine3.server.storage.memory.InMemoryEventStorage;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -57,10 +67,32 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
                 }
             };
 
+    @Override
+    protected org.spine3.server.storage.EventStorage createStorage(StorageFactory factory) {
+        final RecordStorage<EventId> recordStorage = super.createStorage(factory);
+        final org.spine3.server.storage.EventStorage storage =
+                factory.createEventStorage(recordStorage);
+        return storage;
+    }
+
+    @Nonnull
+    @Override
+    protected org.spine3.server.storage.EventStorage recordStorage() {
+        return (org.spine3.server.storage.EventStorage) super.recordStorage();
+    }
+
     Iterator<Event> iterator(EventStreamQuery query) {
-        final Iterator<EventEntity> filtered = iterator(createEntityFilter(query));
-        final List<EventEntity> entities = Lists.newArrayList(filtered);
-        Collections.sort(entities, EventEntity.comparator());
+        final org.spine3.server.storage.EventStorage storage = recordStorage();
+        final Map<EventId, EntityRecord> records = storage.readAll(query);
+        Collection<EventEntity> entities = transform(records.entrySet(),
+                                                           storageRecordToEntity());
+        // TODO:2017-05-19:dmytro.dashenkov: Remove after the Entity Column approach is implemented.
+        if (storage instanceof InMemoryEventStorage) {
+            entities = Collections2.filter(entities, createEntityFilter(query));
+        }
+
+        final List<EventEntity> entityList = newArrayList(entities);
+        Collections.sort(entityList, EventEntity.comparator());
         final Iterator<Event> result = Iterators.transform(entities.iterator(), getEventFunc());
         return result;
     }

@@ -20,6 +20,7 @@
 
 package org.spine3.server.event;
 
+import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
@@ -32,7 +33,8 @@ import java.util.Comparator;
  *
  * @author Alexander Yevsyukov
  */
-class EventEntity extends AbstractEntity<EventId, Event> {
+@Internal
+public class EventEntity extends AbstractEntity<EventId, Event> {
 
     /**
      * Compares event entities by timestamps of events.

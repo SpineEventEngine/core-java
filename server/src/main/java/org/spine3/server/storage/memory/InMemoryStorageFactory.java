@@ -20,12 +20,14 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.base.EventId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
+import org.spine3.server.storage.EventStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 
@@ -91,6 +93,12 @@ public class InMemoryStorageFactory implements StorageFactory {
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(multitenant);
         return InMemoryProjectionStorage.newInstance(entityStorage);
+    }
+
+    @Override
+    public EventStorage createEventStorage(RecordStorage<EventId> delegate) {
+        final EventStorage eventStorage = new InMemoryEventStorage(delegate);
+        return eventStorage;
     }
 
     @Override
