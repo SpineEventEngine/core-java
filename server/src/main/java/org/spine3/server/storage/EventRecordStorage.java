@@ -37,7 +37,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * A {@link RecordStorage} for events.
  *
  * @author Dmytro Dashenkov
- * @deprecated as a part of hotfix; will be removed in the nearest future
+ * @deprecated as a temporal solution before the {@link EventStreamQuery} processing is implemented
+ * using Entity Columns feature
  */
 @Deprecated
 public abstract class EventRecordStorage extends RecordStorage<EventId> {
