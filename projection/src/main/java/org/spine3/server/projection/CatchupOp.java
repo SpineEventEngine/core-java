@@ -106,27 +106,25 @@ public class CatchupOp<I> {
         // Apply events to projections.
         // 1. Load projection, apply events.
         // 2. Take as a side output the timestamp of the last event.
-
-
         final TupleTag<KV<I, EntityRecord>> recordsTag = new TupleTag<KV<I, EntityRecord>>(){};
         final TupleTag<Timestamp> timestampTag = new TupleTag<Timestamp>(){};
 
+        final ProjectionRepository.BeamIO<I, ?, ?> repositoryIO = repository.getIO();
         final PCollectionTuple collectionTuple =
                 groupped.apply("ApplyEvents",
-                               ParDo.of(new ApplyEvents<>(repository.getIO()
-                                                                    .loadOrCreate(tenantId),
+                               ParDo.of(new ApplyEvents<>(repositoryIO.loadOrCreate(tenantId),
                                                           timestampTag))
                                     .withOutputTags(recordsTag, TupleTagList.of(timestampTag)));
 
         // Store projections.
         final PCollection<KV<I, EntityRecord>> records = collectionTuple.get(recordsTag);
-        //TODO:2017-05-15:alexander.yevsyukov: Write records.
+        records.apply("WriteRecords", repositoryIO.write(tenantId));
 
-        // Sort last timestamps of last events and #writeLastHandledEventTime().
+        // Sort last timestamps of last events and write last handled event time.
         final PCollection<Timestamp> timestamps = collectionTuple.get(timestampTag);
         final PCollection<Timestamp> lastTimestamp = timestamps.apply("MaxTimestamp",
                 Max.<Timestamp, TimestampComparator>globally(timestampComparator));
-        //TODO:2017-05-18:alexander.yevsyukov: Write last timestamp.
+        lastTimestamp.apply(repositoryIO.writeLastHandledEventTime(tenantId));
 
         return pipeline;
     }

@@ -24,8 +24,10 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
+import org.spine3.server.projection.ProjectionStorageIO;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.users.TenantId;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -115,7 +117,49 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
      ******************/
 
     @Override
-    public RecordStorageIO<I> getIO() {
-        return recordStorage.getIO();
+    public ProjectionStorageIO<I> getIO() {
+        return new InMemProjectionStorageIO<>(this, recordStorage.getIO());
+    }
+
+    private static class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
+
+        private final InMemoryProjectionStorage<I> parent;
+        private final RecordStorageIO<I> storageIO;
+
+        private InMemProjectionStorageIO(
+                InMemoryProjectionStorage<I> parent,
+                RecordStorageIO<I> storageIO) {
+            this.parent = parent;
+            this.storageIO = storageIO;
+        }
+
+        @Override
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+            // OK for test-only in-memory implementation.
+        public WriteLastHandledEventTimeFn<I> writeLastHandledEventTimeFn(TenantId tenantId) {
+            return new WriteLastHandledEventTimeFn<I>(tenantId) {
+                private static final long serialVersionUID = 0L;
+
+                @Override
+                protected void doWrite(Timestamp timestamp) {
+                    parent.writeLastHandledEventTime(timestamp);
+                }
+            };
+        }
+
+        @Override
+        public FindByQuery<I> findFn(TenantId tenantId) {
+            return storageIO.findFn(tenantId);
+        }
+
+        @Override
+        public Read<I> read(TenantId tenantId, Query<I> query) {
+            return storageIO.read(tenantId, query);
+        }
+
+        @Override
+        public WriteFn<I> writeFn(TenantId tenantId) {
+            return storageIO.writeFn(tenantId);
+        }
     }
 }

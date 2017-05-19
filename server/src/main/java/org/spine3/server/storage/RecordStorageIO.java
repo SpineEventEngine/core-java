@@ -27,13 +27,16 @@ import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PDone;
 import org.joda.time.Instant;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
@@ -83,6 +86,15 @@ public abstract class RecordStorageIO<I> {
      * @param query    the query to obtain records
      */
     public abstract Read<I> read(TenantId tenantId, Query<I> query);
+
+    public Write<I> write(TenantId tenantId) {
+        return new Write<>(writeFn(tenantId));
+    }
+
+    /**
+     * Obtains a {@link DoFn} that writes an {@code EntityRecord} into the storage.
+     */
+    public abstract WriteFn<I> writeFn(TenantId tenantId);
 
     /**
      * Abstract base for functions loading query results.
@@ -221,5 +233,51 @@ public abstract class RecordStorageIO<I> {
             final EntityRecord record = c.element();
             return AnyPacker.unpack(record.getState());
         }
+    }
+
+    /**
+     * Writes entity records into the storage.
+     */
+    public static class Write<I> extends PTransform<PCollection<KV<I, EntityRecord>>, PDone> {
+
+        private static final long serialVersionUID = 0L;
+        private final WriteFn<I> fn;
+
+        private Write(WriteFn<I> fn) {
+            this.fn = fn;
+        }
+
+        @Override
+        public PDone expand(PCollection<KV<I, EntityRecord>> input) {
+            input.apply(ParDo.of(fn));
+            return PDone.in(input.getPipeline());
+        }
+    }
+
+    /**
+     * A {@link DoFn} that writes {@code EnityRecord} into the storage.
+     */
+    public abstract static class WriteFn<I> extends DoFn<KV<I, EntityRecord>, Void> {
+
+        private static final long serialVersionUID = 0L;
+        private final TenantId tenantId;
+
+        protected WriteFn(TenantId tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final KV<I, EntityRecord> kv = c.element();
+            final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
+                @Override
+                public void run() {
+                    doWrite(kv.getKey(), kv.getValue());
+                }
+            };
+            op.execute();
+        }
+
+        protected abstract void doWrite(I key, EntityRecord value);
     }
 }

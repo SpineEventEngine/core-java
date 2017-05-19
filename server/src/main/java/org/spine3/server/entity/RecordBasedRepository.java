@@ -384,14 +384,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         private final RecordStorageIO<I> storageIO;
         private final EntityStorageConverter<I, E, S> converter;
 
-        private BeamIO(RecordStorageIO<I> storageIO,
+        protected BeamIO(RecordStorageIO<I> storageIO,
                        EntityStorageConverter<I, E, S> converter) {
             this.storageIO = storageIO;
             this.converter = converter;
         }
 
+        protected RecordStorageIO<I> storageIO() {
+            return storageIO;
+        }
+
         public ReadFunction<I, E, S> loadOrCreate(TenantId tenantId) {
             return new LoadOrCreate<>(tenantId, storageIO, converter);
+        }
+
+        public RecordStorageIO.Write<I> write(TenantId tenantId) {
+            return storageIO.write(tenantId);
         }
 
         public interface ReadFunction<I, E extends Entity<I, S>, S extends Message>

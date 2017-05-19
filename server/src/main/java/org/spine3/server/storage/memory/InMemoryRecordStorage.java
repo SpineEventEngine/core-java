@@ -165,6 +165,19 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
             return new AsTransform<>(tenantId, query, records.build());
         }
 
+        @Override
+        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
+            /* OK for in-memory test-only implementation. */
+        public WriteFn<I> writeFn(TenantId tenantId) {
+            return new WriteFn<I>(tenantId) {
+                private static final long serialVersionUID = 0L;
+                @Override
+                protected void doWrite(I key, EntityRecord value) {
+                    storage.writeRecord(key, EntityRecordWithColumns.of(value));
+                }
+            };
+        }
+
         private ImmutableMap<I, EntityRecord> readAll(TenantId tenantId) {
             final TenantAwareFunction0<ImmutableMap<I, EntityRecord>> func =
                     new ReadAllRecordsFunc<>(tenantId, storage);

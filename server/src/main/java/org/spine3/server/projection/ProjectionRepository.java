@@ -27,6 +27,10 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
+import org.apache.beam.sdk.transforms.PTransform;
+import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.values.PCollection;
+import org.apache.beam.sdk.values.PDone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
@@ -35,11 +39,13 @@ import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityStorageConverter;
 import org.spine3.server.entity.EventDispatchingRepository;
+import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.event.EventFilter;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.projection.ProjectionStorageIO.WriteLastHandledEventTimeFn;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.Storage;
@@ -47,6 +53,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.AllTenantOperation;
 import org.spine3.type.EventClass;
 import org.spine3.type.TypeName;
+import org.spine3.users.TenantId;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -559,6 +566,46 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             repository.projectionStorage()
                       .writeLastHandledEventTime(lastHandledEventTime);
             repository.completeCatchUp();
+        }
+    }
+
+    /*
+     * Beam support
+     *************************/
+
+    @Override
+    public BeamIO<I, P, S> getIO() {
+        return new BeamIO<>(projectionStorage().getIO(), entityConverter());
+    }
+
+    public static class BeamIO<I, P extends Projection<I, S>, S extends Message>
+            extends RecordBasedRepository.BeamIO<I, P, S> {
+
+        private BeamIO(ProjectionStorageIO<I> storageIO,
+                       EntityStorageConverter<I, P, S> converter) {
+            super(storageIO, converter);
+        }
+
+        public WriteLastHandledEventTime<I> writeLastHandledEventTime(TenantId tenantId) {
+            return new WriteLastHandledEventTime<>(
+                    ((ProjectionStorageIO<I>) storageIO()).writeLastHandledEventTimeFn(tenantId));
+        }
+
+        public static class WriteLastHandledEventTime<I>
+                extends PTransform<PCollection<Timestamp>, PDone> {
+
+            private static final long serialVersionUID = 0L;
+            private final WriteLastHandledEventTimeFn<I> fn;
+
+            public WriteLastHandledEventTime(WriteLastHandledEventTimeFn<I> fn) {
+                this.fn = fn;
+            }
+
+            @Override
+            public PDone expand(PCollection<Timestamp> input) {
+                input.apply(ParDo.of(fn));
+                return PDone.in(input.getPipeline());
+            }
         }
     }
 }
