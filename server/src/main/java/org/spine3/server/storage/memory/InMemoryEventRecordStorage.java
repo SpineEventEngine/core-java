@@ -23,7 +23,7 @@ package org.spine3.server.storage.memory;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
 
 import java.util.Map;
@@ -31,9 +31,9 @@ import java.util.Map;
 /**
  * {@inheritDoc}
  */
-public class InMemoryEventStorage extends EventStorage {
+public class InMemoryEventRecordStorage extends EventRecordStorage {
 
-    protected InMemoryEventStorage(RecordStorage<EventId> storage) {
+    protected InMemoryEventRecordStorage(RecordStorage<EventId> storage) {
         super(storage);
     }
 

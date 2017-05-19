@@ -28,6 +28,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 
@@ -67,21 +68,21 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
             };
 
     @Override
-    protected org.spine3.server.storage.EventStorage createStorage(StorageFactory factory) {
+    protected EventRecordStorage createStorage(StorageFactory factory) {
         final RecordStorage<EventId> recordStorage = super.createStorage(factory);
-        final org.spine3.server.storage.EventStorage storage =
+        final EventRecordStorage storage =
                 factory.createEventStorage(recordStorage);
         return storage;
     }
 
     @Nonnull
     @Override
-    protected org.spine3.server.storage.EventStorage recordStorage() {
-        return (org.spine3.server.storage.EventStorage) super.recordStorage();
+    protected EventRecordStorage recordStorage() {
+        return (EventRecordStorage) super.recordStorage();
     }
 
     Iterator<Event> iterator(EventStreamQuery query) {
-        final org.spine3.server.storage.EventStorage storage = recordStorage();
+        final EventRecordStorage storage = recordStorage();
         final Map<EventId, EntityRecord> records = storage.readAll(query);
         final Collection<EventEntity> entities = transform(records.entrySet(),
                                                            storageRecordToEntity());

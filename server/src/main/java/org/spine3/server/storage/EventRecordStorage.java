@@ -40,11 +40,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @deprecated as a part of hotfix; will be removed in the nearest future
  */
 @Deprecated
-public abstract class EventStorage extends RecordStorage<EventId> {
+public abstract class EventRecordStorage extends RecordStorage<EventId> {
 
     private final RecordStorage<EventId> delegate;
 
-    protected EventStorage(RecordStorage<EventId> storage) {
+    protected EventRecordStorage(RecordStorage<EventId> storage) {
         super(storage.isMultitenant());
         this.delegate = storage;
     }

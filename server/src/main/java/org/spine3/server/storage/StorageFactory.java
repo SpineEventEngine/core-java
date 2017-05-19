@@ -93,7 +93,7 @@ public interface StorageFactory extends AutoCloseable {
      * @deprecated acts as a hotfix; will be removed in the future versions
      */
     @Deprecated
-    EventStorage createEventStorage(RecordStorage<EventId> delegate);
+    EventRecordStorage createEventStorage(RecordStorage<EventId> delegate);
 
     /**
      * Creates a single-tenant version of the factory.

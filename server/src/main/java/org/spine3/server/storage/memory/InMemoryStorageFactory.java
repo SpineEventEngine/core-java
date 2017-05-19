@@ -27,7 +27,7 @@ import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
-import org.spine3.server.storage.EventStorage;
+import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 
@@ -96,9 +96,9 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public EventStorage createEventStorage(RecordStorage<EventId> delegate) {
-        final EventStorage eventStorage = new InMemoryEventStorage(delegate);
-        return eventStorage;
+    public EventRecordStorage createEventStorage(RecordStorage<EventId> delegate) {
+        final EventRecordStorage eventRecordStorage = new InMemoryEventRecordStorage(delegate);
+        return eventRecordStorage;
     }
 
     @Override
