@@ -20,6 +20,8 @@
 
 package org.spine3.validate;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
@@ -202,5 +204,33 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         if (!violations.isEmpty()) {
             throw new ConstraintViolationThrowable(violations);
         }
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof AbstractValidatingBuilder)) {
+            return false;
+        }
+        AbstractValidatingBuilder<?, ?> that = (AbstractValidatingBuilder<?, ?>) o;
+        return Objects.equal(messageBuilder, that.messageBuilder) &&
+                Objects.equal(messageClass, that.messageClass) &&
+                Objects.equal(originalState, that.originalState);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(messageBuilder, messageClass, originalState);
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("messageBuilder", messageBuilder)
+                          .add("messageClass", messageClass)
+                          .add("originalState", originalState)
+                          .toString();
     }
 }

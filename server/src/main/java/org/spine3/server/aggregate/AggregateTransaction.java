@@ -19,10 +19,12 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
+import org.spine3.server.entity.TransactionListener;
 import org.spine3.validate.ValidatingBuilder;
 
 import javax.annotation.Nullable;
@@ -44,12 +46,28 @@ class AggregateTransaction<I,
                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
-    private AggregateTransaction(Aggregate<I, S, B> entity) {
+    @Nullable
+    private TransactionListener<I, Aggregate<I, S, B>, S, B > listener;
+
+    @VisibleForTesting
+    AggregateTransaction(Aggregate<I, S, B> entity) {
         super(entity);
     }
 
-    private AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version) {
+    @VisibleForTesting
+    AggregateTransaction(Aggregate<I, S, B> entity,
+                         TransactionListener<I, Aggregate<I, S, B>, S, B> listener) {
+        super(entity, listener);
+    }
+
+    @VisibleForTesting
+    AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version) {
         super(entity, state, version);
+    }
+
+    private AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version,
+                         TransactionListener<I, Aggregate<I, S, B>, S, B> listener) {
+        super(entity, state, version, listener);
     }
 
     @Override

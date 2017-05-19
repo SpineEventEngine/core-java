@@ -26,6 +26,7 @@ import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.TransactionListener.SilentWitness;
+import org.spine3.util.Exceptions;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -71,7 +72,7 @@ public abstract class Transaction<I,
                                   S extends Message,
                                   B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
-    private final TransactionListener<I, E, S, B> defaultListener = new SilentWitness<>();
+    private final TransactionListener<I, E, S, B> listener;
 
     /**
      * The entity, which state and attributes are modified in this transaction.
@@ -138,16 +139,34 @@ public abstract class Transaction<I,
      *
      * <p>The entity state and attributes are set as starting values for this transaction.
      *
-     * @param entity the entity to create the transaction for
+     * @param entity   the entity to create the transaction for
+     * @param listener the transaction listener
+     * @see TransactionListener
      */
-    protected Transaction(E entity) {
+    protected Transaction(E entity, TransactionListener<I, E, S, B> listener) {
+        checkNotNull(entity);
+        checkNotNull(listener);
+
         this.entity = entity;
         this.builder = entity.builderFromState();
         this.version = entity.getVersion();
         this.lifecycleFlags = entity.getLifecycleFlags();
         this.active = true;
+        this.listener = listener;
 
         injectTo(entity);
+    }
+
+    /**
+     * Acts similar to
+     * {@linkplain Transaction#Transaction(EventPlayingEntity, TransactionListener)
+     * Transaction(EventPlayingEntity, TransactionListener)}, but passes an instance of
+     * {@linkplain SilentWitness SilentWitness} as a listener.
+     *
+     * @param entity the entity to create the transaction for.
+     */
+    protected Transaction(E entity) {
+        this(entity, new SilentWitness<I, E, S, B>());
     }
 
     /**
@@ -158,13 +177,29 @@ public abstract class Transaction<I,
      * <p>Note, that the given {@code state} and {@code version} are applied to the actual entity
      * upon commit.
      *
+     * @param entity   the target entity to modify within this transaction
+     * @param state    the entity state to set
+     * @param version  the entity version to set
+     * @param listener the transaction listener
+     */
+    protected Transaction(E entity, S state, Version version,
+                          TransactionListener<I, E, S, B> listener) {
+        this(entity);
+        initAll(state, version);
+    }
+
+    /**
+     * Acts similar to {@linkplain Transaction#Transaction(EventPlayingEntity,
+     * Message, Version, TransactionListener) an overloaded ctor}
+     * an overloaded ctor}, but passes an instance of
+     * {@linkplain SilentWitness SilentWitness} as a listener.
+     *
      * @param entity  the target entity to modify within this transaction
      * @param state   the entity state to set
      * @param version the entity version to set
      */
     protected Transaction(E entity, S state, Version version) {
-        this(entity);
-        initAll(state, version);
+        this(entity, state, version, new SilentWitness<I, E, S, B>());
     }
 
     /**
@@ -195,11 +230,13 @@ public abstract class Transaction<I,
         return lifecycleFlags;
     }
 
-    private E getEntity() {
+    @VisibleForTesting
+    E getEntity() {
         return entity;
     }
 
-    private Version getVersion() {
+    @VisibleForTesting
+    Version getVersion() {
         return version;
     }
 
@@ -211,8 +248,9 @@ public abstract class Transaction<I,
      * Applies all the outstanding modifications to the enclosed entity.
      *
      * @throws InvalidEntityStateException in case the new entity state is not valid
+     * @throws IllegalStateException       in case of a generic failure
      */
-    protected void commit()  {
+    protected void commit() throws InvalidEntityStateException, IllegalStateException {
 
         final TransactionListener<I, E, S, B> listener = getListener();
         final B builder = getBuilder();
@@ -235,6 +273,9 @@ public abstract class Transaction<I,
                 rollback(invalidStateException);
 
                 throw invalidStateException;
+            } catch (RuntimeException genericException) {
+                rollback(genericException);
+                throw Exceptions.illegalStateWithCauseOf(genericException);
             } finally {
                 releaseTx();
             }
@@ -254,12 +295,45 @@ public abstract class Transaction<I,
      *
      * @param cause the reason of the rollback
      */
-    void rollback(Exception cause) {
+    void rollback(Throwable cause) {
         final S currentState = currentBuilderState();
-        getListener().onTransactionFailed(cause, getEntity(), currentState,
+        final TransactionListener<I, E, S, B> listener = getListener();
+        listener.onTransactionFailed(cause, getEntity(), currentState,
                                           getVersion(), getLifecycleFlags());
         this.active = false;
         entity.releaseTransaction();
+    }
+
+    /**
+     * Creates a new {@linkplain Phase transaction phase} for the given
+     * {@code eventMessage} and {@code context} and propagates the phase.
+     *
+     * <p>If case of an exception, the {@linkplain #rollback(Throwable) transaction rollback}
+     * is performed.
+     *
+     * @param eventMessage the message of an event to apply
+     * @param context      the context of an event to apply
+     * @return this instance of transaction
+     * @see Phase#apply(Message, EventContext)
+     */
+    Transaction<I, E, S, B> apply(Message eventMessage,
+                                  EventContext context) {
+        final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
+
+        Phase<I, E, S, B> appliedPhase = null;
+        try {
+            appliedPhase = phase.propagate();
+        } catch (InvocationTargetException e) {
+            rollback(e);
+            throw illegalStateWithCauseOf(e);
+        } finally {
+            final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
+            phases.add(phaseToAdd);
+
+            getListener().onAfterPhase(phaseToAdd);
+        }
+
+        return this;
     }
 
     private InvalidEntityStateException of(ConstraintViolationThrowable exception) {
@@ -284,46 +358,11 @@ public abstract class Transaction<I,
         entity.updateStateChanged();
     }
 
-    //TODO:5/15/17:alex.tymchenko: make it work only
-    // if the state was empty before and its version was zero.
     void initAll(S state, Version version) {
         final B builder = getBuilder();
         builder.clear();
         builder.mergeFrom(state);
         initVersion(version);
-    }
-
-    /**
-     * Creates a new {@linkplain Phase transaction phase} for the given
-     * {@code eventMessage} and {@code context} and propagates the phase.
-     *
-     * <p>If case of an exception, the {@linkplain #rollback(Exception) transaction rollback}
-     * is performed.
-     *
-     * @param eventMessage the message of an event to apply
-     * @param context      the context of an event to apply
-     * @return this instance of transaction
-     * @see Phase#apply(Message, EventContext)
-     */
-    Transaction<I, E, S, B> apply(Message eventMessage,
-                                  EventContext context) {
-        final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
-        getListener().onBeforePhase(phase);
-
-        Phase<I, E, S, B> appliedPhase = null;
-        try {
-            appliedPhase = phase.propagate();
-        } catch (InvocationTargetException e) {
-            rollback(e);
-            throw illegalStateWithCauseOf(e);
-        } finally {
-            final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
-            phases.add(phaseToAdd);
-
-            getListener().onAfterPhase(phaseToAdd);
-        }
-
-        return this;
     }
 
     /**
@@ -400,8 +439,8 @@ public abstract class Transaction<I,
      *
      * <p>Descendant classes may override this method to specify a custom listener implementation.
      */
-    protected TransactionListener<I, E, S, B> getListener() {
-        return defaultListener;
+    private TransactionListener<I, E, S, B> getListener() {
+        return listener;
     };
 
     public void setArchived(boolean archived) {

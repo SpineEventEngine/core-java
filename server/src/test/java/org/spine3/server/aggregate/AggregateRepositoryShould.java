@@ -223,7 +223,7 @@ public class AggregateRepositoryShould {
     public void mark_aggregate_archived() {
         final ProjectAggregate aggregate = createAndStoreAggregate();
 
-        final AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         // archive the aggregate.
         aggregate.setArchived(true);
         tx.commit();
@@ -237,7 +237,7 @@ public class AggregateRepositoryShould {
     public void mark_aggregate_deleted() {
         final ProjectAggregate aggregate = createAndStoreAggregate();
 
-        final AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(aggregate);
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.setDeleted(true);
         tx.commit();
 

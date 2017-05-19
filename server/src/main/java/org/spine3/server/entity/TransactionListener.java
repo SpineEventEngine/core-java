@@ -39,13 +39,6 @@ public interface TransactionListener<I,
                                     B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
-     * A callback invoked before applying a {@linkplain Phase transaction phase} .
-     *
-     * @param phase the phase which will be applied after this callback is invoked
-     */
-    void onBeforePhase(Phase<I, E, S, B> phase);
-
-    /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
      *
      * <p>This callback is invoked for both successfully applied and failed phases.
@@ -67,13 +60,13 @@ public interface TransactionListener<I,
     /**
      * A callback invoked if the commit has failed.
      *
-     * @param e              a {@code Throwable} caused the commit failure
+     * @param t              a {@code Throwable} caused the commit failure
      * @param entity         an entity modified within the transaction
      * @param state          a state to set to the entity during the commit
      * @param version        a version to set to the entity during the commit
      * @param lifecycleFlags a lifecycle flags to set to the entity during the commit
      */
-    void onTransactionFailed(Exception e, E entity, S state,
+    void onTransactionFailed(Throwable t, E entity, S state,
                              Version version, LifecycleFlags lifecycleFlags);
 
     /**
@@ -87,11 +80,6 @@ public interface TransactionListener<I,
             implements TransactionListener<I, E, S, B> {
 
         @Override
-        public void onBeforePhase(Phase<I, E, S, B> failedPhase) {
-            // do nothing.
-        }
-
-        @Override
         public void onAfterPhase(Phase<I, E, S, B> phase) {
             // do nothing.
         }
@@ -103,7 +91,7 @@ public interface TransactionListener<I,
         }
 
         @Override
-        public void onTransactionFailed(Exception e, E entity, S state,
+        public void onTransactionFailed(Throwable t, E entity, S state,
                                         Version version, LifecycleFlags lifecycleFlags) {
             // do nothing.
         }

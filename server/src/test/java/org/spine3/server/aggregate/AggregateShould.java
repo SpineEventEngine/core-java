@@ -375,7 +375,7 @@ public class AggregateShould {
 
         final TestAggregate anotherAggregate = newAggregate(aggregate.getId());
 
-        final AggregateTransaction<?, ?, ?> tx = AggregateTransaction.start(anotherAggregate);
+        final AggregateTransaction tx = AggregateTransaction.start(anotherAggregate);
         anotherAggregate.restore(snapshotNewProject);
         tx.commit();
 
