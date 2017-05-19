@@ -19,6 +19,7 @@
  */
 package org.spine3.server.entity;
 
+import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
@@ -28,6 +29,7 @@ import org.spine3.server.command.EventFactory;
 import org.spine3.server.entity.Transaction.Phase;
 import org.spine3.test.TestEventFactory;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.util.List;
@@ -77,6 +79,8 @@ public abstract class TransactionShould<I,
     protected abstract Message createEventMessage();
 
     protected abstract Message createEventMessageThatFailsInHandler();
+
+    protected abstract void makeThrowOnBuild(E entity, RuntimeException toThrow);
 
     @Test
     public void initialize_from_entity() {
@@ -275,8 +279,23 @@ public abstract class TransactionShould<I,
         }
     }
 
-    public void throw_InvalidEntityStateException_if_build_fails_on_commit() {
-        //TODO:5/19/17:alex.tymchenko: implement.
+    @Test(expected = InvalidEntityStateException.class)
+    public void throw_InvalidEntityStateException_if_constraints_violated_on_commit() {
+        final E entity = createEntity();
+
+        final S newState = createNewState();
+        final Version version = someVersion();
+
+        final Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
+        final ConstraintViolationThrowable toThrow = constraintViolationsEx();
+        makeThrowOnBuild(entity, toThrow);
+        tx.commit();
+    }
+
+    private ConstraintViolationThrowable constraintViolationsEx() {
+        final ConstraintViolationThrowable ex =
+                new ConstraintViolationThrowable(Lists.<ConstraintViolation>newLinkedList());
+        return ex;
     }
 
     @Test

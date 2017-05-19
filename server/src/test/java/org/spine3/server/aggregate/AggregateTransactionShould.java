@@ -30,15 +30,17 @@ import org.spine3.server.entity.TransactionListener;
 import org.spine3.server.entity.TransactionShould;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
@@ -49,9 +51,9 @@ import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
  */
 public class AggregateTransactionShould
         extends TransactionShould<ProjectId,
-        Aggregate<ProjectId, Project, ProjectValidatingBuilder>,
+        Aggregate<ProjectId, Project, AggregateTransactionShould.PatchedProjectBuilder>,
         Project,
-        ProjectValidatingBuilder> {
+        AggregateTransactionShould.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("prj-transaction-tests-01")
@@ -59,44 +61,44 @@ public class AggregateTransactionShould
 
     @Override
     protected Transaction<ProjectId,
-            Aggregate<ProjectId, Project, ProjectValidatingBuilder>,
+            Aggregate<ProjectId, Project, PatchedProjectBuilder>,
             Project,
-            ProjectValidatingBuilder>
-    createTx(Aggregate<ProjectId, Project, ProjectValidatingBuilder> entity) {
+            PatchedProjectBuilder>
+    createTx(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity) {
         return new AggregateTransaction<>(entity);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, ProjectValidatingBuilder>,
+                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
                           Project,
-                          ProjectValidatingBuilder> createTxWithState(
-            Aggregate<ProjectId, Project, ProjectValidatingBuilder> entity, Project state,
+                          PatchedProjectBuilder> createTxWithState(
+            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
             Version version) {
         return new AggregateTransaction<>(entity, state, version);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, ProjectValidatingBuilder>,
+                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
                           Project,
-                          ProjectValidatingBuilder>
-    createTxWithListener(Aggregate<ProjectId, Project, ProjectValidatingBuilder> entity,
+                          PatchedProjectBuilder>
+    createTxWithListener(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
                          TransactionListener<ProjectId,
                                              Aggregate<ProjectId,
                                                        Project,
-                                                       ProjectValidatingBuilder>,
-                                             Project, ProjectValidatingBuilder> listener) {
+                                                     PatchedProjectBuilder>,
+                                             Project, PatchedProjectBuilder> listener) {
         return new AggregateTransaction<>(entity, listener);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, ProjectValidatingBuilder> createEntity() {
+    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity() {
         return new TestAggregate(ID);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, ProjectValidatingBuilder> createEntity(
+    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity(
             List<ConstraintViolation> violations) {
         return new TestAggregate(ID, violations);
     }
@@ -111,7 +113,7 @@ public class AggregateTransactionShould
 
     @Override
     protected void checkEventReceived(
-            Aggregate<ProjectId, Project, ProjectValidatingBuilder> entity,
+            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
         final TestAggregate aggregate = (TestAggregate) entity;
@@ -130,9 +132,16 @@ public class AggregateTransactionShould
         return Given.EventMessage.taskAdded(ID);
     }
 
+    @Override
+    protected void makeThrowOnBuild(
+            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            RuntimeException toThrow) {
+        entity.getBuilder().setShouldThrow(toThrow);
+    }
+
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
     static class TestAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, PatchedProjectBuilder> {
 
         private final List<Message> receivedEvents = newLinkedList();
         private final List<ConstraintViolation> violations;
@@ -175,6 +184,41 @@ public class AggregateTransactionShould
 
         private List<Message> getReceivedEvents() {
             return ImmutableList.copyOf(receivedEvents);
+        }
+    }
+
+    /**
+     * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
+     * during the state building.
+     *
+     * <p>Should be declared {@code public} to allow accessing from the
+     * {@linkplain org.spine3.validate.ValidatingBuilders#newInstance(Class) factory method}.
+     */
+    public static class PatchedProjectBuilder
+            extends AbstractValidatingBuilder<Project, Project.Builder>{
+
+        @Nullable
+        private RuntimeException shouldThrow;
+
+        public static PatchedProjectBuilder newBuilder() {
+            return new PatchedProjectBuilder();
+        }
+
+        @Override
+        public Project build() throws ConstraintViolationThrowable {
+            if(shouldThrow != null) {
+                throw shouldThrow;
+            } else {
+                return super.build();
+            }
+        }
+
+        /**
+         * Sets an exception to throw upon {@code build()}.
+         */
+        private void setShouldThrow(RuntimeException shouldThrow) {
+            checkNotNull(shouldThrow);
+            this.shouldThrow = shouldThrow;
         }
     }
 }
