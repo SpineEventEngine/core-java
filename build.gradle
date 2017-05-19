@@ -108,6 +108,7 @@ subprojects {
     project.ext {
         sourcesRootDir = "$projectDir/src"
         generatedRootDir = "$projectDir/generated"
+        buildRootDir = "$projectDir/build"
 
         generatedJavaDir = "$generatedRootDir/main/java"
         generatedTestJavaDir = "$generatedRootDir/test/java"
@@ -272,6 +273,11 @@ subprojects {
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
         classifier "test"
+    }
+
+    task javadocJar(type: Jar) {
+        from ("$projectDir/build/docs/javadoc")
+        classifier "javadoc"
     }
 
     apply from: "${rootDir}/scripts/no-internal-javadoc.gradle"

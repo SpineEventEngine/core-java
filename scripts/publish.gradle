@@ -90,6 +90,7 @@ projectsToPublish.each {
 
                     artifact sourceJar
                     artifact testOutputJar
+                    artifact javadocJar
                 }
             }
         }
