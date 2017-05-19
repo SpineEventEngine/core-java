@@ -59,7 +59,8 @@ import static java.lang.String.format;
  *     <li>{@link Entity#getId()}
  *     <li>{@link Entity#getState()}
  *     <li>{@link Entity#getDefaultState()}
- *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags() EntityWithLifecycle.getLifecycleFlags()}
+ *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags()
+ *     EntityWithLifecycle.getLifecycleFlags()}
  *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate.getBuilder()}
  * </ul>
  *
