@@ -26,7 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.json.Json;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -35,7 +34,9 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
-import static org.spine3.protobuf.AnyPacker.unpack;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static org.spine3.client.ColumnFilters.all;
 
 /**
  * A builder for the {@link Query} instances.
@@ -95,7 +96,7 @@ public final class QueryBuilder {
     private Set<?> ids;
 
     @Nullable
-    private Set<ColumnFilter> columns;
+    private Set<AggregatingColumnFilter> columns;
 
     @Nullable
     private Set<String> fieldMask;
@@ -123,9 +124,7 @@ public final class QueryBuilder {
      */
     public QueryBuilder byId(Iterable<?> ids) {
         checkNotNull(ids);
-        this.ids = ImmutableSet.builder()
-                               .addAll(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -137,9 +136,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(Message... ids) {
-        this.ids = ImmutableSet.<Message>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -151,9 +148,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(String... ids) {
-        this.ids = ImmutableSet.<String>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -165,9 +160,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(Integer... ids) {
-        this.ids = ImmutableSet.<Integer>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -179,9 +172,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(Long... ids) {
-        this.ids = ImmutableSet.<Long>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -194,6 +185,8 @@ public final class QueryBuilder {
      * <p>The multiple parameters passed into this method are considered to be joined in
      * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches
      * all of these parameters.
+     *
+     * //TODO:2017-05-19:dmytro.dashenkov: Fix Javadoc.
      * <p>The disjunctive filters currently are not supported.
      *
      * @param predicate the {@link ColumnFilter}s to filter the requested entities by
@@ -201,11 +194,13 @@ public final class QueryBuilder {
      * @see ColumnFilters for a convinient way to create {@link ColumnFilter} instances
      */
     public QueryBuilder where(ColumnFilter... predicate) {
-        final ImmutableSet.Builder<ColumnFilter> builder = ImmutableSet.builder();
-        for (ColumnFilter param : predicate) {
-            builder.add(param);
-        }
-        columns = builder.build();
+        final AggregatingColumnFilter aggregatingFilter = all(asList(predicate));
+        columns = singleton(aggregatingFilter);
+        return this;
+    }
+
+    public QueryBuilder where(AggregatingColumnFilter... predicate) {
+        columns = ImmutableSet.copyOf(predicate);
         return this;
     }
 
@@ -312,14 +307,8 @@ public final class QueryBuilder {
               .append(valueSeparator);
         }
         if (columns != null && !columns.isEmpty()) {
-            for (ColumnFilter filter : columns) {
-                sb.append(filter.getColumnName())
-                  .append(' ')
-                  .append(filter.getOperator())
-                  .append(' ')
-                  .append(Json.toCompactJson(unpack(filter.getValue())))
-                  .append(valueSeparator);
-            }
+            sb.append("AND columns: ")
+              .append(columns);
         }
         sb.append(");");
         return sb.toString();

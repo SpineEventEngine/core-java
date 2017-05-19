@@ -22,8 +22,14 @@ package org.spine3.client;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
+import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
+
+import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.asList;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.EITHER;
 import static org.spine3.client.ColumnFilter.Operator;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
@@ -116,6 +122,18 @@ public final class ColumnFilters {
         return createFilter(columnName, value, LESS_OR_EQUAL);
     }
 
+    public static AggregatingColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
+        return aggregateFilters(asList(first, rest), ALL);
+    }
+
+    public static AggregatingColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
+        return aggregateFilters(asList(first, rest), EITHER);
+    }
+
+    static AggregatingColumnFilter all(Collection<ColumnFilter> filters) {
+        return aggregateFilters(filters, ALL);
+    }
+
     private static ColumnFilter createFilter(String columnName, Object value, Operator operator) {
         final Any wrappedValue = toAny(value);
         final ColumnFilter filter = ColumnFilter.newBuilder()
@@ -124,5 +142,14 @@ public final class ColumnFilters {
                                                 .setOperator(operator)
                                                 .build();
         return filter;
+    }
+
+    private static AggregatingColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
+                                                            AggregatingOperator operator) {
+        final AggregatingColumnFilter result = AggregatingColumnFilter.newBuilder()
+                                                                      .addAllFilter(filters)
+                                                                      .setOperator(operator)
+                                                                      .build();
+        return result;
     }
 }

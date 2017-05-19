@@ -72,10 +72,26 @@ message EntityFilters {
     EntityIdFilter id_filter = 1;
 
     // Match the entities by the value of the Entity Columns.
-    repeated ColumnFilter column_filter = 2;
+    repeated AggregatingColumnFilter filter = 2;
 
     // Reserved for more filter types
     reserved 3 to 40;
+}
+
+message AggregatingColumnFilter {
+
+    repeated ColumnFilter filter = 1;
+
+    AggregatingOperator operator = 2[(required) = true];
+
+    enum AggregatingOperator {
+
+        ACFAO_UNDEFINED = 0;
+
+        ALL = 1;
+
+        EITHER = 2;
+    }
 }
 
 message ColumnFilter {

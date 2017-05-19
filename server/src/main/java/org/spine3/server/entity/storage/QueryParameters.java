@@ -23,7 +23,9 @@ package org.spine3.server.entity.storage;
 import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import org.spine3.client.AggregatingColumnFilter;
 import org.spine3.client.ColumnFilter;
 
 import java.io.Serializable;
@@ -36,11 +38,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public final class QueryParameters implements Iterable<ColumnFilter>, Serializable {
+public final class QueryParameters implements Iterable<AggregatingColumnFilter>, Serializable {
 
     private static final long serialVersionUID = 526400152015141524L;
 
-    private final ImmutableMultimap<Column, ColumnFilter> parameters;
+    private final ImmutableCollection<AggregatingColumnFilter> parameters;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
@@ -52,11 +54,13 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
      * {@link Optional#absent()} is there is no such {@link ColumnFilter}.
      *
      * @param column the target {@link Column} of the result {@link ColumnFilter}
-     * @return the corresponding {@link ColumnFilter}
+     * @return the corresponding {@link ColumnFilter
      */
+    @Deprecated
     public ImmutableCollection<ColumnFilter> get(Column column) {
-        final ImmutableCollection<ColumnFilter> filters = parameters.get(column);
-        return filters;
+//        final ImmutableCollection<ColumnFilter> filters = parameters.get(column);
+//        return filters;
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -65,9 +69,8 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
      * @return an {@link Iterator}.
      */
     @Override
-    public Iterator<ColumnFilter> iterator() {
-        return parameters.values()
-                         .iterator();
+    public Iterator<AggregatingColumnFilter> iterator() {
+        return parameters.iterator();
     }
 
     @Override
@@ -96,10 +99,10 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
      */
     public static class Builder {
 
-        private final ImmutableMultimap.Builder<Column, ColumnFilter> parameters;
+        private final ImmutableCollection.Builder<AggregatingColumnFilter> parameters;
 
         private Builder() {
-            parameters = ImmutableMultimap.builder();
+            parameters = ImmutableList.builder();
         }
 
         /**
@@ -112,7 +115,7 @@ public final class QueryParameters implements Iterable<ColumnFilter>, Serializab
             checkNotNull(column);
             checkNotNull(columnFilter);
 
-            parameters.put(column, columnFilter);
+            parameters.add(column, columnFilter);
 
             return this;
         }

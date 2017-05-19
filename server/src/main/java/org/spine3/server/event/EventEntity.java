@@ -26,6 +26,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.server.entity.AbstractEntity;
+import org.spine3.type.TypeName;
 
 import java.util.Comparator;
 
@@ -43,6 +44,8 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
      * @see #getCreated()
      */
     static final String CREATED_TIME_COLUMN = "created";
+
+    static final String TYPE_COLUMN = "type";
 
     /**
      * Compares event entities by timestamps of events.
@@ -78,6 +81,15 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     public Timestamp getCreated() {
         return getState().getContext()
                          .getTimestamp();
+    }
+
+    /**
+     * // TODO:2017-05-19:dmytro.dashenkov: Document.
+     * @return
+     */
+    public String getType() {
+        return TypeName.ofEvent(getState())
+                       .value();
     }
 
     /**
