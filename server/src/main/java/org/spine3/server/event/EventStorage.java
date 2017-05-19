@@ -23,7 +23,6 @@ package org.spine3.server.event;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
@@ -31,7 +30,6 @@ import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.memory.InMemoryEventStorage;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -41,6 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
 
@@ -84,16 +83,14 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     Iterator<Event> iterator(EventStreamQuery query) {
         final org.spine3.server.storage.EventStorage storage = recordStorage();
         final Map<EventId, EntityRecord> records = storage.readAll(query);
-        Collection<EventEntity> entities = transform(records.entrySet(),
+        final Collection<EventEntity> entities = transform(records.entrySet(),
                                                            storageRecordToEntity());
         // TODO:2017-05-19:dmytro.dashenkov: Remove after the Entity Column approach is implemented.
-        if (storage instanceof InMemoryEventStorage) {
-            entities = Collections2.filter(entities, createEntityFilter(query));
-        }
+        final Collection<EventEntity> filtered = filter(entities, createEntityFilter(query));
 
-        final List<EventEntity> entityList = newArrayList(entities);
+        final List<EventEntity> entityList = newArrayList(filtered);
         Collections.sort(entityList, EventEntity.comparator());
-        final Iterator<Event> result = Iterators.transform(entities.iterator(), getEventFunc());
+        final Iterator<Event> result = Iterators.transform(entityList.iterator(), getEventFunc());
         return result;
     }
 

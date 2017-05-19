@@ -20,11 +20,13 @@
 
 package org.spine3.server.event;
 
+import com.google.protobuf.Timestamp;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.base.Events;
 import org.spine3.server.entity.AbstractEntity;
+import org.spine3.type.TypeName;
 
 import java.util.Comparator;
 
@@ -35,6 +37,10 @@ import java.util.Comparator;
  */
 @Internal
 public class EventEntity extends AbstractEntity<EventId, Event> {
+
+    public static final String CREATED_TIME_COLUMN = "created";
+
+    public static final String TYPE_COLUMN = "type";
 
     /**
      * Compares event entities by timestamps of events.
@@ -57,6 +63,16 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     EventEntity(Event event) {
         this(event.getId());
         updateState(event);
+    }
+
+    public Timestamp getCreated() {
+        return getState().getContext()
+                         .getTimestamp();
+    }
+
+    public String getType() {
+        return TypeName.ofEvent(getState())
+                       .value();
     }
 
     /**

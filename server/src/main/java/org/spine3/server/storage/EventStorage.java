@@ -109,4 +109,8 @@ public abstract class EventStorage extends RecordStorage<EventId> {
     protected void writeRecords(Map<EventId, EntityRecordWithColumns> records) {
         delegate.write(records);
     }
+
+    protected RecordStorage<EventId> getDelegateStorage() {
+        return delegate;
+    }
 }
