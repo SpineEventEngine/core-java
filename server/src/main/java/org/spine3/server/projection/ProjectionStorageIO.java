@@ -33,9 +33,9 @@ import org.spine3.users.TenantId;
  */
 public abstract class ProjectionStorageIO<I> extends RecordStorageIO<I> {
 
-    public abstract WriteLastHandledEventTimeFn<I> writeLastHandledEventTimeFn(TenantId tenantId);
+    public abstract WriteLastHandledEventTimeFn writeLastHandledEventTimeFn(TenantId tenantId);
 
-    public abstract static class WriteLastHandledEventTimeFn<I> extends DoFn<Timestamp, Void> {
+    public abstract static class WriteLastHandledEventTimeFn extends DoFn<Timestamp, Void> {
         private static final long serialVersionUID = 0L;
         private final TenantId tenantId;
 

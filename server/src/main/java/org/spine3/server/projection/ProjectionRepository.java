@@ -186,7 +186,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
-    Set<EventFilter> getEventFilters() {
+    Set<EventFilter> createEventFilters() {
         final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
         final Set<EventClass> eventClasses = getMessageClasses();
         for (EventClass eventClass : eventClasses) {
@@ -394,6 +394,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     public void catchUp() {
         setStatus(Status.CATCHING_UP);
 
+        allTenantOpCatchup();
+        // BeamCatchUp.catchUp(this);
+
+        completeCatchUp();
+        logCatchUpComplete();
+    }
+
+    private void allTenantOpCatchup() {
         final AllTenantOperation op = new AllTenantOperation(boundedContext.getTenantIndex()) {
             @Override
             public void run() {
@@ -402,13 +410,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
             }
         };
         op.execute();
-
-        completeCatchUp();
-        logCatchUpComplete();
     }
 
     EventStreamQuery createStreamQuery() {
-        final Set<EventFilter> eventFilters = getEventFilters();
+        final Set<EventFilter> eventFilters = createEventFilters();
 
         // Get the timestamp of the last event. This also ensures we have the storage.
         final Timestamp timestamp = nullToDefault(
@@ -595,9 +600,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                 extends PTransform<PCollection<Timestamp>, PDone> {
 
             private static final long serialVersionUID = 0L;
-            private final WriteLastHandledEventTimeFn<I> fn;
+            private final WriteLastHandledEventTimeFn fn;
 
-            public WriteLastHandledEventTime(WriteLastHandledEventTimeFn<I> fn) {
+            public WriteLastHandledEventTime(WriteLastHandledEventTimeFn fn) {
                 this.fn = fn;
             }
 

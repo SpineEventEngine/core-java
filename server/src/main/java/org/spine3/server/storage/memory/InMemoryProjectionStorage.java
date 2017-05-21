@@ -136,8 +136,8 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
         @Override
         @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
             // OK for test-only in-memory implementation.
-        public WriteLastHandledEventTimeFn<I> writeLastHandledEventTimeFn(TenantId tenantId) {
-            return new WriteLastHandledEventTimeFn<I>(tenantId) {
+        public WriteLastHandledEventTimeFn writeLastHandledEventTimeFn(TenantId tenantId) {
+            return new WriteLastHandledEventTimeFn(tenantId) {
                 private static final long serialVersionUID = 0L;
 
                 @Override
