@@ -19,6 +19,10 @@
 //
 buildscript {
     repositories {
+        jcenter()
+        // Google's mirror of Maven Central
+        maven { url = 'https://maven-central.storage.googleapis.com' }
+        
         mavenCentral()
         mavenLocal()
 

@@ -28,6 +28,11 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
+import org.apache.beam.sdk.coders.CannotProvideCoderException;
+import org.apache.beam.sdk.coders.Coder;
+import org.apache.beam.sdk.coders.CoderRegistry;
+import org.apache.beam.sdk.coders.KvCoder;
+import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
 import org.apache.beam.sdk.transforms.DoFn;
@@ -61,6 +66,7 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.builder;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * Beam-based catch-up support.
@@ -128,6 +134,16 @@ public class BeamCatchUp {
         private Pipeline createPipeline() {
             Pipeline pipeline = Pipeline.create(options);
 
+            final Coder<I> idCoder;
+            final CoderRegistry coderRegistry = pipeline.getCoderRegistry();
+            try {
+                idCoder = coderRegistry.getCoder(repository.getIdClass());
+            } catch (CannotProvideCoderException e) {
+                throw illegalStateWithCauseOf(e);
+            }
+            final KvCoder<I, Event> eventTupleCoder =
+                    KvCoder.of(idCoder, ProtoCoder.of(Event.class));
+
             // Read events matching the query.
             final EventStreamQuery query = createStreamQuery();
             final PCollection<Event> events = pipeline.apply(
@@ -139,7 +155,7 @@ public class BeamCatchUp {
             final PCollection<KV<I, Event>> flatMap = events.apply(
                     "MapIdsToEvents",
                     FlatMapElements.via(new GetIds<>(repository.getIdSetFunction()))
-            );
+            ).setCoder(eventTupleCoder);
 
             // Group events by projection IDs.
             final PCollection<KV<I, Iterable<Event>>> groupped =
@@ -243,7 +259,7 @@ public class BeamCatchUp {
             Collections.sort(timestamps, Timestamps.comparator());
             final Timestamp lastEventTimestamp = timestamps.get(timestamps.size() - 1);
 
-            c.sideOutput(timestampTag, lastEventTimestamp);
+            c.output(timestampTag, lastEventTimestamp);
         }
     }
 
@@ -296,6 +312,4 @@ public class BeamCatchUp {
     private static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
-
 }

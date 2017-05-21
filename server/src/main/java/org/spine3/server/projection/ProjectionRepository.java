@@ -184,6 +184,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open the method to the package.
+     */
+    @Override
+    protected Class<I> getIdClass() {
+        return super.getIdClass();
+    }
+
+    /**
      * Obtains event filters for event classes handled by projections of this repository.
      */
     Set<EventFilter> createEventFilters() {
@@ -394,13 +404,15 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     public void catchUp() {
         setStatus(Status.CATCHING_UP);
 
-        allTenantOpCatchup();
-        // BeamCatchUp.catchUp(this);
+//        allTenantOpCatchup();
+         BeamCatchUp.catchUp(this);
 
         completeCatchUp();
         logCatchUpComplete();
     }
 
+    @SuppressWarnings("unused")
+        // A direct catch-up impl. Do not delete until Beam-based catch-up is finished.
     private void allTenantOpCatchup() {
         final AllTenantOperation op = new AllTenantOperation(boundedContext.getTenantIndex()) {
             @Override
