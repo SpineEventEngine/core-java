@@ -50,6 +50,9 @@ import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
+ * Base class for testing the {@linkplain Transaction transactions} for different
+ * {@linkplain EventPlayingEntity EventPlayingEntity} implementations.
+ *
  * @author Alex Tymchenko
  */
 public abstract class TransactionShould<I,
@@ -80,7 +83,7 @@ public abstract class TransactionShould<I,
 
     protected abstract Message createEventMessageThatFailsInHandler();
 
-    protected abstract void makeThrowOnBuild(E entity, RuntimeException toThrow);
+    protected abstract void breakEntityValidation(E entity, RuntimeException toThrow);
 
     @Test
     public void initialize_from_entity() {
@@ -191,7 +194,7 @@ public abstract class TransactionShould<I,
         verifyZeroInteractions(listener);
         applyEvent(tx, event);
 
-        verify(listener).onAfterPhase(argThat(matches(event, true)));
+        verify(listener).onAfterPhase(argThat(matchesSuccessfulPhaseFor(event)));
 
     }
 
@@ -278,7 +281,7 @@ public abstract class TransactionShould<I,
 
         final Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
         final ConstraintViolationThrowable toThrow = constraintViolationsEx();
-        makeThrowOnBuild(entity, toThrow);
+        breakEntityValidation(entity, toThrow);
         tx.commit();
     }
 
@@ -321,12 +324,11 @@ public abstract class TransactionShould<I,
         return newArrayList(expectedViolation);
     }
 
-    private ArgumentMatcher<Phase<I, E, S, B>> matches(final Event event,
-                                                       final boolean successful) {
+    private ArgumentMatcher<Phase<I, E, S, B>> matchesSuccessfulPhaseFor(final Event event) {
         return new ArgumentMatcher<Phase<I, E, S, B>>() {
             @Override
             public boolean matches(Phase<I, E, S, B> phase) {
-                return checkPhase(event, phase, successful);
+                return checkPhase(event, phase, true);
             }
         };
     }

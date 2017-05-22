@@ -116,16 +116,20 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
 
     @Override
     protected Message createEventMessage() {
-        return ProjectCreated.newBuilder().setProjectId(ID).build();
+        return ProjectCreated.newBuilder()
+                             .setProjectId(ID)
+                             .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
-        return TaskAdded.newBuilder().setProjectId(ID).build();
+        return TaskAdded.newBuilder()
+                        .setProjectId(ID)
+                        .build();
     }
 
     @Override
-    protected void makeThrowOnBuild(
+    protected void breakEntityValidation(
             ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
         entity.getBuilder().setShouldThrow(toThrow);
@@ -154,7 +158,6 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
             }
             return super.checkEntityState(newState);
         }
-
 
         @Subscribe
         public void event(ProjectCreated event) {

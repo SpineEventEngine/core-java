@@ -131,7 +131,7 @@ public class AggregateTransactionShould
     }
 
     @Override
-    protected void makeThrowOnBuild(
+    protected void breakEntityValidation(
             Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
         entity.getBuilder().setShouldThrow(toThrow);

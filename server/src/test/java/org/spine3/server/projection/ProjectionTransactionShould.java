@@ -133,7 +133,7 @@ public class ProjectionTransactionShould
     }
 
     @Override
-    protected void makeThrowOnBuild(
+    protected void breakEntityValidation(
             Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
         entity.getBuilder()
