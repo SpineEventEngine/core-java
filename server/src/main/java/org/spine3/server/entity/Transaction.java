@@ -97,7 +97,7 @@ public abstract class Transaction<I,
      *
      * <p>This value is propagated to the entity upon the {@linkplain #commit() commit()}.
      */
-    private volatile Version version;
+    private Version version;
 
     /**
      * The lifecycle flags of the entity, modified within this transaction.
@@ -107,14 +107,14 @@ public abstract class Transaction<I,
      *
      * <p>This value is set to the entity upon the {@linkplain #commit() commit()}.
      */
-    private volatile LifecycleFlags lifecycleFlags;
+    private LifecycleFlags lifecycleFlags;
 
     /**
      * The flag, which becomes {@code true}, if the state of the entity
      * {@linkplain #commit() has been changed} since it has been
      * {@linkplain RecordBasedRepository#findOrCreate(Object)} loaded or created.
      */
-    private volatile boolean stateChanged;
+    private boolean stateChanged;
 
     /**
      * Allows to understand whether this transaction is active.
@@ -122,7 +122,7 @@ public abstract class Transaction<I,
      * <p>Has {@code true} value since the transaction instance creation
      * until {@linkplain #commit() commit()} is performed.
      */
-    private volatile boolean active = false;
+    private boolean active = false;
 
     /**
      * An ordered collection of the phases that were propagated in scope of this transaction.
