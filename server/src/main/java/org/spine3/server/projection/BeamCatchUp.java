@@ -28,10 +28,13 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.coders.CannotProvideCoderException;
+import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
+import org.apache.beam.sdk.coders.BigEndianLongCoder;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.CoderRegistry;
+import org.apache.beam.sdk.coders.IterableCoder;
 import org.apache.beam.sdk.coders.KvCoder;
+import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;
@@ -46,10 +49,12 @@ import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionTuple;
 import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.TupleTagList;
+import org.apache.beam.sdk.values.TypeDescriptor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
+import org.spine3.base.Identifier;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.RecordBasedRepository;
@@ -67,6 +72,7 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableList.builder;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Beam-based catch-up support.
@@ -134,15 +140,15 @@ public class BeamCatchUp {
         private Pipeline createPipeline() {
             Pipeline pipeline = Pipeline.create(options);
 
-            final Coder<I> idCoder;
             final CoderRegistry coderRegistry = pipeline.getCoderRegistry();
-            try {
-                idCoder = coderRegistry.getCoder(repository.getIdClass());
-            } catch (CannotProvideCoderException e) {
-                throw illegalStateWithCauseOf(e);
-            }
-            final KvCoder<I, Event> eventTupleCoder =
-                    KvCoder.of(idCoder, ProtoCoder.of(Event.class));
+            final Coder<I> idCoder = getIdCoder(coderRegistry);
+
+            final ProtoCoder<Event> eventCoder = ProtoCoder.of(Event.class);
+            final KvCoder<I, Event> eventTupleCoder = KvCoder.of(idCoder, eventCoder);
+
+            coderRegistry.registerCoderForType(
+                    new TypeDescriptor<KV<I, Event>>() {},
+                    eventTupleCoder);
 
             // Read events matching the query.
             final EventStreamQuery query = createStreamQuery();
@@ -159,7 +165,8 @@ public class BeamCatchUp {
 
             // Group events by projection IDs.
             final PCollection<KV<I, Iterable<Event>>> groupped =
-                    flatMap.apply("GroupEvents", GroupByKey.<I, Event>create());
+                    flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
+                           .setCoder(KvCoder.of(idCoder, IterableCoder.of(eventCoder)));
 
             // Apply events to projections.
             // 1. Load projection, apply events.
@@ -189,6 +196,37 @@ public class BeamCatchUp {
             lastTimestamp.apply(repositoryIO.writeLastHandledEventTime(tenantId));
 
             return pipeline;
+        }
+
+        @SuppressWarnings("unchecked") // the cast is preserved by ID type checking
+        private Coder<I> getIdCoder(CoderRegistry coderRegistry) {
+            final Class<I> idClass = repository.getIdClass();
+            final Coder<I> idCoder;
+            final Identifier.Type idType = Identifier.Type.getType(idClass);
+            switch (idType) {
+                case INTEGER:
+                    idCoder = (Coder<I>) BigEndianIntegerCoder.of();
+                    break;
+                case LONG:
+                    idCoder = (Coder<I>) BigEndianLongCoder.of();
+                    break;
+                case STRING:
+                    idCoder = (Coder<I>) StringUtf8Coder.of();
+                    break;
+                case MESSAGE:
+                    idCoder = (Coder<I>) ProtoCoder.of((Class<? extends Message>)idClass);
+                    break;
+                default:
+                    throw newIllegalStateException("Unsupported ID type: %s", idType.name());
+            }
+
+            // Check that the key coder is deterministic.
+            try {
+                idCoder.verifyDeterministic();
+            } catch (Coder.NonDeterministicException e) {
+                throw illegalStateWithCauseOf(e);
+            }
+            return idCoder;
         }
 
         private EventStreamQuery createStreamQuery() {

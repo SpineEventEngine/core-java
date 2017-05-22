@@ -39,7 +39,7 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * @author Alexander Yevsyukov
  */
-final class Identifier<I> {
+public final class Identifier<I> {
 
     private final Type type;
     private final I value;
@@ -127,7 +127,7 @@ final class Identifier<I> {
     @SuppressWarnings(
        {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
         "unchecked" /* We ensure type by matching it first. */})
-    enum Type {
+    public enum Type {
         STRING {
             @Override
             <I> boolean matchValue(I id) {
@@ -298,7 +298,7 @@ final class Identifier<I> {
             return result;
         }
 
-        static <I> Type getType(Class<I> idClass) {
+        public static <I> Type getType(Class<I> idClass) {
             for (Type type : values()) {
                 if (type.matchClass(idClass)) {
                     return type;
