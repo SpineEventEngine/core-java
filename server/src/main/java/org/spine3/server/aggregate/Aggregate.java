@@ -118,7 +118,6 @@ public abstract class Aggregate<I,
                                 S extends Message,
                                 B extends ValidatingBuilder<S, ? extends Message.Builder>>
                 extends CommandHandlingEntity<I, S, B> {
-//        extends EventPlayingEntity<I, S, B> {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
