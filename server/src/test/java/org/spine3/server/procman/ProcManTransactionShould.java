@@ -178,7 +178,6 @@ public class ProcManTransactionShould extends TransactionShould<ProjectId,
         }
     }
 
-
     /**
      * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
      * during the state building.
