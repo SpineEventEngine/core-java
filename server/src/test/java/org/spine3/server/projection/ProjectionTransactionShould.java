@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import org.spine3.base.Event;
 import org.spine3.base.Subscribe;
 import org.spine3.base.Version;
+import org.spine3.server.entity.ThrowingValidatingBuilder;
 import org.spine3.server.entity.Transaction;
 import org.spine3.server.entity.TransactionListener;
 import org.spine3.server.entity.TransactionShould;
@@ -31,14 +32,11 @@ import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.TaskAdded;
-import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ConstraintViolationThrowable;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
@@ -189,34 +187,14 @@ public class ProjectionTransactionShould
      * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
      * during the state building.
      *
-     * <p>Should be declared {@code public} to allow accessing from the
+     * <p>Must be declared {@code public} to allow accessing from the
      * {@linkplain org.spine3.validate.ValidatingBuilders#newInstance(Class) factory method}.
      */
     public static class PatchedProjectBuilder
-            extends AbstractValidatingBuilder<Project, Project.Builder> {
-
-        @Nullable
-        private RuntimeException shouldThrow;
+            extends ThrowingValidatingBuilder<Project, Project.Builder> {
 
         public static PatchedProjectBuilder newBuilder() {
             return new PatchedProjectBuilder();
-        }
-
-        @Override
-        public Project build() throws ConstraintViolationThrowable {
-            if (shouldThrow != null) {
-                throw shouldThrow;
-            } else {
-                return super.build();
-            }
-        }
-
-        /**
-         * Sets an exception to throw upon {@code build()}.
-         */
-        private void setShouldThrow(RuntimeException shouldThrow) {
-            checkNotNull(shouldThrow);
-            this.shouldThrow = shouldThrow;
         }
     }
 }

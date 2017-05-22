@@ -21,10 +21,12 @@
  */
 package org.spine3.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
+import org.spine3.server.entity.TransactionListener;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -45,11 +47,20 @@ class ProcManTransaction<I,
                          B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
-    private ProcManTransaction(ProcessManager<I, S, B> entity) {
+    @VisibleForTesting
+    ProcManTransaction(ProcessManager<I, S, B> entity) {
         super(entity);
     }
 
-    private ProcManTransaction(ProcessManager<I, S, B> entity, S state, Version version) {
+    @VisibleForTesting
+    ProcManTransaction(ProcessManager<I, S, B> entity,
+                       TransactionListener<I, ProcessManager<I, S, B>, S, B> listener) {
+        super(entity, listener);
+    }
+
+
+    @VisibleForTesting
+    ProcManTransaction(ProcessManager<I, S, B> entity, S state, Version version) {
         super(entity, state, version);
     }
 

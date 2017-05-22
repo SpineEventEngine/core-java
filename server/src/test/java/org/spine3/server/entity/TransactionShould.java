@@ -350,4 +350,5 @@ public abstract class TransactionShould<I,
     private static Version someVersion() {
         return newVersion(1, getCurrentTime());
     }
+
 }

@@ -20,6 +20,7 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
@@ -94,6 +95,12 @@ public abstract class ProcessManager<I,
     /** Returns the {@code CommandBus} to which post commands produced by this process manager. */
     protected CommandBus getCommandBus() {
         return commandBus;
+    }
+
+    @Override
+    @VisibleForTesting      // Overridden to expose this method to tests.
+    protected B getBuilder() {
+        return super.getBuilder();
     }
 
     /**

@@ -17,23 +17,21 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.aggregate;
+package org.spine3.server.procman;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.Subscribe;
 import org.spine3.base.Version;
-import org.spine3.server.command.Assign;
 import org.spine3.server.entity.ThrowingValidatingBuilder;
 import org.spine3.server.entity.Transaction;
 import org.spine3.server.entity.TransactionListener;
 import org.spine3.server.entity.TransactionShould;
-import org.spine3.test.aggregate.Project;
-import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.command.CreateProject;
-import org.spine3.test.aggregate.event.ProjectCreated;
-import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.test.procman.Project;
+import org.spine3.test.procman.ProjectId;
+import org.spine3.test.procman.event.ProjectCreated;
+import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
@@ -42,79 +40,75 @@ import java.util.List;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
 
 /**
  * @author Alex Tymchenko
  */
-public class AggregateTransactionShould
-        extends TransactionShould<ProjectId,
-        Aggregate<ProjectId, Project, AggregateTransactionShould.PatchedProjectBuilder>,
+public class ProcManTransactionShould extends TransactionShould<ProjectId,
+        ProcessManager<ProjectId, Project, ProcManTransactionShould.PatchedProjectBuilder>,
         Project,
-        AggregateTransactionShould.PatchedProjectBuilder> {
+        ProcManTransactionShould.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("aggregate-transaction-should-project")
+                                                 .setId("procman-transaction-should-project")
                                                  .build();
 
     @Override
     protected Transaction<ProjectId,
-            Aggregate<ProjectId, Project, PatchedProjectBuilder>,
+                ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                Project,
+                PatchedProjectBuilder>
+    createTx(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity) {
+        return new ProcManTransaction<>(entity);
+    }
+
+    @Override
+    protected Transaction<ProjectId,
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
             Project,
-            PatchedProjectBuilder>
-    createTx(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity) {
-        return new AggregateTransaction<>(entity);
-    }
-
-    @Override
-    protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
-                          Project,
-                          PatchedProjectBuilder> createTxWithState(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
+            PatchedProjectBuilder> createTxWithState(
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
             Version version) {
-        return new AggregateTransaction<>(entity, state, version);
+        return new ProcManTransaction<>(entity, state, version);
     }
 
     @Override
-    protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
-                          Project,
-                          PatchedProjectBuilder>
-    createTxWithListener(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+    protected Transaction<ProjectId, ProcessManager<ProjectId, Project, PatchedProjectBuilder>,
+                          Project, PatchedProjectBuilder>
+    createTxWithListener(ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
                          TransactionListener<ProjectId,
-                                             Aggregate<ProjectId,
-                                                       Project,
-                                                     PatchedProjectBuilder>,
+                                             ProcessManager<ProjectId,
+                                                            Project,
+                                                            PatchedProjectBuilder>,
                                              Project, PatchedProjectBuilder> listener) {
-        return new AggregateTransaction<>(entity, listener);
+        return new ProcManTransaction<>(entity, listener);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity() {
-        return new TestAggregate(ID);
+    protected ProcessManager<ProjectId, Project, PatchedProjectBuilder> createEntity() {
+        return new TestProcessManager(ID);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity(
+    protected ProcessManager<ProjectId, Project, PatchedProjectBuilder> createEntity(
             List<ConstraintViolation> violations) {
-        return new TestAggregate(ID, violations);
+        return new TestProcessManager(ID, violations);
     }
 
     @Override
     protected Project createNewState() {
         return Project.newBuilder()
                       .setId(ID)
-                      .setName("The new project name to set in tx")
+                      .setName("The new project name for procman tx tests")
                       .build();
     }
 
     @Override
     protected void checkEventReceived(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestAggregate aggregate = (TestAggregate) entity;
+        final TestProcessManager aggregate = (TestProcessManager) entity;
         final Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
@@ -122,33 +116,33 @@ public class AggregateTransactionShould
 
     @Override
     protected Message createEventMessage() {
-        return projectCreated(ID, "Project created in a transaction");
+        return ProjectCreated.newBuilder().setProjectId(ID).build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
-        return Given.EventMessage.taskAdded(ID);
+        return TaskAdded.newBuilder().setProjectId(ID).build();
     }
 
     @Override
     protected void makeThrowOnBuild(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            ProcessManager<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
         entity.getBuilder().setShouldThrow(toThrow);
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
-    static class TestAggregate
-            extends Aggregate<ProjectId, Project, PatchedProjectBuilder> {
+    static class TestProcessManager
+            extends ProcessManager<ProjectId, Project, PatchedProjectBuilder> {
 
         private final List<Message> receivedEvents = newLinkedList();
         private final List<ConstraintViolation> violations;
 
-        private TestAggregate(ProjectId id) {
+        private TestProcessManager(ProjectId id) {
             this(id, null);
         }
 
-        private TestAggregate(ProjectId id, @Nullable List<ConstraintViolation> violations) {
+        private TestProcessManager(ProjectId id, @Nullable List<ConstraintViolation> violations) {
             super(id);
             this.violations = violations;
         }
@@ -161,13 +155,9 @@ public class AggregateTransactionShould
             return super.checkEntityState(newState);
         }
 
-        @Assign
-        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreated(cmd.getProjectId(), cmd.getName());
-        }
 
-        @Apply
-        private void event(ProjectCreated event) {
+        @Subscribe
+        public void event(ProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -175,15 +165,16 @@ public class AggregateTransactionShould
             getBuilder().mergeFrom(newState);
         }
 
-        @Apply
-        private void event(TaskAdded event) {
-            throw new RuntimeException("that tests the tx behaviour");
+        @Subscribe
+        public void event(TaskAdded event) {
+            throw new RuntimeException("that tests the tx behaviour for process manager");
         }
 
         private List<Message> getReceivedEvents() {
             return ImmutableList.copyOf(receivedEvents);
         }
     }
+
 
     /**
      * Custom implementation of {@code ValidatingBuilder}, which allows to simulate an error
