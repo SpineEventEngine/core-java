@@ -182,8 +182,9 @@ public abstract class EventPlayingEntity <I,
 
     B builderFromState() {
         final B builder = newBuilderInstance();
+        builder.setOriginalState(getState());
         @SuppressWarnings("unchecked")      // the cast is safe by `mergeFrom` design.
-        final B result = (B) builder.mergeFrom(getState());
+        final B result = (B) builder;
         return result;
     }
 

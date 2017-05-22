@@ -77,7 +77,6 @@ import static org.spine3.test.Given.aggregateOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newVersionWithNumber;
 import static org.spine3.test.Verify.assertSize;
-import static org.spine3.test.aggregate.Project.newBuilder;
 
 /**
  * @author Alexander Litus
@@ -436,7 +435,9 @@ public class AggregateShould {
         TaskAdded handle(AddTask cmd, CommandContext ctx) {
             isAddTaskCommandHandled = true;
             final TaskAdded event = taskAdded(cmd.getProjectId());
-            return event;
+            return event.toBuilder()
+                        .setTask(cmd.getTask())
+                        .build();
         }
 
         @Assign
@@ -463,6 +464,7 @@ public class AggregateShould {
         @Apply
         private void event(TaskAdded event) {
             isTaskAddedEventApplied = true;
+            getBuilder().addTask(event.getTask());
         }
 
         @Apply
@@ -557,16 +559,6 @@ public class AggregateShould {
             this.brokenApplier = brokenApplier;
         }
 
-        //TODO:5/15/17:alex.tymchenko: remove this method.
-
-//        /**
-//         * This method attempts to call {@link #updateState(Message, Version) setState()}
-//         * directly, which should result in {@link IllegalStateException}.
-//         */
-//        void tryToUpdateStateDirectly() {
-//            injectState(Project.getDefaultInstance(), Version.getDefaultInstance());
-//        }
-
         @Assign
         ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
             if (brokenHandler) {
@@ -581,11 +573,7 @@ public class AggregateShould {
                 throw new IllegalStateException(BROKEN_APPLIER);
             }
 
-            final Project newState = newBuilder(getState())
-                    .setId(event.getProjectId())
-                    .build();
-
-            getBuilder().mergeFrom(newState);
+            getBuilder().setStatus(Status.CREATED);
         }
     }
 

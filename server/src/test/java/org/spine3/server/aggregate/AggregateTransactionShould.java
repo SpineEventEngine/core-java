@@ -171,6 +171,7 @@ public class AggregateTransactionShould
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
+                                            .setName(event.getName())
                                             .build();
             getBuilder().mergeFrom(newState);
         }

@@ -129,7 +129,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         final T message = internalBuild();
 
         final boolean result = originalState != null
-                ? originalState.equals(message)
+                ? !originalState.equals(message)
                 : Validate.isNotDefault(message);
         return result;
     }
@@ -162,15 +162,9 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
      */
     @Internal
     public T internalBuild() {
-        final B resultBuilder = createBuilder();
-        if(getOriginalState().isPresent()) {
-            resultBuilder.mergeFrom(getOriginalState().get());
-        }
-        resultBuilder.mergeFrom(getMessageBuilder().build());
-
         @SuppressWarnings("unchecked")  // OK, as real types of `B`
                                         // are always generated to be compatible with `T`.
-        final T result = (T) resultBuilder.build();
+        final T result = (T) getMessageBuilder().build();
         return result;
     }
 

@@ -39,6 +39,7 @@ import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.ProjectValidatingBuilder;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -359,12 +360,14 @@ public class AggregateRepositoryShould {
         TaskAdded handle(AddTask msg, CommandContext context) {
             return TaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
+                            .setTask(msg.getTask())
                             .build();
         }
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setId(event.getProjectId());
+            getBuilder().setId(event.getProjectId())
+                        .addTask(event.getTask());
         }
 
         @Assign
@@ -376,6 +379,7 @@ public class AggregateRepositoryShould {
 
         @Apply
         private void apply(ProjectStarted event) {
+            getBuilder().setStatus(Status.STARTED);
         }
 
         /**
