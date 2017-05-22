@@ -26,7 +26,6 @@ import org.spine3.annotation.Internal;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.TransactionListener.SilentWitness;
-import org.spine3.util.Exceptions;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
@@ -184,7 +183,7 @@ public abstract class Transaction<I,
      */
     protected Transaction(E entity, S state, Version version,
                           TransactionListener<I, E, S, B> listener) {
-        this(entity);
+        this(entity, listener);
         initAll(state, version);
     }
 
@@ -275,7 +274,7 @@ public abstract class Transaction<I,
                 throw invalidStateException;
             } catch (RuntimeException genericException) {
                 rollback(genericException);
-                throw Exceptions.illegalStateWithCauseOf(genericException);
+                throw illegalStateWithCauseOf(genericException);
             } finally {
                 releaseTx();
             }
