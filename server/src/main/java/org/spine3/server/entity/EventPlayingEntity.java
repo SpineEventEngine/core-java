@@ -32,6 +32,7 @@ import org.spine3.validate.ValidatingBuilders;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
 import static org.spine3.util.Reflection.getGenericParameterType;
@@ -147,8 +148,18 @@ public abstract class EventPlayingEntity <I,
         }
     }
 
+    @SuppressWarnings("ObjectEquality") // the refs must to point to the same object; see below.
     void injectTransaction(Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx) {
         checkNotNull(tx);
+
+        /*
+            In order to be sure we are not hijacked, we must be sure that the transaction
+            is injected to the very same object, wrapped into the transaction.
+        */
+        checkState(tx.getEntity() == this,
+                   "Transaction injected to this " + this
+                           + " is wrapped around a different entity: " + tx.getEntity());
+
         this.transaction = tx;
     }
 

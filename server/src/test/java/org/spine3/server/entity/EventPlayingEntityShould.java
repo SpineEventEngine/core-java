@@ -53,7 +53,7 @@ public class EventPlayingEntityShould {
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(EventPlayingEntityShould.class);
 
-    protected EventPlayingEntity getEntity() {
+    protected EventPlayingEntity newEntity() {
         return new EpeEntity(1L);
     }
 
@@ -64,12 +64,12 @@ public class EventPlayingEntityShould {
 
     @Test
     public void be_non_changed_once_created() {
-        assertFalse(getEntity().isChanged());
+        assertFalse(newEntity().isChanged());
     }
 
     @Test
     public void become_changed_once_lifecycleFlags_are_updated() {
-        final EventPlayingEntity entity = getEntity();
+        final EventPlayingEntity entity = newEntity();
         entity.setLifecycleFlags(LifecycleFlags.newBuilder()
                                                .setDeleted(true)
                                                .build());
@@ -78,22 +78,32 @@ public class EventPlayingEntityShould {
 
     @Test
     public void have_null_transaction_by_default() {
-        assertNull(getEntity().getTransaction());
+        assertNull(newEntity().getTransaction());
     }
 
     @Test
     public void have_no_transaction_in_progress_by_default() {
-        assertFalse(getEntity().isTransactionInProgress());
+        assertFalse(newEntity().isTransactionInProgress());
     }
 
     @Test
     @SuppressWarnings("unchecked")  // OK for the test.
     public void allow_injecting_transaction() {
-        final EventPlayingEntity entity = getEntity();
+        final EventPlayingEntity entity = newEntity();
         final Transaction tx = mock(Transaction.class);
+        when(tx.getEntity()).thenReturn(entity);
         entity.injectTransaction(tx);
 
         assertEquals(tx, entity.getTransaction());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    @SuppressWarnings("unchecked")  // OK for the test.
+    public void disallow_injecting_transaction_wrapped_around_another_entity_instance() {
+        final EventPlayingEntity entity = newEntity();
+        final Transaction tx = mock(Transaction.class);
+        when(tx.getEntity()).thenReturn(newEntity());
+        entity.injectTransaction(tx);
     }
 
     @Test
@@ -126,7 +136,7 @@ public class EventPlayingEntityShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_archive_with_no_transaction() {
-        getEntity().setArchived(true);
+        newEntity().setArchived(true);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -138,7 +148,7 @@ public class EventPlayingEntityShould {
 
     @Test(expected = IllegalStateException.class)
     public void fail_to_delete_with_no_transaction() {
-        getEntity().setDeleted(true);
+        newEntity().setDeleted(true);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -150,7 +160,7 @@ public class EventPlayingEntityShould {
 
     @Test(expected = IllegalStateException.class)
     public void require_active_transaction_to_play_events() {
-        getEntity().play(newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance())));
+        newEntity().play(newArrayList(eventFactory.createEvent(StringValue.getDefaultInstance())));
     }
 
     @Test
@@ -195,13 +205,13 @@ public class EventPlayingEntityShould {
 
     @Test
     public void return_non_null_builder_from_state() {
-        final ValidatingBuilder builder = getEntity().builderFromState();
+        final ValidatingBuilder builder = newEntity().builderFromState();
         assertNotNull(builder);
     }
 
     @Test
     public void return_builder_reflecting_current_state() {
-        final EventPlayingEntity entity = getEntity();
+        final EventPlayingEntity entity = newEntity();
         final Message originalState = entity.builderFromState()
                                             .build();
 
@@ -217,20 +227,22 @@ public class EventPlayingEntityShould {
 
     @SuppressWarnings("unchecked")  // OK for the test code.
     private EventPlayingEntity entityWithInactiveTx() {
-        final EventPlayingEntity entity = getEntity();
+        final EventPlayingEntity entity = newEntity();
 
         final Transaction tx = mock(Transaction.class);
         when(tx.isActive()).thenReturn(false);
+        when(tx.getEntity()).thenReturn(entity);
         entity.injectTransaction(tx);
         return entity;
     }
 
     @SuppressWarnings("unchecked")  // OK for the test.
     private EventPlayingEntity entityWithActiveTx(boolean txChanged) {
-        final EventPlayingEntity entity = getEntity();
+        final EventPlayingEntity entity = newEntity();
         final Transaction tx = spy(mock(Transaction.class));
         when(tx.isActive()).thenReturn(true);
         when(tx.isStateChanged()).thenReturn(txChanged);
+        when(tx.getEntity()).thenReturn(entity);
 
         entity.injectTransaction(tx);
         return entity;
