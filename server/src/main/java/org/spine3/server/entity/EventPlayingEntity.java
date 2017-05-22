@@ -42,7 +42,8 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  *
  * <p>Defines a transaction-based mechanism for state, version and lifecycle flags update.
  *
- * <p>Exposes {@linkplain ValidatingBuilder validating builder} as an only way to modify the state.
+ * <p>Exposes {@linkplain #getBuilder()} validating builder} for the state as the only way
+ * to modify the state from the descendants.
  *
  * @author Alex Tymchenko
  */
