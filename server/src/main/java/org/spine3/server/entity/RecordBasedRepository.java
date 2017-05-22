@@ -37,7 +37,6 @@ import org.spine3.server.entity.storage.EntityQueries;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
 
@@ -74,8 +73,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /** {@inheritDoc} */
     @Override
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createRecordStorage(getEntityClass());
+    protected RecordStorage<I> createStorage(StorageFactory factory) {
+        final RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
         return result;
     }
 
@@ -304,7 +303,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @return new instance of the transforming function
      */
-    private Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
+    protected final Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
         return new Function<Map.Entry<I, EntityRecord>, E>() {
             @Nullable
             @Override
