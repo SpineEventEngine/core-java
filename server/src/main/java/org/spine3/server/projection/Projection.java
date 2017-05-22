@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
@@ -64,6 +65,11 @@ public abstract class Projection<I,
         apply(event, ctx);
     }
 
+    @Override
+    @VisibleForTesting      // Overridden to expose this method to tests.
+    protected B getBuilder() {
+        return super.getBuilder();
+    }
 
     void apply(Message eventMessage,
                          EventContext eventContext)  {

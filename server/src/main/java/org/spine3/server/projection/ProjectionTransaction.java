@@ -19,10 +19,12 @@
  */
 package org.spine3.server.projection;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.server.entity.Transaction;
+import org.spine3.server.entity.TransactionListener;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -45,11 +47,19 @@ class ProjectionTransaction<I,
                             B extends ValidatingBuilder<M, ? extends Message.Builder>>
         extends Transaction<I, Projection<I, M, B>, M, B> {
 
-    private ProjectionTransaction(Projection<I, M, B> entity) {
+    @VisibleForTesting
+    ProjectionTransaction(Projection<I, M, B> entity) {
         super(entity);
     }
 
-    private ProjectionTransaction(Projection<I, M, B> entity, M state, Version version) {
+    @VisibleForTesting
+    ProjectionTransaction(Projection<I, M, B> entity,
+                          TransactionListener<I, Projection<I, M, B>, M, B> listener) {
+        super(entity, listener);
+    }
+
+    @VisibleForTesting
+    ProjectionTransaction(Projection<I, M, B> entity, M state, Version version) {
         super(entity, state, version);
     }
 

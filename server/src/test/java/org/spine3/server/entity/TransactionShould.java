@@ -238,7 +238,6 @@ public abstract class TransactionShould<I,
     }
 
     @Test
-    @SuppressWarnings("ConstantConditions") // Due to Mockito nullable return value.
     public void rollback_automatically_if_phase_failed() {
         final E entity = createEntity();
         final S originalState = entity.getState();
@@ -252,15 +251,6 @@ public abstract class TransactionShould<I,
             fail("Expected an `Exception` due to a failed phase execution.");
         } catch (final Exception e) {
             checkRollback(entity, originalState, originalVersion);
-
-            //TODO:5/19/17:alex.tymchenko: try to fix Mockito.
-//            verify(tx).rollback(argThat(new ArgumentMatcher<Throwable>() {
-//                @Override
-//                public boolean matches(Throwable argument) {
-//                    return e.getCause().getClass().equals(argument.getClass());
-//                }
-//            }));
-//            assertNull(entity.getTransaction());
         }
     }
 
@@ -292,12 +282,6 @@ public abstract class TransactionShould<I,
         tx.commit();
     }
 
-    private ConstraintViolationThrowable constraintViolationsEx() {
-        final ConstraintViolationThrowable ex =
-                new ConstraintViolationThrowable(Lists.<ConstraintViolation>newLinkedList());
-        return ex;
-    }
-
     @Test
     public void rollback_automatically_if_commit_failed() {
         final E entity = createEntity(someViolations());
@@ -316,6 +300,12 @@ public abstract class TransactionShould<I,
         }
     }
 
+    private static ConstraintViolationThrowable constraintViolationsEx() {
+        final ConstraintViolationThrowable ex =
+                new ConstraintViolationThrowable(Lists.<ConstraintViolation>newLinkedList());
+        return ex;
+    }
+
     private void checkRollback(E entity, S originalState, Version originalVersion) {
         assertNull(entity.getTransaction());
         assertEquals(originalState, entity.getState());
@@ -323,10 +313,11 @@ public abstract class TransactionShould<I,
     }
 
     private static List<ConstraintViolation> someViolations() {
-        final ConstraintViolation expectedViolation = ConstraintViolation.newBuilder()
-                                                                         .setMsgFormat("Some violation %s")
-                                                                         .addParam("1")
-                                                                         .build();
+        final ConstraintViolation expectedViolation =
+                ConstraintViolation.newBuilder()
+                                   .setMsgFormat("Some violation %s")
+                                   .addParam("1")
+                                   .build();
         return newArrayList(expectedViolation);
     }
 

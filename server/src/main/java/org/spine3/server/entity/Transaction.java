@@ -316,6 +316,7 @@ public abstract class Transaction<I,
      * @return this instance of transaction
      * @see Phase#apply(Message, EventContext)
      */
+    @SuppressWarnings("OverlyBroadCatchBlock")  // to `rollback(..)` in case of any exception.
     Transaction<I, E, S, B> apply(Message eventMessage,
                                   EventContext context) {
         final Phase<I, E, S, B> phase = new Phase<>(this, eventMessage, context);
@@ -323,9 +324,9 @@ public abstract class Transaction<I,
         Phase<I, E, S, B> appliedPhase = null;
         try {
             appliedPhase = phase.propagate();
-        } catch (InvocationTargetException e) {
-            rollback(e);
-            throw illegalStateWithCauseOf(e);
+        } catch (Throwable t) {
+            rollback(t);
+            throw illegalStateWithCauseOf(t);
         } finally {
             final Phase<I, E, S, B> phaseToAdd = appliedPhase == null ? phase : appliedPhase;
             phases.add(phaseToAdd);

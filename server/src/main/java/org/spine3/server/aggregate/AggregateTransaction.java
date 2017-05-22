@@ -46,9 +46,6 @@ class AggregateTransaction<I,
                            B extends ValidatingBuilder<S, ? extends Message.Builder>>
         extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
-    @Nullable
-    private TransactionListener<I, Aggregate<I, S, B>, S, B > listener;
-
     @VisibleForTesting
     AggregateTransaction(Aggregate<I, S, B> entity) {
         super(entity);
@@ -63,11 +60,6 @@ class AggregateTransaction<I,
     @VisibleForTesting
     AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version) {
         super(entity, state, version);
-    }
-
-    private AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version,
-                         TransactionListener<I, Aggregate<I, S, B>, S, B> listener) {
-        super(entity, state, version, listener);
     }
 
     @Override

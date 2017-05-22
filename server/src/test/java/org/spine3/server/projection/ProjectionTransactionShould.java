@@ -17,22 +17,20 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package org.spine3.server.aggregate;
+package org.spine3.server.projection;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
+import org.spine3.base.Subscribe;
 import org.spine3.base.Version;
-import org.spine3.server.command.Assign;
 import org.spine3.server.entity.Transaction;
 import org.spine3.server.entity.TransactionListener;
 import org.spine3.server.entity.TransactionShould;
-import org.spine3.test.aggregate.Project;
-import org.spine3.test.aggregate.ProjectId;
-import org.spine3.test.aggregate.command.CreateProject;
-import org.spine3.test.aggregate.event.ProjectCreated;
-import org.spine3.test.aggregate.event.TaskAdded;
+import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.event.ProjectCreated;
+import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.validate.AbstractValidatingBuilder;
 import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.ConstraintViolationThrowable;
@@ -44,79 +42,79 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
 
 /**
  * @author Alex Tymchenko
  */
-public class AggregateTransactionShould
+public class ProjectionTransactionShould
         extends TransactionShould<ProjectId,
-        Aggregate<ProjectId, Project, AggregateTransactionShould.PatchedProjectBuilder>,
-        Project,
-        AggregateTransactionShould.PatchedProjectBuilder> {
+                                  Projection<ProjectId, Project,
+                                          ProjectionTransactionShould.PatchedProjectBuilder>,
+                                  Project,
+                                  ProjectionTransactionShould.PatchedProjectBuilder> {
 
     private static final ProjectId ID = ProjectId.newBuilder()
-                                                 .setId("aggregate-transaction-should-project")
+                                                 .setId("projection-transaction-should-project")
                                                  .build();
 
     @Override
     protected Transaction<ProjectId,
-            Aggregate<ProjectId, Project, PatchedProjectBuilder>,
+            Projection<ProjectId, Project, PatchedProjectBuilder>,
             Project,
             PatchedProjectBuilder>
-    createTx(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity) {
-        return new AggregateTransaction<>(entity);
+    createTx(Projection<ProjectId, Project, PatchedProjectBuilder> entity) {
+        return new ProjectionTransaction<>(entity);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
-                          Project,
-                          PatchedProjectBuilder> createTxWithState(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
+            Projection<ProjectId, Project, PatchedProjectBuilder>,
+            Project,
+            PatchedProjectBuilder> createTxWithState(
+            Projection<ProjectId, Project, PatchedProjectBuilder> entity, Project state,
             Version version) {
-        return new AggregateTransaction<>(entity, state, version);
+        return new ProjectionTransaction<>(entity, state, version);
     }
 
     @Override
     protected Transaction<ProjectId,
-                          Aggregate<ProjectId, Project, PatchedProjectBuilder>,
-                          Project,
-                          PatchedProjectBuilder>
-    createTxWithListener(Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            Projection<ProjectId, Project, PatchedProjectBuilder>,
+            Project,
+            PatchedProjectBuilder>
+    createTxWithListener(Projection<ProjectId, Project, PatchedProjectBuilder> entity,
                          TransactionListener<ProjectId,
-                                             Aggregate<ProjectId,
-                                                       Project,
-                                                     PatchedProjectBuilder>,
-                                             Project, PatchedProjectBuilder> listener) {
-        return new AggregateTransaction<>(entity, listener);
+                                 Projection<ProjectId,
+                                         Project,
+                                         PatchedProjectBuilder>,
+                                 Project, PatchedProjectBuilder> listener) {
+        return new ProjectionTransaction<>(entity, listener);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity() {
-        return new TestAggregate(ID);
+    protected Projection<ProjectId, Project, PatchedProjectBuilder> createEntity() {
+        return new TestProjection(ID);
     }
 
     @Override
-    protected Aggregate<ProjectId, Project, PatchedProjectBuilder> createEntity(
+    protected Projection<ProjectId, Project, PatchedProjectBuilder> createEntity(
             List<ConstraintViolation> violations) {
-        return new TestAggregate(ID, violations);
+        return new TestProjection(ID, violations);
     }
 
     @Override
     protected Project createNewState() {
         return Project.newBuilder()
                       .setId(ID)
-                      .setName("The new project name to set in tx")
+                      .setName("The new name for the projection state in this tx")
                       .build();
     }
 
     @Override
     protected void checkEventReceived(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             Event event) {
 
-        final TestAggregate aggregate = (TestAggregate) entity;
+        final TestProjection aggregate = (TestProjection) entity;
         final Message actualMessage = unpack(event.getMessage());
         assertTrue(aggregate.getReceivedEvents()
                             .contains(actualMessage));
@@ -124,52 +122,52 @@ public class AggregateTransactionShould
 
     @Override
     protected Message createEventMessage() {
-        return projectCreated(ID, "Project created in a transaction");
+        return ProjectCreated.newBuilder()
+                             .setProjectId(ID)
+                             .build();
     }
 
     @Override
     protected Message createEventMessageThatFailsInHandler() {
-        return Given.EventMessage.taskAdded(ID);
+        return TaskAdded.newBuilder()
+                        .setProjectId(ID)
+                        .build();
     }
 
     @Override
     protected void makeThrowOnBuild(
-            Aggregate<ProjectId, Project, PatchedProjectBuilder> entity,
+            Projection<ProjectId, Project, PatchedProjectBuilder> entity,
             RuntimeException toThrow) {
-        entity.getBuilder().setShouldThrow(toThrow);
+        entity.getBuilder()
+              .setShouldThrow(toThrow);
     }
 
     @SuppressWarnings({"MethodMayBeStatic", "unused"})  // Methods accessed via reflection.
-    static class TestAggregate
-            extends Aggregate<ProjectId, Project, PatchedProjectBuilder> {
+    static class TestProjection
+            extends Projection<ProjectId, Project, PatchedProjectBuilder> {
 
         private final List<Message> receivedEvents = newLinkedList();
         private final List<ConstraintViolation> violations;
 
-        private TestAggregate(ProjectId id) {
+        private TestProjection(ProjectId id) {
             this(id, null);
         }
 
-        private TestAggregate(ProjectId id, @Nullable List<ConstraintViolation> violations) {
+        private TestProjection(ProjectId id, @Nullable List<ConstraintViolation> violations) {
             super(id);
             this.violations = violations;
         }
 
         @Override
         protected List<ConstraintViolation> checkEntityState(Project newState) {
-            if(violations != null) {
+            if (violations != null) {
                 return ImmutableList.copyOf(violations);
             }
             return super.checkEntityState(newState);
         }
 
-        @Assign
-        ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            return projectCreated(cmd.getProjectId(), cmd.getName());
-        }
-
-        @Apply
-        private void event(ProjectCreated event) {
+        @Subscribe
+        public void event(ProjectCreated event) {
             receivedEvents.add(event);
             final Project newState = Project.newBuilder(getState())
                                             .setId(event.getProjectId())
@@ -177,9 +175,9 @@ public class AggregateTransactionShould
             getBuilder().mergeFrom(newState);
         }
 
-        @Apply
-        private void event(TaskAdded event) {
-            throw new RuntimeException("that tests the tx behaviour");
+        @Subscribe
+        public void event(TaskAdded event) {
+            throw new RuntimeException("that tests the projection tx behaviour");
         }
 
         private List<Message> getReceivedEvents() {
@@ -195,7 +193,7 @@ public class AggregateTransactionShould
      * {@linkplain org.spine3.validate.ValidatingBuilders#newInstance(Class) factory method}.
      */
     public static class PatchedProjectBuilder
-            extends AbstractValidatingBuilder<Project, Project.Builder>{
+            extends AbstractValidatingBuilder<Project, Project.Builder> {
 
         @Nullable
         private RuntimeException shouldThrow;
@@ -206,7 +204,7 @@ public class AggregateTransactionShould
 
         @Override
         public Project build() throws ConstraintViolationThrowable {
-            if(shouldThrow != null) {
+            if (shouldThrow != null) {
                 throw shouldThrow;
             } else {
                 return super.build();
