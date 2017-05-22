@@ -23,10 +23,10 @@ package org.spine3.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
-import org.spine3.util.Exceptions;
 
 import java.lang.reflect.Method;
 
+import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
 import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
@@ -34,6 +34,9 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  *
  * <p>Validating builder is used to validate messages according
  * to the business rules during the {@code Message} creation.
+ *
+ * <p>Non-abstract implementations must declare {@code public static TYPE newBuilder()} method,
+ * returning an instance of the implementation class.
  *
  * @param <T> the type of the message to build
  * @param <B> the type of the message builder
@@ -158,7 +161,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
             try {
                 return cls.getMethod("newBuilder");
             } catch (NoSuchMethodException e) {
-                throw Exceptions.illegalArgumentWithCauseOf(e);
+                throw illegalArgumentWithCauseOf(e);
             }
         }
     }
