@@ -34,9 +34,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A transaction, within which {@linkplain Projection projection instances} are modified.
  *
- * <p>The propagation of each transaction phase is required for this type of transactions.
- * If a transaction phase fails, the failure exception is rethrown.
- *
  * @param <I> the type of projection IDs
  * @param <M> the type of projection state
  * @param <B> the type of a {@code ValidatingBuilder} for the projection state

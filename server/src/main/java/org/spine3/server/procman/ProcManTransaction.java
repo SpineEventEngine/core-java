@@ -34,9 +34,6 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * A transaction, within which {@linkplain ProcessManager ProcessManager instances} are modified.
  *
- * <p>The propagation of each transaction phase is required for this type of transactions.
- * If a transaction phase fails, the failure exception is rethrown.
- *
  * @param <I> the type of process manager IDs
  * @param <S> the type of process manager state
  * @param <B> the type of a {@code ValidatingBuilder} for the process manager state

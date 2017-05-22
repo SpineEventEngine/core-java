@@ -33,9 +33,6 @@ import java.lang.reflect.InvocationTargetException;
 /**
  * A transaction, within which {@linkplain Aggregate Aggregate instances} are modified.
  *
- * <p>The propagation of each transaction phase is NOT required for this type of transactions.
- * If a transaction phase fails, the next phase is executed anyway.
- *
  * @param <I> the type of aggregate IDs
  * @param <S> the type of aggregate state
  * @param <B> the type of a {@code ValidatingBuilder} for the aggregate state
