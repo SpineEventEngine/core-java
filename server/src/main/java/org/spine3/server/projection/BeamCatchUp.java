@@ -140,12 +140,11 @@ public class BeamCatchUp {
         private Pipeline createPipeline() {
             Pipeline pipeline = Pipeline.create(options);
 
-            final CoderRegistry coderRegistry = pipeline.getCoderRegistry();
-            final Coder<I> idCoder = getIdCoder(coderRegistry);
-
+            final Coder<I> idCoder = getIdCoder();
             final ProtoCoder<Event> eventCoder = ProtoCoder.of(Event.class);
             final KvCoder<I, Event> eventTupleCoder = KvCoder.of(idCoder, eventCoder);
 
+            final CoderRegistry coderRegistry = pipeline.getCoderRegistry();
             coderRegistry.registerCoderForType(
                     new TypeDescriptor<KV<I, Event>>() {},
                     eventTupleCoder);
@@ -164,9 +163,11 @@ public class BeamCatchUp {
             ).setCoder(eventTupleCoder);
 
             // Group events by projection IDs.
+            final KvCoder<I, Iterable<Event>> idToEventsCoder =
+                    KvCoder.of(idCoder, IterableCoder.of(eventCoder));
             final PCollection<KV<I, Iterable<Event>>> groupped =
                     flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
-                           .setCoder(KvCoder.of(idCoder, IterableCoder.of(eventCoder)));
+                           .setCoder(idToEventsCoder);
 
             // Apply events to projections.
             // 1. Load projection, apply events.
@@ -199,7 +200,7 @@ public class BeamCatchUp {
         }
 
         @SuppressWarnings("unchecked") // the cast is preserved by ID type checking
-        private Coder<I> getIdCoder(CoderRegistry coderRegistry) {
+        private Coder<I> getIdCoder() {
             final Class<I> idClass = repository.getIdClass();
             final Coder<I> idCoder;
             final Identifier.Type idType = Identifier.Type.getType(idClass);
