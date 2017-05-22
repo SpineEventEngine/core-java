@@ -574,7 +574,7 @@ public class ProjectionRepositoryShould
      * The projection stub with the event subscribing methods that do nothing.
      *
      * <p>Such a projection allows to reproduce a use case, when the event-handling method
-     * does not modify the state of an {@code Entity}. For the newly created entities it leads
+     * does not modify the state of an {@code Entity}. For the newly created entities it could lead
      * to an invalid entry created in the storage.
      */
     static class NoopTaskNamesProjection extends Projection<ProjectId,
