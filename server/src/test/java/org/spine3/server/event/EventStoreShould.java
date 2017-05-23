@@ -39,10 +39,9 @@ import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static org.junit.Assert.assertEquals;
@@ -96,7 +95,7 @@ public abstract class EventStoreShould {
                                                        .setBefore(future)
                                                        .build();
         final AtomicBoolean done = new AtomicBoolean(false);
-        final Collection<Event> resultEvents = Collections.synchronizedSet(new HashSet<Event>());
+        final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
         if (!done.get()) {
             fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
@@ -124,14 +123,14 @@ public abstract class EventStoreShould {
         eventStore.append(eventInFuture);
 
         final EventFilter taskAddedType = EventFilter.newBuilder()
-                                                       .setEventType(of(TaskAdded.class).value())
-                                                       .build();
+                                                     .setEventType(of(TaskAdded.class).value())
+                                                     .build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                                                        .setAfter(past)
                                                        .addFilter(taskAddedType)
                                                        .build();
         final AtomicBoolean done = new AtomicBoolean(false);
-        final Collection<Event> resultEvents = Collections.synchronizedSet(new HashSet<Event>());
+        final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
         if (!done.get()) {
             fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
@@ -162,7 +161,7 @@ public abstract class EventStoreShould {
                                                        .addFilter(taskAddedType)
                                                        .build();
         final AtomicBoolean done = new AtomicBoolean(false);
-        final Collection<Event> resultEvents = Collections.synchronizedSet(new HashSet<Event>());
+        final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
         if (!done.get()) {
             fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
