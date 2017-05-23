@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.base.MoreObjects;
 import com.google.protobuf.Message;
 import org.spine3.protobuf.Messages;
 import org.spine3.validate.ConstraintViolation;
@@ -227,6 +228,13 @@ public abstract class AbstractEntity<I, S extends Message> implements Entity<I, 
             throw InvalidEntityStateException.onConstraintViolations(newState,
                                                                      constraintViolations);
         }
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("id", id)
+                          .toString();
     }
 
     @Override

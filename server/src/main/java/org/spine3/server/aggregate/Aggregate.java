@@ -25,11 +25,11 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.annotation.Internal;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.command.CommandHandlingEntity;
@@ -37,17 +37,18 @@ import org.spine3.server.command.EventFactory;
 import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventApplierMethod;
 import org.spine3.type.CommandClass;
+import org.spine3.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newArrayListWithCapacity;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.reflect.EventApplierMethod.forEventMessage;
 import static org.spine3.time.Time.getCurrentTime;
-import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -113,21 +114,10 @@ import static org.spine3.validate.Validate.isNotDefault;
  * @author Alexander Litus
  * @author Mikhail Melnik
  */
-public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
-                extends CommandHandlingEntity<I, S> {
-
-    /**
-     * The builder for the aggregate state.
-     *
-     * <p>This field is non-null only when the aggregate changes its state
-     * during command handling or playing events.
-     *
-     * @see #createBuilder()
-     * @see #getBuilder()
-     * @see #updateState()
-     */
-    @Nullable
-    private volatile B builder;
+public abstract class Aggregate<I,
+                                S extends Message,
+                                B extends ValidatingBuilder<S, ? extends Message.Builder>>
+                extends CommandHandlingEntity<I, S, B> {
 
     /**
      * Events generated in the process of handling commands that were not yet committed.
@@ -158,83 +148,15 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
         super(id);
     }
 
-    /**
-     * This method starts the phase of updating the aggregate state.
-     *
-     * <p>The update phase is closed by the {@link #updateState()}.
-     */
-    private void createBuilder() {
-        @SuppressWarnings("unchecked") // It is safe as we checked the type on the construction.
-        final B builder = (B) getState().toBuilder();
-        this.builder = builder;
-    }
-
-    /**
-     * Obtains the instance of the state builder.
-     *
-     * <p>This method must be called only from within an event applier.
-     *
-     * @return the instance of the new state builder
-     * @throws IllegalStateException if the method is called from outside an event applier
-     */
+    @Override
+    @VisibleForTesting      // Overridden to expose this method to tests.
     protected B getBuilder() {
-        if (this.builder == null) {
-            throw new IllegalStateException(
-                    "Builder is not available. Make sure to call getBuilder() " +
-                    "only from an event applier method.");
-        }
-        return builder;
+        return super.getBuilder();
     }
 
-    /**
-     * Updates the aggregate state and closes the update phase of the aggregate.
-     */
-    private void updateState() {
-        @SuppressWarnings("unchecked")
-         /* It is safe to assume that correct builder type is passed to the aggregate,
-            because otherwise it won't be possible to write the code of applier methods
-            that make sense to the aggregate. */
-        final S newState = (S) getBuilder().build();
-        final Version version = getVersion();
-        updateState(newState, version);
-        this.builder = null;
-    }
-
-    /**
-     * Sets the new state of the aggregate.
-     *
-     * <p>This method is called during the aggregate update phase.
-     * It is not not supposed to be called from outside of this class.
-     *
-     * @param state   the state object to set
-     * @param version the entity version to set
-     * @throws IllegalStateException if the method is called from outside
-     */
-    @Internal
-    @Override
-    protected final void updateState(S state, Version version) {
-        if (builder == null) {
-            throw new IllegalStateException(
-                    "setState() is called from outside of the aggregate update phase.");
-        }
-        super.updateState(state, version);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to apply generated events to the state.
-     * @param envelope
-     */
-    @Override
+    @Override               // Overridden to expose this method to `AggregateCommandEndpoint`.
     protected List<? extends Message> dispatchCommand(CommandEnvelope envelope) {
-        final List<? extends Message> eventMessages = super.dispatchCommand(envelope);
-        try {
-            apply(eventMessages, envelope);
-        } catch (InvocationTargetException e) {
-            throw illegalStateWithCauseOf(e);
-        }
-        return eventMessages;
+        return super.dispatchCommand(envelope);
     }
 
     /**
@@ -243,7 +165,7 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param eventMessage the event message to apply
      * @throws InvocationTargetException if an exception was thrown during the method invocation
      */
-    private void invokeApplier(Message eventMessage) throws InvocationTargetException {
+    void invokeApplier(Message eventMessage) throws InvocationTargetException {
         final EventApplierMethod method = forEventMessage(getClass(), eventMessage);
         method.invoke(this, eventMessage);
     }
@@ -260,43 +182,13 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *                               the {@code cause} for the thrown instance
      */
     void play(AggregateStateRecord aggregateStateRecord) {
-        createBuilder();
-
         final Snapshot snapshot = aggregateStateRecord.getSnapshot();
         if (isNotDefault(snapshot)) {
             restore(snapshot);
         }
-
         final List<Event> events = aggregateStateRecord.getEventList();
 
-        try {
-            for (Event event : events) {
-                final Message message = getMessage(event);
-                final EventContext context = event.getContext();
-                try {
-                    apply(message);
-                    final Version newVersion = context.getVersion();
-                    advanceVersion(newVersion);
-                } catch (InvocationTargetException e) {
-                    throw illegalStateWithCauseOf(e);
-                }
-            }
-        } finally {
-            /*
-                We perform updating the state of the aggregate in this `finally`
-                block (even if there was an exception in one of the appliers)
-                because we want to transit the aggregate out of the “applying events” mode
-                anyway. We do this to minimize the damage to the aggregate
-                in the case of an exception caused by an applier method.
-
-                In general, applier methods must not throw. Command handlers can
-                in case of business failures.
-
-                The exception thrown from an applier still will be seen because we
-                re-throw its cause in the `catch` block above.
-             */
-            updateState();
-        }
+        play(events);
     }
 
     /**
@@ -304,16 +196,9 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param eventMessages the event message to apply
      * @param envelope      the envelope of the command which caused the events
-     * @throws InvocationTargetException if an exception occurs during event applying
      */
-    private void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope)
-            throws InvocationTargetException {
-        createBuilder();
-        try {
-            applyMessages(eventMessages, envelope);
-        } finally {
-            updateState();
-        }
+    void apply(Iterable<? extends Message> eventMessages, CommandEnvelope envelope) {
+        applyMessages(eventMessages, envelope);
     }
 
     /**
@@ -321,28 +206,36 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      *
      * @param eventMessages the event messages or events to apply
      * @param envelope      the envelope of the command which generated the events
-     * @throws InvocationTargetException if the applier method throws an exception
      * @see #ensureEventMessage(Message)
      */
     private void applyMessages(Iterable<? extends Message> eventMessages,
-                               CommandEnvelope envelope) throws InvocationTargetException {
-        final List<? extends Message> messages = Lists.newArrayList(eventMessages);
+                               CommandEnvelope envelope) {
+        final List<? extends Message> messages = newArrayList(eventMessages);
         final EventFactory eventFactory = createEventFactory(envelope, messages.size());
 
-        for (Message eventOrMessage : messages) {
-            final Message eventMessage = ensureEventMessage(eventOrMessage);
+        final List<Event> events = newArrayListWithCapacity(messages.size());
 
-            apply(eventMessage);
-            incrementVersion();
+        Version projectedEventVersion = getVersion();
+
+        for (Message eventOrMessage : messages) {
+
+            // Applying each message would increment the entity version.
+            // Therefore we should simulate this behaviour.
+            projectedEventVersion = Versions.increment(projectedEventVersion);
+            final Message eventMessage = ensureEventMessage(eventOrMessage);
 
             final Event event;
             if (eventOrMessage instanceof Event) {
-                event = importEvent((Event) eventOrMessage, envelope.getCommandContext());
+                event = importEvent((Event) eventOrMessage,
+                                    envelope.getCommandContext(),
+                                    projectedEventVersion);
             } else {
-                event = eventFactory.createEvent(eventMessage, getVersion());
+                event = eventFactory.createEvent(eventMessage, projectedEventVersion);
             }
-            uncommittedEvents.add(event);
+            events.add(event);
         }
+        play(events);
+        uncommittedEvents.addAll(events);
     }
 
     /**
@@ -352,12 +245,12 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      * @param commandContext the context of the import command
      * @return an event with updated command context and entity version
      */
-    private Event importEvent(Event event, CommandContext commandContext) {
+    private static Event importEvent(Event event, CommandContext commandContext, Version version) {
         final EventContext eventContext = event.getContext()
                                                .toBuilder()
                                                .setCommandContext(commandContext)
                                                .setTimestamp(getCurrentTime())
-                                               .setVersion(getVersion())
+                                               .setVersion(version)
                                                .build();
         final Event result = event.toBuilder()
                                   .setContext(eventContext)
@@ -400,16 +293,6 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
     }
 
     /**
-     * Applies an event to the aggregate.
-     *
-     * @param eventMessage an event message
-     * @throws InvocationTargetException    if an exception occurred when calling event applier
-     */
-    private void apply(Message eventMessage) throws InvocationTargetException {
-        invokeApplier(eventMessage);
-    }
-
-    /**
      * Restores the state and version from the passed snapshot.
      *
      * <p>If this method is called during a {@linkplain #play(AggregateStateRecord) replay}
@@ -422,41 +305,8 @@ public abstract class Aggregate<I, S extends Message, B extends Message.Builder>
      */
     void restore(Snapshot snapshot) {
         final S stateToRestore = AnyPacker.unpack(snapshot.getState());
-
-        // See if we're in the state update cycle.
-        final B builder = this.builder;
-
         final Version versionFromSnapshot = snapshot.getVersion();
-        if (builder != null) {
-            builder.clear();
-            builder.mergeFrom(stateToRestore);
-            initVersion(versionFromSnapshot);
-        } else {
-            injectState(stateToRestore, versionFromSnapshot);
-        }
-    }
-
-    /**
-     * Sets the passed state and version.
-     *
-     * <p>The method circumvents the protection in the {@link #updateState(Message, Version)
-     * setState()} method by creating a fake builder instance, which is cleared
-     * after the call.
-     *
-     * <p>This method has package-private access to be accessible by the
-     * {@code AggregateBuilder} test utility class from the {@code testutil} module.
-     */
-    @VisibleForTesting
-    void injectState(S stateToRestore, Version versionFromSnapshot) {
-        try {
-            @SuppressWarnings("unchecked")
-                // The cast is safe as we checked the type on the construction.
-            final B fakeBuilder = (B) getState().newBuilderForType();
-            this.builder = fakeBuilder;
-            updateState(stateToRestore, versionFromSnapshot);
-        } finally {
-            this.builder = null;
-        }
+        setInitialState(stateToRestore, versionFromSnapshot);
     }
 
     /**

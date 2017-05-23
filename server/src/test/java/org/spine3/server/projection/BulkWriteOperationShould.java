@@ -26,6 +26,7 @@ import org.junit.Test;
 import org.spine3.server.projection.BulkWriteOperation.FlushCallback;
 import org.spine3.test.TimeTests;
 import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.time.Durations2;
 
 import java.util.HashSet;
@@ -208,7 +209,8 @@ public class BulkWriteOperationShould {
         }
     }
 
-    private static class TestProjection extends Projection<Object, Project> {
+    private static class TestProjection
+            extends Projection<Object, Project, ProjectValidatingBuilder> {
 
         /**
          * Creates a new instance.

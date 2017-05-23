@@ -20,6 +20,7 @@
 
 package org.spine3.server.procman;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
@@ -32,6 +33,7 @@ import org.spine3.server.reflect.CommandHandlerMethod;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
+import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -67,7 +69,10 @@ import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public abstract class ProcessManager<I, S extends Message> extends CommandHandlingEntity<I, S> {
+public abstract class ProcessManager<I,
+                                     S extends Message,
+                                     B extends ValidatingBuilder<S, ? extends Message.Builder>>
+        extends CommandHandlingEntity<I, S, B> {
 
     /** The Command Bus to post routed commands. */
     private volatile CommandBus commandBus;
@@ -92,6 +97,12 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
         return commandBus;
     }
 
+    @Override
+    @VisibleForTesting      // Overridden to expose this method to tests.
+    protected B getBuilder() {
+        return super.getBuilder();
+    }
+
     /**
      * Dispatches the command to the handler method and transforms the output
      * into a list of events.
@@ -101,9 +112,9 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-        final List<? extends Message> messages = super.dispatchCommand(envelope);
-        final List<Event> result = toEvents(messages, envelope);
-        return result;
+            final List<? extends Message> messages = super.dispatchCommand(envelope);
+            final List<Event> result = toEvents(messages, envelope);
+            return result;
     }
 
     /**
@@ -127,9 +138,11 @@ public abstract class ProcessManager<I, S extends Message> extends CommandHandli
      * @param eventMessage the event to be handled by the process manager
      * @param context of the event
      */
-    protected void dispatchEvent(Message eventMessage, EventContext context) {
+    void dispatchEvent(Message eventMessage,
+                       EventContext context)  {
         checkNotNull(context);
         checkNotNull(eventMessage);
+
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
             method.invoke(this, eventMessage, context);
