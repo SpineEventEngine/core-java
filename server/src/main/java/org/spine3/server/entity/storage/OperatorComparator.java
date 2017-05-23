@@ -20,8 +20,6 @@
 
 package org.spine3.server.entity.storage;
 
-import org.spine3.client.ColumnFilter;
-
 import javax.annotation.Nullable;
 
 /**
@@ -34,7 +32,7 @@ interface OperatorComparator {
     /**
      * Compares the given operands by the rules of a certain operator.
      *
-     * @see QueryOperators#compare(Object, ColumnFilter.Operator, Object) for the detailed behaiour
+     * @see QueryOperators#compare for the detailed behaiour
      * description
      */
     boolean compare(@Nullable Object left, @Nullable Object right);
