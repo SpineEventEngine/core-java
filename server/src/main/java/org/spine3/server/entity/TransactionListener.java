@@ -34,9 +34,9 @@ import org.spine3.validate.ValidatingBuilder;
  */
 @Internal
 public interface TransactionListener<I,
-                                    E extends EventPlayingEntity<I, S, B>,
-                                    S extends Message,
-                                    B extends ValidatingBuilder<S, ? extends Message.Builder>> {
+                                     E extends EventPlayingEntity<I, S, B>,
+                                     S extends Message,
+                                     B extends ValidatingBuilder<S, ? extends Message.Builder>> {
 
     /**
      * A callback invoked after applying a {@linkplain Phase transaction phase}.
