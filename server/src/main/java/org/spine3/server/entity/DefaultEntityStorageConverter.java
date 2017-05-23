@@ -89,7 +89,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
 
             if (entity instanceof AbstractVersionableEntity) {
                 final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-                if(versionable instanceof EventPlayingEntity) {
+                if (versionable instanceof EventPlayingEntity) {
                     final EventPlayingEntity playingEntity = (EventPlayingEntity) versionable;
                     playingEntity.injectState(state, entityRecord.getVersion());
                 } else {
