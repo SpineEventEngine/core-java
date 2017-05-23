@@ -59,10 +59,16 @@ class AggregateTransaction<I,
         super(aggregate, state, version);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>As long as {@linkplain org.spine3.server.reflect.EventApplierMethod event applier method}
+     * does not operate with {@linkplain EventContext event context}, this parameter is ignored.
+     */
     @Override
-    protected void invokeApplier(Aggregate aggregate,
-                                 Message eventMessage,
-                                 @Nullable EventContext ignored) throws InvocationTargetException {
+    protected void dispatch(Aggregate aggregate,
+                            Message eventMessage,
+                            @Nullable EventContext ignored) throws InvocationTargetException {
         aggregate.invokeApplier(eventMessage);
     }
 

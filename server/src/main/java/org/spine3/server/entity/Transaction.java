@@ -202,17 +202,16 @@ public abstract class Transaction<I,
     }
 
     /**
-     * Invokes the event applier method for the current entity-in-transaction,
-     * passing the event message along its context.
+     * Dispatches the event message and its context to the current entity-in-transaction.
      *
      * <p>This operation is always performed in scope of an active transaction.
      *
      * @param entity       the target entity
      * @param eventMessage the event message
      * @param context      the event context
-     * @throws InvocationTargetException if case of any issues while applying the event
+     * @throws InvocationTargetException if case of any issues while dispatching
      */
-    protected abstract void invokeApplier(E entity, Message eventMessage, EventContext context)
+    protected abstract void dispatch(E entity, Message eventMessage, EventContext context)
             throws InvocationTargetException;
 
     /**
@@ -487,9 +486,9 @@ public abstract class Transaction<I,
          * @throws InvocationTargetException if the event listener invocation encountered an error
          */
         private Phase<I, E, S, B> propagate() throws InvocationTargetException {
-            underlyingTransaction.invokeApplier(underlyingTransaction.getEntity(),
-                                                eventMessage,
-                                                context);
+            underlyingTransaction.dispatch(underlyingTransaction.getEntity(),
+                                           eventMessage,
+                                           context);
             underlyingTransaction.advanceVersion(context.getVersion());
             markSuccessful();
             return this;

@@ -49,10 +49,9 @@ public class TestTransaction {
         final Transaction tx = new Transaction(entity, state, version) {
 
             @Override
-            protected void invokeApplier(EventPlayingEntity entity,
-                                         Message eventMessage,
-                                         EventContext context) throws
-                                                               InvocationTargetException {
+            protected void dispatch(EventPlayingEntity entity,
+                                    Message eventMessage,
+                                    EventContext context) throws InvocationTargetException {
                 // do nothing.
             }
         };

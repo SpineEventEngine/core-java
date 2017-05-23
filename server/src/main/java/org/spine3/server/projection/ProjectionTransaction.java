@@ -61,9 +61,9 @@ class ProjectionTransaction<I,
     }
 
     @Override
-    protected void invokeApplier(Projection projection,
-                                 Message eventMessage,
-                                 EventContext context) throws InvocationTargetException {
+    protected void dispatch(Projection projection,
+                            Message eventMessage,
+                            EventContext context) throws InvocationTargetException {
         projection.apply(eventMessage, context);
     }
 

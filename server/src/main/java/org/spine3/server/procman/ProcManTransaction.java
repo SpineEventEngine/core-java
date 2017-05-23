@@ -62,9 +62,9 @@ class ProcManTransaction<I,
     }
 
     @Override
-    protected void invokeApplier(ProcessManager processManager,
-                                 Message eventMessage,
-                                 EventContext context) throws InvocationTargetException {
+    protected void dispatch(ProcessManager processManager,
+                            Message eventMessage,
+                            EventContext context) throws InvocationTargetException {
         processManager.dispatchEvent(eventMessage, context);
     }
 
