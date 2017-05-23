@@ -21,9 +21,11 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
+import org.spine3.client.ColumnFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.entity.Project;
@@ -36,12 +38,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static com.google.common.collect.ImmutableMultimap.of;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singletonMap;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
 
@@ -93,8 +97,11 @@ public class EntityQueryMatcherShould {
         final Serializable acceptedValue = true;
 
         final Collection<Object> ids = Collections.emptyList();
+
+        final Multimap<Column, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
+        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL, filters);
         final QueryParameters params = QueryParameters.newBuilder()
-                                                      .put(target, eq(targetName, acceptedValue))
+                                                      .add(parameter)
                                                       .build();
         final EntityQuery<?> query = EntityQuery.of(ids, params);
 
@@ -137,8 +144,10 @@ public class EntityQueryMatcherShould {
         final Map<String, Column.MemoizedValue> columns = singletonMap(columnName, value);
         final EntityRecordWithColumns recordWithColumns = of(record, columns);
 
+        final Multimap<Column, ColumnFilter> filters = of(column, eq(columnName, actualValue));
+        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL, filters);
         final QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .put(column, eq(columnName, actualValue))
+                                                          .add(parameter)
                                                           .build();
         final EntityQuery<?> query = EntityQuery.of(emptySet(), parameters);
 

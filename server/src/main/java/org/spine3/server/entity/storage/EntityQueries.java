@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
@@ -32,11 +33,10 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.HashMultimap.create;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -76,7 +76,7 @@ public final class EntityQueries {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
         for (AggregatingColumnFilter filter : entityFilters.getFilterList()) {
-            final Map<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
+            final Multimap<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
             final AggregatingOperator operator = filter.getOperator();
             final AggregatingQueryParameter parameter =
                     new AggregatingQueryParameter(operator, columnFilters);
@@ -85,9 +85,9 @@ public final class EntityQueries {
         return builder.build();
     }
 
-    private static Map<Column, ColumnFilter> splitFilters(AggregatingColumnFilter filter,
+    private static Multimap<Column, ColumnFilter> splitFilters(AggregatingColumnFilter filter,
                                                           Class<? extends Entity> entityClass) {
-        final Map<Column, ColumnFilter> columnFilters = new HashMap<>(filter.getFilterCount());
+        final Multimap<Column, ColumnFilter> columnFilters = create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
             final Column column = Columns.findColumn(entityClass, columnFilter.getColumnName());
             columnFilters.put(column, columnFilter);

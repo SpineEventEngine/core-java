@@ -21,6 +21,7 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.base.Predicate;
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
@@ -105,9 +106,9 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         return true;
     }
 
-    private static boolean checkAll(Map<Column, ColumnFilter> filters,
+    private static boolean checkAll(Multimap<Column, ColumnFilter> filters,
                                     Map<String, MemoizedValue> entityColumns) {
-        for (Map.Entry<Column, ColumnFilter> filter : filters.entrySet()) {
+        for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
             final String columnName = filter.getKey().getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);
             final boolean matches = checkSingleParameter(filter.getValue(), memoizedValue);
@@ -118,9 +119,9 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         return true;
     }
 
-    private static boolean checkEither(Map<Column, ColumnFilter> filters,
+    private static boolean checkEither(Multimap<Column, ColumnFilter> filters,
                                        Map<String, MemoizedValue> entityColumns) {
-        for (Map.Entry<Column, ColumnFilter> filter : filters.entrySet()) {
+        for (Map.Entry<Column, ColumnFilter> filter : filters.entries()) {
             final String columnName = filter.getKey().getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);
             final boolean matches = checkSingleParameter(filter.getValue(), memoizedValue);

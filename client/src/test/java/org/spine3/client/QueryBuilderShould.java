@@ -167,10 +167,10 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<AggregatingColumnFilter> columnFilters = entityFilters.getFilterList();
-        assertSize(1, columnFilters);
-        
-
+        final List<AggregatingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        assertSize(1, aggregatingColumnFilters);
+        final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
+                                                                               .getFilterList();
         final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
         final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);

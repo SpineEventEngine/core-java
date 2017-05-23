@@ -20,7 +20,8 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.Iterators;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
@@ -31,14 +32,18 @@ import org.spine3.server.entity.VersionableEntity;
 
 import java.text.ParseException;
 import java.util.Collection;
+import java.util.List;
 
+import static com.google.common.collect.ImmutableMultimap.of;
+import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
@@ -58,8 +63,9 @@ public class QueryParametersShould {
         final String columnName = version.name();
         final Column column = Columns.findColumn(VersionableEntity.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
+        final AggregatingQueryParameter parameter = aggregatingParameter(column, filter);
         final QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .put(column, filter)
+                                                          .add(parameter)
                                                           .build();
         reserializeAndAssert(parameters);
     }
@@ -76,12 +82,18 @@ public class QueryParametersShould {
                 eq("firstFilter", 1),
                 eq("secondFilter", 42),
                 gt("thirdFilter", getCurrentTime())};
-        final Iterable<ColumnFilter> parameters = newBuilder().put(mockColumn(), filters[0])
-                                                              .put(mockColumn(), filters[1])
-                                                              .put(mockColumn(), filters[2])
-                                                              .build();
-        final ColumnFilter[] results = Iterators.toArray(parameters.iterator(), ColumnFilter.class);
-        assertArrayEquals(filters, results);
+        final Multimap<Column, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
+                                                                mockColumn(), filters[1],
+                                                                mockColumn(), filters[2]);
+        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL,
+                                                                                  columnFilters);
+        final QueryParameters parameters = newBuilder().add(parameter)
+                                                       .build();
+        final Collection<ColumnFilter> results = newLinkedList();
+        for (AggregatingQueryParameter queryParameter : parameters) {
+            results.addAll(queryParameter.getFilters().values());
+        }
+        assertArrayEquals(filters, results.toArray());
     }
 
     @Test
@@ -91,13 +103,19 @@ public class QueryParametersShould {
                 eq("$2st", "entityColumnValue"),
                 gt("$3d", getCurrentTime())};
         final Column[] columns = {mockColumn(), mockColumn(), mockColumn()};
-        final QueryParameters parameters = newBuilder().put(columns[0], filters[0])
-                                                       .put(columns[1], filters[1])
-                                                       .put(columns[2], filters[2])
+        final Multimap<Column, ColumnFilter> columnFilters = of(columns[0], filters[0],
+                                                                columns[1], filters[1],
+                                                                columns[2], filters[2]);
+        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL,
+                                                                                  columnFilters);
+        final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
+        assertSize(1, newArrayList(parameters));
+        final AggregatingQueryParameter singleParameter = parameters.iterator().next();
+        final Multimap<Column, ColumnFilter> actualFilters = singleParameter.getFilters();
         for (int i = 0; i < columns.length; i++) {
             final Column column = columns[i];
-            final Collection<ColumnFilter> readFilters = parameters.get(column);
+            final Collection<ColumnFilter> readFilters = actualFilters.get(column);
             assertFalse(readFilters.isEmpty());
             assertSize(1, readFilters);
             assertEquals(filters[i], readFilters.iterator().next());
@@ -115,20 +133,21 @@ public class QueryParametersShould {
 
         final ColumnFilter startTimeFilter = gt(columnName, startTime);
         final ColumnFilter deadlineFilter = le(columnName, deadline);
-        final QueryParameters parameters = newBuilder().put(column, startTimeFilter)
-                                                       .put(column, deadlineFilter)
+        final Multimap<Column, ColumnFilter> columnFilters =
+                ImmutableMultimap.<Column, ColumnFilter>builder()
+                                 .put(column, startTimeFilter)
+                                 .put(column, deadlineFilter)
+                                 .build();
+        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL,
+                                                                                  columnFilters);
+        final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
-        final Collection<ColumnFilter> timeFilters = parameters.get(column);
+        final List<AggregatingQueryParameter> aggregatingParameters = newArrayList(parameters);
+        assertSize(1, aggregatingParameters);
+        final Multimap<Column, ColumnFilter> actualColumnFilters = aggregatingParameters.get(0).getFilters();
+        final Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
         assertSize(2, timeFilters);
         assertContainsAll(timeFilters, startTimeFilter, deadlineFilter);
-    }
-
-    @Test
-    public void retrieve_absent_value_for_unknown_columns() {
-        final QueryParameters parameters = newBuilder().build();
-        final Column unknownColumn = mockColumn();
-        final Collection<ColumnFilter> filter = parameters.get(unknownColumn);
-        assertTrue(filter.isEmpty());
     }
 
     @Test
@@ -142,18 +161,18 @@ public class QueryParametersShould {
         // Consists of 3 instances with a single filter targeting a String Column
         final Column bColumn = mockColumn();
         final ColumnFilter bFilter = ColumnFilters.eq("b", "c");
-        final QueryParameters paramsB1 = newBuilder().put(bColumn, bFilter)
+        final QueryParameters paramsB1 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                      .build();
-        final QueryParameters paramsB2 = newBuilder().put(bColumn, bFilter)
+        final QueryParameters paramsB2 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                      .build();
-        final QueryParameters paramsB3 = newBuilder().put(bColumn, bFilter)
+        final QueryParameters paramsB3 = newBuilder().add(aggregatingParameter(bColumn, bFilter))
                                                      .build();
 
         // --- Group C ---
         // Consists of an instance with a single filter targeting an integer number Column
         final Column cColumn = mockColumn();
         final ColumnFilter cFilter = ColumnFilters.eq("a", 42);
-        final QueryParameters paramsC = newBuilder().put(cColumn, cFilter)
+        final QueryParameters paramsC = newBuilder().add(aggregatingParameter(cColumn, cFilter))
                                                     .build();
 
         // --- Check ---
@@ -166,5 +185,12 @@ public class QueryParametersShould {
     private static Column mockColumn() {
         final Column column = mock(Column.class);
         return column;
+    }
+
+    private static AggregatingQueryParameter aggregatingParameter(Column column,
+                                                                  ColumnFilter columnFilter) {
+        final Multimap<Column, ColumnFilter> filter = of(column, columnFilter);
+        final AggregatingQueryParameter result = new AggregatingQueryParameter(ALL, filter);
+        return result;
     }
 }

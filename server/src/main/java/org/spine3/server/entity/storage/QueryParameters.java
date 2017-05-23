@@ -21,7 +21,6 @@
 package org.spine3.server.entity.storage;
 
 import com.google.common.base.Objects;
-import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import org.spine3.client.ColumnFilter;
@@ -43,20 +42,6 @@ public final class QueryParameters implements Iterable<AggregatingQueryParameter
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
                                  .build();
-    }
-
-    /**
-     * Returns the {@link ColumnFilter} targeted at the given {@link Column}, or
-     * {@link Optional#absent()} is there is no such {@link ColumnFilter}.
-     *
-     * @param column the target {@link Column} of the result {@link ColumnFilter}
-     * @return the corresponding {@link ColumnFilter
-     */
-    @Deprecated
-    public ImmutableCollection<ColumnFilter> get(Column column) {
-//        final ImmutableCollection<ColumnFilter> filters = parameters.get(column);
-//        return filters;
-        throw new UnsupportedOperationException();
     }
 
     /**

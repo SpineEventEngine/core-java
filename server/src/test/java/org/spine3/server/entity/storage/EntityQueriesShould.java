@@ -20,13 +20,13 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Version;
+import org.spine3.client.AggregatingColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
@@ -40,8 +40,10 @@ import org.spine3.test.storage.ProjectId;
 import org.spine3.testdata.Sample;
 
 import java.util.Collection;
+import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
+import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -97,10 +99,14 @@ public class EntityQueriesShould {
                                                  .build();
         final ColumnFilter versionFilter = ColumnFilters.eq(version.name(), versionValue);
         final ColumnFilter archivedFilter = ColumnFilters.eq(archived.name(), archivedValue);
+        final AggregatingColumnFilter aggregatingFilter =
+                AggregatingColumnFilter.newBuilder()
+                                       .addFilter(versionFilter)
+                                       .addFilter(archivedFilter)
+                                       .build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
-                                                   .addColumnFilter(versionFilter)
-                                                   .addColumnFilter(archivedFilter)
+                                                   .addFilter(aggregatingFilter)
                                                    .build();
         final Class<? extends Entity> entityClass = AbstractVersionableEntity.class;
         final EntityQuery<?> query = EntityQueries.from(filters, entityClass);
@@ -112,8 +118,12 @@ public class EntityQueriesShould {
         final Object singleId = ids.iterator().next();
         assertEquals(someGenericId, singleId);
 
-        final Collection<ColumnFilter> values = Lists.newArrayList(query.getParameters());
-        assertContains(versionFilter, values);
-        assertContains(archivedFilter, values);
+        final List<AggregatingQueryParameter> values = newArrayList(query.getParameters());
+        assertSize(1, values);
+        final Collection<ColumnFilter> columnFilters = values.get(0)
+                                                             .getFilters()
+                                                             .values();
+        assertContains(versionFilter, columnFilters);
+        assertContains(archivedFilter, columnFilters);
     }
 }

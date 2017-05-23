@@ -37,6 +37,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.EITHER;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
@@ -123,7 +124,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     }
 
     private static AggregatingColumnFilter timeFilter(EventStreamQuery query) {
-        final AggregatingColumnFilter.Builder timeFilter = AggregatingColumnFilter.newBuilder();
+        final AggregatingColumnFilter.Builder timeFilter = AggregatingColumnFilter.newBuilder()
+                                                                                  .setOperator(ALL);
         if (query.hasAfter()) {
             final Timestamp timestamp = query.getAfter();
             final ColumnFilter filter = gt(CREATED_TIME_COLUMN, timestamp);

@@ -30,6 +30,7 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.client.AggregatingColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
@@ -46,6 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Verify.assertContains;
@@ -57,10 +59,10 @@ import static org.spine3.test.Verify.assertSize;
  */
 @SuppressWarnings("ConstantConditions")
 public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>
-                                                          & TestEntityWithStringColumn,
-                                                  I,
-                                                  S extends Message>
-                                                  extends TenantAwareTest {
+        & TestEntityWithStringColumn,
+        I,
+        S extends Message>
+        extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -206,8 +208,12 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                                                   .setValue(id1.toString())
                                                   .build();
         final ColumnFilter filter = ColumnFilters.eq(fieldPath, fieldValue);
+        final AggregatingColumnFilter aggregatingFilter = AggregatingColumnFilter.newBuilder()
+                                                                                 .addFilter(filter)
+                                                                                 .setOperator(ALL)
+                                                                                 .build();
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .addColumnFilter(filter)
+                                                   .addFilter(aggregatingFilter)
                                                    .build();
         final Collection<E> found = repository.find(filters, FieldMask.getDefaultInstance());
         assertSize(1, found);

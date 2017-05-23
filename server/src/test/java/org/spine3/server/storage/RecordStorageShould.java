@@ -33,6 +33,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
+import org.spine3.client.AggregatingColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
@@ -68,6 +69,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
@@ -390,9 +392,13 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final ColumnFilter status = ColumnFilters.eq("projectStatusValue", wrappedValue);
         final ColumnFilter version = ColumnFilters.eq("counterVersion", versionValue);
+        final AggregatingColumnFilter aggregatingFilter = AggregatingColumnFilter.newBuilder()
+                                                                                 .setOperator(ALL)
+                                                                                 .addFilter(status)
+                                                                                 .addFilter(version)
+                                                                                 .build();
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .addColumnFilter(status)
-                                                   .addColumnFilter(version)
+                                                   .addFilter(aggregatingFilter)
                                                    .build();
         final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
         final I idMatching = newId();

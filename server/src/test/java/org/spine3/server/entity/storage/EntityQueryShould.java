@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
@@ -38,12 +40,14 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
+import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.protobuf.TypeConverter.toAny;
 import static org.spine3.server.storage.LifecycleFlagField.deleted;
@@ -59,8 +63,10 @@ public class EntityQueryShould {
         final String columnName = deleted.name();
         final Column column = Columns.findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
+        final Multimap<Column, ColumnFilter> filters = of(column, filter);
+        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL, filters);
         final QueryParameters parameters = QueryParameters.newBuilder()
-                                                          .put(column, filter)
+                                                          .add(parameter)
                                                           .build();
         final Set<String> ids = singleton("my-awesome-id");
         final EntityQuery<String> query = EntityQuery.of(ids, parameters);
@@ -71,8 +77,7 @@ public class EntityQueryShould {
     public void not_accept_nulls() {
         new NullPointerTester()
                 .setDefault(EntityIdFilter.class, EntityIdFilter.getDefaultInstance())
-                .setDefault(QueryParameters.class, QueryParameters.newBuilder()
-                                                                  .build())
+                .setDefault(QueryParameters.class, QueryParameters.newBuilder().build())
                 .testStaticMethods(EntityQuery.class, NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -169,6 +174,7 @@ public class EntityQueryShould {
 
     private static QueryParameters paramsFromValues(Map<Column, Object> values) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
+        final Multimap<Column, ColumnFilter> filters = HashMultimap.create(values.size(), 1);
         for (Map.Entry<Column, Object> param : values.entrySet()) {
             final Column column = param.getKey();
             final ColumnFilter filter = ColumnFilter.newBuilder()
@@ -176,8 +182,9 @@ public class EntityQueryShould {
                                                     .setValue(toAny(param.getValue()))
                                                     .setColumnName(column.getName())
                                                     .build();
-            builder.put(column, filter);
+            filters.put(column, filter);
         }
-        return builder.build();
+        return builder.add(new AggregatingQueryParameter(ALL, filters))
+                      .build();
     }
 }

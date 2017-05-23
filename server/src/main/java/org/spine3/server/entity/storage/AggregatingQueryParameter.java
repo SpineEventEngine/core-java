@@ -20,15 +20,15 @@
 
 package org.spine3.server.entity.storage;
 
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Multimap;
 import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
 import org.spine3.client.ColumnFilter;
 
 import java.io.Serializable;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.ImmutableMap.copyOf;
+import static com.google.common.collect.ImmutableMultimap.copyOf;
 
 /**
  * @author Dmytro Dashenkov
@@ -39,9 +39,9 @@ public final class AggregatingQueryParameter implements Serializable {
 
     private final AggregatingOperator operator;
 
-    private final ImmutableMap<Column, ColumnFilter> filters;
+    private final ImmutableMultimap<Column, ColumnFilter> filters;
 
-    AggregatingQueryParameter(AggregatingOperator operator, Map<Column, ColumnFilter> filters) {
+    AggregatingQueryParameter(AggregatingOperator operator, Multimap<Column, ColumnFilter> filters) {
         this.operator = checkNotNull(operator);
         this.filters = copyOf(filters);
     }
@@ -51,7 +51,7 @@ public final class AggregatingQueryParameter implements Serializable {
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public ImmutableMap<Column, ColumnFilter> getFilters() {
+    public ImmutableMultimap<Column, ColumnFilter> getFilters() {
         return filters;
     }
 }
