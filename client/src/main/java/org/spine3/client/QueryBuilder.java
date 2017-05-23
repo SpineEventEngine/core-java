@@ -222,7 +222,7 @@ public final class QueryBuilder {
      * </pre>
      *
      * <p>In the example above, the {@code Customer} records match the built query if they represent
-     * companies that have been created later then two years ago and that have either {@code SMALL}
+     * companies that have been created later than two years ago and that have either {@code SMALL}
      * or {@code MEDIUM} company size.
      *
      * <p>Note that the filters which belong to {@link ColumnFilters#all all(...)} groups may be
