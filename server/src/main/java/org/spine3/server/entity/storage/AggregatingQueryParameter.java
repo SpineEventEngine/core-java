@@ -20,6 +20,8 @@
 
 package org.spine3.server.entity.storage;
 
+import com.google.common.base.MoreObjects;
+import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
@@ -53,5 +55,31 @@ public final class AggregatingQueryParameter implements Serializable {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public ImmutableMultimap<Column, ColumnFilter> getFilters() {
         return filters;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        AggregatingQueryParameter parameter = (AggregatingQueryParameter) o;
+        return getOperator() == parameter.getOperator() &&
+                Objects.equal(getFilters(), parameter.getFilters());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getOperator(), getFilters());
+    }
+
+    @Override
+    public String toString() {
+        return MoreObjects.toStringHelper(this)
+                          .add("operator", operator)
+                          .add("filters", filters)
+                          .toString();
     }
 }
