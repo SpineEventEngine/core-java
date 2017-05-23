@@ -82,7 +82,7 @@ public enum EntityField implements StorageField {
      *
      * <p>All the Spine basic {@linkplain org.spine3.server.entity.Entity Entities} like
      * {@linkplain org.spine3.server.aggregate.Aggregate Aggregates},
-     * {@linkplain org.spine3.server.projection.Projection Projections}, e.t.c do have this field.
+     * {@linkplain org.spine3.server.projection.Projection Projections}, etc. do have this field.
      *
      * @see org.spine3.server.entity.VersionableEntity
      * @see org.spine3.base.Version

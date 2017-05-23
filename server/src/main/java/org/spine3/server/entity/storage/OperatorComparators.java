@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package org.spine3.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
@@ -53,7 +53,7 @@ final class OperatorComparators {
     }
 
     /**
-     * Generates an instance of {@link OperatorComparator} basing on the given {@link Operator}.
+     * Generates an instance of {@link OperatorComparator} based on the given {@link Operator}.
      *
      * @param operator the rule of comparison
      * @return an instance of {@link OperatorComparator}

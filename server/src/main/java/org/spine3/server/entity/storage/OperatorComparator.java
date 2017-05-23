@@ -18,7 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package org.spine3.server.entity.storage;
+
+import org.spine3.client.ColumnFilter;
 
 import javax.annotation.Nullable;
 

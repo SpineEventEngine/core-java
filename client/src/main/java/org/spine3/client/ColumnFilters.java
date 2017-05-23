@@ -58,7 +58,7 @@ public final class ColumnFilters {
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of QueryParameter
+     * @return new instance of ColumnFilter
      */
     public static ColumnFilter eq(String columnName, Object value) {
         checkNotNull(columnName);
@@ -72,7 +72,7 @@ public final class ColumnFilters {
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of QueryParameter
+     * @return new instance of ColumnFilter
      */
     public static ColumnFilter gt(String columnName, Timestamp value) {
         checkNotNull(columnName);
@@ -86,7 +86,7 @@ public final class ColumnFilters {
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of QueryParameter
+     * @return new instance of ColumnFilter
      */
     public static ColumnFilter lt(String columnName, Timestamp value) {
         checkNotNull(columnName);
@@ -100,7 +100,7 @@ public final class ColumnFilters {
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of QueryParameter
+     * @return new instance of ColumnFilter
      */
     public static ColumnFilter ge(String columnName, Timestamp value) {
         checkNotNull(columnName);
@@ -114,7 +114,7 @@ public final class ColumnFilters {
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
-     * @return new instance of QueryParameter
+     * @return new instance of ColumnFilter
      */
     public static ColumnFilter le(String columnName, Timestamp value) {
         checkNotNull(columnName);
@@ -122,14 +122,47 @@ public final class ColumnFilters {
         return createFilter(columnName, value, LESS_OR_EQUAL);
     }
 
+    /**
+     * Creates new conjunction aggregating filter.
+     *
+     * <p>A record is considered matching this filter if and only if it matches all of
+     * the aggregated Column filters.
+     *
+     * @param first the first {@link ColumnFilter}
+     * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
+     * @return new instance of {@link AggregatingColumnFilter}
+     */
     public static AggregatingColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
         return aggregateFilters(asList(first, rest), ALL);
     }
 
+    /**
+     * Creates new disjunction aggregating filter.
+     *
+     * <p>A record is considered matching this filter if it matches at least one of the aggregated
+     * Column filters.
+     *
+     * @param first the first {@link ColumnFilter}
+     * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
+     * @return new instance of {@link AggregatingColumnFilter}
+     */
     public static AggregatingColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
         return aggregateFilters(asList(first, rest), EITHER);
     }
 
+    /**
+     * Creates new conjunction aggregating filter.
+     *
+     * <p>A record is considered matching this filter if and only if it matches all of
+     * the aggregated Column filters.
+     *
+     * <p>This method is used to create the default {@code ALL} filter if the user chooses to pass
+     * instances of {@link ColumnFilter} directly to the {@link QueryBuilder}.
+     *
+     * @param filters the aggregated Column filters
+     * @return new instance of {@link AggregatingColumnFilter}
+     * @see #all(ColumnFilter, ColumnFilter...) for the public API equivalent
+     */
     static AggregatingColumnFilter all(Collection<ColumnFilter> filters) {
         return aggregateFilters(filters, ALL);
     }

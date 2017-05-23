@@ -75,14 +75,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
         final EntityFilters filters = toEntityFilters(query);
         final Iterable<EventEntity> entities = find(filters, FieldMask.getDefaultInstance());
-
-        // Optimize the filtering by excluding the time bounds.
-        final EventStreamQuery queryRegardlessTime = query.toBuilder()
-                                                          .clearBefore()
-                                                          .clearAfter()
-                                                          .build();
-        final Predicate<EventEntity> detailedLookupFilter = createEntityFilter(queryRegardlessTime);
-
+        // A predicate on the Event message and EventContext fields.
+        final Predicate<EventEntity> detailedLookupFilter = createEntityFilter(query);
         final Iterator<EventEntity> entityIterator = FluentIterable.from(entities)
                                                                    .filter(detailedLookupFilter)
                                                                    .toSortedList(comparator())

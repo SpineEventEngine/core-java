@@ -34,6 +34,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMultimap.copyOf;
 
 /**
+ * A set of {@link ColumnFilter} instances joined by a logical aggregating
+ * {@link AggregatingOperator operator}.
+ *
  * @author Dmytro Dashenkov
  */
 public final class AggregatingQueryParameter implements Serializable {
@@ -44,8 +47,16 @@ public final class AggregatingQueryParameter implements Serializable {
 
     private final ImmutableMultimap<Column, ColumnFilter> filters;
 
-    public static AggregatingQueryParameter from(Multimap<Column, ColumnFilter> filters,
-                                                 AggregatingOperator operator) {
+    /**
+     * Creates a new instance of {@code AggregatingQueryParameter} from the given filters joined
+     * by the given operator.
+     *
+     * @param filters  the filters to aggregate
+     * @param operator the operator to apply to the given filters
+     * @return new instance of {@code AggregatingQueryParameter}
+     */
+    static AggregatingQueryParameter from(Multimap<Column, ColumnFilter> filters,
+                                          AggregatingOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
         checkArgument(operator.getNumber() > 0, "Invalid aggregating operator %s.", operator);
@@ -59,10 +70,16 @@ public final class AggregatingQueryParameter implements Serializable {
         this.filters = copyOf(filters);
     }
 
+    /**
+     * @return the aggregating operator
+     */
     public AggregatingOperator getOperator() {
         return operator;
     }
 
+    /**
+     * @return the aggregated {@link ColumnFilter Column filters}
+     */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public ImmutableMultimap<Column, ColumnFilter> getFilters() {
         return filters;

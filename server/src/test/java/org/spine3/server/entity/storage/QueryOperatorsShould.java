@@ -18,12 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package org.spine3.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.server.entity.storage.QueryOperators;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertFalse;
@@ -33,7 +34,7 @@ import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
-import static org.spine3.client.QueryOperators.compare;
+import static org.spine3.server.entity.storage.QueryOperators.compare;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.nullRef;
 import static org.spine3.time.Durations2.seconds;
@@ -43,7 +44,7 @@ import static org.spine3.time.Time.getCurrentTime;
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("Duplicates")     // Comparison tests are similar but cannot be simplified to one
-public class QueryOperatorsShould { // effectively and keeping the 8
+public class QueryOperatorsShould {
 
     @Test
     public void have_private_util_ctor() {

@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package org.spine3.server.entity.storage;
 
 import com.google.protobuf.Timestamp;
-import org.spine3.annotation.Internal;
 import org.spine3.client.ColumnFilter.Operator;
 
 import javax.annotation.Nullable;
@@ -30,7 +29,7 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A utility class for working with the {@link ColumnFilter.Operator} enum.
+ * A utility class for working with the {@link Operator} enum.
  *
  * <p>The main facility of this class is executing the {@linkplain #compare comparison} operations
  * represented by an {@link Operator} enum value and two operands of a certain type.
@@ -49,8 +48,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-@Internal
-public final class QueryOperators {
+final class QueryOperators {
 
     private QueryOperators() {
         // Prevent this static class from being initialized.
@@ -73,7 +71,7 @@ public final class QueryOperators {
      *                                       <a href="supported_types">not supported</a> for
      *                                       the given data types
      */
-    public static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
+    static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
         final OperatorComparator comparator = OperatorComparators.of(operator);

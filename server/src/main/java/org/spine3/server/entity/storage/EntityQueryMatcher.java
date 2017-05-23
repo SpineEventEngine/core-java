@@ -35,8 +35,8 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.client.QueryOperators.compare;
 import static org.spine3.protobuf.TypeConverter.toObject;
+import static org.spine3.server.entity.storage.QueryOperators.compare;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
