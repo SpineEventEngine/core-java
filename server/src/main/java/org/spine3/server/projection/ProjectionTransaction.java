@@ -67,7 +67,12 @@ class ProjectionTransaction<I,
         projection.apply(eventMessage, context);
     }
 
-    @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
+    /**
+     * {@inheritDoc}
+     *
+     * <p>This method is overridden to expose itself to repositories and state builders
+     * in this package.
+     */
     @Override
     protected void commit() {
         super.commit();
