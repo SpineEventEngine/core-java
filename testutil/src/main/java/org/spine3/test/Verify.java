@@ -1508,7 +1508,9 @@ public final class Verify extends Assert {
      * <p>
      * e.g.
      * <pre>
-     * Verify.assertThrowsWithCause(RuntimeException.class, IOException.class, new Callable<Void>()
+     * Verify.assertThrowsWithCause(RuntimeException.class,
+     *                              IOException.class,
+     *                              new Callable&lt;Void&gt;()
      * {
      *    public Void call() throws Exception
      *    {
