@@ -79,14 +79,15 @@ public final class EntityQueries {
             final Multimap<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
             final AggregatingOperator operator = filter.getOperator();
             final AggregatingQueryParameter parameter =
-                    new AggregatingQueryParameter(operator, columnFilters);
+                    AggregatingQueryParameter.from(columnFilters, operator);
             builder.add(parameter);
         }
         return builder.build();
     }
 
-    private static Multimap<Column, ColumnFilter> splitFilters(AggregatingColumnFilter filter,
-                                                          Class<? extends Entity> entityClass) {
+    private static Multimap<Column, ColumnFilter> splitFilters(
+            AggregatingColumnFilter filter,
+            Class<? extends Entity> entityClass) {
         final Multimap<Column, ColumnFilter> columnFilters = create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
             final Column column = Columns.findColumn(entityClass, columnFilter.getColumnName());

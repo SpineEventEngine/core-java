@@ -29,6 +29,7 @@ import org.spine3.client.ColumnFilter;
 
 import java.io.Serializable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMultimap.copyOf;
 
@@ -43,8 +44,18 @@ public final class AggregatingQueryParameter implements Serializable {
 
     private final ImmutableMultimap<Column, ColumnFilter> filters;
 
-    AggregatingQueryParameter(AggregatingOperator operator, Multimap<Column, ColumnFilter> filters) {
-        this.operator = checkNotNull(operator);
+    public static AggregatingQueryParameter from(Multimap<Column, ColumnFilter> filters,
+                                                 AggregatingOperator operator) {
+        checkNotNull(filters);
+        checkNotNull(operator);
+        checkArgument(operator.getNumber() > 0, "Invalid aggregating operator %s.", operator);
+
+        return new AggregatingQueryParameter(operator, filters);
+    }
+
+    private AggregatingQueryParameter(AggregatingOperator operator,
+                                      Multimap<Column, ColumnFilter> filters) {
+        this.operator = operator;
         this.filters = copyOf(filters);
     }
 

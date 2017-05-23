@@ -99,7 +99,7 @@ public class EntityQueryMatcherShould {
         final Collection<Object> ids = Collections.emptyList();
 
         final Multimap<Column, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
-        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL, filters);
+        final AggregatingQueryParameter parameter = AggregatingQueryParameter.from(filters, ALL);
         final QueryParameters params = QueryParameters.newBuilder()
                                                       .add(parameter)
                                                       .build();
@@ -147,7 +147,7 @@ public class EntityQueryMatcherShould {
         final EntityRecordWithColumns recordWithColumns = of(record, columns);
 
         final Multimap<Column, ColumnFilter> filters = of(column, eq(columnName, actualValue));
-        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL, filters);
+        final AggregatingQueryParameter parameter = AggregatingQueryParameter.from(filters, ALL);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();

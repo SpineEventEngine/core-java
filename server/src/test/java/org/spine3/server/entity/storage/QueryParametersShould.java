@@ -47,6 +47,7 @@ import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
+import static org.spine3.server.entity.storage.AggregatingQueryParameter.from;
 import static org.spine3.server.entity.storage.QueryParameters.newBuilder;
 import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.test.Verify.assertContainsAll;
@@ -85,8 +86,7 @@ public class QueryParametersShould {
         final Multimap<Column, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
                                                                 mockColumn(), filters[1],
                                                                 mockColumn(), filters[2]);
-        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL,
-                                                                                  columnFilters);
+        final AggregatingQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         final Collection<ColumnFilter> results = newLinkedList();
@@ -106,8 +106,7 @@ public class QueryParametersShould {
         final Multimap<Column, ColumnFilter> columnFilters = of(columns[0], filters[0],
                                                                 columns[1], filters[1],
                                                                 columns[2], filters[2]);
-        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL,
-                                                                                  columnFilters);
+        final AggregatingQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         assertSize(1, newArrayList(parameters));
@@ -138,8 +137,7 @@ public class QueryParametersShould {
                                  .put(column, startTimeFilter)
                                  .put(column, deadlineFilter)
                                  .build();
-        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL,
-                                                                                  columnFilters);
+        final AggregatingQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         final List<AggregatingQueryParameter> aggregatingParameters = newArrayList(parameters);
@@ -190,7 +188,7 @@ public class QueryParametersShould {
     private static AggregatingQueryParameter aggregatingParameter(Column column,
                                                                   ColumnFilter columnFilter) {
         final Multimap<Column, ColumnFilter> filter = of(column, columnFilter);
-        final AggregatingQueryParameter result = new AggregatingQueryParameter(ALL, filter);
+        final AggregatingQueryParameter result = from(filter, ALL);
         return result;
     }
 }

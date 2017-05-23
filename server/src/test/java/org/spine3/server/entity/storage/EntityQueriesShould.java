@@ -48,6 +48,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.EITHER;
 import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -103,6 +104,7 @@ public class EntityQueriesShould {
                 AggregatingColumnFilter.newBuilder()
                                        .addFilter(versionFilter)
                                        .addFilter(archivedFilter)
+                                       .setOperator(EITHER)
                                        .build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .setIdFilter(idFilter)
@@ -120,9 +122,10 @@ public class EntityQueriesShould {
 
         final List<AggregatingQueryParameter> values = newArrayList(query.getParameters());
         assertSize(1, values);
-        final Collection<ColumnFilter> columnFilters = values.get(0)
-                                                             .getFilters()
-                                                             .values();
+        final AggregatingQueryParameter singleParam = values.get(0);
+        final Collection<ColumnFilter> columnFilters = singleParam.getFilters()
+                                                                  .values();
+        assertEquals(EITHER, singleParam.getOperator());
         assertContains(versionFilter, columnFilters);
         assertContains(archivedFilter, columnFilters);
     }

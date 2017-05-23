@@ -64,7 +64,7 @@ public class EntityQueryShould {
         final Column column = Columns.findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
         final Multimap<Column, ColumnFilter> filters = of(column, filter);
-        final AggregatingQueryParameter parameter = new AggregatingQueryParameter(ALL, filters);
+        final AggregatingQueryParameter parameter = AggregatingQueryParameter.from(filters, ALL);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();
@@ -184,7 +184,7 @@ public class EntityQueryShould {
                                                     .build();
             filters.put(column, filter);
         }
-        return builder.add(new AggregatingQueryParameter(ALL, filters))
+        return builder.add(AggregatingQueryParameter.from(filters, ALL))
                       .build();
     }
 }
