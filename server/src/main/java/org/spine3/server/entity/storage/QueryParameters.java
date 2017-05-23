@@ -24,25 +24,21 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import org.spine3.client.AggregatingColumnFilter;
 import org.spine3.client.ColumnFilter;
 
 import java.io.Serializable;
 import java.util.Iterator;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The parameters of an {@link EntityQuery}.
  *
  * @author Dmytro Dashenkov
  */
-public final class QueryParameters implements Iterable<AggregatingColumnFilter>, Serializable {
+public final class QueryParameters implements Iterable<AggregatingQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 526400152015141524L;
 
-    private final ImmutableCollection<AggregatingColumnFilter> parameters;
+    private final ImmutableCollection<AggregatingQueryParameter> parameters;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
@@ -69,7 +65,7 @@ public final class QueryParameters implements Iterable<AggregatingColumnFilter>,
      * @return an {@link Iterator}.
      */
     @Override
-    public Iterator<AggregatingColumnFilter> iterator() {
+    public Iterator<AggregatingQueryParameter> iterator() {
         return parameters.iterator();
     }
 
@@ -99,28 +95,18 @@ public final class QueryParameters implements Iterable<AggregatingColumnFilter>,
      */
     public static class Builder {
 
-        private final ImmutableCollection.Builder<AggregatingColumnFilter> parameters;
+        private final ImmutableCollection.Builder<AggregatingQueryParameter> parameters;
 
         private Builder() {
             parameters = ImmutableList.builder();
         }
 
-        /**
-         * Put the Query parameter represented by the arguments into the resulting instance of
-         * {@code QueryParameters}.
-         *
-         * @return self for method chaining
-         */
-        public Builder put(Column column, ColumnFilter columnFilter) {
-            checkNotNull(column);
-            checkNotNull(columnFilter);
-
-            parameters.add(column, columnFilter);
-
+        public Builder add(AggregatingQueryParameter parameter) {
+            parameters.add(parameter);
             return this;
         }
 
-        private ImmutableMultimap.Builder<Column, ColumnFilter> getParameters() {
+        public ImmutableCollection.Builder<AggregatingQueryParameter> getParameters() {
             return parameters;
         }
 

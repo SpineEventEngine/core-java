@@ -23,6 +23,8 @@ package org.spine3.server.entity.storage;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
+import org.spine3.client.AggregatingColumnFilter;
+import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -30,7 +32,9 @@ import org.spine3.client.EntityIdFilter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -71,11 +75,24 @@ public final class EntityQueries {
                                                  Class<? extends Entity> entityClass) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
-        for (ColumnFilter filter : entityFilters.getFilterList()) {
-            final Column column = Columns.findColumn(entityClass, filter.getColumnName());
-            builder.put(column, filter);
+        for (AggregatingColumnFilter filter : entityFilters.getFilterList()) {
+            final Map<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
+            final AggregatingOperator operator = filter.getOperator();
+            final AggregatingQueryParameter parameter =
+                    new AggregatingQueryParameter(operator, columnFilters);
+            builder.add(parameter);
         }
         return builder.build();
+    }
+
+    private static Map<Column, ColumnFilter> splitFilters(AggregatingColumnFilter filter,
+                                                          Class<? extends Entity> entityClass) {
+        final Map<Column, ColumnFilter> columnFilters = new HashMap<>(filter.getFilterCount());
+        for (ColumnFilter columnFilter : filter.getFilterList()) {
+            final Column column = Columns.findColumn(entityClass, columnFilter.getColumnName());
+            columnFilters.put(column, columnFilter);
+        }
+        return columnFilters;
     }
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {

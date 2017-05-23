@@ -24,6 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
+import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
 import org.spine3.client.ColumnFilter;
 import org.spine3.server.entity.storage.Column.MemoizedValue;
 
@@ -32,6 +33,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static java.lang.String.format;
 import static org.spine3.client.QueryOperators.compare;
 import static org.spine3.protobuf.TypeConverter.toObject;
 
@@ -79,17 +81,54 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         return true;
     }
 
+    @SuppressWarnings("EnumSwitchStatementWhichMissesCases") // Only valuable cases covered
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, MemoizedValue> entityColumns = record.getColumnValues();
-        for (ColumnFilter filter : queryParams) {
-            final String columnName = filter.getColumnName();
+        boolean match;
+        for (AggregatingQueryParameter filter : queryParams) {
+            final AggregatingOperator operator = filter.getOperator();
+            switch (operator) {
+                case ALL:
+                    match = checkAll(filter.getFilters(), entityColumns);
+                    break;
+                case EITHER:
+                    match = checkEither(filter.getFilters(), entityColumns);
+                    break;
+                default:
+                    throw new IllegalArgumentException(format("Aggregating operator %s is invalid.",
+                                                              operator));
+            }
+            if (!match) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static boolean checkAll(Map<Column, ColumnFilter> filters,
+                                    Map<String, MemoizedValue> entityColumns) {
+        for (Map.Entry<Column, ColumnFilter> filter : filters.entrySet()) {
+            final String columnName = filter.getKey().getName();
             final MemoizedValue memoizedValue = entityColumns.get(columnName);
-            final boolean matches = checkSingleParameter(filter, memoizedValue);
+            final boolean matches = checkSingleParameter(filter.getValue(), memoizedValue);
             if (!matches) {
                 return false;
             }
         }
         return true;
+    }
+
+    private static boolean checkEither(Map<Column, ColumnFilter> filters,
+                                       Map<String, MemoizedValue> entityColumns) {
+        for (Map.Entry<Column, ColumnFilter> filter : filters.entrySet()) {
+            final String columnName = filter.getKey().getName();
+            final MemoizedValue memoizedValue = entityColumns.get(columnName);
+            final boolean matches = checkSingleParameter(filter.getValue(), memoizedValue);
+            if (matches) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private static boolean checkSingleParameter(ColumnFilter filter,

@@ -138,7 +138,10 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<ColumnFilter> columnFilters = entityFilters.getColumnFilterList();
+        final List<AggregatingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        assertSize(1, aggregatingColumnFilters);
+        final AggregatingColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
+        final Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
         assertSize(1, columnFilters);
         final Any actualValue = findByName(columnFilters, columnName).getValue();
         assertNotNull(columnValue);
@@ -164,8 +167,9 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<ColumnFilter> columnFilters = entityFilters.getColumnFilterList();
-        assertSize(2, columnFilters);
+        final List<AggregatingColumnFilter> columnFilters = entityFilters.getFilterList();
+        assertSize(1, columnFilters);
+        
 
         final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
@@ -219,7 +223,10 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
         // Check query params
-        final List<ColumnFilter> columnFilters = entityFilters.getColumnFilterList();
+        final List<AggregatingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        assertSize(1, aggregatingColumnFilters);
+        final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
+                                                                               .getFilterList();
         assertSize(2, columnFilters);
 
         final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
@@ -342,7 +349,8 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
     private static ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
         for (ColumnFilter filter : filters) {
-            if (filter.getColumnName().equals(name)) {
+            if (filter.getColumnName()
+                      .equals(name)) {
                 return filter;
             }
         }
