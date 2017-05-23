@@ -279,7 +279,6 @@ public abstract class Transaction<I,
                 releaseTx();
             }
         } else {
-
             // The state isn't modified, but other attributes may have been modified.
             listener.onBeforeCommit(getEntity(), getEntity().getState(),
                                          getVersion(), getLifecycleFlags());
@@ -441,7 +440,7 @@ public abstract class Transaction<I,
      */
     private TransactionListener<I, E, S, B> getListener() {
         return listener;
-    };
+    }
 
     public void setArchived(boolean archived) {
         lifecycleFlags = lifecycleFlags.toBuilder().setArchived(archived).build();
