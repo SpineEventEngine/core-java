@@ -44,26 +44,26 @@ class AggregateTransaction<I,
         extends Transaction<I, Aggregate<I, S, B>, S, B> {
 
     @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> entity) {
-        super(entity);
+    AggregateTransaction(Aggregate<I, S, B> aggregate) {
+        super(aggregate);
     }
 
     @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> entity,
+    AggregateTransaction(Aggregate<I, S, B> aggregate,
                          TransactionListener<I, Aggregate<I, S, B>, S, B> listener) {
-        super(entity, listener);
+        super(aggregate, listener);
     }
 
     @VisibleForTesting
-    AggregateTransaction(Aggregate<I, S, B> entity, S state, Version version) {
-        super(entity, state, version);
+    AggregateTransaction(Aggregate<I, S, B> aggregate, S state, Version version) {
+        super(aggregate, state, version);
     }
 
     @Override
-    protected void invokeApplier(Aggregate entity,
+    protected void invokeApplier(Aggregate aggregate,
                                  Message eventMessage,
                                  @Nullable EventContext ignored) throws InvocationTargetException {
-        entity.invokeApplier(eventMessage);
+        aggregate.invokeApplier(eventMessage);
     }
 
     @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
@@ -73,33 +73,33 @@ class AggregateTransaction<I,
     }
 
     /**
-     * Creates a new transaction for a given {@code entity}.
+     * Creates a new transaction for a given {@code aggregate}.
      *
-     * @param entity the entity to start the transaction for.
+     * @param aggregate the {@code Aggregate} instance to start the transaction for.
      * @return the new transaction instance
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    static AggregateTransaction start(Aggregate entity) {
-        final AggregateTransaction tx = new AggregateTransaction(entity);
+    static AggregateTransaction start(Aggregate aggregate) {
+        final AggregateTransaction tx = new AggregateTransaction(aggregate);
         return tx;
     }
 
     /**
-     * Creates a new transaction for a given {@code entity} and sets the given {@code state}
+     * Creates a new transaction for a given {@code aggregate} and sets the given {@code state}
      * and {@code version} as a starting point for the transaction.
      *
-     * <p>Please note that the state and version specified are not applied to the given entity
+     * <p>Please note that the state and version specified are not applied to the given aggregate
      * directly and require a {@linkplain Transaction#commit() transaction commit} in order
      * to be applied.
      *
-     * @param entity  the entity to start the transaction for.
+     * @param aggregate  the {@code Aggregate} instance to start the transaction for.
      * @param state   the starting state to set
      * @param version the starting version to set
      * @return the new transaction instance
      */
     @SuppressWarnings("unchecked")  // to avoid massive generic-related issues.
-    static AggregateTransaction startWith(Aggregate entity, Message state, Version version) {
-        final AggregateTransaction tx = new AggregateTransaction(entity, state, version);
+    static AggregateTransaction startWith(Aggregate aggregate, Message state, Version version) {
+        final AggregateTransaction tx = new AggregateTransaction(aggregate, state, version);
         return tx;
     }
 }
