@@ -43,7 +43,7 @@ import static java.lang.String.format;
  *
  * <p>These methods represent the Columns:
  * <pre>
- *      <code>
+ *      {@code
  *
  *         --UserGroupAggregate.java--
  *
@@ -61,12 +61,12 @@ import static java.lang.String.format;
  *                 return null;
  *             }
  *         }
- *     </code>
+ *     }
  * </pre>
  *
  * <p>And these methods are not considered to represent Columns:
  * <pre>
- *      <code>
+ *      {@code
  *         --UserAggregate.java--
  *
  *         // non-public methods may not represent Columns
@@ -80,7 +80,7 @@ import static java.lang.String.format;
  *
  *         // only instance methods are considered Columns
  *         public static Integer isNew(UserAggregate aggregate) { ... }
- *      </code>
+ *      }
  * </pre>
 
  *
@@ -108,14 +108,14 @@ import static java.lang.String.format;
  * <p>The example below shows a faulty Column, which will throw {@linkplain RuntimeException} when
  * trying to get its value.
  * <pre>
- *     <code>
+ *     {@code
  *         --EmployeeProjection.java--
  *
  *         // method should be annotated as @Nullable to return a null value
  *         public Message getAddress() {
  *             return null;
  *         }
- *     </code>
+ *     }
  * </pre>
  *
  * <p>This class is effectively {@code final} since it has a single {@code private} constructor.

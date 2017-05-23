@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkState;
  *
  * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
  * <pre>
- *     <code>
+ *     {@code
  *         final VarcharDateType varcharType = new VarcharDateType();
  *         final ColumnTypeRegistry registry = ColumnTypeRegistry.newBuilder()
  *                                                               .put(Date.class, varcharType)
@@ -46,7 +46,7 @@ import static com.google.common.base.Preconditions.checkState;
  *                                  // ...
  *                                  .setColumnTypeRegistry(registry)
  *                                  .build();
- *     </code>
+ *     }
  * </pre>
  *
  * <p>To retrieve the {@link ColumnType} instance (in case if you implement your own

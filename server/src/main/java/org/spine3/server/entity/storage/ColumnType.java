@@ -35,7 +35,7 @@ import org.spine3.annotation.SPI;
  *
  * <p>Example of implementing this interface for a JDBC-based storage:
  * <pre>
- *     <code>
+ *     {@code
  *     class VarcharDateType implements ColumnType&lt;Date, String, PreparedStatement, Integer&gt; {
  *         \@Override
  *         public String convertColumnValue(Date fieldValue) {
@@ -50,7 +50,7 @@ import org.spine3.annotation.SPI;
  *             storageRecord.setNull(columnIdentifier, Types.VARCHAR);
  *         }
  *     }
- *     </code>
+ *     }
  * </pre>
  *
  * <p>The example above translates a {@linkplain java.util.Date Date} into a formatted
