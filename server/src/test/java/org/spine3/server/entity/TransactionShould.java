@@ -195,7 +195,6 @@ public abstract class TransactionShould<I,
         applyEvent(tx, event);
 
         verify(listener).onAfterPhase(argThat(matchesSuccessfulPhaseFor(event)));
-
     }
 
     @Test
