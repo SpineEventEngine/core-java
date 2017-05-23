@@ -31,8 +31,11 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateRepository;
 import org.spine3.test.options.FullAccessAggregate;
+import org.spine3.test.options.FullAccessAggregateValidatingBuilder;
 import org.spine3.test.options.HiddenAggregate;
+import org.spine3.test.options.HiddenAggregateValidatingBuilder;
 import org.spine3.test.options.SubscribableAggregate;
+import org.spine3.test.options.SubscribableAggregateValidatingBuilder;
 import org.spine3.type.TypeName;
 
 import java.util.List;
@@ -134,7 +137,7 @@ public class VisibilityGuardShould {
     }
 
     private static class Exposed
-                   extends Aggregate<Long, FullAccessAggregate, FullAccessAggregate.Builder> {
+            extends Aggregate<Long, FullAccessAggregate, FullAccessAggregateValidatingBuilder> {
         private Exposed(Long id) {
             super(id);
         }
@@ -147,7 +150,7 @@ public class VisibilityGuardShould {
     }
 
     private static class Subscribable
-                   extends Aggregate<Long, SubscribableAggregate, SubscribableAggregate.Builder> {
+            extends Aggregate<Long, SubscribableAggregate, SubscribableAggregateValidatingBuilder> {
         protected Subscribable(Long id) {
             super(id);
         }
@@ -160,7 +163,7 @@ public class VisibilityGuardShould {
     }
 
     private static class Hidden
-                   extends Aggregate<String, HiddenAggregate, HiddenAggregate.Builder> {
+                   extends Aggregate<String, HiddenAggregate, HiddenAggregateValidatingBuilder> {
         private Hidden(String id) {
             super(id);
         }
