@@ -80,20 +80,29 @@ message EntityFilters {
 
 message AggregatingColumnFilter {
 
+    // The aggregated Entity Column filters.
+    //
+    // If the list is empty, any record is considered matching this filter.
     repeated ColumnFilter filter = 1;
 
+    // The value of the aggregating operator which deternines the behavior of the filter matching.
     AggregatingOperator operator = 2[(required) = true];
 
+    // An enumeration of all supported operators aggregatig the Entity Column filters.
     enum AggregatingOperator {
 
+        // Error value.
         ACFAO_UNDEFINED = 0;
 
+        // The conjunctive operator. The SQL equivalent is `AND`.
         ALL = 1;
 
+        // The disjunctive operator. The SQL equivalent is `OR`.
         EITHER = 2;
     }
 }
 
+// A filter matching the Entity Colummns.
 message ColumnFilter {
 
     // The name of the Entity Column which is campared.
