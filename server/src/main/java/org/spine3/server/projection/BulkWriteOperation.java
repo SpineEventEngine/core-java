@@ -52,7 +52,7 @@ import static org.spine3.time.Time.getCurrentTime;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
-class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable {
+class BulkWriteOperation<I, P extends Projection<I, ?, ?>> implements AutoCloseable {
 
     private final Timestamp expirationTime;
     private final AtomicBoolean active = new AtomicBoolean(false);
@@ -168,7 +168,7 @@ class BulkWriteOperation<I, P extends Projection<I, ?>> implements AutoCloseable
     /**
      * A callback to execute when the {@link BulkWriteOperation operation} is complete.
      */
-    interface FlushCallback<P extends Projection<?, ?>> {
+    interface FlushCallback<P extends Projection<?, ?, ?>> {
 
         /**
          * Process the accumulated results.

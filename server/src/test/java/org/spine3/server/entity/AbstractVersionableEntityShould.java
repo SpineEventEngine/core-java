@@ -20,9 +20,14 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.reflect.Invokable;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+
+import java.lang.reflect.Method;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -39,6 +44,22 @@ public class AbstractVersionableEntityShould {
         new EqualsTester().addEqualityGroup(entity, another)
                           .addEqualityGroup(new AvEntity(42L))
                           .testEquals();
+    }
+
+    @Test
+    public void have_updateState_method_visible_to_package_only() throws NoSuchMethodException {
+        boolean methodFound = false;
+
+        final Method[] methods = AbstractVersionableEntity.class.getDeclaredMethods();
+        for (Method method : methods) {
+            if ("updateState".equals(method.getName())) {
+                final Invokable<?, Object> updateState = Invokable.from(method);
+                assertTrue(updateState.isPackagePrivate());
+                methodFound = true;
+            }
+        }
+        assertTrue("Cannot check 'updateState(...)' in " + AbstractVersionableEntity.class,
+                   methodFound);
     }
 
     private static class AvEntity extends AbstractVersionableEntity<Long, StringValue> {

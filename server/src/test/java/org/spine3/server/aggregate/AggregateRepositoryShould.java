@@ -38,6 +38,8 @@ import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
+import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -62,6 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.spine3.server.aggregate.CommandTestDispatcher.dispatch;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -218,11 +221,13 @@ public class AggregateRepositoryShould {
     }
 
     @Test
-    public void marks_aggregate_archived() {
+    public void mark_aggregate_archived() {
         final ProjectAggregate aggregate = createAndStoreAggregate();
 
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         // archive the aggregate.
         aggregate.setArchived(true);
+        tx.commit();
         repository.store(aggregate);
 
         assertFalse(repository.find(aggregate.getId())
@@ -233,7 +238,10 @@ public class AggregateRepositoryShould {
     public void mark_aggregate_deleted() {
         final ProjectAggregate aggregate = createAndStoreAggregate();
 
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
         aggregate.setDeleted(true);
+        tx.commit();
+
         repository.store(aggregate);
 
         assertFalse(repository.find(aggregate.getId())
@@ -290,9 +298,10 @@ public class AggregateRepositoryShould {
                         .setProjectId(id)
                         .build();
 
-        aggregate.dispatchForTest(env(createProject));
-        aggregate.dispatchForTest(env(addTask));
-        aggregate.dispatchForTest(env(startProject));
+        dispatch(aggregate, env(createProject));
+        dispatch(aggregate, env(addTask));
+        dispatch(aggregate, env(startProject));
+
         return aggregate;
     }
 
@@ -326,7 +335,8 @@ public class AggregateRepositoryShould {
      ****************************/
 
     @SuppressWarnings("RedundantMethodOverride")
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -350,12 +360,14 @@ public class AggregateRepositoryShould {
         TaskAdded handle(AddTask msg, CommandContext context) {
             return TaskAdded.newBuilder()
                             .setProjectId(msg.getProjectId())
+                            .setTask(msg.getTask())
                             .build();
         }
 
         @Apply
         private void apply(TaskAdded event) {
-            getBuilder().setId(event.getProjectId());
+            getBuilder().setId(event.getProjectId())
+                        .addTask(event.getTask());
         }
 
         @Assign
@@ -367,6 +379,7 @@ public class AggregateRepositoryShould {
 
         @Apply
         private void apply(ProjectStarted event) {
+            getBuilder().setStatus(Status.STARTED);
         }
 
         /**

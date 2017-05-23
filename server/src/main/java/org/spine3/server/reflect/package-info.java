@@ -19,10 +19,6 @@
  */
 
 /**
- * This package contains server-side utility classes.
- */
-
-/**
  * This package contains internal utilities for obtaining Reflection information.
  */
 @Internal

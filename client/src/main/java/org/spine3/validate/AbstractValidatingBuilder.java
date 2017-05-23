@@ -22,22 +22,67 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
+import org.spine3.annotation.Internal;
 import org.spine3.base.ConversionException;
 import org.spine3.base.FieldPath;
+import org.spine3.protobuf.Messages;
 import org.spine3.string.Stringifiers;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Type;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
 
 /**
- * Serves as an abstract base for all validating builders.
+ * Serves as an abstract base for all {@linkplain ValidatingBuilder validating builders}.
  *
  * @author Illia Shepilov
- * @see ValidatingBuilder
+ * @author Alex Tymchenko
  */
-public abstract class AbstractValidatingBuilder<T extends Message> implements ValidatingBuilder<T> {
+public abstract class AbstractValidatingBuilder<T extends Message, B extends Message.Builder>
+                                                  implements ValidatingBuilder<T, B> {
+
+    /**
+     * The builder for the original {@code Message}.
+     */
+    private final B messageBuilder;
+
+    /**
+     * The class of the {@code Message} being built.
+     */
+    private final Class<T> messageClass;
+
+    /**
+     * The state of the message, serving as a base value for this {@code ValidatingBuilder}.
+     *
+     * <p>Used to verify if any modifications were made by a user via {@code ValidatingBuilder}
+     * public API calls.
+     *
+     * <p>Has {@code null} value if not set via {@linkplain #setOriginalState(Message)
+     * setOriginalState(..)}.
+     */
+    @Nullable
+    private T originalState;
+
+    protected AbstractValidatingBuilder() {
+        this.messageClass = TypeInfo.getMessageClass(getClass());
+        this.messageBuilder = createBuilder();
+    }
+
+    @Override
+    public T build() throws ConstraintViolationThrowable {
+        final T message = internalBuild();
+        validateResult(message);
+        return message;
+    }
+
+    @Override
+    public void clear() {
+        messageBuilder.clear();
+        originalState = null;
+    }
 
     /**
      * Converts the passed `raw` value and returns it.
@@ -67,9 +112,76 @@ public abstract class AbstractValidatingBuilder<T extends Message> implements Va
                                              .build();
         final FieldValidator<?> validator =
                 FieldValidatorFactory.create(descriptor, fieldValue, fieldPath);
-        final List<ConstraintViolation> constraints = validator.validate();
-        if (!constraints.isEmpty()) {
-            throw new ConstraintViolationThrowable(constraints);
+        final List<ConstraintViolation> violations = validator.validate();
+        onViolations(violations);
+    }
+
+    /**
+     * Checks whether any modifications have been made to the fields of message being built.
+     *
+     * @return {@code true} if any modifications have been made, {@code false} otherwise.
+     */
+    @Override
+    public boolean isDirty() {
+        final T message = internalBuild();
+
+        final boolean result = originalState != null
+                ? !originalState.equals(message)
+                : Validate.isNotDefault(message);
+        return result;
+    }
+
+    @Override
+    public void setOriginalState(T state) {
+        checkNotNull(state);
+        this.originalState = state;
+
+        messageBuilder.clear();
+        messageBuilder.mergeFrom(state);
+    }
+
+    protected B getMessageBuilder() {
+        return messageBuilder;
+    }
+
+    @Override
+    public ValidatingBuilder<T, B> mergeFrom(T message) {
+        messageBuilder.mergeFrom(message);
+        return this;
+    }
+
+    /**
+     * Builds a message without triggering its validation.
+     *
+     * <p>Exposed to those who wish to obtain the state anyway, e.g. for logging.
+     *
+     * @return the message built from the values set by the user
+     */
+    @Internal
+    public T internalBuild() {
+        @SuppressWarnings("unchecked")  // OK, as real types of `B`
+                                        // are always generated to be compatible with `T`.
+        final T result = (T) getMessageBuilder().build();
+        return result;
+    }
+
+    private B createBuilder() {
+        @SuppressWarnings("unchecked")  // OK, since it is guaranteed by the class declaration.
+        final B result = (B) Messages.newInstance(messageClass)
+                                     .newBuilderForType();
+        return result;
+    }
+
+    private void validateResult(T message) throws ConstraintViolationThrowable {
+        final List<ConstraintViolation> violations = MessageValidator.newInstance()
+                                                                     .validate(message);
+        onViolations(violations);
+    }
+
+    private static void onViolations(List<ConstraintViolation> violations)
+            throws ConstraintViolationThrowable {
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationThrowable(violations);
         }
     }
 }

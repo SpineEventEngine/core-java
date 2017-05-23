@@ -31,9 +31,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.base.Versions.checkIsIncrement;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -94,7 +92,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected void init() {
         super.init();
         injectState(getDefaultState());
-        initVersion(Versions.create());
+        setVersion(Versions.create());
         setVisible();
     }
 
@@ -119,7 +117,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *                version of the entity
      * @see #validate(S)
      */
-    protected void updateState(S state, Version version) {
+    void updateState(S state, Version version) {
         updateState(state);
         updateVersion(version);
     }
@@ -150,39 +148,6 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
         return result;
     }
 
-    /**
-     * Initializes the entity with the passed version.
-     *
-     * <p>This method assumes that the entity version is zero.
-     * If this is not so, {@code IllegalStateException} will be thrown.
-     *
-     * <p>One of the usages for this method is for creating an entity instance
-     * from a storage.
-     *
-     * <p>To increment a version of the entity please call {@link #incrementVersion()}.
-     *
-     * <p>To set a new version which is several numbers ahead please use
-     * {@link #advanceVersion(Version)}.
-     *
-     * @param version the version to set.
-     */
-    protected void initVersion(Version version) {
-        if (versionNumber() > 0) {
-            final String errMsg = format(
-                    "initVersion() called on an entity with non-zero version number (%d).",
-                    versionNumber()
-            );
-            throw new IllegalStateException(errMsg);
-        }
-        setVersion(version);
-    }
-
-    protected void advanceVersion(Version newVersion) {
-        checkNotNull(newVersion);
-        checkIsIncrement(this.getVersion(), newVersion);
-        setVersion(newVersion);
-    }
-
     private void updateVersion(Version newVersion) {
         checkNotNull(newVersion);
         if (version.equals(newVersion)) {
@@ -207,7 +172,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @param newState a new state to set
      */
-    protected void incrementState(S newState) {
+    void incrementState(S newState) {
         updateState(newState, incrementedVersion());
     }
 
@@ -232,7 +197,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      *
      * @return new version number
      */
-    protected int incrementVersion() {
+    int incrementVersion() {
         setVersion(incrementedVersion());
         return version.getNumber();
     }
