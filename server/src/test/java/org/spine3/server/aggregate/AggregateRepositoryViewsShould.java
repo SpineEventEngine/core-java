@@ -37,7 +37,7 @@ import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.server.entity.idfunc.IdCommandFunction;
 import org.spine3.test.TestActorRequestFactory;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

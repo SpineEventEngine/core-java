@@ -30,7 +30,7 @@ import org.spine3.server.aggregate.AggregatePart;
 import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.validate.ValidatingBuilders.UInt32ValueValidatingBuilder;
+import org.spine3.validate.UInt32ValueValidatingBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

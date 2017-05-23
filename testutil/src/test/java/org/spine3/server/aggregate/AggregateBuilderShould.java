@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.test.TimeTests;
 import org.spine3.time.Time;
-import org.spine3.validate.ValidatingBuilders.TimestampValidatingBuilder;
+import org.spine3.validate.TimestampValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 

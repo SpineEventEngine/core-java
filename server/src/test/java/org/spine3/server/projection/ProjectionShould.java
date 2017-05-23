@@ -31,7 +31,7 @@ import org.spine3.base.Subscribe;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Given;
 import org.spine3.type.EventClass;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -25,8 +25,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.test.TestActorRequestFactory;
-import org.spine3.server.Environment;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.newUuidValue;

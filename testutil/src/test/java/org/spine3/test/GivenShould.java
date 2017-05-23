@@ -32,9 +32,9 @@ import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.TimestampValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.UInt32ValueValidatingBuilder;
+import org.spine3.validate.StringValueValidatingBuilder;
+import org.spine3.validate.TimestampValidatingBuilder;
+import org.spine3.validate.UInt32ValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;

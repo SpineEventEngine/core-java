@@ -29,7 +29,7 @@ import org.spine3.client.ActorRequestFactory;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.Apply;
 import org.spine3.server.command.Assign;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

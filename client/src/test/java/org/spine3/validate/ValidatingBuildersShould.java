@@ -35,17 +35,6 @@ import com.google.protobuf.UInt64Value;
 import org.junit.Test;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.time.Time;
-import org.spine3.validate.ValidatingBuilders.AnyValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.BoolValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.DoubleValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.EmptyValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.FloatValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.Int32ValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.Int64ValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.TimestampValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.UInt32ValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.UInt64ValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

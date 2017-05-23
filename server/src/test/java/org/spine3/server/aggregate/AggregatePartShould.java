@@ -41,7 +41,7 @@ import org.spine3.test.aggregate.user.User;
 import org.spine3.test.aggregate.user.UserValidatingBuilder;
 import org.spine3.testdata.Sample;
 import org.spine3.validate.ConstraintViolation;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import java.lang.reflect.Constructor;
 import java.util.List;

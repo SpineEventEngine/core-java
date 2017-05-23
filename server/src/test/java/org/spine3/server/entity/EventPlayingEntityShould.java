@@ -26,8 +26,8 @@ import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
+import org.spine3.validate.StringValueValidatingBuilder;
 import org.spine3.validate.ValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders.StringValueValidatingBuilder;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;

@@ -56,7 +56,7 @@ import org.spine3.test.procman.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
-import org.spine3.validate.ValidatingBuilders.AnyValidatingBuilder;
+import org.spine3.validate.AnyValidatingBuilder;
 
 import java.util.List;
 import java.util.Set;

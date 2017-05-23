@@ -66,7 +66,7 @@ import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
-import org.spine3.validate.ValidatingBuilders.EmptyValidatingBuilder;
+import org.spine3.validate.EmptyValidatingBuilder;
 
 import java.util.List;
 
