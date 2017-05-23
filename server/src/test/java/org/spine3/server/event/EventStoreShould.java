@@ -95,7 +95,9 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = Collections.synchronizedSet(new HashSet<Event>());
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        await(done);
+        if (!done.get()) {
+            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
+        }
 
         assertSize(1, resultEvents);
         final Event event = resultEvents.iterator()
@@ -106,17 +108,6 @@ public abstract class EventStoreShould {
     private static Event projectCreated(Timestamp timestamp) {
         final ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
         return eventFactory.createEvent(msg, null, timestamp);
-    }
-
-    @SuppressWarnings("BusyWait")
-    private static void await(AtomicBoolean done) {
-        while (!done.get()) {
-            try {
-                Thread.sleep(200);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
     }
 
     private static class ResponseObserver implements StreamObserver<Event> {

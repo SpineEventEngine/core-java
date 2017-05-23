@@ -40,7 +40,6 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.AllTenantOperation;
 import org.spine3.type.EventClass;
@@ -186,7 +185,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
                        we create a specific type of a storage, not a regular entity storage created
                        in the parent. */)
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
+    protected RecordStorage<I> createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage =
                 factory.createProjectionStorage(projectionClass);
