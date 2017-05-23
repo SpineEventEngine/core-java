@@ -78,6 +78,7 @@ message EntityFilters {
     reserved 3 to 40;
 }
 
+// The filter aggregating a number of Entity Column filters with a specifed logical operator.
 message AggregatingColumnFilter {
 
     // The aggregated Entity Column filters.
@@ -105,10 +106,10 @@ message AggregatingColumnFilter {
 // A filter matching the Entity Colummns.
 message ColumnFilter {
 
-    // The name of the Entity Column which is campared.
+    // The name of the Entity Column which is matched.
     string column_name = 1[(required) = true];
 
-    // The value to campare upon.
+    // The value to compare upon.
     google.protobuf.Any value = 2[(required) = true];
 
     // The compasison operator.
