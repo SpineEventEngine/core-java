@@ -166,7 +166,6 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     }
 
     private B createBuilder() {
-
         @SuppressWarnings("unchecked")  // OK, since it is guaranteed by the class declaration.
         final B result = (B) Messages.newInstance(messageClass)
                                      .newBuilderForType();
