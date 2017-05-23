@@ -45,26 +45,26 @@ class ProjectionTransaction<I,
         extends Transaction<I, Projection<I, M, B>, M, B> {
 
     @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> entity) {
-        super(entity);
+    ProjectionTransaction(Projection<I, M, B> projection) {
+        super(projection);
     }
 
     @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> entity,
+    ProjectionTransaction(Projection<I, M, B> projection,
                           TransactionListener<I, Projection<I, M, B>, M, B> listener) {
-        super(entity, listener);
+        super(projection, listener);
     }
 
     @VisibleForTesting
-    ProjectionTransaction(Projection<I, M, B> entity, M state, Version version) {
-        super(entity, state, version);
+    ProjectionTransaction(Projection<I, M, B> projection, M state, Version version) {
+        super(projection, state, version);
     }
 
     @Override
-    protected void invokeApplier(Projection entity,
+    protected void invokeApplier(Projection projection,
                                  Message eventMessage,
                                  EventContext context) throws InvocationTargetException {
-        entity.apply(eventMessage, context);
+        projection.apply(eventMessage, context);
     }
 
     @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
@@ -74,30 +74,30 @@ class ProjectionTransaction<I,
     }
 
     /**
-     * Creates a new transaction for a given {@code entity}.
+     * Creates a new transaction for a given {@code projection}.
      *
-     * @param entity the entity to start the transaction for.
+     * @param projection the {@code Projection} instance to start the transaction for.
      * @return the new transaction instance
      */
     static <I,
             M extends Message,
             B extends ValidatingBuilder<M, ? extends Message.Builder>>
-    ProjectionTransaction<I, M, B> start(Projection<I, M, B> entity) {
-        checkNotNull(entity);
+    ProjectionTransaction<I, M, B> start(Projection<I, M, B> projection) {
+        checkNotNull(projection);
 
-        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity);
+        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection);
         return tx;
     }
 
     /**
-     * Creates a new transaction for a given {@code entity} and sets the given {@code state}
+     * Creates a new transaction for a given {@code projection} and sets the given {@code state}
      * and {@code version} as a starting point for the transaction.
      *
-     * <p>Please note that the state and version specified are not applied to the given entity
+     * <p>Please note that the state and version specified are not applied to the given projection
      * directly and require a {@linkplain Transaction#commit() transaction commit} in order
      * to be applied.
      *
-     * @param entity  the entity to start the transaction for.
+     * @param projection  the {@code Projection} instance to start the transaction for.
      * @param state   the starting state to set
      * @param version the starting version to set
      * @return the new transaction instance
@@ -105,12 +105,12 @@ class ProjectionTransaction<I,
     static <I,
             M extends Message,
             B extends ValidatingBuilder<M, ? extends Message.Builder>>
-    ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> entity, M state, Version version) {
-        checkNotNull(entity);
+    ProjectionTransaction<I, M, B> startWith(Projection<I, M, B> projection, M state, Version version) {
+        checkNotNull(projection);
         checkNotNull(state);
         checkNotNull(version);
 
-        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(entity,
+        final ProjectionTransaction<I, M, B> tx = new ProjectionTransaction<>(projection,
                                                                               state,
                                                                               version);
         return tx;
