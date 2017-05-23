@@ -24,6 +24,7 @@ import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import org.junit.Test;
 import org.spine3.base.Version;
+import org.spine3.server.entity.AbstractEntity;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityWithLifecycle;
 import org.spine3.server.entity.VersionableEntity;
@@ -39,6 +40,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dmytro Dashenkov
@@ -55,6 +57,11 @@ public class ColumnShould {
     @Test(expected = IllegalArgumentException.class)
     public void construct_for_getter_method_only() {
         forMethod("toString", Object.class);
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_construct_for_non_serializable_column() {
+        forMethod("getFoo", BrokenTestEntity.class);
     }
 
     @Test
@@ -203,6 +210,18 @@ public class ColumnShould {
     private static class DifferentTestEntity extends AbstractVersionableEntity<String, Any> {
         protected DifferentTestEntity(String id) {
             super(id);
+        }
+    }
+
+    public static class BrokenTestEntity extends AbstractEntity<String, Any> {
+        protected BrokenTestEntity(String id) {
+            super(id);
+        }
+
+        // non-serializable Entity Column
+        public Object getFoo() {
+            fail("Invoked a getter for a non-serializable Entity Column BrokenTestEntity.foo");
+            return new Object();
         }
     }
 }
