@@ -45,27 +45,27 @@ class ProcManTransaction<I,
         extends Transaction<I, ProcessManager<I, S, B>, S, B> {
 
     @VisibleForTesting
-    ProcManTransaction(ProcessManager<I, S, B> entity) {
-        super(entity);
+    ProcManTransaction(ProcessManager<I, S, B> processManager) {
+        super(processManager);
     }
 
     @VisibleForTesting
-    ProcManTransaction(ProcessManager<I, S, B> entity,
+    ProcManTransaction(ProcessManager<I, S, B> processManager,
                        TransactionListener<I, ProcessManager<I, S, B>, S, B> listener) {
-        super(entity, listener);
+        super(processManager, listener);
     }
 
 
     @VisibleForTesting
-    ProcManTransaction(ProcessManager<I, S, B> entity, S state, Version version) {
-        super(entity, state, version);
+    ProcManTransaction(ProcessManager<I, S, B> processManager, S state, Version version) {
+        super(processManager, state, version);
     }
 
     @Override
-    protected void invokeApplier(ProcessManager entity,
+    protected void invokeApplier(ProcessManager processManager,
                                  Message eventMessage,
                                  EventContext context) throws InvocationTargetException {
-        entity.dispatchEvent(eventMessage, context);
+        processManager.dispatchEvent(eventMessage, context);
     }
 
     @SuppressWarnings("RedundantMethodOverride") // overrides to expose to this package.
@@ -75,28 +75,28 @@ class ProcManTransaction<I,
     }
 
     /**
-     * Creates a new transaction for a given {@code entity}.
+     * Creates a new transaction for a given {@code ProcessManager}.
      *
-     * @param entity the entity to start the transaction for.
+     * @param processManager the {@code ProcessManager} instance to start the transaction for.
      * @return the new transaction instance
      */
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    ProcManTransaction<I, S, B> start(ProcessManager<I, S, B> entity) {
-        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(entity);
+    ProcManTransaction<I, S, B> start(ProcessManager<I, S, B> processManager) {
+        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(processManager);
         return tx;
     }
 
     /**
-     * Creates a new transaction for a given {@code entity} and sets the given {@code state}
+     * Creates a new transaction for a given {@code processManager} and sets the given {@code state}
      * and {@code version} as a starting point for the transaction.
      *
-     * <p>Please note that the state and version specified are not applied to the given entity
-     * directly and require a {@linkplain Transaction#commit() transaction commit} in order
+     * <p>Please note that the state and version specified are not applied to the given process
+     * manager directly and require a {@linkplain Transaction#commit() transaction commit} in order
      * to be applied.
      *
-     * @param entity  the entity to start the transaction for.
+     * @param processManager  the {@code ProcessManager} instance to start the transaction for.
      * @param state   the starting state to set
      * @param version the starting version to set
      * @return the new transaction instance
@@ -104,10 +104,12 @@ class ProcManTransaction<I,
     static <I,
             S extends Message,
             B extends ValidatingBuilder<S, ? extends Message.Builder>>
-    ProcManTransaction<I, S, B> startWith(ProcessManager<I, S, B> entity,
+    ProcManTransaction<I, S, B> startWith(ProcessManager<I, S, B> processManager,
                                           S state,
                                           Version version) {
-        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(entity, state, version);
+        final ProcManTransaction<I, S, B> tx = new ProcManTransaction<>(processManager,
+                                                                        state,
+                                                                        version);
         return tx;
     }
 }
