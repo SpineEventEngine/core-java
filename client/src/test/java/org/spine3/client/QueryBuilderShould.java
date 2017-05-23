@@ -28,7 +28,6 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
-import org.spine3.json.Json;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeConverter;
 import org.spine3.test.client.TestEntity;
@@ -318,10 +317,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(stringRepr, containsString(valueOf(id1)));
         assertThat(stringRepr, containsString(valueOf(id2)));
         assertThat(stringRepr, containsString(columnName1));
-        assertThat(stringRepr, containsString(valueOf(columnValue1)));
         assertThat(stringRepr, containsString(columnName2));
-        assertThat(stringRepr, containsString(Json.toCompactJson(columnValue2)));
-        assertThat(stringRepr, containsString(fieldName));
     }
 
     private static ProjectId newMessageId() {

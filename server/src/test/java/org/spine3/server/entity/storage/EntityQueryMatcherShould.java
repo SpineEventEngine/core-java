@@ -136,6 +136,8 @@ public class EntityQueryMatcherShould {
 
         final Column column = mock(Column.class);
         when(column.getType()).thenReturn(Any.class);
+        when(column.getName()).thenReturn(columnName);
+
         final Column.MemoizedValue value = mock(Column.MemoizedValue.class);
         when(value.getSourceColumn()).thenReturn(column);
         when(value.getValue()).thenReturn(actualValue);

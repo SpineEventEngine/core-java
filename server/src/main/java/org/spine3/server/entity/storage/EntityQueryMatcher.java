@@ -129,7 +129,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
                 return true;
             }
         }
-        return false;
+        return filters.isEmpty();
     }
 
     private static boolean checkSingleParameter(ColumnFilter filter,
