@@ -41,10 +41,16 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
 
     /**
      * The name of the Entity Column representing the time, when the event was fired.
+     *
      * @see #getCreated()
      */
     static final String CREATED_TIME_COLUMN = "created";
 
+    /**
+     * The name of the Entity Column representing the Protobuf type of the event.
+     *
+     * @see #getType()
+     */
     static final String TYPE_COLUMN = "type";
 
     /**
@@ -84,8 +90,12 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     }
 
     /**
-     * // TODO:2017-05-19:dmytro.dashenkov: Document.
-     * @return
+     * Retrieves the Protobuf type of the enclosed event.
+     *
+     * <p>This method represents an Entity Column {@code type}.
+     *
+     * @return the {@link TypeName} value of the event represented by this Entity
+     * @see #TYPE_COLUMN
      */
     public String getType() {
         return TypeName.ofEvent(getState())

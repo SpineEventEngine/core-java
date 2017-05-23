@@ -183,15 +183,13 @@ public final class QueryBuilder {
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
-     * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches
-     * all of these parameters.
-     *
-     * //TODO:2017-05-19:dmytro.dashenkov: Fix Javadoc.
-     * <p>The disjunctive filters currently are not supported.
+     * a conjunction ({@link AggregatingColumnFilter.AggregatingOperator#ALL ALL} operator), i.e.
+     * a record matches this query only if it matches all of these parameters.
      *
      * @param predicate the {@link ColumnFilter}s to filter the requested entities by
      * @return self for method chaining
      * @see ColumnFilters for a convinient way to create {@link ColumnFilter} instances
+     * @see #where(AggregatingColumnFilter...)
      */
     public QueryBuilder where(ColumnFilter... predicate) {
         final AggregatingColumnFilter aggregatingFilter = all(asList(predicate));
@@ -199,6 +197,43 @@ public final class QueryBuilder {
         return this;
     }
 
+    /**
+     * Sets the Entity Column predicate to the {@linkplain Query}.
+     *
+     * <p>If there are no {@link ColumnFilter}s (i.e. the passed array is empty), all
+     * the records will be retrieved regardless the Entity Columns values.
+     *
+     * <p>The input values represent groups of {@linkplain ColumnFilter column filters} joined with
+     * a {@linkplain AggregatingColumnFilter.AggregatingOperator aggregating operator}.
+     *
+     * <p>The input filter groups are effectively joined between each other by
+     * {@link AggregatingColumnFilter.AggregatingOperator#ALL ALL} operator, i.e. a record matches
+     * this query if it matches all the aggregated filters.
+     *
+     * <p>Example of usage:
+     * <pre>
+     *     {@code
+     *     factory.select(Customer.class)
+     *            // Possibly other parameters
+     *            .where(either(eq("companySize", SMALL), eq("companySize", MEDIUM)),
+     *                   all(gt("establishedTime", twoYearsAgo)))
+     *            .build();
+     *     }
+     * </pre>
+     *
+     * <p>In the example above, the {@code Customer} records match the built query if they represent
+     * companies that have been created later then two years ago and that have either {@code SMALL}
+     * or {@code MEDIUM} company size.
+     *
+     * <p>Note that the filters which belong to {@link ColumnFilters#all all(...)} groups may be
+     * regrouped on the behalf of the user, since the {@link ColumnFilters#all all(...)} behavior is
+     * default for the groups, as stated above.
+     *
+     * @param predicate a number of {@link AggregatingColumnFilter} instances forming the query
+     *                  predicate
+     * @return self for method chaining
+     * @see ColumnFilters for a convinient way to create {@link AggregatingColumnFilter} instances
+     */
     public QueryBuilder where(AggregatingColumnFilter... predicate) {
         columns = ImmutableSet.copyOf(predicate);
         return this;
