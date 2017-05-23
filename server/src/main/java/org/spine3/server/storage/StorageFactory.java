@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import org.spine3.base.EventId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.commandstore.CommandStore;
@@ -86,14 +85,6 @@ public interface StorageFactory extends AutoCloseable {
      */
     <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Entity<I, ?>> projectionClass);
-
-    /**
-     * Creates a new {@link RecordStorage} for storing events.
-     *
-     * @deprecated acts as a hotfix; will be removed in the future versions
-     */
-    @Deprecated
-    EventRecordStorage createEventStorage(RecordStorage<EventId> delegate);
 
     /**
      * Creates a single-tenant version of the factory.
