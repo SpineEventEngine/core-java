@@ -52,7 +52,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Enrichments.getEnrichment;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.server.event.Given.AnEvent.projectStarted;
 import static org.spine3.server.event.Given.EventMessage.projectCreated;
 import static org.spine3.test.TestEventFactory.newInstance;

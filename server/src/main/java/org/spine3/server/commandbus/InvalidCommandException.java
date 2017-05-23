@@ -25,6 +25,7 @@ import com.google.protobuf.Value;
 import org.spine3.base.Command;
 import org.spine3.base.CommandValidationError;
 import org.spine3.base.Error;
+import org.spine3.base.Identifier;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.type.CommandClass;
 import org.spine3.type.TypeName;
@@ -34,7 +35,6 @@ import org.spine3.validate.ConstraintViolations.ExceptionFactory;
 import java.util.Map;
 
 import static java.lang.String.format;
-import static org.spine3.base.Identifiers.idToString;
 
 /**
  * The exception for reporting invalid commands.
@@ -84,7 +84,7 @@ public class InvalidCommandException extends CommandException {
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                idToString(envelope.getCommandId()));
+                Identifier.toString(envelope.getCommandId()));
         final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }

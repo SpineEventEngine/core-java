@@ -24,6 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
+import org.spine3.base.Identifier;
 import org.spine3.change.MessageMismatch;
 import org.spine3.change.StringMismatch;
 import org.spine3.change.ValueMismatch;
@@ -32,8 +33,6 @@ import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.reflect.CommandHandlerMethod;
 
 import java.util.List;
-
-import static org.spine3.base.Identifiers.idToAny;
 
 /**
  * An entity that can handle commands.
@@ -68,7 +67,7 @@ public abstract class CommandHandlingEntity<I, S extends Message>
      */
     protected CommandHandlingEntity(I id) {
         super(id);
-        this.idAsAny = idToAny(id);
+        this.idAsAny = Identifier.pack(id);
     }
 
     protected Any getProducerId() {

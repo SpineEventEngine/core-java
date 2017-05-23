@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
@@ -72,7 +72,7 @@ public class AggregateCommandEndpointShould {
     @Before
     public void setUp() {
         projectId = ProjectId.newBuilder()
-                             .setId(Identifiers.newUuid())
+                             .setId(Identifier.newUuid())
                              .build();
 
         final CommandStore commandStore = mock(CommandStore.class);

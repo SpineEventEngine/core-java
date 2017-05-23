@@ -23,7 +23,7 @@ package org.spine3.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.base.Version;
 import org.spine3.base.Versions;
 import org.spine3.test.ReflectiveBuilder;
@@ -109,7 +109,7 @@ public class EntityBuilder<E extends AbstractVersionableEntity<I, S>, I, S exten
     }
 
     private I createDefaultId() {
-        return Identifiers.getDefaultValue(idClass);
+        return Identifier.getDefaultValue(idClass);
     }
 
     @Override

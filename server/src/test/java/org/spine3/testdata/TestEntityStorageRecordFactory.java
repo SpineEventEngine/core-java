@@ -23,7 +23,7 @@ package org.spine3.testdata;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.test.Tests;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.Wrappers.pack;
 
 /**

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
+import org.spine3.base.Identifier;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.entity.idfunc.GetTargetIdFromCommand;
 import org.spine3.validate.ConstraintViolation;
@@ -32,8 +33,7 @@ import org.spine3.validate.MessageValidator;
 
 import java.util.List;
 
-import static org.spine3.base.Identifiers.EMPTY_ID;
-import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.base.Identifier.EMPTY_ID;
 import static org.spine3.validate.Validate.isDefault;
 
 /**
@@ -92,7 +92,7 @@ class Validator {
 
     private static void validateCommandId(CommandId id,
                                           ImmutableList.Builder<ConstraintViolation> result) {
-        final String commandId = idToString(id);
+        final String commandId = Identifier.toString(id);
         if (commandId.equals(EMPTY_ID)) {
             result.add(newConstraintViolation("Command ID cannot be empty or blank."));
         }
@@ -102,7 +102,7 @@ class Validator {
                                          ImmutableList.Builder<ConstraintViolation> result) {
         final Optional targetId = GetTargetIdFromCommand.asOptional(message);
         if (targetId.isPresent()) {
-            final String targetIdString = idToString(targetId.get());
+            final String targetIdString = Identifier.toString(targetId.get());
             if (targetIdString.equals(EMPTY_ID)) {
                 final ConstraintViolation violation = newConstraintViolation(
                         COMMAND_TARGET_ENTITY_ID_CANNOT_BE_EMPTY_OR_BLANK);

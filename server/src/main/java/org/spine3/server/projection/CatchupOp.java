@@ -146,7 +146,7 @@ class CatchupOp<I> {
     private Coder<I> getIdCoder() {
         final Class<I> idClass = repository.getIdClass();
         final Coder<I> idCoder;
-        final Identifier.Type idType = Identifier.Type.getType(idClass);
+        final Identifier.Type idType = Identifier.getType(idClass);
         switch (idType) {
             case INTEGER:
                 idCoder = (Coder<I>) BigEndianIntegerCoder.of();

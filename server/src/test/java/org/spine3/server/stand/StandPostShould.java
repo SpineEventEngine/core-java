@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.mockito.ArgumentMatchers;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.base.Version;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
@@ -123,7 +123,7 @@ public class StandPostShould {
         final Stand stand = builder.build();
         Assert.assertNotNull(stand);
 
-        final Object id = Identifiers.newUuid();
+        final Object id = Identifier.newUuid();
         final StringValue state = StringValue.getDefaultInstance();
 
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
@@ -279,7 +279,7 @@ public class StandPostShould {
                                                 .getName();
                 Assert.assertFalse(threadInvocationRegistry.contains(threadName));
                 final ProjectId enitityId = ProjectId.newBuilder()
-                                                     .setId(Identifiers.newUuid())
+                                                     .setId(Identifier.newUuid())
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);

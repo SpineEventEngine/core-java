@@ -37,7 +37,7 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.json.Json.fromJson;
 import static org.spine3.json.Json.toCompactJson;
 import static org.spine3.json.Json.toJson;

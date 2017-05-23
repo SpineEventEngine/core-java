@@ -21,7 +21,7 @@
 package org.spine3.server.storage.memory;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
@@ -43,7 +43,7 @@ public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId, 
     @Override
     protected ProjectId newId() {
         final ProjectId id = ProjectId.newBuilder()
-                                      .setId(Identifiers.newUuid())
+                                      .setId(Identifier.newUuid())
                                       .build();
         return id;
     }

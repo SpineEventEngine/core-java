@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.annotation.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
+import org.spine3.base.Identifier;
 import org.spine3.server.storage.AbstractStorage;
 import org.spine3.server.storage.StorageWithLifecycleFlags;
 
@@ -37,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
@@ -164,7 +164,7 @@ public abstract class AggregateStorage<I>
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
-        final String eventIdStr = idToString(event.getId());
+        final String eventIdStr = Identifier.toString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID");
 
         checkArgument(event.hasMessage(), "Event message must be set.");

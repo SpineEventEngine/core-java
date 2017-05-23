@@ -28,7 +28,7 @@ import org.spine3.base.CommandContext.Schedule;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.time.ZoneOffsets.UTC;

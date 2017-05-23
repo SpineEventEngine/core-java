@@ -20,7 +20,7 @@
 
 package org.spine3.client;
 
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 
 import static java.lang.String.format;
 
@@ -39,7 +39,7 @@ class Topics {
     }
 
     static TopicId generateId() {
-        final String formattedId = format(TOPIC_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
         return TopicId.newBuilder()
                       .setValue(formattedId)
                       .build();

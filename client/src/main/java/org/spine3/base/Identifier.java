@@ -20,17 +20,28 @@
 
 package org.spine3.base;
 
+import com.google.common.base.Optional;
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import com.google.protobuf.MessageOrBuilder;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
+import org.spine3.annotation.Internal;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Messages;
 import org.spine3.protobuf.Wrapper;
+import org.spine3.string.Stringifier;
+import org.spine3.string.StringifierRegistry;
+
+import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.UUID;
+import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.base.Identifiers.EMPTY_ID;
+import static com.google.protobuf.TextFormat.shortDebugString;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
@@ -41,8 +52,25 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  */
 public final class Identifier<I> {
 
+    /** The suffix of ID fields. */
+    public static final String ID_PROPERTY_SUFFIX = "id";
+
+    /** A {@code null} ID string representation. */
+    public static final String NULL_ID = "NULL";
+
+    /** An empty ID string representation. */
+    public static final String EMPTY_ID = "EMPTY";
+
+    private static final Pattern PATTERN_COLON_SPACE = Pattern.compile(": ");
+    private static final String EQUAL_SIGN = "=";
+
     private final Type type;
     private final I value;
+
+    private Identifier(Type type, I value) {
+        this.value = value;
+        this.type = type;
+    }
 
     static <I> Identifier<I> from(I value) {
         checkNotNull(value);
@@ -51,7 +79,7 @@ public final class Identifier<I> {
         return result;
     }
 
-    static Identifier<Message> fromMessage(Message value) {
+    private static Identifier<Message> fromMessage(Message value) {
         checkNotNull(value);
         final Identifier<Message> result = create(Type.MESSAGE, value);
         return result;
@@ -61,15 +89,209 @@ public final class Identifier<I> {
         return new Identifier<>(type, value);
     }
 
-    static <I> I getDefaultValue(Class<I> idClass) {
-        final Type type = Type.getType(idClass);
-        final I result = type.getDefaultValue(idClass);
+    /**
+     * Obtains a default value for an identifier of the passed class.
+     */
+    @Internal
+    public static <I> I getDefaultValue(Class<I> idClass) {
+        checkNotNull(idClass);
+        final Type type1 = getType(idClass);
+        final I result = type1.getDefaultValue(idClass);
         return result;
     }
 
-    private Identifier(Type type, I value) {
-        this.value = value;
-        this.type = type;
+    /**
+     * Obtains the type of identifiers of the passed class.
+     */
+    public static <I> Type getType(Class<I> idClass) {
+        for (Type type : Type.values()) {
+            if (type.matchClass(idClass)) {
+                return type;
+            }
+        }
+        throw unsupportedClass(idClass);
+    }
+
+    private static <I> IllegalArgumentException unsupported(I id) {
+        return newIllegalArgumentException("ID of unsupported type encountered: %s", id);
+    }
+
+    private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
+        return newIllegalArgumentException("Unsupported ID class encountered: %s",
+                                           idClass.getName());
+    }
+
+    /**
+     * Ensures that the passed class of identifiers is supported.
+     *
+     * <p>The following types of IDs are supported:
+     * <ul>
+     * <li>{@code String}
+     * <li>{@code Long}
+     * <li>{@code Integer}
+     * <li>A class implementing {@link Message Message}
+     * </ul>
+     *
+     * <p>Consider using {@code Message}-based IDs if you want to have typed IDs in your code,
+     * and/or if you need to have IDs with some structure inside.
+     *
+     * <p>Examples of such structural IDs are:
+     * <ul>
+     * <li>EAN value used in bar codes
+     * <li>ISBN
+     * <li>Phone number
+     * <li>Email address as a couple of local-part and domain
+     * </ul>
+     *
+     * @param <I>     the type of the ID
+     * @param idClass the class of IDs
+     * @throws IllegalArgumentException if the class of IDs is not of supported type
+     */
+    public static <I> void checkSupported(Class<I> idClass) {
+        checkNotNull(idClass);
+        getType(idClass);
+    }
+
+    /**
+     * Wraps the passed ID value into an instance of {@link Any}.
+     *
+     * <p>The passed value must be of one of the supported types listed below.
+     * The type of the value wrapped into the returned instance is defined by the type
+     * of the passed value:
+     * <ul>
+     * <li>For classes implementing {@link Message Message} — the value
+     * of the message itself
+     * <li>For {@code String} — {@link StringValue StringValue}
+     * <li>For {@code Long} — {@link UInt64Value UInt64Value}
+     * <li>For {@code Integer} — {@link UInt32Value UInt32Value}
+     * </ul>
+     *
+     * @param id  the value to wrap
+     * @param <I> the type of the value
+     * @return instance of {@link Any} with the passed value
+     * @throws IllegalArgumentException if the passed value is not of the supported type
+     */
+    public static <I> Any pack(I id) {
+        checkNotNull(id);
+        final Identifier<I> identifier = from(id);
+        final Any anyId = identifier.pack();
+        return anyId;
+    }
+
+    /**
+     * Extracts ID object from the passed {@code Any} instance.
+     *
+     * <p>Returned type depends on the type of the message wrapped into {@code Any}:
+     * <ul>
+     * <li>{@code String} for unwrapped {@link StringValue StringValue}
+     * <li>{@code Integer} for unwrapped {@link UInt32Value UInt32Value}
+     * <li>{@code Long} for unwrapped {@link UInt64Value UInt64Value}
+     * <li>unwrapped {@code Message} instance if its type is none of the above
+     * </ul>
+     *
+     * @param any the ID value wrapped into {@code Any}
+     * @return unwrapped ID
+     */
+    public static Object idFromAny(Any any) {
+        checkNotNull(any);
+        final Message unpacked = AnyPacker.unpack(any);
+
+        for (Type type : Type.values()) {
+            if (type.matchMessage(unpacked)) {
+                final Object result = type.fromMessage(unpacked);
+                return result;
+            }
+        }
+
+        throw unsupported(unpacked);
+    }
+
+    /**
+     * Generates a new random UUID.
+     *
+     * @return the generated value
+     * @see UUID#randomUUID()
+     */
+    public static String newUuid() {
+        final String id = UUID.randomUUID()
+                              .toString();
+        return id;
+    }
+
+    /**
+     * Converts the passed ID value into the string representation.
+     *
+     * @param id  the value to convert
+     * @param <I> the type of the ID
+     * @return <ul>
+     * <li>for classes implementing {@link Message} &mdash; a Json form;
+     * <li>for {@code String}, {@code Long}, {@code Integer} &mdash;
+     * the result of {@link Object#toString()};
+     * <li>for {@code null} ID &mdash; the {@link #NULL_ID};
+     * <li>if the result is empty or blank string &mdash; the {@link #EMPTY_ID}.
+     * </ul>
+     * @throws IllegalArgumentException if the passed type isn't one of the above or
+     *                                  the passed {@link Message} instance has no fields
+     * @see StringifierRegistry
+     */
+    public static <I> String toString(@Nullable I id) {
+        if (id == null) {
+            return NULL_ID;
+        }
+
+        final Identifier<?> identifier;
+        if (id instanceof Any) {
+            final Message unpacked = AnyPacker.unpack((Any) id);
+            identifier = fromMessage(unpacked);
+        } else {
+            identifier = from(id);
+        }
+
+        final String result = identifier.toString();
+        return result;
+    }
+
+    @SuppressWarnings("unchecked") // OK to cast to String as output type of Stringifier.
+    private static String idMessageToString(Message message) {
+        checkNotNull(message);
+        final String result;
+        final StringifierRegistry registry = StringifierRegistry.getInstance();
+        final Class<? extends Message> msgClass = message.getClass();
+        final TypeToken<? extends Message> msgToken = TypeToken.of(msgClass);
+        final java.lang.reflect.Type msgType = msgToken.getType();
+        final Optional<Stringifier<Object>> optional = registry.get(msgType);
+        if (optional.isPresent()) {
+            final Stringifier converter = optional.get();
+            result = (String) converter.convert(message);
+        } else {
+            result = convert(message);
+        }
+        return result;
+    }
+
+    private static String convert(Message message) {
+        final Collection<Object> values = message.getAllFields()
+                                                 .values();
+        final String result;
+        if (values.isEmpty()) {
+            result = EMPTY_ID;
+        } else if (values.size() == 1) {
+            final Object object = values.iterator()
+                                        .next();
+            result = object instanceof Message
+                    ? idMessageToString((Message) object)
+                    : object.toString();
+        } else {
+            result = messageWithMultipleFieldsToString(message);
+        }
+        return result;
+    }
+
+    private static String messageWithMultipleFieldsToString(MessageOrBuilder message) {
+        String result = shortDebugString(message);
+        result = PATTERN_COLON_SPACE.matcher(result)
+                                    .replaceAll(EQUAL_SIGN);
+        return result;
     }
 
     boolean isString() {
@@ -88,7 +310,7 @@ public final class Identifier<I> {
         return type == Type.MESSAGE;
     }
 
-    Any pack() {
+    private Any pack() {
         final Any result = type.pack(value);
         return result;
     }
@@ -108,7 +330,7 @@ public final class Identifier<I> {
                 break;
 
             case MESSAGE:
-                result = Identifiers.idMessageToString((Message)value);
+                result = idMessageToString((Message) value);
                 break;
             default:
                 throw newIllegalStateException("toString() is not supported for type: %s", type);
@@ -125,8 +347,8 @@ public final class Identifier<I> {
      * Supported types of identifiers.
      */
     @SuppressWarnings(
-       {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
-        "unchecked" /* We ensure type by matching it first. */})
+            {"OverlyStrongTypeCast" /* For clarity. We cannot get OrBuilder instances here. */,
+                    "unchecked" /* We ensure type by matching it first. */})
     public enum Type {
         STRING {
             @Override
@@ -146,12 +368,12 @@ public final class Identifier<I> {
 
             @Override
             <I> Message toMessage(I id) {
-                return Wrapper.forString((String)id);
+                return Wrapper.forString((String) id);
             }
 
             @Override
             String fromMessage(Message message) {
-                return ((StringValue)message).getValue();
+                return ((StringValue) message).getValue();
             }
 
             @Override
@@ -185,7 +407,7 @@ public final class Identifier<I> {
 
             @Override
             Integer fromMessage(Message message) {
-                return ((UInt32Value)message).getValue();
+                return ((UInt32Value) message).getValue();
             }
 
             @Override
@@ -219,7 +441,7 @@ public final class Identifier<I> {
 
             @Override
             Long fromMessage(Message message) {
-                return ((UInt64Value)message).getValue();
+                return ((UInt64Value) message).getValue();
             }
 
             @Override
@@ -271,6 +493,15 @@ public final class Identifier<I> {
             }
         };
 
+        private static <I> Type getType(I id) {
+            for (Type type : values()) {
+                if (type.matchValue(id)) {
+                    return type;
+                }
+            }
+            throw unsupported(id);
+        }
+
         abstract <I> boolean matchValue(I id);
 
         abstract boolean matchMessage(Message message);
@@ -283,50 +514,10 @@ public final class Identifier<I> {
 
         abstract <I> I getDefaultValue(Class<I> idClass);
 
-        private static <I> Type getType(I id) {
-            for (Type type : values()) {
-                if (type.matchValue(id)) {
-                    return type;
-                }
-            }
-            throw unsupported(id);
-        }
-
         <I> Any pack(I id) {
             final Message msg = toMessage(id);
             final Any result = AnyPacker.pack(msg);
             return result;
-        }
-
-        public static <I> Type getType(Class<I> idClass) {
-            for (Type type : values()) {
-                if (type.matchClass(idClass)) {
-                    return type;
-                }
-            }
-            throw unsupportedClass(idClass);
-        }
-
-        static Object unpack(Any any) {
-            final Message unpacked = AnyPacker.unpack(any);
-
-            for (Type type : values()) {
-                if (type.matchMessage(unpacked)) {
-                    final Object result = type.fromMessage(unpacked);
-                    return result;
-                }
-            }
-
-            throw unsupported(unpacked);
-        }
-
-        static <I> IllegalArgumentException unsupported(I id) {
-            return newIllegalArgumentException("ID of unsupported type encountered: %s", id);
-        }
-
-        private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
-            return newIllegalArgumentException("Unsupported ID class encountered: %s",
-                                               idClass.getName());
         }
     }
 }

@@ -37,6 +37,7 @@ import org.spine3.base.Failure;
 import org.spine3.base.FailureContext;
 import org.spine3.base.FailureId;
 import org.spine3.base.Failures;
+import org.spine3.base.Identifier;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.Given;
 import org.spine3.server.commandbus.ProcessingStatus;
@@ -59,7 +60,6 @@ import static org.spine3.base.CommandStatus.OK;
 import static org.spine3.base.CommandStatus.RECEIVED;
 import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Wrappers.pack;
 import static org.spine3.server.commandstore.CommandTestUtil.checkRecord;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
@@ -160,8 +160,8 @@ public class StorageShould extends TenantAwareTest {
         final List<CommandRecord> records = Lists.newArrayList(storage.iterator(ERROR));
 
         assertEquals(1, records.size());
-        final String commandIdStr = idToString(records.get(0)
-                                                      .getCommandId());
+        final String commandIdStr = Identifier.toString(records.get(0)
+                                                               .getCommandId());
         assertFalse(commandIdStr.isEmpty());
     }
 

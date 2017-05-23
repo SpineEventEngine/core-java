@@ -23,7 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.entity.LifecycleFlags;
@@ -161,7 +161,7 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
         private void logConcurrentModification(I aggregateId,
                                                Message commandMessage,
                                                int newEventCount) {
-            final String idStr = Identifiers.idToString(aggregateId);
+            final String idStr = Identifier.toString(aggregateId);
             final Class<?> aggregateClass = repository.getAggregateClass();
             AggregateRepository.log()
                .warn("Detected the concurrent modification of {} ID: {}. " +

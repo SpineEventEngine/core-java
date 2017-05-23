@@ -107,7 +107,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.client.QueryValidationError.INVALID_QUERY;
 import static org.spine3.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static org.spine3.client.SubscriptionValidationError.INVALID_SUBSCRIPTION;

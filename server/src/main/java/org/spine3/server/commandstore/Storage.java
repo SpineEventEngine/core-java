@@ -29,7 +29,7 @@ import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Error;
 import org.spine3.base.Failure;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.server.commandbus.CommandRecord;
 import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
@@ -162,7 +162,7 @@ class Storage extends DefaultRecordBasedRepository<CommandId, Entity, CommandRec
     private Entity loadEntity(CommandId commandId) {
         final Optional<Entity> loaded = find(commandId);
         if (!loaded.isPresent()) {
-            final String idStr = Identifiers.idToString(commandId);
+            final String idStr = Identifier.toString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
         }
 

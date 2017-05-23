@@ -21,7 +21,7 @@ package org.spine3.server.stand;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -107,7 +107,7 @@ final class SubscriptionRecord {
         final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
                                                    .equals(givenIdFilter);
         if (idFilterSet) {
-            final Any idAsAny = Identifiers.idToAny(id);
+            final Any idAsAny = Identifier.pack(id);
             final EntityId givenEntityId = EntityId.newBuilder()
                                                    .setId(idAsAny)
                                                    .build();

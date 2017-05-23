@@ -54,8 +54,7 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Commands.createContext;
 import static org.spine3.base.Commands.newContextBasedOn;
 import static org.spine3.base.Commands.sameActorAndTenant;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Tests.newUserUuid;
@@ -162,7 +161,7 @@ public class CommandsShould {
     public void generate_command_ids() {
         final CommandId id = Commands.generateId();
 
-        assertFalse(idToString(id).isEmpty());
+        assertFalse(Identifier.toString(id).isEmpty());
     }
 
     @Test

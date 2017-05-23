@@ -28,7 +28,7 @@ import org.spine3.base.CommandContext;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.base.Subscribe;
 import org.spine3.base.Version;
 import org.spine3.protobuf.Wrapper;
@@ -60,7 +60,7 @@ class Given {
     static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
     static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
     static final int AWAIT_SECONDS = 6;
-    private static final String PROJECT_UUID = Identifiers.newUuid();
+    private static final String PROJECT_UUID = Identifier.newUuid();
 
     private Given() {
     }

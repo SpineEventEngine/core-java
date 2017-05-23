@@ -27,7 +27,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.people.PersonName;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.test.TestEventFactory;
@@ -45,7 +45,7 @@ import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.TestEventFactory.newInstance;
 
@@ -115,22 +115,22 @@ public class Given {
 
         public static PermissionGrantedEvent permissionGranted() {
             return PermissionGrantedEvent.newBuilder()
-                                         .setGranterUid(Identifiers.newUuid())
+                                         .setGranterUid(Identifier.newUuid())
                                          .setPermissionId("mock-permission")
-                                         .setUserUid(Identifiers.newUuid())
+                                         .setUserUid(Identifier.newUuid())
                                          .build();
         }
 
         public static PermissionRevokedEvent permissionRevoked() {
             return PermissionRevokedEvent.newBuilder()
                                          .setPermissionId("old-permission")
-                                         .setUserUid(Identifiers.newUuid())
+                                         .setUserUid(Identifier.newUuid())
                                          .build();
         }
 
         public static SharingRequestApproved sharingRequestApproved() {
             return SharingRequestApproved.newBuilder()
-                                         .setUserUid(Identifiers.newUuid())
+                                         .setUserUid(Identifier.newUuid())
                                          .build();
         }
     }

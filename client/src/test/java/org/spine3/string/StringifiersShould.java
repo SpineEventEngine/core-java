@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 import org.spine3.base.CommandId;
 import org.spine3.base.EventId;
+import org.spine3.base.Identifier;
 import org.spine3.test.identifiers.IdWithPrimitiveFields;
 import org.spine3.users.UserId;
 
@@ -34,8 +35,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.string.Stringifiers.forBoolean;
 import static org.spine3.string.Stringifiers.forInteger;
 import static org.spine3.string.Stringifiers.forLong;
@@ -76,7 +76,7 @@ public class StringifiersShould {
         final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
                                                               .setName(testId)
                                                               .build();
-        final String result = idToString(id);
+        final String result = Identifier.toString(id);
         assertEquals(testId, result);
     }
 

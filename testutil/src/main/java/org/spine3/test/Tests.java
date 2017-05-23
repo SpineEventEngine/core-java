@@ -43,7 +43,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.Math.abs;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**

@@ -47,7 +47,7 @@ import static org.spine3.base.Events.getMessage;
 import static org.spine3.base.Events.getProducer;
 import static org.spine3.base.Events.getTimestamp;
 import static org.spine3.base.Events.sort;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.protobuf.Wrapper.forBoolean;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;

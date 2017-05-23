@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
@@ -38,7 +38,6 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
@@ -121,7 +120,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     private static <I> void checkIdClass(Class<I> idClass) throws IllegalStateException {
         try {
-            Identifiers.checkSupported(idClass);
+            Identifier.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
             throw illegalStateWithCauseOf(e);
         }
@@ -344,7 +343,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             final I id = index.next();
             final Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
-                final String idStr = idToString(id);
+                final String idStr = Identifier.toString(id);
                 throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
             }
 

@@ -23,7 +23,7 @@ package org.spine3.util;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 import static org.spine3.util.Exceptions.newIllegalStateException;

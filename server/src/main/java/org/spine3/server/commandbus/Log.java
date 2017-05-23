@@ -25,11 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.CommandId;
 import org.spine3.base.FailureThrowable;
+import org.spine3.base.Identifier;
 import org.spine3.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -94,7 +94,7 @@ public class Log {
 
         final String cmdType = TypeName.of(commandMessage)
                                        .value();
-        final String id = idToString(commandId);
+        final String id = Identifier.toString(commandId);
         final String result = format(format, cmdType, id);
         return result;
     }

@@ -20,7 +20,7 @@
 package org.spine3.client;
 
 import org.spine3.annotation.Internal;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 
 import static java.lang.String.format;
 
@@ -49,7 +49,7 @@ public final class Subscriptions {
      * @return new subscription identifier.
      */
     public static SubscriptionId generateId() {
-        final String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(SUBSCRIPTION_ID_FORMAT, Identifier.newUuid());
         return newId(formattedId);
     }
 

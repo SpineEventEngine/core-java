@@ -34,7 +34,7 @@ import org.spine3.type.EventClass;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.Wrapper.forInteger;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 

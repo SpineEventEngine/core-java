@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.client.Query;
 import org.spine3.people.PersonName;
@@ -55,7 +55,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.test.Tests.newUserId;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.time.Time.getCurrentTime;
@@ -164,7 +164,7 @@ public class Given {
                                               .setCustomerId(customerId)
                                               .setCustomer(customer)
                                               .build();
-            final UserId userId = newUserId(Identifiers.newUuid());
+            final UserId userId = newUserId(Identifier.newUuid());
             final Command result = create(msg, userId, getCurrentTime());
             return result;
         }

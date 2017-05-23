@@ -34,7 +34,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.server.aggregate.AggregatePart.create;
 import static org.spine3.server.aggregate.AggregatePart.getConstructor;
 import static org.spine3.test.Given.aggregatePartOfClass;

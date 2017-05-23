@@ -27,7 +27,7 @@ import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.failures.Failures.CannotPerformBusinessOperation;
 import org.spine3.type.FailureClass;
@@ -53,7 +53,7 @@ public class FailureEnvelopeShould {
         this.commandMessage = Int32Value.getDefaultInstance();
         this.command = requestFactory.command().create(commandMessage);
         this.failureMessage = CannotPerformBusinessOperation.newBuilder()
-                                                            .setOperationId(Identifiers.newUuid())
+                                                            .setOperationId(Identifier.newUuid())
                                                             .build();
         final Failure failure = Failures.createFailure(failureMessage, command);
         this.envelope = FailureEnvelope.of(failure);

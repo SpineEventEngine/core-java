@@ -24,7 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.base.Version;
 import org.spine3.envelope.MessageEnvelope;
 import org.spine3.string.Stringifiers;
@@ -80,7 +80,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     private EntityStateEnvelope(I entityId, S entityState,
                                 TenantId tenantId, @Nullable Version entityVersion) {
         this.entityState = entityState;
-        this.entityId = Identifiers.idToAny(entityId);
+        this.entityId = Identifier.pack(entityId);
         this.entityStateClass = EntityStateClass.of(entityState);
         this.entityVersion = entityVersion;
         this.tenantId = tenantId;
@@ -124,7 +124,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     }
 
     public I getEntityId() {
-        final Object rawId = Identifiers.idFromAny(entityId);
+        final Object rawId = Identifier.idFromAny(entityId);
         @SuppressWarnings("unchecked")  // as `Any` was created out of `I`-typed object previously.
         final I result = (I) rawId;
         return result;

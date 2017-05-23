@@ -30,7 +30,7 @@ import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.bc.event.ProjectStarted;
 import org.spine3.test.bc.event.TaskAdded;
 
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.time.Time.getCurrentTime;
 

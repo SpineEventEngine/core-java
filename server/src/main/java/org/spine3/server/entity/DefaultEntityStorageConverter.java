@@ -23,10 +23,9 @@ package org.spine3.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import org.spine3.base.Identifier;
 import org.spine3.type.TypeUrl;
 
-import static org.spine3.base.Identifiers.idFromAny;
-import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -67,7 +66,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
 
     @Override
     protected EntityRecord doForward(E entity) {
-        final Any entityId = idToAny(entity.getId());
+        final Any entityId = Identifier.pack(entity.getId());
         final Any stateAny = pack(entity.getState());
         final EntityRecord.Builder builder =
                 EntityRecord.newBuilder()
@@ -89,7 +88,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         final Message unpacked = unpack(entityRecord.getState());
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
 
-        final I id = (I) idFromAny(entityRecord.getEntityId());
+        final I id = (I) Identifier.idFromAny(entityRecord.getEntityId());
         final E entity = entityFactory.create(id);
 
         if (entity != null) {

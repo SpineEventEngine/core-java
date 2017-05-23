@@ -38,7 +38,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Enrichments.isEnrichmentEnabled;
 import static org.spine3.base.EventsShould.newEventContext;
-import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.Wrapper.forBoolean;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;

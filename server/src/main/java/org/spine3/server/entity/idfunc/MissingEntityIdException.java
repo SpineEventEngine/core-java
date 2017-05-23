@@ -19,12 +19,14 @@
  */
 package org.spine3.server.entity.idfunc;
 
-import static org.spine3.base.Identifiers.ID_PROPERTY_SUFFIX;
+import org.spine3.base.Identifier;
+
+import static org.spine3.base.Identifier.ID_PROPERTY_SUFFIX;
 
 /**
  * This exception is thrown if the corresponding Protobuf command/event message definition
  * does not have an entity ID field whose name ends with
- * the {@link org.spine3.base.Identifiers#ID_PROPERTY_SUFFIX Identifiers.ID_PROPERTY_SUFFIX}.
+ * the {@link Identifier#ID_PROPERTY_SUFFIX Identifiers.ID_PROPERTY_SUFFIX}.
  *
  * @author Alexander Litus
  */

@@ -29,7 +29,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
@@ -66,7 +66,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         @Override
         public AggregateStateId<ProjectId> get() {
             final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(Identifiers.newUuid())
+                                                 .setId(Identifier.newUuid())
                                                  .build();
             return AggregateStateId.of(projectId, TypeUrl.of(Project.class));
         }
