@@ -21,8 +21,8 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.reflect.GenericTypeIndex;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.reflect.GenericTypeIndex;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.Constructor;

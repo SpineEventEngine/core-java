@@ -23,6 +23,7 @@ package org.spine3.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
+import org.spine3.reflect.GenericTypeIndex;
 
 import java.lang.reflect.Method;
 
@@ -106,7 +107,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParameter {
+    enum GenericParameter implements GenericTypeIndex {
 
         /**
          * The index of the declaration of the generic parameter type {@code <T>}
@@ -126,6 +127,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
             this.index = index;
         }
 
+        @Override
         public int getIndex() {
             return this.index;
         }

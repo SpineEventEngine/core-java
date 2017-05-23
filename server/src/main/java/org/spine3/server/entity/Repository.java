@@ -25,7 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
-import org.spine3.server.reflect.GenericTypeIndex;
+import org.spine3.reflect.GenericTypeIndex;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;

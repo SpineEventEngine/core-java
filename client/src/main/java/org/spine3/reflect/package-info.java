@@ -17,13 +17,16 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+/**
+ * @author Alex Tymchenko
+ */
 
 /**
  * This package contains internal utilities for obtaining Reflection information.
  */
 @Internal
 @ParametersAreNonnullByDefault
-package org.spine3.server.reflect;
+package org.spine3.reflect;
 
 import org.spine3.annotation.Internal;
 

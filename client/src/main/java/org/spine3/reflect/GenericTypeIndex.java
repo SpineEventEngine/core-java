@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package org.spine3.reflect;
 
 /**
  * Base interface for enumerations on generic parameters of types.

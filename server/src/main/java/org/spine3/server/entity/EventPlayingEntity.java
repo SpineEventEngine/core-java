@@ -25,7 +25,7 @@ import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
-import org.spine3.server.reflect.GenericTypeIndex;
+import org.spine3.reflect.GenericTypeIndex;
 import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
