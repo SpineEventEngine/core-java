@@ -25,8 +25,10 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.test.TimeTests;
+import org.spine3.test.commands.RequiredFieldCommand;
 import org.spine3.time.Timestamps2;
 import org.spine3.users.TenantId;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -74,5 +76,17 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
         assertEquals(tenantId, command.getContext()
                                       .getActorContext()
                                       .getTenantId());
+    }
+
+    @Test(expected = ConstraintViolationThrowable.class)
+    public void throw_ConstraintViolation_exception_once_passed_invalid_Message() {
+        final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+        factory().command().create(invalidCommand);
+    }
+
+    @Test(expected = ConstraintViolationThrowable.class)
+    public void throw_ConstraintViolation_exception_once_passed_invalid_Message_with_version() {
+        final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+        factory().command().create(invalidCommand, 42);
     }
 }
