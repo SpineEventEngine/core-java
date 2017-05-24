@@ -46,13 +46,10 @@ import java.util.Map;
 class InMemoryBeamIO<I> extends RecordStorageIO<I> {
 
     private final InMemoryRecordStorage<I> storage;
-    private final KvCoder<I, EntityRecord> kvCoder;
 
     InMemoryBeamIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
         super(idClass);
         this.storage = storage;
-        this.kvCoder = storage.getIO(idClass)
-                              .getKvCoder();
     }
 
     @Override
@@ -68,7 +65,7 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
         for (Map.Entry<I, EntityRecord> entry : filtered.entrySet()) {
             records.add(KV.of(entry.getKey(), entry.getValue()));
         }
-        return new AsTransform<>(tenantId, query, records.build(), kvCoder);
+        return new AsTransform<>(tenantId, query, records.build(), getKvCoder());
     }
 
     @Override

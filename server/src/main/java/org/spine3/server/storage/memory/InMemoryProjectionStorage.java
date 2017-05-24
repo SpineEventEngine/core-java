@@ -27,12 +27,15 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageIO;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.server.tenant.TenantFunction;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Maps.newConcurrentMap;
 
 /**
  * The in-memory implementation of {@link ProjectionStorage}.
@@ -44,8 +47,8 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final InMemoryRecordStorage<I> recordStorage;
 
-    /** The time of the last handled event. */
-    private Timestamp timestampOfLastEvent;
+    /** The time of the last handled event per tenant. */
+    private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
 
     public static <I> InMemoryProjectionStorage<I> newInstance(
             InMemoryRecordStorage<I> entityStorage) {
@@ -63,14 +66,32 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    public void writeLastHandledEventTime(Timestamp timestamp) {
+    public void writeLastHandledEventTime(final Timestamp timestamp) {
         checkNotNull(timestamp);
-        this.timestampOfLastEvent = timestamp;
+        final TenantFunction<Void> func = new TenantFunction<Void>(isMultitenant()) {
+            @Nullable
+            @Override
+            public Void apply(@Nullable TenantId tenantId) {
+                checkNotNull(tenantId);
+                timestampOfLastEvent.put(tenantId, timestamp);
+                return null;
+            }
+        };
+        func.execute();
     }
 
     @Override
     public Timestamp readLastHandledEventTime() {
-        return timestampOfLastEvent;
+        final TenantFunction<Timestamp> func = new TenantFunction<Timestamp>(isMultitenant()) {
+            @Nullable
+            @Override
+            public Timestamp apply(@Nullable TenantId tenantId) {
+                checkNotNull(tenantId);
+                final Timestamp result = timestampOfLastEvent.get(tenantId);
+                return result;
+            }
+        };
+        return func.execute();
     }
 
     @Override

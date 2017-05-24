@@ -39,7 +39,7 @@ import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordVi
 import static org.spine3.server.entity.FieldMasks.applyMask;
 
 /**
- * The memory-based storage for {@code EntityStorageRecord} that represents
+ * The memory-based storage for {@link EntityRecord} that represents
  * all storage operations available for data of a single tenant.
  *
  * @author Alexander Yevsyukov
