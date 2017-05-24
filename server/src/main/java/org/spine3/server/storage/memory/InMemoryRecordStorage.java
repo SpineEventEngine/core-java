@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
+import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
 import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.values.KV;
@@ -137,15 +138,16 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
      ******************/
 
     @Override
-    public RecordStorageIO<I> getIO() {
-        return new BeamIO<>(this);
+    public RecordStorageIO<I> getIO(Class<I> idClass) {
+        return new BeamIO<>(idClass, this);
     }
 
     private static class BeamIO<I> extends RecordStorageIO<I> {
 
         private final InMemoryRecordStorage<I> storage;
 
-        private BeamIO(InMemoryRecordStorage<I> storage) {
+        private BeamIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
+            super(idClass);
             this.storage = storage;
         }
 
@@ -162,7 +164,8 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
             for (Map.Entry<I, EntityRecord> entry : filtered.entrySet()) {
                 records.add(KV.of(entry.getKey(), entry.getValue()));
             }
-            return new AsTransform<>(tenantId, query, records.build());
+            return new AsTransform<>(tenantId, query, records.build(), storage.getIO(getIdClass())
+                                                                              .getKvCoder());
         }
 
         @Override
@@ -217,17 +220,22 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         private static class AsTransform<I> extends Read<I> {
             private static final long serialVersionUID = 0L;
             private final ImmutableList<KV<I, EntityRecord>> records;
+            private final KvCoder<I, EntityRecord> kvCoder;
 
             private AsTransform(TenantId tenantId,
                                 Query<I> query,
-                                ImmutableList<KV<I, EntityRecord>> records) {
+                                ImmutableList<KV<I, EntityRecord>> records,
+                                KvCoder<I, EntityRecord> kvCoder) {
                 super(StaticValueProvider.of(tenantId), query);
                 this.records = records;
+                this.kvCoder = kvCoder;
             }
 
             @Override
             public PCollection<KV<I, EntityRecord>> expand(PBegin input) {
-                final PCollection<KV<I, EntityRecord>> result = input.apply(Create.of(records));
+                final PCollection<KV<I, EntityRecord>> result =
+                        input.apply(Create.of(records)
+                                          .withCoder(kvCoder));
                 return result;
             }
         }

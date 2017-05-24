@@ -376,7 +376,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      ******************/
 
     public BeamIO<I, E, S> getIO() {
-        return new BeamIO<>(recordStorage().getIO(), entityConverter());
+        return new BeamIO<>(recordStorage().getIO(getIdClass()), entityConverter());
     }
 
     public static class BeamIO<I, E extends Entity<I, S>, S extends Message> {

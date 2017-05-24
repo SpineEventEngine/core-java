@@ -27,6 +27,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
+import org.apache.beam.sdk.coders.Coder;
+import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.PCollection;
@@ -37,6 +39,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.BoundedContext;
+import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.EntityStorageConverter;
 import org.spine3.server.entity.EventDispatchingRepository;
 import org.spine3.server.entity.RecordBasedRepository;
@@ -592,7 +595,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     @Override
     public BeamIO<I, P, S> getIO() {
-        return new BeamIO<>(projectionStorage().getIO(), entityConverter());
+        return new BeamIO<>(projectionStorage().getIO(getIdClass()), entityConverter());
     }
 
     public static class BeamIO<I, P extends Projection<I, S>, S extends Message>
@@ -601,6 +604,14 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         private BeamIO(ProjectionStorageIO<I> storageIO,
                        EntityStorageConverter<I, P, S> converter) {
             super(storageIO, converter);
+        }
+
+        public Coder<I> getIdCoder() {
+            return storageIO().getIdCoder();
+        }
+
+        public KvCoder<I, EntityRecord> getKvCoder() {
+            return storageIO().getKvCoder();
         }
 
         public WriteLastHandledEventTime<I> writeLastHandledEventTime(TenantId tenantId) {

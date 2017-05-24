@@ -179,7 +179,7 @@ class InMemoryStandStorage extends StandStorage {
      ******************/
 
     @Override
-    public RecordStorageIO<AggregateStateId> getIO() {
-        return recordStorage.getIO();
+    public RecordStorageIO<AggregateStateId> getIO(Class<AggregateStateId> idClass) {
+        return recordStorage.getIO(idClass);
     }
 }

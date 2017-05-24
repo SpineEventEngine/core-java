@@ -24,6 +24,12 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
+import org.apache.beam.sdk.coders.BigEndianLongCoder;
+import org.apache.beam.sdk.coders.Coder;
+import org.apache.beam.sdk.coders.KvCoder;
+import org.apache.beam.sdk.coders.StringUtf8Coder;
+import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
@@ -34,6 +40,7 @@ import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
 import org.joda.time.Instant;
+import org.spine3.base.Identifier;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.tenant.TenantAwareOperation;
@@ -45,6 +52,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.toMillis;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for I/O operations based on Apache Beam.
@@ -53,6 +62,24 @@ import static com.google.protobuf.util.Timestamps.toMillis;
  * @author Alexander Yevsyukov
  */
 public abstract class RecordStorageIO<I> {
+
+    private static final Coder<EntityRecord> entityRecordCoder = ProtoCoder.of(EntityRecord.class);
+
+    private final Class<I> idClass;
+
+    @Nullable
+    private Coder<I> idCoder;
+
+    @Nullable
+    private KvCoder<I, EntityRecord> kvCoder;
+
+    protected RecordStorageIO(Class<I> idClass) {
+        this.idClass = idClass;
+    }
+
+    public Class<I> getIdClass() {
+        return idClass;
+    }
 
     /**
      * Obtains transformation for extracting an entity state from {@link EntityRecord}s.
@@ -72,6 +99,56 @@ public abstract class RecordStorageIO<I> {
     public static Instant toInstant(Timestamp timestamp) {
         final long millis = toMillis(timestamp);
         return new Instant(millis);
+    }
+
+    /**
+     * Creates a deterministic coder for identifiers used by the storage.
+     */
+    @SuppressWarnings("unchecked") // the cast is preserved by ID type checking
+    public Coder<I> getIdCoder() {
+        if (idCoder != null) {
+            return idCoder;
+        }
+
+        final Identifier.Type idType = Identifier.getType(idClass);
+        switch (idType) {
+            case INTEGER:
+                idCoder = (Coder<I>) BigEndianIntegerCoder.of();
+                break;
+            case LONG:
+                idCoder = (Coder<I>) BigEndianLongCoder.of();
+                break;
+            case STRING:
+                idCoder = (Coder<I>) StringUtf8Coder.of();
+                break;
+            case MESSAGE:
+                idCoder = (Coder<I>) ProtoCoder.of((Class<? extends Message>)idClass);
+                break;
+            default:
+                throw newIllegalStateException("Unsupported ID type: %s", idType.name());
+        }
+
+        // Check that the key coder is deterministic.
+        try {
+            idCoder.verifyDeterministic();
+        } catch (Coder.NonDeterministicException e) {
+            throw illegalStateWithCauseOf(e);
+        }
+
+        return idCoder;
+    }
+
+    public static Coder<EntityRecord> getEntityRecordCoder() {
+        return entityRecordCoder;
+    }
+
+    public KvCoder<I, EntityRecord> getKvCoder() {
+        if (kvCoder != null) {
+            return kvCoder;
+        }
+
+        kvCoder = KvCoder.of(getIdCoder(), getEntityRecordCoder());
+        return kvCoder;
     }
 
     /**

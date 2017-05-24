@@ -20,18 +20,13 @@
 
 package org.spine3.server.projection;
 
-import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
-import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
-import org.apache.beam.sdk.coders.BigEndianLongCoder;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.CoderRegistry;
 import org.apache.beam.sdk.coders.IterableCoder;
 import org.apache.beam.sdk.coders.KvCoder;
-import org.apache.beam.sdk.coders.StringUtf8Coder;
-import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.FlatMapElements;
 import org.apache.beam.sdk.transforms.GroupByKey;
@@ -44,15 +39,12 @@ import org.apache.beam.sdk.values.TupleTag;
 import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.values.TypeDescriptor;
 import org.spine3.base.Event;
-import org.spine3.base.Identifier;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.event.EventStore;
+import org.spine3.server.event.EventStoreIO;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.users.TenantId;
-
-import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
-import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
  * Performs of a catch-up for the repository for one tenant.
@@ -83,8 +75,9 @@ class CatchupOp<I> {
     private Pipeline createPipeline() {
         Pipeline pipeline = Pipeline.create(options);
 
-        final Coder<I> idCoder = getIdCoder();
-        final ProtoCoder<Event> eventCoder = ProtoCoder.of(Event.class);
+        final Coder<I> idCoder = repository.getIO()
+                                           .getIdCoder();
+        final Coder<Event> eventCoder = EventStoreIO.getEventCoder();
         final KvCoder<I, Event> eventTupleCoder = KvCoder.of(idCoder, eventCoder);
 
         final CoderRegistry coderRegistry = pipeline.getCoderRegistry();
@@ -142,37 +135,6 @@ class CatchupOp<I> {
         return pipeline;
     }
 
-    @SuppressWarnings("unchecked") // the cast is preserved by ID type checking
-    private Coder<I> getIdCoder() {
-        final Class<I> idClass = repository.getIdClass();
-        final Coder<I> idCoder;
-        final Identifier.Type idType = Identifier.getType(idClass);
-        switch (idType) {
-            case INTEGER:
-                idCoder = (Coder<I>) BigEndianIntegerCoder.of();
-                break;
-            case LONG:
-                idCoder = (Coder<I>) BigEndianLongCoder.of();
-                break;
-            case STRING:
-                idCoder = (Coder<I>) StringUtf8Coder.of();
-                break;
-            case MESSAGE:
-                idCoder = (Coder<I>) ProtoCoder.of((Class<? extends Message>)idClass);
-                break;
-            default:
-                throw newIllegalStateException("Unsupported ID type: %s", idType.name());
-        }
-
-        // Check that the key coder is deterministic.
-        try {
-            idCoder.verifyDeterministic();
-        } catch (Coder.NonDeterministicException e) {
-            throw illegalStateWithCauseOf(e);
-        }
-        return idCoder;
-    }
-
     private EventStreamQuery createStreamQuery() {
         final TenantAwareFunction0<EventStreamQuery> fn =
                 new TenantAwareFunction0<EventStreamQuery>(tenantId) {
@@ -190,5 +152,4 @@ class CatchupOp<I> {
         final PipelineResult result = pipeline.run();
         return result;
     }
-
 }

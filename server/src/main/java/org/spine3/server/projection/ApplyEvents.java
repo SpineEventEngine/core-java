@@ -87,4 +87,13 @@ class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, KV<I, EntityRecord>> {
 
         c.output(timestampTag, lastEventTimestamp);
     }
+
+    /**
+     * The class to be used instead of anonymous descendants of {@link TupleTag} required for
+     * output tags.
+     */
+    static class TimestampTupleTag extends TupleTag<Timestamp> {
+        private static final long serialVersionUID = 0L;
+    }
+
 }

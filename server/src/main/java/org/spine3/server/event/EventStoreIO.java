@@ -20,12 +20,15 @@
 
 package org.spine3.server.event;
 
+import org.apache.beam.sdk.coders.Coder;
+import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.Values;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.spine3.annotation.SPI;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.EntityRecord;
@@ -38,10 +41,17 @@ import static org.spine3.server.storage.RecordStorageIO.toInstant;
  *
  * @author Alexander Yevsyukov
  */
+@SPI
 public class EventStoreIO {
+
+    private static final Coder<Event> eventCoder = ProtoCoder.of(Event.class);
 
     private EventStoreIO() {
         // Prevent instantiation of this utility class.
+    }
+
+    public static Coder<Event> getEventCoder() {
+        return eventCoder;
     }
 
     /**

@@ -117,8 +117,8 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
      ******************/
 
     @Override
-    public ProjectionStorageIO<I> getIO() {
-        return new InMemProjectionStorageIO<>(this, recordStorage.getIO());
+    public ProjectionStorageIO<I> getIO(Class<I> idClass) {
+        return new InMemProjectionStorageIO<>(this, recordStorage.getIO(idClass));
     }
 
     private static class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
@@ -129,6 +129,7 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
         private InMemProjectionStorageIO(
                 InMemoryProjectionStorage<I> parent,
                 RecordStorageIO<I> storageIO) {
+            super(storageIO.getIdClass());
             this.parent = parent;
             this.storageIO = storageIO;
         }

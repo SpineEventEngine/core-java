@@ -272,5 +272,5 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     /**
      * Obtains {@link RecordStorageIO} instance for read/write operations with this record storage.
      */
-    public abstract RecordStorageIO<I> getIO();
+    public abstract RecordStorageIO<I> getIO(Class<I> idClass);
 }

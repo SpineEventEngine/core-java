@@ -88,6 +88,6 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
      *****************/
 
     @Override
-    public abstract ProjectionStorageIO<I> getIO();
+    public abstract ProjectionStorageIO<I> getIO(Class<I> idClass);
 
 }

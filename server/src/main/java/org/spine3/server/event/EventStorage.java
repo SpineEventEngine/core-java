@@ -93,7 +93,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      */
     RecordStorageIO.Read<EventId> query(TenantId tenantId, EventStreamQuery query) {
         final RecordStorageIO.Query<EventId> recordQuery = new EventRecordQuery(query);
-        final RecordStorageIO.Read<EventId> readRecords = recordStorage().getIO()
+        final RecordStorageIO.Read<EventId> readRecords = recordStorage().getIO(EventId.class)
                                                                          .read(tenantId,
                                                                                recordQuery);
         return readRecords;
