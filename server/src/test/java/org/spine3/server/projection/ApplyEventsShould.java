@@ -50,7 +50,6 @@ public class ApplyEventsShould {
         final RecordBasedRepository.BeamIO.ReadFunction<Long, ?, ?> readFn =
                 projectionRepository.getIO()
                                     .loadOrCreate(tenantId);
-        @SuppressWarnings("serial") // Std. serialization ID is fine.
         final TupleTag<Timestamp> tag = new ApplyEvents.TimestampTupleTag();
         applyEvents = new ApplyEvents<>(readFn, tag);
     }

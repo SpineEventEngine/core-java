@@ -21,22 +21,11 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.FieldMask;
-import org.apache.beam.sdk.coders.KvCoder;
-import org.apache.beam.sdk.options.ValueProvider.StaticValueProvider;
-import org.apache.beam.sdk.transforms.Create;
-import org.apache.beam.sdk.values.KV;
-import org.apache.beam.sdk.values.PBegin;
-import org.apache.beam.sdk.values.PCollection;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
-import org.spine3.server.tenant.TenantAwareFunction0;
-import org.spine3.users.TenantId;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -139,129 +128,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public RecordStorageIO<I> getIO(Class<I> idClass) {
-        return new BeamIO<>(idClass, this);
-    }
-
-    private static class BeamIO<I> extends RecordStorageIO<I> {
-
-        private final InMemoryRecordStorage<I> storage;
-
-        private BeamIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
-            super(idClass);
-            this.storage = storage;
-        }
-
-        @Override
-        public FindByQuery<I> findFn(TenantId tenantId) {
-            return new InMemFindByQuery<>(readAll(tenantId));
-        }
-
-        @Override
-        public Read<I> read(TenantId tenantId, Query<I> query) {
-            final Map<I, EntityRecord> all = readAll(tenantId);
-            final Map<I, EntityRecord> filtered = filter(all, query);
-            final ImmutableList.Builder<KV<I, EntityRecord>> records = ImmutableList.builder();
-            for (Map.Entry<I, EntityRecord> entry : filtered.entrySet()) {
-                records.add(KV.of(entry.getKey(), entry.getValue()));
-            }
-            return new AsTransform<>(tenantId, query, records.build(), storage.getIO(getIdClass())
-                                                                              .getKvCoder());
-        }
-
-        @Override
-        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-            /* OK for in-memory test-only implementation. */
-        public WriteFn<I> writeFn(TenantId tenantId) {
-            return new WriteFn<I>(tenantId) {
-                private static final long serialVersionUID = 0L;
-                @Override
-                protected void doWrite(I key, EntityRecord value) {
-                    storage.writeRecord(key, EntityRecordWithColumns.of(value));
-                }
-            };
-        }
-
-        private ImmutableMap<I, EntityRecord> readAll(TenantId tenantId) {
-            final TenantAwareFunction0<ImmutableMap<I, EntityRecord>> func =
-                    new ReadAllRecordsFunc<>(tenantId, storage);
-            final ImmutableMap<I, EntityRecord> allRecords = func.execute();
-            return allRecords;
-        }
-
-        private static  <I> Map<I, EntityRecord> filter(Map<I, EntityRecord> map, Query<I> query) {
-            final ImmutableMap.Builder<I, EntityRecord> filtered = ImmutableMap.builder();
-            final Predicate<KV<I, EntityRecord>> predicate = query.toPredicate();
-            for (Map.Entry<I, EntityRecord> entry : map.entrySet()) {
-                if (predicate.apply(KV.of(entry.getKey(), entry.getValue()))) {
-                    filtered.put(entry);
-                }
-            }
-            return filtered.build();
-        }
-
-        private static class InMemFindByQuery<I> extends RecordStorageIO.FindByQuery<I> {
-
-            private static final long serialVersionUID = 0L;
-            private final ImmutableMap<I, EntityRecord> records;
-
-            private InMemFindByQuery(ImmutableMap<I, EntityRecord> records) {
-                this.records = records;
-            }
-
-            @Override
-            public Iterable<EntityRecord> apply(Query<I> input) {
-                return filter(records, input).values();
-            }
-        }
-
-        /**
-         * Transforms passed records into {@link PCollection}.
-         */
-        private static class AsTransform<I> extends Read<I> {
-            private static final long serialVersionUID = 0L;
-            private final ImmutableList<KV<I, EntityRecord>> records;
-            private final KvCoder<I, EntityRecord> kvCoder;
-
-            private AsTransform(TenantId tenantId,
-                                Query<I> query,
-                                ImmutableList<KV<I, EntityRecord>> records,
-                                KvCoder<I, EntityRecord> kvCoder) {
-                super(StaticValueProvider.of(tenantId), query);
-                this.records = records;
-                this.kvCoder = kvCoder;
-            }
-
-            @Override
-            public PCollection<KV<I, EntityRecord>> expand(PBegin input) {
-                final PCollection<KV<I, EntityRecord>> result =
-                        input.apply(Create.of(records)
-                                          .withCoder(kvCoder));
-                return result;
-            }
-        }
-
-        private static class ReadAllRecordsFunc<I>
-                extends TenantAwareFunction0<ImmutableMap<I, EntityRecord>> {
-
-            private final InMemoryRecordStorage<I> storage;
-
-            private ReadAllRecordsFunc(TenantId tenantId, InMemoryRecordStorage<I> storage) {
-                super(tenantId);
-                this.storage = storage;
-            }
-
-            @Override
-            public ImmutableMap<I, EntityRecord> apply() {
-                ImmutableMap.Builder<I, EntityRecord> result = ImmutableMap.builder();
-                final Iterator<I> index = storage.index();
-                while (index.hasNext()) {
-                    I id = index.next();
-                    final EntityRecord record = storage.readRecord(id)
-                                                       .get();
-                    result.put(id, record);
-                }
-                return result.build();
-            }
-        }
+        return new InMemoryBeamIO<>(idClass, this);
     }
 }

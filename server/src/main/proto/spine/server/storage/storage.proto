@@ -1,0 +1,73 @@
+//
+// Copyright 2017, TeamDev Ltd. All rights reserved.
+//
+// Redistribution and use in source and/or binary forms, with or without
+// modification, must retain the above copyright notice and the following
+// disclaimer.
+//
+// THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+// "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+// LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+// A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+// OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+// SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+// LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+// DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+// THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+// (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+// OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+//
+syntax = "proto3";
+
+package spine.server.event;
+
+option (type_url_prefix) = "type.spine3.org";
+option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "StorageProto";
+// Put generated code under the 'grpc' sub-package, which is annotated @SPI.
+option java_package = "org.spine3.server.storage.grpc";
+
+import "google/protobuf/any.proto";
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+import "spine/options.proto";
+import "spine/base/response.proto";
+import "spine/server/entity/entity.proto";
+
+message RecordStorageRequest {
+    string entity_state_type_name = 1;
+    google.protobuf.Any entity_id = 2;
+}
+
+service RecordStorageService {
+    option (SPI_service) = true;
+
+    // Reads `EntityRecord` by the passed ID.
+    rpc Read(RecordStorageRequest) returns (server.entity.EntityRecord);
+
+    // Writes `EntityRecord` to the storage.
+    rpc Write(RecordStorageRequest) returns (base.Response);
+}
+
+message LastHandledEventRequest {
+    string projection_type_name = 1;
+    google.protobuf.Timestamp timestamp = 2;
+}
+
+service ProjectionStorageService {
+    option (SPI_service) = true;
+
+    // Reads `EntityRecord` by the passed ID.
+    rpc Read(RecordStorageRequest) returns (server.entity.EntityRecord);
+
+    // Writes `EntityRecord` to the storage.
+    rpc Write(RecordStorageRequest) returns (base.Response);
+
+    // Reads the timestamp of the last handled event.
+    rpc ReadLastHandledEventTimestamp(LastHandledEventRequest) returns (google.protobuf.Timestamp);
+
+    // Writes the timestamp of the last handled event.
+    rpc WriteLastHandledEventTimestamp(LastHandledEventRequest) returns (base.Response);
+}

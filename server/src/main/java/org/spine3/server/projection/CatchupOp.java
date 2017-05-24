@@ -110,8 +110,7 @@ class CatchupOp<I> {
         // 2. Take as a side output the timestamp of the last event.
         final TupleTag<KV<I, EntityRecord>> recordsTag = new TupleTag<KV<I, EntityRecord>>() {
         };
-        final TupleTag<Timestamp> timestampTag = new TupleTag<Timestamp>() {
-        };
+        final TupleTag<Timestamp> timestampTag = new ApplyEvents.TimestampTupleTag();
 
         final ProjectionRepository.BeamIO<I, ?, ?> repositoryIO = repository.getIO();
         final PCollectionTuple collectionTuple = groupped.apply(
