@@ -102,8 +102,6 @@ public final class CommandFactory {
         checkNotNull(context);
         checkValid(message);
 
-        //TODO:5/25/17:alex.tymchenko: validate the context k
-
         final Command result = createCommand(message, context);
         return result;
     }
