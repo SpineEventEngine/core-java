@@ -24,13 +24,10 @@ import com.google.protobuf.Message;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
-import org.spine3.validate.ConstraintViolation;
 import org.spine3.validate.ConstraintViolationThrowable;
-import org.spine3.validate.MessageValidator;
-
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
@@ -67,7 +64,7 @@ public final class CommandFactory {
     public Command create(Message message) throws ConstraintViolationThrowable {
         checkNotNull(message);
 
-        validate(message);
+        checkValid(message);
 
         final CommandContext context = createContext();
         final Command result = Commands.createCommand(message, context);
@@ -106,7 +103,7 @@ public final class CommandFactory {
     public Command create(Message message, int targetVersion) throws ConstraintViolationThrowable {
         checkNotNull(message);
         checkNotNull(targetVersion);
-        validate(message);
+        checkValid(message);
 
         final CommandContext context = createContext(targetVersion);
         final Command result = Commands.createCommand(message, context);
@@ -120,17 +117,5 @@ public final class CommandFactory {
         return Commands.createContext(actorRequestFactory.getTenantId(),
                                       actorRequestFactory.getActor(),
                                       actorRequestFactory.getZoneOffset(), targetVersion);
-    }
-
-    /**
-     * Validates the given message according to its definition and throws
-     * {@code ConstraintViolationThrowable} if any constraints are violated.
-     */
-    private static void validate(Message message) {
-        final List<ConstraintViolation> violations = MessageValidator.newInstance()
-                                                                     .validate(message);
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationThrowable(violations);
-        }
     }
 }
