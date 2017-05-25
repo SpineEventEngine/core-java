@@ -36,6 +36,7 @@ import org.spine3.test.Spy;
 import org.spine3.test.bc.event.ProjectCreated;
 import org.spine3.test.commandservice.ProjectId;
 import org.spine3.test.projection.Project;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 
 import java.util.Set;
 
@@ -182,7 +183,8 @@ public class QueryServiceShould {
         }
     }
 
-    private static class ProjectDetails extends Projection<ProjectId, Project> {
+    private static class ProjectDetails
+            extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
 
         /**
          * Creates a new instance.

@@ -21,7 +21,7 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.server.reflect.GenericTypeIndex;
+import org.spine3.reflect.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Reflection.getGenericParameterType;

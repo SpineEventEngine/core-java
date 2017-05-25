@@ -40,7 +40,6 @@ import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.tenant.AllTenantOperation;
 import org.spine3.type.EventClass;
@@ -63,7 +62,7 @@ import static com.google.common.base.Preconditions.checkState;
  * @param <S> the type of projection state messages
  * @author Alexander Yevsyukov
  */
-public abstract class ProjectionRepository<I, P extends Projection<I, S>, S extends Message>
+public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
 
     /** The {@code BoundedContext} in which this repository works. */
@@ -185,7 +184,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @SuppressWarnings("MethodDoesntCallSuperMethod" /* We do not call super.createStorage() because
                        we create a specific type of a storage, not a regular entity storage created
                        in the parent. */)
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
+    protected RecordStorage<I> createStorage(StorageFactory factory) {
         final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage =
                 factory.createProjectionStorage(projectionClass);
@@ -285,17 +284,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = findOrCreate(id);
+        final ProjectionTransaction<I, ?, ?> tx =
+                ProjectionTransaction.start((Projection<I, ?, ?>) projection);
         projection.handle(eventMessage, context);
+        tx.commit();
 
-        final Timestamp eventTime = context.getTimestamp();
+        if (projection.isChanged()) {
+            final Timestamp eventTime = context.getTimestamp();
 
-        if (isBulkWriteInProgress()) {
-            storePostponed(projection, eventTime);
-        } else {
-            storeNow(projection, eventTime);
+            if (isBulkWriteInProgress()) {
+                storePostponed(projection, eventTime);
+            } else {
+                storeNow(projection, eventTime);
+            }
+
+            stand.post(projection, context.getCommandContext());
         }
-
-        stand.post(projection, context.getCommandContext());
     }
 
     /**
@@ -514,7 +518,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
      * Implementation of the {@link BulkWriteOperation.FlushCallback} for storing
      * the projections and the last handled event time into the {@link ProjectionRepository}.
      */
-    private static class PendingDataFlushTask<I, P extends Projection<I, S>, S extends Message>
+    private static class PendingDataFlushTask<I, P extends Projection<I, S, ?>, S extends Message>
             implements BulkWriteOperation.FlushCallback<P> {
 
         private final ProjectionRepository<I, P, S> projectionRepository;

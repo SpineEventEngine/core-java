@@ -38,8 +38,8 @@ import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.TypeConverter;
-import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.EventPlayingEntity;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.storage.EntityQueries;
@@ -47,6 +47,7 @@ import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectValidatingBuilder;
 import org.spine3.testdata.Sample;
 import org.spine3.time.Time;
 
@@ -68,6 +69,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.TestTransaction.injectState;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
@@ -500,7 +502,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
+    public static class TestCounterEntity<I> extends EventPlayingEntity<I,
+                                                                        Project,
+                                                                        ProjectValidatingBuilder> {
 
         private int counter = 0;
 
@@ -547,7 +551,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             final Project newState = Project.newBuilder(getState())
                                             .setStatus(status)
                                             .build();
-            incrementState(newState);
+            injectState(this, newState, getCounterVersion());
         }
     }
 }

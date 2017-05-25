@@ -54,6 +54,6 @@ public class AggregateBuilder<A extends Aggregate<I, S, ?>,
 
     @Override
     protected void setState(A result, S state, Version version) {
-        result.injectState(state, version);
+        AggregateTransaction.startWith(result, state, version).commit();
     }
 }

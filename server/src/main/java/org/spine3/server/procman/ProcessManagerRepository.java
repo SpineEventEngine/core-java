@@ -55,7 +55,7 @@ import static org.spine3.util.Exceptions.newIllegalArgumentException;
  * @author Alexander Yevsyukov
  */
 public abstract class ProcessManagerRepository<I,
-                                               P extends ProcessManager<I, S>,
+                                               P extends ProcessManager<I, S, ?>,
                                                S extends Message>
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
@@ -119,9 +119,17 @@ public abstract class ProcessManagerRepository<I,
         checkCommandClass(commandClass);
         final I id = getIdFromCommandMessage.apply(commandMessage, context);
         final P manager = findOrCreate(id);
+
+        final ProcManTransaction<?, ?, ?> tx = beginTransactionFor(manager);
         final List<Event> events = manager.dispatchCommand(envelope);
         store(manager);
+        tx.commit();
+
         postEvents(events);
+    }
+
+    private ProcManTransaction<?, ?, ?> beginTransactionFor(P manager) {
+        return ProcManTransaction.start((ProcessManager<?, ?, ?>) manager);
     }
 
     /**
@@ -160,7 +168,9 @@ public abstract class ProcessManagerRepository<I,
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P manager = findOrCreate(id);
+        final ProcManTransaction<?, ?, ?> transaction = beginTransactionFor(manager);
         manager.dispatchEvent(eventMessage, context);
+        transaction.commit();
         store(manager);
     }
 

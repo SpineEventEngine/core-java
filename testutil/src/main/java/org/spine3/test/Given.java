@@ -32,6 +32,7 @@ import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.procman.ProcessManagerBuilder;
 import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionBuilder;
+import org.spine3.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -85,10 +86,13 @@ public class Given {
     /**
      * Creates a builder for a {@code Projection}.
      */
-    public static <P extends Projection<I, S>, I, S extends Message>
-           ProjectionBuilder<P, I, S> projectionOfClass(Class<P> projectionClass) {
+    public static <P extends Projection<I, S, B>,
+            I,
+            S extends Message,
+            B extends ValidatingBuilder<S, ? extends Message.Builder>>
+    ProjectionBuilder<P, I, S, B> projectionOfClass(Class<P> projectionClass) {
         checkNotNull(projectionClass);
-        final ProjectionBuilder<P, I, S> result = new ProjectionBuilder<>();
+        final ProjectionBuilder<P, I, S, B> result = new ProjectionBuilder<>();
         result.setResultClass(projectionClass);
         return result;
     }
@@ -96,10 +100,11 @@ public class Given {
     /**
      * Creates a builder for a {@code ProcessManager}.
      */
-    public static <P extends ProcessManager<I, S>, I, S extends Message>
-           ProcessManagerBuilder<P, I, S> processManagerOfClass(Class<P> pmClass) {
+    public static
+    <P extends ProcessManager<I, S, B>, I, S extends Message, B extends ValidatingBuilder<S, ?>>
+           ProcessManagerBuilder<P, I, S, B> processManagerOfClass(Class<P> pmClass) {
         checkNotNull(pmClass);
-        final ProcessManagerBuilder<P, I, S> result = new ProcessManagerBuilder<>();
+        final ProcessManagerBuilder<P, I, S, B> result = new ProcessManagerBuilder<>();
         result.setResultClass(pmClass);
         return result;
     }
