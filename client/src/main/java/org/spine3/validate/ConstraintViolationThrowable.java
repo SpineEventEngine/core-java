@@ -29,6 +29,7 @@ import static java.util.Collections.unmodifiableList;
  *
  * @author Illia Shepilov
  */
+@Deprecated
 public class ConstraintViolationThrowable extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
