@@ -30,6 +30,7 @@ import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.transforms.FlatMapElements;
 import org.apache.beam.sdk.transforms.GroupByKey;
+import org.apache.beam.sdk.transforms.Keys;
 import org.apache.beam.sdk.transforms.Max;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.KV;
@@ -102,12 +103,14 @@ class CatchupOp<I> {
         final KvCoder<I, Iterable<Event>> idToEventsCoder =
                 KvCoder.of(idCoder, IterableCoder.of(eventCoder));
 
-        //TODO:2017-05-25:alexander.yevsyukov: get all IDs.
-        //TODO:2017-05-25:alexander.yevsyukov: Load or create all the
-
         final PCollection<KV<I, Iterable<Event>>> groupped =
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
                        .setCoder(idToEventsCoder);
+
+        final PCollection<I> ids = groupped.apply(Keys.<I>create());
+
+        //TODO:2017-05-25:alexander.yevsyukov: Load or create all the entities and get their records.
+        // Pass them as side input to `ApplyEvents`.
 
         // Apply events to projections.
         // 1. Load projection, apply events.
@@ -116,7 +119,7 @@ class CatchupOp<I> {
         };
         final TupleTag<Timestamp> timestampTag = new ApplyEvents.TimestampTupleTag();
 
-        final ProjectionRepository.BeamIO<I, ?, ?> repositoryIO = repository.getIO();
+        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
         final PCollectionTuple collectionTuple = groupped.apply(
                 "ApplyEvents",
                 ParDo.of(new ApplyEvents<>(repositoryIO.loadOrCreate(tenantId), timestampTag))

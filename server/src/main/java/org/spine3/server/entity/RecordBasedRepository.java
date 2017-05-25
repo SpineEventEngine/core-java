@@ -32,18 +32,14 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.spine3.annotation.Internal;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.RecordStorageIO;
-import org.spine3.server.storage.RecordStorageIO.FindById;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
-import org.spine3.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
@@ -399,69 +395,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Beam support
      ******************/
 
-    public BeamIO<I, E, S> getIO() {
-        return new BeamIO<>(recordStorage().getIO(getIdClass()), entityConverter());
-    }
-
-    public static class BeamIO<I, E extends Entity<I, S>, S extends Message> {
-
-        private final RecordStorageIO<I> storageIO;
-        private final EntityStorageConverter<I, E, S> converter;
-
-        protected BeamIO(RecordStorageIO<I> storageIO,
-                         EntityStorageConverter<I, E, S> converter) {
-            this.storageIO = storageIO;
-            this.converter = converter;
-        }
-
-        protected RecordStorageIO<I> storageIO() {
-            return storageIO;
-        }
-
-        public ReadFunction<I, E, S> loadOrCreate(TenantId tenantId) {
-            return new LoadOrCreate<>(tenantId, storageIO, converter);
-        }
-
-        public RecordStorageIO.Write<I> write(TenantId tenantId) {
-            return storageIO.write(tenantId);
-        }
-
-        public interface ReadFunction<I, E extends Entity<I, S>, S extends Message>
-               extends SerializableFunction<I, E> {
-
-            EntityStorageConverter<I, E, S> getConverter();
-        }
-
-        private static class LoadOrCreate<I, E extends Entity<I, S>, S extends Message>
-                implements ReadFunction<I, E, S> {
-
-            private static final long serialVersionUID = 0L;
-            private final FindById<I> queryFn;
-            private final EntityStorageConverter<I, E, S> converter;
-
-            private LoadOrCreate(TenantId tenantId,
-                                 RecordStorageIO<I> storageIO,
-                                 EntityStorageConverter<I, E, S> converter) {
-                this.queryFn = storageIO.findFn(tenantId);
-                this.converter = converter;
-            }
-
-            @Override
-            public E apply(I input) {
-                //TODO:2017-05-25:alexander.yevsyukov: Load only one record by ID.
-
-                final Iterable<EntityRecord> queryResult = null ; // queryFn.apply(singleRecord(input));
-                final EntityRecord record = FluentIterable.from(queryResult)
-                                                          .get(0);
-                final E result = converter.reverse()
-                                          .convert(record);
-                return result;
-            }
-
-            @Override
-            public EntityStorageConverter<I, E, S> getConverter() {
-                return converter;
-            }
-        }
+    public RecordBasedRepositoryIO<I, E, S> getIO() {
+        return new RecordBasedRepositoryIO<>(recordStorage().getIO(getIdClass()),
+                                             entityConverter());
     }
 }

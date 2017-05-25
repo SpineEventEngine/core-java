@@ -29,7 +29,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.entity.RecordBasedRepository;
+import org.spine3.server.entity.RecordBasedRepositoryIO;
 import org.spine3.test.Tests;
 import org.spine3.users.TenantId;
 
@@ -47,7 +47,7 @@ public class ApplyEventsShould {
         boundedContext.register(projectionRepository);
 
         final TenantId tenantId = Tests.newTenantUuid();
-        final RecordBasedRepository.BeamIO.ReadFunction<Long, ?, ?> readFn =
+        final RecordBasedRepositoryIO.ReadFunction<Long, ?, ?> readFn =
                 projectionRepository.getIO()
                                     .loadOrCreate(tenantId);
         final TupleTag<Timestamp> tag = new ApplyEvents.TimestampTupleTag();

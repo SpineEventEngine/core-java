@@ -128,6 +128,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public RecordStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemoryBeamIO<>(idClass, this);
+        return new InMemoryIO<>(idClass, this);
     }
 }

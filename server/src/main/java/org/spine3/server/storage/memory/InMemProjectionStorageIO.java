@@ -86,7 +86,7 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemoryBeamIO.createDefaultChannel();
+            channel = InMemoryIO.createDefaultChannel();
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 

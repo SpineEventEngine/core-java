@@ -50,9 +50,9 @@ import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
  *
  * @author Alexander Yevsyukov
  */
-class InMemoryBeamIO<I> extends RecordStorageIO<I> {
+class InMemoryIO<I> extends RecordStorageIO<I> {
 
-    InMemoryBeamIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
+    InMemoryIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
         super(idClass);
     }
 
@@ -67,11 +67,13 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
 
     @Override
     public FindById<I> findFn(TenantId tenantId) {
+        //TODO:2017-05-25:alexander.yevsyukov: Implement
         return null; // new InMemFindById<>(readAll(tenantId));
     }
 
     @Override
     public Read<I> read(TenantId tenantId, Query<I> query) {
+        //TODO:2017-05-25:alexander.yevsyukov: Implement
         final Map<I, EntityRecord> all = null; // readAll(tenantId);
         final Map<I, EntityRecord> filtered = filter(all, query);
         final ImmutableList.Builder<KV<I, EntityRecord>> records = ImmutableList.builder();
@@ -82,8 +84,6 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
     }
 
     @Override
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-        /* OK for in-memory test-only implementation. */
     public WriteFn<I> writeFn(TenantId tenantId) {
         return new InMemWriteFn<>(tenantId);
     }

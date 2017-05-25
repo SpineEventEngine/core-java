@@ -30,7 +30,7 @@ import org.apache.beam.sdk.values.TupleTag;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.RecordBasedRepository;
+import org.spine3.server.entity.RecordBasedRepositoryIO;
 
 import java.util.Collections;
 import java.util.List;
@@ -43,10 +43,10 @@ import java.util.List;
 class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, KV<I, EntityRecord>> {
 
     private static final long serialVersionUID = 0L;
-    private final RecordBasedRepository.BeamIO.ReadFunction<I, ?, ?> loadOrCreate;
+    private final RecordBasedRepositoryIO.ReadFunction<I, ?, ?> loadOrCreate;
     private final TupleTag<Timestamp> timestampTag;
 
-    ApplyEvents(RecordBasedRepository.BeamIO.ReadFunction<I, ?, ?> loadOrCreate,
+    ApplyEvents(RecordBasedRepositoryIO.ReadFunction<I, ?, ?> loadOrCreate,
                 TupleTag<Timestamp> timestampTag) {
         this.loadOrCreate = loadOrCreate;
         this.timestampTag = timestampTag;
