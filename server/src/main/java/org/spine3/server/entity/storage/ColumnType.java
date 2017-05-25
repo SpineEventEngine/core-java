@@ -34,26 +34,24 @@ import org.spine3.annotation.SPI;
  * both the DTO to store the value to and the key to store it under.
  *
  * <p>Example of implementing this interface for a JDBC-based storage:
- * <code>
- *     <pre>
- *         class VarcharDateType implements ColumnType<Date, String, PreparedStatement, Integer> {
- *             \@Override
- *             public String convertColumnValue(Date fieldValue) {
- *                 return MY_DATE_FORMAT.format(fieldValue);
- *             }
- *
- *             \@Override
- *             public void setColumnValue(PreparedStatement record, String value, Integer column) {
- *                 record.setString(column, value);
- *             }
- *
- *             \@Override
- *             public void setNull(PreparedStatement storageRecord, Integer columnIdentifier) {
- *                 storageRecord.setNull(columnIdentifier, Types.VARCHAR);
- *             }
+ * <pre>
+ *     {@code
+ *     class VarcharDateType implements ColumnType&lt;Date, String, PreparedStatement, Integer&gt; {
+ *         \@Override
+ *         public String convertColumnValue(Date fieldValue) {
+ *             return MY_DATE_FORMAT.format(fieldValue);
  *         }
- *     </pre>
- * </code>
+ *            \@Override
+ *         public void setColumnValue(PreparedStatement record, String value, Integer column) {
+ *             record.setString(column, value);
+ *         }
+ *            \@Override
+ *         public void setNull(PreparedStatement storageRecord, Integer columnIdentifier) {
+ *             storageRecord.setNull(columnIdentifier, Types.VARCHAR);
+ *         }
+ *     }
+ *     }
+ * </pre>
  *
  * <p>The example above translates a {@linkplain java.util.Date Date} into a formatted
  * {@code String}, which is persisted into the DB.

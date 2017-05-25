@@ -72,7 +72,7 @@ public class DispatcherRegistry<C extends MessageClass,
     /**
      * Removes registration for the passed dispatcher.
      *
-     * @see #register(D)
+     * @see #register(MessageDispatcher)
      */
     protected void unregister(D dispatcher) {
         checkNotNull(dispatcher);

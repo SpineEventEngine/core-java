@@ -1508,21 +1508,18 @@ public final class Verify extends Assert {
      * <p>
      * e.g.
      * <pre>
-     * Verify.assertThrowsWithCause(RuntimeException.class, IOException.class, new Callable<Void>()
-     * {
-     *    public Void call() throws Exception
-     *    {
-     *        try
-     *        {
-     *            new File("").createNewFile();
-     *        }
-     *        catch (final IOException e)
-     *        {
-     *            throw new RuntimeException("Uh oh!", e);
-     *        }
-     *        return null;
-     *    }
-     * });
+     * Verify.assertThrowsWithCause(RuntimeException.class, IOException.class,
+     *                              new Callable&lt;Void&gt;() {
+     *      public Void call() throws Exception {
+     *           try {
+     *               new File("").createNewFile();
+     *           }
+     *           catch (final IOException e) {
+     *               throw new RuntimeException("Uh oh!", e);
+     *           }
+     *           return null;
+     *      }
+     *  });
      * </pre>
      *
      * @see #assertThrowsWithCause(Class, Class, Runnable)
