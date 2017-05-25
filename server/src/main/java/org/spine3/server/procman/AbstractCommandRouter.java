@@ -23,12 +23,15 @@ package org.spine3.server.procman;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.SettableFuture;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Response;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.commandbus.CommandBus;
 
 import java.util.Iterator;
@@ -37,6 +40,7 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.base.Commands.generateId;
 
 /**
  * Abstract base for command routers.
@@ -76,7 +80,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         this.commandBus = checkNotNull(commandBus);
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        this.source = Commands.createCommand(commandMessage, commandContext);
+        this.source = asCommand(commandMessage, commandContext);
         this.queue = Queues.newConcurrentLinkedQueue();
     }
 
@@ -151,8 +155,16 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     private Command produceCommand(Message commandMessage) {
-        final CommandContext newContext = Commands.newContextBasedOn(source.getContext());
-        final Command result = Commands.createCommand(commandMessage, newContext);
+        final CommandContext sourceContext = source.getContext();
+        final ActorContext actorContext = sourceContext.getActorContext();
+        final ActorRequestFactory factory =
+                ActorRequestFactory.newBuilder()
+                                   .setActor(actorContext.getActor())
+                                   .setTenantId(actorContext.getTenantId())
+                                   .setZoneOffset(actorContext.getZoneOffset())
+                                   .build();
+        final Command result = factory.command()
+                                      .createBasedOnContext(commandMessage, sourceContext);
         return result;
     }
 
@@ -185,5 +197,30 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
                 finishFuture.set(null);
             }
         };
+    }
+
+    /**
+     * Creates a command instance with the given {@code message} and the {@code context}.
+     *
+     * <p>If {@code Any} instance is passed as the first parameter it will be used as is.
+     * Otherwise, the command message will be packed into {@code Any}.
+     *
+     * //TODO:5/25/17:alex.tymchenko: remove the duplication with CommandFactory.copyOf(...)
+     * //TODO:5/25/17:alex.tymchenko: and CommandFactory.createBasedOnContext().
+     *
+     * @param message the command message
+     * @param context the context of the command
+     * @return a new command
+     */
+    private static Command asCommand(Message message, CommandContext context) {
+        checkNotNull(message);
+        checkNotNull(context);
+
+        final Any packed = AnyPacker.pack(message);
+        final Command.Builder result = Command.newBuilder()
+                                              .setId(generateId())
+                                              .setMessage(packed)
+                                              .setContext(context);
+        return result.build();
     }
 }

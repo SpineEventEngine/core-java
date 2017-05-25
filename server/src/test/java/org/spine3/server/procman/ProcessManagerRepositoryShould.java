@@ -29,6 +29,7 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
@@ -46,6 +47,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
 import org.spine3.test.procman.ProjectValidatingBuilder;
@@ -60,6 +62,7 @@ import org.spine3.testdata.Sample;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.type.CommandClass;
 import org.spine3.type.EventClass;
+import org.spine3.users.TenantId;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -68,7 +71,7 @@ import java.util.Set;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Commands.createCommand;
+import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
@@ -220,8 +223,16 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final CommandEnvelope cmd = CommandEnvelope.of(createCommand(cmdMsg, CMD_CONTEXT));
-        repository.dispatchCommand(cmd);
+        final TenantId generatedTenantId = TenantId.newBuilder()
+                                                   .setValue(newUuid())
+                                                   .build();
+        final Command cmd =
+                TestActorRequestFactory.newInstance(ProcessManagerRepositoryShould.class,
+                                                    generatedTenantId)
+                                       .command()
+                                       .create(cmdMsg);
+
+        repository.dispatchCommand(CommandEnvelope.of(cmd));
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
@@ -238,10 +249,9 @@ public class ProcessManagerRepositoryShould
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
-        final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final CommandEnvelope request =
-                CommandEnvelope.of(createCommand(unknownCommand,
-                                                 CommandContext.getDefaultInstance()));
+        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        final Command unknownCommand = factory.createCommand(Int32Value.getDefaultInstance());
+        final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         repository.dispatchCommand(request);
     }
 

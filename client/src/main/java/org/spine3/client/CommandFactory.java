@@ -20,18 +20,38 @@
 
 package org.spine3.client;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import org.spine3.annotation.Internal;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.time.ZoneOffset;
+import org.spine3.users.TenantId;
+import org.spine3.users.UserId;
 import org.spine3.validate.ConstraintViolationThrowable;
 
+import javax.annotation.Nullable;
+
 import static com.google.common.base.Preconditions.checkNotNull;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.checkValid;
 
 /**
  * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
  * configuration.
+ *
+ * <p>During the creation of {@code Command} instances the source {@code Message} instances, passed
+ * into creation methods, are validated. The validation is performed according to the constraints
+ * set in Protobuf definition of each {@code Message}. In case the message isn't valid,
+ * an {@linkplain ConstraintViolationThrowable exception} is thrown.
+ *
+ * <p>Therefore it is recommended to use a corresponding
+ * {@linkplain org.spine3.validate.ValidatingBuilder validating Builder} implementation to create
+ * the Command message.
  *
  * @see ActorRequestFactory#command()
  */
@@ -48,14 +68,6 @@ public final class CommandFactory {
      *
      * <p>The command contains a {@code CommandContext} instance with the current time.
      *
-     * <p>The message passed is validated according to the constraints set in its Protobuf
-     * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
-     * exception} is thrown.
-     *
-     * <p>Therefore it is recommended to use an appropriate
-     * {@linkplain org.spine3.validate.ValidatingBuilder validating Builder} implementation
-     * to create the message.
-     *
      * @param message the command message
      * @return new command instance
      * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
@@ -63,11 +75,36 @@ public final class CommandFactory {
      */
     public Command create(Message message) throws ConstraintViolationThrowable {
         checkNotNull(message);
-
         checkValid(message);
 
         final CommandContext context = createContext();
-        final Command result = Commands.createCommand(message, context);
+        final Command result = createCommand(message, context);
+        return result;
+    }
+
+    /**
+     * Creates a copy of the given Command {@code message} and {@code context} and returns
+     * as new {@code Command} instance.
+     *
+     * <p>The context passed is additionally checked to match the {@code tenantId}
+     * and {@code actorId} set for this factory. This is done to prevent chaotic command creation.
+     *
+     * @param message the command message
+     * @param context the command context
+     * @return a new command instance
+     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
+     *                                      set for it in its Protobuf definition
+     */
+    @Internal
+    public Command copyOf(Message message, CommandContext context)
+            throws ConstraintViolationThrowable {
+        checkNotNull(message);
+        checkNotNull(context);
+        checkValid(message);
+
+        //TODO:5/25/17:alex.tymchenko: validate the context k
+
+        final Command result = createCommand(message, context);
         return result;
     }
 
@@ -75,9 +112,9 @@ public final class CommandFactory {
      * Creates command context for a new command.
      */
     CommandContext createContext() {
-        return Commands.createContext(actorRequestFactory.getTenantId(),
-                                      actorRequestFactory.getActor(),
-                                      actorRequestFactory.getZoneOffset());
+        return createContext(actorRequestFactory.getTenantId(),
+                             actorRequestFactory.getActor(),
+                             actorRequestFactory.getZoneOffset());
     }
 
     /**
@@ -88,10 +125,6 @@ public final class CommandFactory {
      * <p>The message passed is validated according to the constraints set in its Protobuf
      * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
      * exception} is thrown.
-     *
-     * <p>Therefore it is recommended to use an appropriate
-     * {@linkplain org.spine3.validate.ValidatingBuilder validating Builder} implementation
-     * to create the message.
      *
      * @param message       the command message
      * @param targetVersion the ID of the entity for applying commands if {@code null}
@@ -106,7 +139,39 @@ public final class CommandFactory {
         checkValid(message);
 
         final CommandContext context = createContext(targetVersion);
-        final Command result = Commands.createCommand(message, context);
+        final Command result = createCommand(message, context);
+        return result;
+    }
+
+    /**
+     * Creates new {@code Command} with the passed message, based on the existing context.
+     *
+     * <p>The produced command is created with a {@code CommandContext} instance, copied from
+     * the given one, but with the current time set as a context timestamp.
+     *
+     * <p>The message passed is validated according to the constraints set in its Protobuf
+     * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
+     * exception} is thrown.
+     *
+     * <p>Therefore it is recommended to use an appropriate
+     * {@linkplain org.spine3.validate.ValidatingBuilder validating Builder} implementation
+     * to create the message.
+     *
+     * @param message         the command message
+     * @param existingContext the command context to use as a base for the new command
+     * @return new command instance
+     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
+     *                                      set for it in its Protobuf definition
+     */
+    public Command createBasedOnContext(Message message, CommandContext existingContext)
+            throws ConstraintViolationThrowable {
+        checkNotNull(message);
+        checkNotNull(existingContext);
+        checkValid(message);
+
+        final CommandContext newContext = createContextBasedOn(existingContext);
+
+        final Command result = createCommand(message, newContext);
         return result;
     }
 
@@ -114,8 +179,110 @@ public final class CommandFactory {
      * Creates command context for a new command with entity ID.
      */
     private CommandContext createContext(int targetVersion) {
-        return Commands.createContext(actorRequestFactory.getTenantId(),
-                                      actorRequestFactory.getActor(),
-                                      actorRequestFactory.getZoneOffset(), targetVersion);
+        return createContext(actorRequestFactory.getTenantId(),
+                             actorRequestFactory.getActor(),
+                             actorRequestFactory.getZoneOffset(), targetVersion);
+    }
+
+    /**
+     * Creates a new command context with the current time.
+     *
+     * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId     the actor ID
+     * @param zoneOffset the offset of the timezone in which the user works
+     * @return new {@code CommandContext}
+     * @see CommandFactory#create(Message)
+     */
+    @VisibleForTesting
+    static CommandContext createContext(@Nullable TenantId tenantId,
+                                        UserId userId,
+                                        ZoneOffset zoneOffset) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        return result.build();
+    }
+
+    private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
+                                                            UserId userId,
+                                                            ZoneOffset zoneOffset) {
+        final ActorContext.Builder actorContext = ActorContext.newBuilder()
+                                                              .setActor(userId)
+                                                              .setTimestamp(getCurrentTime())
+                                                              .setZoneOffset(zoneOffset);
+        if (tenantId != null) {
+            actorContext.setTenantId(tenantId);
+        }
+
+        final CommandContext.Builder result = CommandContext.newBuilder()
+                                                            .setActorContext(actorContext);
+        return result;
+    }
+
+    /**
+     * Creates a new command context with the current time.
+     *
+     * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
+     * @param userId        the actor id
+     * @param zoneOffset    the offset of the timezone in which the user works
+     * @param targetVersion the the ID of the entity for applying commands
+     * @return new {@code CommandContext}
+     * @see CommandFactory#create(Message)
+     */
+    @VisibleForTesting
+    static CommandContext createContext(@Nullable TenantId tenantId,
+                                        UserId userId,
+                                        ZoneOffset zoneOffset,
+                                        int targetVersion) {
+        checkNotNull(userId);
+        checkNotNull(zoneOffset);
+        checkNotNull(targetVersion);
+
+        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
+        result.setTargetVersion(targetVersion);
+
+        return result.build();
+    }
+
+    /**
+     * Creates a command instance with the given {@code message} and the {@code context}.
+     *
+     * <p>If {@code Any} instance is passed as the first parameter it will be used as is.
+     * Otherwise, the command message will be packed into {@code Any}.
+     *
+     * @param message the command message
+     * @param context the context of the command
+     * @return a new command
+     */
+    private static Command createCommand(Message message, CommandContext context) {
+        checkNotNull(message);
+        checkNotNull(context);
+
+        final Any packed = AnyPacker.pack(message);
+        final Command.Builder result = Command.newBuilder()
+                                              .setId(Commands.generateId())
+                                              .setMessage(packed)
+                                              .setContext(context);
+        return result.build();
+    }
+
+    /**
+     * Creates a new instance of {@code CommandContext} based on the passed one.
+     *
+     * <p>The returned instance gets new generated {@code CommandId} and {@code timestamp}
+     * set to the time of the call.
+     *
+     * @param value the instance from which to copy values
+     * @return new {@code CommandContext}
+     */
+    private static CommandContext createContextBasedOn(CommandContext value) {
+        checkNotNull(value);
+        final ActorContext.Builder withCurrentTime = value.getActorContext()
+                                                          .toBuilder()
+                                                          .setTimestamp(getCurrentTime());
+        final CommandContext.Builder result = value.toBuilder()
+                                                   .setActorContext(withCurrentTime);
+        return result.build();
     }
 }

@@ -23,17 +23,44 @@ package org.spine3.client;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
+import org.spine3.base.CommandContext;
 import org.spine3.test.TimeTests;
 import org.spine3.test.commands.RequiredFieldCommand;
 import org.spine3.time.Timestamps2;
+import org.spine3.time.ZoneOffset;
+import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
+import org.spine3.users.UserId;
 import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.test.Tests.newTenantUuid;
+import static org.spine3.test.Tests.newUserUuid;
 
 public class CommandFactoryShould extends ActorRequestFactoryShould {
+
+    @Test
+    public void create_command_context() {
+        final TenantId tenantId = newTenantUuid();
+        final UserId userId = newUserUuid();
+        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
+        final int targetVersion = 100500;
+
+        final CommandContext commandContext = CommandFactory.createContext(tenantId,
+                                                                           userId,
+                                                                           zoneOffset,
+                                                                           targetVersion);
+
+        final ActorContext actorContext = commandContext.getActorContext();
+
+        assertEquals(tenantId, actorContext.getTenantId());
+        assertEquals(userId, actorContext.getActor());
+        assertEquals(zoneOffset, actorContext.getZoneOffset());
+        assertEquals(targetVersion, commandContext.getTargetVersion());
+    }
 
     @Test
     public void create_new_instances_with_current_time() {

@@ -28,7 +28,8 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
+import org.spine3.client.CommandFactory;
+import org.spine3.test.TestActorRequestFactory;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -38,6 +39,8 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.server.commandbus.Given.CommandMessage.addTask;
+import static org.spine3.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.time.Durations2.milliseconds;
 
@@ -52,6 +55,9 @@ public class ExecutorCommandSchedulerShould {
 
     // Wait a bit longer in the verifier to ensure the command was processed.
     private static final int WAIT_FOR_PROPAGATION_MS = 300;
+
+    private final CommandFactory commandFactory =
+            TestActorRequestFactory.newInstance(ExecutorCommandSchedulerShould.class).command();
 
     private CommandScheduler scheduler;
     private CommandContext context;
@@ -69,7 +75,8 @@ public class ExecutorCommandSchedulerShould {
 
     @Test
     public void schedule_command_if_delay_is_set() {
-        final Command cmdPrimary = Commands.createCommand(Given.CommandMessage.createProjectMessage(), context);
+        final Command cmdPrimary =
+                commandFactory.createBasedOnContext(createProjectMessage(), context);
         final ArgumentCaptor<Command> commandCaptor = ArgumentCaptor.forClass(Command.class);
 
         scheduler.schedule(cmdPrimary);
@@ -84,12 +91,14 @@ public class ExecutorCommandSchedulerShould {
     @Test
     public void not_schedule_command_with_same_id_twice() {
         final String id = newUuid();
-        final Command expectedCmd = Commands.createCommand(
-                Given.CommandMessage.createProjectMessage(id), context);
-        final Command extraCmd = Commands.createCommand(Given.CommandMessage.addTask(id), context)
-                                         .toBuilder()
-                                         .setId(expectedCmd.getId())
-                                         .build();
+
+        final Command expectedCmd = commandFactory.createBasedOnContext(createProjectMessage(id),
+                                                                        context);
+
+        final Command extraCmd = commandFactory.createBasedOnContext(addTask(id), context)
+                                               .toBuilder()
+                                               .setId(expectedCmd.getId())
+                                               .build();
 
         scheduler.schedule(expectedCmd);
         scheduler.schedule(extraCmd);

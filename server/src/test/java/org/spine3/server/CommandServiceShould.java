@@ -27,11 +27,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.Commands;
 import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.server.commandbus.UnsupportedCommandException;
 import org.spine3.server.transport.GrpcContainer;
+import org.spine3.test.TestActorRequestFactory;
 
 import java.io.IOException;
 import java.util.Set;
@@ -42,7 +42,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 public class CommandServiceShould {
 
@@ -119,8 +118,9 @@ public class CommandServiceShould {
 
     @Test
     public void return_error_if_command_is_unsupported() {
-        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(),
-                                                              createCommandContext());
+        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+
+        final Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 

@@ -33,8 +33,8 @@ import static org.spine3.util.Reflection.getGenericParameterType;
 /**
  * An interface for all validating builders.
  *
- * <p>Validating builder is used to validate messages according
- * to the business rules during the {@code Message} creation.
+ * <p>Validating builder is used to validate messages according to the business rules
+ * during the {@code Message} creation.
  *
  * <p>Non-abstract implementations must declare {@code public static TYPE newBuilder()} method,
  * returning an instance of the implementation class.
