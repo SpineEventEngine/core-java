@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.Tests.newUuidValue;
-import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkNotDefaultState;
 
 /**
  * @author Alexander Yevsyukov
@@ -55,9 +55,9 @@ public class CommandTestShould {
         final StringValue commandMessage = newUuidValue();
         final Command command = commandTest.createCommand(commandMessage);
 
-        checkNotDefault(command);
+        checkNotDefaultState(command);
         assertEquals(commandMessage, Commands.getMessage(command));
-        checkNotDefault(command.getContext());
+        checkNotDefaultState(command.getContext());
     }
 
     @Before
