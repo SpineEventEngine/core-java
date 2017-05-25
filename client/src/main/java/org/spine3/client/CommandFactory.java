@@ -86,8 +86,8 @@ public final class CommandFactory {
      * Creates a copy of the given Command {@code message} and {@code context} and returns
      * as new {@code Command} instance.
      *
-     * <p>The context passed is additionally checked to match the {@code tenantId}
-     * and {@code actorId} set for this factory. This is done to prevent chaotic command creation.
+     * <p>The timestamp of the resulting command is the same as in
+     * the passed {@code CommandContext}.
      *
      * @param message the command message
      * @param context the command context
@@ -147,20 +147,13 @@ public final class CommandFactory {
      * <p>The produced command is created with a {@code CommandContext} instance, copied from
      * the given one, but with the current time set as a context timestamp.
      *
-     * <p>The message passed is validated according to the constraints set in its Protobuf
-     * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
-     * exception} is thrown.
-     *
-     * <p>Therefore it is recommended to use an appropriate
-     * {@linkplain org.spine3.validate.ValidatingBuilder validating Builder} implementation
-     * to create the message.
-     *
      * @param message         the command message
      * @param existingContext the command context to use as a base for the new command
      * @return new command instance
      * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
      *                                      set for it in its Protobuf definition
      */
+    @Internal
     public Command createBasedOnContext(Message message, CommandContext existingContext)
             throws ConstraintViolationThrowable {
         checkNotNull(message);
@@ -191,10 +184,9 @@ public final class CommandFactory {
      * @return new {@code CommandContext}
      * @see CommandFactory#create(Message)
      */
-    @VisibleForTesting
-    static CommandContext createContext(@Nullable TenantId tenantId,
-                                        UserId userId,
-                                        ZoneOffset zoneOffset) {
+    private static CommandContext createContext(@Nullable TenantId tenantId,
+                                                UserId userId,
+                                                ZoneOffset zoneOffset) {
         checkNotNull(userId);
         checkNotNull(zoneOffset);
 
@@ -237,10 +229,10 @@ public final class CommandFactory {
         checkNotNull(zoneOffset);
         checkNotNull(targetVersion);
 
-        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
-        result.setTargetVersion(targetVersion);
-
-        return result.build();
+        final CommandContext.Builder builder = newContextBuilder(tenantId, userId, zoneOffset);
+        final CommandContext result = builder.setTargetVersion(targetVersion)
+                                             .build();
+        return result;
     }
 
     /**
