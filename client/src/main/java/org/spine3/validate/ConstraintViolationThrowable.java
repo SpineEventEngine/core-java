@@ -26,7 +26,7 @@ import static java.util.Collections.unmodifiableList;
 
 /**
  * Signals that the validated value violates the constraints set for it.
- *
+ * @deprecated due to changing to a new class name {@link ConstraintViolationException}.
  * @author Illia Shepilov
  */
 @Deprecated
