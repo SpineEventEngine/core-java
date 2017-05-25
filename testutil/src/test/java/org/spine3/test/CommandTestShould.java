@@ -36,7 +36,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.spine3.test.Tests.newUserUuid;
 import static org.spine3.test.Tests.newUuidValue;
-import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkNotDefaultState;
 
 /**
  * @author Alexander Yevsyukov

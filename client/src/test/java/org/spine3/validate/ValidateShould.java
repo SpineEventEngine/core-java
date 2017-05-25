@@ -34,7 +34,9 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
+import static org.spine3.validate.Validate.checkDefault;
 import static org.spine3.validate.Validate.checkDefaultState;
+import static org.spine3.validate.Validate.checkNotDefault;
 import static org.spine3.validate.Validate.checkNotDefaultState;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.isDefault;
@@ -79,25 +81,47 @@ public class ValidateShould {
     }
 
     @Test(expected = IllegalStateException.class)
-    public void check_if_message_is_in_default() {
+    public void check_if_message_is_in_default_state() {
         final StringValue nonDefault = newUuidValue();
         checkDefaultState(nonDefault);
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void check_if_message_is_default() {
+        final StringValue nonDefault = newUuidValue();
+        checkDefault(nonDefault);
+    }
+
     @Test(expected = IllegalStateException.class)
-    public void check_a_message_is_default_with_parametrized_error_message() {
+    public void check_a_message_is_in_default_state_with_parametrized_error_message() {
         final StringValue nonDefault = newUuidValue();
         checkDefaultState(nonDefault,
-                                   "Message value: %s, Type name: %s",
-                                   nonDefault,
-                                   TypeName.of(nonDefault));
+                          "Message value: %s, Type name: %s",
+                          nonDefault,
+                          TypeName.of(nonDefault));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void check_a_message_is_default_with_parametrized_error_message() {
+        final StringValue nonDefault = newUuidValue();
+        checkDefault(nonDefault,
+                     "Message value: %s, Type name: %s",
+                     nonDefault,
+                     TypeName.of(nonDefault));
     }
 
     @Test
-    public void return_default_value_on_check() {
+    public void return_default_value_on_checkDefaultState() {
         final Message defaultValue = StringValue.getDefaultInstance();
         assertEquals(defaultValue, checkDefaultState(defaultValue));
         assertEquals(defaultValue, checkDefaultState(defaultValue, "error message"));
+    }
+
+    @Test
+    public void return_default_value_on_checkDefault() {
+        final Message defaultValue = StringValue.getDefaultInstance();
+        assertEquals(defaultValue, checkDefault(defaultValue));
+        assertEquals(defaultValue, checkDefault(defaultValue, "error message"));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -105,11 +129,23 @@ public class ValidateShould {
         checkNotDefaultState(StringValue.getDefaultInstance());
     }
 
+    @Test(expected = IllegalArgumentException.class)
+    public void check_if_message_is_not_default_throwing_exception_if_not() {
+        checkNotDefault(StringValue.getDefaultInstance());
+    }
+
     @Test
-    public void return_non_default_value_on_check() {
+    public void return_non_default_value_on_checkNotDefaultState() {
         final StringValue nonDefault = newUuidValue();
         assertEquals(nonDefault, checkNotDefaultState(nonDefault));
         assertEquals(nonDefault, checkNotDefaultState(nonDefault, "with error message"));
+    }
+
+    @Test
+    public void return_non_default_value_on_checkNotDefault() {
+        final StringValue nonDefault = newUuidValue();
+        assertEquals(nonDefault, checkNotDefault(nonDefault));
+        assertEquals(nonDefault, checkNotDefault(nonDefault, "with error message"));
     }
 
     @Test(expected = NullPointerException.class)
