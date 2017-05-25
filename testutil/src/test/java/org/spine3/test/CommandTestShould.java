@@ -55,9 +55,9 @@ public class CommandTestShould {
         final StringValue commandMessage = newUuidValue();
         final Command command = commandTest.createCommand(commandMessage);
 
-        checkNotDefault(command);
+        checkNotDefaultState(command);
         assertEquals(commandMessage, Commands.getMessage(command));
-        checkNotDefault(command.getContext());
+        checkNotDefaultState(command.getContext());
     }
 
     @Before

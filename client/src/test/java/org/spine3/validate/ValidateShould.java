@@ -34,8 +34,8 @@ import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Tests.newUuidValue;
 import static org.spine3.validate.Validate.checkBounds;
-import static org.spine3.validate.Validate.checkDefault;
-import static org.spine3.validate.Validate.checkNotDefault;
+import static org.spine3.validate.Validate.checkDefaultState;
+import static org.spine3.validate.Validate.checkNotDefaultState;
 import static org.spine3.validate.Validate.checkNotEmptyOrBlank;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;
@@ -81,35 +81,35 @@ public class ValidateShould {
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_default() {
         final StringValue nonDefault = newUuidValue();
-        checkDefault(nonDefault);
+        checkDefaultState(nonDefault);
     }
 
     @Test(expected = IllegalStateException.class)
     public void check_a_message_is_default_with_parametrized_error_message() {
         final StringValue nonDefault = newUuidValue();
-        checkDefault(nonDefault,
-                     "Message value: %s, Type name: %s",
-                     nonDefault,
-                     TypeName.of(nonDefault));
+        checkDefaultState(nonDefault,
+                                   "Message value: %s, Type name: %s",
+                                   nonDefault,
+                                   TypeName.of(nonDefault));
     }
 
     @Test
     public void return_default_value_on_check() {
         final Message defaultValue = StringValue.getDefaultInstance();
-        assertEquals(defaultValue, checkDefault(defaultValue));
-        assertEquals(defaultValue, checkDefault(defaultValue, "error message"));
+        assertEquals(defaultValue, checkDefaultState(defaultValue));
+        assertEquals(defaultValue, checkDefaultState(defaultValue, "error message"));
     }
 
     @Test(expected = IllegalStateException.class)
     public void check_if_message_is_in_not_in_default_state_throwing_exception_if_not() {
-        checkNotDefault(StringValue.getDefaultInstance());
+        checkNotDefaultState(StringValue.getDefaultInstance());
     }
 
     @Test
     public void return_non_default_value_on_check() {
         final StringValue nonDefault = newUuidValue();
-        assertEquals(nonDefault, checkNotDefault(nonDefault));
-        assertEquals(nonDefault, checkNotDefault(nonDefault, "with error message"));
+        assertEquals(nonDefault, checkNotDefaultState(nonDefault));
+        assertEquals(nonDefault, checkNotDefaultState(nonDefault, "with error message"));
     }
 
     @Test(expected = NullPointerException.class)
