@@ -26,17 +26,16 @@ import static java.util.Collections.unmodifiableList;
 
 /**
  * Signals that the validated value violates the constraints set for it.
- * @deprecated due to changing to a new class name {@link ConstraintViolationException}.
+ *
  * @author Illia Shepilov
  */
-@Deprecated
-public class ConstraintViolationThrowable extends RuntimeException {
+public class ConstraintViolationException extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
 
     private final List<ConstraintViolation> constraintViolations;
 
-    public ConstraintViolationThrowable(List<ConstraintViolation> constraintViolations) {
+    public ConstraintViolationException(List<ConstraintViolation> constraintViolations) {
         super();
         this.constraintViolations = constraintViolations;
     }
