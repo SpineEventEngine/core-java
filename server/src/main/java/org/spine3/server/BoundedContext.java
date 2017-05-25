@@ -46,6 +46,7 @@ import org.spine3.server.failure.FailureBus;
 import org.spine3.server.integration.IntegrationEvent;
 import org.spine3.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import org.spine3.server.procman.ProcessManagerRepository;
+import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.StorageFactory;
@@ -327,20 +328,31 @@ public final class BoundedContext
      */
     public Optional<? extends AggregateRepository<?, ?>> getAggregateRepository(
             Class<? extends Message> aggregateStateClass) {
-        // See if there is a repository for this state at all.
-        if (!guard.hasRepository(aggregateStateClass)) {
-            throw newIllegalStateException("No repository found for the aggregate state class %s",
-                                           aggregateStateClass.getName());
-        }
-
-        // See if the aggregate state is visible.
-        final Optional<Repository> repository = guard.getRepository(aggregateStateClass);
+        final Optional<Repository> repository = getRepository(aggregateStateClass);
         if (!repository.isPresent()) {
             return Optional.absent();
         }
-
         final AggregateRepository<?, ?> result = (AggregateRepository<?, ?>) repository.get();
         return Optional.of(result);
+    }
+
+    private Optional<Repository> getRepository(Class<? extends Message> entityStateClass) {
+        // See if there is a repository for this state at all.
+        if (!guard.hasRepository(entityStateClass)) {
+            throw newIllegalStateException("No repository found for the the entity state class %s",
+                                           entityStateClass.getName());
+        }
+        final Optional<Repository> repository = guard.getRepository(entityStateClass);
+        return repository;
+    }
+
+    public Optional<? extends ProjectionRepository<?, ?, ?>> getProjectionRepository(
+            Class<? extends Message> projectionStateClass) {
+        final Optional<Repository> repository = getRepository(projectionStateClass);
+        if (!repository.isPresent()) {
+            return Optional.absent();
+        }
+        return Optional.of((ProjectionRepository<?, ?, ?>) repository.get());
     }
 
     /**

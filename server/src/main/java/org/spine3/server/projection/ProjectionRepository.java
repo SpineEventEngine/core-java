@@ -35,6 +35,7 @@ import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.spine3.annotation.Internal;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.envelope.EventEnvelope;
@@ -414,6 +415,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
         logCatchUpComplete();
     }
 
+    @Internal
+    public void writeLastHandledEventTime(Timestamp timestamp) {
+        projectionStorage().writeLastHandledEventTime(timestamp);
+    }
+
+    @Internal
+    public Timestamp readLastHandledEventTime() {
+        return projectionStorage().readLastHandledEventTime();
+    }
+
     @SuppressWarnings("unused")
         // A direct catch-up impl. Do not delete until Beam-based catch-up is finished.
     private void allTenantOpCatchup() {
@@ -540,8 +551,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
             if (repository.isBulkWriteRequired()) {
                 if (!repository.isBulkWriteInProgress()) {
-                    operation = repository.startBulkWrite(
-                            repository.catchUpMaxDuration);
+                    operation = repository.startBulkWrite(repository.catchUpMaxDuration);
                 }
                 // `flush` the data if the operation expires.
                 operation.checkExpiration();

@@ -33,6 +33,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.apache.beam.sdk.transforms.SerializableFunction;
+import org.spine3.annotation.Internal;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
@@ -118,35 +119,50 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     public void store(E entity) {
-        final RecordStorage<I> storage = recordStorage();
         final EntityRecordWithColumns record = toRecord(entity);
+        final RecordStorage<I> storage = recordStorage();
         storage.write(entity.getId(), record);
+    }
+
+    /**
+     * Stores the passed entity record.
+     */
+    @Internal
+    public void storeRecord(EntityRecord record) {
+        final E entity = toEntity(record);
+        store(entity);
     }
 
     /** {@inheritDoc} */
     @Override
     @CheckReturnValue
     public Optional<E> find(I id) {
+        Optional<EntityRecord> record = findRecord(id);
+        if (!record.isPresent()) {
+            return Optional.absent();
+        }
+        final E entity = toEntity(record.get());
+        return Optional.of(entity);
+    }
+
+    /**
+     * Finds a record and returns it if its {@link LifecycleFlags} don't make it
+     * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible()}.
+     */
+    @Internal
+    @CheckReturnValue
+    public Optional<EntityRecord> findRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
         final Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
             return Optional.absent();
         }
         final EntityRecord record = found.get();
-        if (!isEntityVisible().apply(record.getLifecycleFlags())) {
+        final boolean recordVisible = !isEntityVisible().apply(record.getLifecycleFlags());
+        if (recordVisible) {
             return Optional.absent();
         }
-        final E entity = toEntity(record);
-        return Optional.of(entity);
-    }
-
-    @Override
-    public Iterator<E> iterator(Predicate<E> filter) {
-        final Iterable<E> allEntities = loadAll();
-        final Iterator<E> result = FluentIterable.from(allEntities)
-                                                 .filter(filter)
-                                                 .iterator();
-        return result;
+        return Optional.of(record);
     }
 
     /**
@@ -162,6 +178,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
 
         final E result = loaded.get();
+        return result;
+    }
+
+    @Override
+    public Iterator<E> iterator(Predicate<E> filter) {
+        final Iterable<E> allEntities = loadAll();
+        final Iterator<E> result = FluentIterable.from(allEntities)
+                                                 .filter(filter)
+                                                 .iterator();
         return result;
     }
 
