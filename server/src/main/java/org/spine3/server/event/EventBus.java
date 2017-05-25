@@ -183,7 +183,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      * <p>This method should be used if the callee does not care about the event acknowledgement.
      *
      * @param event the event to be handled
-     * @see #CommandOutputBus#post(Message, StreamObserver)
+     * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public void post(Event event) {
         post(event, StreamObservers.<Response>noOpObserver());

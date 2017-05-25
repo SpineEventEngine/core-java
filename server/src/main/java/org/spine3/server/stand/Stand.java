@@ -341,7 +341,8 @@ public class Stand implements AutoCloseable {
      *
      * <p>{@link Query} defines the query target and the expected detail level for response.
      *
-     * <p>The query results are fed to an instance of {@link StreamObserver<QueryResponse>}.
+     * <p>The query results are fed to an instance
+     * of {@link StreamObserver}&lt;{@link QueryResponse}&gt;.
      *
      * @param query            an instance of query
      * @param responseObserver an observer to feed the query results to.

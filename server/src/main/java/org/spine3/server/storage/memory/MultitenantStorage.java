@@ -32,7 +32,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
 /**
  * The multitenant storage
  *
- * @param <S> the type of the storage “slice” for each tenant
+ * @param <S> the type of the storage "slice" for each tenant
  * @author Alexander Yevsyukov
  */
 abstract class MultitenantStorage<S extends TenantStorage<?, ?>> {

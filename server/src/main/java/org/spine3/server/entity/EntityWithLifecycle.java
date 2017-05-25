@@ -101,7 +101,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
          * Obtains the predicate for checking if an entity has
          * any of the {@link LifecycleFlags} set.
          *
-         * <p>If so, an entity becomes “invisible” to load methods of a repository.
+         * <p>If so, an entity becomes "invisible" to load methods of a repository.
          * Entities with flags set must be treated by special {@linkplain RepositoryView views}
          * of a repository.
          *
@@ -116,7 +116,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
          * Obtains the predicate for checking if an entity record has any
          * of the {@link LifecycleFlags} set.
          *
-         * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
+         * @return the predicate that filters "invisible" {@code EntityStorageRecord}s
          * @see EntityRecord#getLifecycleFlags()
          */
         public static Predicate<EntityRecord> isRecordVisible() {
