@@ -23,6 +23,8 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import io.grpc.ManagedChannel;
+import io.grpc.ManagedChannelBuilder;
 import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.Create;
@@ -38,6 +40,8 @@ import org.spine3.users.TenantId;
 import java.util.Iterator;
 import java.util.Map;
 
+import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
+
 /**
  * A {@link RecordStorageIO} for {@link InMemoryRecordStorage}.
  *
@@ -50,6 +54,15 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
     InMemoryBeamIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
         super(idClass);
         this.storage = storage;
+    }
+
+    /**
+     * Creates a default channel for read/write operations to in-memory storages via
+     * {@link ProjectionStorageService}.
+     */
+    static ManagedChannel createDefaultChannel() {
+        return ManagedChannelBuilder.forAddress("localhost", DEFAULT_CLIENT_SERVICE_PORT)
+                                    .build();
     }
 
     @Override

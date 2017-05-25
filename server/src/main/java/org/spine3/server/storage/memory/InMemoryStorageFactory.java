@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.entity.Entity;
@@ -28,6 +29,7 @@ import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
+import org.spine3.type.TypeUrl;
 
 /**
  * A factory for in-memory storages.
@@ -86,11 +88,13 @@ public class InMemoryStorageFactory implements StorageFactory {
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
+    public <I, S extends Message>
+    ProjectionStorage<I> createProjectionStorage(Class<I> idClass, Class<S> stateClass) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(multitenant);
-        return InMemoryProjectionStorage.newInstance(entityStorage);
+        final TypeUrl stateUrl = TypeUrl.of(stateClass);
+        return InMemoryProjectionStorage.newInstance(stateUrl, entityStorage);
     }
 
     @Override

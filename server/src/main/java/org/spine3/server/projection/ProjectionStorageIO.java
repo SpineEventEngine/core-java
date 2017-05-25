@@ -23,7 +23,6 @@ package org.spine3.server.projection;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.spine3.server.storage.RecordStorageIO;
-import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.users.TenantId;
 
 /**
@@ -50,15 +49,9 @@ public abstract class ProjectionStorageIO<I> extends RecordStorageIO<I> {
         @ProcessElement
         public void processElement(ProcessContext c) {
             final Timestamp timestamp = c.element();
-            final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
-                @Override
-                public void run() {
-                    doWrite(timestamp);
-                }
-            };
-            op.execute();
+            doWrite(tenantId, timestamp);
         }
 
-        protected abstract void doWrite(Timestamp timestamp);
+        protected abstract void doWrite(TenantId tenantId, Timestamp timestamp);
     }
 }

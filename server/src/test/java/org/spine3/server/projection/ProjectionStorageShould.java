@@ -133,18 +133,18 @@ public abstract class ProjectionStorageShould<I>
     @Override
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
-        final Map<I, EntityRecord> noMaskEntiries = storage.readAll();
+        final Map<I, EntityRecord> noMaskEntries = storage.readAll();
 
         final FieldMask nonEmptyMask = FieldMask.newBuilder()
                                                 .addPaths("invalid_path")
                                                 .build();
         final Map<I, EntityRecord> maskedEntries = storage.readAll(nonEmptyMask);
 
-        assertEmpty(noMaskEntiries);
+        assertEmpty(noMaskEntries);
         assertEmpty(maskedEntries);
 
         // Same type
-        assertEquals(noMaskEntiries, maskedEntries);
+        assertEquals(noMaskEntries, maskedEntries);
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})

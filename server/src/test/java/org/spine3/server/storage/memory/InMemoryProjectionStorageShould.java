@@ -22,6 +22,7 @@ package org.spine3.server.storage.memory;
 
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageShould;
+import org.spine3.type.TypeUrl;
 
 import static org.spine3.base.Identifier.newUuid;
 
@@ -33,7 +34,9 @@ public class InMemoryProjectionStorageShould extends ProjectionStorageShould<Str
     @Override
     protected ProjectionStorage<String> getStorage() {
         final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
-        final InMemoryProjectionStorage<String> storage = InMemoryProjectionStorage.newInstance(recordStorage);
+        final TypeUrl typeUrl = TypeUrl.of(org.spine3.test.projection.Project.class);
+        final InMemoryProjectionStorage<String> storage =
+                InMemoryProjectionStorage.newInstance(typeUrl, recordStorage);
         return storage;
     }
 

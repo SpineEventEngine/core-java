@@ -26,8 +26,8 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.projection.ProjectionStorageIO;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.tenant.TenantFunction;
+import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
@@ -45,18 +45,21 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  */
 class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
+    private final TypeUrl stateTypeUrl;
     private final InMemoryRecordStorage<I> recordStorage;
 
     /** The time of the last handled event per tenant. */
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
 
     public static <I> InMemoryProjectionStorage<I> newInstance(
-            InMemoryRecordStorage<I> entityStorage) {
-        return new InMemoryProjectionStorage<>(entityStorage);
+            TypeUrl stateTypeUrl, InMemoryRecordStorage<I> entityStorage) {
+        return new InMemoryProjectionStorage<>(stateTypeUrl, entityStorage);
     }
 
-    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
+    private InMemoryProjectionStorage(TypeUrl stateTypeUrl,
+                                      InMemoryRecordStorage<I> recordStorage) {
         super(recordStorage.isMultitenant());
+        this.stateTypeUrl = stateTypeUrl;
         this.recordStorage = recordStorage;
     }
 
@@ -139,49 +142,6 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public ProjectionStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemProjectionStorageIO<>(this, recordStorage.getIO(idClass));
-    }
-
-    private static class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
-
-        private final InMemoryProjectionStorage<I> parent;
-        private final RecordStorageIO<I> storageIO;
-
-        private InMemProjectionStorageIO(
-                InMemoryProjectionStorage<I> parent,
-                RecordStorageIO<I> storageIO) {
-            super(storageIO.getIdClass());
-            this.parent = parent;
-            this.storageIO = storageIO;
-        }
-
-        @Override
-        @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-            // OK for test-only in-memory implementation.
-        public WriteLastHandledEventTimeFn writeLastHandledEventTimeFn(TenantId tenantId) {
-            return new WriteLastHandledEventTimeFn(tenantId) {
-                private static final long serialVersionUID = 0L;
-
-                @Override
-                protected void doWrite(Timestamp timestamp) {
-                    parent.writeLastHandledEventTime(timestamp);
-                }
-            };
-        }
-
-        @Override
-        public FindByQuery<I> findFn(TenantId tenantId) {
-            return storageIO.findFn(tenantId);
-        }
-
-        @Override
-        public Read<I> read(TenantId tenantId, Query<I> query) {
-            return storageIO.read(tenantId, query);
-        }
-
-        @Override
-        public WriteFn<I> writeFn(TenantId tenantId) {
-            return storageIO.writeFn(tenantId);
-        }
+        return new InMemProjectionStorageIO<>(stateTypeUrl, recordStorage.getIO(idClass));
     }
 }

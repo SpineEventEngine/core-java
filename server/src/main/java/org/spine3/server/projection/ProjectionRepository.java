@@ -250,9 +250,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
                        we create a specific type of a storage, not a regular entity storage created
                        in the parent. */)
     protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Class<P> projectionClass = getEntityClass();
         final ProjectionStorage<I> projectionStorage =
-                factory.createProjectionStorage(projectionClass);
+                factory.createProjectionStorage(getIdClass(), getEntityStateClass());
         this.recordStorage = projectionStorage.recordStorage();
         return projectionStorage;
     }
@@ -408,8 +407,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     public void catchUp() {
         setStatus(Status.CATCHING_UP);
 
-//        allTenantOpCatchup();
-         BeamCatchUp.catchUp(this);
+        allTenantOpCatchup();
+//         BeamCatchUp.catchUp(this);
 
         completeCatchUp();
         logCatchUpComplete();

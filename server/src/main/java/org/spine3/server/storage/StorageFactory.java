@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage;
 
+import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.commandstore.CommandStore;
@@ -79,12 +80,13 @@ public interface StorageFactory extends AutoCloseable {
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
-     *
-     * @param <I>             the type of stream projection IDs
-     * @param projectionClass the class of projections to store
+     * @param <I>        the type of stream projection IDs
+     * @param <S>        the type of the projection state
+     * @param idClass    the class of identifiers
+     * @param stateClass the class of the projection state
      */
-    <I> ProjectionStorage<I> createProjectionStorage(
-            Class<? extends Entity<I, ?>> projectionClass);
+    <I, S extends Message> ProjectionStorage<I> createProjectionStorage(Class<I> idClass,
+                                                                        Class<S> stateClass);
 
     /**
      * Creates a single-tenant version of the factory.
