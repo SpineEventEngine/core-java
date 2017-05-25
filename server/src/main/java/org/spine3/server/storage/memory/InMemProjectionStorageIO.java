@@ -56,7 +56,7 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     }
 
     @Override
-    public FindByQuery<I> findFn(TenantId tenantId) {
+    public FindById<I> findFn(TenantId tenantId) {
         return storageIO.findFn(tenantId);
     }
 
@@ -74,28 +74,36 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
 
         private static final long serialVersionUID = 0L;
         private final TypeUrl stateTypeUrl;
-        private ProjectionStorageServiceBlockingStub blockingStub;
+
+        private transient ManagedChannel channel;
+        private transient ProjectionStorageServiceBlockingStub blockingStub;
 
         protected WriteTimestampOverGrpc(TenantId tenantId, TypeUrl typeUrl) {
             super(tenantId);
             this.stateTypeUrl = typeUrl;
         }
 
+        @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            final ManagedChannel channel = InMemoryBeamIO.createDefaultChannel();
+            channel = InMemoryBeamIO.createDefaultChannel();
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
+        }
+
+        @SuppressWarnings("unused") // called by Beam
+        @FinishBundle
+        public void finishBundle() {
+            channel.shutdownNow();
         }
 
         @Override
         protected void doWrite(TenantId tenantId, Timestamp timestamp) {
-            //TODO:2017-05-25:alexander.yevsyukov: Implement
             final LastHandledEventRequest req =
                     LastHandledEventRequest.newBuilder()
+                                           .setTenantId(tenantId)
                                            .setProjectionStateTypeUrl(stateTypeUrl.value())
                                            .build();
             blockingStub.writeLastHandledEventTimestamp(req);
         }
     }
-
 }

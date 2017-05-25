@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.util.Objects;
 
 import static org.spine3.server.entity.AbstractEntity.createEntity;
 import static org.spine3.server.entity.AbstractEntity.getConstructor;
@@ -69,5 +70,23 @@ class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityF
             entityConstructor = getEntityConstructor();
         }
         return createEntity(this.entityConstructor, id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityClass, idClass);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final DefaultEntityFactory other = (DefaultEntityFactory) obj;
+        return Objects.equals(this.entityClass, other.entityClass)
+                && Objects.equals(this.idClass, other.idClass);
     }
 }

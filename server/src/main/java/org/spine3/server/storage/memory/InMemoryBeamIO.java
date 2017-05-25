@@ -31,9 +31,12 @@ import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
+import org.spine3.base.Identifier;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.server.storage.grpc.ProjectionStorageServiceGrpc;
+import org.spine3.server.storage.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
+import org.spine3.server.storage.grpc.RecordStorageRequest;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.users.TenantId;
 
@@ -49,11 +52,8 @@ import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
  */
 class InMemoryBeamIO<I> extends RecordStorageIO<I> {
 
-    private final InMemoryRecordStorage<I> storage;
-
     InMemoryBeamIO(Class<I> idClass, InMemoryRecordStorage<I> storage) {
         super(idClass);
-        this.storage = storage;
     }
 
     /**
@@ -66,13 +66,13 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
     }
 
     @Override
-    public FindByQuery<I> findFn(TenantId tenantId) {
-        return new InMemFindByQuery<>(readAll(tenantId));
+    public FindById<I> findFn(TenantId tenantId) {
+        return null; // new InMemFindById<>(readAll(tenantId));
     }
 
     @Override
     public Read<I> read(TenantId tenantId, Query<I> query) {
-        final Map<I, EntityRecord> all = readAll(tenantId);
+        final Map<I, EntityRecord> all = null; // readAll(tenantId);
         final Map<I, EntityRecord> filtered = filter(all, query);
         final ImmutableList.Builder<KV<I, EntityRecord>> records = ImmutableList.builder();
         for (Map.Entry<I, EntityRecord> entry : filtered.entrySet()) {
@@ -85,17 +85,11 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
     @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
         /* OK for in-memory test-only implementation. */
     public WriteFn<I> writeFn(TenantId tenantId) {
-        return new WriteFn<I>(tenantId) {
-            private static final long serialVersionUID = 0L;
-
-            @Override
-            protected void doWrite(I key, EntityRecord value) {
-                storage.writeRecord(key, EntityRecordWithColumns.of(value));
-            }
-        };
+        return new InMemWriteFn<>(tenantId);
     }
 
-    private ImmutableMap<I, EntityRecord> readAll(TenantId tenantId) {
+    private static <I> ImmutableMap<I, EntityRecord>
+        readAll(TenantId tenantId, InMemoryRecordStorage<I> storage) {
         final TenantAwareFunction0<ImmutableMap<I, EntityRecord>> func =
                 new ReadAllRecordsFunc<>(tenantId, storage);
         final ImmutableMap<I, EntityRecord> allRecords = func.execute();
@@ -113,18 +107,18 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
         return filtered.build();
     }
 
-    private static class InMemFindByQuery<I> extends FindByQuery<I> {
+    private static class InMemFindById<I> extends FindById<I> {
 
         private static final long serialVersionUID = 0L;
         private final ImmutableMap<I, EntityRecord> records;
 
-        private InMemFindByQuery(ImmutableMap<I, EntityRecord> records) {
+        private InMemFindById(ImmutableMap<I, EntityRecord> records) {
             this.records = records;
         }
 
         @Override
-        public Iterable<EntityRecord> apply(Query<I> input) {
-            return filter(records, input).values();
+        public EntityRecord apply(I id) {
+            return records.get(id);
         }
     }
 
@@ -175,6 +169,41 @@ class InMemoryBeamIO<I> extends RecordStorageIO<I> {
                 result.put(id, record);
             }
             return result.build();
+        }
+    }
+
+    private static class InMemWriteFn<I> extends WriteFn<I> {
+        private static final long serialVersionUID = 0L;
+
+        private InMemWriteFn(TenantId tenantId) {
+            super(tenantId);
+        }
+
+        private transient ManagedChannel channel;
+        private transient ProjectionStorageServiceBlockingStub blockingStub;
+
+        @SuppressWarnings("unused") // called by Beam
+        @StartBundle
+        public void startBundle() {
+            channel = createDefaultChannel();
+            blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
+        }
+
+        @SuppressWarnings("unused") // called by Beam
+        @FinishBundle
+        public void finishBundle() {
+            channel.shutdownNow();
+        }
+
+        @Override
+        protected void doWrite(TenantId tenantId, I key, EntityRecord record) {
+            final RecordStorageRequest req =
+                    RecordStorageRequest.newBuilder()
+                                        .setTenantId(tenantId)
+                                        .setEntityId(Identifier.pack(key))
+                                        .setRecord(record)
+                                        .build();
+            blockingStub.write(req);
         }
     }
 }

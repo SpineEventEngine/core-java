@@ -43,7 +43,6 @@ import org.joda.time.Instant;
 import org.spine3.base.Identifier;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
@@ -154,7 +153,7 @@ public abstract class RecordStorageIO<I> {
     /**
      * Obtains a function for loading query results.
      */
-    public abstract FindByQuery<I> findFn(TenantId tenantId);
+    public abstract FindById<I> findFn(TenantId tenantId);
 
     /**
      * Obtains a transformation for reading records matching the query.
@@ -178,8 +177,7 @@ public abstract class RecordStorageIO<I> {
      *
      * @param <I> the type of IDs
      */
-    public abstract static class FindByQuery<I>
-            implements SerializableFunction<Query<I>, Iterable<EntityRecord>> {
+    public abstract static class FindById<I> implements SerializableFunction<I, EntityRecord> {
         private static final long serialVersionUID = 0L;
     }
 
@@ -346,15 +344,9 @@ public abstract class RecordStorageIO<I> {
         @ProcessElement
         public void processElement(ProcessContext c) {
             final KV<I, EntityRecord> kv = c.element();
-            final TenantAwareOperation op = new TenantAwareOperation(tenantId) {
-                @Override
-                public void run() {
-                    doWrite(kv.getKey(), kv.getValue());
-                }
-            };
-            op.execute();
+            doWrite(tenantId, kv.getKey(), kv.getValue());
         }
 
-        protected abstract void doWrite(I key, EntityRecord value);
+        protected abstract void doWrite(TenantId tenantId, I key, EntityRecord value);
     }
 }

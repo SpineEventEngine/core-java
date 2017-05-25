@@ -21,22 +21,17 @@
 package org.spine3.server.entity;
 
 import com.google.common.testing.SerializableTester;
-import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
-
-import static org.junit.Assert.assertEquals;
-import static org.spine3.server.entity.DefaultEntityStorageConverter.forAllFields;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class DefaultEntityStorageConverterShould {
+public class DefaultEntityFactoryShould {
 
-    private EntityStorageConverter<Long, TestEntity, StringValue> converter;
+    private EntityFactory<Long, TestEntity> entityFactory;
 
     @Before
     public void setUp() {
@@ -45,45 +40,12 @@ public class DefaultEntityStorageConverterShould {
         RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
-        converter = forAllFields(repository.getEntityStateType(), repository.entityFactory());
-    }
-
-    @Test
-    public void create_instance_for_for_all_fields() throws Exception {
-        assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
-    }
-
-    @Test
-    public void create_instance_with_FieldMask() throws Exception {
-        final FieldMask fieldMask = FieldMask.newBuilder()
-                                             .addPaths("foo.bar")
-                                             .build();
-
-        final EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
-                converter.withFieldMask(fieldMask);
-
-        assertEquals(fieldMask, withMasks.getFieldMask());
-    }
-
-    private static TestEntity createEntity(Long id, StringValue state) {
-        final TestEntity result = new TestEntity(id);
-        result.injectState(state);
-        return result;
-    }
-
-    @Test
-    public void convert_forward_and_backward() throws Exception {
-        final TestEntity entity = createEntity(100L, Wrapper.forString("back and forth"));
-
-        final EntityRecord out = converter.convert(entity);
-        final TestEntity back = converter.reverse()
-                                         .convert(out);
-        assertEquals(entity, back);
+        entityFactory = repository.entityFactory();
     }
 
     @Test
     public void serialize() {
-        SerializableTester.reserializeAndAssert(converter);
+        SerializableTester.reserializeAndAssert(entityFactory);
     }
 
     /**

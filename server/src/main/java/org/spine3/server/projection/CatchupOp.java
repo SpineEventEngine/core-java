@@ -101,6 +101,10 @@ class CatchupOp<I> {
         // Group events by projection IDs.
         final KvCoder<I, Iterable<Event>> idToEventsCoder =
                 KvCoder.of(idCoder, IterableCoder.of(eventCoder));
+
+        //TODO:2017-05-25:alexander.yevsyukov: get all IDs.
+        //TODO:2017-05-25:alexander.yevsyukov: Load or create all the
+
         final PCollection<KV<I, Iterable<Event>>> groupped =
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
                        .setCoder(idToEventsCoder);

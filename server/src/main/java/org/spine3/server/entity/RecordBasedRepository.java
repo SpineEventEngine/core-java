@@ -39,7 +39,7 @@ import org.spine3.client.EntityId;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
-import org.spine3.server.storage.RecordStorageIO.FindByQuery;
+import org.spine3.server.storage.RecordStorageIO.FindById;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
@@ -56,7 +56,6 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
-import static org.spine3.server.storage.RecordStorageIO.Query.singleRecord;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
@@ -410,7 +409,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         private final EntityStorageConverter<I, E, S> converter;
 
         protected BeamIO(RecordStorageIO<I> storageIO,
-                       EntityStorageConverter<I, E, S> converter) {
+                         EntityStorageConverter<I, E, S> converter) {
             this.storageIO = storageIO;
             this.converter = converter;
         }
@@ -437,7 +436,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
                 implements ReadFunction<I, E, S> {
 
             private static final long serialVersionUID = 0L;
-            private final FindByQuery<I> queryFn;
+            private final FindById<I> queryFn;
             private final EntityStorageConverter<I, E, S> converter;
 
             private LoadOrCreate(TenantId tenantId,
@@ -449,7 +448,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
             @Override
             public E apply(I input) {
-                final Iterable<EntityRecord> queryResult = queryFn.apply(singleRecord(input));
+                //TODO:2017-05-25:alexander.yevsyukov: Load only one record by ID.
+
+                final Iterable<EntityRecord> queryResult = null ; // queryFn.apply(singleRecord(input));
                 final EntityRecord record = FluentIterable.from(queryResult)
                                                           .get(0);
                 final E result = converter.reverse()

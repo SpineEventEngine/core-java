@@ -26,6 +26,9 @@ import com.google.protobuf.Message;
 import org.spine3.base.Identifier;
 import org.spine3.type.TypeUrl;
 
+import javax.annotation.Nullable;
+import java.util.Objects;
+
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 
@@ -101,5 +104,24 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
             }
         }
         return entity;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityFactory, entityStateType, fieldMask);
+    }
+
+    @Override
+    public boolean equals(@Nullable Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final DefaultEntityStorageConverter other = (DefaultEntityStorageConverter) obj;
+        return Objects.equals(this.entityFactory, other.entityFactory)
+                && Objects.equals(this.entityStateType, other.entityStateType)
+                && Objects.equals(this.fieldMask, other.fieldMask);
     }
 }
