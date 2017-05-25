@@ -32,13 +32,16 @@ import org.spine3.server.entity.InvalidEntityStateException;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.Task;
+import org.spine3.test.aggregate.TaskValidatingBuilder;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.event.ProjectCreated;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.aggregate.user.User;
+import org.spine3.test.aggregate.user.UserValidatingBuilder;
 import org.spine3.testdata.Sample;
 import org.spine3.validate.ConstraintViolation;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import java.lang.reflect.Constructor;
 import java.util.List;
@@ -49,6 +52,7 @@ import static org.junit.Assert.fail;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.AggregatePart.create;
 import static org.spine3.server.aggregate.AggregatePart.getConstructor;
+import static org.spine3.server.aggregate.CommandTestDispatcher.dispatch;
 import static org.spine3.test.Given.aggregatePartOfClass;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertSize;
@@ -169,15 +173,6 @@ public class AggregatePartShould {
                                                    .build();
     }
 
-    /*
-     Test environment classes
-    ***************************/
-    private static class AnAggregateRoot extends AggregateRoot<String> {
-        protected AnAggregateRoot(BoundedContext boundedContext, String id) {
-            super(boundedContext, id);
-        }
-    }
-
     private static CommandEnvelope env(Message commandMessage) {
         return CommandEnvelope.of(factory.command().create(commandMessage));
     }
@@ -185,7 +180,7 @@ public class AggregatePartShould {
     private NullPointerTester createNullPointerTester() throws NoSuchMethodException {
         final Constructor constructor =
                 AnAggregateRoot.class
-                               .getDeclaredConstructor(BoundedContext.class, String.class);
+                        .getDeclaredConstructor(BoundedContext.class, String.class);
         final NullPointerTester tester = new NullPointerTester();
         tester.setDefault(Constructor.class, constructor)
               .setDefault(BoundedContext.class, boundedContext)
@@ -196,13 +191,25 @@ public class AggregatePartShould {
     private void prepareAggregatePart() {
         final AddTask addTask =
                 ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                                         .setProjectId(ProjectId.getDefaultInstance())
-                                         .build();
-        taskPart.dispatchForTest(env(addTask));
+                        .setProjectId(ProjectId.getDefaultInstance())
+                        .build();
+        dispatch(taskPart, env(addTask));
     }
 
-    private static class WrongAggregatePart
-            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
+    /*
+     Test environment classes
+    ***************************/
+
+    private static class AnAggregateRoot extends AggregateRoot<String> {
+        protected AnAggregateRoot(BoundedContext boundedContext, String id) {
+            super(boundedContext, id);
+        }
+    }
+
+    private static class WrongAggregatePart extends AggregatePart<String,
+            StringValue,
+            StringValueValidatingBuilder,
+            AnAggregateRoot> {
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
         protected WrongAggregatePart() {
@@ -210,8 +217,10 @@ public class AggregatePartShould {
         }
     }
 
-    private static class AnAggregatePart
-            extends AggregatePart<String, User, User.Builder, AnAggregateRoot> {
+    private static class AnAggregatePart extends AggregatePart<String,
+            User,
+            UserValidatingBuilder,
+            AnAggregateRoot> {
 
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
@@ -219,7 +228,7 @@ public class AggregatePartShould {
     }
 
     private static class TaskPart
-            extends AggregatePart<String, Task, Task.Builder, AnAggregateRoot> {
+            extends AggregatePart<String, Task, TaskValidatingBuilder, AnAggregateRoot> {
 
         private TaskPart(AnAggregateRoot root) {
             super(root);
@@ -239,8 +248,10 @@ public class AggregatePartShould {
         }
     }
 
-    private static class TaskDescriptionPart
-            extends AggregatePart<String, StringValue, StringValue.Builder, AnAggregateRoot> {
+    private static class TaskDescriptionPart extends AggregatePart<String,
+                                                                   StringValue,
+                                                                   StringValueValidatingBuilder,
+                                                                   AnAggregateRoot> {
 
         protected TaskDescriptionPart(AnAggregateRoot root) {
             super(root);

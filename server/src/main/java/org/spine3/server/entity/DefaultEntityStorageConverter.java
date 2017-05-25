@@ -86,9 +86,15 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         final E entity = repository.create(id);
 
         if (entity != null) {
+
             if (entity instanceof AbstractVersionableEntity) {
                 final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-                versionable.updateState(state, entityRecord.getVersion());
+                if (versionable instanceof EventPlayingEntity) {
+                    final EventPlayingEntity playingEntity = (EventPlayingEntity) versionable;
+                    playingEntity.injectState(state, entityRecord.getVersion());
+                } else {
+                    versionable.updateState(state, entityRecord.getVersion());
+                }
                 versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
             } else {
                 entity.injectState(state);

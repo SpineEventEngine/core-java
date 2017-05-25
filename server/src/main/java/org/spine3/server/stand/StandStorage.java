@@ -25,7 +25,6 @@ import org.spine3.annotation.SPI;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.string.StringifierRegistry;
 import org.spine3.type.TypeUrl;
 
 import java.util.Map;
@@ -43,12 +42,6 @@ import java.util.Map;
  */
 @SPI
 public abstract class StandStorage extends RecordStorage<AggregateStateId> {
-
-    static {
-        StringifierRegistry.getInstance()
-                           .register(new AggregateStateIdStringifier(),
-                                     AggregateStateId.class);
-    }
 
     protected StandStorage(boolean multitenant) {
         super(multitenant);

@@ -32,6 +32,9 @@ import org.spine3.server.aggregate.AggregateRoot;
 import org.spine3.server.entity.AbstractVersionableEntity;
 import org.spine3.server.procman.ProcessManager;
 import org.spine3.server.projection.Projection;
+import org.spine3.validate.StringValueValidatingBuilder;
+import org.spine3.validate.TimestampValidatingBuilder;
+import org.spine3.validate.UInt32ValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -61,7 +64,8 @@ public class GivenShould {
                                              .getResultClass());
     }
 
-    private static class AnAggregate extends Aggregate<Integer, StringValue, StringValue.Builder> {
+    private static class AnAggregate
+            extends Aggregate<Integer, StringValue, StringValueValidatingBuilder> {
         protected AnAggregate(Integer id) {
             super(id);
         }
@@ -75,7 +79,7 @@ public class GivenShould {
 
     private static class AnAggregatePart extends AggregatePart<Long,
                                                                Timestamp,
-                                                               Timestamp.Builder,
+                                                               TimestampValidatingBuilder,
                                                                AnAggregateRoot> {
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
@@ -88,7 +92,9 @@ public class GivenShould {
                                              .getResultClass());
     }
 
-    private static class AProjection extends Projection<String, UInt32Value> {
+    private static class AProjection extends Projection<String,
+                                                        UInt32Value,
+                                                        UInt32ValueValidatingBuilder> {
         protected AProjection(String id) {
             super(id);
         }
@@ -106,7 +112,9 @@ public class GivenShould {
                 .testAllPublicStaticMethods(Given.class);
     }
 
-    private static class AProcessManager extends ProcessManager<Timestamp, StringValue> {
+    private static class AProcessManager extends ProcessManager<Timestamp,
+                                                                StringValue,
+                                                                StringValueValidatingBuilder> {
         protected AProcessManager(Timestamp id) {
             super(id);
         }

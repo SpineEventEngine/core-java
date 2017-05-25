@@ -59,3 +59,13 @@ message Task {
     string title = 2;
     string description = 3;
 }
+
+// A projection of all `Task` names for a certain `Project`.
+message ProjectTaskNames {
+
+    ProjectId project_id = 1;
+
+    string project_name = 2 [(required) = true];
+
+    repeated string task_name = 3;
+}

@@ -20,12 +20,14 @@
 
 package org.spine3.server.projection;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import org.spine3.base.EventContext;
-import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.server.entity.EventPlayingEntity;
 import org.spine3.server.reflect.EventSubscriberMethod;
 import org.spine3.type.EventClass;
+import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 
@@ -44,7 +46,10 @@ import static org.spine3.server.reflect.EventSubscriberMethod.forMessage;
  * @param <I> the type of the IDs
  * @param <M> the type of the state objects holding projection data
  */
-public abstract class Projection<I, M extends Message> extends AbstractVersionableEntity<I, M> {
+public abstract class Projection<I,
+                                 M extends Message,
+                                 B extends ValidatingBuilder<M, ? extends Message.Builder>>
+        extends EventPlayingEntity<I, M, B> {
 
     /**
      * Creates a new instance.
@@ -57,13 +62,20 @@ public abstract class Projection<I, M extends Message> extends AbstractVersionab
     }
 
     protected void handle(Message event, EventContext ctx) {
-        dispatch(event, ctx);
+        apply(event, ctx);
     }
 
-    private void dispatch(Message eventMessage, EventContext ctx) {
+    @Override
+    @VisibleForTesting      // Overridden to expose this method to tests.
+    protected B getBuilder() {
+        return super.getBuilder();
+    }
+
+    void apply(Message eventMessage,
+                         EventContext eventContext)  {
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
-            method.invoke(this, eventMessage, ctx);
+            method.invoke(this, eventMessage, eventContext);
         } catch (InvocationTargetException e) {
             throw new IllegalStateException(e);
         }
