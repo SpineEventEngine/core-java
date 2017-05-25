@@ -74,7 +74,7 @@ public class PredicatesShould {
 
     /**
      * We are not likely to encounter {@code null} records,
-     * but making such records “visible” would help identify possible bugs.
+     * but making such records "visible" would help identify possible bugs.
      */
     @Test
     public void consider_null_records_visible() {

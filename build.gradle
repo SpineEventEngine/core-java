@@ -35,7 +35,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.9.7-SNAPSHOT'
+        spineVersion = '0.9.9-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
@@ -264,6 +264,10 @@ subprojects {
         }
     }
 
+    javadoc {
+        source = sourceSets.main.allJava
+    }
+
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
         classifier "sources"
@@ -272,6 +276,11 @@ subprojects {
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
         classifier "test"
+    }
+
+    task javadocJar(type: Jar, dependsOn: 'javadoc') {
+        from ("$projectDir/build/docs/javadoc")
+        classifier "javadoc"
     }
 
     apply from: "${rootDir}/scripts/no-internal-javadoc.gradle"
