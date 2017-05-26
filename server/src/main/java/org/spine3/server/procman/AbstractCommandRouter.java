@@ -208,7 +208,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     private static Command asCommand(Message message, CommandContext context) {
-        final Command command = commandFactory(context).copyOf(message, context);
+        final Command command = commandFactory(context).createWithContext(message, context);
         return command;
     }
 }

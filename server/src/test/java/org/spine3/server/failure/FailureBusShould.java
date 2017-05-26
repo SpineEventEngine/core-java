@@ -346,7 +346,7 @@ public class FailureBusShould {
             final CommandFactory commandFactory =
                     TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
                                            .command();
-            final Command command = commandFactory.copyOf(commandMessage, context);
+            final Command command = commandFactory.createWithContext(commandMessage, context);
             this.failureHandled = Failures.createFailure(failure, command);
         }
 
