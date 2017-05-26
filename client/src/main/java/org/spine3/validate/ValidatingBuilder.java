@@ -33,7 +33,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
 /**
  * An interface for all validating builders.
  *
- * <p>Validating builder is used to validate messages according to the business rules
+ * <p>Validating builder is used to validate messages according to their Protobuf definition
  * during the {@code Message} creation.
  *
  * <p>Non-abstract implementations must declare {@code public static TYPE newBuilder()} method,
@@ -47,7 +47,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
 public interface ValidatingBuilder<T extends Message, B extends Message.Builder> {
 
     /**
-     * Validates the field according to the protocol buffer message declaration.
+     * Validates the field according to the Protobuf message declaration.
      *
      * @param descriptor the {@code FieldDescriptor} of the field
      * @param fieldValue the value of the field
