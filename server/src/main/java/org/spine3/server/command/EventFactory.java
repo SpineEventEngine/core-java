@@ -92,6 +92,12 @@ public class EventFactory {
         return result;
     }
 
+    /**
+     * Validates an event message according to their Protobuf definition.
+     *
+     * <p>If the given {@code messageOrAny} is an instance of {@code Any}, it is unpacked
+     * for the validation.
+     */
     private static void validate(Message messageOrAny) throws ConstraintViolationThrowable {
         final Message toValidate;
         toValidate = messageOrAny instanceof Any
