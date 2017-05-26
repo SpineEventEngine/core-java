@@ -20,9 +20,7 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.collect.FluentIterable;
 import com.google.protobuf.Message;
-import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.users.TenantId;
 
@@ -46,49 +44,15 @@ public class RecordBasedRepositoryIO<I, E extends Entity<I, S>, S extends Messag
         return storageIO;
     }
 
-    public ReadFunction<I, E, S> loadOrCreate(TenantId tenantId) {
-        return new LoadOrCreate<>(tenantId, storageIO, converter);
+    public EntityStorageConverter<I, E, S> getConverter() {
+        return converter;
     }
 
     public RecordStorageIO.Write<I> write(TenantId tenantId) {
         return storageIO.write(tenantId);
     }
 
-    public interface ReadFunction<I, E extends Entity<I, S>, S extends Message>
-            extends SerializableFunction<I, E> {
-
-        EntityStorageConverter<I, E, S> getConverter();
-    }
-
-    private static class LoadOrCreate<I, E extends Entity<I, S>, S extends Message>
-            implements ReadFunction<I, E, S> {
-
-        private static final long serialVersionUID = 0L;
-        private final RecordStorageIO.FindById<I> queryFn;
-        private final EntityStorageConverter<I, E, S> converter;
-
-        private LoadOrCreate(TenantId tenantId,
-                             RecordStorageIO<I> storageIO,
-                             EntityStorageConverter<I, E, S> converter) {
-            this.queryFn = storageIO.findFn(tenantId);
-            this.converter = converter;
-        }
-
-        @Override
-        public E apply(I input) {
-            //TODO:2017-05-25:alexander.yevsyukov: Load only one record by ID.
-
-            final Iterable<EntityRecord> queryResult = null; // queryFn.apply(singleRecord(input));
-            final EntityRecord record = FluentIterable.from(queryResult)
-                                                      .get(0);
-            final E result = converter.reverse()
-                                      .convert(record);
-            return result;
-        }
-
-        @Override
-        public EntityStorageConverter<I, E, S> getConverter() {
-            return converter;
-        }
+    public RecordStorageIO.ReadFn<I> read(TenantId tenantId) {
+        return storageIO.readFn(tenantId);
     }
 }

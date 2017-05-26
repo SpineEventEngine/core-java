@@ -33,6 +33,9 @@ import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.Keys;
 import org.apache.beam.sdk.transforms.Max;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.join.CoGbkResult;
+import org.apache.beam.sdk.transforms.join.CoGroupByKey;
+import org.apache.beam.sdk.transforms.join.KeyedPCollectionTuple;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionTuple;
@@ -60,9 +63,9 @@ class CatchupOp<I> {
     private final EventStore eventStore;
     private final PipelineOptions options;
 
-    public CatchupOp(TenantId tenantId,
-                     ProjectionRepository<I, ?, ?> repository,
-                     PipelineOptions options) {
+    CatchupOp(TenantId tenantId,
+              ProjectionRepository<I, ?, ?> repository,
+              PipelineOptions options) {
         this.tenantId = tenantId;
         this.repository = repository;
         this.options = options;
@@ -103,32 +106,42 @@ class CatchupOp<I> {
         final KvCoder<I, Iterable<Event>> idToEventsCoder =
                 KvCoder.of(idCoder, IterableCoder.of(eventCoder));
 
-        final PCollection<KV<I, Iterable<Event>>> groupped =
+        final PCollection<KV<I, Iterable<Event>>> grouppedEvents =
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
                        .setCoder(idToEventsCoder);
 
-        final PCollection<I> ids = groupped.apply(Keys.<I>create());
+        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
 
-        //TODO:2017-05-25:alexander.yevsyukov: Load or create all the entities and get their records.
-        // Pass them as side input to `ApplyEvents`.
+        final PCollection<I> ids = grouppedEvents.apply(Keys.<I>create());
+        final PCollection<KV<I, EntityRecord>> projectionStates = ids.apply(
+                ParDo.of(repositoryIO.read(tenantId)));
+
+        // Join ID-to-Event collection with ID-to-EntityRecord collection.
+        final TupleTag<Iterable<Event>> eventsTag = new TupleTag<>();
+        final TupleTag<EntityRecord> entityRecordsTag = new TupleTag<>();
+
+        PCollection<KV<I, CoGbkResult>> joinedCollection =
+                KeyedPCollectionTuple.of(eventsTag, grouppedEvents)
+                                     .and(entityRecordsTag, projectionStates)
+                                     .apply(CoGroupByKey.<I>create());
 
         // Apply events to projections.
-        // 1. Load projection, apply events.
-        // 2. Take as a side output the timestamp of the last event.
-        final TupleTag<KV<I, EntityRecord>> recordsTag = new TupleTag<KV<I, EntityRecord>>() {
-        };
+        final TupleTag<KV<I, EntityRecord>> recordsTag = new ApplyEvents.RecordsTag<>();
         final TupleTag<Timestamp> timestampTag = new ApplyEvents.TimestampTupleTag();
 
-        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
-        final PCollectionTuple collectionTuple = groupped.apply(
+        final PCollectionTuple collectionTuple = joinedCollection.apply(
                 "ApplyEvents",
-                ParDo.of(new ApplyEvents<>(repositoryIO.loadOrCreate(tenantId), timestampTag))
+                ParDo.of(new ApplyEvents<>(eventsTag,
+                                           entityRecordsTag,
+                                           repositoryIO.getConverter(),
+                                           timestampTag))
                      .withOutputTags(recordsTag, TupleTagList.of(timestampTag))
         );
 
         // Store projections.
         final PCollection<KV<I, EntityRecord>> records = collectionTuple.get(recordsTag);
-        records.apply("WriteRecords", repositoryIO.write(tenantId));
+        records.setCoder(repositoryIO.getKvCoder())
+               .apply("WriteRecords", repositoryIO.write(tenantId));
 
         // Sort last timestamps of last events and write last handled event time.
         final PCollection<Timestamp> timestamps = collectionTuple.get(timestampTag);

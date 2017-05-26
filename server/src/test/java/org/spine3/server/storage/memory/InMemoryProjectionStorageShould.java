@@ -33,8 +33,9 @@ public class InMemoryProjectionStorageShould extends ProjectionStorageShould<Str
 
     @Override
     protected ProjectionStorage<String> getStorage() {
-        final InMemoryRecordStorage<String> recordStorage = InMemoryRecordStorage.newInstance(false);
         final TypeUrl typeUrl = TypeUrl.of(org.spine3.test.projection.Project.class);
+        final InMemoryRecordStorage<String> recordStorage =
+                InMemoryRecordStorage.newInstance(typeUrl, false);
         final InMemoryProjectionStorage<String> storage =
                 InMemoryProjectionStorage.newInstance(typeUrl, recordStorage);
         return storage;

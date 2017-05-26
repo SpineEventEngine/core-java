@@ -91,12 +91,12 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      * Obtains transform for loading all events (from the tenant's slice) matching
      * the passed predicate.
      */
-    RecordStorageIO.Read<EventId> query(TenantId tenantId, EventStreamQuery query) {
+    RecordStorageIO.Find<EventId> query(TenantId tenantId, EventStreamQuery query) {
         final RecordStorageIO.Query<EventId> recordQuery = new EventRecordQuery(query);
-        final RecordStorageIO.Read<EventId> readRecords = recordStorage().getIO(EventId.class)
-                                                                         .read(tenantId,
-                                                                               recordQuery);
-        return readRecords;
+        final RecordStorageIO.Find<EventId> findRecords =
+                recordStorage().getIO(EventId.class)
+                               .find(tenantId, recordQuery);
+        return findRecords;
     }
 
     private static class EventRecordQuery extends RecordStorageIO.Query<EventId> {

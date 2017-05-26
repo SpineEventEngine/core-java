@@ -75,18 +75,12 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             return;
         }
         @SuppressWarnings("unchecked") //
-        final Optional<EntityRecord> record = repository.findRecord(id);
-        if (record.isPresent()) {
-            responseObserver.onNext(record.get());
-            responseObserver.onCompleted();
-        }
-
-        responseObserver.onError(
-                newIllegalStateException(
-                        "Unable to find projection (class: %s) with ID: %s",
-                        repository.getEntityClass()
-                                  .getName(),
-                        id));
+        final Optional<EntityRecord> optional = repository.findRecord(id);
+        final EntityRecord record = optional.isPresent()
+                ? optional.get()
+                : EntityRecord.getDefaultInstance();
+        responseObserver.onNext(record);
+        responseObserver.onCompleted();
     }
 
     @Override

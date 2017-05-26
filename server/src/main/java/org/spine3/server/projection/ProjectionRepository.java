@@ -170,7 +170,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     /**
      * {@inheritDoc}
      *
-     * <p>Overrides to open the method to the package.
+     * <p>Overrides to open the method to the {@code beam} package.
      */
     @Override
     protected EventTargetsFunction<I, Message> getIdSetFunction() {
@@ -594,7 +594,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
 
     @Override
     public ProjectionRepositoryIO<I, P, S> getIO() {
-        return new ProjectionRepositoryIO<>(projectionStorage().getIO(getIdClass()), entityConverter());
+        return new ProjectionRepositoryIO<>(projectionStorage().getIO(getIdClass()),
+                                            entityConverter());
     }
-
 }

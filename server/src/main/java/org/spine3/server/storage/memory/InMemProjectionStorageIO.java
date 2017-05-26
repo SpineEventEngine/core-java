@@ -49,20 +49,18 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     }
 
     @Override
-    @SuppressWarnings("SerializableInnerClassWithNonSerializableOuterClass")
-    // OK for test-only in-memory implementation.
     public WriteLastHandledEventTimeFn writeLastHandledEventTimeFn(TenantId tenantId) {
         return new WriteTimestampOverGrpc(tenantId, stateTypeUrl);
     }
 
     @Override
-    public FindById<I> findFn(TenantId tenantId) {
-        return storageIO.findFn(tenantId);
+    public ReadFn<I> readFn(TenantId tenantId) {
+        return storageIO.readFn(tenantId);
     }
 
     @Override
-    public Read<I> read(TenantId tenantId, Query<I> query) {
-        return storageIO.read(tenantId, query);
+    public Find<I> find(TenantId tenantId, Query<I> query) {
+        return storageIO.find(tenantId, query);
     }
 
     @Override
@@ -86,7 +84,7 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemoryIO.createDefaultChannel();
+            channel = InMemRecordStorageIO.createDefaultChannel();
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 

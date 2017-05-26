@@ -26,6 +26,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -42,10 +43,12 @@ import java.util.Map;
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
+    private final TypeUrl entityStateUrl;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(boolean multitenant) {
+    InMemoryRecordStorage(TypeUrl entityStateUrl, boolean multitenant) {
         super(multitenant);
+        this.entityStateUrl = entityStateUrl;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
             TenantRecords<I> createSlice() {
@@ -54,8 +57,9 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
-    protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
-        return new InMemoryRecordStorage<>(multitenant);
+    protected static <I> InMemoryRecordStorage<I> newInstance(TypeUrl entityStateUrl,
+                                                              boolean multitenant) {
+        return new InMemoryRecordStorage<>(entityStateUrl, multitenant);
     }
 
     @Override
@@ -128,6 +132,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public RecordStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemoryIO<>(idClass, this);
+        return new InMemRecordStorageIO<>(idClass, entityStateUrl);
     }
 }

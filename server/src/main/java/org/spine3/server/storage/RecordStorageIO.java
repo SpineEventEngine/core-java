@@ -21,7 +21,6 @@
 package org.spine3.server.storage;
 
 import com.google.common.base.Predicate;
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
@@ -34,7 +33,6 @@ import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.SerializableFunction;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
@@ -151,21 +149,18 @@ public abstract class RecordStorageIO<I> {
     }
 
     /**
-     * Obtains a function for loading query results.
-     */
-    public abstract FindById<I> findFn(TenantId tenantId);
-
-    /**
      * Obtains a transformation for reading records matching the query.
      *
      * @param tenantId the ID of the tenant for whom records belong
      * @param query    the query to obtain records
      */
-    public abstract Read<I> read(TenantId tenantId, Query<I> query);
+    public abstract Find<I> find(TenantId tenantId, Query<I> query);
 
     public Write<I> write(TenantId tenantId) {
         return new Write<>(writeFn(tenantId));
     }
+
+    public abstract ReadFn<I> readFn(TenantId tenantId);
 
     /**
      * Obtains a {@link DoFn} that writes an {@code EntityRecord} into the storage.
@@ -173,29 +168,10 @@ public abstract class RecordStorageIO<I> {
     public abstract WriteFn<I> writeFn(TenantId tenantId);
 
     /**
-     * Abstract base for functions loading query results.
-     *
-     * @param <I> the type of IDs
-     */
-    public abstract static class FindById<I> implements SerializableFunction<I, EntityRecord> {
-        private static final long serialVersionUID = 0L;
-    }
-
-    /**
      * A query to get multiple records from a storage.
-     *
-     * @param <I> the type of IDs
      */
     public abstract static class Query<I> implements Serializable {
         private static final long serialVersionUID = 0L;
-
-        public static <I> Query<I> singleRecord(I id) {
-            return new SingleRecord<>(id);
-        }
-
-        public static <I> Query byIdsAndPredicate(Iterable<I> ids, RecordPredicate predicate) {
-            return new ByIdsAndPredicate<>(ids, predicate);
-        }
 
         public abstract Set<I> getIds();
 
@@ -216,66 +192,19 @@ public abstract class RecordStorageIO<I> {
                 }
             };
         }
-
-        private static class SingleRecord<I> extends Query<I> {
-            private static final long serialVersionUID = 0L;
-            private final ImmutableSet<I> oneSet;
-
-            private SingleRecord(I id) {
-                oneSet = ImmutableSet.of(id);
-            }
-
-            @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as returning immutable impl.
-            @Override
-            public Set<I> getIds() {
-                return oneSet;
-            }
-
-            @Override
-            public RecordPredicate getRecordPredicate() {
-                return RecordPredicate.Always.isTrue();
-            }
-        }
-
-        /**
-         * A simple query containing a limiting list of IDs and a record predicate.
-         *
-         * <p>If the set of IDs is empty, the query does not limit the result by IDs.
-         *
-         * @param <I> the type of IDs
-         */
-        private static class ByIdsAndPredicate<I> extends Query<I> {
-
-            private static final long serialVersionUID = 0L;
-            private final ImmutableSet<I> ids;
-            private final RecordPredicate predicate;
-
-            private ByIdsAndPredicate(Iterable<I> ids, RecordPredicate predicate) {
-                this.ids = ImmutableSet.copyOf(ids);
-                this.predicate = predicate;
-            }
-
-            @Override
-            @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.
-            public Set<I> getIds() {
-                return ids;
-            }
-
-            @Override
-            public RecordPredicate getRecordPredicate() {
-                return predicate;
-            }
-        }
     }
 
-    public abstract static class Read<I>
+    /**
+     * Finds entity records by query.
+     */
+    public abstract static class Find<I>
             extends PTransform<PBegin, PCollection<KV<I, EntityRecord>>> {
 
         private static final long serialVersionUID = 0L;
         private final ValueProvider<TenantId> tenantId;
         private final Query<I> query;
 
-        protected Read(ValueProvider<TenantId> tenantId, Query<I> query) {
+        protected Find(ValueProvider<TenantId> tenantId, Query<I> query) {
             this.tenantId = tenantId;
             this.query = query;
         }
@@ -291,11 +220,34 @@ public abstract class RecordStorageIO<I> {
     }
 
     /**
+     * Reads entity record by ID.
+     */
+    public abstract static class ReadFn<I> extends DoFn<I, KV<I, EntityRecord>> {
+
+        private static final long serialVersionUID = 0L;
+        private final TenantId tenantId;
+
+        protected ReadFn(TenantId tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final I id = c.element();
+            final EntityRecord record = doRead(tenantId, id);
+            c.output(KV.of(id, record));
+        }
+
+        protected abstract EntityRecord doRead(TenantId tenantId, I id);
+    }
+
+    /**
      * Extracts the state of an entity from a {@link EntityRecord}.
      *
      * @param <S> the type of the entity state
      */
     public static class UnpackFn<S extends Message> extends DoFn<EntityRecord, S> {
+
         private static final long serialVersionUID = 0L;
 
         @ProcessElement
@@ -330,7 +282,7 @@ public abstract class RecordStorageIO<I> {
     }
 
     /**
-     * A {@link DoFn} that writes {@code EnityRecord} into the storage.
+     * A {@link DoFn} that writes {@code EntityRecord} into the storage.
      */
     public abstract static class WriteFn<I> extends DoFn<KV<I, EntityRecord>, Void> {
 

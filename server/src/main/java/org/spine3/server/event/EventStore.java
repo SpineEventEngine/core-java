@@ -285,8 +285,8 @@ public abstract class EventStore implements AutoCloseable {
 
         @Override
         public EventStoreIO.Read query(TenantId tenantId, EventStreamQuery query) {
-            final RecordStorageIO.Read<EventId> readRecords = storage.query(tenantId, query);
-            return new EventStoreIO.Read(readRecords);
+            final RecordStorageIO.Find<EventId> findRecords = storage.query(tenantId, query);
+            return new EventStoreIO.Read(findRecords);
         }
     }
 

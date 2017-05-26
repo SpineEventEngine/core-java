@@ -38,7 +38,7 @@ import org.spine3.users.TenantId;
  *
  * @author Alexander Yevsyukov
  */
-public class ProjectionRepositoryIO<I, P extends Projection<I, S>, S extends Message>
+class ProjectionRepositoryIO<I, P extends Projection<I, S>, S extends Message>
         extends RecordBasedRepositoryIO<I, P, S> {
 
     ProjectionRepositoryIO(ProjectionStorageIO<I> storageIO,
@@ -46,26 +46,25 @@ public class ProjectionRepositoryIO<I, P extends Projection<I, S>, S extends Mes
         super(storageIO, converter);
     }
 
-    public Coder<I> getIdCoder() {
+    Coder<I> getIdCoder() {
         return storageIO().getIdCoder();
     }
 
-    public KvCoder<I, EntityRecord> getKvCoder() {
+    KvCoder<I, EntityRecord> getKvCoder() {
         return storageIO().getKvCoder();
     }
 
-    public WriteLastHandledEventTime<I> writeLastHandledEventTime(TenantId tenantId) {
-        return new WriteLastHandledEventTime<>(
+    WriteLastHandledEventTime writeLastHandledEventTime(TenantId tenantId) {
+        return new WriteLastHandledEventTime(
                 ((ProjectionStorageIO<I>) storageIO()).writeLastHandledEventTimeFn(tenantId));
     }
 
-    public static class WriteLastHandledEventTime<I>
-            extends PTransform<PCollection<Timestamp>, PDone> {
+    static class WriteLastHandledEventTime extends PTransform<PCollection<Timestamp>, PDone> {
 
         private static final long serialVersionUID = 0L;
         private final ProjectionStorageIO.WriteLastHandledEventTimeFn fn;
 
-        public WriteLastHandledEventTime(ProjectionStorageIO.WriteLastHandledEventTimeFn fn) {
+        private WriteLastHandledEventTime(ProjectionStorageIO.WriteLastHandledEventTimeFn fn) {
             this.fn = fn;
         }
 

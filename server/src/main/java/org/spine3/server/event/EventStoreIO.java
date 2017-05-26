@@ -61,15 +61,15 @@ public class EventStoreIO {
      */
     public static class Read extends PTransform<PBegin, PCollection<Event>> {
         private static final long serialVersionUID = 0L;
-        private final RecordStorageIO.Read<EventId> read;
+        private final RecordStorageIO.Find<EventId> find;
 
-        Read(RecordStorageIO.Read<EventId> read) {
-            this.read = read;
+        Read(RecordStorageIO.Find<EventId> find) {
+            this.find = find;
         }
 
         @Override
         public PCollection<Event> expand(PBegin input) {
-            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(read);
+            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(find);
             final PCollection<EntityRecord> allRecords =
                     withKeys.apply(Values.<EntityRecord>create());
             final PCollection<Event> matching = allRecords.apply(

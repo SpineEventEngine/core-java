@@ -76,7 +76,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createRecordStorage(getEntityClass());
+        final Storage<I, ?> result = factory.createRecordStorage(getIdClass(),
+                                                                 getEntityStateClass());
         return result;
     }
 
@@ -132,11 +133,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     @CheckReturnValue
     public Optional<E> find(I id) {
-        Optional<EntityRecord> record = findRecord(id);
-        if (!record.isPresent()) {
+        Optional<EntityRecord> optional = findRecord(id);
+        if (!optional.isPresent()) {
             return Optional.absent();
         }
-        final E entity = toEntity(record.get());
+        final EntityRecord record = optional.get();
+        final boolean recordVisible = !isEntityVisible().apply(record.getLifecycleFlags());
+        if (recordVisible) {
+            return Optional.absent();
+        }
+        final E entity = toEntity(record);
         return Optional.of(entity);
     }
 
@@ -153,10 +159,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             return Optional.absent();
         }
         final EntityRecord record = found.get();
-        final boolean recordVisible = !isEntityVisible().apply(record.getLifecycleFlags());
-        if (recordVisible) {
-            return Optional.absent();
-        }
         return Optional.of(record);
     }
 

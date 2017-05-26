@@ -21,17 +21,20 @@
 package org.spine3.server.storage.memory;
 
 import com.google.common.testing.SerializableTester;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.type.TypeUrl;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class InMemoryBeamIOShould {
+public class InMemoryRecordStorageIOShould {
 
     @Test
     public void serialize() {
-        final InMemoryRecordStorage<Long> recordStorage = InMemoryRecordStorage.newInstance(true);
+        final InMemoryRecordStorage<Long> recordStorage =
+                InMemoryRecordStorage.newInstance(TypeUrl.of(Timestamp.class), true);
         final RecordStorageIO<Long> io = recordStorage.getIO(Long.class);
 
         SerializableTester.reserialize(io);

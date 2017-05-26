@@ -55,7 +55,12 @@ class InMemoryStandStorage extends StandStorage {
 
     private InMemoryStandStorage(Builder builder) {
         super(builder.isMultitenant());
-        recordStorage = new InMemoryRecordStorage<>(builder.isMultitenant());
+        /*
+            We do not use the StandStorage in a way that requires the `entityStateUrl` parameter
+            passed. Therefore simply pass the `TypeUrl` of `EntityRecord`
+        */
+        recordStorage = new InMemoryRecordStorage<>(TypeUrl.of(EntityRecord.class),
+                                                    builder.isMultitenant());
     }
 
     public static Builder newBuilder() {

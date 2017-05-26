@@ -23,7 +23,6 @@ package org.spine3.server.storage.memory;
 import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
@@ -79,12 +78,11 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     /**
      * {@inheritDoc}
-     *
-     * @param unused the parameter is not used in this implementation
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {
-        return InMemoryRecordStorage.newInstance(isMultitenant());
+    public <I, S extends Message> RecordStorage<I> createRecordStorage(Class<I> idClass,
+                                                                       Class<S> stateClass) {
+        return InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), isMultitenant());
     }
 
     @Override
@@ -92,7 +90,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     ProjectionStorage<I> createProjectionStorage(Class<I> idClass, Class<S> stateClass) {
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
-                InMemoryRecordStorage.newInstance(multitenant);
+                InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), multitenant);
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
         return InMemoryProjectionStorage.newInstance(stateUrl, entityStorage);
     }

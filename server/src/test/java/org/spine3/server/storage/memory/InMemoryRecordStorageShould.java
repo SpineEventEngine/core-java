@@ -27,17 +27,20 @@ import org.spine3.server.storage.RecordStorageShould;
 import org.spine3.test.storage.Project;
 import org.spine3.test.storage.ProjectId;
 import org.spine3.test.storage.Task;
+import org.spine3.type.TypeUrl;
 
 import static java.lang.String.format;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId, RecordStorage<ProjectId>> {
+public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId,
+                                                                     RecordStorage<ProjectId>> {
 
     @Override
     protected RecordStorage<ProjectId> getStorage() {
-        return InMemoryRecordStorage.newInstance(false);
+        final TypeUrl typeUrl = TypeUrl.of(Project.class);
+        return InMemoryRecordStorage.newInstance(typeUrl, false);
     }
 
     @Override

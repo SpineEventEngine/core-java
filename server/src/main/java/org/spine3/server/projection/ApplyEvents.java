@@ -25,30 +25,40 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.apache.beam.sdk.transforms.DoFn;
+import org.apache.beam.sdk.transforms.join.CoGbkResult;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.TupleTag;
 import org.spine3.base.Event;
 import org.spine3.base.Events;
 import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.RecordBasedRepositoryIO;
+import org.spine3.server.entity.EntityStorageConverter;
 
 import java.util.Collections;
 import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Applies events to a projection and emits a timestamp of last event as a side output.
  *
  * @author Alexander Yevsyukov
  */
-class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, KV<I, EntityRecord>> {
+class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
 
     private static final long serialVersionUID = 0L;
-    private final RecordBasedRepositoryIO.ReadFunction<I, ?, ?> loadOrCreate;
+
+    private final TupleTag<Iterable<Event>> eventsTag;
+    private final TupleTag<EntityRecord> entityRecordsTag;
+    private final EntityStorageConverter<I, ?, ?> converter;
     private final TupleTag<Timestamp> timestampTag;
 
-    ApplyEvents(RecordBasedRepositoryIO.ReadFunction<I, ?, ?> loadOrCreate,
+    ApplyEvents(TupleTag<Iterable<Event>> eventsTag,
+                TupleTag<EntityRecord> entityRecordsTag,
+                EntityStorageConverter<I, ?, ?> converter,
                 TupleTag<Timestamp> timestampTag) {
-        this.loadOrCreate = loadOrCreate;
+        this.eventsTag = eventsTag;
+        this.entityRecordsTag = entityRecordsTag;
+        this.converter = converter;
         this.timestampTag = timestampTag;
     }
 
@@ -56,17 +66,20 @@ class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, KV<I, EntityRecord>> {
     public void processElement(ProcessContext c) {
         final I id = c.element()
                       .getKey();
-        final List<Event> events = Lists.newArrayList(c.element()
-                                                       .getValue());
+        final CoGbkResult coGbkResult = c.element()
+                                         .getValue();
+        final List<Event> events = Lists.newArrayList(coGbkResult.getOnly(eventsTag));
         Collections.sort(events, Events.eventComparator());
 
         // Timestamps of all applied events.
         final List<Timestamp> timestamps = Lists.newArrayList();
 
+        final EntityRecord entityRecord = coGbkResult.getOnly(entityRecordsTag);
         @SuppressWarnings("unchecked")
         // the types are preserved since the the function is returned by a projection repo.
-        final Projection<I, ?> projection = (Projection<I, ?>) loadOrCreate.apply(id);
-
+        final Projection<I, ?> projection = (Projection<I, ?>) converter.reverse()
+                                                                        .convert(entityRecord);
+        checkNotNull(projection);
         // Apply events
         for (Event event : events) {
             projection.handle(Events.getMessage(event), event.getContext());
@@ -77,8 +90,8 @@ class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, KV<I, EntityRecord>> {
         // Add the resulting record to output.
         @SuppressWarnings("unchecked") /* OK as the types are preserved since the the function
             is returned by a projection repo. */
-        final EntityRecord record = ((Converter<? super Projection<I, ?>, EntityRecord>)
-                loadOrCreate.getConverter()).convert(projection);
+        final EntityRecord record =
+                ((Converter<? super Projection<I, ?>, EntityRecord>)converter).convert(projection);
         c.output(KV.of(id, record));
 
         // Get the latest event timestamp.
@@ -89,11 +102,18 @@ class ApplyEvents<I> extends DoFn<KV<I, Iterable<Event>>, KV<I, EntityRecord>> {
     }
 
     /**
+     * The class to be used instead of anonymous descendant of {@link TupleTag} required for main
+     * output of {@link ApplyEvents}.
+     */
+    static class RecordsTag<I> extends TupleTag<KV<I, EntityRecord>> {
+        private static final long serialVersionUID = 0L;
+    }
+
+    /**
      * The class to be used instead of anonymous descendants of {@link TupleTag} required for
      * output tags.
      */
     static class TimestampTupleTag extends TupleTag<Timestamp> {
         private static final long serialVersionUID = 0L;
     }
-
 }

@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.commandstore.CommandStore;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
@@ -72,11 +71,13 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link RecordStorage} instance.
      *
-     * @param <I>         the type of entity IDs
-     * @param entityClass the class of entities to store
+     * @param <I>        the type of entity IDs
+     * @param <S>        the type of entity state
+     * @param idClass    the class of entity identifiers
+     * @param stateClass the class of entity state
      */
-    <I> RecordStorage<I> createRecordStorage(
-            Class<? extends Entity<I, ?>> entityClass);
+    <I, S extends Message> RecordStorage<I> createRecordStorage(Class<I> idClass,
+                                                                Class<S> stateClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
