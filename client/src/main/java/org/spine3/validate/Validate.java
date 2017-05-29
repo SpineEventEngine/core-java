@@ -84,20 +84,6 @@ public final class Validate {
         return object;
     }
 
-//    /**
-//     * Ensures that the passed object is not in its default state and is not {@code null}.
-//     *
-//     * @param object   the {@code Message} instance to check
-//     * @param errorMsg the message for the exception to be thrown;
-//     *                 will be converted to a string using {@link String#valueOf(Object)}
-//     * @throws IllegalStateException if the object is in its default state
-//     */
-//    public static <M extends Message> M checkNotDefaultState(M object, @Nullable Object errorMsg) {
-//        checkNotNull(object);
-//        checkState(isNotDefault(object), errorMsg);
-//        return object;
-//    }
-
     /**
      * Ensures that the passed object is not in its default state and is not {@code null}.
      *
@@ -106,7 +92,6 @@ public final class Validate {
      * @param errorMessageArgs     the arguments to be substituted into the message template
      * @throws IllegalStateException if the object is in its default state
      */
-    @SuppressWarnings("OverloadedVarargsMethod")
     public static <M extends Message> M checkNotDefaultState(M object,
                                                              String errorMessageTemplate,
                                                              Object... errorMessageArgs) {
@@ -114,40 +99,6 @@ public final class Validate {
         checkNotNull(errorMessageTemplate);
         checkNotNull(errorMessageArgs);
         checkState(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
-        return object;
-    }
-
-    /**
-     * Ensures that the passed object is not default and is not {@code null}.
-     *
-     * @param object    the {@code Message} instance to check
-     * @param errorMsg  the message for the exception to be thrown;
-     *                  will be converted to a string using {@link String#valueOf(Object)}
-     * @throws IllegalArgumentException if the object is in its default state
-     */
-    public static <M extends Message> M checkNotDefault(M object, @Nullable Object errorMsg) {
-        checkNotNull(object);
-        checkArgument(isNotDefault(object), errorMsg);
-        return object;
-    }
-
-
-
-    /**
-     * Ensures that the passed object is not default and is not {@code null}.
-     *
-     * @param object               the {@code Message} instance to check
-     * @param errorMessageTemplate a template for the exception message should the check fail
-     * @param errorMessageArgs     the arguments to be substituted into the message template
-     * @throws IllegalArgumentException if the object is in its default state
-     */
-    @SuppressWarnings("OverloadedVarargsMethod")
-    public static <M extends Message> M checkNotDefault(M object, String errorMessageTemplate,
-                                                        Object... errorMessageArgs) {
-        checkNotNull(object);
-        checkNotNull(errorMessageTemplate);
-        checkNotNull(errorMessageArgs);
-        checkArgument(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
 
@@ -165,35 +116,19 @@ public final class Validate {
     }
 
     /**
-     * Ensures that the passed object is in its default state and is not {@code null}.
-     *
-     * @param object       the {@code Message} instance to check
-     * @param errorMessage the message for the exception to be thrown;
-     *                     will be converted to a string using {@link String#valueOf(Object)}
-     * @throws IllegalStateException if the object is not in its default state
-     */
-    public static <M extends Message> M checkDefaultState(M object, @Nullable Object errorMessage) {
-        checkNotNull(object);
-        checkState(isDefault(object), errorMessage);
-        return object;
-    }
-
-    /**
-     * Ensures that the passed object is in its default state and is not {@code null}.
+     * Ensures that the passed object is not default and is not {@code null}.
      *
      * @param object               the {@code Message} instance to check
      * @param errorMessageTemplate a template for the exception message should the check fail
      * @param errorMessageArgs     the arguments to be substituted into the message template
-     * @throws IllegalStateException if the object is not in its default state
+     * @throws IllegalArgumentException if the object is in its default state
      */
-    @SuppressWarnings("OverloadedVarargsMethod")
-    public static <M extends Message> M checkDefaultState(M object,
-                                                          String errorMessageTemplate,
-                                                          Object... errorMessageArgs) {
+    public static <M extends Message> M checkNotDefault(M object, String errorMessageTemplate,
+                                                        Object... errorMessageArgs) {
         checkNotNull(object);
         checkNotNull(errorMessageTemplate);
         checkNotNull(errorMessageArgs);
-        checkState(isDefault(object), errorMessageTemplate, errorMessageArgs);
+        checkArgument(isNotDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
 
@@ -214,35 +149,20 @@ public final class Validate {
     }
 
     /**
-     * Ensures that the passed object is default and is not {@code null}.
-     *
-     * @param object       the {@code Message} instance to check
-     * @param errorMessage the message for the exception to be thrown;
-     *                     will be converted to a string using {@link String#valueOf(Object)}
-     * @throws IllegalArgumentException if the object is not in its default state
-     */
-    public static <M extends Message> M checkDefault(M object, @Nullable Object errorMessage) {
-        checkNotNull(object);
-        checkArgument(isDefault(object), errorMessage);
-        return object;
-    }
-
-    /**
-     * Ensures that the passed object is default and is not {@code null}.
+     * Ensures that the passed object is in its default state and is not {@code null}.
      *
      * @param object               the {@code Message} instance to check
      * @param errorMessageTemplate a template for the exception message should the check fail
      * @param errorMessageArgs     the arguments to be substituted into the message template
-     * @throws IllegalArgumentException if the object is not in its default state
+     * @throws IllegalStateException if the object is not in its default state
      */
-    @SuppressWarnings("OverloadedVarargsMethod")
-    public static <M extends Message> M checkDefault(M object,
-                                                     String errorMessageTemplate,
-                                                     Object... errorMessageArgs) {
+    public static <M extends Message> M checkDefaultState(M object,
+                                                          String errorMessageTemplate,
+                                                          Object... errorMessageArgs) {
         checkNotNull(object);
         checkNotNull(errorMessageTemplate);
         checkNotNull(errorMessageArgs);
-        checkArgument(isDefault(object), errorMessageTemplate, errorMessageArgs);
+        checkState(isDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
 
@@ -259,6 +179,24 @@ public final class Validate {
                                             .value();
             throw newIllegalArgumentException("The message is not default: %s", typeName);
         }
+        return object;
+    }
+
+    /**
+     * Ensures that the passed object is default and is not {@code null}.
+     *
+     * @param object               the {@code Message} instance to check
+     * @param errorMessageTemplate a template for the exception message should the check fail
+     * @param errorMessageArgs     the arguments to be substituted into the message template
+     * @throws IllegalArgumentException if the object is not in its default state
+     */
+    public static <M extends Message> M checkDefault(M object,
+                                                     String errorMessageTemplate,
+                                                     Object... errorMessageArgs) {
+        checkNotNull(object);
+        checkNotNull(errorMessageTemplate);
+        checkNotNull(errorMessageArgs);
+        checkArgument(isDefault(object), errorMessageTemplate, errorMessageArgs);
         return object;
     }
 

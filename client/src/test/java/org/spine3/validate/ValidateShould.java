@@ -115,6 +115,9 @@ public class ValidateShould {
         final Message defaultValue = StringValue.getDefaultInstance();
         assertEquals(defaultValue, checkDefaultState(defaultValue));
         assertEquals(defaultValue, checkDefaultState(defaultValue, "error message"));
+        assertEquals(defaultValue, checkDefaultState(defaultValue,
+                                                     "error message",
+                                                     "error args"));
     }
 
     @Test
@@ -122,6 +125,9 @@ public class ValidateShould {
         final Message defaultValue = StringValue.getDefaultInstance();
         assertEquals(defaultValue, checkDefault(defaultValue));
         assertEquals(defaultValue, checkDefault(defaultValue, "error message"));
+        assertEquals(defaultValue, checkDefaultState(defaultValue,
+                                                     "error message",
+                                                     "error args"));
     }
 
     @Test(expected = IllegalStateException.class)
