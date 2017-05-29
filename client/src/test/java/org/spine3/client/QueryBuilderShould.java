@@ -26,10 +26,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.base.Identifiers;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.protobuf.TypeConverter;
 import org.spine3.test.client.TestEntity;
 import org.spine3.test.validate.msg.ProjectId;
 import org.spine3.type.TypeName;
@@ -39,6 +39,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
+import static com.google.protobuf.util.Timestamps.subtract;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
@@ -52,10 +53,20 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
+import static org.spine3.client.ColumnFilters.all;
+import static org.spine3.client.ColumnFilters.either;
 import static org.spine3.client.ColumnFilters.eq;
+import static org.spine3.client.ColumnFilters.ge;
+import static org.spine3.client.ColumnFilters.gt;
+import static org.spine3.client.ColumnFilters.le;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
+import static org.spine3.protobuf.TypeConverter.toObject;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
 import static org.spine3.test.Verify.fail;
+import static org.spine3.time.Durations2.fromHours;
+import static org.spine3.time.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov
@@ -172,17 +183,82 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
                                                                                .getFilterList();
         final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
+        final int actualGenericValue1 = toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
         final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
     @SuppressWarnings("OverlyLongMethod")
-    // A big test case covering the query arguments co-living
+        // A big test for the grouping operators proper building
+    @Test
+    public void create_queries_with_grouping_params() {
+        final String establishedTimeColumn = "establishedTime";
+        final String companySizeColumn = "companySize";
+        final String countryColumn = "country";
+        final String countryName = "Ukraine";
+
+        final Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
+
+        final Query query = factory().query()
+                                     .select(TestEntity.class)
+                                     .where(all(ge(companySizeColumn, 50),
+                                                le(companySizeColumn, 1000)),
+                                            either(gt(establishedTimeColumn, twoDaysAgo),
+                                                   eq(countryColumn, countryName)))
+                                     .build();
+        final Target target = query.getTarget();
+        final List<GroupingColumnFilter> filters = target.getFilters().getFilterList();
+        assertSize(2, filters);
+
+        final GroupingColumnFilter firstFilter = filters.get(0);
+        final GroupingColumnFilter secondFilter = filters.get(1);
+
+        final List<ColumnFilter> allColumnFilters;
+        final List<ColumnFilter> eitherColumnFilters;
+        if (firstFilter.getOperator() == ALL) {
+            assertEquals(EITHER, secondFilter.getOperator());
+            allColumnFilters = firstFilter.getFilterList();
+            eitherColumnFilters = secondFilter.getFilterList();
+        } else {
+            assertEquals(ALL, secondFilter.getOperator());
+            eitherColumnFilters = firstFilter.getFilterList();
+            allColumnFilters = secondFilter.getFilterList();
+        }
+        assertSize(2, allColumnFilters);
+        assertSize(2, eitherColumnFilters);
+
+        final ColumnFilter companySizeLowerBound = allColumnFilters.get(0);
+        assertEquals(companySizeColumn, companySizeLowerBound.getColumnName());
+        assertEquals(50L,
+                     (long) toObject(companySizeLowerBound.getValue(), int.class));
+        assertEquals(ColumnFilter.Operator.GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
+
+        final ColumnFilter companySizeHigherBound = allColumnFilters.get(1);
+        assertEquals(companySizeColumn, companySizeHigherBound.getColumnName());
+        assertEquals(1000L,
+                     (long) toObject(companySizeHigherBound.getValue(), int.class));
+        assertEquals(ColumnFilter.Operator.LESS_OR_EQUAL, companySizeHigherBound.getOperator());
+
+        final ColumnFilter establishedTimeFilter = eitherColumnFilters.get(0);
+        assertEquals(establishedTimeColumn, establishedTimeFilter.getColumnName());
+        assertEquals(twoDaysAgo,
+                     toObject(establishedTimeFilter.getValue(), Timestamp.class));
+        assertEquals(ColumnFilter.Operator.GREATER_THAN, establishedTimeFilter.getOperator());
+
+        final ColumnFilter countryFilter = eitherColumnFilters.get(1);
+        assertEquals(countryColumn, countryFilter.getColumnName());
+        assertEquals(countryName,
+                     toObject(countryFilter.getValue(), String.class));
+        assertEquals(ColumnFilter.Operator.EQUAL, countryFilter.getOperator());
+    }
+
+
+    @SuppressWarnings("OverlyLongMethod")
+        // A big test case covering the query arguments co-living
     @Test
     public void create_queries_with_all_arguments() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
@@ -230,12 +306,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
         final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
+        final int actualGenericValue1 = toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
         final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
@@ -338,7 +414,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         public T apply(@Nullable EntityId entityId) {
             assertNotNull(entityId);
             final Any value = entityId.getId();
-            final T actual = TypeConverter.toObject(value, targetClass);
+            final T actual = toObject(value, targetClass);
             return actual;
         }
     }
