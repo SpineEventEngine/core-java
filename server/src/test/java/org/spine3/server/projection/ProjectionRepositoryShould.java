@@ -82,7 +82,6 @@ import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
 import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
-import static org.spine3.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 /**
  * @author Alexander Litus
@@ -120,7 +119,7 @@ public class ProjectionRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
-        boundedContext = newBoundedContext();
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         return new TestProjectionRepository(boundedContext);
     }
 
@@ -283,7 +282,8 @@ public class ProjectionRepositoryShould
 
     @Test
     public void have_CREATED_status_by_default() {
-        final TestProjectionRepository repository = new TestProjectionRepository(newBoundedContext());
+        final BoundedContext bc = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        final TestProjectionRepository repository = new TestProjectionRepository(bc);
 
         assertEquals(CREATED, repository.getStatus());
     }

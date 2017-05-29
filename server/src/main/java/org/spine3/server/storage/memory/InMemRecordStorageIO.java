@@ -23,6 +23,7 @@ package org.spine3.server.storage.memory;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
 import org.apache.beam.sdk.coders.KvCoder;
@@ -77,7 +78,8 @@ class InMemRecordStorageIO<I> extends RecordStorageIO<I> {
     @Override
     public Find<I> find(TenantId tenantId, Query<I> query) {
         //TODO:2017-05-25:alexander.yevsyukov: Implement
-        final Map<I, EntityRecord> all = null; // readAll(tenantId);
+        final Map<I, EntityRecord> all = Maps.newHashMap(); //readAll(tenantId, storage);
+
         final Map<I, EntityRecord> filtered = filter(all, query);
         final ImmutableList.Builder<KV<I, EntityRecord>> records = ImmutableList.builder();
         for (Map.Entry<I, EntityRecord> entry : filtered.entrySet()) {

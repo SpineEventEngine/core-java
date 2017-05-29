@@ -397,8 +397,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S>, S exte
     public void catchUp() {
         setStatus(Status.CATCHING_UP);
 
-        allTenantOpCatchup();
-//         BeamCatchUp.catchUp(this);
+//        allTenantOpCatchup();
+         BeamCatchUp.catchUp(this);
 
         completeCatchUp();
         logCatchUpComplete();
