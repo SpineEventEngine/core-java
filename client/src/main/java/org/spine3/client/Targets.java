@@ -77,11 +77,11 @@ public final class Targets {
 
     static Target composeTarget(Class<? extends Message> entityClass,
                                 @Nullable Set<? extends Message> ids,
-                                @Nullable Set<AggregatingColumnFilter> columnFilters) {
+                                @Nullable Set<GroupingColumnFilter> columnFilters) {
         final boolean includeAll = (ids == null && columnFilters == null);
 
         final Set<? extends Message> entityIds = nullToEmpty(ids);
-        final Set<AggregatingColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
+        final Set<GroupingColumnFilter> entityColumnValues = nullToEmpty(columnFilters);
 
         final EntityIdFilter.Builder idFilterBuilder = EntityIdFilter.newBuilder();
 

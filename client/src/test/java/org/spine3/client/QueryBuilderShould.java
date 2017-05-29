@@ -137,9 +137,9 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<AggregatingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        final List<GroupingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
         assertSize(1, aggregatingColumnFilters);
-        final AggregatingColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
+        final GroupingColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
         final Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
         assertSize(1, columnFilters);
         final Any actualValue = findByName(columnFilters, columnName).getValue();
@@ -166,7 +166,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<AggregatingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        final List<GroupingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
         assertSize(1, aggregatingColumnFilters);
         final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                                .getFilterList();
@@ -222,7 +222,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
         // Check query params
-        final List<AggregatingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        final List<GroupingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
         assertSize(1, aggregatingColumnFilters);
         final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                                .getFilterList();

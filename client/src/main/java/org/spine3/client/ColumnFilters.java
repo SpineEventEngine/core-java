@@ -22,14 +22,14 @@ package org.spine3.client;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
+import org.spine3.client.GroupingColumnFilter.GroupingOperator;
 
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
-import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.EITHER;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.client.ColumnFilter.Operator;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
@@ -130,9 +130,9 @@ public final class ColumnFilters {
      *
      * @param first the first {@link ColumnFilter}
      * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
-     * @return new instance of {@link AggregatingColumnFilter}
+     * @return new instance of {@link GroupingColumnFilter}
      */
-    public static AggregatingColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
+    public static GroupingColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
         return aggregateFilters(asList(first, rest), ALL);
     }
 
@@ -144,9 +144,9 @@ public final class ColumnFilters {
      *
      * @param first the first {@link ColumnFilter}
      * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
-     * @return new instance of {@link AggregatingColumnFilter}
+     * @return new instance of {@link GroupingColumnFilter}
      */
-    public static AggregatingColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
+    public static GroupingColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
         return aggregateFilters(asList(first, rest), EITHER);
     }
 
@@ -160,10 +160,10 @@ public final class ColumnFilters {
      * instances of {@link ColumnFilter} directly to the {@link QueryBuilder}.
      *
      * @param filters the aggregated Column filters
-     * @return new instance of {@link AggregatingColumnFilter}
+     * @return new instance of {@link GroupingColumnFilter}
      * @see #all(ColumnFilter, ColumnFilter...) for the public API equivalent
      */
-    static AggregatingColumnFilter all(Collection<ColumnFilter> filters) {
+    static GroupingColumnFilter all(Collection<ColumnFilter> filters) {
         return aggregateFilters(filters, ALL);
     }
 
@@ -177,9 +177,9 @@ public final class ColumnFilters {
         return filter;
     }
 
-    private static AggregatingColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
-                                                            AggregatingOperator operator) {
-        final AggregatingColumnFilter result = AggregatingColumnFilter.newBuilder()
+    private static GroupingColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
+                                                            GroupingOperator operator) {
+        final GroupingColumnFilter result = GroupingColumnFilter.newBuilder()
                                                                       .addAllFilter(filters)
                                                                       .setOperator(operator)
                                                                       .build();

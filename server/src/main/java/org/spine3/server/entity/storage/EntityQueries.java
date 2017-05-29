@@ -24,8 +24,8 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
-import org.spine3.client.AggregatingColumnFilter;
-import org.spine3.client.AggregatingColumnFilter.AggregatingOperator;
+import org.spine3.client.GroupingColumnFilter;
+import org.spine3.client.GroupingColumnFilter.GroupingOperator;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -75,18 +75,18 @@ public final class EntityQueries {
                                                  Class<? extends Entity> entityClass) {
         final QueryParameters.Builder builder = QueryParameters.newBuilder();
 
-        for (AggregatingColumnFilter filter : entityFilters.getFilterList()) {
+        for (GroupingColumnFilter filter : entityFilters.getFilterList()) {
             final Multimap<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
-            final AggregatingOperator operator = filter.getOperator();
-            final AggregatingQueryParameter parameter =
-                    AggregatingQueryParameter.from(columnFilters, operator);
+            final GroupingOperator operator = filter.getOperator();
+            final GroupingQueryParameter parameter =
+                    GroupingQueryParameter.from(columnFilters, operator);
             builder.add(parameter);
         }
         return builder.build();
     }
 
     private static Multimap<Column, ColumnFilter> splitFilters(
-            AggregatingColumnFilter filter,
+            GroupingColumnFilter filter,
             Class<? extends Entity> entityClass) {
         final Multimap<Column, ColumnFilter> columnFilters = create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {

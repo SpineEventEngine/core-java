@@ -33,11 +33,11 @@ import java.util.Iterator;
  *
  * @author Dmytro Dashenkov
  */
-public final class QueryParameters implements Iterable<AggregatingQueryParameter>, Serializable {
+public final class QueryParameters implements Iterable<GroupingQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 526400152015141524L;
 
-    private final ImmutableCollection<AggregatingQueryParameter> parameters;
+    private final ImmutableCollection<GroupingQueryParameter> parameters;
 
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
@@ -50,7 +50,7 @@ public final class QueryParameters implements Iterable<AggregatingQueryParameter
      * @return an {@link Iterator}.
      */
     @Override
-    public Iterator<AggregatingQueryParameter> iterator() {
+    public Iterator<GroupingQueryParameter> iterator() {
         return parameters.iterator();
     }
 
@@ -80,18 +80,18 @@ public final class QueryParameters implements Iterable<AggregatingQueryParameter
      */
     public static class Builder {
 
-        private final ImmutableCollection.Builder<AggregatingQueryParameter> parameters;
+        private final ImmutableCollection.Builder<GroupingQueryParameter> parameters;
 
         private Builder() {
             parameters = ImmutableList.builder();
         }
 
-        public Builder add(AggregatingQueryParameter parameter) {
+        public Builder add(GroupingQueryParameter parameter) {
             parameters.add(parameter);
             return this;
         }
 
-        public ImmutableCollection.Builder<AggregatingQueryParameter> getParameters() {
+        public ImmutableCollection.Builder<GroupingQueryParameter> getParameters() {
             return parameters;
         }
 

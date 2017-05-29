@@ -72,14 +72,14 @@ message EntityFilters {
     EntityIdFilter id_filter = 1;
 
     // Match the entities by the value of the Entity Columns.
-    repeated AggregatingColumnFilter filter = 2;
+    repeated GroupingColumnFilter filter = 2;
 
     // Reserved for more filter types
     reserved 3 to 40;
 }
 
-// The filter aggregating a number of Entity Column filters with a specifed logical operator.
-message AggregatingColumnFilter {
+// The filter grouping a number of Entity Column filters with a specifed logical operator.
+message GroupingColumnFilter {
 
     // The aggregated Entity Column filters.
     //
@@ -87,10 +87,10 @@ message AggregatingColumnFilter {
     repeated ColumnFilter filter = 1;
 
     // The value of the aggregating operator which deternines the behavior of the filter matching.
-    AggregatingOperator operator = 2[(required) = true];
+    GroupingOperator operator = 2[(required) = true];
 
     // An enumeration of all supported operators aggregatig the Entity Column filters.
-    enum AggregatingOperator {
+    enum GroupingOperator {
 
         // Error value.
         ACFAO_UNDEFINED = 0;

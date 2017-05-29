@@ -33,7 +33,7 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
-import org.spine3.client.AggregatingColumnFilter;
+import org.spine3.client.GroupingColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
@@ -70,7 +70,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.TestTransaction.injectState;
@@ -394,7 +394,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final ColumnFilter status = ColumnFilters.eq("projectStatusValue", wrappedValue);
         final ColumnFilter version = ColumnFilters.eq("counterVersion", versionValue);
-        final AggregatingColumnFilter aggregatingFilter = AggregatingColumnFilter.newBuilder()
+        final GroupingColumnFilter aggregatingFilter = GroupingColumnFilter.newBuilder()
                                                                                  .setOperator(ALL)
                                                                                  .addFilter(status)
                                                                                  .addFilter(version)

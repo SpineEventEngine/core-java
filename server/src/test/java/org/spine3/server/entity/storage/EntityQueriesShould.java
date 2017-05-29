@@ -26,7 +26,7 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Version;
-import org.spine3.client.AggregatingColumnFilter;
+import org.spine3.client.GroupingColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
@@ -48,7 +48,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.EITHER;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
@@ -100,8 +100,8 @@ public class EntityQueriesShould {
                                                  .build();
         final ColumnFilter versionFilter = ColumnFilters.eq(version.name(), versionValue);
         final ColumnFilter archivedFilter = ColumnFilters.eq(archived.name(), archivedValue);
-        final AggregatingColumnFilter aggregatingFilter =
-                AggregatingColumnFilter.newBuilder()
+        final GroupingColumnFilter aggregatingFilter =
+                GroupingColumnFilter.newBuilder()
                                        .addFilter(versionFilter)
                                        .addFilter(archivedFilter)
                                        .setOperator(EITHER)
@@ -120,9 +120,9 @@ public class EntityQueriesShould {
         final Object singleId = ids.iterator().next();
         assertEquals(someGenericId, singleId);
 
-        final List<AggregatingQueryParameter> values = newArrayList(query.getParameters());
+        final List<GroupingQueryParameter> values = newArrayList(query.getParameters());
         assertSize(1, values);
-        final AggregatingQueryParameter singleParam = values.get(0);
+        final GroupingQueryParameter singleParam = values.get(0);
         final Collection<ColumnFilter> columnFilters = singleParam.getFilters()
                                                                   .values();
         assertEquals(EITHER, singleParam.getOperator());

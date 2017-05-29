@@ -28,7 +28,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.client.AggregatingColumnFilter;
+import org.spine3.client.GroupingColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
@@ -37,8 +37,8 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.ALL;
-import static org.spine3.client.AggregatingColumnFilter.AggregatingOperator.EITHER;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.lt;
@@ -108,8 +108,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
      * @return new instance of {@link EntityFilters} filtering the events by their timestamp
      */
     private static EntityFilters toEntityFilters(EventStreamQuery query) {
-        final AggregatingColumnFilter timeFilter = timeFilter(query);
-        final AggregatingColumnFilter typeFilter = typeFilter(query);
+        final GroupingColumnFilter timeFilter = timeFilter(query);
+        final GroupingColumnFilter typeFilter = typeFilter(query);
         final EntityFilters entityFilters = EntityFilters.newBuilder()
                                                          .addFilter(timeFilter)
                                                          .addFilter(typeFilter)
@@ -117,8 +117,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return entityFilters;
     }
 
-    private static AggregatingColumnFilter timeFilter(EventStreamQuery query) {
-        final AggregatingColumnFilter.Builder timeFilter = AggregatingColumnFilter.newBuilder()
+    private static GroupingColumnFilter timeFilter(EventStreamQuery query) {
+        final GroupingColumnFilter.Builder timeFilter = GroupingColumnFilter.newBuilder()
                                                                                   .setOperator(ALL);
         if (query.hasAfter()) {
             final Timestamp timestamp = query.getAfter();
@@ -133,9 +133,9 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return timeFilter.build();
     }
 
-    private static AggregatingColumnFilter typeFilter(EventStreamQuery query) {
-        final AggregatingColumnFilter.Builder typeFilter =
-                AggregatingColumnFilter.newBuilder()
+    private static GroupingColumnFilter typeFilter(EventStreamQuery query) {
+        final GroupingColumnFilter.Builder typeFilter =
+                GroupingColumnFilter.newBuilder()
                                        .setOperator(EITHER);
         for (EventFilter eventFilter : query.getFilterList()) {
             final String type = eventFilter.getEventType();
