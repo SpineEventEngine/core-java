@@ -28,6 +28,7 @@ import org.junit.Test;
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.spine3.client.ColumnFilter.Operator;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
@@ -144,6 +145,66 @@ public class QueryOperatorsShould {
         assertFalse(compare(medium, LESS_OR_EQUAL, nullRef()));
     }
 
+    @Test
+    public void compare_ints_by_GT() {
+        assertGreater(42, 31);
+    }
+
+    @Test
+    public void compare_ints_by_GE() {
+        assertGreaterOrEqual(42, 41);
+    }
+
+    @Test
+    public void compare_ints_by_LT() {
+        assertLess(42, 314);
+    }
+
+    @Test
+    public void compare_ints_by_LE() {
+        assertLessOrEqual(42, 43);
+    }
+
+    @Test
+    public void compare_strings_by_GT() {
+        assertGreater("a", "!");
+    }
+
+    @Test
+    public void compare_strings_by_GE() {
+        assertGreaterOrEqual("d", "c");
+    }
+
+    @Test
+    public void compare_strings_by_LT() {
+        assertLess("Z", "a");
+    }
+
+    @Test
+    public void compare_strings_by_LE() {
+        assertLessOrEqual("a", "b");
+    }
+
+    @Test
+    public void compare_doubles_by_GT() {
+        assertGreater(42, 31);
+    }
+
+    @Test
+    public void compare_doubles_by_GE() {
+        assertGreaterOrEqual(42.1, 42.01);
+    }
+
+    @Test
+    public void compare_doubles_by_LT() {
+        assertLess(42.81, 314.0);
+    }
+
+    @Test
+    public void compare_doubles_by_LE() {
+        assertLessOrEqual(42.999, 43.0);
+    }
+
     @Test(expected = UnsupportedOperationException.class)
     public void fail_to_compare_unsupported_types_by_GT() {
         compare(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
@@ -164,6 +225,38 @@ public class QueryOperatorsShould {
     @Test(expected = UnsupportedOperationException.class)
     public void fail_to_compare_unsupported_types_by_LE() {
         compare(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
+    }
+
+    private static void assertGreater(Object left, Object right) {
+        assertStrict(left, right, GREATER_THAN);
+    }
+
+    private static void assertLess(Object left, Object right) {
+        assertStrict(left, right, LESS_THAN);
+    }
+
+    private static void assertGreaterOrEqual(Object obj, Object less) {
+        assertNotStrict(obj, less, GREATER_OR_EQUAL, GREATER_THAN);
+    }
+
+    private static void assertLessOrEqual(Object obj, Object less) {
+        assertNotStrict(obj, less, LESS_OR_EQUAL, LESS_THAN);
+    }
+
+    private static void assertStrict(Object left, Object right, Operator operator) {
+        assertTrue(compare(left, operator, right));
+        assertFalse(compare(right, operator, left));
+        assertFalse(compare(left, EQUAL, right));
+    }
+
+    private static void assertNotStrict(Object obj,
+                                        Object other,
+                                        Operator operator,
+                                        Operator strictOperator) {
+        assertStrict(obj, other, strictOperator);
+
+        assertTrue(compare(obj, operator, obj));
+        assertTrue(compare(obj, EQUAL, obj));
     }
 
     private static class FaultyComparisonType {
