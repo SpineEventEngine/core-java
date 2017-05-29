@@ -27,6 +27,7 @@ import org.spine3.base.Identifier;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -97,7 +98,8 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     }
 
 
-    private static class TestAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class TestAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         protected TestAggregate(ProjectId id) {
             super(id);

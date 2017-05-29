@@ -22,6 +22,7 @@ package org.spine3.server.projection;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -37,6 +38,7 @@ import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.projection.ProjectionRepository.Status;
@@ -49,6 +51,9 @@ import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.ProjectTaskNames;
+import org.spine3.test.projection.ProjectTaskNamesValidatingBuilder;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.test.projection.event.ProjectCreated;
 import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
@@ -473,6 +478,20 @@ public class ProjectionRepositoryShould
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
 
+    @Test
+    public void do_not_create_record_if_entity_isnt_updated() {
+        final NoopTaskNamesRepository repo = new NoopTaskNamesRepository(boundedContext);
+        repo.initStorage(storageFactory());
+
+        assertTrue(repo.loadAll().isEmpty());
+
+        final Event event = createEvent(PRODUCER_ID, projectCreated());
+        repo.dispatch(event);
+
+        final ImmutableCollection<NoopTaskNamesProjection> items = repo.loadAll();
+        assertTrue(items.isEmpty());
+    }
+
     private ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
@@ -485,7 +504,9 @@ public class ProjectionRepositoryShould
     }
 
     /** The projection stub used in tests. */
-    static class TestProjection extends Projection<ProjectId, Project> {
+    public static class TestProjection
+            extends Projection<ProjectId, Project, ProjectValidatingBuilder>
+            implements TestEntityWithStringColumn {
 
         /** The event message history we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> eventMessagesDelivered =
@@ -517,7 +538,7 @@ public class ProjectionRepositoryShould
                                                .setId(event.getProjectId())
                                                .setStatus(Project.Status.CREATED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -526,7 +547,7 @@ public class ProjectionRepositoryShould
             final Project newState = getState().toBuilder()
                                                .addTask(event.getTask())
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
 
@@ -544,7 +565,38 @@ public class ProjectionRepositoryShould
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
+        }
+
+        @Override
+        public String getIdString() {
+            return getId().toString();
+        }
+    }
+
+    /**
+     * The projection stub with the event subscribing methods that do nothing.
+     *
+     * <p>Such a projection allows to reproduce a use case, when the event-handling method
+     * does not modify the state of an {@code Entity}. For the newly created entities it could lead
+     * to an invalid entry created in the storage.
+     */
+    static class NoopTaskNamesProjection extends Projection<ProjectId,
+                                                            ProjectTaskNames,
+                                                            ProjectTaskNamesValidatingBuilder> {
+
+        public NoopTaskNamesProjection(ProjectId id) {
+            super(id);
+        }
+
+        @Subscribe
+        public void on(ProjectCreated event) {
+            // do nothing.
+        }
+
+        @Subscribe
+        public void on(TaskAdded event) {
+            // do nothing
         }
     }
 
@@ -596,6 +648,14 @@ public class ProjectionRepositoryShould
         @Subscribe
         public void apply(ProjectCreated event, EventContext eventContext) {
             // NOP
+        }
+    }
+
+    /** Stub projection repository. */
+    private static class NoopTaskNamesRepository
+            extends ProjectionRepository<ProjectId, NoopTaskNamesProjection, ProjectTaskNames> {
+        private NoopTaskNamesRepository(BoundedContext boundedContext) {
+            super(boundedContext);
         }
     }
 }

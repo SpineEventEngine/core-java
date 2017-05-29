@@ -39,6 +39,7 @@ import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -189,7 +190,8 @@ public class AggregateCommandEndpointShould {
      * Test environment classes and utilities
      *****************************************/
 
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
 
         // Needs to be `static` to share the state updates in scope of the test.
         private static final CommandHistory commandsHandled = new CommandHistory();

@@ -20,6 +20,7 @@
 
 package org.spine3.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
@@ -29,15 +30,25 @@ import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.storage.EventRecordStorage;
+import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.RecordPredicate;
 import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.users.TenantId;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import static com.google.common.collect.Collections2.filter;
+import static com.google.common.collect.Collections2.transform;
+import static com.google.common.collect.Lists.newArrayList;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -62,12 +73,37 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
                 }
             };
 
+    @Override
+    protected EventRecordStorage createStorage(StorageFactory factory) {
+        final RecordStorage<EventId> recordStorage = super.createStorage(factory);
+        final EventRecordStorage storage =
+                factory.createEventStorage(recordStorage);
+        return storage;
+    }
+
+    @Nonnull
+    @Override
+    protected EventRecordStorage recordStorage() {
+        return (EventRecordStorage) super.recordStorage();
+    }
+
     Iterator<Event> iterator(EventStreamQuery query) {
-        final Iterator<EventEntity> filtered = iterator(createFilter(query));
-        final List<EventEntity> entities = Lists.newArrayList(filtered);
-        Collections.sort(entities, EventEntity.comparator());
-        final Iterator<Event> result = Iterators.transform(entities.iterator(), getEventFunc());
+        final EventRecordStorage storage = recordStorage();
+        final Map<EventId, EntityRecord> records = storage.readAll(query);
+        final Collection<EventEntity> entities = transform(records.entrySet(),
+                                                           storageRecordToEntity());
+        // TODO:2017-05-19:dmytro.dashenkov: Remove after the Entity Column approach is implemented.
+        final Collection<EventEntity> filtered = filter(entities, createEntityFilter(query));
+
+        final List<EventEntity> entityList = newArrayList(filtered);
+        Collections.sort(entityList, EventEntity.comparator());
+        final Iterator<Event> result = Iterators.transform(entityList.iterator(), getEventFunc());
         return result;
+    }
+
+    @VisibleForTesting
+    static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
+        return new EventEntityMatchesStreamQuery(query);
     }
 
     private static Predicate<EventEntity> createFilter(EventStreamQuery query) {

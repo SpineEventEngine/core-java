@@ -60,7 +60,9 @@ public class Log {
         log().warn(msg, flr);
     }
 
-    public void errorHandlingUnknown(Throwable throwable, Message commandMessage, CommandId commandId) {
+    public void errorHandlingUnknown(Throwable throwable,
+                                     Message commandMessage,
+                                     CommandId commandId) {
         final String msg = formatMessageTypeAndId(
                 "Throwable encountered when handling command `%s` (ID: `%s`)",
                 commandMessage,

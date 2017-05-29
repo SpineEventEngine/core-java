@@ -46,8 +46,8 @@ import static java.lang.String.format;
  * A utility for generating the {@link Column Columns} {@linkplain Map}.
  *
  * <p>All the methods of the passed {@link Entity} that fit
- * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">the Java Bean</a>
- *  getter spec are considered {@link Column Columns}.
+ * <a href="http://download.oracle.com/otndocs/jcp/7224-javabeans-1.01-fr-spec-oth-JSpec/">
+ * the Java Bean</a> getter spec are considered {@link Column Columns}.
  *
  * <p>When passing an instance of an already known {@link Entity} type, the getters are retrieved
  * from a cache and are not updated.
@@ -59,8 +59,9 @@ import static java.lang.String.format;
  *     <li>{@link Entity#getId()}
  *     <li>{@link Entity#getState()}
  *     <li>{@link Entity#getDefaultState()}
- *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags() EntityWithLifecycle#getLifecycleFlags()}
- *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate#getBuilder()}
+ *     <li>{@link org.spine3.server.entity.EntityWithLifecycle#getLifecycleFlags()
+ *     EntityWithLifecycle.getLifecycleFlags()}
+ *     <li>{@link org.spine3.server.aggregate.Aggregate#getBuilder() Aggregate.getBuilder()}
  * </ul>
  *
  * <p>Note: if creating a getter method with a name which intersects with one of these method
@@ -100,7 +101,7 @@ class Columns {
      * and use it in all the successive calls.
      *
      * @param entity an {@link Entity} to get the {@link Column Columns} from
-     * @param <E> the type of the {@link Entity}
+     * @param <E>    the type of the {@link Entity}
      * @return a {@link Map} of the {@link Column Column} names to their
      * {@linkplain Column.MemoizedValue memoized values}.
      * @see Column.MemoizedValue
@@ -115,19 +116,51 @@ class Columns {
         }
         ensureRegistered(entityType);
 
-        final Map<String, Column.MemoizedValue<?>> fields = getStorageFields(entityType, entity);
+        final Map<String, Column.MemoizedValue<?>> fields = extractColumns(entityType, entity);
         return fields;
     }
 
     /**
-     * Generates the {@link Column Column} values considering the passed {@linkplain Entity entity type}
-     * indexed.
+     * Retrieves a {@link Column} instance of the given name and from the given Entity class.
+     *
+     * <p>If the given Entity class has not yet been added to the Column cache, it's added upon this
+     * operation.
+     *
+     * <p>If no column is found, an {@link IllegalArgumentException} is thrown.
+     *
+     * @param entityClass the class containing the {@link Column} definition
+     * @param columnName  the name of the {@link Column}
+     * @return an instance of {@link Column} with the given name
+     * @throws IllegalArgumentException if the {@link Column} is not found
+     */
+    static Column<?> findColumn(Class<? extends Entity> entityClass, String columnName) {
+        checkNotNull(entityClass);
+        checkNotNull(columnName);
+        ensureRegistered(entityClass);
+
+        final Collection<Column<?>> cachedColumns = knownEntityProperties.get(entityClass);
+        for (Column<?> column : cachedColumns) {
+            if (column.getName()
+                      .equals(columnName)) {
+                return column;
+            }
+        }
+
+        throw new IllegalArgumentException(
+                format("Could not find a Column description for %s.%s.",
+                       entityClass.getCanonicalName(),
+                       columnName));
+    }
+
+    /**
+     * Generates the {@link Column Column} values considering the passed
+     * {@linkplain Entity entity type} indexed.
      *
      * @param entityType indexed type of the {@link Entity}
-     * @param entity the object which to take the values from
+     * @param entity     the object which to take the values from
      * @return a {@link Map} of the {@link Column Columns}
      */
-    private static Map<String, Column.MemoizedValue<?>> getStorageFields(
+    private static Map<String, Column.MemoizedValue<?>> extractColumns(
             Class<? extends Entity> entityType,
             Entity entity) {
         final Collection<Column<?>> storageFieldProperties =

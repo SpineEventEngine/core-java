@@ -40,6 +40,7 @@ import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
+import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
@@ -47,6 +48,7 @@ import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
+import org.spine3.test.procman.ProjectValidatingBuilder;
 import org.spine3.test.procman.Task;
 import org.spine3.test.procman.command.AddTask;
 import org.spine3.test.procman.command.CreateProject;
@@ -312,7 +314,9 @@ public class ProcessManagerRepositoryShould
 
     // Marked as {@code public} to reuse for {@code CommandBus} dispatcher registration tests as well
     // with no code duplication.
-    public static class TestProcessManager extends ProcessManager<ProjectId, Project> {
+    public static class TestProcessManager
+                  extends ProcessManager<ProjectId, Project, ProjectValidatingBuilder>
+                  implements TestEntityWithStringColumn {
 
         /** The event message we store for inspecting in delivery tests. */
         private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
@@ -354,7 +358,7 @@ public class ProcessManagerRepositoryShould
                                                .setId(projectId)
                                                .setStatus(Project.Status.CREATED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -369,7 +373,7 @@ public class ProcessManagerRepositoryShould
             final Project newState = getState().toBuilder()
                                                .addTask(task)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
@@ -383,7 +387,7 @@ public class ProcessManagerRepositoryShould
             final Project newState = getState().toBuilder()
                                                .setStatus(Project.Status.STARTED)
                                                .build();
-            incrementState(newState);
+            getBuilder().mergeFrom(newState);
         }
 
         @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
@@ -423,6 +427,11 @@ public class ProcessManagerRepositoryShould
             return newRouterFor(command, context)
                     .add(addTask)
                     .routeAll();
+        }
+
+        @Override
+        public String getIdString() {
+            return getId().toString();
         }
     }
 }

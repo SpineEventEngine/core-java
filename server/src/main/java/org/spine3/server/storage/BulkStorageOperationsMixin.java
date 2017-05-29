@@ -62,7 +62,7 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * <p>Each record is returned as a {@link Map} of record ID to the instance of a record.
      * Such an approach enables turning the records into entities for callees.
      *
-     * @return the {@code Map} containing the ID -> record entries.
+     * @return the {@code Map} containing the ID - record entries.
      * @throws IllegalStateException if the storage was closed before
      */
     @CheckReturnValue

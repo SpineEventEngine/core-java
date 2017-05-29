@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
@@ -35,16 +34,16 @@ import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
+import org.spine3.server.entity.storage.EntityQueries;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -75,9 +74,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     /** {@inheritDoc} */
     @Override
-    protected Storage<I, ?> createStorage(StorageFactory factory) {
-        final Storage<I, ?> result = factory.createRecordStorage(getIdClass(),
-                                                                 getEntityStateClass());
+    protected RecordStorage<I> createStorage(StorageFactory factory) {
+        final RecordStorage<I> result = factory.createRecordStorage(getIdClass(),
+                                                                    getEntityStateClass());
         return result;
     }
 
@@ -283,36 +282,28 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>Field mask is applied according to <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
      *
-     * <p>At this point only {@link org.spine3.client.EntityIdFilter EntityIdFilter} is supported.
-     * All other filters are ignored.
+     * <p>The field paths in the Column field filters are specified to contain a single path
+     * member - the name of the Entity Column.
      *
-     * <p>Filtering by IDs set via {@code EntityIdFilter} is performed
-     * in the same way as by {@link #loadAll(Iterable)}.
+     * <p>The filtering process is delegated to the underlying {@link RecordStorage}.
      *
      * <p>NOTE: The storage must be assigned before calling this method.
      *
      * @param filters   entity filters
      * @param fieldMask mask to apply to the entities
-     * @return all the entities in this repository passed the filters.
+     * @return all the entities in this repository passed through the filters
+     * @see EntityQuery
      */
     @CheckReturnValue
     public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
-        final Collection<I> domainIds = unpackIds(filters);
-        final ImmutableCollection<E> result = loadAll(domainIds, fieldMask);
-        return result;
-    }
+        checkNotNull(filters);
+        checkNotNull(fieldMask);
 
-    /**
-     * Extracts entity IDs from the passed filters.
-     */
-    private Collection<I> unpackIds(EntityFilters filters) {
-        final List<EntityId> idsList = filters.getIdFilter()
-                                              .getIdsList();
-        final Class<I> expectedIdClass = getIdClass();
-
-        final EntityIdFunction<I> func = new EntityIdFunction<>(expectedIdClass);
-        final Collection<I> result = Collections2.transform(idsList, func);
-
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
+        final Map<I, EntityRecord> records = recordStorage().readAll(entityQuery, fieldMask);
+        final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
+                                                            .transform(storageRecordToEntity())
+                                                            .toList();
         return result;
     }
 
@@ -339,7 +330,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @return new instance of the transforming function
      */
-    private Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
+    protected final Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
         return new Function<Map.Entry<I, EntityRecord>, E>() {
             @Nullable
             @Override

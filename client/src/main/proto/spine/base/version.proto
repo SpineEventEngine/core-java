@@ -37,7 +37,7 @@ message Version {
     // A zero-based version number.
     //
     // When numbering versions of entities the zero value is reserved for
-    // the “pre-initialization” version of an entity.
+    // the "pre-initialization" version of an entity.
     //
     int32 number = 1 [(required) = true];
 

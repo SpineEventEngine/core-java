@@ -25,22 +25,15 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.base.ActorContext;
-import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.time.ZoneOffset;
 import org.spine3.time.ZoneOffsets;
 import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
-import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.Queries.queryBuilderFor;
-import static org.spine3.client.Targets.composeTarget;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -103,20 +96,20 @@ public class ActorRequestFactory {
         return result;
     }
 
-    public ForQuery query() {
-        return new ForQuery();
+    public QueryFactory query() {
+        return new QueryFactory(this);
     }
 
-    public ForTopic topic() {
-        return new ForTopic();
+    public TopicFactory topic() {
+        return new TopicFactory(this);
     }
 
-    public ForCommand command() {
-        return new ForCommand();
+    public CommandFactory command() {
+        return new CommandFactory(this);
     }
 
     /**
-     * @see ForCommand#createContext()
+     * @see CommandFactory#createContext()
      */
     @VisibleForTesting
     protected CommandContext createCommandContext() {
@@ -129,7 +122,6 @@ public class ActorRequestFactory {
      * <p>Sets the timestamp value to the
      * {@linkplain org.spine3.time.Time#getCurrentTime() current time}.
      */
-    @VisibleForTesting
     ActorContext actorContext() {
         final ActorContext.Builder builder = ActorContext.newBuilder()
                                                          .setActor(actor)
@@ -139,252 +131,6 @@ public class ActorRequestFactory {
             builder.setTenantId(tenantId);
         }
         return builder.build();
-    }
-
-    /**
-     * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}
-     * configuration.
-     */
-    public final class ForQuery {
-
-        private ForQuery() {
-            // Prevent instantiation from the outside.
-        }
-
-        /**
-         * Creates a {@link Query} to read certain entity states by IDs with the {@link FieldMask}
-         * applied to each of the results.
-         *
-         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
-         * The processing results will contain only the entities, which IDs are present among
-         * the {@code ids}.
-         *
-         * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
-         * results. This processing is performed according to the
-         * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
-         *
-         * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-         * (e.g. a {@code path} references a missing field),
-         * such invalid paths are silently ignored.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids         the entity IDs of interest
-         * @param maskPaths   the property paths for the {@code FieldMask} applied
-         *                    to each of results
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query byIdsWithMask(Class<? extends Message> entityClass,
-                                   Set<? extends Message> ids,
-                                   String... maskPaths) {
-            checkNotNull(ids);
-            checkArgument(!ids.isEmpty(), "Entity ID set must not be empty");
-
-            final FieldMask fieldMask = FieldMask.newBuilder()
-                                                 .addAllPaths(Arrays.asList(maskPaths))
-                                                 .build();
-            final Query result = composeQuery(entityClass, ids, fieldMask);
-            return result;
-        }
-
-        /**
-         * Creates a {@link Query} to read certain entity states by IDs.
-         *
-         * <p>Allows to specify a set of identifiers to be used during the {@code Query} processing.
-         * The processing results will contain only the entities, which IDs are present among
-         * the {@code ids}.
-         *
-         * <p>Unlike {@link #byIdsWithMask(Class, Set, String...)}, the {@code Query} processing
-         * will not change the resulting entities.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids         the entity IDs of interest
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query byIds(Class<? extends Message> entityClass,
-                           Set<? extends Message> ids) {
-            checkNotNull(entityClass);
-            checkNotNull(ids);
-
-            return composeQuery(entityClass, ids, null);
-        }
-
-        /**
-         * Creates a {@link Query} to read all entity states with the {@link FieldMask}
-         * applied to each of the results.
-         *
-         * <p>Allows to set property paths for a {@link FieldMask}, applied to each of the query
-         * results. This processing is performed according to the
-         * <a href="https://goo.gl/tW5wIU">FieldMask specs</a>.
-         *
-         * <p>In case the {@code paths} array contains entries inapplicable to the resulting entity
-         * (e.g. a {@code path} references a missing field), such invalid paths
-         * are silently ignored.
-         *
-         * @param entityClass the class of a target entity
-         * @param maskPaths   the property paths for the {@code FieldMask} applied
-         *                    to each of results
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query allWithMask(Class<? extends Message> entityClass, String... maskPaths) {
-            final FieldMask fieldMask = FieldMask.newBuilder()
-                                                 .addAllPaths(Arrays.asList(maskPaths))
-                                                 .build();
-            final Query result = composeQuery(entityClass, null, fieldMask);
-            return result;
-        }
-
-        /**
-         * Creates a {@link Query} to read all states of a certain entity.
-         *
-         * <p>Unlike {@link #allWithMask(Class, String...)}, the {@code Query} processing will
-         * not change the resulting entities.
-         *
-         * @param entityClass the class of a target entity
-         * @return an instance of {@code Query} formed according to the passed parameters
-         */
-        public Query all(Class<? extends Message> entityClass) {
-            checkNotNull(entityClass);
-
-            return composeQuery(entityClass, null, null);
-        }
-
-        private Query composeQuery(Class<? extends Message> entityClass,
-                                   @Nullable Set<? extends Message> ids,
-                                   @Nullable FieldMask fieldMask) {
-            checkNotNull(entityClass, "The class of Entity must be specified for a Query");
-
-            final Query.Builder builder = queryBuilderFor(entityClass, ids, fieldMask);
-
-            builder.setId(Queries.generateId());
-            builder.setContext(actorContext());
-            return builder.build();
-        }
-
-    }
-
-    /**
-     * Public API for creating {@link Topic} instances, using the {@code ActorRequestFactory}
-     * configuration.
-     */
-    public final class ForTopic {
-
-        private ForTopic() {
-            // Prevent instantiation from the outside.
-        }
-
-        /**
-         * Creates a {@link Topic} for a subset of the entity states by specifying their IDs.
-         *
-         * @param entityClass the class of a target entity
-         * @param ids         the IDs of interest
-         * @return the instance of {@code Topic} assembled according to the parameters.
-         */
-        public Topic someOf(Class<? extends Message> entityClass, Set<? extends Message> ids) {
-            checkNotNull(entityClass);
-            checkNotNull(ids);
-
-            final Target target = composeTarget(entityClass, ids);
-            final Topic result = forTarget(target);
-            return result;
-        }
-
-        /**
-         * Creates a {@link Topic} for all of the specified entity states.
-         *
-         * @param entityClass the class of a target entity
-         * @return the instance of {@code Topic} assembled according to the parameters.
-         */
-        public Topic allOf(Class<? extends Message> entityClass) {
-            checkNotNull(entityClass);
-
-            final Target target = composeTarget(entityClass, null);
-            final Topic result = forTarget(target);
-            return result;
-        }
-
-        /**
-         * Creates a {@link Topic} for the specified {@linkplain Target}.
-         *
-         * <p>This method is intended for internal use only. To achieve the similar result,
-         * {@linkplain #allOf(Class) allOf()} and {@linkplain #someOf(Class, Set) someOf()} methods
-         * should be used.
-         *
-         * @param target the {@code} Target to create a topic for.
-         * @return the instance of {@code Topic}.
-         */
-        @Internal
-        public Topic forTarget(Target target) {
-            checkNotNull(target);
-            final TopicId id = Topics.generateId();
-            return Topic.newBuilder()
-                        .setId(id)
-                        .setContext(actorContext())
-                        .setTarget(target)
-                        .build();
-        }
-
-    }
-
-    /**
-     * Public API for creating {@link Command} instances, using the {@code ActorRequestFactory}
-     * configuration.
-     */
-    public final class ForCommand {
-
-        private ForCommand() {
-            // Prevent instantiation from the outside.
-        }
-
-        /**
-         * Creates new {@code Command} with the passed message.
-         *
-         * <p>The command contains a {@code CommandContext} instance with the current time.
-         *
-         * @param message the command message
-         * @return new command instance
-         */
-        public Command create(Message message) {
-            checkNotNull(message);
-            final CommandContext context = createContext();
-            final Command result = Commands.createCommand(message, context);
-            return result;
-        }
-
-        /**
-         * Creates new {@code Command} with the passed message and target entity version.
-         *
-         * <p>The command contains a {@code CommandContext} instance with the current time.
-         *
-         * @param message       the command message
-         * @param targetVersion the ID of the entity for applying commands if {@code null}
-         *                      the commands can be applied to any entity
-         * @return new command instance
-         */
-        public Command create(Message message, int targetVersion) {
-            checkNotNull(message);
-            checkNotNull(targetVersion);
-
-            final CommandContext context = createContext(targetVersion);
-            final Command result = Commands.createCommand(message, context);
-            return result;
-        }
-
-        /**
-         * Creates command context for a new command with entity ID.
-         */
-        private CommandContext createContext(int targetVersion) {
-            return Commands.createContext(getTenantId(), getActor(),
-                                          getZoneOffset(), targetVersion);
-        }
-
-        /**
-         * Creates command context for a new command.
-         */
-        private CommandContext createContext() {
-            return Commands.createContext(getTenantId(),
-                                          getActor(),
-                                          getZoneOffset());
-        }
     }
 
     /**

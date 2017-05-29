@@ -58,13 +58,15 @@ public class ColumnRecords {
      * @param <D> the type of the database record
      * @param <I> the type of the column identifier
      */
-    public static <D, I> void feedColumnsTo(D destination,
-                                            EntityRecordWithColumns recordWithColumns,
-                                            ColumnTypeRegistry<? extends ColumnType<?, ?, D, I>> columnTypeRegistry,
-                                            Function<String, I> mapColumnIdentifier) {
+    public static <D, I> void feedColumnsTo(
+            D destination,
+            EntityRecordWithColumns recordWithColumns,
+            ColumnTypeRegistry<? extends ColumnType<?, ?, D, I>> columnTypeRegistry,
+            Function<String, I> mapColumnIdentifier) {
         checkNotNull(destination);
         checkNotNull(recordWithColumns);
         checkNotNull(columnTypeRegistry);
+        checkNotNull(mapColumnIdentifier);
         checkArgument(recordWithColumns.hasColumns(),
                       "Passed record has no Entity Columns.");
 

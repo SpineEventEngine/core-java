@@ -36,6 +36,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.AddTask;
 import org.spine3.test.aggregate.command.CreateProject;
@@ -45,6 +46,7 @@ import org.spine3.test.aggregate.event.ProjectStarted;
 import org.spine3.test.aggregate.event.TaskAdded;
 import org.spine3.test.commandservice.customer.Customer;
 import org.spine3.test.commandservice.customer.CustomerId;
+import org.spine3.test.commandservice.customer.CustomerValidatingBuilder;
 import org.spine3.test.commandservice.customer.command.CreateCustomer;
 import org.spine3.test.commandservice.customer.event.CustomerCreated;
 import org.spine3.time.LocalDate;
@@ -193,7 +195,8 @@ public class Given {
         }
     }
 
-    private static class ProjectAggregate extends Aggregate<ProjectId, Project, Project.Builder> {
+    private static class ProjectAggregate
+            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectAggregate(ProjectId id) {
@@ -244,7 +247,8 @@ public class Given {
         }
     }
 
-    public static class CustomerAggregate extends Aggregate<CustomerId, Customer, Customer.Builder> {
+    public static class CustomerAggregate
+            extends Aggregate<CustomerId, Customer, CustomerValidatingBuilder> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // by convention (as it's used by Reflection).
@@ -263,7 +267,7 @@ public class Given {
 
         @Apply
         private void event(CustomerCreated event) {
-            incrementState(event.getCustomer());
+            getBuilder().mergeFrom(event.getCustomer());
         }
     }
 }

@@ -19,6 +19,7 @@
  */
 package org.spine3.client;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
@@ -27,12 +28,12 @@ import org.spine3.type.TypeName;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
+import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.client.Targets.allOf;
-import static org.spine3.client.Targets.someOf;
+import static org.spine3.client.Targets.composeTarget;
 
 /**
  * Client-side utilities for working with queries.
@@ -59,20 +60,6 @@ public final class Queries {
                       .build();
     }
 
-    static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
-                                      @Nullable Set<? extends Message> ids,
-                                      @Nullable FieldMask fieldMask) {
-        checkNotNull(entityClass);
-
-        final Target target = ids == null ? allOf(entityClass) : someOf(entityClass, ids);
-        final Query.Builder queryBuilder = Query.newBuilder()
-                                                .setTarget(target);
-        if (fieldMask != null) {
-            queryBuilder.setFieldMask(fieldMask);
-        }
-        return queryBuilder;
-    }
-
     /**
      * Extract the type of {@link Target} for the given {@link Query}.
      *
@@ -90,4 +77,18 @@ public final class Queries {
         return type;
     }
 
+    static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
+                                         @Nullable Set<? extends Message> ids,
+                                         @Nullable Map<String, Any> columnFilters,
+                                         @Nullable FieldMask fieldMask) {
+        checkNotNull(entityClass);
+
+        final Target target = composeTarget(entityClass, ids, columnFilters);
+        final Query.Builder queryBuilder = Query.newBuilder()
+                                                .setTarget(target);
+        if (fieldMask != null) {
+            queryBuilder.setFieldMask(fieldMask);
+        }
+        return queryBuilder;
+    }
 }

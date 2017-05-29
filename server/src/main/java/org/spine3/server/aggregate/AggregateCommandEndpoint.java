@@ -30,6 +30,7 @@ import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.tenant.TenantAwareOperation;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 /**
  * Dispatches commands to aggregates of the associated {@code AggregateRepository}.
@@ -108,8 +109,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
          *
          * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
          * concurrent actor changes, the event count from the last snapshot should remain the same
-         * during the {@linkplain AggregateRepository#find(Object) loading}
-         * and {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope) command dispatching}.
+         * during the {@linkplain AggregateRepository#find(Object) loading} and
+         * {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope) command dispatching}.
          *
          * <p>In case the new events are detected, the loading and command
          * dispatching is repeated from scratch.
@@ -140,7 +141,11 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
             final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
 
-            aggregate.dispatchCommand(envelope);
+            final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
+
+            final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+            aggregate.apply(eventMessages, envelope);
+            tx.commit();
 
             // Update status only if the command was handled successfully.
             final LifecycleFlags statusAfter = aggregate.getLifecycleFlags();

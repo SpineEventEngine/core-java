@@ -45,8 +45,10 @@ import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
+import org.spine3.test.projection.ProjectValidatingBuilder;
 import org.spine3.test.projection.command.CreateProject;
 import org.spine3.test.projection.event.ProjectCreated;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -145,7 +147,7 @@ class Given {
     }
 
     static class StandTestAggregate
-            extends Aggregate<ProjectId, StringValue, StringValue.Builder> {
+            extends Aggregate<ProjectId, StringValue, StringValueValidatingBuilder> {
 
         /**
          * Creates a new aggregate instance.
@@ -170,7 +172,8 @@ class Given {
         }
     }
 
-    static class StandTestProjection extends Projection<ProjectId, Project> {
+    static class StandTestProjection
+            extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
 
         public StandTestProjection(ProjectId id) {
             super(id);
@@ -179,7 +182,7 @@ class Given {
         @SuppressWarnings("unused") // OK for test class.
         @Subscribe
         public void handle(ProjectCreated event, EventContext context) {
-            // Do nothing
+            getBuilder().setId(event.getProjectId());
         }
     }
 }

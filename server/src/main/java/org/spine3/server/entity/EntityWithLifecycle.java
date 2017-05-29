@@ -22,6 +22,7 @@ package org.spine3.server.entity;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 
 import javax.annotation.Nullable;
 
@@ -59,26 +60,38 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
 
         private static final Predicate<LifecycleFlags> isEntityVisible =
                 new Predicate<LifecycleFlags>() {
-            @Override
-            public boolean apply(@Nullable LifecycleFlags input) {
-                return input == null ||
-                        !(input.getArchived() || input.getDeleted());
-            }
-        };
+                    @Override
+                    public boolean apply(@Nullable LifecycleFlags input) {
+                        return input == null ||
+                                !(input.getArchived() || input.getDeleted());
+                    }
+                };
 
         private static final Predicate<EntityRecord> isRecordVisible =
                 new Predicate<EntityRecord>() {
 
-            @Override
-            public boolean apply(@Nullable EntityRecord input) {
-                if (input == null) {
-                    return true;
-                }
-                final LifecycleFlags flags = input.getLifecycleFlags();
-                final boolean result = isEntityVisible.apply(flags);
-                return result;
-            }
-        };
+                    @Override
+                    public boolean apply(@Nullable EntityRecord input) {
+                        if (input == null) {
+                            return true;
+                        }
+                        final LifecycleFlags flags = input.getLifecycleFlags();
+                        final boolean result = isEntityVisible.apply(flags);
+                        return result;
+                    }
+                };
+
+        private static final Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible =
+                new Predicate<EntityRecordWithColumns>() {
+                    @Override
+                    public boolean apply(@Nullable EntityRecordWithColumns input) {
+                        if (input == null) {
+                            return false;
+                        }
+                        final EntityRecord record = input.getRecord();
+                        return isRecordVisible().apply(record);
+                    }
+                };
 
         private Predicates() {
             // Prevent instantiation of this utility class.
@@ -88,7 +101,7 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
          * Obtains the predicate for checking if an entity has
          * any of the {@link LifecycleFlags} set.
          *
-         * <p>If so, an entity becomes “invisible” to load methods of a repository.
+         * <p>If so, an entity becomes "invisible" to load methods of a repository.
          * Entities with flags set must be treated by special {@linkplain RepositoryView views}
          * of a repository.
          *
@@ -103,11 +116,15 @@ public interface EntityWithLifecycle<I, S extends Message> extends Entity<I, S> 
          * Obtains the predicate for checking if an entity record has any
          * of the {@link LifecycleFlags} set.
          *
-         * @return the predicate that filters “invisible” {@code EntityStorageRecord}s
+         * @return the predicate that filters "invisible" {@code EntityStorageRecord}s
          * @see EntityRecord#getLifecycleFlags()
          */
         public static Predicate<EntityRecord> isRecordVisible() {
             return isRecordVisible;
+        }
+
+        public static Predicate<EntityRecordWithColumns> isRecordWithColumnsVisible() {
+            return isRecordWithColumnsVisible;
         }
     }
 }

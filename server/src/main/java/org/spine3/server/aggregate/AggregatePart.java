@@ -21,8 +21,9 @@
 package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
+import org.spine3.reflect.GenericTypeIndex;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.reflect.GenericTypeIndex;
+import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -60,7 +61,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  */
 public abstract class AggregatePart<I,
                                     S extends Message,
-                                    B extends Message.Builder,
+                                    B extends ValidatingBuilder<S, ? extends Message.Builder>,
                                     R extends AggregateRoot<I>>
                       extends Aggregate<I, S, B> {
 

@@ -35,18 +35,19 @@ import static com.google.common.base.Preconditions.checkState;
  * A registry of type conversion strategies for the {@link Column Columns}.
  *
  * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
- * <code>
- *     <pre>
+ * <pre>
+ *     {@code
+ *         final VarcharDateType varcharType = new VarcharDateType();
  *         final ColumnTypeRegistry registry = ColumnTypeRegistry.newBuilder()
- *                                                               .put(Date.class, new VarcharDateType())
+ *                                                               .put(Date.class, varcharType)
  *                                                               .build();
  *
  *         MyJdbcBasedStorageFactory.newBuilder()
  *                                  // ...
  *                                  .setColumnTypeRegistry(registry)
  *                                  .build();
- *     </pre>
- * </code>
+ *     }
+ * </pre>
  *
  * <p>To retrieve the {@link ColumnType} instance (in case if you implement your own
  * {@linkplain org.spine3.server.storage.Storage Storage}) call {@link #get(Column)}
@@ -117,7 +118,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
 
     @SuppressWarnings("unchecked")
         // Unchecked copying from the src instance
-        // Never leads to a failure, since checke while writing into the instance itself
+        // Never leads to a failure, since checked while writing into the instance itself
     public static <C extends ColumnType> Builder<C> newBuilder(ColumnTypeRegistry<C> src) {
         final Builder<C> builder = newBuilder();
         for (Map.Entry<Class, C> typeMapping : src.columnTypeMap.entrySet()) {

@@ -17,18 +17,24 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.validate;
 
-package org.spine3.server.reflect;
+import com.google.protobuf.Empty;
 
 /**
- * Base interface for enumerations on generic parameters of types.
+ * Validating builder for {@linkplain Empty} messages.
  *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
-public interface GenericTypeIndex {
+public final class EmptyValidatingBuilder
+        extends AbstractValidatingBuilder<Empty, Empty.Builder> {
 
-    /**
-     * Obtains a zero-based index of a generic parameter of a type.
-     */
-    int getIndex();
+    // Prevent instantiation from the outside.
+    private EmptyValidatingBuilder() {
+        super();
+    }
+
+    public static EmptyValidatingBuilder newBuilder() {
+        return new EmptyValidatingBuilder();
+    }
 }

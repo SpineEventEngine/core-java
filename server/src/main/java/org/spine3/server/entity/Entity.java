@@ -21,14 +21,13 @@
 package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.base.Identifier;
-import org.spine3.server.reflect.GenericTypeIndex;
+import org.spine3.reflect.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
- * A server-side object with an {@link Identifier#checkSupported(Class) identity}.
+ * A server-side object with an {@link org.spine3.base.Identifier#checkSupported(Class) identity}.
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *

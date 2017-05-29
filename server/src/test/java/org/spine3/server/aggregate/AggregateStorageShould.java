@@ -36,7 +36,9 @@ import org.spine3.test.TestEventFactory;
 import org.spine3.test.Tests;
 import org.spine3.test.aggregate.Project;
 import org.spine3.test.aggregate.ProjectId;
+import org.spine3.test.aggregate.ProjectValidatingBuilder;
 import org.spine3.testdata.Sample;
+import org.spine3.validate.ValidatingBuilder;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -88,7 +90,7 @@ public abstract class AggregateStorageShould
     protected abstract <I> AggregateStorage<I> getStorage(
             Class<? extends Aggregate<I,
                                       ? extends Message,
-                                      ? extends Message.Builder>> aggregateClass);
+                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass);
 
     @Override
     protected AggregateStateRecord newStorageRecord() {
@@ -332,21 +334,21 @@ public abstract class AggregateStorageShould
     }
 
     private static class TestAggregateWithIdString
-                   extends Aggregate<String, Project, Project.Builder> {
+                   extends Aggregate<String, Project, ProjectValidatingBuilder> {
         private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
     private static class TestAggregateWithIdInteger
-                   extends Aggregate<Integer, Project, Project.Builder> {
+                   extends Aggregate<Integer, Project, ProjectValidatingBuilder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
     private static class TestAggregateWithIdLong
-                   extends Aggregate<Long, Project, Project.Builder> {
+                   extends Aggregate<Long, Project, ProjectValidatingBuilder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

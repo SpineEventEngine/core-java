@@ -1,3 +1,5 @@
+import groovy.time.TimeCategory
+
 //
 // Copyright 2017, TeamDev Ltd. All rights reserved.
 //
@@ -37,16 +39,16 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.9.3-SNAPSHOT'
+        spineVersion = '0.9.9-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.9.1-SNAPSHOT'
+        spineToolsVersion = '0.9.5-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.
-        generateValidatingBuildersValue = false
+        generateValidatingBuildersValue = true
     }
 
     dependencies {
@@ -64,6 +66,7 @@ buildscript {
 
         classpath group: 'org.spine3.tools', name: 'spine-codestyle-checker',
                                              version: spineToolsVersion
+        classpath group: 'org.spine3.tools', name: 'gcs-plugin', version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -144,9 +147,15 @@ subprojects {
         //
         // Finds and reports FQNs used in links in the wrong format.
         javadocLinkChecker {
-
             threshold = 0
             reportType = "warn"
+        }
+
+        // Right margin line checker.
+        //
+        // Finds and reports about the lines of a code with length above threshold.
+        rightMarginWrappingChecker {
+            maxTextWidth = 100
         }
     }
 
@@ -259,6 +268,10 @@ subprojects {
         }
     }
 
+    javadoc {
+        source = sourceSets.main.allJava
+    }
+
     task sourceJar(type: Jar) {
         from sourceSets.main.allJava
         classifier "sources"
@@ -267,6 +280,11 @@ subprojects {
     task testOutputJar(type: Jar) {
         from sourceSets.test.output
         classifier "test"
+    }
+
+    task javadocJar(type: Jar, dependsOn: 'javadoc') {
+        from ("$projectDir/build/docs/javadoc")
+        classifier "javadoc"
     }
 
     apply from: "${rootDir}/scripts/no-internal-javadoc.gradle"
@@ -308,3 +326,16 @@ idea.project.ipr {
 apply from: "${rootDir}/scripts/jacoco.gradle"
 
 apply from: publishPlugin
+
+apply plugin: 'org.spine3.tools.gcs-plugin'
+
+cleanGCS {
+    final Properties properties = new Properties()
+    final File gcsProperties = project.file("gcs.properties")
+    properties.load(gcsProperties.newDataInputStream())
+
+    authKeyPath = "gcs-auth-key.json"
+    bucketName = properties.getProperty("artifacts.bucket")
+    targetFolder = properties.getProperty("artifacts.folder")
+    threshold = TimeCategory.getDays(30)
+}

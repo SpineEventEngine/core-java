@@ -20,22 +20,29 @@
 
 package org.spine3.server.storage.memory;
 
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityQuery;
+import org.spine3.server.entity.storage.EntityQueryMatcher;
+import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.type.TypeUrl;
 
+import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
+import static com.google.common.collect.Maps.transformValues;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordVisible;
+import static org.spine3.server.entity.EntityWithLifecycle.Predicates.isRecordWithColumnsVisible;
 import static org.spine3.server.entity.FieldMasks.applyMask;
 
 /**
@@ -44,10 +51,11 @@ import static org.spine3.server.entity.FieldMasks.applyMask;
  *
  * @author Alexander Yevsyukov
  */
-class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
+class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
 
-    private final Map<I, EntityRecord> records = newHashMap();
-    private final Map<I, EntityRecord> filtered = filterValues(records, isRecordVisible());
+    private final Map<I, EntityRecordWithColumns> records = newHashMap();
+    private final Map<I, EntityRecordWithColumns> filtered =
+            filterValues(records, isRecordWithColumnsVisible());
 
     @Override
     public Iterator<I> index() {
@@ -57,13 +65,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
     }
 
     @Override
-    public void put(I id, EntityRecord record) {
+    public void put(I id, EntityRecordWithColumns record) {
         records.put(id, record);
     }
 
     @Override
-    public Optional<EntityRecord> get(I id) {
-        final EntityRecord record = records.get(id);
+    public Optional<EntityRecordWithColumns> get(I id) {
+        final EntityRecordWithColumns record = records.get(id);
         return Optional.fromNullable(record);
     }
 
@@ -71,13 +79,28 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         return records.remove(id) != null;
     }
 
-    private Map<I, EntityRecord> filtered() {
+    private Map<I, EntityRecordWithColumns> filtered() {
         return filtered;
     }
 
     Map<I, EntityRecord> readAllRecords() {
-        final Map<I, EntityRecord> filtered = filtered();
-        final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(filtered);
+        final Map<I, EntityRecordWithColumns> filtered = filtered();
+        final Map<I, EntityRecord> records = transformValues(filtered,
+                                                             EntityRecordUnpacker.INSTANCE);
+        final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(records);
+        return result;
+    }
+
+    Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+        final Map<I, EntityRecordWithColumns> filtered =
+                filterValues(filtered(),
+                             new EntityQueryMatcher<>(query));
+        final Map<I, EntityRecord> records = transformValues(filtered,
+                                                             EntityRecordUnpacker.INSTANCE);
+        final Function<EntityRecord, EntityRecord> fieldMaskApplier =
+                new FieldMaskApplier(fieldMask);
+        final Map<I, EntityRecord> maskedRecords = transformValues(records, fieldMaskApplier);
+        final ImmutableMap<I, EntityRecord> result = ImmutableMap.copyOf(maskedRecords);
         return result;
     }
 
@@ -85,11 +108,13 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
         EntityRecord matchingResult = null;
         for (I recordId : filtered.keySet()) {
             if (recordId.equals(givenId)) {
-                final Optional<EntityRecord> record = get(recordId);
+                final Optional<EntityRecordWithColumns> record = get(recordId);
                 if (!record.isPresent()) {
                     continue;
                 }
-                EntityRecord.Builder matchingRecord = record.get().toBuilder();
+                EntityRecord.Builder matchingRecord = record.get()
+                                                            .getRecord()
+                                                            .toBuilder();
                 final Any state = matchingRecord.getState();
                 final TypeUrl typeUrl = TypeUrl.parse(state.getTypeUrl());
                 final Message wholeState = unpack(state);
@@ -115,9 +140,10 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
 
         final ImmutableMap.Builder<I, EntityRecord> result = ImmutableMap.builder();
 
-        for (Map.Entry<I, EntityRecord> storageEntry : filtered.entrySet()) {
+        for (Map.Entry<I, EntityRecordWithColumns> storageEntry : filtered.entrySet()) {
             final I id = storageEntry.getKey();
-            final EntityRecord rawRecord = storageEntry.getValue();
+            final EntityRecord rawRecord = storageEntry.getValue()
+                                                       .getRecord();
             final TypeUrl type = TypeUrl.parse(rawRecord.getState()
                                                         .getTypeUrl());
             final Any recordState = rawRecord.getState();
@@ -136,5 +162,36 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecord> {
     @Override
     public boolean isEmpty() {
         return filtered.isEmpty();
+    }
+
+    /**
+     * A {@link Function} transforming the {@link EntityRecord} state by applying the given
+     * {@link FieldMask} to it.
+     *
+     * <p>The resulting {@link EntityRecord} has the same fields as the given one except
+     * the {@code state} field, which is masked.
+     */
+    private static class FieldMaskApplier implements Function<EntityRecord, EntityRecord> {
+
+        private final FieldMask fieldMask;
+
+        private FieldMaskApplier(FieldMask fieldMask) {
+            this.fieldMask = fieldMask;
+        }
+
+        @Nullable
+        @Override
+        public EntityRecord apply(@Nullable EntityRecord input) {
+            checkNotNull(input);
+            final Any packedState = input.getState();
+            final Message state = unpack(packedState);
+            final TypeUrl typeUrl = TypeUrl.ofEnclosed(packedState);
+            final Message maskedState = applyMask(fieldMask, state, typeUrl);
+            final Any repackedState = pack(maskedState);
+            final EntityRecord result = EntityRecord.newBuilder(input)
+                                                    .setState(repackedState)
+                                                    .build();
+            return result;
+        }
     }
 }

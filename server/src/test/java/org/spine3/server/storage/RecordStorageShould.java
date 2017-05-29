@@ -27,19 +27,27 @@ import com.google.common.collect.Maps;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
+import org.spine3.client.EntityFilters;
+import org.spine3.client.EntityId;
+import org.spine3.client.EntityIdFilter;
 import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.AbstractVersionableEntity;
+import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.EventPlayingEntity;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityQueries;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.test.Tests;
 import org.spine3.test.storage.Project;
+import org.spine3.test.storage.ProjectValidatingBuilder;
 import org.spine3.testdata.Sample;
 import org.spine3.time.Time;
 
@@ -59,7 +67,10 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
+import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.TestTransaction.injectState;
+import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
@@ -97,6 +108,16 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     private static EntityRecord newStorageRecord(Message state) {
         final Any wrappedState = AnyPacker.pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
+                                                .setState(wrappedState)
+                                                .setVersion(Tests.newVersionWithNumber(0))
+                                                .build();
+        return record;
+    }
+
+    private EntityRecord newStorageRecord(I id, Message state) {
+        final Any wrappedState = AnyPacker.pack(state);
+        final EntityRecord record = EntityRecord.newBuilder()
+                                                .setEntityId(idToAny(id))
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();
@@ -348,13 +369,125 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = newStorageRecord(id);
         final TestCounterEntity<?> testEntity = new TestCounterEntity<>(id);
         final EntityRecordWithColumns recordWithColumns =
-                EntityRecordWithColumns.create(record, testEntity);
+                create(record, testEntity);
         final S storage = getStorage();
         storage.write(id, recordWithColumns);
 
         final Optional<EntityRecord> readRecord = storage.read(id);
         assertTrue(readRecord.isPresent());
         assertEquals(record, readRecord.get());
+    }
+
+    @SuppressWarnings("OverlyLongMethod") // Complex test case (still tests a single operation)
+    @Test
+    public void filter_records_by_columns() {
+        final Project.Status requiredValue = Project.Status.DONE;
+        final Int32Value wrappedValue = Int32Value.newBuilder()
+                                                  .setValue(requiredValue.getNumber())
+                                                  .build();
+        final Version versionValue = Version.newBuilder()
+                                            .setNumber(2) // Value of the counter after one columns
+                                            .build();     // scan (incremented 2 times internally)
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .putColumnFilter("projectStatusValue",
+                                                                    AnyPacker.pack(wrappedValue))
+                                                   .putColumnFilter("counterVersion",
+                                                                    AnyPacker.pack(versionValue))
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
+        final I idMatching = newId();
+        final I idWrong1 = newId();
+        final I idWrong2 = newId();
+
+        final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
+        final TestCounterEntity<I> wrongEntity1 = new TestCounterEntity<>(idWrong1);
+        final TestCounterEntity<I> wrongEntity2 = new TestCounterEntity<>(idWrong2);
+
+        // 2 of 3 have required values
+        matchingEntity.setStatus(requiredValue);
+        wrongEntity1.setStatus(requiredValue);
+        wrongEntity2.setStatus(Project.Status.CANCELLED);
+
+        // Change internal Entity state
+        wrongEntity1.getCounter();
+
+        // After the mutation above the single matching record is the one under the `idMatching` ID
+
+        final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
+        final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
+        final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
+
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
+        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
+        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
+
+        final RecordStorage<I> storage = getStorage();
+
+        storage.write(idMatching, recordRight);
+        storage.write(idWrong1, recordWrong1);
+        storage.write(idWrong2, recordWrong2);
+
+        final Map<I, EntityRecord> readRecords = storage.readAll(query,
+                                                                 FieldMask.getDefaultInstance());
+        assertSize(1, readRecords);
+        final I singleId = readRecords.keySet()
+                                      .iterator()
+                                      .next();
+        assertEquals(idMatching, singleId);
+
+        final EntityRecord singleRecord = readRecords.values()
+                                                     .iterator()
+                                                     .next();
+        assertEquals(fineRecord, singleRecord);
+    }
+
+    @Test
+    public void allow_by_single_id_queries_with_no_columns() {
+        // Create the test data
+        final I idMatching = newId();
+        final I idWrong1 = newId();
+        final I idWrong2 = newId();
+
+        final TestCounterEntity<I> matchingEntity = new TestCounterEntity<>(idMatching);
+        final TestCounterEntity<I> wrongEntity1 = new TestCounterEntity<>(idWrong1);
+        final TestCounterEntity<I> wrongEntity2 = new TestCounterEntity<>(idWrong2);
+
+        final EntityRecord fineRecord = newStorageRecord(idMatching, newState(idMatching));
+        final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
+        final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
+
+
+        final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
+        final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
+        final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
+
+        final RecordStorage<I> storage = getStorage();
+
+        // Fill the storage
+        storage.write(idWrong1, recordWrong1);
+        storage.write(idMatching, recordRight);
+        storage.write(idWrong2, recordWrong2);
+
+        // Prepare the query
+        final Any matchingIdPacked = TypeConverter.toAny(idMatching);
+        final EntityId entityId = EntityId.newBuilder()
+                                          .setId(matchingIdPacked)
+                                          .build();
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(entityId)
+                                                      .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(idFilter)
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
+
+        // Perform the query
+        final Map<I, EntityRecord> readRecords =  storage.readAll(query,
+                                                                  FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(1, readRecords);
+        final EntityRecord actualRecord = readRecords.get(idMatching);
+        assertEquals(fineRecord, actualRecord);
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
@@ -369,7 +502,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     @SuppressWarnings("unused") // Reflective access
-    public static class TestCounterEntity<I> extends AbstractVersionableEntity<I, Project> {
+    public static class TestCounterEntity<I> extends EventPlayingEntity<I,
+                                                                        Project,
+                                                                        ProjectValidatingBuilder> {
 
         private int counter = 0;
 
@@ -406,6 +541,17 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         public Project getCounterState() {
             return getState();
+        }
+
+        public int getProjectStatusValue() {
+            return getState().getStatusValue();
+        }
+
+        private void setStatus(Project.Status status) {
+            final Project newState = Project.newBuilder(getState())
+                                            .setStatus(status)
+                                            .build();
+            injectState(this, newState, getCounterVersion());
         }
     }
 }

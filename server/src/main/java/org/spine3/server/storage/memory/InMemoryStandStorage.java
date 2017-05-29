@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Maps;
 import com.google.protobuf.FieldMask;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.server.stand.StandStorage;
@@ -133,6 +134,13 @@ class InMemoryStandStorage extends StandStorage {
     @Override
     protected Map<AggregateStateId, EntityRecord> readAllRecords(FieldMask fieldMask) {
         return recordStorage.readAll(fieldMask);
+    }
+
+    @Override
+    protected Map<AggregateStateId, EntityRecord> readAllRecords(
+            EntityQuery<AggregateStateId> query,
+            FieldMask fieldMask) {
+        return recordStorage.readAll(query, fieldMask);
     }
 
     @Override

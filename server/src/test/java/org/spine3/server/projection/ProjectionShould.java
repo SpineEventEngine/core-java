@@ -31,11 +31,14 @@ import org.spine3.base.Subscribe;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Given;
 import org.spine3.type.EventClass;
+import org.spine3.validate.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifier.newUuid;
 import static org.spine3.protobuf.Wrapper.forInteger;
+import static org.spine3.server.projection.ProjectionTransaction.start;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ProjectionShould {
@@ -54,16 +57,29 @@ public class ProjectionShould {
     @Test
     public void handle_events() {
         final String stringValue = newUuid();
+
+        ProjectionTransaction<?, ?, ?> tx;
+        tx = start(projection);
+        assertFalse(projection.isChanged());
         projection.handle(Wrapper.forString(stringValue), EventContext.getDefaultInstance());
+        tx.commit();
         assertTrue(projection.getState()
                              .getValue()
                              .contains(stringValue));
 
+        assertTrue(projection.isChanged());
+
         final Integer integerValue = 1024;
+
+        tx = start(projection);
+        assertFalse(projection.isChanged());
         projection.handle(forInteger(integerValue), EventContext.getDefaultInstance());
+        tx.commit();
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
+
+        assertTrue(projection.isChanged());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -86,7 +102,8 @@ public class ProjectionShould {
         assertHasPrivateParameterlessCtor(Projection.TypeInfo.class);
     }
 
-    private static class TestProjection extends Projection<String, StringValue> {
+    private static class TestProjection
+            extends Projection<String, StringValue, StringValueValidatingBuilder> {
 
         /** The number of events this class handles. */
         private static final int HANDLING_EVENT_COUNT = 2;
@@ -97,15 +114,15 @@ public class ProjectionShould {
 
         @Subscribe
         public void on(StringValue event) {
-            final StringValue newSate = createNewState("stringState", event.getValue());
-            incrementState(newSate);
+            final StringValue newState = createNewState("stringState", event.getValue());
+            getBuilder().mergeFrom(newState);
         }
 
         @Subscribe
         public void on(Int32Value event) {
-            final StringValue newSate = createNewState("integerState",
+            final StringValue newState = createNewState("integerState",
                                                        String.valueOf(event.getValue()));
-            incrementState(newSate);
+            getBuilder().mergeFrom(newState);
         }
 
         private StringValue createNewState(String type, String value) {

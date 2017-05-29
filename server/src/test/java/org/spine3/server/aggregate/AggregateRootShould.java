@@ -27,8 +27,10 @@ import org.junit.Test;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
 import org.spine3.test.aggregate.ProjectDefinition;
+import org.spine3.test.aggregate.ProjectDefinitionValidatingBuilder;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.ProjectLifecycle;
+import org.spine3.test.aggregate.ProjectLifecycleValidatingBuilder;
 import org.spine3.test.aggregate.Status;
 import org.spine3.test.aggregate.command.CreateProject;
 import org.spine3.test.aggregate.command.StartProject;
@@ -140,7 +142,7 @@ public class AggregateRootShould {
     @SuppressWarnings("TypeMayBeWeakened") // Exact message classes without OrBuilder are needed.
     private static class ProjectDefinitionPart extends AggregatePart<ProjectId,
             ProjectDefinition,
-            ProjectDefinition.Builder,
+            ProjectDefinitionValidatingBuilder,
             ProjectRoot> {
 
         private ProjectDefinitionPart(ProjectRoot root) {
@@ -167,7 +169,7 @@ public class AggregateRootShould {
     // Static field in the instance method is used for the test simplification.
     private static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
             ProjectLifecycle,
-            ProjectLifecycle.Builder,
+            ProjectLifecycleValidatingBuilder,
             ProjectRoot> {
 
         protected ProjectLifeCyclePart(ProjectRoot root) {

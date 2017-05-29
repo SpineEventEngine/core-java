@@ -17,12 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+package org.spine3.validate;
+
+import com.google.protobuf.DoubleValue;
 
 /**
- * This package contains utilities that can be used by the client code, server code,
- * and business model compiler.
+ * Validating builder for {@linkplain DoubleValue} messages.
+ *
+ * @author Alex Tymchenko
  */
-@ParametersAreNonnullByDefault
-package org.spine3.util;
+public final class DoubleValueValidatingBuilder
+        extends AbstractValidatingBuilder<DoubleValue, DoubleValue.Builder> {
 
-import javax.annotation.ParametersAreNonnullByDefault;
+    // Prevent instantiation from the outside.
+    private DoubleValueValidatingBuilder() {
+        super();
+    }
+
+    public static DoubleValueValidatingBuilder newBuilder() {
+        return new DoubleValueValidatingBuilder();
+    }
+
+    public DoubleValueValidatingBuilder setValue(double value) {
+        getMessageBuilder().setValue(value);
+        return this;
+    }
+}

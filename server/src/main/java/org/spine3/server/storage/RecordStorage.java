@@ -29,6 +29,7 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.FieldMasks;
 import org.spine3.server.entity.LifecycleFlags;
+import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
 import org.spine3.server.stand.AggregateStateId;
 import org.spine3.type.TypeUrl;
@@ -220,6 +221,22 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return readAllRecords(fieldMask);
     }
 
+    /**
+     * Reads all the records matching the given {@link EntityQuery} and applies the given
+     * {@link FieldMask} to the resulting record states.
+     *
+     * @param query     the query to execute
+     * @param fieldMask the fields to retrieve
+     * @return the matching records mapped upon their IDs
+     */
+    public Map<I, EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
+        checkNotClosed();
+        checkNotNull(query);
+        checkNotNull(fieldMask);
+
+        return readAllRecords(query, fieldMask);
+    }
+
     /*
      * Internal storage methods
      *****************************/
@@ -244,6 +261,12 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
 
     /** @see BulkStorageOperationsMixin#readAll() */
     protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
+
+    /**
+     * @see #readAll(EntityQuery, FieldMask)
+     */
+    protected abstract Map<I, EntityRecord> readAllRecords(EntityQuery<I> query,
+                                                           FieldMask fieldMask);
 
     /**
      * Writes a record and the associated
