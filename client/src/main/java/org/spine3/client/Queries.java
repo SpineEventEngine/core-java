@@ -77,7 +77,7 @@ public final class Queries {
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
-                                         @Nullable Set<GroupingColumnFilter> columnFilters,
+                                         @Nullable Set<CompositeColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 

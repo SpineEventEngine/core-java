@@ -24,7 +24,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import org.spine3.client.GroupingColumnFilter.GroupingOperator;
+import org.spine3.client.CompositeColumnFilter.CompositeOperator;
 import org.spine3.client.ColumnFilter;
 
 import java.io.Serializable;
@@ -35,36 +35,36 @@ import static com.google.common.collect.ImmutableMultimap.copyOf;
 
 /**
  * A set of {@link ColumnFilter} instances joined by a logical grouping
- * {@link GroupingOperator operator}.
+ * {@link CompositeOperator operator}.
  *
  * @author Dmytro Dashenkov
  */
-public final class GroupingQueryParameter implements Serializable {
+public final class CompositeQueryParameter implements Serializable {
 
-    private static final long serialVersionUID = -475685759190562528L;
+    private static final long serialVersionUID = 1L;
 
-    private final GroupingOperator operator;
+    private final CompositeOperator operator;
 
     private final ImmutableMultimap<Column, ColumnFilter> filters;
 
     /**
-     * Creates a new instance of {@code GroupingQueryParameter} from the given filters joined
+     * Creates a new instance of {@code CompositeQueryParameter} from the given filters joined
      * by the given operator.
      *
      * @param filters  the filters to aggregate
      * @param operator the operator to apply to the given filters
-     * @return new instance of {@code GroupingQueryParameter}
+     * @return new instance of {@code CompositeQueryParameter}
      */
-    static GroupingQueryParameter from(Multimap<Column, ColumnFilter> filters,
-                                       GroupingOperator operator) {
+    static CompositeQueryParameter from(Multimap<Column, ColumnFilter> filters,
+                                       CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
         checkArgument(operator.getNumber() > 0, "Invalid aggregating operator %s.", operator);
 
-        return new GroupingQueryParameter(operator, filters);
+        return new CompositeQueryParameter(operator, filters);
     }
 
-    private GroupingQueryParameter(GroupingOperator operator,
+    private CompositeQueryParameter(CompositeOperator operator,
                                    Multimap<Column, ColumnFilter> filters) {
         this.operator = operator;
         this.filters = copyOf(filters);
@@ -73,7 +73,7 @@ public final class GroupingQueryParameter implements Serializable {
     /**
      * @return the aggregating operator
      */
-    public GroupingOperator getOperator() {
+    public CompositeOperator getOperator() {
         return operator;
     }
 
@@ -93,7 +93,7 @@ public final class GroupingQueryParameter implements Serializable {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
-        GroupingQueryParameter parameter = (GroupingQueryParameter) o;
+        CompositeQueryParameter parameter = (CompositeQueryParameter) o;
         return getOperator() == parameter.getOperator() &&
                 Objects.equal(getFilters(), parameter.getFilters());
     }

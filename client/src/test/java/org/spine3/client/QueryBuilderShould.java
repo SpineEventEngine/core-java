@@ -59,8 +59,8 @@ import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.ge;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.protobuf.TypeConverter.toObject;
 import static org.spine3.test.Verify.assertContains;
 import static org.spine3.test.Verify.assertSize;
@@ -148,9 +148,9 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<GroupingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
         assertSize(1, aggregatingColumnFilters);
-        final GroupingColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
+        final CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
         final Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
         assertSize(1, columnFilters);
         final Any actualValue = findByName(columnFilters, columnName).getValue();
@@ -177,7 +177,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final List<GroupingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
         assertSize(1, aggregatingColumnFilters);
         final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                                .getFilterList();
@@ -193,7 +193,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
     }
 
     @SuppressWarnings("OverlyLongMethod")
-        // A big test for the grouping operators proper building
+        // A big test for the grouping operators proper building.
     @Test
     public void create_queries_with_grouping_params() {
         final String establishedTimeColumn = "establishedTime";
@@ -211,11 +211,11 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
                                                    eq(countryColumn, countryName)))
                                      .build();
         final Target target = query.getTarget();
-        final List<GroupingColumnFilter> filters = target.getFilters().getFilterList();
+        final List<CompositeColumnFilter> filters = target.getFilters().getFilterList();
         assertSize(2, filters);
 
-        final GroupingColumnFilter firstFilter = filters.get(0);
-        final GroupingColumnFilter secondFilter = filters.get(1);
+        final CompositeColumnFilter firstFilter = filters.get(0);
+        final CompositeColumnFilter secondFilter = filters.get(1);
 
         final List<ColumnFilter> allColumnFilters;
         final List<ColumnFilter> eitherColumnFilters;
@@ -258,7 +258,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
 
     @SuppressWarnings("OverlyLongMethod")
-        // A big test case covering the query arguments co-living
+        // A big test case covering the query arguments coexistence.
     @Test
     public void create_queries_with_all_arguments() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
@@ -298,7 +298,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
         // Check query params
-        final List<GroupingColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
         assertSize(1, aggregatingColumnFilters);
         final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
                                                                                .getFilterList();

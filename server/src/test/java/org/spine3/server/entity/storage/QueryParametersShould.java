@@ -43,11 +43,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.mock;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
-import static org.spine3.server.entity.storage.GroupingQueryParameter.from;
+import static org.spine3.server.entity.storage.CompositeQueryParameter.from;
 import static org.spine3.server.entity.storage.QueryParameters.newBuilder;
 import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.test.Verify.assertContainsAll;
@@ -64,7 +64,7 @@ public class QueryParametersShould {
         final String columnName = version.name();
         final Column column = Columns.findColumn(VersionableEntity.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, 1);
-        final GroupingQueryParameter parameter = aggregatingParameter(column, filter);
+        final CompositeQueryParameter parameter = aggregatingParameter(column, filter);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();
@@ -86,11 +86,11 @@ public class QueryParametersShould {
         final Multimap<Column, ColumnFilter> columnFilters = of(mockColumn(), filters[0],
                                                                 mockColumn(), filters[1],
                                                                 mockColumn(), filters[2]);
-        final GroupingQueryParameter parameter = from(columnFilters, ALL);
+        final CompositeQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         final Collection<ColumnFilter> results = newLinkedList();
-        for (GroupingQueryParameter queryParameter : parameters) {
+        for (CompositeQueryParameter queryParameter : parameters) {
             results.addAll(queryParameter.getFilters().values());
         }
         assertArrayEquals(filters, results.toArray());
@@ -106,11 +106,11 @@ public class QueryParametersShould {
         final Multimap<Column, ColumnFilter> columnFilters = of(columns[0], filters[0],
                                                                 columns[1], filters[1],
                                                                 columns[2], filters[2]);
-        final GroupingQueryParameter parameter = from(columnFilters, ALL);
+        final CompositeQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
         assertSize(1, newArrayList(parameters));
-        final GroupingQueryParameter singleParameter = parameters.iterator().next();
+        final CompositeQueryParameter singleParameter = parameters.iterator().next();
         final Multimap<Column, ColumnFilter> actualFilters = singleParameter.getFilters();
         for (int i = 0; i < columns.length; i++) {
             final Column column = columns[i];
@@ -137,10 +137,10 @@ public class QueryParametersShould {
                                  .put(column, startTimeFilter)
                                  .put(column, deadlineFilter)
                                  .build();
-        final GroupingQueryParameter parameter = from(columnFilters, ALL);
+        final CompositeQueryParameter parameter = from(columnFilters, ALL);
         final QueryParameters parameters = newBuilder().add(parameter)
                                                        .build();
-        final List<GroupingQueryParameter> aggregatingParameters = newArrayList(parameters);
+        final List<CompositeQueryParameter> aggregatingParameters = newArrayList(parameters);
         assertSize(1, aggregatingParameters);
         final Multimap<Column, ColumnFilter> actualColumnFilters = aggregatingParameters.get(0).getFilters();
         final Collection<ColumnFilter> timeFilters = actualColumnFilters.get(column);
@@ -185,10 +185,10 @@ public class QueryParametersShould {
         return column;
     }
 
-    private static GroupingQueryParameter aggregatingParameter(Column column,
+    private static CompositeQueryParameter aggregatingParameter(Column column,
                                                                   ColumnFilter columnFilter) {
         final Multimap<Column, ColumnFilter> filter = of(column, columnFilter);
-        final GroupingQueryParameter result = from(filter, ALL);
+        final CompositeQueryParameter result = from(filter, ALL);
         return result;
     }
 }

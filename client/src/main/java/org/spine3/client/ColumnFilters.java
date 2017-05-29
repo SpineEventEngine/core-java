@@ -23,7 +23,7 @@ package org.spine3.client;
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import org.spine3.client.GroupingColumnFilter.GroupingOperator;
+import org.spine3.client.CompositeColumnFilter.CompositeOperator;
 
 import java.util.Collection;
 
@@ -36,8 +36,8 @@ import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.protobuf.TypeConverter.toAny;
 
 /**
@@ -51,8 +51,8 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  *
  * <p>The Column filters support two generic kinds of comparison:
  * <ol>
- *     <li>Equality comparison
- *     <li>Ordering comparison
+ *     <li>Equality comparison;
+ *     <li>Ordering comparison.
  * </ol>
  *
  * <p>The {@linkplain #eq equality comparison} supports any data type for the Entity Columns.
@@ -163,9 +163,9 @@ public final class ColumnFilters {
      *
      * @param first the first {@link ColumnFilter}
      * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
-     * @return new instance of {@link GroupingColumnFilter}
+     * @return new instance of {@link CompositeColumnFilter}
      */
-    public static GroupingColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
+    public static CompositeColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
         return aggregateFilters(asList(first, rest), ALL);
     }
 
@@ -177,9 +177,9 @@ public final class ColumnFilters {
      *
      * @param first the first {@link ColumnFilter}
      * @param rest  the array of additional {@linkplain ColumnFilter filters}, possibly empty
-     * @return new instance of {@link GroupingColumnFilter}
+     * @return new instance of {@link CompositeColumnFilter}
      */
-    public static GroupingColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
+    public static CompositeColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
         return aggregateFilters(asList(first, rest), EITHER);
     }
 
@@ -193,10 +193,10 @@ public final class ColumnFilters {
      * instances of {@link ColumnFilter} directly to the {@link QueryBuilder}.
      *
      * @param filters the aggregated Column filters
-     * @return new instance of {@link GroupingColumnFilter}
+     * @return new instance of {@link CompositeColumnFilter}
      * @see #all(ColumnFilter, ColumnFilter...) for the public API equivalent
      */
-    static GroupingColumnFilter all(Collection<ColumnFilter> filters) {
+    static CompositeColumnFilter all(Collection<ColumnFilter> filters) {
         return aggregateFilters(filters, ALL);
     }
 
@@ -210,9 +210,9 @@ public final class ColumnFilters {
         return filter;
     }
 
-    private static GroupingColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
-                                                         GroupingOperator operator) {
-        final GroupingColumnFilter result = GroupingColumnFilter.newBuilder()
+    private static CompositeColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
+                                                         CompositeOperator operator) {
+        final CompositeColumnFilter result = CompositeColumnFilter.newBuilder()
                                                                 .addAllFilter(filters)
                                                                 .setOperator(operator)
                                                                 .build();

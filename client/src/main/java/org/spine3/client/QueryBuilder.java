@@ -96,7 +96,7 @@ public final class QueryBuilder {
     private Set<?> ids;
 
     @Nullable
-    private Set<GroupingColumnFilter> columns;
+    private Set<CompositeColumnFilter> columns;
 
     @Nullable
     private Set<String> fieldMask;
@@ -183,16 +183,16 @@ public final class QueryBuilder {
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
-     * a conjunction ({@link GroupingColumnFilter.GroupingOperator#ALL ALL} operator), i.e.
+     * a conjunction ({@link CompositeColumnFilter.CompositeOperator#ALL ALL} operator), i.e.
      * a record matches this query only if it matches all of these parameters.
      *
      * @param predicate the {@link ColumnFilter}s to filter the requested entities by
      * @return self for method chaining
      * @see ColumnFilters for a convinient way to create {@link ColumnFilter} instances
-     * @see #where(GroupingColumnFilter...)
+     * @see #where(CompositeColumnFilter...)
      */
     public QueryBuilder where(ColumnFilter... predicate) {
-        final GroupingColumnFilter aggregatingFilter = all(asList(predicate));
+        final CompositeColumnFilter aggregatingFilter = all(asList(predicate));
         columns = singleton(aggregatingFilter);
         return this;
     }
@@ -204,10 +204,10 @@ public final class QueryBuilder {
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The input values represent groups of {@linkplain ColumnFilter column filters} joined with
-     * a {@linkplain GroupingColumnFilter.GroupingOperator aggregating operator}.
+     * a {@linkplain CompositeColumnFilter.CompositeOperator aggregating operator}.
      *
      * <p>The input filter groups are effectively joined between each other by
-     * {@link GroupingColumnFilter.GroupingOperator#ALL ALL} operator, i.e. a record matches
+     * {@link CompositeColumnFilter.CompositeOperator#ALL ALL} operator, i.e. a record matches
      * this query if it matches all the aggregated filters.
      *
      * <p>Example of usage:
@@ -229,12 +229,12 @@ public final class QueryBuilder {
      * regrouped on the behalf of the user, since the {@link ColumnFilters#all all(...)} behavior is
      * default for the groups, as stated above.
      *
-     * @param predicate a number of {@link GroupingColumnFilter} instances forming the query
+     * @param predicate a number of {@link CompositeColumnFilter} instances forming the query
      *                  predicate
      * @return self for method chaining
-     * @see ColumnFilters for a convinient way to create {@link GroupingColumnFilter} instances
+     * @see ColumnFilters for a convinient way to create {@link CompositeColumnFilter} instances
      */
-    public QueryBuilder where(GroupingColumnFilter... predicate) {
+    public QueryBuilder where(CompositeColumnFilter... predicate) {
         columns = ImmutableSet.copyOf(predicate);
         return this;
     }

@@ -30,7 +30,7 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.client.GroupingColumnFilter;
+import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
 import org.spine3.client.EntityFilters;
@@ -47,7 +47,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.test.Verify.assertContains;
@@ -208,7 +208,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                                                   .setValue(id1.toString())
                                                   .build();
         final ColumnFilter filter = ColumnFilters.eq(fieldPath, fieldValue);
-        final GroupingColumnFilter aggregatingFilter = GroupingColumnFilter.newBuilder()
+        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
                                                                                  .addFilter(filter)
                                                                                  .setOperator(ALL)
                                                                                  .build();

@@ -45,7 +45,7 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
 
@@ -99,7 +99,7 @@ public class EntityQueryMatcherShould {
         final Collection<Object> ids = Collections.emptyList();
 
         final Multimap<Column, ColumnFilter> filters = of(target, eq(targetName, acceptedValue));
-        final GroupingQueryParameter parameter = GroupingQueryParameter.from(filters, ALL);
+        final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         final QueryParameters params = QueryParameters.newBuilder()
                                                       .add(parameter)
                                                       .build();
@@ -147,7 +147,7 @@ public class EntityQueryMatcherShould {
         final EntityRecordWithColumns recordWithColumns = of(record, columns);
 
         final Multimap<Column, ColumnFilter> filters = of(column, eq(columnName, actualValue));
-        final GroupingQueryParameter parameter = GroupingQueryParameter.from(filters, ALL);
+        final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();

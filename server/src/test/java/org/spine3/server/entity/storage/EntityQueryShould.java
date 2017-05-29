@@ -47,7 +47,7 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.protobuf.TypeConverter.toAny;
 import static org.spine3.server.storage.LifecycleFlagField.deleted;
@@ -64,7 +64,7 @@ public class EntityQueryShould {
         final Column column = Columns.findColumn(EntityWithLifecycle.class, columnName);
         final ColumnFilter filter = ColumnFilters.eq(columnName, false);
         final Multimap<Column, ColumnFilter> filters = of(column, filter);
-        final GroupingQueryParameter parameter = GroupingQueryParameter.from(filters, ALL);
+        final CompositeQueryParameter parameter = CompositeQueryParameter.from(filters, ALL);
         final QueryParameters parameters = QueryParameters.newBuilder()
                                                           .add(parameter)
                                                           .build();
@@ -184,7 +184,7 @@ public class EntityQueryShould {
                                                     .build();
             filters.put(column, filter);
         }
-        return builder.add(GroupingQueryParameter.from(filters, ALL))
+        return builder.add(CompositeQueryParameter.from(filters, ALL))
                       .build();
     }
 }

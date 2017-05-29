@@ -45,9 +45,9 @@ import static org.spine3.client.ColumnFilters.ge;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
 import static org.spine3.client.ColumnFilters.lt;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.spine3.test.Verify.assertContainsAll;
@@ -161,8 +161,8 @@ public class ColumnFiltersShould {
         assertEquals(operator, filter.getOperator());
     }
 
-    private static void checkCreatesInstance(GroupingColumnFilter filter,
-                                             GroupingOperator operator,
+    private static void checkCreatesInstance(CompositeColumnFilter filter,
+                                             CompositeOperator operator,
                                              ColumnFilter[] groupedFilters) {
         assertEquals(operator, filter.getOperator());
         assertContainsAll(filter.getFilterList(), groupedFilters);

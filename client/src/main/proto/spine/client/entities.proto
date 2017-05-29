@@ -72,28 +72,28 @@ message EntityFilters {
     EntityIdFilter id_filter = 1;
 
     // Match the entities by the value of the Entity Columns.
-    repeated GroupingColumnFilter filter = 2;
+    repeated CompositeColumnFilter filter = 2;
 
     // Reserved for more filter types
     reserved 3 to 40;
 }
 
 // The filter grouping a number of Entity Column filters with a specifed logical operator.
-message GroupingColumnFilter {
+message CompositeColumnFilter {
 
-    // The aggregated Entity Column filters.
+    // The composite Entity Column filters.
     //
     // If the list is empty, any record is considered matching this filter.
     repeated ColumnFilter filter = 1;
 
-    // The value of the aggregating operator which deternines the behavior of the filter matching.
-    GroupingOperator operator = 2[(required) = true];
+    // The value of the composite operator which deternines the behavior of the filter matching.
+    CompositeOperator operator = 2[(required) = true];
 
-    // An enumeration of all supported operators aggregatig the Entity Column filters.
-    enum GroupingOperator {
+    // An enumeration of all supported composite operators upon the Entity Column filters.
+    enum CompositeOperator {
 
         // Error value.
-        ACFAO_UNDEFINED = 0;
+        GCF_GO_UNDEFINED = 0;
 
         // The conjunctive operator. The SQL equivalent is `AND`.
         ALL = 1;

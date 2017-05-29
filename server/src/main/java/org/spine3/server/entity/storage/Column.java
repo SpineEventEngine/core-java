@@ -134,13 +134,22 @@ import static java.lang.String.format;
  */
 public class Column implements Serializable {
 
-    private static final long serialVersionUID = 8200711636725154347L;
+    private static final long serialVersionUID = 1L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
 
     /**
-     * This field is left non-final for serialization purposes.
+     * <p>The getter which declares this {@code Column}.
+     *
+     * <p>This field contains the getter method declared in an {@link Entity} class, which
+     * represents the Entity Column described by this instance of {@link Column}.
+     *
+     * <p>The equality of this field in two different instances of {@code Column} determine
+     * the equality of the instances. More formally for any non-null instances of {@code Column}
+     * {@code c1} and {@code c2} {@code c1.getter.equals(c2.getter) == c1.equals(c2)}.
+     *
+     * <p>This field is left non-final for serialization purposes.
      *
      * <p>The only place where this field is updated, except the constructor, is
      * {@link #readObject(ObjectInputStream)} method.

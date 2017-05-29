@@ -25,7 +25,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
-import org.spine3.client.GroupingColumnFilter.GroupingOperator;
+import org.spine3.client.CompositeColumnFilter.CompositeOperator;
 import org.spine3.client.ColumnFilter;
 import org.spine3.server.entity.storage.Column.MemoizedValue;
 
@@ -86,8 +86,8 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
     private boolean columnValuesMatch(EntityRecordWithColumns record) {
         final Map<String, MemoizedValue> entityColumns = record.getColumnValues();
         boolean match;
-        for (GroupingQueryParameter filter : queryParams) {
-            final GroupingOperator operator = filter.getOperator();
+        for (CompositeQueryParameter filter : queryParams) {
+            final CompositeOperator operator = filter.getOperator();
             switch (operator) {
                 case ALL:
                     match = checkAll(filter.getFilters(), entityColumns);
@@ -96,7 +96,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
                     match = checkEither(filter.getFilters(), entityColumns);
                     break;
                 default:
-                    throw new IllegalArgumentException(format("Grouping operator %s is invalid.",
+                    throw new IllegalArgumentException(format("Composite operator %s is invalid.",
                                                               operator));
             }
             if (!match) {

@@ -175,7 +175,7 @@ public final class QueryFactory {
 
     Query composeQuery(Class<? extends Message> entityClass,
                        @Nullable Set<? extends Message> ids,
-                       @Nullable Set<GroupingColumnFilter> columnFilters,
+                       @Nullable Set<CompositeColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 

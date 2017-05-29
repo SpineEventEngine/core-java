@@ -64,7 +64,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityQuery<I> implements Serializable {
 
-    private static final long serialVersionUID = 7007336125384634462L;
+    private static final long serialVersionUID = 1L;
 
     private final ImmutableSet<I> ids;
     private final QueryParameters parameters;
