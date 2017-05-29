@@ -35,8 +35,8 @@ import static com.google.common.base.Preconditions.checkState;
  * A registry of type conversion strategies for the {@link Column Columns}.
  *
  * <p>To register new {@link Class} to {@link ColumnType} mapping, do:
- * <code>
- *     <pre>
+ * <pre>
+ *     {@code
  *         final VarcharDateType varcharType = new VarcharDateType();
  *         final ColumnTypeRegistry registry = ColumnTypeRegistry.newBuilder()
  *                                                               .put(Date.class, varcharType)
@@ -46,8 +46,8 @@ import static com.google.common.base.Preconditions.checkState;
  *                                  // ...
  *                                  .setColumnTypeRegistry(registry)
  *                                  .build();
- *     </pre>
- * </code>
+ *     }
+ * </pre>
  *
  * <p>To retrieve the {@link ColumnType} instance (in case if you implement your own
  * {@linkplain org.spine3.server.storage.Storage Storage}) call {@link #get(Column)}

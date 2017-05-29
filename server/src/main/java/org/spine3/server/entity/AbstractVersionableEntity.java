@@ -111,11 +111,11 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      * @param state   the state object to set
      * @param version the entity version to set
      * @throws IllegalStateException
-     *                if the passed state is not {@linkplain #validate(S) valid}
+     *                if the passed state is not {@linkplain #validate(Message) valid}
      * @throws IllegalArgumentException
      *                if the passed version has the number which is greater than the current
      *                version of the entity
-     * @see #validate(S)
+     * @see #validate(Message)
      */
     void updateState(S state, Version version) {
         updateState(state);

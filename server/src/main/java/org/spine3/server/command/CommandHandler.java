@@ -134,7 +134,7 @@ public abstract class CommandHandler implements CommandDispatcher {
     }
 
     /**
-     * Indicates whether some another command handler is “equal to” this one.
+     * Indicates whether some another command handler is "equal to" this one.
      *
      * <p>Two command handlers are equal if they handle the same set of commands.
      *
