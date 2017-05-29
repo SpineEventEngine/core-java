@@ -20,22 +20,24 @@
 
 package org.spine3.client;
 
+import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.spine3.client.GroupingColumnFilter.GroupingOperator;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
-import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.client.ColumnFilter.Operator;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.protobuf.TypeConverter.toAny;
 
 /**
@@ -43,6 +45,25 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  *
  * <p>The public methods of this class represent the recommended way to create
  * a {@link ColumnFilter}.
+ *
+ * <a name="types"/>
+ * <h5>Comparision types</h5>
+ *
+ * <p>The Column filters support two generic kinds of comparison:
+ * <ol>
+ *     <li>Equality comparison
+ *     <li>Ordering comparison
+ * </ol>
+ *
+ * <p>The {@linkplain #eq equality comparison} supports any data type for the Entity Columns.
+ *
+ * <p>The ordering comparison ({@link #gt &gt;}, {@link #lt &lt;}, {@link #ge &gt;=},
+ * {@link #le &lt;=}) support only following data types for the Entity Columns:
+ * <ul>
+ *     <li>{@link Timestamp com.google.protobuf.Timestamp}
+ *     <li>Java primitive types
+ *     <li>{@code String}
+ * </ul>
  *
  * @see QueryBuilder for the application
  */
@@ -69,56 +90,68 @@ public final class ColumnFilters {
     /**
      * Creates new "greater than" {@link ColumnFilter}.
      *
+     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of ColumnFilter
      */
-    public static ColumnFilter gt(String columnName, Timestamp value) {
+    public static ColumnFilter gt(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(columnName, value, GREATER_THAN);
     }
 
     /**
      * Creates new "less than" {@link ColumnFilter}.
      *
+     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of ColumnFilter
      */
-    public static ColumnFilter lt(String columnName, Timestamp value) {
+    public static ColumnFilter lt(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(columnName, value, LESS_THAN);
     }
 
     /**
      * Creates new "greater or equal" {@link ColumnFilter}.
      *
-     * @param columnName the name of the Entity Column to query by, expressed in a single field
-     *                   name with no type info
-     * @param value      the requested value of the Entity Column
-     * @return new instance of ColumnFilter
-     */
-    public static ColumnFilter ge(String columnName, Timestamp value) {
-        checkNotNull(columnName);
-        checkNotNull(value);
-        return createFilter(columnName, value, GREATER_OR_EQUAL);
-    }
-
-    /**
-     * Creates new "less or equal" {@link ColumnFilter}.
+     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
      *
      * @param columnName the name of the Entity Column to query by, expressed in a single field
      *                   name with no type info
      * @param value      the requested value of the Entity Column
      * @return new instance of ColumnFilter
      */
-    public static ColumnFilter le(String columnName, Timestamp value) {
+    public static ColumnFilter ge(String columnName, Object value) {
         checkNotNull(columnName);
         checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
+        return createFilter(columnName, value, GREATER_OR_EQUAL);
+    }
+
+    /**
+     * Creates new "less or equal" {@link ColumnFilter}.
+     *
+     * <p>For the supported types description see <a href="#types">Comparision types section</a>.
+     *
+     * @param columnName the name of the Entity Column to query by, expressed in a single field
+     *                   name with no type info
+     * @param value      the requested value of the Entity Column
+     * @return new instance of ColumnFilter
+     */
+    public static ColumnFilter le(String columnName, Object value) {
+        checkNotNull(columnName);
+        checkNotNull(value);
+        checkSupportedOrderingComparisonType(value.getClass());
         return createFilter(columnName, value, LESS_OR_EQUAL);
     }
 
@@ -178,11 +211,22 @@ public final class ColumnFilters {
     }
 
     private static GroupingColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
-                                                            GroupingOperator operator) {
+                                                         GroupingOperator operator) {
         final GroupingColumnFilter result = GroupingColumnFilter.newBuilder()
-                                                                      .addAllFilter(filters)
-                                                                      .setOperator(operator)
-                                                                      .build();
+                                                                .addAllFilter(filters)
+                                                                .setOperator(operator)
+                                                                .build();
         return result;
+    }
+
+    private static void checkSupportedOrderingComparisonType(Class<?> cls) {
+        final Class<?> dataType = Primitives.wrap(cls);
+        final boolean supported = Number.class.isAssignableFrom(dataType)
+                || Timestamp.class.isAssignableFrom(dataType)
+                || Boolean.class.isAssignableFrom(dataType)
+                || String.class.isAssignableFrom(dataType);
+        checkArgument(supported,
+                      "The type %s is not supported for the ordering comparison.",
+                      dataType);
     }
 }
