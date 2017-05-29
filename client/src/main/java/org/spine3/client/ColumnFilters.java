@@ -60,9 +60,9 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  * <p>The ordering comparison ({@link #gt &gt;}, {@link #lt &lt;}, {@link #ge &gt;=},
  * {@link #le &lt;=}) support only following data types for the Entity Columns:
  * <ul>
- *     <li>{@link Timestamp com.google.protobuf.Timestamp}
- *     <li>Java primitive number types
- *     <li>{@code String}
+ *     <li>{@link Timestamp com.google.protobuf.Timestamp};
+ *     <li>Java primitive number types;
+ *     <li>{@code String}.
  * </ul>
  *
  * @see QueryBuilder for the application

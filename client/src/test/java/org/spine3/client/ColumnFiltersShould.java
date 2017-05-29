@@ -21,11 +21,18 @@
 package org.spine3.client;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.DoubleValue;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.spine3.client.ColumnFilter.Operator;
+import org.spine3.protobuf.AnyPacker;
+
+import java.util.Calendar;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.spine3.client.ColumnFilter.Operator.EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
@@ -38,7 +45,7 @@ import static org.spine3.client.ColumnFilters.ge;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
 import static org.spine3.client.ColumnFilters.lt;
-import static org.spine3.client.GroupingColumnFilter.*;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator;
 import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
 import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.protobuf.AnyPacker.pack;
@@ -108,6 +115,43 @@ public class ColumnFiltersShould {
                 gt(COLUMN_NAME, COLUMN_VALUE)
         };
         checkCreatesInstance(either(filters[0], filters[1]), EITHER, filters);
+    }
+
+    @Test
+    public void create_ordering_filters_for_numbers() {
+        final double number = 3.14;
+        final ColumnFilter filter = le("doubleColumn", number);
+        assertNotNull(filter);
+        assertEquals(LESS_OR_EQUAL, filter.getOperator());
+        final DoubleValue value = AnyPacker.unpack(filter.getValue());
+        assertEquals(number, value.getValue(), 0.0);
+    }
+
+    @Test
+    public void create_ordering_filters_for_strings() {
+        final String string = "abc";
+        final ColumnFilter filter = gt("stringColumn", string);
+        assertNotNull(filter);
+        assertEquals(GREATER_THAN, filter.getOperator());
+        final StringValue value = AnyPacker.unpack(filter.getValue());
+        assertEquals(string, value.getValue());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_ordering_filters_for_enums() {
+        ge("enumColumn", EQUAL);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_ordering_filters_for_non_primitive_numbers() {
+        final AtomicInteger number = new AtomicInteger(42);
+        ge("atomicColumn", number);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_create_ordering_filters_for_not_supported_types() {
+        final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
+        le("invaliudColumn", value);
     }
 
     private static void checkCreatesInstance(ColumnFilter filter,
