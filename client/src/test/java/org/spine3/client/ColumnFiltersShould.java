@@ -31,13 +31,19 @@ import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
 import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
+import static org.spine3.client.ColumnFilters.all;
+import static org.spine3.client.ColumnFilters.either;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.ge;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.le;
 import static org.spine3.client.ColumnFilters.lt;
+import static org.spine3.client.GroupingColumnFilter.*;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.ALL;
+import static org.spine3.client.GroupingColumnFilter.GroupingOperator.EITHER;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.time.Time.getCurrentTime;
 
 /**
@@ -86,10 +92,35 @@ public class ColumnFiltersShould {
         checkCreatesInstance(le(COLUMN_NAME, COLUMN_VALUE), LESS_OR_EQUAL);
     }
 
+    @Test
+    public void create_ALL_grouping_instances() {
+        final ColumnFilter[] filters = {
+                le(COLUMN_NAME, COLUMN_VALUE),
+                ge(COLUMN_NAME, COLUMN_VALUE)
+        };
+        checkCreatesInstance(all(filters[0], filters[1]), ALL, filters);
+    }
+
+    @Test
+    public void create_EITHER_grouping_instances() {
+        final ColumnFilter[] filters = {
+                lt(COLUMN_NAME, COLUMN_VALUE),
+                gt(COLUMN_NAME, COLUMN_VALUE)
+        };
+        checkCreatesInstance(either(filters[0], filters[1]), EITHER, filters);
+    }
+
     private static void checkCreatesInstance(ColumnFilter filter,
                                              Operator operator) {
         assertEquals(COLUMN_NAME, filter.getColumnName());
         assertEquals(pack(COLUMN_VALUE), filter.getValue());
         assertEquals(operator, filter.getOperator());
+    }
+
+    private static void checkCreatesInstance(GroupingColumnFilter filter,
+                                             GroupingOperator operator,
+                                             ColumnFilter[] groupedFilters) {
+        assertEquals(operator, filter.getOperator());
+        assertContainsAll(filter.getFilterList(), groupedFilters);
     }
 }
