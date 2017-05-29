@@ -74,16 +74,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Optional<EntityRecord> readRecord(I id) {
-        return getStorage().get(id);
-    }
-
-    @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        return readMultipleRecords(ids, FieldMask.getDefaultInstance());
-    }
-
-    @Override
     protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
                                                          FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
@@ -117,10 +107,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     @Override
     protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         return getStorage().readAllRecords(query, fieldMask);
-    }
-
-    protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
-        return new InMemoryRecordStorage<>(multitenant);
     }
 
     private TenantRecords<I> getStorage() {

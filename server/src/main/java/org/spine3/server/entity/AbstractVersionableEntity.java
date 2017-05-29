@@ -32,8 +32,6 @@ import javax.annotation.CheckReturnValue;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
-import static org.spine3.base.Versions.checkIsIncrement;
 import static org.spine3.util.Exceptions.newIllegalArgumentException;
 
 /**

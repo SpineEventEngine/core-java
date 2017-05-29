@@ -20,11 +20,10 @@
 
 package org.spine3.server.storage.memory;
 
-import org.spine3.base.EventId;
 import com.google.protobuf.Message;
+import org.spine3.base.EventId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;

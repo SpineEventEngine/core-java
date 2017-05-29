@@ -26,7 +26,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.json.Json;
 
 import javax.annotation.Nullable;
@@ -283,7 +283,7 @@ public final class QueryBuilder {
             @Override
             public Any apply(@Nullable Object o) {
                 checkNotNull(o);
-                final Any id = Identifiers.idToAny(o);
+                final Any id = Identifier.pack(o);
                 return id;
             }
         });

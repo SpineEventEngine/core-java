@@ -25,7 +25,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
 
-import static java.lang.String.*;
+import static java.lang.String.valueOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.spine3.client.QueryParameter.eq;

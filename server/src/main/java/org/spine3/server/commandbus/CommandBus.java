@@ -32,11 +32,11 @@ import org.spine3.base.Response;
 import org.spine3.base.Responses;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.io.StreamObservers;
+import org.spine3.server.Environment;
 import org.spine3.server.bus.Bus;
 import org.spine3.server.commandstore.CommandStore;
 import org.spine3.server.failure.FailureBus;
 import org.spine3.type.CommandClass;
-import org.spine3.server.Environment;
 
 import javax.annotation.Nullable;
 import java.util.List;

@@ -32,6 +32,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
+import org.spine3.base.Identifier;
 import org.spine3.base.Version;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -67,7 +68,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.entity.TestTransaction.injectState;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
@@ -117,7 +117,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     private EntityRecord newStorageRecord(I id, Message state) {
         final Any wrappedState = AnyPacker.pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
-                                                .setEntityId(idToAny(id))
+                                                .setEntityId(Identifier.pack(id))
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();

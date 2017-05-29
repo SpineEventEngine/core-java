@@ -24,17 +24,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
-import com.google.common.collect.Lists;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.EventRecordStorage;
-import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.RecordPredicate;
+import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nonnull;
@@ -103,16 +102,11 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     @VisibleForTesting
     static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
-        return new EventEntityMatchesStreamQuery(query);
-    }
-
-    private static Predicate<EventEntity> createFilter(EventStreamQuery query) {
         return new EventEntityMatchesStreamQuery(query).toEntityPredicate();
     }
 
     void store(Event event) {
         final EventEntity entity = new EventEntity(event);
-        store(entity);
     }
 
     private static Function<EventEntity, Event> getEventFunc() {

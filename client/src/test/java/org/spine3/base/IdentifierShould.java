@@ -174,14 +174,14 @@ public class IdentifierShould {
 
         final SeveralFieldsId idToConvert = SeveralFieldsId.newBuilder()
                                                            .setString(outerString)
-                                                           .setInt(number)
+                                                           .setNumber(number)
                                                            .setMessage(
                                                                    forString(nestedString))
                                                            .build();
 
         final String expected =
                 "string=\"" + outerString + '\"' +
-                        " int=" + number +
+                        " number=" + number +
                         " message { value=\"" + nestedString + "\" }";
 
         final String actual = Identifier.toString(idToConvert);
@@ -249,6 +249,6 @@ public class IdentifierShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_unpack_unsupported_types() {
-        Identifier.idFromAny(Any.getDefaultInstance());
+        Identifier.unpack(Any.getDefaultInstance());
     }
 }

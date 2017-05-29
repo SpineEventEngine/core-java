@@ -22,7 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -88,7 +88,7 @@ public final class EntityQueries {
         for (EntityId entityId : idFilter.getIdsList()) {
             final Any wrappedMessageId = entityId.getId();
             @SuppressWarnings("unchecked") // Checked at runtime
-            final I genericId = (I) Identifiers.idFromAny(wrappedMessageId);
+            final I genericId = (I) Identifier.unpack(wrappedMessageId);
             ids.add(genericId);
         }
         return ids;

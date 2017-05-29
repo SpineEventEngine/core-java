@@ -25,6 +25,7 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
+import org.spine3.server.storage.RecordStorageIO;
 
 import java.util.Map;
 
@@ -41,5 +42,10 @@ public class InMemoryEventRecordStorage extends EventRecordStorage {
     protected Map<EventId, EntityRecord> readRecords(EventStreamQuery query) {
         final Map<EventId, EntityRecord> allRecords = readAll();
         return allRecords;
+    }
+
+    @Override
+    public RecordStorageIO<EventId> getIO(Class<EventId> idClass) {
+        return getDelegateStorage().getIO(idClass);
     }
 }

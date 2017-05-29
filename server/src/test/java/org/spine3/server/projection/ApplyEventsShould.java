@@ -31,6 +31,7 @@ import org.spine3.base.Event;
 import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.validate.DoubleValueValidatingBuilder;
 
 /**
  * @author Alexander Yevsyukov
@@ -60,7 +61,7 @@ public class ApplyEventsShould {
         SerializableTester.reserialize(applyEvents);
     }
 
-    private static class Sum extends Projection<Long, DoubleValue> {
+    private static class Sum extends Projection<Long, DoubleValue, DoubleValueValidatingBuilder> {
 
         private Sum(Long id) {
             super(id);

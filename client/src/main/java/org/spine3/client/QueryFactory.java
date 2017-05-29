@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import org.spine3.base.ActorContext;
-import org.spine3.base.Identifiers;
+import org.spine3.base.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -59,7 +59,7 @@ public final class QueryFactory {
     }
 
     private static QueryId newQueryId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();

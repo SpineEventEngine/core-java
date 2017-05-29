@@ -38,7 +38,7 @@ import org.spine3.users.TenantId;
  *
  * @author Alexander Yevsyukov
  */
-class ProjectionRepositoryIO<I, P extends Projection<I, S>, S extends Message>
+class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends Message>
         extends RecordBasedRepositoryIO<I, P, S> {
 
     ProjectionRepositoryIO(ProjectionStorageIO<I> storageIO,
