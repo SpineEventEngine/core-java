@@ -23,8 +23,6 @@ package org.spine3.validate;
 import com.google.protobuf.Message;
 import org.spine3.type.TypeName;
 
-import javax.annotation.Nullable;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -79,7 +77,7 @@ public final class Validate {
     public static <M extends Message> M checkNotDefaultState(M object) {
         checkNotNull(object);
         checkNotDefaultState(object,
-                             "The message is in the default state: %s",
+                             "The message represents the default state: %s",
                              TypeName.of(object));
         return object;
     }
@@ -143,7 +141,7 @@ public final class Validate {
         if (!isDefault(object)) {
             final String typeName = TypeName.of(object)
                                             .value();
-            throw newIllegalStateException("The message is not in the default state: %s", typeName);
+            throw newIllegalStateException("The message do not represent the default state: %s", typeName);
         }
         return object;
     }
