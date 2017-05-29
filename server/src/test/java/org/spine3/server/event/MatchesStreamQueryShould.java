@@ -21,13 +21,29 @@
 package org.spine3.server.event;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Event;
+import org.spine3.base.FieldFilter;
+import org.spine3.base.Identifiers;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.test.TestEventFactory;
+import org.spine3.test.event.ProjectCreated;
+import org.spine3.test.event.ProjectId;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.spine3.test.TestEventFactory.newInstance;
 
 /**
  * @author Dmytro Dashenkov
  */
 public class MatchesStreamQueryShould {
+
+    private static final String FIELD_NAME = "spine.test.event.ProjectCreated.projectId";
+
+    private static final TestEventFactory eventFactory =
+            newInstance(MatchesStreamQueryShould.class);
 
     @Test
     public void not_accept_nulls() {
@@ -38,4 +54,47 @@ public class MatchesStreamQueryShould {
                 .setDefault(Event.class, Event.getDefaultInstance())
                 .testAllPublicInstanceMethods(predicate);
     }
+
+    @Test
+    public void match_proper_records() {
+        final ProjectId properField = ProjectId.newBuilder()
+                                               .setId(Identifiers.newUuid())
+                                               .build();
+        final ProjectCreated eventMsg = ProjectCreated.newBuilder()
+                                                      .setProjectId(properField)
+                                                      .build();
+        final Event event = eventFactory.createEvent(eventMsg);
+        final MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
+        assertTrue(predicate.apply(event));
+    }
+
+    @Test
+    public void not_match_improper_records() {
+        final ProjectId properField = ProjectId.newBuilder()
+                                               .setId(Identifiers.newUuid())
+                                               .build();
+        final ProjectId improperField = ProjectId.getDefaultInstance();
+        final ProjectCreated eventMsg = ProjectCreated.newBuilder()
+                                                      .setProjectId(improperField)
+                                                      .build();
+        final Event event = eventFactory.createEvent(eventMsg);
+        final MatchesStreamQuery predicate = eventWith(FIELD_NAME, properField);
+        assertFalse(predicate.apply(event));
+    }
+
+    private static MatchesStreamQuery eventWith(String fieldPath, Message field) {
+        final FieldFilter filter = FieldFilter.newBuilder()
+                                              .setFieldPath(fieldPath)
+                                              .addValue(AnyPacker.pack(field))
+                                              .build();
+        final EventFilter eventFilter = EventFilter.newBuilder()
+                                                   .addEventFieldFilter(filter)
+                                                   .build();
+        final EventStreamQuery query = EventStreamQuery.newBuilder()
+                                                       .addFilter(eventFilter)
+                                                       .build();
+        final MatchesStreamQuery predicate = new MatchesStreamQuery(query);
+        return predicate;
+    }
+
 }
