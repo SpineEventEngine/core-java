@@ -61,7 +61,7 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  * {@link #le &lt;=}) support only following data types for the Entity Columns:
  * <ul>
  *     <li>{@link Timestamp com.google.protobuf.Timestamp}
- *     <li>Java primitive types
+ *     <li>Java primitive number types
  *     <li>{@code String}
  * </ul>
  *
@@ -221,12 +221,17 @@ public final class ColumnFilters {
 
     private static void checkSupportedOrderingComparisonType(Class<?> cls) {
         final Class<?> dataType = Primitives.wrap(cls);
-        final boolean supported = Number.class.isAssignableFrom(dataType)
+        final boolean supported = isSupportedNumber(dataType)
                 || Timestamp.class.isAssignableFrom(dataType)
-                || Boolean.class.isAssignableFrom(dataType)
                 || String.class.isAssignableFrom(dataType);
         checkArgument(supported,
                       "The type %s is not supported for the ordering comparison.",
-                      dataType);
+                      dataType.getCanonicalName());
+    }
+
+    private static boolean isSupportedNumber(Class<?> wrapperClass) {
+        final boolean result = (Number.class.isAssignableFrom(wrapperClass)
+                && Comparable.class.isAssignableFrom(wrapperClass));
+        return result;
     }
 }

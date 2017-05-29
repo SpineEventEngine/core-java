@@ -34,7 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMultimap.copyOf;
 
 /**
- * A set of {@link ColumnFilter} instances joined by a logical aggregating
+ * A set of {@link ColumnFilter} instances joined by a logical grouping
  * {@link GroupingOperator operator}.
  *
  * @author Dmytro Dashenkov
@@ -56,7 +56,7 @@ public final class GroupingQueryParameter implements Serializable {
      * @return new instance of {@code GroupingQueryParameter}
      */
     static GroupingQueryParameter from(Multimap<Column, ColumnFilter> filters,
-                                          GroupingOperator operator) {
+                                       GroupingOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
         checkArgument(operator.getNumber() > 0, "Invalid aggregating operator %s.", operator);
@@ -65,7 +65,7 @@ public final class GroupingQueryParameter implements Serializable {
     }
 
     private GroupingQueryParameter(GroupingOperator operator,
-                                      Multimap<Column, ColumnFilter> filters) {
+                                   Multimap<Column, ColumnFilter> filters) {
         this.operator = operator;
         this.filters = copyOf(filters);
     }

@@ -81,15 +81,31 @@ final class OperatorComparators {
 
         INSTANCE;
 
+        @SuppressWarnings("ChainOfInstanceofChecks") // Generic but limited operand types
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
             if (left == null || right == null) {
                 return false;
             }
-            if (left instanceof Timestamp && right instanceof Timestamp) {
+            if (left.getClass() != right.getClass()) {
+                throw new IllegalArgumentException(
+                        format(
+                                "Cannot compare an instance of %s to an instance of %s.",
+                                left.getClass(),
+                                right.getClass())
+                );
+            }
+            if (left instanceof Timestamp) {
                 final Timestamp tsLeft = (Timestamp) left;
                 final Timestamp tsRight = (Timestamp) right;
                 return isLaterThan(tsLeft, tsRight);
+            }
+            if (left instanceof Comparable<?>) {
+                final Comparable cmpLeft = (Comparable<?>) left;
+                final Comparable cmpRight = (Comparable<?>) right;
+                @SuppressWarnings("unchecked") // Type is unknown but checked at runtime
+                final int comparisonResult = cmpLeft.compareTo(cmpRight);
+                return comparisonResult > 0;
             }
             throw new UnsupportedOperationException(
                     format("Operation \'%s\' is not supported for type %s.",
@@ -116,8 +132,8 @@ final class OperatorComparators {
 
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return EqualComparator.INSTANCE.compare(left, right)
-                    || GreaterThanComparator.INSTANCE.compare(left, right);
+            return GreaterThanComparator.INSTANCE.compare(left, right)
+                    || EqualComparator.INSTANCE.compare(left, right);
         }
     }
 
@@ -127,8 +143,8 @@ final class OperatorComparators {
 
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return EqualComparator.INSTANCE.compare(left, right)
-                    || LessThanComparator.INSTANCE.compare(left, right);
+            return LessThanComparator.INSTANCE.compare(left, right)
+                    || EqualComparator.INSTANCE.compare(left, right);
         }
     }
 }

@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.server.entity.storage.QueryOperators;
 
 import static com.google.protobuf.util.Timestamps.add;
 import static org.junit.Assert.assertFalse;
@@ -147,24 +146,32 @@ public class QueryOperatorsShould {
 
     @Test(expected = UnsupportedOperationException.class)
     public void fail_to_compare_unsupported_types_by_GT() {
-        compare("foa", GREATER_THAN, "bor");
+        compare(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void fail_to_compare_unsupported_types_by_GE() {
-        compare("boo", GREATER_OR_EQUAL, "far");
+        compare(FaultyComparisonType.INSTANCE, GREATER_OR_EQUAL, FaultyComparisonType.INSTANCE);
 
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void fail_to_compare_unsupported_types_by_LT() {
-        compare("roo", LESS_THAN, "baf");
+        compare(FaultyComparisonType.INSTANCE, LESS_THAN, FaultyComparisonType.INSTANCE);
 
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void fail_to_compare_unsupported_types_by_LE() {
-        compare("bfo", LESS_OR_EQUAL, "oar");
+        compare(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
+    }
 
+    private static class FaultyComparisonType {
+        @SuppressWarnings("InstantiationOfUtilityClass") // Not a utility class
+        private static final FaultyComparisonType INSTANCE = new FaultyComparisonType();
+
+        private FaultyComparisonType() {
+            // Singleton type
+        }
     }
 }
