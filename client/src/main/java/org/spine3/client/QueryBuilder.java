@@ -215,15 +215,15 @@ public final class QueryBuilder {
      *     {@code
      *     factory.select(Customer.class)
      *            // Possibly other parameters
-     *            .where(either(eq("companySize", SMALL), eq("companySize", MEDIUM)),
-     *                   all(gt("establishedTime", twoYearsAgo)))
+     *            .where(all(ge("companySize", 50), le("companySize", 1000)),
+     *                   either(gt("establishedTime", twoYearsAgo), eq("country", "Germany")))
      *            .build();
      *     }
      * </pre>
      *
      * <p>In the example above, the {@code Customer} records match the built query if they represent
-     * companies that have been created later than two years ago and that have either {@code SMALL}
-     * or {@code MEDIUM} company size.
+     * companies that have their company size between 50 and 1000 employees and either have been
+     * established less than two years ago, or originate from Germany.
      *
      * <p>Note that the filters which belong to {@link ColumnFilters#all all(...)} groups may be
      * regrouped on the behalf of the user, since the {@link ColumnFilters#all all(...)} behavior is
