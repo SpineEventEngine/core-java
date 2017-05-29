@@ -75,8 +75,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     protected RecordStorage<I> createStorage(StorageFactory factory) {
-        final RecordStorage<I> result = factory.createRecordStorage(getIdClass(),
-                                                                    getEntityStateClass());
+        final RecordStorage<I> result = factory.createRecordStorage(getEntityClass());
         return result;
     }
 

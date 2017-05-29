@@ -20,12 +20,13 @@
 
 package org.spine3.server.storage;
 
-import com.google.protobuf.Message;
 import org.spine3.base.EventId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
 import org.spine3.server.commandstore.CommandStore;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
+import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 
@@ -72,24 +73,25 @@ public interface StorageFactory extends AutoCloseable {
     /**
      * Creates a new {@link RecordStorage} instance.
      *
-     * @param <I>        the type of entity IDs
-     * @param <S>        the type of entity state
-     * @param idClass    the class of entity identifiers
-     * @param stateClass the class of entity state
+     * @param <I>         the type of entity IDs
+     * @param entityClass the class of entities to store
      */
-    <I, S extends Message> RecordStorage<I> createRecordStorage(Class<I> idClass,
-                                                                Class<S> stateClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
-     * @param <I>        the type of stream projection IDs
-     * @param <S>        the type of the projection state
-     * @param idClass    the class of identifiers
-     * @param stateClass the class of the projection state
+     * @param <I>             the type of stream projection IDs
+     * @param projectionClass the class of projections to be stored
      */
-    <I, S extends Message> ProjectionStorage<I> createProjectionStorage(Class<I> idClass,
-                                                                        Class<S> stateClass);
+    <I> ProjectionStorage<I> createProjectionStorage(
+            Class<? extends Projection<I, ?, ?>> projectionClass);
 
+    /*
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> var1);
+
+    <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> var1);
+
+     */
     /**
      * Creates a new {@link RecordStorage} for storing events.
      *

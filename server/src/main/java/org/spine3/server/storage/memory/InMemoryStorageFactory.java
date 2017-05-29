@@ -24,13 +24,17 @@ import com.google.protobuf.Message;
 import org.spine3.base.EventId;
 import org.spine3.server.aggregate.Aggregate;
 import org.spine3.server.aggregate.AggregateStorage;
+import org.spine3.server.entity.Entity;
 import org.spine3.server.entity.storage.ColumnTypeRegistry;
+import org.spine3.server.projection.Projection;
 import org.spine3.server.projection.ProjectionStorage;
 import org.spine3.server.stand.StandStorage;
 import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
+
+import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A factory for in-memory storages.
@@ -82,15 +86,19 @@ public class InMemoryStorageFactory implements StorageFactory {
      * {@inheritDoc}
      */
     @Override
-    public <I, S extends Message> RecordStorage<I> createRecordStorage(Class<I> idClass,
-                                                                       Class<S> stateClass) {
-        return InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), isMultitenant());
+    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
+        final Class<Message> stateClass =
+                getGenericParameterType(entityClass, Entity.GenericParameter.STATE.getIndex());
+        final TypeUrl typeUrl = TypeUrl.of(stateClass);
+        return InMemoryRecordStorage.newInstance(typeUrl, isMultitenant());
     }
 
     @Override
-    public <I, S extends Message>
-    ProjectionStorage<I> createProjectionStorage(Class<I> idClass, Class<S> stateClass) {
+    public <I> ProjectionStorage<I> createProjectionStorage(
+            Class<? extends Projection<I, ?, ?>> projectionClass) {
         final boolean multitenant = isMultitenant();
+        final Class<Message> stateClass =
+                getGenericParameterType(projectionClass, Entity.GenericParameter.STATE.getIndex());
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), multitenant);
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
