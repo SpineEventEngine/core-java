@@ -86,9 +86,9 @@ public class InMemoryStorageFactory implements StorageFactory {
      * {@inheritDoc}
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<Message> stateClass =
-                getGenericParameterType(entityClass, Entity.GenericParameter.STATE.getIndex());
+    public <I> RecordStorage<I>
+    createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
+        final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
         final TypeUrl typeUrl = TypeUrl.of(stateClass);
         return InMemoryRecordStorage.newInstance(typeUrl, isMultitenant());
     }
