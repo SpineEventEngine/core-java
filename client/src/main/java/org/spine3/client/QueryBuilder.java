@@ -225,9 +225,34 @@ public final class QueryBuilder {
      * companies that have their company size between 50 and 1000 employees and either have been
      * established less than two years ago, or originate from Germany.
      *
-     * <p>Note that the filters which belong to {@link ColumnFilters#all all(...)} groups may be
-     * regrouped on the behalf of the user, since the {@link ColumnFilters#all all(...)} behavior is
-     * default for the groups, as stated above.
+     * <p>Note that the filters which belong to different {@link ColumnFilters#all all(...)} groups
+     * may be represented as a single {@link ColumnFilters#all all(...)} group. For example, two
+     * following queries would be identical:
+     * <pre>
+     *     {@code
+     *     // Option 1
+     *     factory.select(Customer.class)
+     *            .where(all(
+     *                       eq("country", "Germany")),
+     *                   all(
+     *                       ge("companySize", 50),
+     *                       le("companySize", 100)))
+     *            .build();
+     *
+     *     // Option 2 (identical)
+     *     factory.select(Customer.class)
+     *            .where(all(
+     *                       eq("country", "Germany"),
+     *                       ge("companySize", 50),
+     *                       le("companySize", 100)))
+     *            .build();
+     *     }
+     * </pre>
+     *
+     * <p>The {@code Option 1} is recommended in this case, since the filters are grouped logically,
+     * though both builders produce effectively the same {@link Query} instances. Though note, that
+     * the instances may not be equal in terms of {@link Object#equals(Object), Object.equals}
+     * method.
      *
      * @param predicate a number of {@link CompositeColumnFilter} instances forming the query
      *                  predicate
