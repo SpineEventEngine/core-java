@@ -28,7 +28,7 @@ import org.spine3.reflect.GenericTypeIndex;
 import java.lang.reflect.Method;
 
 import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * An interface for all validating builders.
@@ -152,8 +152,8 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
         public static <T extends Message> Class<T> getMessageClass(
                 Class<? extends ValidatingBuilder> builderClass) {
             final Class<T> result =
-                    getGenericParameterType(builderClass,
-                                            GenericParameter.MESSAGE.getIndex());
+                    getGenericArgument(builderClass,
+                                       GenericParameter.MESSAGE.getIndex());
             return result;
         }
 

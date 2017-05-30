@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * The abstract base for classes obtaining a value of a named property.
@@ -52,7 +52,7 @@ public abstract class NamedProperty<T, O> {
      * Obtains the class of the value.
      */
     protected Class<T> getValueClass() {
-        final Class<T> cls = getGenericParameterType(getClass(), 0);
+        final Class<T> cls = getGenericArgument(getClass(), 0);
         return cls;
     }
 

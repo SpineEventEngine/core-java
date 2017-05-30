@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * A base for entities, which can play {@linkplain org.spine3.base.Event events}.
@@ -300,8 +300,8 @@ public abstract class EventPlayingEntity <I,
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
 
-            final Class<B> builderClass = getGenericParameterType(entityClass,
-                                                                  STATE_BUILDER.getIndex());
+            final Class<B> builderClass = getGenericArgument(entityClass,
+                                                             STATE_BUILDER.getIndex());
             return builderClass;
         }
     }

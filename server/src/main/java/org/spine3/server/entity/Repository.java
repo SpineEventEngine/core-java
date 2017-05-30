@@ -42,7 +42,7 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * Abstract base class for repositories.
@@ -311,8 +311,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         private static <E extends Entity<I, ?>, I>
         Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
-            final Class<E> result = getGenericParameterType(repositoryClass,
-                                                            GenericParameter.ENTITY.getIndex());
+            final Class<E> result = getGenericArgument(repositoryClass,
+                                                       GenericParameter.ENTITY.getIndex());
             return result;
         }
     }

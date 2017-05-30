@@ -30,7 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * A part of a larger aggregate.
@@ -207,7 +207,7 @@ public abstract class AggregatePart<I,
         static <I, R extends AggregateRoot<I>> Class<R>
         getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
             checkNotNull(aggregatePartClass);
-            final Class<R> rootClass = getGenericParameterType(
+            final Class<R> rootClass = getGenericArgument(
                     aggregatePartClass,
                     GenericParameter.AGGREGATE_ROOT.getIndex());
             return rootClass;

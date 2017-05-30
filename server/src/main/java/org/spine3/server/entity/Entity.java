@@ -20,12 +20,9 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
+import org.spine3.util.Reflection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -87,16 +84,9 @@ public interface Entity<I, S extends Message> {
         }
 
         private Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
-            final TypeToken<?> supertypeToken = TypeToken.of(entityClass)
-                                                         .getSupertype(Entity.class);
-            final ParameterizedType genericSuperclass =
-                    (ParameterizedType) supertypeToken.getType();
-            final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
-            final Type typeArgument = typeArguments[index];
-            @SuppressWarnings("unchecked") /* The type is ensured by the bounds of the Entity
-                interface since its parameters can be only classes. */
-            final Class<?> result = (Class<?>) typeArgument;
-            return result;
+            final Class<Entity> superclass = Entity.class;
+            final int index = getIndex();
+            return Reflection.getGenericArgument(entityClass, superclass, index);
         }
 
         @Override
@@ -123,7 +113,7 @@ public interface Entity<I, S extends Message> {
          */
         public static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
             checkNotNull(entityClass);
-            @SuppressWarnings("unchecked") // the type is preserved by bounds of the class param.
+            @SuppressWarnings("unchecked") // the caller is responsible for the correct type.
             final Class<I> result = (Class<I>) GenericParameter.ID.getArgumentIn(entityClass);
             return result;
         }
@@ -137,7 +127,7 @@ public interface Entity<I, S extends Message> {
          */
         public static <S extends Message> Class<S>
         getStateClass(Class<? extends Entity> entityClass) {
-            @SuppressWarnings("unchecked") // the type is preserved by bounds of the class param.
+            @SuppressWarnings("unchecked") // the caller is responsible for the correct type.
             final Class<S> result = (Class<S>) GenericParameter.STATE.getArgumentIn(entityClass);
             return result;
         }
