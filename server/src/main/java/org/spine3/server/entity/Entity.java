@@ -20,6 +20,7 @@
 
 package org.spine3.server.entity;
 
+import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
 
@@ -27,7 +28,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Class) identity}.
@@ -86,6 +86,19 @@ public interface Entity<I, S extends Message> {
             this.index = index;
         }
 
+        private Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
+            final TypeToken<?> supertypeToken = TypeToken.of(entityClass)
+                                                         .getSupertype(Entity.class);
+            final ParameterizedType genericSuperclass =
+                    (ParameterizedType) supertypeToken.getType();
+            final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
+            final Type typeArgument = typeArguments[index];
+            @SuppressWarnings("unchecked") /* The type is ensured by the bounds of the Entity
+                interface since its parameters can be only classes. */
+            final Class<?> result = (Class<?>) typeArgument;
+            return result;
+        }
+
         @Override
         public int getIndex() {
             return this.index;
@@ -105,44 +118,27 @@ public interface Entity<I, S extends Message> {
          * Retrieves the ID class of the entities of the given class using reflection.
          *
          * @param entityClass the entity class to inspect
-         * @param <I> the entity ID type
+         * @param <I>         the entity ID type
          * @return the entity ID class
          */
-        public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+        public static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
             checkNotNull(entityClass);
-            final Class<I> idClass = getGenericParameterType(entityClass,
-                                                             GenericParameter.ID.getIndex());
-            return idClass;
+            @SuppressWarnings("unchecked") // the type is preserved by bounds of the class param.
+            final Class<I> result = (Class<I>) GenericParameter.ID.getArgumentIn(entityClass);
+            return result;
         }
 
         /**
          * Retrieves the state class of the passed entity class.
          *
+         * @param <S>         the entity state type
          * @param entityClass the entity class to inspect
-         * @param <S> the entity state type
          * @return the entity state class
          */
-        public static <S extends Message> Class<S> getStateClass(
-                Class<? extends Entity> entityClass) {
-            final Class<S> result = getGenericParameterType(entityClass,
-                                                            GenericParameter.STATE.getIndex());
-            return result;
-        }
-
-        public static <S extends Message> Class<S> getStateClassNew(
-                Class<? extends Entity<?, S>> entityClass) {
-            Type parentClass = entityClass.getGenericSuperclass();
-
-            while (!(parentClass.equals(Entity.class))) {
-                parentClass = ((Class)parentClass).getGenericSuperclass();
-            }
-
-            final ParameterizedType genericSuperclass = (ParameterizedType)parentClass;
-            final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
-            final Type typeArgument = typeArguments[GenericParameter.STATE.getIndex()];
-
-            @SuppressWarnings("unchecked") // The type is ensured by the bounds of the call.
-            final Class<S> result = (Class<S>) typeArgument;
+        public static <S extends Message> Class<S>
+        getStateClass(Class<? extends Entity> entityClass) {
+            @SuppressWarnings("unchecked") // the type is preserved by bounds of the class param.
+            final Class<S> result = (Class<S>) GenericParameter.STATE.getArgumentIn(entityClass);
             return result;
         }
     }
