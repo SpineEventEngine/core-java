@@ -109,6 +109,17 @@ public final class CompositeQueryParameter implements Serializable {
         return result;
     }
 
+    /**
+     * Merges current instance with the given filter.
+     *
+     * <p>The resulting {@code CompositeQueryParameter} is joined with
+     * the {@link CompositeOperator#ALL ALL} operator.
+     *
+     * @param column the {@link Column} to add the filter to
+     * @param columnFilter the value of the filter to add
+     * @return new instance of {@code CompositeQueryParameter} merged from current instance and
+     * the given filter
+     */
     public CompositeQueryParameter and(Column column, ColumnFilter columnFilter) {
         checkNotNull(column);
         checkNotNull(columnFilter);
