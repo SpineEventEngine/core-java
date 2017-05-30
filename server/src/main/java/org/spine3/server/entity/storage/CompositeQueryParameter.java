@@ -22,6 +22,7 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
@@ -106,6 +107,16 @@ public final class CompositeQueryParameter implements Serializable {
         }
         final CompositeQueryParameter result = from(mergedFilters, ALL);
         return result;
+    }
+
+    public CompositeQueryParameter and(Column column, ColumnFilter columnFilter) {
+        checkNotNull(column);
+        checkNotNull(columnFilter);
+
+        final Multimap<Column, ColumnFilter> newFilters = HashMultimap.create(filters);
+        newFilters.put(column, columnFilter);
+        final CompositeQueryParameter parameter = from(newFilters, ALL);
+        return parameter;
     }
 
     @Override

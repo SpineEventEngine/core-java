@@ -32,6 +32,7 @@ import org.spine3.server.entity.Entity;
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static org.junit.Assert.assertEquals;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.ge;
 import static org.spine3.client.ColumnFilters.lt;
@@ -89,8 +90,41 @@ public class CompositeQueryParameterShould {
                                                                             versionUpperBound));
 
         // Check
+        assertEquals(all.getOperator(), ALL);
+
         final Multimap<Column, ColumnFilter> asMultimp = all.getFilters();
         assertContainsAll(asMultimp.get(versionColumn), versionLower, versionUpper);
+        assertContainsAll(asMultimp.get(archivedColumn), archived);
+        assertContainsAll(asMultimp.get(deletedColumn), deleted);
+    }
+
+    @Test
+    public void merge_with_single_filter() {
+        final Class<? extends Entity> cls = AbstractVersionableEntity.class;
+
+        final String archivedColumnName = archived.name();
+        final String deletedColumnName = deleted.name();
+        final String versionColumnName = version.name();
+
+        final Column archivedColumn = Columns.findColumn(cls, archivedColumnName);
+        final Column deletedColumn = Columns.findColumn(cls, deletedColumnName);
+        final Column versionColumn = Columns.findColumn(cls, versionColumnName);
+
+        final ColumnFilter archived = eq(archivedColumnName, false);
+        final ColumnFilter deleted = eq(archivedColumnName, false);
+        final ColumnFilter version = ge(archivedColumnName, 4);
+
+        final CompositeQueryParameter lifecycle = from(of(archivedColumn, archived,
+                                                          deletedColumn, deleted),
+                                                       ALL);
+        // Merge the instances
+        final CompositeQueryParameter all = lifecycle.and(versionColumn, version);
+
+        // Check
+        assertEquals(all.getOperator(), ALL);
+
+        final Multimap<Column, ColumnFilter> asMultimp = all.getFilters();
+        assertContainsAll(asMultimp.get(versionColumn), version);
         assertContainsAll(asMultimp.get(archivedColumn), archived);
         assertContainsAll(asMultimp.get(deletedColumn), deleted);
     }
