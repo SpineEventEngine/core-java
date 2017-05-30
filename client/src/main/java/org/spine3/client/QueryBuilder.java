@@ -251,7 +251,7 @@ public final class QueryBuilder {
      *
      * <p>The {@code Option 1} is recommended in this case, since the filters are grouped logically,
      * though both builders produce effectively the same {@link Query} instances. Though, note, that
-     * the instances may not be equal in terms of {@link Object#equals(Object), Object.equals}
+     * the instances may not be equal in terms of {@link Object#equals(Object) Object.equals}
      * method.
      *
      * @param predicate a number of {@link CompositeColumnFilter} instances forming the query

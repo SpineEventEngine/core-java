@@ -46,8 +46,8 @@ import static org.spine3.protobuf.TypeConverter.toAny;
  * <p>The public methods of this class represent the recommended way to create
  * a {@link ColumnFilter}.
  *
- * <a name="types"/>
- * <h5>Comparision types</h5>
+ * <a name="types"></a>
+ * <h1>Comparision types</h1>
  *
  * <p>The Column filters support two generic kinds of comparison:
  * <ol>
