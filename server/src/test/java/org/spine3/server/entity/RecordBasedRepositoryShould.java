@@ -55,13 +55,17 @@ import static org.spine3.test.Verify.assertNotContains;
 import static org.spine3.test.Verify.assertSize;
 
 /**
+ * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
+ *
+ * @param <E> the type of the {@link Entity} of this repository; the type is checked to implement
+ *            {@link TestEntityWithStringColumn} at runtime
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ConstantConditions")
-public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>
-        & TestEntityWithStringColumn,
-        I,
-        S extends Message>
+public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>,
+                                                  I,
+                                                  S extends Message>
         extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
