@@ -47,11 +47,11 @@ public class Reflection {
      * <ol>
      *     <li>The passed class must have a generic superclass.
      *     <li>This generic superclass must have the number of generic
-     *        parameters greater than value passed in {@code paramNumber}.
+     *        parameters greater or equal the value passed in {@code paramNumber}.
      *     <li>The generic parameter must not be a type variable.
      * </ol>
      *
-     * @param cls the class to check
+     * @param cls         the class to check
      * @param paramNumber a zero-based index of the generic parameter in the class declaration
      * @param <T> the generic type
      * @return the class reference for the generic type
