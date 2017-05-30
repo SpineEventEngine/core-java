@@ -23,6 +23,9 @@ package org.spine3.server.entity;
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Reflection.getGenericParameterType;
 
@@ -123,6 +126,23 @@ public interface Entity<I, S extends Message> {
                 Class<? extends Entity> entityClass) {
             final Class<S> result = getGenericParameterType(entityClass,
                                                             GenericParameter.STATE.getIndex());
+            return result;
+        }
+
+        public static <S extends Message> Class<S> getStateClassNew(
+                Class<? extends Entity<?, S>> entityClass) {
+            Type parentClass = entityClass.getGenericSuperclass();
+
+            while (!(parentClass.equals(Entity.class))) {
+                parentClass = ((Class)parentClass).getGenericSuperclass();
+            }
+
+            final ParameterizedType genericSuperclass = (ParameterizedType)parentClass;
+            final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
+            final Type typeArgument = typeArguments[GenericParameter.STATE.getIndex()];
+
+            @SuppressWarnings("unchecked") // The type is ensured by the bounds of the call.
+            final Class<S> result = (Class<S>) typeArgument;
             return result;
         }
     }
