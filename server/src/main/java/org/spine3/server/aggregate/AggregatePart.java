@@ -23,6 +23,7 @@ package org.spine3.server.aggregate;
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
 import org.spine3.server.entity.AbstractEntity;
+import org.spine3.util.Reflection;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.Constructor;
@@ -30,7 +31,6 @@ import java.lang.reflect.InvocationTargetException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * A part of a larger aggregate.
@@ -207,8 +207,10 @@ public abstract class AggregatePart<I,
         static <I, R extends AggregateRoot<I>> Class<R>
         getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
             checkNotNull(aggregatePartClass);
-            final Class<R> rootClass = getGenericArgument(
+            @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
+            final Class<R> rootClass = (Class<R>)Reflection.getGenericArgument(
                     aggregatePartClass,
+                    AggregatePart.class,
                     GenericParameter.AGGREGATE_ROOT.getIndex());
             return rootClass;
         }

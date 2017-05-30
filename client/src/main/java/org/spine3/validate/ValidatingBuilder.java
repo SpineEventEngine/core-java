@@ -24,11 +24,11 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.reflect.GenericTypeIndex;
+import org.spine3.util.Reflection;
 
 import java.lang.reflect.Method;
 
 import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
-import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * An interface for all validating builders.
@@ -151,9 +151,11 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
          */
         public static <T extends Message> Class<T> getMessageClass(
                 Class<? extends ValidatingBuilder> builderClass) {
-            final Class<T> result =
-                    getGenericArgument(builderClass,
-                                       GenericParameter.MESSAGE.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
+            final Class<T> result = (Class<T>) Reflection.getGenericArgument(
+                    builderClass,
+                    ValidatingBuilder.class,
+                    GenericParameter.MESSAGE.getIndex());
             return result;
         }
 

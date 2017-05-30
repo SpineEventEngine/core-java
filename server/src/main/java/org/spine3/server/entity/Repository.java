@@ -31,6 +31,7 @@ import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
+import org.spine3.util.Reflection;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -42,7 +43,6 @@ import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
-import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * Abstract base class for repositories.
@@ -311,8 +311,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         private static <E extends Entity<I, ?>, I>
         Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
-            final Class<E> result = getGenericArgument(repositoryClass,
-                                                       GenericParameter.ENTITY.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
+            final Class<E> result = (Class<E>) Reflection.getGenericArgument(
+                    repositoryClass,
+                    Repository.class,
+                    GenericParameter.ENTITY.getIndex());
             return result;
         }
     }

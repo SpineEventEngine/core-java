@@ -42,42 +42,6 @@ public class Reflection {
     }
 
     /**
-     * Returns a class of the generic type of the passed class.
-     *
-     * <p>Two restrictions apply to the passed class:
-     * <ol>
-     * <li>The passed class must have a generic superclass.
-     * <li>This generic superclass must have at least {@code paramNumber + 1} generic parameters.
-     * <li>The generic parameter must not be a type variable.
-     * </ol>
-     *
-     * @param cls         the class to check
-     * @param paramNumber a zero-based index of the generic parameter in the class declaration
-     * @param <T>         the generic type
-     * @return the class reference for the generic type
-     * @throws ClassCastException if the passed class does not have a generic
-     *                            parameter of the expected class
-     */
-    @CheckReturnValue
-    public static <T> Class<T> getGenericArgument(Class<?> cls, int paramNumber) {
-        checkNotNull(cls);
-
-        // We cast here as we assume that the superclasses of the classes
-        // we operate with are parametrized too.
-        final ParameterizedType genericSuperclass =
-                (ParameterizedType) cls.getGenericSuperclass();
-
-        final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
-        final Type typeArgument = typeArguments[paramNumber];
-
-        @SuppressWarnings("unchecked") /* The cast is the purpose of this method.
-            Correctness of the cast must be ensured in the calling code by passing the class,
-            which meets the requirements described in the Javadoc. */
-        final Class<T> result = (Class<T>) typeArgument;
-        return result;
-    }
-
-    /**
      * Obtains the class of a generic type argument which is specified in the inheritance chain
      * of the passed class.
      *

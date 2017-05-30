@@ -26,6 +26,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.reflect.GenericTypeIndex;
+import org.spine3.util.Reflection;
 import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
@@ -35,7 +36,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
-import static org.spine3.util.Reflection.getGenericArgument;
 
 /**
  * A base for entities, which can play {@linkplain org.spine3.base.Event events}.
@@ -299,8 +299,11 @@ public abstract class EventPlayingEntity <I,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
-            final Class<B> builderClass = getGenericArgument(entityClass,
-                                                             STATE_BUILDER.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
+            final Class<B> builderClass = (Class<B>) Reflection.getGenericArgument(
+                    entityClass,
+                    EventPlayingEntity.class,
+                    STATE_BUILDER.getIndex());
             return builderClass;
         }
     }
