@@ -26,12 +26,12 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.reflect.GenericTypeIndex;
+import org.spine3.reflect.Reflection;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
 import org.spine3.type.KnownTypes;
 import org.spine3.type.TypeUrl;
-import org.spine3.util.Reflection;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -40,6 +40,7 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Identifiers.idToString;
+import static org.spine3.server.entity.Repository.GenericParameter.ENTITY;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
@@ -287,7 +288,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<Repository> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -305,6 +306,11 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         public int getIndex() {
             return this.index;
         }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends Repository> cls) {
+            return Reflection.getGenericArgument(cls, Repository.class, getIndex());
+        }
     }
 
     private static class TypeInfo {
@@ -312,10 +318,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         private static <E extends Entity<I, ?>, I>
         Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
             @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
-            final Class<E> result = (Class<E>) Reflection.getGenericArgument(
-                    repositoryClass,
-                    Repository.class,
-                    GenericParameter.ENTITY.getIndex());
+            final Class<E> result = (Class<E>)ENTITY.getArgumentIn(repositoryClass);
             return result;
         }
     }

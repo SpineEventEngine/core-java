@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.reflect;
 
 import com.google.common.reflect.TypeToken;
 import org.spine3.annotation.Internal;
@@ -64,8 +64,7 @@ public class Reflection {
                 (ParameterizedType) supertypeToken.getType();
         final Type[] typeArguments = genericSupertype.getActualTypeArguments();
         final Type typeArgument = typeArguments[paramNumber];
-        @SuppressWarnings("unchecked") /* The type is ensured by the bounds of the Entity
-            interface since its parameters can be only classes. */
+        @SuppressWarnings("unchecked") // The type is ensured by the calling code.
         final Class<?> result = (Class<?>) typeArgument;
         return result;
     }

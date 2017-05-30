@@ -22,6 +22,7 @@ package org.spine3.util;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
+import org.spine3.reflect.Reflection;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;

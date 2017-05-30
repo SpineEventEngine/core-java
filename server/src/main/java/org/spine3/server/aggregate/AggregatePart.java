@@ -22,8 +22,8 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
+import org.spine3.reflect.Reflection;
 import org.spine3.server.entity.AbstractEntity;
-import org.spine3.util.Reflection;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.Constructor;
@@ -169,7 +169,7 @@ public abstract class AggregatePart<I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<AggregatePart> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -193,6 +193,11 @@ public abstract class AggregatePart<I,
         public int getIndex() {
             return this.index;
         }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends AggregatePart> cls) {
+            return Reflection.getGenericArgument(cls, AggregatePart.class, getIndex());
+        }
     }
 
     /**
@@ -208,10 +213,8 @@ public abstract class AggregatePart<I,
         getRootClass(Class<? extends AggregatePart<I, ?, ?, R>> aggregatePartClass) {
             checkNotNull(aggregatePartClass);
             @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
-            final Class<R> rootClass = (Class<R>)Reflection.getGenericArgument(
-                    aggregatePartClass,
-                    AggregatePart.class,
-                    GenericParameter.AGGREGATE_ROOT.getIndex());
+            final Class<R> rootClass =
+                    (Class<R>)GenericParameter.AGGREGATE_ROOT.getArgumentIn(aggregatePartClass);
             return rootClass;
         }
     }

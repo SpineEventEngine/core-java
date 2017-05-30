@@ -23,12 +23,21 @@ package org.spine3.reflect;
 /**
  * Base interface for enumerations on generic parameters of types.
  *
+ * @param <C> the type in which class the generic index is declared
  * @author Alexander Yevsyukov
  */
-public interface GenericTypeIndex {
+public interface GenericTypeIndex<C> {
 
     /**
      * Obtains a zero-based index of a generic parameter of a type.
      */
     int getIndex();
+
+    /**
+     * Obtains the class of the genetic type argument.
+     *
+     * @param cls the class to inspect
+     * @return the argument class
+     */
+    Class<?> getArgumentIn(Class<? extends C> cls);
 }

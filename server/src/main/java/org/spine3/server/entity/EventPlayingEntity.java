@@ -26,7 +26,7 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.reflect.GenericTypeIndex;
-import org.spine3.util.Reflection;
+import org.spine3.reflect.Reflection;
 import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
@@ -258,7 +258,7 @@ public abstract class EventPlayingEntity <I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<EventPlayingEntity> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -278,6 +278,11 @@ public abstract class EventPlayingEntity <I,
         @Override
         public int getIndex() {
             return this.index;
+        }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends EventPlayingEntity> cls) {
+            return Reflection.getGenericArgument(cls, EventPlayingEntity.class, getIndex());
         }
     }
 
@@ -300,10 +305,7 @@ public abstract class EventPlayingEntity <I,
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
             @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
-            final Class<B> builderClass = (Class<B>) Reflection.getGenericArgument(
-                    entityClass,
-                    EventPlayingEntity.class,
-                    STATE_BUILDER.getIndex());
+            final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
             return builderClass;
         }
     }

@@ -21,6 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.base.Optional;
+import org.spine3.reflect.Reflection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
