@@ -23,15 +23,17 @@ package org.spine3.server.entity.storage;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import org.spine3.client.CompositeColumnFilter.CompositeOperator;
 import org.spine3.client.ColumnFilter;
+import org.spine3.client.CompositeColumnFilter.CompositeOperator;
 
 import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMultimap.copyOf;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 
 /**
  * A set of {@link ColumnFilter} instances joined by a logical grouping
@@ -56,7 +58,7 @@ public final class CompositeQueryParameter implements Serializable {
      * @return new instance of {@code CompositeQueryParameter}
      */
     static CompositeQueryParameter from(Multimap<Column, ColumnFilter> filters,
-                                       CompositeOperator operator) {
+                                        CompositeOperator operator) {
         checkNotNull(filters);
         checkNotNull(operator);
         checkArgument(operator.getNumber() > 0, "Invalid aggregating operator %s.", operator);
@@ -65,7 +67,7 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     private CompositeQueryParameter(CompositeOperator operator,
-                                   Multimap<Column, ColumnFilter> filters) {
+                                    Multimap<Column, ColumnFilter> filters) {
         this.operator = operator;
         this.filters = copyOf(filters);
     }
@@ -83,6 +85,27 @@ public final class CompositeQueryParameter implements Serializable {
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public ImmutableMultimap<Column, ColumnFilter> getFilters() {
         return filters;
+    }
+
+    /**
+     * Merges current instance with the given instances by the rules of conjunction.
+     *
+     * <p>The resulting {@code CompositeQueryParameter} contains all the filters of the current and
+     * the given instances joined by the {@linkplain CompositeOperator#ALL conjunction operator}.
+     *
+     * @param other the instances of the {@code CompositeQueryParameter} to merge with
+     * @return new instance of {@code CompositeQueryParameter} joining all the parameters
+     */
+    public CompositeQueryParameter conjunct(Iterable<CompositeQueryParameter> other) {
+        checkNotNull(other);
+
+        final Multimap<Column, ColumnFilter> mergedFilters = LinkedListMultimap.create();
+        mergedFilters.putAll(filters);
+        for (CompositeQueryParameter parameter : other) {
+            mergedFilters.putAll(parameter.getFilters());
+        }
+        final CompositeQueryParameter result = from(mergedFilters, ALL);
+        return result;
     }
 
     @Override
