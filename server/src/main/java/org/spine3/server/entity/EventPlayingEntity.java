@@ -123,7 +123,7 @@ public abstract class EventPlayingEntity <I,
      */
     @VisibleForTesting
     boolean isTransactionInProgress() {
-        final boolean result = this.transaction != null && this.transaction.isActive();
+        final boolean result = transaction != null && transaction.isActive();
         return result;
     }
 
@@ -299,7 +299,6 @@ public abstract class EventPlayingEntity <I,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
-
             final Class<B> builderClass = getGenericArgument(entityClass,
                                                              STATE_BUILDER.getIndex());
             return builderClass;

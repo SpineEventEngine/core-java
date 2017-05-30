@@ -52,7 +52,9 @@ public abstract class NamedProperty<T, O> {
      * Obtains the class of the value.
      */
     protected Class<T> getValueClass() {
-        final Class<T> cls = getGenericArgument(getClass(), 0);
+        @SuppressWarnings("unchecked") /* The type is ensured by the first generic param
+                                          of this class declaration. */
+        final Class<T> cls = (Class<T>) getGenericArgument(getClass(), NamedProperty.class, 0);
         return cls;
     }
 
