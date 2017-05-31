@@ -72,6 +72,8 @@ public interface GenericTypeIndex<C> {
          * @return      the value of the generic argument
          */
         public static <C> Class<?> getArgument(GenericTypeIndex<C> index, Class<? extends C> cls) {
+            checkNotNull(index);
+            checkNotNull(cls);
             @SuppressWarnings("unchecked") /* The type is ensured by the declaration of
                                               the GenericTypeIndex interface. */
             final Class<C> superclass = (Class<C>)
