@@ -29,7 +29,7 @@ import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Version;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
