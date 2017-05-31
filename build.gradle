@@ -326,5 +326,5 @@ cleanGCS {
     authKeyPath = "gcs-auth-key.json"
     bucketName = properties.getProperty("artifacts.bucket")
     targetFolder = properties.getProperty("artifacts.folder")
-    threshold = TimeCategory.getDays(30)
+    threshold = TimeCategory.getDays(5)
 }

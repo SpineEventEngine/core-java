@@ -19,6 +19,6 @@ dpl --provider=gcs \
     --access-key-id=GOOGX66ER6DXLZH7IKQF \
     --secret-access-key=${GCS_SECRET} \
     --bucket="$(getProp 'artifacts.bucket')" \
-    --upload-dir="$(getProp 'artifacts.folder')"/${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH}-${TRAVIS_BUILD_NUMBER} \
+    --upload-dir="$(getProp 'artifacts.folder')"/${TRAVIS_BUILD_NUMBER}-${TRAVIS_PULL_REQUEST_BRANCH:-$TRAVIS_BRANCH} \
     --local-dir=reports \
     --skip_cleanup=true
