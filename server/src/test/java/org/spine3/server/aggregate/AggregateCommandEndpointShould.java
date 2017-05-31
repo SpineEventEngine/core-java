@@ -28,7 +28,7 @@ import org.mockito.ArgumentCaptor;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;

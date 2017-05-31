@@ -28,7 +28,7 @@ import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Responses;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.event.enrich.EventEnricher;
 import org.spine3.server.storage.StorageFactory;

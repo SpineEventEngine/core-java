@@ -25,7 +25,7 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.change.StringChange;
 import org.spine3.client.CommandFactory;
 import org.spine3.envelope.FailureEnvelope;
