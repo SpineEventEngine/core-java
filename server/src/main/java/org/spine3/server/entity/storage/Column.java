@@ -298,6 +298,15 @@ public class Column implements Serializable {
         return Objects.hashCode(getter);
     }
 
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(entityType.getSimpleName())
+          .append('.')
+          .append(getName());
+        return sb.toString();
+    }
+
     private void readObject(ObjectInputStream inputStream) throws IOException,
                                                                   ClassNotFoundException {
         inputStream.defaultReadObject();

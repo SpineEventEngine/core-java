@@ -54,6 +54,12 @@ public class ColumnShould {
         reserializeAndAssert(column);
     }
 
+    @Test
+    public void support_tooString() {
+        final Column column = forMethod("getVersion", VersionableEntity.class);
+        assertEquals("VersionableEntity.version", column.toString());
+    }
+
     @Test(expected = IllegalArgumentException.class)
     public void construct_for_getter_method_only() {
         forMethod("toString", Object.class);
