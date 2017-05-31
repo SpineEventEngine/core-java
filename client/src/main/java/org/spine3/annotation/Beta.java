@@ -35,8 +35,6 @@ import java.lang.annotation.Target;
  * quality of the API in question, only the fact that it is not "API-frozen."
  * It is generally safe for applications to depend on beta APIs, at the cost of some extra work
  * during upgrades.
- *
- * @author Dmytro Grankin
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({
