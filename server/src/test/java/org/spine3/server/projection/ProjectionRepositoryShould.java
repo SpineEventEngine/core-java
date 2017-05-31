@@ -180,25 +180,28 @@ public class ProjectionRepositoryShould
         keepTenantIdFromEvent(event);
     }
 
-    // Tests
-    //-------------------------
+    /*
+     * Tests
+     ************/
 
     /**
-     * As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in
-     * {@link #setUp()}, the catch-up should be automatically triggered.
+     * Tests that the repository become {@code ONLINE} after the catch-up.
      *
-     * <p>The repository should become {@code ONLINE} after the catch-up.
-     **/
+     * <p>As long as {@link TestProjectionRepository#initStorage(StorageFactory)} is called in
+     * {@link #setUp()}, the catch-up should be automatically triggered.
+     */
     @Test
     public void become_online_automatically_after_init_storage() {
         assertTrue(repository().isOnline());
     }
 
     /**
-     * As long as {@code ManualCatchupProjectionRepository} has automatic catch-up disabled,
+     * Tests that the repository does not go {@code ONLINE} if automatic catch-up is disabled.
+     *
+     * <p>As long as {@code ManualCatchupProjectionRepository} has automatic catch-up disabled,
      * it does not become online automatically after
      * {@link ManualCatchupProjectionRepository#initStorage(StorageFactory)} is called.
-     **/
+     */
     @Test
     public void not_become_online_automatically_after_init_storage_if_auto_catch_up_disabled() {
         final ManualCatchupProjectionRepository repo = repoWithManualCatchup();

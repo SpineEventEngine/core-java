@@ -41,6 +41,9 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
 /**
  * Exposes projection storages of a BoundedContext for reading and writing over gRPC.
  *
+ * <p>This test harness is needed for being able to write to in-memory storage from Beam-based
+ * transformations.
+ * 
  * @author Alexander Yevsyukov
  */
 class ProjectionStorageService extends ProjectionStorageServiceImplBase {
