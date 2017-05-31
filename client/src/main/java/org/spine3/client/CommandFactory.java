@@ -50,8 +50,8 @@ import static org.spine3.validate.Validate.checkValid;
  * an {@linkplain ConstraintViolationThrowable exception} is thrown.
  *
  * <p>Therefore it is recommended to use a corresponding
- * {@linkplain org.spine3.validate.ValidatingBuilder validating Builder} implementation to create
- * the Command message.
+ * {@linkplain org.spine3.validate.ValidatingBuilder ValidatingBuilder} implementation to create
+ * a command message.
  *
  * @see ActorRequestFactory#command()
  */

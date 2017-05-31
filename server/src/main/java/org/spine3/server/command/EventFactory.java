@@ -74,7 +74,7 @@ public class EventFactory {
      * <p>In the message is an instance of {@code Any}, it is unpacked for validation.
      *
      * <p>It is recommended to use a corresponding {@linkplain org.spine3.validate.ValidatingBuilder
-     * validating Builder} implementation to create the message.
+     * ValidatingBuilder} implementation to create a message.
      *
      * @param messageOrAny the message of the event or the message packed into {@code Any}
      * @param version      the version of the entity which produces the event
