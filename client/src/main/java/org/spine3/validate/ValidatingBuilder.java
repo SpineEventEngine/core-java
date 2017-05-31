@@ -28,7 +28,7 @@ import org.spine3.reflect.GenericTypeIndex;
 import java.lang.reflect.Method;
 
 import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static org.spine3.validate.ValidatingBuilder.GenericParameter.MESSAGE;
 
 /**
  * An interface for all validating builders.
@@ -107,7 +107,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<ValidatingBuilder> {
 
         /**
          * The index of the declaration of the generic parameter type {@code <T>}
@@ -131,6 +131,11 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
         public int getIndex() {
             return this.index;
         }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends ValidatingBuilder> cls) {
+            return Default.getArgument(this, cls);
+        }
     }
 
     /**
@@ -151,9 +156,8 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
          */
         public static <T extends Message> Class<T> getMessageClass(
                 Class<? extends ValidatingBuilder> builderClass) {
-            final Class<T> result =
-                    getGenericParameterType(builderClass,
-                                            GenericParameter.MESSAGE.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
+            final Class<T> result = (Class<T>)MESSAGE.getArgumentIn(builderClass);
             return result;
         }
 
