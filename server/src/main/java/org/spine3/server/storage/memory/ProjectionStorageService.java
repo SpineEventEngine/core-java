@@ -29,9 +29,9 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.server.storage.grpc.LastHandledEventRequest;
-import org.spine3.server.storage.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceImplBase;
-import org.spine3.server.storage.grpc.RecordStorageRequest;
+import org.spine3.server.storage.memory.grpc.LastHandledEventRequest;
+import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceImplBase;
+import org.spine3.server.storage.memory.grpc.RecordStorageRequest;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;

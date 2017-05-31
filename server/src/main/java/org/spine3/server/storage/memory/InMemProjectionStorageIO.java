@@ -24,9 +24,9 @@ import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import org.spine3.server.projection.ProjectionStorageIO;
 import org.spine3.server.storage.RecordStorageIO;
-import org.spine3.server.storage.grpc.LastHandledEventRequest;
-import org.spine3.server.storage.grpc.ProjectionStorageServiceGrpc;
-import org.spine3.server.storage.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
+import org.spine3.server.storage.memory.grpc.LastHandledEventRequest;
+import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
+import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
 import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
 

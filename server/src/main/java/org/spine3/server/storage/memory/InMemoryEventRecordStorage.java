@@ -20,13 +20,17 @@
 
 package org.spine3.server.storage.memory;
 
+import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.event.EventStoreIO;
 import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.users.TenantId;
 
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -44,8 +48,34 @@ class InMemoryEventRecordStorage extends EventRecordStorage {
         return allRecords;
     }
 
+    /*
+     * Beam support
+     *****************/
+
     @Override
     public RecordStorageIO<EventId> getIO(Class<EventId> idClass) {
         return getDelegateStorage().getIO(idClass);
+    }
+
+    @Override
+    public EventStoreIO.QueryFn queryFn(TenantId tenantId) {
+        return new InMemQueryFn(tenantId);
+    }
+
+    private static class InMemQueryFn extends EventStoreIO.QueryFn {
+
+        private static final long serialVersionUID = 0L;
+
+        private InMemQueryFn(TenantId tenantId) {
+            super(tenantId);
+        }
+
+        //TODO:2017-05-31:alexander.yevsyukov: Connect to gRPC service before ops and disconnect on completion.
+
+        @Override
+        protected Iterator<Event> read(TenantId tenantId, EventStreamQuery query) {
+            //TODO:2017-05-31:alexander.yevsyukov: Implement
+            return null;
+        }
     }
 }

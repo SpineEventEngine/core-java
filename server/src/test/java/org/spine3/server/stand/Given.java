@@ -23,13 +23,13 @@ package org.spine3.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Identifier;
-import org.spine3.base.Subscribe;
 import org.spine3.base.Version;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
@@ -70,7 +70,8 @@ class Given {
     static Command validCommand() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(Given.class);
-        return requestFactory.command().create(CreateProject.getDefaultInstance());
+        return requestFactory.command()
+                             .create(CreateProject.getDefaultInstance());
     }
 
     static Event validEvent() {
@@ -88,10 +89,10 @@ class Given {
         final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
         final Event result = event.toBuilder()
                                   .setContext(event.getContext()
-                                               .toBuilder()
-                                               .setEnrichment(Enrichment.newBuilder()
-                                                                        .setDoNotEnrich(true))
-                                               .build())
+                                                   .toBuilder()
+                                                   .setEnrichment(Enrichment.newBuilder()
+                                                                            .setDoNotEnrich(true))
+                                                   .build())
                                   .build();
         return result;
     }
@@ -117,15 +118,15 @@ class Given {
         private static final EventTargetsFunction<ProjectId, ProjectCreated> ID_FUNC =
                 new EventTargetsFunction<ProjectId, ProjectCreated>() {
 
-            private static final long serialVersionUID = 0L;
+                    private static final long serialVersionUID = 0L;
 
-            @Override
-            public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
-                return ImmutableSet.of(ProjectId.newBuilder()
-                                                .setId(PROJECT_UUID)
-                                                .build());
-            }
-        };
+                    @Override
+                    public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
+                        return ImmutableSet.of(ProjectId.newBuilder()
+                                                        .setId(PROJECT_UUID)
+                                                        .build());
+                    }
+                };
 
         StandTestProjectionRepository(BoundedContext boundedContext) {
             super(boundedContext);

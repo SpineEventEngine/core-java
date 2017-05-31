@@ -21,12 +21,12 @@ package org.spine3.server.failure;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Commands;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
-import org.spine3.annotation.Subscribe;
 import org.spine3.change.StringChange;
 import org.spine3.envelope.FailureEnvelope;
 import org.spine3.test.failure.ProjectFailures;

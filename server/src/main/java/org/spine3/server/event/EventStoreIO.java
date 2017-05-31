@@ -22,18 +22,17 @@ package org.spine3.server.event;
 
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
+import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
-import org.apache.beam.sdk.transforms.Values;
-import org.apache.beam.sdk.values.KV;
-import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.spine3.annotation.SPI;
 import org.spine3.base.Event;
-import org.spine3.base.EventId;
-import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.users.TenantId;
 
+import java.util.Iterator;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.server.storage.RecordStorageIO.toInstant;
 
 /**
@@ -55,43 +54,54 @@ public class EventStoreIO {
     }
 
     /**
-     * Abstract base for transformations reading events from {@link EventStore}.
-     *
-     * @author Alexander Yevsyukov
+     * Reads events matching an {@link EventStreamQuery}.
      */
-    public static class Read extends PTransform<PBegin, PCollection<Event>> {
-        private static final long serialVersionUID = 0L;
-        private final RecordStorageIO.Find<EventId> find;
+    public static class Query extends PTransform<PCollection<EventStreamQuery>,
+                                                 PCollection<Event>> {
 
-        Read(RecordStorageIO.Find<EventId> find) {
-            this.find = find;
+        private static final long serialVersionUID = 0L;
+        private final DoFn<EventStreamQuery, Event> fn;
+
+        public static Query of(QueryFn fn) {
+            checkNotNull(fn);
+            final Query result = new Query(fn);
+            return result;
+        }
+
+        private Query(QueryFn fn) {
+            this.fn = fn;
         }
 
         @Override
-        public PCollection<Event> expand(PBegin input) {
-            final PCollection<KV<EventId, EntityRecord>> withKeys = input.apply(find);
-            final PCollection<EntityRecord> allRecords =
-                    withKeys.apply(Values.<EntityRecord>create());
-            final PCollection<Event> matching = allRecords.apply(
-                    ParDo.of(new UnpackWithTimestamp()));
-            return matching;
+        public PCollection<Event> expand(PCollection<EventStreamQuery> input) {
+            final PCollection<Event> result = input.apply(ParDo.of(fn));
+            return result;
         }
     }
 
     /**
-     * An {@link RecordStorageIO.UnpackFn UnpackFn} that extracts
-     * events and accepts those matching the passed predicate.
+     * Abstract base for operations reading events matching {@link EventStreamQuery}.
      */
-    private static class UnpackWithTimestamp extends RecordStorageIO.UnpackFn<Event> {
+    public abstract static class QueryFn extends DoFn<EventStreamQuery, Event> {
 
         private static final long serialVersionUID = 0L;
+        private final TenantId tenantId;
 
-        @Override
-        @ProcessElement
-        public void processElement(ProcessContext c) {
-            final Event event = doUnpack(c);
-            c.outputWithTimestamp(event, toInstant(event.getContext()
-                                                        .getTimestamp()));
+        protected QueryFn(TenantId tenantId) {
+            this.tenantId = tenantId;
         }
+
+        @ProcessElement
+        public void processElement(ProcessContext context) {
+            final EventStreamQuery query = context.element();
+            final Iterator<Event> iterator = read(tenantId, query);
+            while (iterator.hasNext()) {
+                final Event event = iterator.next();
+                context.outputWithTimestamp(event, toInstant(event.getContext()
+                                                                  .getTimestamp()));
+            }
+        }
+
+        protected abstract Iterator<Event> read(TenantId tenantId, EventStreamQuery query);
     }
 }

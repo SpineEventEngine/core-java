@@ -25,10 +25,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifier;
-import org.spine3.base.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
@@ -70,6 +70,14 @@ public class AggregateCommandEndpointShould {
     private ProjectId projectId;
     private Subscriber subscriber;
 
+    private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
+            AggregateCommandEndpointShould.ProjectAggregate> repository) {
+        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor =
+                ArgumentCaptor.forClass(ProjectAggregate.class);
+        verify(repository).store(aggregateCaptor.capture());
+        return aggregateCaptor.getValue();
+    }
+
     @Before
     public void setUp() {
         projectId = ProjectId.newBuilder()
@@ -83,20 +91,11 @@ public class AggregateCommandEndpointShould {
         final BoundedContext boundedContext = newBoundedContext(commandBus);
         subscriber = new Subscriber();
 
-        boundedContext.getEventBus().register(subscriber);
+        boundedContext.getEventBus()
+                      .register(subscriber);
 
         repository = new ProjectAggregateRepository(boundedContext);
         repositorySpy = spy(repository);
-    }
-
-    private static class Subscriber extends EventSubscriber {
-
-        private ProjectCreated remembered;
-
-        @Subscribe
-        void on(ProjectCreated msg) {
-            remembered = msg;
-        }
     }
 
     @After
@@ -130,19 +129,23 @@ public class AggregateCommandEndpointShould {
 
     @Test
     public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
-        @SuppressWarnings("unchecked")
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
+        @SuppressWarnings("unchecked") final AggregateStorage<ProjectId> storage = mock(
+                AggregateStorage.class);
         final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
 
         // Change reported event count upon the second invocation and trigger re-dispatch.
         doReturn(0, 1)
-                .when(storage).readEventCountAfterLastSnapshot(projectId);
+                .when(storage)
+                .readEventCountAfterLastSnapshot(projectId);
         doReturn(Optional.absent())
-                .when(storage).read(projectId);
+                .when(storage)
+                .read(projectId);
         doReturn(storage)
-                .when(repositorySpy).aggregateStorage();
+                .when(repositorySpy)
+                .aggregateStorage();
         doReturn(Optional.absent())
-                .when(storage).readLifecycleFlags(projectId);
+                .when(storage)
+                .readLifecycleFlags(projectId);
 
         repositorySpy.dispatch(cmd);
 
@@ -172,18 +175,20 @@ public class AggregateCommandEndpointShould {
      * Utility methods.
      ****************************/
 
-    private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
-            AggregateCommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor =
-                ArgumentCaptor.forClass(ProjectAggregate.class);
-        verify(repository).store(aggregateCaptor.capture());
-        return aggregateCaptor.getValue();
-    }
-
     private void assertDispatches(Command cmd) {
         final CommandEnvelope envelope = CommandEnvelope.of(cmd);
         repository.dispatch(envelope);
         ProjectAggregate.assertHandled(cmd);
+    }
+
+    private static class Subscriber extends EventSubscriber {
+
+        private ProjectCreated remembered;
+
+        @Subscribe
+        void on(ProjectCreated msg) {
+            remembered = msg;
+        }
     }
 
     /*
@@ -198,6 +203,14 @@ public class AggregateCommandEndpointShould {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
+        }
+
+        private static void assertHandled(Command expected) {
+            commandsHandled.assertHandled(expected);
+        }
+
+        static void clearCommandsHandled() {
+            commandsHandled.clear();
         }
 
         @Assign
@@ -239,18 +252,10 @@ public class AggregateCommandEndpointShould {
         @Apply
         private void apply(ProjectStarted event) {
         }
-
-        private static void assertHandled(Command expected) {
-            commandsHandled.assertHandled(expected);
-        }
-
-        static void clearCommandsHandled() {
-            commandsHandled.clear();
-        }
     }
 
     private static class ProjectAggregateRepository
-        extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
+            extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
             super(boundedContext);
             initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));

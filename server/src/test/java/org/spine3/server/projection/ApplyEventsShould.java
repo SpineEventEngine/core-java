@@ -27,8 +27,8 @@ import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.values.TupleTag;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Event;
-import org.spine3.base.Subscribe;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.validate.DoubleValueValidatingBuilder;
@@ -42,7 +42,8 @@ public class ApplyEventsShould {
 
     @Before
     public void setUp() {
-        final BoundedContext boundedContext = BoundedContext.newBuilder().build();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .build();
         final ProjectionRepository<Long, ?, ?> projectionRepository = new SumRepo(boundedContext);
         boundedContext.register(projectionRepository);
 
@@ -54,7 +55,6 @@ public class ApplyEventsShould {
                                         projectionRepository.entityConverter(),
                                         tag);
     }
-
 
     @Test
     public void serialize() {

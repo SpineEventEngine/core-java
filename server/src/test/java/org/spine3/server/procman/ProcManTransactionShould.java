@@ -21,8 +21,8 @@ package org.spine3.server.procman;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import org.spine3.base.Event;
 import org.spine3.annotation.Subscribe;
+import org.spine3.base.Event;
 import org.spine3.base.Version;
 import org.spine3.server.entity.ThrowingValidatingBuilder;
 import org.spine3.server.entity.Transaction;

@@ -19,23 +19,25 @@
 //
 syntax = "proto3";
 
-package spine.server.event;
+package spine.server.storage;
 
 option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "StorageProto";
 // Put generated code under the 'grpc' sub-package, which is annotated @SPI.
-option java_package = "org.spine3.server.storage.grpc";
+option java_package = "org.spine3.server.storage.memory.grpc";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/options.proto";
+import "spine/base/event.proto";
 import "spine/base/response.proto";
 import "spine/users/tenant_id.proto";
 import "spine/server/entity/entity.proto";
+import "spine/server/event/event_stream_query.proto";
 
 // Read/Write request for an entity.
 message RecordStorageRequest {
@@ -86,4 +88,21 @@ service ProjectionStorageService {
 
     // Writes the timestamp of the last handled event.
     rpc WriteLastHandledEventTimestamp(LastHandledEventRequest) returns (base.Response);
+}
+
+// A request for events matching `EventStreamQuery` in a tenant's data slice.
+message EventStreamRequest {
+
+    // The ID of a tenant.
+    spine.users.TenantId tenant_id = 1;
+
+    // The query for events.
+    spine.server.event.EventStreamQuery query = 2;
+}
+
+// Provides events in response to `EventStreamRequest`.
+service EventStreamService {
+    option (SPI_service) = true;
+
+    rpc Query(EventStreamRequest) returns (stream base.Event);
 }

@@ -26,7 +26,9 @@ import org.spine3.base.EventId;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.entity.storage.EntityQuery;
 import org.spine3.server.entity.storage.EntityRecordWithColumns;
+import org.spine3.server.event.EventStoreIO;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.users.TenantId;
 
 import java.util.Iterator;
 import java.util.Map;
@@ -114,4 +116,10 @@ public abstract class EventRecordStorage extends RecordStorage<EventId> {
     protected RecordStorage<EventId> getDelegateStorage() {
         return delegate;
     }
+
+    /*
+     * Beam support
+     *****************/
+
+    public abstract EventStoreIO.QueryFn queryFn(TenantId tenantId);
 }

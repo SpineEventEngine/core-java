@@ -28,6 +28,7 @@ import org.apache.beam.sdk.coders.CoderRegistry;
 import org.apache.beam.sdk.coders.IterableCoder;
 import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.options.PipelineOptions;
+import org.apache.beam.sdk.transforms.Create;
 import org.apache.beam.sdk.transforms.FlatMapElements;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.Keys;
@@ -63,14 +64,23 @@ class CatchupOp<I> {
     private final EventStore eventStore;
     private final PipelineOptions options;
 
+    private final KvCoder<I, Event> eventTupleCoder;
+    private final KvCoder<I, Iterable<Event>> idToEventsCoder;
+
     CatchupOp(TenantId tenantId,
               ProjectionRepository<I, ?, ?> repository,
               PipelineOptions options) {
         this.tenantId = tenantId;
         this.repository = repository;
         this.options = options;
-
         this.eventStore = repository.getEventStore();
+
+        // Create coders.
+        final Coder<I> idCoder = repository.getIO()
+                                           .getIdCoder();
+        final Coder<Event> eventCoder = EventStoreIO.getEventCoder();
+        this.eventTupleCoder = KvCoder.of(idCoder, eventCoder);
+        this.idToEventsCoder = KvCoder.of(idCoder, IterableCoder.of(eventCoder));
     }
 
     @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
@@ -79,11 +89,6 @@ class CatchupOp<I> {
     private Pipeline createPipeline() {
         Pipeline pipeline = Pipeline.create(options);
 
-        final Coder<I> idCoder = repository.getIO()
-                                           .getIdCoder();
-        final Coder<Event> eventCoder = EventStoreIO.getEventCoder();
-        final KvCoder<I, Event> eventTupleCoder = KvCoder.of(idCoder, eventCoder);
-
         final CoderRegistry coderRegistry = pipeline.getCoderRegistry();
         coderRegistry.registerCoderForType(
                 new TypeDescriptor<KV<I, Event>>() {},
@@ -91,10 +96,10 @@ class CatchupOp<I> {
 
         // Read events matching the query.
         final EventStreamQuery query = createStreamQuery();
-        final PCollection<Event> events = pipeline.apply(
+        final PCollection<EventStreamQuery> eventStreamQuery = pipeline.apply(Create.of(query));
+        final PCollection<Event> events = eventStreamQuery.apply(
                 "QueryEvents",
-                eventStore.query(tenantId, query)
-        );
+                eventStore.query(tenantId));
 
         // Compose a flat map where a key is a projection ID and a value is an event to apply.
         final PCollection<KV<I, Event>> flatMap = events.apply(
@@ -103,9 +108,6 @@ class CatchupOp<I> {
         ).setCoder(eventTupleCoder);
 
         // Group events by projection IDs.
-        final KvCoder<I, Iterable<Event>> idToEventsCoder =
-                KvCoder.of(idCoder, IterableCoder.of(eventCoder));
-
         final PCollection<KV<I, Iterable<Event>>> grouppedEvents =
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
                        .setCoder(idToEventsCoder);

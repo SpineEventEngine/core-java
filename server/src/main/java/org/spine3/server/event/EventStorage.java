@@ -20,19 +20,15 @@
 
 package org.spine3.server.event;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.EventRecordStorage;
-import org.spine3.server.storage.RecordPredicate;
 import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.users.TenantId;
 
@@ -43,7 +39,6 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.google.common.collect.Collections2.filter;
 import static com.google.common.collect.Collections2.transform;
@@ -100,8 +95,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return result;
     }
 
-    @VisibleForTesting
-    static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
+    private static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
         return new EventEntityMatchesStreamQuery(query).toEntityPredicate();
     }
 
@@ -112,54 +106,6 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     private static Function<EventEntity, Event> getEventFunc() {
         return GET_EVENT;
-    }
-
-    /*
-     * Beam Support
-     *********************/
-
-    /**
-     * Obtains transform for loading all events (from the tenant's slice) matching
-     * the passed predicate.
-     */
-    RecordStorageIO.Find<EventId> query(TenantId tenantId, EventStreamQuery query) {
-        final RecordStorageIO.Query<EventId> recordQuery = new EventRecordQuery(query);
-        final RecordStorageIO.Find<EventId> findRecords =
-                recordStorage().getIO(EventId.class)
-                               .find(tenantId, recordQuery);
-        return findRecords;
-    }
-
-    private static class EventRecordQuery extends RecordStorageIO.Query<EventId> {
-
-        private static final long serialVersionUID = 0L;
-        private final EventStreamQuery query;
-
-        private EventRecordQuery(EventStreamQuery query) {
-            this.query = query;
-        }
-
-        /**
-         * Returns empty set to instruct to get all the events matching the query.
-         */
-        @Override
-        public Set<EventId> getIds() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public RecordPredicate getRecordPredicate() {
-            return new RecordPredicate() {
-                private static final long serialVersionUID = 0L;
-                private final MatchesStreamQuery query = new MatchesStreamQuery(
-                        EventRecordQuery.this.query);
-
-                @Override
-                public Boolean apply(EntityRecord input) {
-                    return query.apply(AnyPacker.<Event>unpack(input.getState()));
-                }
-            };
-        }
     }
 
     /**
@@ -194,5 +140,18 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
                 }
             };
         }
+    }
+
+    /*
+     * Beam Support
+     *********************/
+
+    EventStoreIO.Query query(TenantId tenantId) {
+        return EventStoreIO.Query.of(queryFn(tenantId));
+    }
+
+    private EventStoreIO.QueryFn queryFn(TenantId tenantId) {
+        final EventRecordStorage storage = recordStorage();
+        return storage.queryFn(tenantId);
     }
 }
