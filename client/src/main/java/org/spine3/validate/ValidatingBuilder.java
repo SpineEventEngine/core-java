@@ -24,7 +24,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import org.spine3.annotation.Internal;
 import org.spine3.reflect.GenericTypeIndex;
-import org.spine3.reflect.Reflection;
 
 import java.lang.reflect.Method;
 
@@ -135,7 +134,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
 
         @Override
         public Class<?> getArgumentIn(Class<? extends ValidatingBuilder> cls) {
-            return Reflection.getGenericArgument(cls, ValidatingBuilder.class, getIndex());
+            return Default.getArgument(this, cls);
         }
     }
 

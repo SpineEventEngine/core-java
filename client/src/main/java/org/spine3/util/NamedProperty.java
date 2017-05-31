@@ -21,7 +21,7 @@
 package org.spine3.util;
 
 import com.google.common.base.Optional;
-import org.spine3.reflect.Reflection;
+import org.spine3.reflect.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -54,9 +54,7 @@ public abstract class NamedProperty<T, O> {
     protected Class<T> getValueClass() {
         @SuppressWarnings("unchecked") /* The type is ensured by the first generic param
                                           of this class declaration. */
-        final Class<T> cls = (Class<T>) Reflection.getGenericArgument(getClass(),
-                                                                      NamedProperty.class,
-                                                                      0);
+        final Class<T> cls = (Class<T>) GenericParameter.PROPERTY_TYPE.getArgumentIn(getClass());
         return cls;
     }
 
@@ -65,5 +63,37 @@ public abstract class NamedProperty<T, O> {
      */
     protected String getName() {
         return name;
+    }
+
+    /**
+     * Enumeration of generic type parameters of the {@link NamedProperty} class.
+     */
+    public enum GenericParameter implements GenericTypeIndex<NamedProperty> {
+
+        /**
+         * The index of the declaration of the generic parameter {@code <T>}.
+         */
+        PROPERTY_TYPE(0),
+
+        /**
+         * The index of the declaration of the generic parameter {@code <O>}.
+         */
+        OBJECT_TYPE(1);
+
+        private final int index;
+
+        GenericParameter(int index) {
+            this.index = index;
+        }
+
+        @Override
+        public int getIndex() {
+            return this.index;
+        }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends NamedProperty> cls) {
+            return Default.getArgument(this, cls);
+        }
     }
 }

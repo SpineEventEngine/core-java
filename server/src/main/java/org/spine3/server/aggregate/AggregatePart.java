@@ -22,7 +22,6 @@ package org.spine3.server.aggregate;
 
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
-import org.spine3.reflect.Reflection;
 import org.spine3.server.entity.AbstractEntity;
 import org.spine3.validate.ValidatingBuilder;
 
@@ -196,7 +195,7 @@ public abstract class AggregatePart<I,
 
         @Override
         public Class<?> getArgumentIn(Class<? extends AggregatePart> cls) {
-            return Reflection.getGenericArgument(cls, AggregatePart.class, getIndex());
+            return Default.getArgument(this, cls);
         }
     }
 

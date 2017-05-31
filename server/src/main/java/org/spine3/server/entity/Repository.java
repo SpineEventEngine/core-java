@@ -26,7 +26,6 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.reflect.GenericTypeIndex;
-import org.spine3.reflect.Reflection;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
@@ -309,7 +308,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         @Override
         public Class<?> getArgumentIn(Class<? extends Repository> cls) {
-            return Reflection.getGenericArgument(cls, Repository.class, getIndex());
+            return Default.getArgument(this, cls);
         }
     }
 

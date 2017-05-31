@@ -26,7 +26,6 @@ import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Version;
 import org.spine3.reflect.GenericTypeIndex;
-import org.spine3.reflect.Reflection;
 import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
@@ -282,7 +281,7 @@ public abstract class EventPlayingEntity <I,
 
         @Override
         public Class<?> getArgumentIn(Class<? extends EventPlayingEntity> cls) {
-            return Reflection.getGenericArgument(cls, EventPlayingEntity.class, getIndex());
+            return Default.getArgument(this, cls);
         }
     }
 

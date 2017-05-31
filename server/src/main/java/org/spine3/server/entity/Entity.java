@@ -22,7 +22,6 @@ package org.spine3.server.entity;
 
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
-import org.spine3.reflect.Reflection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -85,7 +84,7 @@ public interface Entity<I, S extends Message> {
 
         @Override
         public Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
-            return Reflection.getGenericArgument(entityClass, Entity.class, getIndex());
+            return Default.getArgument(this, entityClass);
         }
 
         @Override

@@ -18,42 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.reflect.Reflection;
 import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.reflect.GenericTypeIndex.Default.getArgument;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ReflectionShould {
+public class GenericTypeIndexShould {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(Reflection.class);
+    public void have_utility_ctor_in_the_Default_class() {
+        Tests.assertHasPrivateParameterlessCtor(GenericTypeIndex.Default.class);
     }
 
     @Test
     public void obtain_generic_argument_assuming_generic_superclass() {
         final Parametrized<Long, String> val = new Parametrized<Long, String>() {};
-        assertEquals(Long.class, Reflection.getGenericArgument(val.getClass(), Base.class, 0));
-        assertEquals(String.class, Reflection.getGenericArgument(val.getClass(), Base.class, 1));
+        assertEquals(Long.class, getArgument(val.getClass(), Base.class, 0));
+        assertEquals(String.class, getArgument(val.getClass(), Base.class, 1));
     }
 
     @Test
     public void obtain_generic_argument_via_superclass() {
-        assertEquals(String.class, Reflection.getGenericArgument(Leaf.class, Base.class, 0));
-        assertEquals(Float.class, Reflection.getGenericArgument(Leaf.class, Base.class, 1));
+        assertEquals(String.class, getArgument(Leaf.class, Base.class, 0));
+        assertEquals(Float.class, getArgument(Leaf.class, Base.class, 1));
     }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(Reflection.class);
+                .testAllPublicStaticMethods(GenericTypeIndex.Default.class);
     }
 
     @SuppressWarnings({"EmptyClass", "unused"})
