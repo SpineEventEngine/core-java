@@ -97,9 +97,7 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
+        assertDone(done);
 
         assertSize(1, resultEvents);
         final Event event = resultEvents.iterator()
@@ -132,9 +130,7 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
+        assertDone(done);
 
         assertSize(1, resultEvents);
         final Event event = resultEvents.iterator()
@@ -163,9 +159,7 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
+        assertDone(done);
 
         assertSize(2, resultEvents);
         assertContainsAll(resultEvents, taskAdded1, teasAdded2);
@@ -179,6 +173,12 @@ public abstract class EventStoreShould {
     private static Event taskAdded(Timestamp when) {
         final TaskAdded msg = Sample.messageOfType(TaskAdded.class);
         return eventFactory.createEvent(msg, null, when);
+    }
+
+    private static void assertDone(AtomicBoolean done) {
+        if (!done.get()) {
+            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
+        }
     }
 
     private static class ResponseObserver implements StreamObserver<Event> {

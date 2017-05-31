@@ -107,6 +107,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     void store(Event event) {
         final EventEntity entity = new EventEntity(event);
+        store(entity);
     }
 
     private static Function<EventEntity, Event> getEventFunc() {

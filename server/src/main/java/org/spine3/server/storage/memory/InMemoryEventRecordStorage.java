@@ -32,9 +32,9 @@ import java.util.Map;
 /**
  * {@inheritDoc}
  */
-public class InMemoryEventRecordStorage extends EventRecordStorage {
+class InMemoryEventRecordStorage extends EventRecordStorage {
 
-    protected InMemoryEventRecordStorage(RecordStorage<EventId> storage) {
+    InMemoryEventRecordStorage(RecordStorage<EventId> storage) {
         super(storage);
     }
 

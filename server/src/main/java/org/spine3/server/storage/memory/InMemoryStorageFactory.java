@@ -94,14 +94,18 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
+        final Class<Message> stateClass = getStateClass(projectionClass);
         final boolean multitenant = isMultitenant();
-        @SuppressWarnings("unchecked") // The type is protected by the Projection class declaration.
-        final Class<Message> stateClass = (Class<Message>)
-                Entity.GenericParameter.STATE.getArgumentIn(projectionClass);
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), multitenant);
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
         return InMemoryProjectionStorage.newInstance(stateUrl, entityStorage);
+    }
+
+    @SuppressWarnings("unchecked") // The type is protected by the Projection class declaration.
+    private static <I> Class<Message> getStateClass(
+            Class<? extends Projection<I, ?, ?>> projectionClass) {
+        return (Class<Message>) Entity.GenericParameter.STATE.getArgumentIn(projectionClass);
     }
 
     @Override
@@ -125,17 +129,14 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     public static InMemoryStorageFactory getInstance(boolean multitenant) {
         return multitenant
-                ? Singleton.INSTANCE.multiTenantInstance
-                : Singleton.INSTANCE.singleTenantInstance;
+                ? Singleton.INSTANCE.multiTenant
+                : Singleton.INSTANCE.singleTenant;
     }
 
     @SuppressWarnings("NonSerializableFieldInSerializableClass")
     private enum Singleton {
         INSTANCE;
-        private final InMemoryStorageFactory singleTenantInstance =
-                new InMemoryStorageFactory(false);
-
-        private final InMemoryStorageFactory multiTenantInstance =
-                new InMemoryStorageFactory(true);
+        private final InMemoryStorageFactory singleTenant = new InMemoryStorageFactory(false);
+        private final InMemoryStorageFactory multiTenant = new InMemoryStorageFactory(true);
     }
 }
