@@ -34,8 +34,6 @@ import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.TypeUrl;
 
-import static org.spine3.util.Reflection.getGenericParameterType;
-
 /**
  * A factory for in-memory storages.
  *
@@ -97,8 +95,9 @@ public class InMemoryStorageFactory implements StorageFactory {
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
         final boolean multitenant = isMultitenant();
-        final Class<Message> stateClass =
-                getGenericParameterType(projectionClass, Entity.GenericParameter.STATE.getIndex());
+        @SuppressWarnings("unchecked") // The type is protected by the Projection class declaration.
+        final Class<Message> stateClass = (Class<Message>)
+                Entity.GenericParameter.STATE.getArgumentIn(projectionClass);
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), multitenant);
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
