@@ -58,11 +58,23 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static TestActorRequestFactory newInstance(String actor, ZoneOffset zoneOffset) {
-        return new TestActorRequestFactory(newUserId(actor), zoneOffset);
+        return newInstance(newUserId(actor), zoneOffset);
+    }
+
+    public static TestActorRequestFactory newInstance(UserId actor, ZoneOffset zoneOffset) {
+        return new TestActorRequestFactory(actor, zoneOffset);
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass) {
         return newInstance(testClass.getName(), ZoneOffsets.UTC);
+    }
+
+    public static TestActorRequestFactory newInstance(UserId actor) {
+        return newInstance(actor, ZoneOffsets.UTC);
+    }
+
+    public static TestActorRequestFactory newInstance(UserId actor, TenantId tenantId) {
+        return new TestActorRequestFactory(actor, ZoneOffsets.UTC, tenantId);
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
@@ -74,7 +86,11 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     public Command createCommand(Message message, Timestamp timestamp) {
         final Command command = command().create(message);
         return TimeTests.adjustTimestamp(command, timestamp);
+    }
 
+    public Command createCommand(Message message) {
+        final Command command = command().create(message);
+        return command;
     }
 
     /**

@@ -30,8 +30,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.type.TypeUrl;
@@ -55,12 +53,6 @@ import static org.spine3.protobuf.Messages.builderFor;
 public class Sample {
 
     private Sample() {
-    }
-
-    public static Command command(Message commandMessage) {
-        final CommandContext commandContext = TestCommandContextFactory.createCommandContext();
-        final Command command = Commands.createCommand(commandMessage, commandContext);
-        return command;
     }
 
     /**

@@ -25,10 +25,12 @@ import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import org.spine3.base.ActorContext;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Response;
+import org.spine3.client.ActorRequestFactory;
+import org.spine3.client.CommandFactory;
 import org.spine3.server.commandbus.CommandBus;
 
 import java.util.Iterator;
@@ -76,7 +78,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         this.commandBus = checkNotNull(commandBus);
         checkNotNull(commandMessage);
         checkNotNull(commandContext);
-        this.source = Commands.createCommand(commandMessage, commandContext);
+        this.source = asCommand(commandMessage, commandContext);
         this.queue = Queues.newConcurrentLinkedQueue();
     }
 
@@ -151,8 +153,10 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     private Command produceCommand(Message commandMessage) {
-        final CommandContext newContext = Commands.newContextBasedOn(source.getContext());
-        final Command result = Commands.createCommand(commandMessage, newContext);
+        final CommandContext sourceContext = source.getContext();
+        final CommandFactory commandFactory = commandFactory(sourceContext);
+        final Command result = commandFactory
+                .createBasedOnContext(commandMessage, sourceContext);
         return result;
     }
 
@@ -185,5 +189,26 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
                 finishFuture.set(null);
             }
         };
+    }
+
+    /**
+     * Creates a {@code CommandFactory} using the {@linkplain org.spine3.users.UserId actor},
+     * {@linkplain org.spine3.users.TenantId tenant ID} and {@linkplain org.spine3.time.ZoneOffset
+     * zone offset} from the given command context.
+     */
+    private static CommandFactory commandFactory(CommandContext sourceContext) {
+        final ActorContext actorContext = sourceContext.getActorContext();
+        final ActorRequestFactory factory =
+                ActorRequestFactory.newBuilder()
+                                   .setActor(actorContext.getActor())
+                                   .setTenantId(actorContext.getTenantId())
+                                   .setZoneOffset(actorContext.getZoneOffset())
+                                   .build();
+        return factory.command();
+    }
+
+    private static Command asCommand(Message message, CommandContext context) {
+        final Command command = commandFactory(context).createWithContext(message, context);
+        return command;
     }
 }

@@ -32,3 +32,10 @@ import "spine/options.proto";
 message TestCommand {
     string value = 1;
 }
+
+// To use in `CommandFactoryShould` class.
+message RequiredFieldCommand{
+    string opt_value = 1;
+
+    string req_value = 2 [(required) = true];
+}

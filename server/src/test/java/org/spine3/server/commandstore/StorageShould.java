@@ -28,7 +28,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.CommandId;
 import org.spine3.base.CommandStatus;
 import org.spine3.base.Commands;
@@ -42,6 +41,7 @@ import org.spine3.server.commandbus.Given;
 import org.spine3.server.commandbus.ProcessingStatus;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.server.tenant.TenantAwareTest;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
 import org.spine3.type.TypeName;
 
@@ -61,6 +61,7 @@ import static org.spine3.base.CommandStatus.SCHEDULED;
 import static org.spine3.base.Commands.generateId;
 import static org.spine3.base.Identifiers.idToString;
 import static org.spine3.protobuf.Wrappers.pack;
+import static org.spine3.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static org.spine3.server.commandstore.CommandTestUtil.checkRecord;
 import static org.spine3.server.commandstore.Records.newRecordBuilder;
 import static org.spine3.server.commandstore.Records.toCommandIterator;
@@ -152,8 +153,8 @@ public class StorageShould extends TenantAwareTest {
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.createCommand(Given.CommandMessage.createProjectMessage(),
-                                                       CommandContext.getDefaultInstance());
+        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        final Command command = factory.createCommand(createProjectMessage());
         final Error error = newError();
 
         storage.store(command, error);
