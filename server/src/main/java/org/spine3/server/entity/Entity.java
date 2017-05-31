@@ -89,7 +89,7 @@ public interface Entity<I, S extends Message> {
 
         @Override
         public int getIndex() {
-            return this.index;
+            return index;
         }
     }
 

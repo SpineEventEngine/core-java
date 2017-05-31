@@ -31,6 +31,32 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * Base interface for enumerations on generic parameters of types.
  *
+ * <p>Example of implementing an enumeration for generic parameters:
+ * <pre>  {@code
+ * public abstract class Tuple<K, V> {
+ *      ...
+ *     public enum GenericParameter extends GenericTypeIndex<Tuple> {
+ *
+ *         // <K> param has index 0
+ *         KEY(0),
+ *
+ *         // <V> param has index 1
+ *         VALUE(1);
+ *
+ *         private final int index;
+ *
+ *         GenericParameter(int index) { this.index = index; }
+ *
+ *        @literal @Override
+ *         public int getIndex() { return index; }
+ *
+ *        @literal @Override
+ *         public Class<?> getArgumentIn(Class<? extends Tuple> derivedClass) {
+ *             return Default.getArgument(this, derivedClass);
+ *         }
+ *     }
+ * }
+ * }</pre>
  * @param <C> the type in which class the generic index is declared
  * @author Alexander Yevsyukov
  */
@@ -42,7 +68,7 @@ public interface GenericTypeIndex<C> {
     int getIndex();
 
     /**
-     * Obtains the class of the genetic type argument.
+     * Obtains the class of the generic type argument.
      *
      * @param cls the class to inspect
      * @return the argument class
