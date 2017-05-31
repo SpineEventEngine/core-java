@@ -38,10 +38,10 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static org.spine3.server.entity.Repository.GenericParameter.ENTITY;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 import static org.spine3.util.Exceptions.unsupported;
-import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * Abstract base class for repositories.
@@ -286,7 +286,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<Repository> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -304,14 +304,19 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         public int getIndex() {
             return this.index;
         }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends Repository> cls) {
+            return Default.getArgument(this, cls);
+        }
     }
 
     private static class TypeInfo {
 
         private static <E extends Entity<I, ?>, I>
         Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
-            final Class<E> result = getGenericParameterType(repositoryClass,
-                                                            GenericParameter.ENTITY.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
+            final Class<E> result = (Class<E>)ENTITY.getArgumentIn(repositoryClass);
             return result;
         }
     }

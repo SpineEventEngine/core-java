@@ -20,12 +20,8 @@
 
 package org.spine3.server.entity;
 
-import com.google.common.reflect.TypeToken;
 import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
-
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -66,7 +62,7 @@ public interface Entity<I, S extends Message> {
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<Entity> {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>}
@@ -86,22 +82,14 @@ public interface Entity<I, S extends Message> {
             this.index = index;
         }
 
-        private Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
-            final TypeToken<?> supertypeToken = TypeToken.of(entityClass)
-                                                         .getSupertype(Entity.class);
-            final ParameterizedType genericSuperclass =
-                    (ParameterizedType) supertypeToken.getType();
-            final Type[] typeArguments = genericSuperclass.getActualTypeArguments();
-            final Type typeArgument = typeArguments[index];
-            @SuppressWarnings("unchecked") /* The type is ensured by the bounds of the Entity
-                interface since its parameters can be only classes. */
-            final Class<?> result = (Class<?>) typeArgument;
-            return result;
+        @Override
+        public Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
+            return Default.getArgument(this, entityClass);
         }
 
         @Override
         public int getIndex() {
-            return this.index;
+            return index;
         }
     }
 
@@ -115,7 +103,7 @@ public interface Entity<I, S extends Message> {
         }
 
         /**
-         * Retrieves the ID class of the entities of the given class using reflection.
+         * Retrieves the ID class of the entities of the given class.
          *
          * @param entityClass the entity class to inspect
          * @param <I>         the entity ID type
@@ -123,7 +111,7 @@ public interface Entity<I, S extends Message> {
          */
         public static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
             checkNotNull(entityClass);
-            @SuppressWarnings("unchecked") // the type is preserved by bounds of the class param.
+            @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
             final Class<I> result = (Class<I>) GenericParameter.ID.getArgumentIn(entityClass);
             return result;
         }
@@ -137,7 +125,7 @@ public interface Entity<I, S extends Message> {
          */
         public static <S extends Message> Class<S>
         getStateClass(Class<? extends Entity> entityClass) {
-            @SuppressWarnings("unchecked") // the type is preserved by bounds of the class param.
+            @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
             final Class<S> result = (Class<S>) GenericParameter.STATE.getArgumentIn(entityClass);
             return result;
         }

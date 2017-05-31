@@ -35,7 +35,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static org.spine3.base.Events.getMessage;
 import static org.spine3.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
-import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A base for entities, which can play {@linkplain org.spine3.base.Event events}.
@@ -123,7 +122,7 @@ public abstract class EventPlayingEntity <I,
      */
     @VisibleForTesting
     boolean isTransactionInProgress() {
-        final boolean result = this.transaction != null && this.transaction.isActive();
+        final boolean result = transaction != null && transaction.isActive();
         return result;
     }
 
@@ -258,7 +257,7 @@ public abstract class EventPlayingEntity <I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<EventPlayingEntity> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -278,6 +277,11 @@ public abstract class EventPlayingEntity <I,
         @Override
         public int getIndex() {
             return this.index;
+        }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends EventPlayingEntity> cls) {
+            return Default.getArgument(this, cls);
         }
     }
 
@@ -299,9 +303,8 @@ public abstract class EventPlayingEntity <I,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
-
-            final Class<B> builderClass = getGenericParameterType(entityClass,
-                                                                  STATE_BUILDER.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
+            final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
             return builderClass;
         }
     }
