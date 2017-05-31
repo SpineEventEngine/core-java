@@ -43,7 +43,9 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  *
  * <p>This test harness is needed for being able to write to in-memory storage from Beam-based
  * transformations.
- * 
+ *
+ * <p>See gRPC service declaration in {@code spine/server/storage/storage.proto}.
+ *
  * @author Alexander Yevsyukov
  */
 class ProjectionStorageService extends ProjectionStorageServiceImplBase {
