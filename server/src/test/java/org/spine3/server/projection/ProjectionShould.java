@@ -27,7 +27,7 @@ import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.EventContext;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Given;
 import org.spine3.type.EventClass;

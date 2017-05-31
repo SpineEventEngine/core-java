@@ -28,7 +28,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.event.EventBus;
