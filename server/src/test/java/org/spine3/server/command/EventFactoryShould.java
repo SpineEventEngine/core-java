@@ -30,6 +30,8 @@ import org.spine3.base.Commands;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.Tests;
+import org.spine3.test.command.event.MandatoryFieldEvent;
+import org.spine3.validate.ConstraintViolationThrowable;
 
 import static org.spine3.test.Tests.newUuidValue;
 
@@ -90,5 +92,15 @@ public class EventFactoryShould {
                     .setProducerId(producerId)
                     .setCommandContext(commandContext)
                     .build();
+    }
+
+    @Test(expected = ConstraintViolationThrowable.class)
+    public void validate_event_messages_before_creation() {
+        final EventFactory factory = EventFactory.newBuilder()
+                                               .setCommandContext(commandContext)
+                                               .setCommandId(commandId)
+                                               .setProducerId(producerId)
+                                               .build();
+        factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null);
     }
 }

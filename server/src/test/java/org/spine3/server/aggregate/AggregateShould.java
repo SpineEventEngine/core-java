@@ -389,6 +389,7 @@ public class AggregateShould {
         final ProjectId id = aggregate.getId();
         final ImportEvents importCmd =
                 ImportEvents.newBuilder()
+                            .setProjectId(id)
                             .addEvent(event(projectCreated(id, projectName), 1))
                             .addEvent(event(taskAdded(id), 2))
                             .build();

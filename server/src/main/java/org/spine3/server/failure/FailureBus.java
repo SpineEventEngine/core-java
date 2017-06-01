@@ -27,7 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spine3.base.Failure;
 import org.spine3.base.Response;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.envelope.FailureEnvelope;
 import org.spine3.io.StreamObservers;
 import org.spine3.server.outbus.CommandOutputBus;

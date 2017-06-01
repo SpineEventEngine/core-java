@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Identifiers;
 import org.spine3.client.ActorRequestFactory;
 import org.spine3.client.Query;
@@ -51,6 +50,7 @@ import org.spine3.test.commandservice.customer.command.CreateCustomer;
 import org.spine3.test.commandservice.customer.event.CustomerCreated;
 import org.spine3.time.LocalDate;
 import org.spine3.time.LocalDates;
+import org.spine3.users.TenantId;
 import org.spine3.users.UserId;
 
 import java.util.List;
@@ -59,7 +59,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.collect.Lists.newArrayList;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.test.Tests.newUserId;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.time.Time.getCurrentTime;
 
 public class Given {
@@ -127,9 +126,12 @@ public class Given {
          * timestamp using default {@link ACommand} instance.
          */
         static Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId,
-                                                                when);
-            final Command result = Commands.createCommand(command, context);
+            final TenantId generatedTenantId = TenantId.newBuilder()
+                                                       .setValue(newUuid())
+                                                       .build();
+            final TestActorRequestFactory factory =
+                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+            final Command result = factory.createCommand(command, when);
             return result;
         }
 

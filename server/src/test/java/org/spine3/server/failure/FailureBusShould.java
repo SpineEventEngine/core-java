@@ -23,16 +23,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Failure;
 import org.spine3.base.Failures;
-import org.spine3.base.Subscribe;
+import org.spine3.annotation.Subscribe;
 import org.spine3.change.StringChange;
+import org.spine3.client.CommandFactory;
 import org.spine3.envelope.FailureEnvelope;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.failure.ProjectFailures;
 import org.spine3.test.failure.ProjectId;
 import org.spine3.test.failure.command.UpdateProjectName;
 import org.spine3.type.FailureClass;
+import org.spine3.users.TenantId;
 
 import java.util.Collection;
 import java.util.Map;
@@ -300,8 +302,13 @@ public class FailureBusShould {
                                                                      .setId(projectId)
                                                                      .setNameUpdate(nameChange)
                                                                      .build();
-        final Command command = Commands.createCommand(updateProjectName,
-                                                       CommandContext.getDefaultInstance());
+
+        final TenantId generatedTenantId = TenantId.newBuilder()
+                                                   .setValue(newUuid())
+                                                   .build();
+        final TestActorRequestFactory factory =
+                TestActorRequestFactory.newInstance(FailureBusShould.class, generatedTenantId);
+        final Command command = factory.createCommand(updateProjectName);
         return Failures.createFailure(invalidProjectName, command);
     }
 
@@ -336,7 +343,10 @@ public class FailureBusShould {
         public void on(ProjectFailures.InvalidProjectName failure,
                        UpdateProjectName commandMessage,
                        CommandContext context) {
-            final Command command = Commands.createCommand(commandMessage, context);
+            final CommandFactory commandFactory =
+                    TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
+                                           .command();
+            final Command command = commandFactory.createWithContext(commandMessage, context);
             this.failureHandled = Failures.createFailure(failure, command);
         }
 

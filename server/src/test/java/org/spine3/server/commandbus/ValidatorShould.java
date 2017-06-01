@@ -20,17 +20,21 @@
 
 package org.spine3.server.commandbus;
 
+import com.google.protobuf.Any;
 import org.junit.Test;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.protobuf.AnyPacker;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.command.CreateProject;
+import org.spine3.time.Time;
 import org.spine3.validate.ConstraintViolation;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.spine3.base.Commands.generateId;
 import static org.spine3.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
@@ -52,9 +56,12 @@ public class ValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_message_is_NOT_valid() {
-        final Command commandWithEmptyMessage =
-                Commands.createCommand(CreateProject.getDefaultInstance(),
-                                       createCommandContext());
+        final Any invalidMessagePacked = AnyPacker.pack(CreateProject.getDefaultInstance());
+        final Command commandWithEmptyMessage = Command.newBuilder()
+                                                       .setId(generateId())
+                                                       .setMessage(invalidMessagePacked)
+                                                       .setContext(createCommandContext())
+                                                       .build();
 
         final List<ConstraintViolation> violations =
                 validator.validate(CommandEnvelope.of(commandWithEmptyMessage));
@@ -64,9 +71,12 @@ public class ValidatorShould {
 
     @Test
     public void validate_command_and_return_violations_if_context_is_NOT_valid() {
-        final Command commandWithoutContext =
-                Commands.createCommand(createProjectMessage(),
-                                       CommandContext.getDefaultInstance());
+        final Command command = TestActorRequestFactory.newInstance(ValidatorShould.class)
+                                                       .createCommand(createProjectMessage(),
+                                                                      Time.getCurrentTime());
+        final Command commandWithoutContext = command.toBuilder()
+                                     .setContext(CommandContext.getDefaultInstance())
+                                     .build();
 
         final List<ConstraintViolation> violations =
                 validator.validate(CommandEnvelope.of(commandWithoutContext));

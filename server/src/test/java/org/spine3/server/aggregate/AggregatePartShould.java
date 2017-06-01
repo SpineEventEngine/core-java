@@ -191,7 +191,7 @@ public class AggregatePartShould {
     private void prepareAggregatePart() {
         final AddTask addTask =
                 ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                        .setProjectId(ProjectId.getDefaultInstance())
+                        .setProjectId(ProjectId.newBuilder().setId("agg-part-ID"))
                         .build();
         dispatch(taskPart, env(addTask));
     }

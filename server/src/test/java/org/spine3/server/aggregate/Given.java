@@ -24,9 +24,8 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
+import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.command.AddTask;
@@ -46,7 +45,6 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
 import static org.spine3.server.aggregate.Given.EventMessage.taskAdded;
 import static org.spine3.test.Tests.newUserId;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.time.Durations2.seconds;
 import static org.spine3.time.Time.getCurrentTime;
 
@@ -123,9 +121,8 @@ class Given {
          * {@link org.spine3.base.CommandId CommandId} instance.
          */
         static Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context =
-                    createCommandContext(userId, when);
-            final Command result = Commands.createCommand(command, context);
+            final Command result = TestActorRequestFactory.newInstance(userId)
+                                                          .createCommand(command, when);
             return result;
         }
     }
