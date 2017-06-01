@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.server.storage;
+package spine.server.storage.memory;
 
 option (type_url_prefix) = "type.spine3.org";
 option java_generate_equals_and_hash = true;

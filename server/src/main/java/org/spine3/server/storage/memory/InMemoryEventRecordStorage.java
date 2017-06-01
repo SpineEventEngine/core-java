@@ -20,6 +20,7 @@
 
 package org.spine3.server.storage.memory;
 
+import io.grpc.ManagedChannel;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
 import org.spine3.server.entity.EntityRecord;
@@ -28,6 +29,10 @@ import org.spine3.server.event.EventStreamQuery;
 import org.spine3.server.storage.EventRecordStorage;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.server.storage.memory.grpc.EventStreamRequest;
+import org.spine3.server.storage.memory.grpc.EventStreamServiceGrpc;
+import org.spine3.server.storage.memory.grpc.EventStreamServiceGrpc.EventStreamServiceBlockingStub;
+import org.spine3.server.storage.memory.grpc.GrpcServer;
 import org.spine3.users.TenantId;
 
 import java.util.Iterator;
@@ -65,17 +70,33 @@ class InMemoryEventRecordStorage extends EventRecordStorage {
     private static class InMemQueryFn extends EventStoreIO.QueryFn {
 
         private static final long serialVersionUID = 0L;
+        private transient ManagedChannel channel;
+        private transient EventStreamServiceBlockingStub blockingStub;
 
         private InMemQueryFn(TenantId tenantId) {
             super(tenantId);
         }
 
-        //TODO:2017-05-31:alexander.yevsyukov: Connect to gRPC service before ops and disconnect on completion.
+        @StartBundle
+        public void startBundle() {
+            channel = GrpcServer.createDefaultChannel();
+            blockingStub = EventStreamServiceGrpc.newBlockingStub(channel);
+        }
+
+        @FinishBundle
+        public void finishBundle() {
+            channel.shutdownNow();
+            blockingStub = null;
+        }
 
         @Override
         protected Iterator<Event> read(TenantId tenantId, EventStreamQuery query) {
-            //TODO:2017-05-31:alexander.yevsyukov: Implement
-            return null;
+            final EventStreamRequest request = EventStreamRequest.newBuilder()
+                                                               .setTenantId(tenantId)
+                                                               .setQuery(query)
+                                                               .build();
+            final Iterator<Event> result = blockingStub.query(request);
+            return result;
         }
     }
 }

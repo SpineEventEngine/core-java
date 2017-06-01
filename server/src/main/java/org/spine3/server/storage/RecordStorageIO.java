@@ -20,7 +20,6 @@
 
 package org.spine3.server.storage;
 
-import com.google.common.base.Predicate;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
@@ -29,12 +28,10 @@ import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
-import org.apache.beam.sdk.options.ValueProvider;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.KV;
-import org.apache.beam.sdk.values.PBegin;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
 import org.joda.time.Instant;
@@ -44,8 +41,6 @@ import org.spine3.server.entity.EntityRecord;
 import org.spine3.users.TenantId;
 
 import javax.annotation.Nullable;
-import java.io.Serializable;
-import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.toMillis;
@@ -60,7 +55,8 @@ import static org.spine3.util.Exceptions.newIllegalStateException;
  */
 public abstract class RecordStorageIO<I> {
 
-    private static final Coder<EntityRecord> entityRecordCoder = ProtoCoder.of(EntityRecord.class);
+    private static final Coder<EntityRecord> ENTITY_RECORD_CODER =
+            ProtoCoder.of(EntityRecord.class);
 
     private final Class<I> idClass;
 
@@ -135,26 +131,14 @@ public abstract class RecordStorageIO<I> {
         return idCoder;
     }
 
-    public static Coder<EntityRecord> getEntityRecordCoder() {
-        return entityRecordCoder;
-    }
-
     public KvCoder<I, EntityRecord> getKvCoder() {
         if (kvCoder != null) {
             return kvCoder;
         }
 
-        kvCoder = KvCoder.of(getIdCoder(), getEntityRecordCoder());
+        kvCoder = KvCoder.of(getIdCoder(), ENTITY_RECORD_CODER);
         return kvCoder;
     }
-
-    /**
-     * Obtains a transformation for reading records matching the query.
-     *
-     * @param tenantId the ID of the tenant for whom records belong
-     * @param query    the query to obtain records
-     */
-    public abstract Find<I> find(TenantId tenantId, Query<I> query);
 
     public Write<I> write(TenantId tenantId) {
         return new Write<>(writeFn(tenantId));
@@ -166,58 +150,6 @@ public abstract class RecordStorageIO<I> {
      * Obtains a {@link DoFn} that writes an {@code EntityRecord} into the storage.
      */
     public abstract WriteFn<I> writeFn(TenantId tenantId);
-
-    /**
-     * A query to get multiple records from a storage.
-     */
-    public abstract static class Query<I> implements Serializable {
-        private static final long serialVersionUID = 0L;
-
-        public abstract Set<I> getIds();
-
-        public abstract RecordPredicate getRecordPredicate();
-
-        public Predicate<KV<I, EntityRecord>> toPredicate() {
-            return new Predicate<KV<I, EntityRecord>>() {
-                @Override
-                public boolean apply(@Nullable KV<I, EntityRecord> input) {
-                    checkNotNull(input);
-                    if (!getIds().isEmpty()) {
-                        if (!getIds().contains(input.getKey())) {
-                            return false;
-                        }
-                    }
-                    final Boolean result = getRecordPredicate().apply(input.getValue());
-                    return result;
-                }
-            };
-        }
-    }
-
-    /**
-     * Finds entity records by query.
-     */
-    public abstract static class Find<I>
-            extends PTransform<PBegin, PCollection<KV<I, EntityRecord>>> {
-
-        private static final long serialVersionUID = 0L;
-        private final ValueProvider<TenantId> tenantId;
-        private final Query<I> query;
-
-        protected Find(ValueProvider<TenantId> tenantId, Query<I> query) {
-            this.tenantId = tenantId;
-            this.query = query;
-        }
-
-        protected TenantId getTenantId() {
-            final TenantId result = tenantId.get();
-            return result;
-        }
-
-        protected Query<I> getQuery() {
-            return query;
-        }
-    }
 
     /**
      * Reads entity record by ID.

@@ -29,7 +29,9 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.annotation.Subscribe;
 import org.spine3.base.Event;
@@ -45,6 +47,7 @@ import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.server.storage.memory.grpc.GrpcServer;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
@@ -63,6 +66,7 @@ import org.spine3.time.Time;
 import org.spine3.type.EventClass;
 import org.spine3.users.TenantId;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.LinkedList;
 import java.util.List;
@@ -92,7 +96,11 @@ import static org.spine3.test.Verify.assertContainsAll;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+@SuppressWarnings({
+        "ClassWithTooManyMethods",
+        "OverlyCoupledClass",
+        "StaticVariableMayNotBeInitialized" /* OK as these vars are initialized in `beforeClass()*/,
+        "StaticVariableUsedBeforeInitialization"})
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
                                             ProjectId,
@@ -103,7 +111,8 @@ public class ProjectionRepositoryShould
                                                  .build();
     private static final Any PRODUCER_ID = pack(ID);
 
-    private BoundedContext boundedContext;
+    private static BoundedContext boundedContext;
+    private static GrpcServer grpcServer;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
@@ -124,7 +133,6 @@ public class ProjectionRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProjection, Project> createRepository() {
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         return new TestProjectionRepository(boundedContext);
     }
 
@@ -157,6 +165,19 @@ public class ProjectionRepositoryShould
                         .build();
     }
 
+    @BeforeClass
+    public static void beforeClass() throws IOException {
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        grpcServer = new GrpcServer(boundedContext);
+        grpcServer.start();
+    }
+
+    @AfterClass
+    public static void afterClass() throws Exception {
+        boundedContext.close();
+        grpcServer.shutdown();
+    }
+
     @Override
     @Before
     public void setUp() {
@@ -175,7 +196,7 @@ public class ProjectionRepositoryShould
         return newEventFactory(producerId).createEvent(eventMessage);
     }
 
-    private void appendEvent(EventStore eventStore, Event event) {
+    private static void appendEvent(EventStore eventStore, Event event) {
         eventStore.append(event);
         keepTenantIdFromEvent(event);
     }
@@ -244,7 +265,7 @@ public class ProjectionRepositoryShould
      * Simulates updating TenantIndex, which occurs during command processing
      * in multi-tenant context.
      */
-    private void keepTenantIdFromEvent(Event event) {
+    private static void keepTenantIdFromEvent(Event event) {
         final TenantId tenantId = event.getContext()
                                        .getCommandContext()
                                        .getActorContext()
@@ -495,14 +516,14 @@ public class ProjectionRepositoryShould
         assertTrue(items.isEmpty());
     }
 
-    private ManualCatchupProjectionRepository repoWithManualCatchup() {
+    private static ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
         repo.initStorage(storageFactory());
         return repo;
     }
 
-    private StorageFactory storageFactory() {
+    private static StorageFactory storageFactory() {
         return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 
@@ -584,6 +605,7 @@ public class ProjectionRepositoryShould
      * does not modify the state of an {@code Entity}. For the newly created entities it could lead
      * to an invalid entry created in the storage.
      */
+    @SuppressWarnings("unused") // OK as event subscriber methods do nothing in this class.
     static class NoopTaskNamesProjection extends Projection<ProjectId,
                                                             ProjectTaskNames,
                                                             ProjectTaskNamesValidatingBuilder> {

@@ -24,6 +24,7 @@ import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import org.spine3.server.projection.ProjectionStorageIO;
 import org.spine3.server.storage.RecordStorageIO;
+import org.spine3.server.storage.memory.grpc.GrpcServer;
 import org.spine3.server.storage.memory.grpc.LastHandledEventRequest;
 import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
 import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
@@ -59,11 +60,6 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     }
 
     @Override
-    public Find<I> find(TenantId tenantId, Query<I> query) {
-        return storageIO.find(tenantId, query);
-    }
-
-    @Override
     public WriteFn<I> writeFn(TenantId tenantId) {
         return storageIO.writeFn(tenantId);
     }
@@ -76,7 +72,7 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
         private transient ManagedChannel channel;
         private transient ProjectionStorageServiceBlockingStub blockingStub;
 
-        protected WriteTimestampOverGrpc(TenantId tenantId, TypeUrl typeUrl) {
+        private WriteTimestampOverGrpc(TenantId tenantId, TypeUrl typeUrl) {
             super(tenantId);
             this.stateTypeUrl = typeUrl;
         }
@@ -84,7 +80,7 @@ class InMemProjectionStorageIO<I> extends ProjectionStorageIO<I> {
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemRecordStorageIO.createDefaultChannel();
+            channel = GrpcServer.createDefaultChannel();
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 

@@ -132,7 +132,7 @@ public abstract class EventStore implements AutoCloseable {
                     responseObserver.onNext(event);
                 }
                 responseObserver.onCompleted();
-                logCatchUpComplete(responseObserver);
+                logReadingComplete(responseObserver);
             }
         });
     }
@@ -387,12 +387,12 @@ public abstract class EventStore implements AutoCloseable {
         }
     }
 
-    private void logCatchUpComplete(StreamObserver<Event> observer) {
+    private void logReadingComplete(StreamObserver<Event> observer) {
         if (logger == null) {
             return;
         }
         if (logger.isInfoEnabled()) {
-            logger.info("Observer {} got all catch-up events.", observer);
+            logger.info("Observer {} got all queried events.", observer);
         }
     }
 
