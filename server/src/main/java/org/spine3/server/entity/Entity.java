@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import org.spine3.reflect.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Reflection.getGenericParameterType;
 
 /**
  * A server-side object with an {@link org.spine3.base.Identifiers#checkSupported(Class) identity}.
@@ -63,7 +62,7 @@ public interface Entity<I, S extends Message> {
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<Entity> {
 
         /**
          * The index of the declaration of the generic parameter type {@code <I>}
@@ -84,8 +83,13 @@ public interface Entity<I, S extends Message> {
         }
 
         @Override
+        public Class<?> getArgumentIn(Class<? extends Entity> entityClass) {
+            return Default.getArgument(this, entityClass);
+        }
+
+        @Override
         public int getIndex() {
-            return this.index;
+            return index;
         }
     }
 
@@ -99,30 +103,30 @@ public interface Entity<I, S extends Message> {
         }
 
         /**
-         * Retrieves the ID class of the entities of the given class using reflection.
+         * Retrieves the ID class of the entities of the given class.
          *
          * @param entityClass the entity class to inspect
-         * @param <I> the entity ID type
+         * @param <I>         the entity ID type
          * @return the entity ID class
          */
-        public static <I> Class<I> getIdClass(Class<? extends Entity<I, ?>> entityClass) {
+        public static <I> Class<I> getIdClass(Class<? extends Entity> entityClass) {
             checkNotNull(entityClass);
-            final Class<I> idClass = getGenericParameterType(entityClass,
-                                                             GenericParameter.ID.getIndex());
-            return idClass;
+            @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+            final Class<I> result = (Class<I>) GenericParameter.ID.getArgumentIn(entityClass);
+            return result;
         }
 
         /**
          * Retrieves the state class of the passed entity class.
          *
+         * @param <S>         the entity state type
          * @param entityClass the entity class to inspect
-         * @param <S> the entity state type
          * @return the entity state class
          */
-        public static <S extends Message> Class<S> getStateClass(
-                Class<? extends Entity> entityClass) {
-            final Class<S> result = getGenericParameterType(entityClass,
-                                                            GenericParameter.STATE.getIndex());
+        public static <S extends Message> Class<S>
+        getStateClass(Class<? extends Entity> entityClass) {
+            @SuppressWarnings("unchecked") // The type is preserved by the Entity type declaration.
+            final Class<S> result = (Class<S>) GenericParameter.STATE.getArgumentIn(entityClass);
             return result;
         }
     }

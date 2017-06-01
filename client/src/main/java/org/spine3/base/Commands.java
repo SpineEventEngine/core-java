@@ -22,19 +22,14 @@ package org.spine3.base;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotation.Internal;
-import org.spine3.client.CommandFactory;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.string.Stringifier;
 import org.spine3.time.Timestamps2;
-import org.spine3.time.ZoneOffset;
 import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -47,7 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.base.CommandContext.Schedule;
 import static org.spine3.base.Identifiers.EMPTY_ID;
 import static org.spine3.base.Identifiers.idToString;
-import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.validate.Validate.isNotDefault;
 
 /**
@@ -80,120 +74,6 @@ public final class Commands {
         return CommandId.newBuilder()
                         .setUuid(value)
                         .build();
-    }
-
-    /**
-     * Creates a new command context with the current time.
-     *
-     * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by
-     * {@link CommandFactory#create(Message)
-     * ActorRequestFactory.command().create(Message)},
-     * which creates {@code CommandContext} automatically.
-     *
-     * @param tenantId   the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId     the actor ID
-     * @param zoneOffset the offset of the timezone in which the user works
-     * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
-     */
-    @Internal
-    public static CommandContext createContext(@Nullable TenantId tenantId,
-                                               UserId userId,
-                                               ZoneOffset zoneOffset) {
-        checkNotNull(userId);
-        checkNotNull(zoneOffset);
-
-        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
-        return result.build();
-    }
-
-    /**
-     * Creates a new command context with the current time.
-     *
-     * <p>This method is not supposed to be called from outside the framework.
-     * Commands in client applications should be created by
-     * {@link CommandFactory#create(Message)
-     * ActorRequestFactory.command().create(Message)},
-     * which creates {@code CommandContext} automatically.
-     *
-     * @param tenantId      the ID of the tenant or {@code null} for single-tenant applications
-     * @param userId        the actor id
-     * @param zoneOffset    the offset of the timezone in which the user works
-     * @param targetVersion the the ID of the entity for applying commands
-     * @return new {@code CommandContext}
-     * @see CommandFactory#create(Message)
-     */
-    @Internal
-    public static CommandContext createContext(@Nullable TenantId tenantId,
-                                               UserId userId,
-                                               ZoneOffset zoneOffset,
-                                               int targetVersion) {
-        checkNotNull(userId);
-        checkNotNull(zoneOffset);
-        checkNotNull(targetVersion);
-
-        final CommandContext.Builder result = newContextBuilder(tenantId, userId, zoneOffset);
-        result.setTargetVersion(targetVersion);
-
-        return result.build();
-    }
-
-    private static CommandContext.Builder newContextBuilder(@Nullable TenantId tenantId,
-                                                            UserId userId,
-                                                            ZoneOffset zoneOffset) {
-        final ActorContext.Builder actorContext = ActorContext.newBuilder()
-                                                              .setActor(userId)
-                                                              .setTimestamp(getCurrentTime())
-                                                              .setZoneOffset(zoneOffset);
-        if (tenantId != null) {
-            actorContext.setTenantId(tenantId);
-        }
-
-        final CommandContext.Builder result = CommandContext.newBuilder()
-                                                            .setActorContext(actorContext);
-        return result;
-    }
-
-    /**
-     * Creates a new instance of {@code CommandContext} based on the passed one.
-     *
-     * <p>The returned instance gets new generated {@code CommandId} and {@code timestamp}
-     * set to the time of the call.
-     *
-     * @param value the instance from which to copy values
-     * @return new {@code CommandContext}
-     */
-    public static CommandContext newContextBasedOn(CommandContext value) {
-        checkNotNull(value);
-        final ActorContext.Builder withCurrentTime = value.getActorContext()
-                                                          .toBuilder()
-                                                          .setTimestamp(getCurrentTime());
-        final CommandContext.Builder result = value.toBuilder()
-                                                   .setActorContext(withCurrentTime);
-        return result.build();
-    }
-
-    /**
-     * Creates a command instance with the given {@code message} and the {@code context}.
-     *
-     * <p>If {@code Any} instance is passed as the first parameter it will be used as is.
-     * Otherwise, the command message will be packed into {@code Any}.
-     *
-     * @param message the command message
-     * @param context the context of the command
-     * @return a new command
-     */
-    public static Command createCommand(Message message, CommandContext context) {
-        checkNotNull(message);
-        checkNotNull(context);
-
-        final Any packed = AnyPacker.pack(message);
-        final Command.Builder result = Command.newBuilder()
-                                              .setId(generateId())
-                                              .setMessage(packed)
-                                              .setContext(context);
-        return result.build();
     }
 
     /**

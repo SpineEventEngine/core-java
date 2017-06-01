@@ -18,31 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.util;
+package org.spine3.server.entity;
 
+import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.test.Tests;
 
 import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ReflectionShould {
+public class EntityTypeInfoShould {
 
     @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(Reflection.class);
+    public void obtain_id_class() {
+        assertEquals(Long.class, Entity.TypeInfo.getIdClass(Derived.class));
     }
 
     @Test
-    public void obtain_generic_parameter() {
-        final Derived<Long> val = new Derived<Long>() {};
-        assertEquals(Long.class, Reflection.getGenericParameterType(val.getClass(), 0));
+    public void obtain_state_class() {
+        assertEquals(Timestamp.class, Entity.TypeInfo.getStateClass(Derived.class));
     }
 
-    @SuppressWarnings("EmptyClass")
-    private static class Base<T> {}
+    private abstract static class Base<I> extends AbstractEntity<I, Timestamp> {
+        Base(I id) {
+            super(id);
+        }
+    }
 
-    private static class Derived<T> extends Base<T> {}
+    private static class Derived extends Base<Long> {
+        private Derived(Long id) {
+            super(id);
+        }
+    }
 }

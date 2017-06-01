@@ -34,6 +34,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * Serves as an abstract base for all {@linkplain ValidatingBuilder validating builders}.
@@ -74,7 +75,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     @Override
     public T build() throws ConstraintViolationThrowable {
         final T message = internalBuild();
-        validateResult(message);
+        checkValid(message);
         return message;
     }
 
@@ -113,7 +114,9 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         final FieldValidator<?> validator =
                 FieldValidatorFactory.create(descriptor, fieldValue, fieldPath);
         final List<ConstraintViolation> violations = validator.validate();
-        onViolations(violations);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationThrowable(violations);
+        }
     }
 
     /**
@@ -170,18 +173,5 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         final B result = (B) Messages.newInstance(messageClass)
                                      .newBuilderForType();
         return result;
-    }
-
-    private void validateResult(T message) throws ConstraintViolationThrowable {
-        final List<ConstraintViolation> violations = MessageValidator.newInstance()
-                                                                     .validate(message);
-        onViolations(violations);
-    }
-
-    private static void onViolations(List<ConstraintViolation> violations)
-            throws ConstraintViolationThrowable {
-        if (!violations.isEmpty()) {
-            throw new ConstraintViolationThrowable(violations);
-        }
     }
 }

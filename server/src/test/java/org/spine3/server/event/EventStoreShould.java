@@ -27,16 +27,12 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.base.CommandContext;
-import org.spine3.base.Commands;
 import org.spine3.base.Event;
 import org.spine3.test.TestEventFactory;
 import org.spine3.test.event.ProjectCreated;
 import org.spine3.test.event.TaskAdded;
 import org.spine3.testdata.Sample;
 import org.spine3.time.Durations2;
-import org.spine3.time.ZoneOffsets;
-import org.spine3.users.TenantId;
-import org.spine3.users.UserId;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -48,6 +44,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.spine3.test.Verify.assertContainsAll;
 import static org.spine3.test.Verify.assertSize;
+import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.type.TypeName.of;
 
@@ -64,9 +61,7 @@ public abstract class EventStoreShould {
 
     @BeforeClass
     public static void prepare() {
-        final CommandContext context = Commands.createContext(TenantId.getDefaultInstance(),
-                                                              Sample.messageOfType(UserId.class),
-                                                              ZoneOffsets.getDefault());
+        final CommandContext context = createCommandContext();
         eventFactory = TestEventFactory.newInstance(EventStoreShould.class, context);
     }
 

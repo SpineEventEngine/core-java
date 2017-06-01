@@ -35,7 +35,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.9.10-SNAPSHOT'
+        spineVersion = '0.9.14-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
@@ -326,5 +326,5 @@ cleanGCS {
     authKeyPath = "gcs-auth-key.json"
     bucketName = properties.getProperty("artifacts.bucket")
     targetFolder = properties.getProperty("artifacts.folder")
-    threshold = TimeCategory.getDays(30)
+    threshold = TimeCategory.getDays(10)
 }
