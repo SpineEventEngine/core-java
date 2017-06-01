@@ -34,6 +34,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Illia Shepilov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public final class Types {
 
     private Types() {
@@ -71,7 +72,7 @@ public final class Types {
 
         final Type type =
                 new TypeToken<List<T>>() {}.where(new TypeParameter<T>() {}, elementClass)
-                                                      .getType();
+                                           .getType();
         return type;
     }
 }

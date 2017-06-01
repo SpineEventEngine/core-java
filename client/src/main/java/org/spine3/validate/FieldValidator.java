@@ -28,14 +28,15 @@ import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.FieldPath;
-import org.spine3.option.IfMissingOption;
-import org.spine3.option.OptionsProto;
+import io.spine.base.FieldPath;
+import io.spine.option.IfMissingOption;
+import io.spine.option.OptionsProto;
+import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.spine3.base.Commands.isCommandsFile;
+import static io.spine.base.Commands.isCommandsFile;
 
 /**
  * Validates messages according to Spine custom protobuf options and
@@ -44,10 +45,11 @@ import static org.spine3.base.Commands.isCommandsFile;
  * @param <V> a type of field values
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 abstract class FieldValidator<V> {
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG =
-                                "Entity ID must not be a repeated field.";
+            "Entity ID must not be a repeated field.";
 
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;

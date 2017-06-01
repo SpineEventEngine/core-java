@@ -24,28 +24,30 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.option.Time;
+import io.spine.option.TimeOption;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.FieldPath;
-import org.spine3.option.IfInvalidOption;
-import org.spine3.option.OptionsProto;
-import org.spine3.option.Time;
-import org.spine3.option.TimeOption;
-import org.spine3.protobuf.AnyPacker;
+import io.spine.base.FieldPath;
+import io.spine.option.IfInvalidOption;
+import io.spine.option.OptionsProto;
+import io.spine.protobuf.AnyPacker;
+import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
-import static org.spine3.option.Time.FUTURE;
-import static org.spine3.option.Time.TIME_UNDEFINED;
-import static org.spine3.time.Time.getCurrentTime;
-import static org.spine3.time.Timestamps2.isLaterThan;
-import static org.spine3.validate.Validate.isDefault;
+import static io.spine.option.Time.FUTURE;
+import static io.spine.option.Time.TIME_UNDEFINED;
+import static io.spine.time.Time.getCurrentTime;
+import static io.spine.time.Timestamps2.isLaterThan;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * Validates fields of type {@link Message}.
  *
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class MessageFieldValidator extends FieldValidator<Message> {
 
     private final TimeOption timeOption;
@@ -151,8 +153,8 @@ class MessageFieldValidator extends FieldValidator<Message> {
      */
     private static boolean isTimeInvalid(Timestamp timeToCheck, Time whenExpected, Timestamp now) {
         final boolean isValid = (whenExpected == FUTURE)
-                                ? isLaterThan(timeToCheck, /*than*/ now)
-                                : isLaterThan(now, /*than*/ timeToCheck);
+                ? isLaterThan(timeToCheck, /*than*/ now)
+                : isLaterThan(now, /*than*/ timeToCheck);
         final boolean isInvalid = !isValid;
         return isInvalid;
     }

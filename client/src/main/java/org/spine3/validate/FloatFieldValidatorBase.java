@@ -22,18 +22,20 @@ package org.spine3.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.spine3.base.FieldPath;
+import io.spine.base.FieldPath;
+import io.spine.validate.ConstraintViolation;
 
 /**
  * A base for floating point number field validators.
  *
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 abstract class FloatFieldValidatorBase<V extends Number & Comparable<V>>
-         extends NumberFieldValidator<V> {
+        extends NumberFieldValidator<V> {
 
     private static final String INVALID_ID_TYPE_MSG =
-                                "Entity ID field must not be a floating point number.";
+            "Entity ID field must not be a floating point number.";
 
     /**
      * Creates a new validator instance.

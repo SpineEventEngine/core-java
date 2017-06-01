@@ -21,9 +21,10 @@
 package org.spine3.validate;
 
 import com.google.protobuf.Descriptors;
+import io.spine.validate.ConstraintViolation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.FieldPath;
+import io.spine.base.FieldPath;
 
 import java.util.List;
 
@@ -32,6 +33,7 @@ import java.util.List;
  *
  * @author Dmitry Kashcheiev
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class BooleanFieldValidator extends FieldValidator<Boolean> {
 
     /**

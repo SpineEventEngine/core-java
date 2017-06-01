@@ -22,11 +22,15 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.annotation.Internal;
+import io.spine.annotation.Internal;
+import io.spine.base.FieldPath;
+import io.spine.protobuf.Messages;
+import io.spine.string.Stringifiers;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.MessageValidator;
+import io.spine.validate.Validate;
 import org.spine3.base.ConversionException;
-import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Messages;
-import org.spine3.string.Stringifiers;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Type;
@@ -41,8 +45,9 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Illia Shepilov
  * @author Alex Tymchenko
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public abstract class AbstractValidatingBuilder<T extends Message, B extends Message.Builder>
-                                                  implements ValidatingBuilder<T, B> {
+        implements ValidatingBuilder<T, B> {
 
     /**
      * The builder for the original {@code Message}.
@@ -160,7 +165,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     @Internal
     public T internalBuild() {
         @SuppressWarnings("unchecked")  // OK, as real types of `B`
-                                        // are always generated to be compatible with `T`.
+        // are always generated to be compatible with `T`.
         final T result = (T) getMessageBuilder().build();
         return result;
     }

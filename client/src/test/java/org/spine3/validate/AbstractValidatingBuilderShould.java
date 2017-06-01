@@ -22,16 +22,18 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Timestamp;
+import io.spine.validate.*;
+import io.spine.validate.AbstractValidatingBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.ConversionException;
-import org.spine3.string.Stringifier;
-import org.spine3.string.StringifierRegistry;
-import org.spine3.string.Stringifiers;
-import org.spine3.test.types.Task;
-import org.spine3.test.validate.msg.PatternStringFieldValue;
-import org.spine3.test.validate.msg.ProjectId;
-import org.spine3.test.validate.msg.TaskId;
+import io.spine.base.ConversionException;
+import io.spine.string.Stringifier;
+import io.spine.string.StringifierRegistry;
+import io.spine.string.Stringifiers;
+import io.spine.test.types.Task;
+import io.spine.test.validate.msg.PatternStringFieldValue;
+import io.spine.test.validate.msg.ProjectId;
+import io.spine.test.validate.msg.TaskId;
 
 import java.lang.reflect.Type;
 import java.util.List;
@@ -40,15 +42,15 @@ import static com.google.common.collect.Lists.newArrayList;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.base.Types.listTypeOf;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Types.listTypeOf;
 
 /**
  * @author Illia Shepilov
  */
 public class AbstractValidatingBuilderShould {
 
-    private AbstractValidatingBuilder<Task, Task.Builder> validatingBuilder;
+    private io.spine.validate.AbstractValidatingBuilder<Task, Task.Builder> validatingBuilder;
 
     @Before
     public void setUp() {
@@ -88,16 +90,16 @@ public class AbstractValidatingBuilderShould {
     }
 
     @Test
-    public void validate_value() throws ConstraintViolationThrowable {
+    public void validate_value() throws io.spine.validate.ConstraintViolationThrowable {
         final FieldDescriptor descriptor = ProjectId.getDescriptor()
                                                     .getFields()
                                                     .get(0);
         validatingBuilder.validate(descriptor, newUuid(), "id");
     }
 
-    @Test(expected = ConstraintViolationThrowable.class)
+    @Test(expected = io.spine.validate.ConstraintViolationThrowable.class)
     public void throw_exception_when_field_contains_constraint_violations()
-            throws ConstraintViolationThrowable {
+            throws io.spine.validate.ConstraintViolationThrowable {
         final FieldDescriptor descriptor = PatternStringFieldValue.getDescriptor()
                                                                   .getFields()
                                                                   .get(0);

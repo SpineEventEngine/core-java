@@ -22,13 +22,13 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.annotation.Internal;
-import org.spine3.reflect.GenericTypeIndex;
+import io.spine.annotation.Internal;
+import io.spine.reflect.GenericTypeIndex;
 
 import java.lang.reflect.Method;
 
-import static org.spine3.util.Exceptions.illegalArgumentWithCauseOf;
-import static org.spine3.util.Reflection.getGenericParameterType;
+import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
+import static io.spine.util.Reflection.getGenericParameterType;
 
 /**
  * An interface for all validating builders.
@@ -44,6 +44,7 @@ import static org.spine3.util.Reflection.getGenericParameterType;
  * @author Illia Shepilov
  * @author Alex Tymchenko
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public interface ValidatingBuilder<T extends Message, B extends Message.Builder> {
 
     /**

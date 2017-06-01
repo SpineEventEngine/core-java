@@ -21,9 +21,11 @@ package org.spine3.validate;
 
 import com.google.protobuf.Empty;
 import org.junit.Test;
+import io.spine.validate.AbstractValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko

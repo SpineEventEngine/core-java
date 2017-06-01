@@ -22,7 +22,8 @@ package org.spine3.validate;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.spine3.base.FieldPath;
+import io.spine.base.FieldPath;
+import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ import java.util.List;
  *
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class ByteStringFieldValidator extends FieldValidator<ByteString> {
 
     private static final String INVALID_ID_TYPE_MSG = "Entity ID field must not be a ByteString.";

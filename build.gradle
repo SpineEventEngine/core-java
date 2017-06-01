@@ -22,7 +22,7 @@ import groovy.time.TimeCategory
 buildscript {
     repositories {
         mavenCentral()
-        mavenLocal()
+//        mavenLocal()
 
         // Spine releases repository.
         maven { url = 'http://maven.teamdev.com/repository/spine' }
@@ -40,7 +40,7 @@ buildscript {
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.9.5-SNAPSHOT'
+        spineToolsVersion = '0.9.6-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.

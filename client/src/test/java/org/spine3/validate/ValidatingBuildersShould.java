@@ -32,16 +32,27 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
+import io.spine.protobuf.AnyPacker;
+import io.spine.time.Time;
+import io.spine.validate.AnyValidatingBuilder;
+import io.spine.validate.BoolValueValidatingBuilder;
+import io.spine.validate.DoubleValueValidatingBuilder;
+import io.spine.validate.EmptyValidatingBuilder;
+import io.spine.validate.FloatValueValidatingBuilder;
+import io.spine.validate.Int32ValueValidatingBuilder;
+import io.spine.validate.Int64ValueValidatingBuilder;
+import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.TimestampValidatingBuilder;
+import io.spine.validate.UInt32ValueValidatingBuilder;
+import io.spine.validate.UInt64ValueValidatingBuilder;
 import org.junit.Test;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.time.Time;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.ValidatingBuilders.newInstance;
 
 /**
@@ -209,7 +220,8 @@ public class ValidatingBuildersShould {
     }
 
     private static <T extends Message, B extends Message.Builder> void
-    checkBuilder(Class<? extends ValidatingBuilder<T, B>> builderClass, T sampleValue) {
+    checkBuilder(Class<? extends ValidatingBuilder<T, B>> builderClass,
+                 T sampleValue) {
         final ValidatingBuilder<T, B> builder = newInstance(builderClass);
         assertNotNull(builder);
 

@@ -22,8 +22,8 @@ package org.spine3.validate;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.spine3.base.FieldPath;
-import org.spine3.protobuf.Wrapper;
+import io.spine.base.FieldPath;
+import io.spine.protobuf.Wrapper;
 
 import static java.lang.Math.abs;
 
@@ -32,6 +32,7 @@ import static java.lang.Math.abs;
  *
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class IntegerFieldValidator extends NumberFieldValidator<Integer> {
 
     /**

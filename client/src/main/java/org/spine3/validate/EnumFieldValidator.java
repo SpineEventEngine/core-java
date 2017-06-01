@@ -22,7 +22,8 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
-import org.spine3.base.FieldPath;
+import io.spine.base.FieldPath;
+import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
@@ -31,6 +32,7 @@ import java.util.List;
  *
  * @author Dmitry Kashcheiev
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class EnumFieldValidator extends FieldValidator<EnumValueDescriptor> {
 
     /**

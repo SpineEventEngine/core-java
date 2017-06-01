@@ -23,9 +23,11 @@ package org.spine3.validate;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolMessageEnum;
 import com.google.protobuf.Value;
-import org.spine3.annotation.Internal;
-import org.spine3.base.Error;
-import org.spine3.type.MessageClass;
+import io.spine.type.MessageClass;
+import io.spine.annotation.Internal;
+import io.spine.base.Error;
+import io.spine.validate.ConstraintViolation;
+import io.spine.validate.ValidationError;
 
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import static java.lang.System.lineSeparator;
  *
  * @author Alexander Yevsyukov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public class ConstraintViolations {
 
     private ConstraintViolations() {
