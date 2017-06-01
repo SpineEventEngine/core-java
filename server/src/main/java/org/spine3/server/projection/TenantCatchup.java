@@ -20,6 +20,7 @@
 
 package org.spine3.server.projection;
 
+import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.apache.beam.sdk.Pipeline;
 import org.apache.beam.sdk.PipelineResult;
@@ -45,9 +46,13 @@ import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.values.TypeDescriptor;
 import org.spine3.base.Event;
 import org.spine3.server.entity.EntityRecord;
+import org.spine3.server.entity.EntityStorageConverter;
+import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStoreIO;
 import org.spine3.server.event.EventStreamQuery;
+import org.spine3.server.projection.ProjectionRepositoryIO.WriteLastHandledEventTime;
+import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.users.TenantId;
 
@@ -57,30 +62,46 @@ import org.spine3.users.TenantId;
  * @param <I> the type of projection identifiers
  * @author Alexander Yevsyukov
  */
-class CatchupOp<I> {
+class TenantCatchup<I> {
+
+    private final ProjectionRepository<I, ?, ?> repository;
+    private final PipelineOptions options;
 
     private final TenantId tenantId;
-    private final ProjectionRepository<I, ?, ?> repository;
-    private final EventStore eventStore;
-    private final PipelineOptions options;
 
     private final KvCoder<I, Event> eventTupleCoder;
     private final KvCoder<I, Iterable<Event>> idToEventsCoder;
+    private final EventTargetsFunction<I, Message> eventTargetsFunction;
+    private final RecordStorageIO.ReadFn<I> readRecordFn;
+    private final EntityStorageConverter<I, ?, ?> converter;
+    private final KvCoder<I, EntityRecord> kvCoder;
+    private final WriteLastHandledEventTime writeLastEventTimestamp;
+    private final RecordStorageIO.Write<I> writeRecords;
+    private final EventStoreIO.Query queryEvents;
 
-    CatchupOp(TenantId tenantId,
-              ProjectionRepository<I, ?, ?> repository,
-              PipelineOptions options) {
+    TenantCatchup(TenantId tenantId,
+                  ProjectionRepository<I, ?, ?> repository,
+                  PipelineOptions options) {
         this.tenantId = tenantId;
         this.repository = repository;
         this.options = options;
-        this.eventStore = repository.getEventStore();
 
-        // Create coders.
-        final Coder<I> idCoder = repository.getIO()
-                                           .getIdCoder();
+        final EventStore eventStore = repository.getEventStore();
+        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
+
+        final Coder<I> idCoder = repositoryIO.getIdCoder();
         final Coder<Event> eventCoder = EventStoreIO.getEventCoder();
         this.eventTupleCoder = KvCoder.of(idCoder, eventCoder);
         this.idToEventsCoder = KvCoder.of(idCoder, IterableCoder.of(eventCoder));
+
+        this.eventTargetsFunction = repository.getIdSetFunction();
+
+        this.readRecordFn = repositoryIO.read(tenantId);
+        this.converter = repositoryIO.getConverter();
+        this.kvCoder = repositoryIO.getKvCoder();
+        this.writeLastEventTimestamp = repositoryIO.writeLastHandledEventTime(tenantId);
+        this.writeRecords = repositoryIO.write(tenantId);
+        this.queryEvents = eventStore.query(tenantId);
     }
 
     @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
@@ -98,13 +119,11 @@ class CatchupOp<I> {
         final EventStreamQuery query = createStreamQuery();
         final PCollection<EventStreamQuery> eventStreamQuery = pipeline.apply(Create.of(query));
         final PCollection<Event> events = eventStreamQuery.apply(
-                "QueryEvents",
-                eventStore.query(tenantId));
+                "QueryEvents", queryEvents);
 
         // Compose a flat map where a key is a projection ID and a value is an event to apply.
         final PCollection<KV<I, Event>> flatMap = events.apply(
-                "MapIdsToEvents",
-                FlatMapElements.via(new GetIds<>(repository.getIdSetFunction()))
+                "MapIdsToEvents", FlatMapElements.via(new GetIds<>(eventTargetsFunction))
         ).setCoder(eventTupleCoder);
 
         // Group events by projection IDs.
@@ -112,11 +131,9 @@ class CatchupOp<I> {
                 flatMap.apply("GroupEvents", GroupByKey.<I, Event>create())
                        .setCoder(idToEventsCoder);
 
-        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
-
         final PCollection<I> ids = grouppedEvents.apply(Keys.<I>create());
-        final PCollection<KV<I, EntityRecord>> projectionStates = ids.apply(
-                ParDo.of(repositoryIO.read(tenantId)));
+        final PCollection<KV<I, EntityRecord>> projectionStates =
+                ids.apply(ParDo.of(readRecordFn));
 
         // Join ID-to-Event collection with ID-to-EntityRecord collection.
         final TupleTag<Iterable<Event>> eventsTag = new TupleTag<>();
@@ -135,15 +152,15 @@ class CatchupOp<I> {
                 "ApplyEvents",
                 ParDo.of(new ApplyEvents<>(eventsTag,
                                            entityRecordsTag,
-                                           repositoryIO.getConverter(),
+                                           converter,
                                            timestampTag))
                      .withOutputTags(recordsTag, TupleTagList.of(timestampTag))
         );
 
         // Store projections.
         final PCollection<KV<I, EntityRecord>> records = collectionTuple.get(recordsTag);
-        records.setCoder(repositoryIO.getKvCoder())
-               .apply("WriteRecords", repositoryIO.write(tenantId));
+        records.setCoder(kvCoder)
+               .apply("WriteRecords", writeRecords);
 
         // Sort last timestamps of last events and write last handled event time.
         final PCollection<Timestamp> timestamps = collectionTuple.get(timestampTag);
@@ -151,11 +168,12 @@ class CatchupOp<I> {
                 "MaxTimestamp",
                 Max.<Timestamp, TimestampComparator>globally(TimestampComparator.getInstance())
         );
-        lastTimestamp.apply(repositoryIO.writeLastHandledEventTime(tenantId));
+        lastTimestamp.apply(writeLastEventTimestamp);
 
         return pipeline;
     }
 
+    //TODO:2017-06-01:alexander.yevsyukov: Transform into gRPC call.
     private EventStreamQuery createStreamQuery() {
         final TenantAwareFunction0<EventStreamQuery> fn =
                 new TenantAwareFunction0<EventStreamQuery>(tenantId) {

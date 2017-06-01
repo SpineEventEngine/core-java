@@ -31,6 +31,8 @@ import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc.Projec
 import org.spine3.type.TypeUrl;
 import org.spine3.users.TenantId;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * BeamIO operations for in-memory projection storage.
  *
@@ -92,6 +94,8 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
 
         @Override
         protected void doWrite(TenantId tenantId, Timestamp timestamp) {
+            checkNotNull(tenantId);
+            checkNotNull(timestamp);
             final LastHandledEventRequest req =
                     LastHandledEventRequest.newBuilder()
                                            .setTenantId(tenantId)

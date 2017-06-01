@@ -29,6 +29,8 @@ import org.spine3.server.BoundedContext;
 
 import java.io.IOException;
 
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+
 /**
  * Starts a gRPC server serving access to in-memory data storage.
  *
@@ -47,6 +49,16 @@ public class InMemoryGrpcServer {
                 .addService(new ProjectionStorageService(boundedContext))
                 .addService(new EventStreamService(boundedContext))
                 .build();
+    }
+
+    public static InMemoryGrpcServer startOn(BoundedContext boundedContext) {
+        InMemoryGrpcServer grpcServer = new InMemoryGrpcServer(boundedContext);
+        try {
+            grpcServer.start();
+        } catch (IOException e) {
+            throw illegalStateWithCauseOf(e);
+        }
+        return grpcServer;
     }
 
     /**

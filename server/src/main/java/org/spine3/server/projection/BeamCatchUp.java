@@ -56,7 +56,7 @@ class BeamCatchUp {
         // and composing EventStreamQuery would be two calls for corresponding RecordStorageIOs.
 
         for (TenantId tenantId : allTenants) {
-            final CatchupOp<I> catchupOp = new CatchupOp<>(tenantId, repository, options);
+            final TenantCatchup<I> catchupOp = new TenantCatchup<>(tenantId, repository, options);
             final PipelineResult result = catchupOp.run();
             result.waitUntilFinish();
         }

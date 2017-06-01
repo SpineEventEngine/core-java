@@ -49,7 +49,9 @@ public abstract class ProjectionStorageIO<I> extends RecordStorageIO<I> {
         @ProcessElement
         public void processElement(ProcessContext c) {
             final Timestamp timestamp = c.element();
-            doWrite(tenantId, timestamp);
+            if (timestamp != null) {
+                doWrite(tenantId, timestamp);
+            }
         }
 
         protected abstract void doWrite(TenantId tenantId, Timestamp timestamp);
