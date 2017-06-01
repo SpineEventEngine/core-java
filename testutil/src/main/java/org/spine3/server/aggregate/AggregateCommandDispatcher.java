@@ -36,10 +36,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class AggregateCommandDispatcher {
 
     private AggregateCommandDispatcher() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
-     * Dispatches the given {@code Command} envelope and applies the resulting events
+     * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
      * to the given {@code Aggregate}.
      *
      * @return the list of {@code Event} messages.

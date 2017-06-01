@@ -43,7 +43,7 @@ public class ProcessManagerDispatcher {
     }
 
     /**
-     * Dispatches the given {@linkplain org.spine3.base.Command Command} envelope
+     * Dispatches the {@linkplain CommandEnvelope Command envelope}
      * to the given {@code ProcessManager}.
      *
      * @return the list of {@linkplain Event events}, being the command output.
