@@ -148,9 +148,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * Finds a record and returns it if its {@link LifecycleFlags} don't make it
      * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible()}.
      */
-    @Internal
-    @CheckReturnValue
-    public Optional<EntityRecord> findRecord(I id) {
+    private Optional<EntityRecord> findRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
         final Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
@@ -158,6 +156,25 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
         final EntityRecord record = found.get();
         return Optional.of(record);
+    }
+
+    /**
+     * Obtains a record for an entity with the passed ID.
+     *
+     * <p>If there is no such entity yet, it is created and {@link EntityRecord} for this entity is
+     * returned. The new entity is not stored as the result of this call.
+     *
+     * <p>This method is used internally and should not be called by the application code directly.
+     *
+     * @param id the ID of the entity
+     * @return loaded or created {@link EntityRecord}
+     */
+    @Internal
+    @CheckReturnValue
+    public EntityRecord findOrCreateRecord(I id) {
+        final E entity = findOrCreate(id);
+        final EntityRecordWithColumns recordWithColumns = toRecord(entity);
+        return recordWithColumns.getRecord();
     }
 
     /**

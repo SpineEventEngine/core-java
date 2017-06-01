@@ -138,6 +138,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public RecordStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemRecordStorageIO<>(idClass, entityStateUrl);
+        return new InMemoryRecordStorageIO<>(idClass, entityStateUrl);
     }
 }

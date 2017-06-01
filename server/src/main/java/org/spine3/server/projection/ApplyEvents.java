@@ -77,12 +77,16 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
         final EntityRecord entityRecord = coGbkResult.getOnly(entityRecordsTag);
         @SuppressWarnings("unchecked")
         // the types are preserved since the the function is returned by a projection repo.
-        final Projection<I, ?, ?> projection = (Projection<I, ?, ?>) converter.reverse()
-                                                                        .convert(entityRecord);
+        final Projection<I, ?, ?> projection = (Projection<I, ?, ?>)
+                                                converter.reverse()
+                                                         .convert(entityRecord);
         checkNotNull(projection);
+
         // Apply events
+        final ProjectionTransaction<I, ?, ?> tx = ProjectionTransaction.start(projection);
+        Projection.play(projection, events);
+        tx.commit();
         for (Event event : events) {
-            projection.handle(Events.getMessage(event), event.getContext());
             timestamps.add(event.getContext()
                                 .getTimestamp());
         }
@@ -90,8 +94,8 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
         // Add the resulting record to output.
         @SuppressWarnings("unchecked") /* OK as the types are preserved since the the function
             is returned by a projection repo. */
-        final EntityRecord record =
-                ((Converter<? super Projection<I, ?, ?>, EntityRecord>)converter).convert(projection);
+        final EntityRecord record = ((Converter<? super Projection<I, ?, ?>, EntityRecord>)
+                                     converter).convert(projection);
         c.output(KV.of(id, record));
 
         // Get the latest event timestamp.

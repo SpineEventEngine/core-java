@@ -20,11 +20,11 @@
 
 package org.spine3.server.storage.memory.grpc;
 
-import com.google.common.annotations.VisibleForTesting;
 import io.grpc.ManagedChannel;
 import io.grpc.Server;
 import io.grpc.inprocess.InProcessChannelBuilder;
 import io.grpc.inprocess.InProcessServerBuilder;
+import org.spine3.annotation.Internal;
 import org.spine3.server.BoundedContext;
 
 import java.io.IOException;
@@ -34,13 +34,14 @@ import java.io.IOException;
  *
  * @author Alexander Yevsyukov
  */
-@VisibleForTesting
-public class GrpcServer {
+@Internal
+public class InMemoryGrpcServer {
+
     private static final String SERVER_NAME = "InMemory";
 
     private Server grpcServer;
 
-    public GrpcServer(BoundedContext boundedContext) {
+    public InMemoryGrpcServer(BoundedContext boundedContext) {
         this.grpcServer = InProcessServerBuilder
                 .forName(SERVER_NAME)
                 .addService(new ProjectionStorageService(boundedContext))

@@ -142,6 +142,6 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public ProjectionStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemProjectionStorageIO<>(stateTypeUrl, recordStorage.getIO(idClass));
+        return new InMemoryProjectionStorageIO<>(stateTypeUrl, recordStorage.getIO(idClass));
     }
 }

@@ -37,6 +37,8 @@ import org.spine3.annotation.Subscribe;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
+import org.spine3.base.Version;
+import org.spine3.base.Versions;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
@@ -47,7 +49,7 @@ import org.spine3.server.projection.ProjectionRepository.Status;
 import org.spine3.server.storage.RecordStorage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
-import org.spine3.server.storage.memory.grpc.GrpcServer;
+import org.spine3.server.storage.memory.grpc.InMemoryGrpcServer;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
@@ -62,7 +64,6 @@ import org.spine3.test.projection.event.ProjectStarted;
 import org.spine3.test.projection.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.time.Durations2;
-import org.spine3.time.Time;
 import org.spine3.type.EventClass;
 import org.spine3.users.TenantId;
 
@@ -91,6 +92,7 @@ import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
 import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
+import static org.spine3.time.Time.getCurrentTime;
 import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
@@ -111,7 +113,7 @@ public class ProjectionRepositoryShould
     private static final Any PRODUCER_ID = pack(ID);
 
     private BoundedContext boundedContext;
-    private GrpcServer grpcServer;
+    private InMemoryGrpcServer grpcServer;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
@@ -172,7 +174,7 @@ public class ProjectionRepositoryShould
     @Before
     public void setUp() {
         boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
-        grpcServer = new GrpcServer(boundedContext);
+        grpcServer = new InMemoryGrpcServer(boundedContext);
         try {
             grpcServer.start();
         } catch (IOException e) {
@@ -380,19 +382,22 @@ public class ProjectionRepositoryShould
         final ProjectCreated projectCreated = ProjectCreated.newBuilder()
                                                             .setProjectId(ID)
                                                             .build();
-        final Event projectCreatedEvent = eventFactory.createEvent(projectCreated);
+        Version version = Versions.newVersion(1, getCurrentTime());
+        final Event projectCreatedEvent = eventFactory.createEvent(projectCreated, version);
         appendEvent(eventStore, projectCreatedEvent);
 
         final TaskAdded taskAdded = TaskAdded.newBuilder()
                                              .setProjectId(ID)
                                              .build();
-        final Event taskAddedEvent = eventFactory.createEvent(taskAdded);
+        version = Versions.increment(version);
+        final Event taskAddedEvent = eventFactory.createEvent(taskAdded, version);
         appendEvent(eventStore, taskAddedEvent);
 
         final ProjectStarted projectStarted = ProjectStarted.newBuilder()
                                                             .setProjectId(ID)
                                                             .build();
-        final Event projectStartedEvent = eventFactory.createEvent(projectStarted);
+        version = Versions.increment(version);
+        final Event projectStartedEvent = eventFactory.createEvent(projectStarted, version);
         appendEvent(eventStore, projectStartedEvent);
 
         repo.catchUp();
@@ -400,6 +405,16 @@ public class ProjectionRepositoryShould
         assertTrue(TestProjection.processed(projectCreated));
         assertTrue(TestProjection.processed(taskAdded));
         assertTrue(TestProjection.processed(projectStarted));
+
+        final Optional<TestProjection> optional = repo.find(ID);
+        assertTrue(optional.isPresent());
+        final TestProjection actual = optional.get();
+
+        assertEquals(Project.Status.STARTED, actual.getState()
+                                                   .getStatus());
+        final Timestamp timestampFound = repo.readLastHandledEventTime();
+        assertEquals(projectStartedEvent.getContext()
+                                        .getTimestamp(), timestampFound);
     }
 
     @Test
@@ -506,7 +521,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void convert_null_timestamp_to_default() {
-        final Timestamp timestamp = Time.getCurrentTime();
+        final Timestamp timestamp = getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
@@ -567,38 +582,26 @@ public class ProjectionRepositoryShould
             // Keep the event message for further inspection in tests.
             keep(event);
 
-            final Project newState = getState().toBuilder()
-                                               .setId(event.getProjectId())
-                                               .setStatus(Project.Status.CREATED)
-                                               .build();
-            getBuilder().mergeFrom(newState);
+            getBuilder().setId(event.getProjectId())
+                        .setStatus(Project.Status.CREATED);
         }
 
         @Subscribe
         public void on(TaskAdded event) {
             keep(event);
-            final Project newState = getState().toBuilder()
-                                               .addTask(event.getTask())
-                                               .build();
-            getBuilder().mergeFrom(newState);
+            getBuilder().addTask(event.getTask())
+                        .build();
         }
-
 
         /**
          * Handles the {@link ProjectStarted} event.
          *
          * @param event   the event message
-         * @param ignored this parameter is left to show that a projection subscriber
-         *                can have two parameters
          */
         @Subscribe
-        public void on(ProjectStarted event,
-                       @SuppressWarnings("UnusedParameters") EventContext ignored) {
+        public void on(ProjectStarted event) {
             keep(event);
-            final Project newState = getState().toBuilder()
-                                               .setStatus(Project.Status.STARTED)
-                                               .build();
-            getBuilder().mergeFrom(newState);
+            getBuilder().setStatus(Project.Status.STARTED);
         }
 
         @Override

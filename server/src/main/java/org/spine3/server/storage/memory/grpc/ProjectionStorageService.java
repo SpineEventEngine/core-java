@@ -81,26 +81,24 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
-        final TenantAwareFunction<Object, Optional<EntityRecord>> func =
-                new TenantAwareFunction<Object, Optional<EntityRecord>>(request.getTenantId()) {
-            @Override
-            public Optional<EntityRecord> apply(@Nullable Object id) {
-                checkNotNull(id);
-                @SuppressWarnings("unchecked") //
-                final Optional<EntityRecord> optional = repository.findRecord(id);
-                return optional;
-            }
-        };
-        final Optional<EntityRecord> optional = func.execute(id);
-        final EntityRecord record = optional.isPresent()
-                ? optional.get()
-                : EntityRecord.getDefaultInstance();
+        final TenantAwareFunction<Object, EntityRecord> func =
+                new TenantAwareFunction<Object, EntityRecord>(request.getTenantId()) {
+                    @Override
+                    @SuppressWarnings("unchecked")
+                        // The ID type should be preserved by the `request` composition.
+                    public EntityRecord apply(@Nullable Object id) {
+                        checkNotNull(id);
+                        final EntityRecord record = repository.findOrCreateRecord(id);
+                        return record;
+                    }
+                };
+        final EntityRecord record = func.execute(id);
         responseObserver.onNext(record);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void write(final RecordStorageRequest request, StreamObserver<Response> responseObserver) {
+    public void write(final RecordStorageRequest request, final StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
         final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
         if (repository == null) {
@@ -111,6 +109,8 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             @Override
             public void run() {
                 repository.storeRecord(request.getRecord());
+                responseObserver.onNext(Responses.ok());
+                responseObserver.onCompleted();
             }
         }.execute();
     }
@@ -138,7 +138,7 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
 
     @Override
     public void writeLastHandledEventTimestamp(final LastHandledEventRequest request,
-                                               StreamObserver<Response> responseObserver) {
+                                               final StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getProjectionStateTypeUrl());
         final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
         if (repository == null) {
@@ -149,10 +149,9 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             @Override
             public void run() {
                 repository.writeLastHandledEventTime(request.getTimestamp());
+                responseObserver.onNext(Responses.ok());
+                responseObserver.onCompleted();
             }
         }.execute();
-
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
     }
 }

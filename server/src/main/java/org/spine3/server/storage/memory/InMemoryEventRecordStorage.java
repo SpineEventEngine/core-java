@@ -32,7 +32,7 @@ import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.storage.memory.grpc.EventStreamRequest;
 import org.spine3.server.storage.memory.grpc.EventStreamServiceGrpc;
 import org.spine3.server.storage.memory.grpc.EventStreamServiceGrpc.EventStreamServiceBlockingStub;
-import org.spine3.server.storage.memory.grpc.GrpcServer;
+import org.spine3.server.storage.memory.grpc.InMemoryGrpcServer;
 import org.spine3.users.TenantId;
 
 import java.util.Iterator;
@@ -79,7 +79,7 @@ class InMemoryEventRecordStorage extends EventRecordStorage {
 
         @StartBundle
         public void startBundle() {
-            channel = GrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createDefaultChannel();
             blockingStub = EventStreamServiceGrpc.newBlockingStub(channel);
         }
 

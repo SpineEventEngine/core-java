@@ -24,7 +24,7 @@ import io.grpc.ManagedChannel;
 import org.spine3.base.Identifier;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.storage.RecordStorageIO;
-import org.spine3.server.storage.memory.grpc.GrpcServer;
+import org.spine3.server.storage.memory.grpc.InMemoryGrpcServer;
 import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
 import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
 import org.spine3.server.storage.memory.grpc.RecordStorageRequest;
@@ -36,11 +36,11 @@ import org.spine3.users.TenantId;
  *
  * @author Alexander Yevsyukov
  */
-class InMemRecordStorageIO<I> extends RecordStorageIO<I> {
+class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
 
     private final TypeUrl entityStateUrl;
 
-    InMemRecordStorageIO(Class<I> idClass, TypeUrl entityStateUrl) {
+    InMemoryRecordStorageIO(Class<I> idClass, TypeUrl entityStateUrl) {
         super(idClass);
         this.entityStateUrl = entityStateUrl;
     }
@@ -57,7 +57,7 @@ class InMemRecordStorageIO<I> extends RecordStorageIO<I> {
 
     private static class InMemReadFn<I> extends ReadFn<I> {
 
-        private static final long serialVersionUID = 3686720299328852578L;
+        private static final long serialVersionUID = 0L;
         private final TypeUrl entityStateUrl;
         private transient ManagedChannel channel;
         private transient ProjectionStorageServiceBlockingStub blockingStub;
@@ -70,7 +70,7 @@ class InMemRecordStorageIO<I> extends RecordStorageIO<I> {
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = GrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createDefaultChannel();
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 
@@ -107,7 +107,7 @@ class InMemRecordStorageIO<I> extends RecordStorageIO<I> {
 
         @StartBundle
         public void startBundle() {
-            channel = GrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createDefaultChannel();
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 
