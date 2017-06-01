@@ -27,12 +27,12 @@ import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Events;
-import org.spine3.annotation.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.protobuf.Wrapper;
@@ -73,6 +73,7 @@ import static org.mockito.Mockito.verify;
 import static org.spine3.base.Commands.getMessage;
 import static org.spine3.protobuf.AnyPacker.unpack;
 import static org.spine3.server.procman.ProcManTransaction.start;
+import static org.spine3.server.procman.ProcessManagerDispatcher.dispatch;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("OverlyCoupledClass")
@@ -124,9 +125,7 @@ public class ProcessManagerShould {
     }
 
     private void testDispatchEvent(Message event) {
-        final ProcManTransaction<?, ?, ?> tx = start(processManager);
-        processManager.dispatchEvent(event, EVENT_CONTEXT);
-        tx.commit();
+        dispatch(processManager, event, EVENT_CONTEXT);
         assertEquals(AnyPacker.pack(event), processManager.getState());
     }
 
@@ -221,7 +220,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        processManager.dispatchEvent(unknownEvent, EVENT_CONTEXT);
+        dispatch(processManager, unknownEvent, EVENT_CONTEXT);
     }
 
     @Test
