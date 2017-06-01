@@ -54,17 +54,17 @@ class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends Message
         return storageIO().getKvCoder();
     }
 
-    WriteLastHandledEventTime writeLastHandledEventTime(TenantId tenantId) {
-        return new WriteLastHandledEventTime(
-                ((ProjectionStorageIO<I>) storageIO()).writeLastHandledEventTimeFn(tenantId));
+    WriteTimestamp writeLastHandledEventTime(TenantId tenantId) {
+        return new WriteTimestamp(
+                ((ProjectionStorageIO<I>) storageIO()).writeTimestampFn(tenantId));
     }
 
-    static class WriteLastHandledEventTime extends PTransform<PCollection<Timestamp>, PDone> {
+    static class WriteTimestamp extends PTransform<PCollection<Timestamp>, PDone> {
 
         private static final long serialVersionUID = 0L;
-        private final ProjectionStorageIO.WriteLastHandledEventTimeFn fn;
+        private final ProjectionStorageIO.WriteTimestampFn fn;
 
-        private WriteLastHandledEventTime(ProjectionStorageIO.WriteLastHandledEventTimeFn fn) {
+        private WriteTimestamp(ProjectionStorageIO.WriteTimestampFn fn) {
             this.fn = fn;
         }
 

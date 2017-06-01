@@ -161,7 +161,10 @@ public class ProjectionRepositoryShould
     @Override
     @Before
     public void setUp() {
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        boundedContext = BoundedContext.newBuilder()
+                                       .setName(getClass().getSimpleName())
+                                       .setMultitenant(true)
+                                       .build();
         grpcServer = InMemoryGrpcServer.startOn(boundedContext);
         super.setUp();
 

@@ -77,7 +77,7 @@ public class InMemoryGrpcServer {
     }
 
     public void shutdown() {
-        grpcServer.shutdown();
+        grpcServer.shutdownNow();
         grpcServer = null;
     }
 }

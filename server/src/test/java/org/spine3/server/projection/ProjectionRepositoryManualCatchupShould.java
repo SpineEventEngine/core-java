@@ -40,7 +40,6 @@ import org.spine3.test.TestEventFactory;
 import org.spine3.test.projection.Project;
 import org.spine3.test.projection.ProjectId;
 import org.spine3.test.projection.event.ProjectCreated;
-import org.spine3.testdata.TestBoundedContextFactory;
 import org.spine3.time.Durations2;
 import org.spine3.time.Time;
 import org.spine3.users.TenantId;
@@ -71,8 +70,11 @@ public class ProjectionRepositoryManualCatchupShould extends TenantAwareTest {
     @Before
     public void setUp() {
         setCurrentTenant(newTenantUuid());
-        
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+
+        boundedContext = BoundedContext.newBuilder()
+                                       .setName(getClass().getSimpleName())
+                                       .setMultitenant(true)
+                                       .build();
         grpcServer = InMemoryGrpcServer.startOn(boundedContext);
 
         repository = new ManualCatchupProjectionRepository(boundedContext);

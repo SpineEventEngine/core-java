@@ -51,7 +51,6 @@ import org.spine3.server.entity.idfunc.EventTargetsFunction;
 import org.spine3.server.event.EventStore;
 import org.spine3.server.event.EventStoreIO;
 import org.spine3.server.event.EventStreamQuery;
-import org.spine3.server.projection.ProjectionRepositoryIO.WriteLastHandledEventTime;
 import org.spine3.server.storage.RecordStorageIO;
 import org.spine3.server.tenant.TenantAwareFunction0;
 import org.spine3.users.TenantId;
@@ -75,7 +74,7 @@ class TenantCatchup<I> {
     private final RecordStorageIO.ReadFn<I> readRecordFn;
     private final EntityStorageConverter<I, ?, ?> converter;
     private final KvCoder<I, EntityRecord> kvCoder;
-    private final WriteLastHandledEventTime writeLastEventTimestamp;
+    private final ProjectionRepositoryIO.WriteTimestamp writeLastEventTimestamp;
     private final RecordStorageIO.Write<I> writeRecords;
     private final EventStoreIO.Query queryEvents;
 

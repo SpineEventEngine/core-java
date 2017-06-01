@@ -52,7 +52,7 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     }
 
     @Override
-    public WriteLastHandledEventTimeFn writeLastHandledEventTimeFn(TenantId tenantId) {
+    public WriteTimestampFn writeTimestampFn(TenantId tenantId) {
         return new WriteTimestampOverGrpc(tenantId, stateTypeUrl);
     }
 
@@ -66,7 +66,7 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
         return storageIO.writeFn(tenantId);
     }
 
-    private static class WriteTimestampOverGrpc extends WriteLastHandledEventTimeFn {
+    private static class WriteTimestampOverGrpc extends WriteTimestampFn {
 
         private static final long serialVersionUID = 0L;
         private final TypeUrl stateTypeUrl;
