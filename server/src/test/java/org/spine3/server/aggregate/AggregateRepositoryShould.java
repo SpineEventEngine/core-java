@@ -64,7 +64,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.spine3.server.aggregate.CommandTestDispatcher.dispatch;
+import static org.spine3.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static org.spine3.test.Tests.newTenantUuid;
 import static org.spine3.validate.Validate.isDefault;
 import static org.spine3.validate.Validate.isNotDefault;

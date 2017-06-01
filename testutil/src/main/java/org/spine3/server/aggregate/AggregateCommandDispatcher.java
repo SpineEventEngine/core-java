@@ -19,19 +19,23 @@
  */
 package org.spine3.server.aggregate;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.envelope.CommandEnvelope;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
- * A test utility to dispatch the commands to an Aggregate in test purposes.
+ * A test utility to dispatch commands to an {@code Aggregate} in test purposes.
  *
  * @author Alex Tymchenko
  */
-class CommandTestDispatcher {
+@VisibleForTesting
+public class AggregateCommandDispatcher {
 
-    private CommandTestDispatcher() {
+    private AggregateCommandDispatcher() {
     }
 
     /**
@@ -40,8 +44,11 @@ class CommandTestDispatcher {
      *
      * @return the list of {@code Event} messages.
      */
-    static List<? extends Message> dispatch(Aggregate<?, ?, ?> aggregate,
+    public static List<? extends Message> dispatch(Aggregate<?, ?, ?> aggregate,
                                             CommandEnvelope envelope) {
+        checkNotNull(aggregate);
+        checkNotNull(envelope);
+
         final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
 
         final AggregateTransaction tx = AggregateTransaction.start(aggregate);
