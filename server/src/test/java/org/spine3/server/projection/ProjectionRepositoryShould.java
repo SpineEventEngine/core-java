@@ -29,9 +29,9 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import org.spine3.annotation.Subscribe;
 import org.spine3.base.Event;
@@ -91,6 +91,7 @@ import static org.spine3.server.projection.ProjectionRepository.Status.CREATED;
 import static org.spine3.server.projection.ProjectionRepository.Status.ONLINE;
 import static org.spine3.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static org.spine3.test.Verify.assertContainsAll;
+import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * @author Alexander Litus
@@ -98,9 +99,7 @@ import static org.spine3.test.Verify.assertContainsAll;
  */
 @SuppressWarnings({
         "ClassWithTooManyMethods",
-        "OverlyCoupledClass",
-        "StaticVariableMayNotBeInitialized" /* OK as these vars are initialized in `beforeClass()*/,
-        "StaticVariableUsedBeforeInitialization"})
+        "OverlyCoupledClass"})
 public class ProjectionRepositoryShould
         extends RecordBasedRepositoryShould<ProjectionRepositoryShould.TestProjection,
                                             ProjectId,
@@ -111,23 +110,23 @@ public class ProjectionRepositoryShould
                                                  .build();
     private static final Any PRODUCER_ID = pack(ID);
 
-    private static BoundedContext boundedContext;
-    private static GrpcServer grpcServer;
+    private BoundedContext boundedContext;
+    private GrpcServer grpcServer;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
     }
 
     /**
-     * {@code IdSetFunction} used for testing add/get/remove.
+     * {@link EventTargetsFunction} used for testing add/get/remove of functions.
      */
-    private static final EventTargetsFunction<ProjectId, ProjectCreated> idSetForCreateProject =
+    private static final EventTargetsFunction<ProjectId, ProjectCreated> creteProjectTargets =
             new EventTargetsFunction<ProjectId, ProjectCreated>() {
                 private static final long serialVersionUID = 0L;
 
                 @Override
                 public Set<ProjectId> apply(ProjectCreated message, EventContext context) {
-                    return newHashSet();
+                    return newHashSet(message.getProjectId());
                 }
             };
 
@@ -165,25 +164,35 @@ public class ProjectionRepositoryShould
                         .build();
     }
 
-    @BeforeClass
-    public static void beforeClass() throws IOException {
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
-        grpcServer = new GrpcServer(boundedContext);
-        grpcServer.start();
-    }
-
     @AfterClass
     public static void afterClass() throws Exception {
-        boundedContext.close();
-        grpcServer.shutdown();
     }
 
     @Override
     @Before
     public void setUp() {
+        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        grpcServer = new GrpcServer(boundedContext);
+        try {
+            grpcServer.start();
+        } catch (IOException e) {
+            throw illegalStateWithCauseOf(e);
+        }
+
         super.setUp();
+
         repository.initStorage(storageFactory());
+        boundedContext.register(repository());
+
         TestProjection.clearMessageDeliveryHistory();
+    }
+
+    @Override
+    @After
+    public void tearDown() throws Exception {
+        boundedContext.close();
+        grpcServer.shutdown();
+        super.tearDown();
     }
 
     private TestEventFactory newEventFactory(Any producerId) {
@@ -196,7 +205,7 @@ public class ProjectionRepositoryShould
         return newEventFactory(producerId).createEvent(eventMessage);
     }
 
-    private static void appendEvent(EventStore eventStore, Event event) {
+    private void appendEvent(EventStore eventStore, Event event) {
         eventStore.append(event);
         keepTenantIdFromEvent(event);
     }
@@ -265,7 +274,7 @@ public class ProjectionRepositoryShould
      * Simulates updating TenantIndex, which occurs during command processing
      * in multi-tenant context.
      */
-    private static void keepTenantIdFromEvent(Event event) {
+    private void keepTenantIdFromEvent(Event event) {
         final TenantId tenantId = event.getContext()
                                        .getCommandContext()
                                        .getActorContext()
@@ -420,13 +429,13 @@ public class ProjectionRepositoryShould
     @SuppressWarnings("OptionalGetWithoutIsPresent")
         // because the test checks that the function is present.
     public void obtain_id_set_function_after_put() {
-        repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+        repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
 
         final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> func =
                 repository().getIdSetFunction(ProjectCreated.class);
 
         assertTrue(func.isPresent());
-        assertEquals(idSetForCreateProject, func.get());
+        assertEquals(creteProjectTargets, func.get());
     }
 
     @Test
@@ -454,8 +463,8 @@ public class ProjectionRepositoryShould
         verify(repository, never()).store(any(TestProjection.class));
     }
 
-    @SuppressWarnings("unchecked") // Due to mockito matcher usage
     @Test
+    @SuppressWarnings("unchecked") // Due to mockito matcher usage
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
         // Set up bounded context
         final BoundedContext boundedContext =
@@ -486,7 +495,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void remove_id_set_function_after_put() {
-        repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
+        repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
 
         repository().removeIdSetFunction(ProjectCreated.class);
         final Optional<EventTargetsFunction<ProjectId, ProjectCreated>> out =
@@ -516,14 +525,14 @@ public class ProjectionRepositoryShould
         assertTrue(items.isEmpty());
     }
 
-    private static ManualCatchupProjectionRepository repoWithManualCatchup() {
+    private ManualCatchupProjectionRepository repoWithManualCatchup() {
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository(boundedContext);
         repo.initStorage(storageFactory());
         return repo;
     }
 
-    private static StorageFactory storageFactory() {
+    private StorageFactory storageFactory() {
         return StorageFactorySwitch.get(boundedContext.isMultitenant());
     }
 

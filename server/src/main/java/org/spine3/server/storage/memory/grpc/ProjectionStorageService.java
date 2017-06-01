@@ -29,13 +29,15 @@ import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.entity.EntityRecord;
 import org.spine3.server.projection.ProjectionRepository;
-import org.spine3.server.storage.memory.grpc.LastHandledEventRequest;
 import org.spine3.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceImplBase;
-import org.spine3.server.storage.memory.grpc.RecordStorageRequest;
+import org.spine3.server.tenant.TenantAwareFunction;
+import org.spine3.server.tenant.TenantAwareFunction0;
+import org.spine3.server.tenant.TenantAwareOperation;
 import org.spine3.type.TypeUrl;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spine3.util.Exceptions.newIllegalStateException;
 
 /**
@@ -79,8 +81,17 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
-        @SuppressWarnings("unchecked") //
-        final Optional<EntityRecord> optional = repository.findRecord(id);
+        final TenantAwareFunction<Object, Optional<EntityRecord>> func =
+                new TenantAwareFunction<Object, Optional<EntityRecord>>(request.getTenantId()) {
+            @Override
+            public Optional<EntityRecord> apply(@Nullable Object id) {
+                checkNotNull(id);
+                @SuppressWarnings("unchecked") //
+                final Optional<EntityRecord> optional = repository.findRecord(id);
+                return optional;
+            }
+        };
+        final Optional<EntityRecord> optional = func.execute(id);
         final EntityRecord record = optional.isPresent()
                 ? optional.get()
                 : EntityRecord.getDefaultInstance();
@@ -89,15 +100,19 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
     }
 
     @Override
-    public void write(RecordStorageRequest request, StreamObserver<Response> responseObserver) {
+    public void write(final RecordStorageRequest request, StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
         final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
         if (repository == null) {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
-        repository.storeRecord(request.getRecord());
-        super.write(request, responseObserver);
+        new TenantAwareOperation(request.getTenantId()) {
+            @Override
+            public void run() {
+                repository.storeRecord(request.getRecord());
+            }
+        }.execute();
     }
 
     @Override
@@ -109,13 +124,20 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
-        final Timestamp timestamp = repository.readLastHandledEventTime();
+        final TenantAwareFunction0<Timestamp> func =
+                new TenantAwareFunction0<Timestamp>(request.getTenantId()) {
+            @Override
+            public Timestamp apply() {
+                return repository.readLastHandledEventTime();
+            }
+        };
+        final Timestamp timestamp = func.apply();
         responseObserver.onNext(timestamp);
         responseObserver.onCompleted();
     }
 
     @Override
-    public void writeLastHandledEventTimestamp(LastHandledEventRequest request,
+    public void writeLastHandledEventTimestamp(final LastHandledEventRequest request,
                                                StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getProjectionStateTypeUrl());
         final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
@@ -123,7 +145,13 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
-        repository.writeLastHandledEventTime(request.getTimestamp());
+        new TenantAwareOperation(request.getTenantId()) {
+            @Override
+            public void run() {
+                repository.writeLastHandledEventTime(request.getTimestamp());
+            }
+        }.execute();
+
         responseObserver.onNext(Responses.ok());
         responseObserver.onCompleted();
     }

@@ -22,13 +22,12 @@ package org.spine3.server.storage.memory.grpc;
 
 import com.google.common.annotations.VisibleForTesting;
 import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
+import io.grpc.Server;
+import io.grpc.inprocess.InProcessChannelBuilder;
+import io.grpc.inprocess.InProcessServerBuilder;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.transport.GrpcContainer;
 
 import java.io.IOException;
-
-import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
 
 /**
  * Starts a gRPC server serving access to in-memory data storage.
@@ -37,18 +36,16 @@ import static org.spine3.client.ConnectionConstants.DEFAULT_CLIENT_SERVICE_PORT;
  */
 @VisibleForTesting
 public class GrpcServer {
+    private static final String SERVER_NAME = "InMemory";
 
-    private static final String HOST = "localhost";
-    private static final int PORT = DEFAULT_CLIENT_SERVICE_PORT;
-
-    private final GrpcContainer container;
+    private Server grpcServer;
 
     public GrpcServer(BoundedContext boundedContext) {
-        this.container = GrpcContainer.newBuilder()
-                                      .setPort(PORT)
-                                      .addService(new ProjectionStorageService(boundedContext))
-                                      .addService(new EventStreamService(boundedContext))
-                                      .build();
+        this.grpcServer = InProcessServerBuilder
+                .forName(SERVER_NAME)
+                .addService(new ProjectionStorageService(boundedContext))
+                .addService(new EventStreamService(boundedContext))
+                .build();
     }
 
     /**
@@ -57,15 +54,17 @@ public class GrpcServer {
      * ProjectionStorageService}.
      */
     public static ManagedChannel createDefaultChannel() {
-        return ManagedChannelBuilder.forAddress(HOST, PORT)
-                                    .build();
+        final ManagedChannel result = InProcessChannelBuilder.forName(SERVER_NAME)
+                                                             .build();
+        return result;
     }
 
     public void start() throws IOException {
-        container.start();
+        grpcServer.start();
     }
 
     public void shutdown() {
-        container.shutdown();
+        grpcServer.shutdown();
+        grpcServer = null;
     }
 }
