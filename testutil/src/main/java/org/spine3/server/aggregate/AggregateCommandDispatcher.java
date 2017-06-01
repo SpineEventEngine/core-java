@@ -46,7 +46,7 @@ public class AggregateCommandDispatcher {
      * @return the list of {@code Event} messages.
      */
     public static List<? extends Message> dispatch(Aggregate<?, ?, ?> aggregate,
-                                            CommandEnvelope envelope) {
+                                                   CommandEnvelope envelope) {
         checkNotNull(aggregate);
         checkNotNull(envelope);
 
