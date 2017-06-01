@@ -32,7 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * Base interface for enumerations on generic parameters of types.
  *
  * <p>Example of implementing an enumeration for generic parameters:
- * <pre>  {@code
+ * <pre>
+ * {@code
  * public abstract class Tuple<K, V> {
  *      ...
  *     public enum GenericParameter extends GenericTypeIndex<Tuple> {
@@ -47,16 +48,17 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  *         GenericParameter(int index) { this.index = index; }
  *
- *        @literal @Override
+ *         {@literal @}Override
  *         public int getIndex() { return index; }
  *
- *        @literal @Override
+ *         {@literal @}Override
  *         public Class<?> getArgumentIn(Class<? extends Tuple> derivedClass) {
  *             return Default.getArgument(this, derivedClass);
  *         }
  *     }
  * }
- * }</pre>
+ * }
+ * </pre>
  * @param <C> the type in which class the generic index is declared
  * @author Alexander Yevsyukov
  */
