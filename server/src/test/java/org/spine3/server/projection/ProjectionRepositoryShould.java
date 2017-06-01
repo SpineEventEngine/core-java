@@ -406,15 +406,18 @@ public class ProjectionRepositoryShould
         assertTrue(TestProjection.processed(taskAdded));
         assertTrue(TestProjection.processed(projectStarted));
 
+        // Assert that the projection was stored and has correct state.
         final Optional<TestProjection> optional = repo.find(ID);
         assertTrue(optional.isPresent());
         final TestProjection actual = optional.get();
 
         assertEquals(Project.Status.STARTED, actual.getState()
                                                    .getStatus());
-        final Timestamp timestampFound = repo.readLastHandledEventTime();
+
+        // Assert that the timestamp of the last event was stored.
+        final Timestamp lastEventTimestamp = repo.readLastHandledEventTime();
         assertEquals(projectStartedEvent.getContext()
-                                        .getTimestamp(), timestampFound);
+                                        .getTimestamp(), lastEventTimestamp);
     }
 
     @Test
