@@ -20,16 +20,22 @@
 package org.spine3.server.procman;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.server.command.Assign;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.TestEventFactory;
 import org.spine3.validate.StringValueValidatingBuilder;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -37,15 +43,17 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
  */
 public class ProcessManagerDispatcherShould {
 
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(getClass());
+
+    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+
     @Test
     public void pass_the_null_tolerance_check() {
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final Event sampleEvent = factory.createEvent(StringValue.getDefaultInstance());
+        final Event sampleEvent = eventFactory.createEvent(StringValue.getDefaultInstance());
 
-        final TestActorRequestFactory commandFactory =
-                TestActorRequestFactory.newInstance(getClass());
-        final Command sampleCommand = commandFactory.createCommand(StringValue.getDefaultInstance());
-
+        final StringValue commandMessage = StringValue.getDefaultInstance();
+        final Command sampleCommand = requestFactory.createCommand(commandMessage);
 
         final NullPointerTester tester = new NullPointerTester();
         tester.setDefault(EventContext.class, EventContext.getDefaultInstance())
@@ -61,11 +69,66 @@ public class ProcessManagerDispatcherShould {
         assertHasPrivateParameterlessCtor(ProcessManagerDispatcher.class);
     }
 
-    private static final class SampleProcessManager
+    @Test
+    public void dispatch_command() {
+        final ProcessManager spied = spiedProcMan();
+
+        final Command sampleCommand = requestFactory.createCommand(
+                StringValue.getDefaultInstance());
+        final CommandEnvelope expectedEnvelope = CommandEnvelope.of(sampleCommand);
+        ProcessManagerDispatcher.dispatch(spied, expectedEnvelope);
+
+        verify(spied).dispatchCommand(eq(expectedEnvelope));
+    }
+
+    @Test
+    public void dispatch_event_passed_as_Event() {
+        final ProcessManager spied = spiedProcMan();
+
+        final Int32Value eventMsg = Int32Value.getDefaultInstance();
+        final Event event = eventFactory.createEvent(eventMsg);
+
+        ProcessManagerDispatcher.dispatch(spied, event);
+
+        verify(spied).dispatchEvent(eq(eventMsg), eq(event.getContext()));
+    }
+
+    @Test
+    public void dispatch_event_passed_as_Message_and_EventContext() {
+        final ProcessManager spied = spiedProcMan();
+
+        final Int32Value eventMsg = Int32Value.getDefaultInstance();
+        final Event event = eventFactory.createEvent(eventMsg);
+        final EventContext expectedContext = event.getContext();
+
+        ProcessManagerDispatcher.dispatch(spied, eventMsg, expectedContext);
+
+        verify(spied).dispatchEvent(eq(eventMsg), eq(expectedContext));
+    }
+
+    private static ProcessManager spiedProcMan() {
+        final SampleProcessManager processManager = new SampleProcessManager(1L);
+        return Mockito.spy(processManager);
+    }
+
+    @SuppressWarnings("unused")     // Methods accessed via reflection.
+    private static class SampleProcessManager
             extends ProcessManager<Long, StringValue, StringValueValidatingBuilder> {
+
+        private static final Int32Value EVENT_MSG = Int32Value.getDefaultInstance();
 
         private SampleProcessManager(Long id) {
             super(id);
+        }
+
+        @Assign
+        public Int32Value command(StringValue command) {
+            return EVENT_MSG;
+        }
+
+        @Subscribe
+        public void event(Int32Value event) {
+            // do nothing.
         }
     }
 }

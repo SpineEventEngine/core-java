@@ -20,13 +20,18 @@
 package org.spine3.server.projection;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
+import org.mockito.Mockito;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.test.TestEventFactory;
 import org.spine3.validate.StringValueValidatingBuilder;
 
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
@@ -34,10 +39,11 @@ import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
  */
 public class ProjectionEventDispatcherShould {
 
+    private final TestEventFactory eventFactory = TestEventFactory.newInstance(getClass());
+
     @Test
     public void pass_the_null_tolerance_check() {
-        final TestEventFactory factory = TestEventFactory.newInstance(getClass());
-        final Event sampleEvent = factory.createEvent(StringValue.getDefaultInstance());
+        final Event sampleEvent = eventFactory.createEvent(StringValue.getDefaultInstance());
 
         final NullPointerTester tester = new NullPointerTester();
         tester.setDefault(EventContext.class, EventContext.getDefaultInstance())
@@ -52,11 +58,47 @@ public class ProjectionEventDispatcherShould {
         assertHasPrivateParameterlessCtor(ProjectionEventDispatcher.class);
     }
 
-    private static final class SampleProjection
+    @Test
+    public void dispatch_event_passed_as_Event() {
+        final Projection spied = spiedProjection();
+
+        final Int32Value eventMsg = Int32Value.getDefaultInstance();
+        final Event event = eventFactory.createEvent(eventMsg);
+
+        ProjectionEventDispatcher.dispatch(spied, event);
+
+        verify(spied).apply(eq(eventMsg), eq(event.getContext()));
+    }
+
+    @Test
+    public void dispatch_event_passed_as_Message_and_EventContext() {
+        final Projection spied = spiedProjection();
+
+        final Int32Value eventMsg = Int32Value.getDefaultInstance();
+        final Event event = eventFactory.createEvent(eventMsg);
+        final EventContext expectedContext = event.getContext();
+
+        ProjectionEventDispatcher.dispatch(spied, eventMsg, expectedContext);
+
+        verify(spied).apply(eq(eventMsg), eq(expectedContext));
+    }
+
+    private static Projection spiedProjection() {
+        final SampleProjection projection = new SampleProjection(1L);
+        return Mockito.spy(projection);
+    }
+
+    @SuppressWarnings("unused")     // Methods accessed via reflection.
+    private static class SampleProjection
             extends Projection<Long, StringValue, StringValueValidatingBuilder> {
 
         private SampleProjection(Long id) {
             super(id);
+        }
+
+        @Subscribe
+        public void event(Int32Value event) {
+            // do nothing.
         }
     }
 }
