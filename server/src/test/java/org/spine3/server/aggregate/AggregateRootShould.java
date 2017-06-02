@@ -23,13 +23,12 @@ package org.spine3.server.aggregate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.given.AggregateRootTestEnv;
 import org.spine3.server.aggregate.given.AggregateRootTestEnv.AnAggregateRoot;
 import org.spine3.server.aggregate.given.AggregateRootTestEnv.ProjectDefinitionRepository;
 import org.spine3.server.aggregate.given.AggregateRootTestEnv.ProjectLifeCycleRepository;
+import org.spine3.server.aggregate.given.AggregateRootTestEnv.ProjectRoot;
 import org.spine3.test.aggregate.ProjectDefinition;
 import org.spine3.test.aggregate.ProjectId;
 import org.spine3.test.aggregate.ProjectLifecycle;
@@ -37,14 +36,11 @@ import org.spine3.test.aggregate.ProjectLifecycle;
 import java.lang.reflect.Constructor;
 
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.newUuid;
 
 public class AggregateRootShould {
 
-    private AggregateRootTestEnv.ProjectRoot aggregateRoot;
+    private ProjectRoot aggregateRoot;
     private BoundedContext boundedContext;
 
     @Before
@@ -54,7 +50,7 @@ public class AggregateRootShould {
         ProjectId projectId = ProjectId.newBuilder()
                                        .setId(newUuid())
                                        .build();
-        aggregateRoot = new AggregateRootTestEnv.ProjectRoot(boundedContext, projectId);
+        aggregateRoot = new ProjectRoot(boundedContext, projectId);
         boundedContext.register(new ProjectDefinitionRepository());
         boundedContext.register(new ProjectLifeCycleRepository());
     }
@@ -90,34 +86,5 @@ public class AggregateRootShould {
 
         final Message lifeCyclePart = aggregateRoot.getPartState(ProjectLifecycle.class);
         assertNotNull(lifeCyclePart);
-    }
-
-    @Ignore //TODO:2017-06-02:alexander.yevsyukov: Return back when fixing Mockito
-    @Test
-    public void cache_repositories() {
-        final AggregateRoot rootSpy = spy(aggregateRoot);
-        final Class<ProjectDefinition> partClass = ProjectDefinition.class;
-
-        rootSpy.getPartState(partClass);
-        rootSpy.getPartState(partClass);
-
-        verify(rootSpy, times(1)).lookup(partClass);
-    }
-
-    @Ignore //TODO:2017-06-02:alexander.yevsyukov: Return back when fixing Mockito
-    @Test
-    public void have_different_cache_for_different_instances() {
-        final ProjectId projectId = ProjectId.getDefaultInstance();
-        final AggregateRoot firstRoot = new AggregateRootTestEnv.ProjectRoot(boundedContext, projectId);
-        final AggregateRoot secondRoot = new AggregateRootTestEnv.ProjectRoot(boundedContext, projectId);
-        final AggregateRoot firstRootSpy = spy(firstRoot);
-        final AggregateRoot secondRootSpy = spy(secondRoot);
-        final Class<ProjectDefinition> partClass = ProjectDefinition.class;
-
-        firstRootSpy.getPartState(partClass);
-        secondRootSpy.getPartState(partClass);
-
-        verify(firstRootSpy, times(1)).lookup(partClass);
-        verify(secondRootSpy, times(1)).lookup(partClass);
     }
 }
