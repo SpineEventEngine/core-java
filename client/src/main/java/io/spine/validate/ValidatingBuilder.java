@@ -44,7 +44,6 @@ import static io.spine.validate.ValidatingBuilder.GenericParameter.MESSAGE;
  * @author Illia Shepilov
  * @author Alex Tymchenko
  */
-@Deprecated //Due to renaming of package to 'io.spine'.
 public interface ValidatingBuilder<T extends Message, B extends Message.Builder> {
 
     /**

@@ -155,8 +155,7 @@ public class AggregatePartShould {
             final List<ConstraintViolation> violations = e.getError()
                                                           .getValidationError()
                                                           .getConstraintViolationList();
-            assertSize(user.getAllFields()
-                           .size(), violations);
+            assertSize(user.getAllFields().size(), violations);
         }
     }
 
