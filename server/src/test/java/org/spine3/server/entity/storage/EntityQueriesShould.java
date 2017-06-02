@@ -26,9 +26,9 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import org.junit.Test;
 import org.spine3.base.Version;
-import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
+import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -71,6 +71,18 @@ public class EntityQueriesShould {
                 .setDefault(EntityFilters.class, EntityFilters.getDefaultInstance())
                 .testAllPublicStaticMethods(EntityQueries.class);
     }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void check_filter_type() {
+        // Boolean Column queried for for an Integer value
+        final ColumnFilter filter = ColumnFilters.gt(archived.name(), 42);
+        final CompositeColumnFilter compositeFilter = ColumnFilters.all(filter);
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(compositeFilter)
+                                                   .build();
+        EntityQueries.from(filters, AbstractVersionableEntity.class);
+    }
+
 
     @Test
     public void construct_empty_queries() {

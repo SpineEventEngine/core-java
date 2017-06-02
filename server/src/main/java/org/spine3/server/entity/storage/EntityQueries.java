@@ -24,17 +24,19 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import org.spine3.annotation.Internal;
 import org.spine3.base.Identifiers;
+import org.spine3.client.ColumnFilter;
 import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.CompositeColumnFilter.CompositeOperator;
-import org.spine3.client.ColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
+import org.spine3.protobuf.TypeConverter;
 import org.spine3.server.entity.Entity;
 
 import java.util.Collection;
 import java.util.LinkedList;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
 
@@ -91,9 +93,19 @@ public final class EntityQueries {
         final Multimap<Column, ColumnFilter> columnFilters = create(filter.getFilterCount(), 1);
         for (ColumnFilter columnFilter : filter.getFilterList()) {
             final Column column = Columns.findColumn(entityClass, columnFilter.getColumnName());
+            checkFilterType(column, columnFilter);
             columnFilters.put(column, columnFilter);
         }
         return columnFilters;
+    }
+
+    private static void checkFilterType(Column column, ColumnFilter filter) {
+        final Any filterConvent = filter.getValue();
+        final Class<?> expectedType = column.getType();
+        final Object filterValue = TypeConverter.toObject(filterConvent, expectedType);
+        checkArgument(expectedType.isInstance(filter),
+                      "Column type mismatch. Column %s cannot have value %s.",
+                      filterValue);
     }
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {
