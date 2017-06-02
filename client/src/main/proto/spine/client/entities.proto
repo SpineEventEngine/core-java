@@ -87,7 +87,7 @@ message CompositeColumnFilter {
     repeated ColumnFilter filter = 1;
 
     // The value of the composite operator which deternines the behavior of the filter matching.
-    CompositeOperator operator = 2[(required) = true];
+    CompositeOperator operator = 2 [(required) = true];
 
     // An enumeration of all supported composite operators upon the Entity Column filters.
     enum CompositeOperator {
@@ -107,13 +107,13 @@ message CompositeColumnFilter {
 message ColumnFilter {
 
     // The name of the Entity Column which is matched.
-    string column_name = 1[(required) = true];
+    string column_name = 1 [(required) = true];
 
     // The value to compare upon.
-    google.protobuf.Any value = 2[(required) = true];
+    google.protobuf.Any value = 2 [(required) = true];
 
     // The compasison operator.
-    Operator operator = 3[(required) = true];
+    Operator operator = 3 [(required) = true];
 
     // An enumeration of all supported comparison operators applicable to the Entity Columns.
     enum Operator {
