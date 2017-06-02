@@ -29,7 +29,6 @@ import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.option.EntityOptions;
 import io.spine.type.TypeName;
-import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -40,7 +39,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A registry of repositories that controls access to them depending on the visibility of

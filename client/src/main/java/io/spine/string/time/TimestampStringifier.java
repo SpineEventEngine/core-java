@@ -23,12 +23,11 @@ package io.spine.string.time;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.string.Stringifier;
-import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The stringifier of timestamps into RFC 3339 date string format.

@@ -23,13 +23,12 @@ package io.spine.protobuf;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.util.Exceptions;
 import io.spine.util.NamedProperty;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * An attribute stored in a protobuf {@code map<string, Any>}.

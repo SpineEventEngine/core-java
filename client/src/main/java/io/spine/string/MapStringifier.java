@@ -24,14 +24,13 @@ import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.escape.Escaper;
-import io.spine.util.Exceptions;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * The stringifier for the {@code Map} classes.

@@ -25,7 +25,9 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.time.Calendars.*;
+import static io.spine.time.Calendars.checkArguments;
+import static io.spine.time.Calendars.toCalendar;
+import static io.spine.time.Calendars.toLocalDate;
 import static io.spine.validate.Validate.checkPositive;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;

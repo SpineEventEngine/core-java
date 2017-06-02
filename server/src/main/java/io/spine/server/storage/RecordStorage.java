@@ -21,7 +21,6 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Optional;
-import com.google.common.base.Preconditions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -33,14 +32,13 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.type.TypeUrl;
-import io.spine.util.Exceptions;
 
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.*;
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifiers.idToString;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A storage keeping messages with identity.

@@ -21,13 +21,12 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.util.Exceptions;
 
 import javax.annotation.CheckReturnValue;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A wrapper for the map from entity classes to entity default states.

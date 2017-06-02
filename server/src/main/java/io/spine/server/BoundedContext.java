@@ -50,7 +50,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.type.TypeName;
-import io.spine.util.Exceptions;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -61,7 +60,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
 import static java.lang.String.format;
 

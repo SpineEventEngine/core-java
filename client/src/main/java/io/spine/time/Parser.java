@@ -25,7 +25,15 @@ import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
-import static io.spine.time.Formats.*;
+import static io.spine.time.Formats.MINUS;
+import static io.spine.time.Formats.PLUS;
+import static io.spine.time.Formats.SUB_SECOND_SEPARATOR;
+import static io.spine.time.Formats.TIME_SEPARATOR;
+import static io.spine.time.Formats.TIME_VALUE_SEPARATOR;
+import static io.spine.time.Formats.UTC_ZONE_SIGN;
+import static io.spine.time.Formats.dateFormat;
+import static io.spine.time.Formats.dateTimeFormat;
+import static io.spine.time.Formats.timeFormat;
 import static io.spine.time.Time.MILLIS_PER_SECOND;
 import static io.spine.time.Time.NANOS_PER_MILLISECOND;
 import static java.lang.String.format;

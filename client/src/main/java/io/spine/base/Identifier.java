@@ -28,11 +28,11 @@ import com.google.protobuf.UInt64Value;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Messages;
 import io.spine.protobuf.Wrapper;
-import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifiers.EMPTY_ID;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Wrapper of an identifier value.

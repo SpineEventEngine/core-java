@@ -26,14 +26,13 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
-import io.spine.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.*;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * A wrapper for event applier method.
