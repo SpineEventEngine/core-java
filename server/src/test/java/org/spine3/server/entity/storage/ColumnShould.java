@@ -55,7 +55,7 @@ public class ColumnShould {
     }
 
     @Test
-    public void support_tooString() {
+    public void support_toString() {
         final Column column = forMethod("getVersion", VersionableEntity.class);
         assertEquals("VersionableEntity.version", column.toString());
     }
