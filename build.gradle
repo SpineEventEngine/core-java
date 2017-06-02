@@ -74,7 +74,7 @@ allprojects {
     apply plugin: 'jacoco'
     apply plugin: 'idea'
 
-    group = 'org.spine3'
+    group = 'io.spine'
     version = spineVersion
 }
 
