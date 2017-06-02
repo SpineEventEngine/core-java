@@ -96,10 +96,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @Nonnull
     protected RecordStorage<I> recordStorage() {
-        @SuppressWarnings("unchecked") // It is safe to cast as we control
-                                       // the creation in createStorage().
+        @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
-        return checkStorage(storage);
+        return storage;
     }
 
     /** {@inheritDoc} */

@@ -246,7 +246,7 @@ public final class BoundedContext
     }
 
     private void checkStorageAssigned(Repository repository) {
-        if (!repository.storageAssigned()) {
+        if (!repository.isStorageAssigned()) {
             repository.initStorage(storageFactory.get());
         }
     }

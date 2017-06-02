@@ -199,17 +199,21 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Returns the storage assigned to this repository or {@code null} if
-     * the storage is not assigned yet.
+     * Returns the storage assigned to this repository.
+     *
+     * <p>In order to verify if the storage is assigned use {@link #isStorageAssigned()}.
+     *
+     * @throws IllegalStateException if the storage is not assigned
      */
     @CheckReturnValue
-    @Nullable
-    protected Storage<I, ?> getStorage() {
-        return this.storage;
+    protected final Storage<I, ?> getStorage() {
+        return checkStorage(this.storage);
     }
 
-    /** Returns {@code true} if the storage is assigned, {@code false} otherwise. */
-    public boolean storageAssigned() {
+    /**
+     * Returns {@code true} if the storage is assigned, {@code false} otherwise.
+     */
+    public final boolean isStorageAssigned() {
         return this.storage != null;
     }
 

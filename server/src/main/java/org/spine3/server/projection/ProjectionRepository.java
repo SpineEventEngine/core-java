@@ -232,10 +232,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Nonnull
     protected ProjectionStorage<I> projectionStorage() {
-        @SuppressWarnings("unchecked")
-        // It is safe to cast as we control the creation in createStorage().
+        @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
-        return checkStorage(storage);
+        return storage;
     }
 
     /** {@inheritDoc} */

@@ -43,7 +43,6 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.test.Tests.newTenantUuid;
 
@@ -76,7 +75,7 @@ public class RepositoryShould {
 
     @Test(expected = IllegalStateException.class)
     public void check_for_entity_id_class() {
-        new RepoForEntityWithUnsupportedId(boundedContext).getIdClass();
+        new RepoForEntityWithUnsupportedId().getIdClass();
     }
 
     private static class EntityWithUnsupportedId
@@ -93,9 +92,8 @@ public class RepositoryShould {
         /**
          * Creates the repository in the passed {@link BoundedContext}.
          *
-         * @param boundedContext the {@link BoundedContext} in which this repository works
          */
-        private RepoForEntityWithUnsupportedId(BoundedContext boundedContext) {
+        private RepoForEntityWithUnsupportedId() {
             super();
         }
 
@@ -156,14 +154,18 @@ public class RepositoryShould {
 
     @Test
     public void have_no_storage_upon_creation() {
-        assertFalse(repository.storageAssigned());
-        assertNull(repository.getStorage());
+        assertFalse(repository.isStorageAssigned());
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void throw_ISE_on_getting_unassigned_storage() {
+        repository.getStorage();
     }
 
     @Test
     public void init_storage_with_factory() {
         repository.initStorage(storageFactory);
-        assertTrue(repository.storageAssigned());
+        assertTrue(repository.isStorageAssigned());
         assertNotNull(repository.getStorage());
     }
 
@@ -182,7 +184,7 @@ public class RepositoryShould {
 
         //noinspection ConstantConditions
         assertTrue(storage.isClosed());
-        assertNull(repository.getStorage());
+        assertFalse(repository.isStorageAssigned());
     }
 
     @Test
@@ -190,8 +192,7 @@ public class RepositoryShould {
         repository.initStorage(storageFactory);
 
         repository.close();
-        assertFalse(repository.storageAssigned());
-        assertNull(repository.getStorage());
+        assertFalse(repository.isStorageAssigned());
     }
 
     /**
