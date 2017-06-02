@@ -47,10 +47,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  *         GenericParameter(int index) { this.index = index; }
  *
- *        @literal @Override
+ *        {@literal @}Override
  *         public int getIndex() { return index; }
  *
- *        @literal @Override
+ *        {@literal @}Override
  *         public Class<?> getArgumentIn(Class<? extends Tuple> derivedClass) {
  *             return Default.getArgument(this, derivedClass);
  *         }
