@@ -19,18 +19,12 @@
  */
 package io.spine.time.change;
 
-import io.spine.time.change.IntervalChange;
-import io.spine.time.change.LocalTimeChange;
 import io.spine.time.Interval;
 import io.spine.time.LocalDate;
 import io.spine.time.LocalTime;
 import io.spine.time.OffsetDate;
 import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetTime;
-import io.spine.time.change.LocalDateChange;
-import io.spine.time.change.OffsetDateChange;
-import io.spine.time.change.OffsetDateTimeChange;
-import io.spine.time.change.OffsetTimeChange;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions.checkNotEqual;

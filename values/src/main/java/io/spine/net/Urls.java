@@ -20,10 +20,6 @@
 
 package io.spine.net;
 
-import io.spine.net.Url;
-import io.spine.net.UrlParser;
-import io.spine.net.UrlPrinter;
-
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 

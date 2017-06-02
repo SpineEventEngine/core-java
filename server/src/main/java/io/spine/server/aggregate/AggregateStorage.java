@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
-import io.spine.server.aggregate.AggregateStateRecord;
 import io.spine.annotation.SPI;
 import io.spine.base.Event;
 import io.spine.base.EventContext;

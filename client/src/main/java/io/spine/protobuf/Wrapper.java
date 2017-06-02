@@ -33,7 +33,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import io.spine.protobuf.AnyPacker;
 
 import java.io.Serializable;
 

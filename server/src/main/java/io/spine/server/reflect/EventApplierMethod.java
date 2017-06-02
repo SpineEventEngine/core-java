@@ -24,16 +24,16 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.util.Exceptions;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
+import io.spine.util.Exceptions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * A wrapper for event applier method.
@@ -75,7 +75,7 @@ public class EventApplierMethod extends HandlerMethod<Empty> {
 
     private static IllegalStateException missingEventApplier(Class<? extends Aggregate> cls,
                                                       Class<? extends Message> eventClass) {
-        return Exceptions.newIllegalStateException(
+        return newIllegalStateException(
                 "Missing event applier for event class %s in aggregate class %s.",
                 eventClass.getName(),
                 cls.getName());

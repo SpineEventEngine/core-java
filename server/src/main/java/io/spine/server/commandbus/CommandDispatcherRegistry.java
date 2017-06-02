@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Maps;
-import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.server.bus.DispatcherRegistry;
 import io.spine.type.CommandClass;
 

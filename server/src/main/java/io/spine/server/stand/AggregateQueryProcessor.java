@@ -30,14 +30,13 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.client.EntityFilters;
-import io.spine.server.entity.EntityRecord;
-import io.spine.type.TypeUrl;
-import io.spine.server.stand.StandStorage;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.client.Query;
 import io.spine.client.Target;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.EntityRecord;
+import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

@@ -24,13 +24,12 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.util.Exceptions;
-import io.spine.protobuf.AnyPacker;
 import io.spine.util.NamedProperty;
 
 import javax.annotation.Nullable;
 import java.util.Map;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * An attribute stored in a protobuf {@code map<string, Any>}.
@@ -262,7 +261,7 @@ public abstract class Attribute<T, M extends Message, B extends Message.Builder>
         abstract <T> boolean matchClass(Class<T> valueClass);
 
         private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
-            return Exceptions.newIllegalArgumentException("Unsupported attribute class encountered: %s",
+            return newIllegalArgumentException("Unsupported attribute class encountered: %s",
                                                           idClass.getName());
         }
     }

@@ -23,20 +23,18 @@ package io.spine.base;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
-import io.spine.test.TestActorRequestFactory;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
+import org.junit.Before;
+import org.junit.Test;
 
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.test.Tests.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.test.Tests.newUuidValue;
 
 public class FailureThrowableShould {
 

@@ -28,8 +28,8 @@ import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.EventRecordStorage;
+import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
 import javax.annotation.Nonnull;

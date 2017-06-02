@@ -20,7 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.BoundedContext;
 
 import java.lang.reflect.Constructor;

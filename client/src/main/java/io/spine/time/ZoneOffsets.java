@@ -21,10 +21,7 @@
 package io.spine.time;
 
 import com.google.protobuf.Duration;
-import io.spine.time.Durations2;
 import io.spine.time.Formats.Parameter;
-import io.spine.time.ZoneConverter;
-import io.spine.time.ZoneOffset;
 
 import javax.annotation.Nullable;
 import java.text.ParseException;
@@ -33,12 +30,12 @@ import java.util.TimeZone;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Strings.nullToEmpty;
-import static java.lang.String.format;
 import static io.spine.time.Durations2.hoursAndMinutes;
 import static io.spine.time.Formats.formatOffsetTime;
 import static io.spine.time.Time.MINUTES_PER_HOUR;
 import static io.spine.time.Time.SECONDS_PER_MINUTE;
 import static io.spine.validate.Validate.checkBounds;
+import static java.lang.String.format;
 
 /**
  * Utilities for working with {@code ZoneOffset}s.

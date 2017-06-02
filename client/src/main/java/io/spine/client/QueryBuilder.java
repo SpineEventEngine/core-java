@@ -27,9 +27,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.base.Identifiers;
-import io.spine.client.Query;
-import io.spine.client.QueryFactory;
-import io.spine.client.QueryParameter;
 import io.spine.json.Json;
 
 import javax.annotation.Nullable;

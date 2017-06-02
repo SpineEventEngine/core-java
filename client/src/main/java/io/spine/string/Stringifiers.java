@@ -23,7 +23,6 @@ package io.spine.string;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import com.google.protobuf.Message;
-import io.spine.string.StringifierRegistry;
 
 import java.lang.reflect.Type;
 import java.util.List;

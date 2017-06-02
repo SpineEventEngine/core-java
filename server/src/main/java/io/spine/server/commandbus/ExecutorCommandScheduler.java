@@ -21,14 +21,13 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
-import io.spine.server.commandbus.CommandScheduler;
 import io.spine.base.Command;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static io.spine.base.CommandContext.Schedule;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**
  * The command scheduler implementation which uses basic Java task scheduling features.

@@ -20,20 +20,15 @@
 
 package io.spine.time;
 
-import io.spine.time.LocalTime;
-import io.spine.time.LocalTimes;
-import io.spine.time.ZoneConverter;
-import io.spine.time.ZoneOffset;
-
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.time.Time.NANOS_PER_MICROSECOND;
 import static io.spine.time.Time.NANOS_PER_MILLISECOND;
+import static java.lang.String.format;
 
 /**
  * Utilities and constants for working with date/time formats.

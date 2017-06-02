@@ -23,7 +23,6 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.primitives.Primitives;
-import io.spine.server.entity.storage.ColumnType;
 
 import java.util.Collections;
 import java.util.HashMap;

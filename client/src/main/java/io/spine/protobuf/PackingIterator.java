@@ -23,7 +23,6 @@ package io.spine.protobuf;
 import com.google.common.collect.UnmodifiableIterator;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.protobuf.AnyPacker;
 
 import java.util.Iterator;
 

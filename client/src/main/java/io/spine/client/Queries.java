@@ -22,7 +22,6 @@ package io.spine.client;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.QueryId;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifiers;
 import io.spine.type.TypeName;
@@ -33,8 +32,8 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.client.Targets.composeTarget;
+import static java.lang.String.format;
 
 /**
  * Client-side utilities for working with queries.

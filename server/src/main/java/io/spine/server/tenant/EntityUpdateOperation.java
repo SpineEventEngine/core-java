@@ -21,7 +21,6 @@ package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
 import io.spine.server.entity.EntityStateEnvelope;
-import io.spine.server.tenant.TenantAwareOperation;
 
 /**
  * A tenant-aware operation performed in relation to

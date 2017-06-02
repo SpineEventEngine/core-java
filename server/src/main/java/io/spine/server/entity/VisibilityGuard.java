@@ -25,11 +25,11 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
-import io.spine.option.EntityOptions;
-import io.spine.util.Exceptions;
 import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
+import io.spine.option.EntityOptions;
 import io.spine.type.TypeName;
+import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -40,8 +40,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.transform;
 import static com.google.common.collect.Maps.filterValues;
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * A registry of repositories that controls access to them depending on the visibility of
@@ -79,7 +78,7 @@ public final class VisibilityGuard {
     private void checkNotAlreadyRegistered(Class<? extends Message> stateClass) {
         final RepositoryAccess alreadyRegistered = repositories.get(stateClass);
         if (alreadyRegistered != null) {
-            throw Exceptions.newIllegalStateException(
+            throw newIllegalStateException(
                     "A repository for the state class %s already registered: %s",
                     stateClass, alreadyRegistered);
         }
@@ -109,7 +108,7 @@ public final class VisibilityGuard {
         checkNotNull(stateClass);
         final RepositoryAccess repositoryAccess = repositories.get(stateClass);
         if (repositoryAccess == null) {
-            throw Exceptions.newIllegalArgumentException(
+            throw newIllegalArgumentException(
                     "A repository for the state class (%s) was not registered in VisibilityGuard",
                     stateClass.getName());
         }

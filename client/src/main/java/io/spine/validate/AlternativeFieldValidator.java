@@ -26,10 +26,9 @@ import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
+import io.spine.base.FieldPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.base.FieldPath;
-import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.List;

@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityBuilder;
-import io.spine.server.aggregate.AggregateBuilder;
 
 import java.lang.reflect.Constructor;
 

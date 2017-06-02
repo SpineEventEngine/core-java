@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Event;

@@ -23,7 +23,6 @@ import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import io.spine.client.Query;
-import io.spine.server.stand.QueryProcessor;
 
 /**
  * An {@link QueryProcessor} implementation that always returns empty result.

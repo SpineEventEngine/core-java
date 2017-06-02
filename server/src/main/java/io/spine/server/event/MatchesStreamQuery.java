@@ -23,8 +23,6 @@ package io.spine.server.event;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
-import io.spine.server.event.EventFilter;
-import io.spine.server.event.MatchFilter;
 
 import javax.annotation.Nullable;
 import java.util.List;

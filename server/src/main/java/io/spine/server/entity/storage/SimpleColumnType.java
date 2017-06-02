@@ -20,7 +20,6 @@
 
 package io.spine.server.entity.storage;
 
-import io.spine.server.entity.storage.ColumnType;
 import io.spine.annotation.SPI;
 
 /**

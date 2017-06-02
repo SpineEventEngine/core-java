@@ -22,7 +22,6 @@ package io.spine.change;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.DoubleValue;
-import io.spine.change.ValueMismatch;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions.checkNotNullOrEqual;

@@ -26,8 +26,6 @@ import com.google.common.base.Throwables;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.spine.base.Error;
-import io.spine.base.MetadataConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

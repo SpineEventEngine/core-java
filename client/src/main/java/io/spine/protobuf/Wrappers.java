@@ -24,7 +24,6 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

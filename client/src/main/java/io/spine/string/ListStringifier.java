@@ -24,9 +24,6 @@ import com.google.common.base.Converter;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.escape.Escaper;
-import io.spine.string.Quoter;
-import io.spine.string.Stringifier;
-import io.spine.string.Stringifiers;
 
 import java.util.List;
 

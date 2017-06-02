@@ -20,17 +20,12 @@
 package io.spine.time;
 
 import com.google.protobuf.Timestamp;
-import io.spine.time.OffsetTime;
 
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Calendar.HOUR;
-import static java.util.Calendar.MILLISECOND;
-import static java.util.Calendar.MINUTE;
-import static java.util.Calendar.SECOND;
 import static io.spine.time.Calendars.at;
 import static io.spine.time.Calendars.toCalendar;
 import static io.spine.time.Calendars.toLocalTime;
@@ -39,6 +34,10 @@ import static io.spine.time.Formats.appendZoneOffset;
 import static io.spine.time.Formats.timeFormat;
 import static io.spine.time.ZoneOffsets.adjustZero;
 import static io.spine.validate.Validate.checkPositive;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.SECOND;
 
 /**
  * Routines for working with {@link OffsetTime}.

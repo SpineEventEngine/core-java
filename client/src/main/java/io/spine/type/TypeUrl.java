@@ -30,14 +30,13 @@ import com.google.protobuf.Descriptors.EnumDescriptor;
 import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
-import io.spine.base.Event;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
+import io.spine.base.Event;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.envelope.EventEnvelope;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.option.OptionsProto;
-import io.spine.type.KnownTypes;
 
 import java.util.List;
 import java.util.Objects;
@@ -45,8 +44,8 @@ import java.util.Objects;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.Internal.getDefaultInstance;
-import static java.lang.String.format;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static java.lang.String.format;
 
 /**
  * A URL of a Protobuf type.

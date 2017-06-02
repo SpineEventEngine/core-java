@@ -26,12 +26,11 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.GeneratedMessage.GeneratedExtension;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.base.FieldPath;
 import io.spine.option.IfMissingOption;
 import io.spine.option.OptionsProto;
-import io.spine.validate.ConstraintViolation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 

@@ -19,20 +19,11 @@
  */
 package io.spine.time;
 
-import io.spine.time.LocalDate;
-
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Calendar.DAY_OF_MONTH;
-import static java.util.Calendar.HOUR;
-import static java.util.Calendar.MILLISECOND;
-import static java.util.Calendar.MINUTE;
-import static java.util.Calendar.MONTH;
-import static java.util.Calendar.SECOND;
-import static java.util.Calendar.YEAR;
 import static io.spine.time.Calendars.at;
 import static io.spine.time.Calendars.checkArguments;
 import static io.spine.time.Calendars.toCalendar;
@@ -42,6 +33,13 @@ import static io.spine.time.Formats.appendSubSecond;
 import static io.spine.time.Formats.appendZoneOffset;
 import static io.spine.time.Formats.dateTimeFormat;
 import static io.spine.time.ZoneOffsets.adjustZero;
+import static java.util.Calendar.DAY_OF_MONTH;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.MONTH;
+import static java.util.Calendar.SECOND;
+import static java.util.Calendar.YEAR;
 
 /**
  * Routines for working with {@link OffsetDateTime}.

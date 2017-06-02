@@ -22,7 +22,6 @@ package io.spine.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import io.spine.validate.MessageValidator;
 import io.spine.annotation.Internal;
 import io.spine.base.ConversionException;
 import io.spine.base.FieldPath;

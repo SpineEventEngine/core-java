@@ -22,19 +22,14 @@ package io.spine.base;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
-import io.spine.client.CommandFactory;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.time.Timestamps2;
-import io.spine.time.ZoneOffset;
 import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -47,7 +42,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.CommandContext.Schedule;
 import static io.spine.base.Identifiers.EMPTY_ID;
 import static io.spine.base.Identifiers.idToString;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**

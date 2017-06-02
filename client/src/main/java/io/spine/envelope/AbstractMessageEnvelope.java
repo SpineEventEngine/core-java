@@ -20,8 +20,6 @@
 
 package io.spine.envelope;
 
-import io.spine.envelope.MessageEnvelope;
-
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;

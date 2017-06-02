@@ -22,14 +22,14 @@ package io.spine.string.time;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.util.Exceptions;
 import io.spine.string.Stringifier;
+import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;
 import java.util.regex.Pattern;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * The stringifier for web-safe representation of timestamps.
@@ -96,7 +96,7 @@ final class WebSafeTimestampStringifer extends Stringifier<Timestamp> implements
             final String rfcStr = fromWebSafe(webSafe);
             return Timestamps.parse(rfcStr);
         } catch (ParseException e) {
-            throw Exceptions.newIllegalArgumentException(e.getMessage(), e);
+            throw newIllegalArgumentException(e.getMessage(), e);
         }
     }
 

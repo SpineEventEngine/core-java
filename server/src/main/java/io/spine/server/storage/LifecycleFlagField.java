@@ -20,8 +20,6 @@
 
 package io.spine.server.storage;
 
-import io.spine.server.storage.StorageField;
-
 /**
  * A container for the storage fields used to store the
  * {@linkplain io.spine.server.entity.LifecycleFlags LifecycleFlags}.

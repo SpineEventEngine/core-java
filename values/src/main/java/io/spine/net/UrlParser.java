@@ -21,11 +21,9 @@
 package io.spine.net;
 
 import com.google.common.base.Splitter;
-import io.spine.net.Url;
 import io.spine.net.Url.Record.Protocol;
 import io.spine.net.Url.Record.QueryParameter;
 import io.spine.net.Url.Record.Schema;
-import io.spine.net.UrlQueryParameters;
 
 /**
  * Parses given URL to {@link Url} instance.

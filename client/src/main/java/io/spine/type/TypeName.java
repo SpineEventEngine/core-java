@@ -23,8 +23,6 @@ package io.spine.type;
 import com.google.common.base.Splitter;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import io.spine.type.TypeUrl;
-import io.spine.type.UnknownTypeException;
 import io.spine.base.Command;
 import io.spine.base.Event;
 

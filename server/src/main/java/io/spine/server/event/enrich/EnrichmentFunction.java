@@ -23,7 +23,6 @@ package io.spine.server.event.enrich;
 import com.google.common.base.Function;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Predicate;
-import io.spine.util.Exceptions;
 import io.spine.base.EventContext;
 import io.spine.server.event.EventBus;
 
@@ -62,9 +61,9 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
         this.eventClass = checkNotNull(eventClass);
         this.enrichmentClass = checkNotNull(enrichmentClass);
         checkArgument(
-            !eventClass.equals(enrichmentClass),
-            "Event and enrichment class must not be equal. Passed two values of %",
-            eventClass
+                !eventClass.equals(enrichmentClass),
+                "Event and enrichment class must not be equal. Passed two values of %",
+                eventClass
         );
     }
 
@@ -159,10 +158,10 @@ abstract class EnrichmentFunction<S, T> implements Function<S, T> {
      * <p>Throws {@link IllegalStateException} if the instance is not active.
      */
     protected void ensureActive() {
-        if(!isActive()) {
-            throw Exceptions.newIllegalStateException(
+        if (!isActive()) {
+            throw newIllegalStateException(
                     "The given instance of %s is not active at the moment. " +
-                    "Please use `activate()` first.",
+                            "Please use `activate()` first.",
                     getClass().getName());
         }
     }

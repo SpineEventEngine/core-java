@@ -21,14 +21,13 @@
 package io.spine.server.entity.storage;
 
 import com.google.protobuf.Any;
-import io.spine.client.EntityFilters;
-import io.spine.protobuf.TypeConverter;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifiers;
+import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
-import io.spine.server.entity.storage.Columns;
 
 import java.util.Collection;
 import java.util.HashMap;

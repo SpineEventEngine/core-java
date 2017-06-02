@@ -20,20 +20,15 @@
 package io.spine.server.stand;
 
 import com.google.common.base.Optional;
-import io.spine.type.TypeUrl;
 import io.spine.base.Error;
 import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.TopicValidationError;
-import io.spine.server.stand.AbstractTargetValidator;
-import io.spine.server.stand.InvalidRequestException;
-import io.spine.server.stand.InvalidTopicException;
-import io.spine.server.stand.Stand;
-import io.spine.server.stand.TypeRegistry;
+import io.spine.type.TypeUrl;
 
-import static java.lang.String.format;
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
+import static java.lang.String.format;
 
 /**
  * Validates the {@linkplain Topic} instances submitted to {@linkplain Stand}.

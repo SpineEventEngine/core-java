@@ -20,7 +20,6 @@
 package io.spine.time;
 
 import com.google.protobuf.Timestamp;
-import io.spine.time.ZoneOffsets;
 import io.spine.time.Formats.Parameter;
 
 import java.text.ParseException;
@@ -28,10 +27,6 @@ import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Calendar.HOUR;
-import static java.util.Calendar.MILLISECOND;
-import static java.util.Calendar.MINUTE;
-import static java.util.Calendar.SECOND;
 import static io.spine.time.Calendars.checkArguments;
 import static io.spine.time.Calendars.getHours;
 import static io.spine.time.Calendars.getMillis;
@@ -46,6 +41,10 @@ import static io.spine.time.Time.MILLIS_PER_SECOND;
 import static io.spine.time.Time.MINUTES_PER_HOUR;
 import static io.spine.time.Time.NANOS_PER_MILLISECOND;
 import static io.spine.validate.Validate.checkBounds;
+import static java.util.Calendar.HOUR;
+import static java.util.Calendar.MILLISECOND;
+import static java.util.Calendar.MINUTE;
+import static java.util.Calendar.SECOND;
 
 /**
  * Routines for working with {@link LocalTime}.

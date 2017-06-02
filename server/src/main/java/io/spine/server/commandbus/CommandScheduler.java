@@ -23,14 +23,12 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
-import io.spine.server.commandbus.CommandBusFilter;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.server.commandbus.CommandBus;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

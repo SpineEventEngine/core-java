@@ -22,8 +22,6 @@ package io.spine.server.stand;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Topic;
-import io.spine.server.stand.Stand;
-import io.spine.server.stand.SubscriptionRecord;
 import io.spine.type.TypeUrl;
 
 import java.util.Set;

@@ -20,9 +20,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.base.Version;
 import io.spine.annotation.Internal;
-import io.spine.server.entity.Transaction;
+import io.spine.base.Version;
 import io.spine.server.entity.Transaction.Phase;
 import org.spine3.validate.ValidatingBuilder;
 

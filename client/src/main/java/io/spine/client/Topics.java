@@ -20,8 +20,6 @@
 
 package io.spine.client;
 
-import io.spine.client.Topic;
-import io.spine.client.TopicId;
 import io.spine.base.Identifiers;
 
 import static java.lang.String.format;

@@ -25,22 +25,22 @@ import com.google.common.base.Preconditions;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
-import io.spine.server.entity.storage.EntityQuery;
-import io.spine.type.TypeUrl;
-import io.spine.util.Exceptions;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
+import io.spine.type.TypeUrl;
+import io.spine.util.Exceptions;
 
 import java.util.Map;
 
-import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.*;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifiers.idToString;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * A storage keeping messages with identity.
@@ -108,7 +108,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      */
     public void write(I id, EntityRecordWithColumns record) {
         checkNotNull(id);
-        Preconditions.checkArgument(record.getRecord().hasState(), "Record does not have state field.");
+        checkArgument(record.getRecord().hasState(), "Record does not have state field.");
         checkNotClosed();
 
         writeRecord(id, record);
@@ -163,7 +163,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
             final String idStr = id instanceof AggregateStateId
                                  ? id.toString()
                                  : idToString(id);
-            throw Exceptions.newIllegalStateException("Unable to load record for entity with ID: %s",
+            throw newIllegalStateException("Unable to load record for entity with ID: %s",
                                                       idStr);
         }
     }

@@ -23,23 +23,20 @@ package io.spine.string;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import io.spine.string.time.TimeStringifiers;
 import io.spine.base.CommandId;
 import io.spine.base.Commands;
 import io.spine.base.EventId;
 import io.spine.base.Events;
-import io.spine.string.MissingStringifierException;
-import io.spine.string.Stringifier;
-import io.spine.string.Stringifiers;
+import io.spine.string.time.TimeStringifiers;
 
 import java.lang.reflect.Type;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.protobuf.Messages.isMessage;
 import static java.lang.String.format;
 import static java.util.Collections.synchronizedMap;
-import static io.spine.protobuf.Messages.isMessage;
 
 /**
  * The registry of converters of types to their string representations.

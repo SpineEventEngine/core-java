@@ -24,15 +24,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.option.Time;
-import io.spine.option.TimeOption;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.base.FieldPath;
 import io.spine.option.IfInvalidOption;
 import io.spine.option.OptionsProto;
+import io.spine.option.Time;
+import io.spine.option.TimeOption;
 import io.spine.protobuf.AnyPacker;
-import io.spine.validate.ConstraintViolation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 

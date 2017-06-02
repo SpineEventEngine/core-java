@@ -21,7 +21,6 @@
 package io.spine.string;
 
 import com.google.common.primitives.Longs;
-import io.spine.string.Stringifier;
 
 import java.io.Serializable;
 

@@ -25,19 +25,17 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.server.commandbus.CommandBusFilter;
-import io.spine.server.commandbus.CommandScheduler;
 import io.spine.base.Command;
 import io.spine.base.Identifiers;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
+import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 import io.spine.type.CommandClass;
-import io.spine.server.Environment;
 import org.spine3.base.FailureThrowable;
 
 import javax.annotation.Nullable;
@@ -48,8 +46,8 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static java.lang.String.format;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.lang.String.format;
 
 /**
  * Dispatches the incoming commands to the corresponding handler.

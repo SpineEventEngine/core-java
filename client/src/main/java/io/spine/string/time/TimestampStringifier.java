@@ -22,13 +22,13 @@ package io.spine.string.time;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.util.Exceptions;
 import io.spine.string.Stringifier;
+import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * The stringifier of timestamps into RFC 3339 date string format.
@@ -56,7 +56,7 @@ final class TimestampStringifier extends Stringifier<Timestamp> implements Seria
         try {
             return Timestamps.parse(str);
         } catch (ParseException e) {
-            throw Exceptions.newIllegalArgumentException(e.getMessage(), e);
+            throw newIllegalArgumentException(e.getMessage(), e);
         }
     }
 

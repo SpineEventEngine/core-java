@@ -22,13 +22,12 @@ package io.spine.time;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
-import io.spine.time.MonthOfYear;
 import io.spine.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.protobuf.util.Timestamps.fromMillis;
-import static java.lang.String.format;
 import static io.spine.validate.Validate.checkPositive;
+import static java.lang.String.format;
 
 /**
  * Utilities for working with time information.

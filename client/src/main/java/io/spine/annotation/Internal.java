@@ -20,8 +20,6 @@
 
 package io.spine.annotation;
 
-import io.spine.annotation.SPI;
-
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

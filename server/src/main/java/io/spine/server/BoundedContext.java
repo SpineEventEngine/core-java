@@ -24,35 +24,35 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.Response;
-import io.spine.server.command.EventFactory;
-import io.spine.server.commandstore.CommandStore;
-import io.spine.server.entity.Entity;
-import io.spine.server.entity.Repository;
-import io.spine.server.entity.VisibilityGuard;
-import io.spine.server.event.EventDispatcher;
-import io.spine.server.failure.FailureBus;
-import io.spine.server.stand.Stand;
-import io.spine.server.tenant.TenantIndex;
-import io.spine.util.Exceptions;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import io.spine.annotation.Internal;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandbus.DelegatingCommandDispatcher;
+import io.spine.server.commandstore.CommandStore;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
+import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
+import io.spine.server.failure.FailureBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.stand.Stand;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.tenant.TenantIndex;
 import io.spine.type.TypeName;
+import io.spine.util.Exceptions;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -60,10 +60,10 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static java.lang.String.format;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.*;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
+import static java.lang.String.format;
 
 /**
  * A facade for configuration and entry point for handling commands.
@@ -331,7 +331,7 @@ public final class BoundedContext
             Class<? extends Message> aggregateStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(aggregateStateClass)) {
-            throw Exceptions.newIllegalStateException("No repository found for " +
+            throw newIllegalStateException("No repository found for " +
                                                       "the aggregate state class %s",
                                                       aggregateStateClass.getName());
         }

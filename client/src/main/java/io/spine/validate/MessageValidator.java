@@ -26,7 +26,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.FieldPath;
-import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 

@@ -23,8 +23,6 @@ package io.spine.client;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.ActorContext;
-import io.spine.client.Target;
-import io.spine.client.Topics;
 
 import java.util.Set;
 

@@ -22,9 +22,6 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import io.spine.server.aggregate.AggregateStateRecord;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
@@ -41,6 +38,8 @@ import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.CommandOperation;
 import io.spine.type.CommandClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

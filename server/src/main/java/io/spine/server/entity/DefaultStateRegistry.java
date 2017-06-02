@@ -27,7 +27,7 @@ import javax.annotation.CheckReturnValue;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newConcurrentMap;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * A wrapper for the map from entity classes to entity default states.
@@ -67,7 +67,7 @@ class DefaultStateRegistry {
      */
     void put(Class<? extends Entity> entityClass, Message state) {
         if (contains(entityClass)) {
-            throw Exceptions.newIllegalArgumentException("This class is registered already: %s", entityClass);
+            throw newIllegalArgumentException("This class is registered already: %s", entityClass);
         }
         defaultStates.put(entityClass, state);
     }

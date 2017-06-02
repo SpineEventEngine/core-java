@@ -23,11 +23,6 @@ package io.spine.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import io.spine.base.FieldPath;
-import io.spine.validate.BooleanFieldValidator;
-import io.spine.validate.ByteStringFieldValidator;
-import io.spine.validate.FloatFieldValidator;
-import io.spine.validate.LongFieldValidator;
-import io.spine.validate.StringFieldValidator;
 
 import static java.lang.String.format;
 

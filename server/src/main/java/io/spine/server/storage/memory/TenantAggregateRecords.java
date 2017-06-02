@@ -29,7 +29,6 @@ import com.google.common.collect.TreeMultimap;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.storage.memory.TenantStorage;
 import io.spine.time.Timestamps2;
 
 import javax.annotation.Nullable;

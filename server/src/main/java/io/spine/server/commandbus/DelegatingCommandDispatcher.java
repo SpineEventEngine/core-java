@@ -19,9 +19,7 @@
  */
 package io.spine.server.commandbus;
 
-
 import io.spine.annotation.Internal;
-import io.spine.server.commandbus.CommandDispatcherDelegate;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 

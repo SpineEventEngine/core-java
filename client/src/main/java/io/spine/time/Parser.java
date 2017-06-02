@@ -20,33 +20,15 @@
 
 package io.spine.time;
 
-import io.spine.time.Calendars;
-import io.spine.time.Formats;
-import io.spine.time.LocalTime;
-import io.spine.time.OffsetDate;
-import io.spine.time.OffsetDateTime;
-import io.spine.time.OffsetDateTimes;
-import io.spine.time.OffsetDates;
-import io.spine.time.OffsetTimes;
-import io.spine.time.ZoneOffset;
-
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
-import static java.lang.String.format;
-import static io.spine.time.Formats.MINUS;
-import static io.spine.time.Formats.PLUS;
-import static io.spine.time.Formats.SUB_SECOND_SEPARATOR;
-import static io.spine.time.Formats.TIME_SEPARATOR;
-import static io.spine.time.Formats.TIME_VALUE_SEPARATOR;
-import static io.spine.time.Formats.UTC_ZONE_SIGN;
-import static io.spine.time.Formats.dateFormat;
-import static io.spine.time.Formats.dateTimeFormat;
-import static io.spine.time.Formats.timeFormat;
+import static io.spine.time.Formats.*;
 import static io.spine.time.Time.MILLIS_PER_SECOND;
 import static io.spine.time.Time.NANOS_PER_MILLISECOND;
+import static java.lang.String.format;
 
 /**
  * The parser for date/time values.
@@ -124,7 +106,7 @@ final class Parser {
         initTimeParts();
 
         parseZoneOffset();
-        parseTime(Formats.dateTimeFormat(zoneOffset));
+        parseTime(dateTimeFormat(zoneOffset));
 
         final Calendar calendar = createCalendar();
         final LocalDate localDate = Calendars.toLocalDate(calendar);
@@ -138,7 +120,7 @@ final class Parser {
         initTimeParts();
 
         parseZoneOffset();
-        parseTime(Formats.timeFormat(zoneOffset));
+        parseTime(timeFormat(zoneOffset));
 
         final Calendar calendar = createCalendar();
         final LocalTime localTime = Calendars.toLocalTime(calendar);
@@ -151,7 +133,7 @@ final class Parser {
         initTimeParts();
 
         parseZoneOffset();
-        parseTime(Formats.dateFormat(zoneOffset));
+        parseTime(dateFormat(zoneOffset));
 
         final Calendar calendar = createCalendar();
         final LocalDate localDate = Calendars.toLocalDate(calendar);
@@ -163,7 +145,7 @@ final class Parser {
         // The input string for local time does not have zone offset.
         timezoneOffsetPosition = value.length();
         initTimeParts();
-        parseTime(Formats.timeFormat());
+        parseTime(timeFormat());
         zoneOffset = ZoneOffsets.getDefault();
         Calendar calendar = createCalendar();
         @SuppressWarnings("NumericCastThatLosesPrecision") // OK as we compute remainder
@@ -182,7 +164,7 @@ final class Parser {
     }
 
     private void parseZoneOffset() throws ParseException {
-        if (value.charAt(timezoneOffsetPosition) == Formats.UTC_ZONE_SIGN) {
+        if (value.charAt(timezoneOffsetPosition) == UTC_ZONE_SIGN) {
             if (value.length() != timezoneOffsetPosition + 1) {
                 final String errMsg = format(
                         "Failed to parse date/time value. Missing zone offset in: \"%s\"",
@@ -202,7 +184,7 @@ final class Parser {
         final String timeSubstring = value.substring(0, timezoneOffsetPosition);
         secondValue = timeSubstring;
         nanoValue = "";
-        int pointPosition = timeSubstring.indexOf(Formats.SUB_SECOND_SEPARATOR);
+        int pointPosition = timeSubstring.indexOf(SUB_SECOND_SEPARATOR);
         if (pointPosition != -1) {
             secondValue = timeSubstring.substring(0, pointPosition);
             nanoValue = timeSubstring.substring(pointPosition + 1);
@@ -210,7 +192,7 @@ final class Parser {
     }
 
     private void initDayOffset() throws ParseException {
-        dayOffset = value.indexOf(Formats.TIME_SEPARATOR);
+        dayOffset = value.indexOf(TIME_SEPARATOR);
         if (dayOffset == -1) {
             final String errMsg = format(
                     "Failed to parse date/time value. Missing time separator in: \"%s\"",
@@ -221,19 +203,19 @@ final class Parser {
     }
 
     private void initZoneOffsetPosition() throws ParseException {
-        timezoneOffsetPosition = value.indexOf(Formats.UTC_ZONE_SIGN, dayOffset);
+        timezoneOffsetPosition = value.indexOf(UTC_ZONE_SIGN, dayOffset);
         if (timezoneOffsetPosition == -1) {
-            timezoneOffsetPosition = value.indexOf(Formats.PLUS, dayOffset);
+            timezoneOffsetPosition = value.indexOf(PLUS, dayOffset);
         }
         if (timezoneOffsetPosition == -1) {
             /* We have not found neither 'Z' nor '+' characters.
                Chances are we have a negative offset. */
             if (dayOffset == -1) {
-                if (value.contains(String.valueOf(Formats.TIME_VALUE_SEPARATOR))) {
-                    timezoneOffsetPosition = value.lastIndexOf(Formats.MINUS);
+                if (value.contains(String.valueOf(TIME_VALUE_SEPARATOR))) {
+                    timezoneOffsetPosition = value.lastIndexOf(MINUS);
                 }
             } else {
-                timezoneOffsetPosition = value.indexOf(Formats.MINUS, dayOffset);
+                timezoneOffsetPosition = value.indexOf(MINUS, dayOffset);
             }
         }
         if (timezoneOffsetPosition == -1) {

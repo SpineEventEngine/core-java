@@ -23,8 +23,6 @@ package io.spine.server.aggregate;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.base.Version;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateTransaction;
 import io.spine.server.entity.EntityBuilder;
 
 /**

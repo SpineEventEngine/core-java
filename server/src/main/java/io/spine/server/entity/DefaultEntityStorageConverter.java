@@ -23,7 +23,6 @@ package io.spine.server.entity;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.server.entity.FieldMasks;
 import io.spine.type.TypeUrl;
 
 import static io.spine.base.Identifiers.idFromAny;

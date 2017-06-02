@@ -20,8 +20,6 @@
 
 package io.spine.string;
 
-import io.spine.string.StringifierRegistry;
-
 /**
  * Thrown when a string conversion operation encounters a type for which
  * there is no registered {@link Stringifier Stringifier}.

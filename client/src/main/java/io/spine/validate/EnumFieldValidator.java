@@ -23,7 +23,6 @@ package io.spine.validate;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.Descriptors.EnumValueDescriptor;
 import io.spine.base.FieldPath;
-import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 

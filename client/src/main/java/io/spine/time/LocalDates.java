@@ -20,22 +20,17 @@
 
 package io.spine.time;
 
-import io.spine.time.Time;
-
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.time.Calendars.*;
+import static io.spine.validate.Validate.checkPositive;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.MONTH;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.getInstance;
-import static io.spine.time.Calendars.checkArguments;
-import static io.spine.time.Calendars.toCalendar;
-import static io.spine.time.Calendars.toLocalDate;
-import static io.spine.time.Formats.dateFormat;
-import static io.spine.validate.Validate.checkPositive;
 
 /**
  * Utilities for working with {@link LocalDate}.
@@ -54,7 +49,7 @@ public final class LocalDates {
      */
     public static LocalDate now() {
         final Calendar cal = getInstance();
-        final LocalDate result = Calendars.toLocalDate(cal);
+        final LocalDate result = toLocalDate(cal);
         return result;
     }
 
@@ -78,7 +73,7 @@ public final class LocalDates {
      * Obtains a copy of this local date with the specified number of years added.
      */
     public static LocalDate addYears(LocalDate localDate, int yearsToAdd) {
-        Calendars.checkArguments(localDate, yearsToAdd);
+        checkArguments(localDate, yearsToAdd);
         return changeYear(localDate, yearsToAdd);
     }
 
@@ -86,7 +81,7 @@ public final class LocalDates {
      * Obtains a copy of this local date with the specified number of months added.
      */
     public static LocalDate addMonths(LocalDate localDate, int monthsToAdd) {
-        Calendars.checkArguments(localDate, monthsToAdd);
+        checkArguments(localDate, monthsToAdd);
         return changeMonth(localDate, monthsToAdd);
     }
 
@@ -94,7 +89,7 @@ public final class LocalDates {
      * Obtains a copy of this local date with the specified number of days added.
      */
     public static LocalDate addDays(LocalDate localDate, int daysToAdd) {
-        Calendars.checkArguments(localDate, daysToAdd);
+        checkArguments(localDate, daysToAdd);
         return changeDays(localDate, daysToAdd);
     }
 
@@ -102,7 +97,7 @@ public final class LocalDates {
      * Obtains a copy of this local date with the specified number of years subtracted.
      */
     public static LocalDate subtractYears(LocalDate localDate, int yearsToSubtract) {
-        Calendars.checkArguments(localDate, yearsToSubtract);
+        checkArguments(localDate, yearsToSubtract);
         return changeYear(localDate, -yearsToSubtract);
     }
 
@@ -110,7 +105,7 @@ public final class LocalDates {
      * Obtains a copy of this local date with the specified number of months subtracted.
      */
     public static LocalDate subtractMonths(LocalDate localDate, int monthsToSubtract) {
-        Calendars.checkArguments(localDate, monthsToSubtract);
+        checkArguments(localDate, monthsToSubtract);
         return changeMonth(localDate, -monthsToSubtract);
     }
 
@@ -118,7 +113,7 @@ public final class LocalDates {
      * Obtains a copy of this local date with the specified number of days subtracted.
      */
     public static LocalDate subtractDays(LocalDate localDate, int daysToSubtract) {
-        Calendars.checkArguments(localDate, daysToSubtract);
+        checkArguments(localDate, daysToSubtract);
         return changeDays(localDate, -daysToSubtract);
     }
 
@@ -162,9 +157,9 @@ public final class LocalDates {
      * Performs date calculation using parameters of {@link Calendar#add(int, int)}.
      */
     private static LocalDate change(LocalDate localDate, int calendarField, int delta) {
-        final Calendar cal = Calendars.toCalendar(localDate);
+        final Calendar cal = toCalendar(localDate);
         cal.add(calendarField, delta);
-        return Calendars.toLocalDate(cal);
+        return toLocalDate(cal);
     }
 
     /**
@@ -179,7 +174,7 @@ public final class LocalDates {
         final Calendar calendar = getInstance();
         calendar.setTime(date);
 
-        final LocalDate result = Calendars.toLocalDate(calendar);
+        final LocalDate result = toLocalDate(calendar);
         return result;
     }
 
@@ -188,7 +183,7 @@ public final class LocalDates {
      */
     public static String toString(LocalDate date) {
         checkNotNull(date);
-        final Date classicDate = Calendars.toCalendar(date).getTime();
+        final Date classicDate = toCalendar(date).getTime();
         final String result = Formats.dateFormat().format(classicDate);
         return result;
     }

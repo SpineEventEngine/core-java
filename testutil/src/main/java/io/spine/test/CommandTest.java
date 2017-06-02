@@ -23,7 +23,6 @@ package io.spine.test;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.client.ActorRequestFactory;

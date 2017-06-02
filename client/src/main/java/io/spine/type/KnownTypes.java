@@ -59,12 +59,9 @@ import com.google.protobuf.Type;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
-import io.spine.type.UnknownTypeException;
+import io.spine.annotation.Internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.annotation.Internal;
-import io.spine.type.ClassName;
-import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

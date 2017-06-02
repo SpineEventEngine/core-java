@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.base.Function;
-import io.spine.server.entity.storage.ColumnType;
 import io.spine.server.entity.storage.Column.MemoizedValue;
 
 import java.util.Map;

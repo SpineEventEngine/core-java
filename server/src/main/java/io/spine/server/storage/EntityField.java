@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
-import io.spine.server.storage.StorageField;
 import io.spine.type.TypeUrl;
 
 /**

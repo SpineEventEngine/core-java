@@ -24,14 +24,13 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import io.spine.option.DecimalMaxOption;
 import io.spine.base.FieldPath;
+import io.spine.option.DecimalMaxOption;
 import io.spine.option.DecimalMinOption;
 import io.spine.option.DigitsOption;
 import io.spine.option.MaxOption;
 import io.spine.option.MinOption;
 import io.spine.option.OptionsProto;
-import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 import java.util.regex.Pattern;

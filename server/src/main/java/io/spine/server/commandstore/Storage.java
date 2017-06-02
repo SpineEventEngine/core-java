@@ -24,7 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import io.spine.server.commandstore.CommandStore;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;

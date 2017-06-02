@@ -20,8 +20,6 @@
 
 package io.spine.string;
 
-import io.spine.string.Stringifier;
-
 import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkNotNull;

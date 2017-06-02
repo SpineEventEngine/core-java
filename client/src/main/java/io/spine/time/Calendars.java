@@ -22,12 +22,6 @@ package io.spine.time;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.time.LocalTime;
-import io.spine.time.LocalTimes;
-import io.spine.time.OffsetDate;
-import io.spine.time.OffsetDateTime;
-import io.spine.time.ZoneConverter;
-import io.spine.time.ZoneOffset;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -35,6 +29,8 @@ import java.util.GregorianCalendar;
 import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.time.Time.MILLIS_PER_SECOND;
+import static io.spine.validate.Validate.checkPositive;
 import static java.util.Calendar.DAY_OF_MONTH;
 import static java.util.Calendar.HOUR_OF_DAY;
 import static java.util.Calendar.MILLISECOND;
@@ -44,8 +40,6 @@ import static java.util.Calendar.SECOND;
 import static java.util.Calendar.YEAR;
 import static java.util.Calendar.ZONE_OFFSET;
 import static java.util.Calendar.getInstance;
-import static io.spine.time.Time.MILLIS_PER_SECOND;
-import static io.spine.validate.Validate.checkPositive;
 
 /**
  * Utilities for working with {@link Calendar}.

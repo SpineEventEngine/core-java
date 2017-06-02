@@ -24,7 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.FieldPath;
 import io.spine.protobuf.Wrapper;
-import io.spine.validate.FloatFieldValidatorBase;
 
 import static java.lang.Math.abs;
 

@@ -25,7 +25,6 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.server.aggregate.AggregateStateRecord;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventContext;

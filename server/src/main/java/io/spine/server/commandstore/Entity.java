@@ -26,7 +26,6 @@ import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.Failure;
 import io.spine.server.commandbus.CommandRecord;
-import io.spine.server.commandstore.Records;
 import io.spine.server.entity.AbstractEntity;
 
 import static com.google.common.base.Preconditions.checkNotNull;

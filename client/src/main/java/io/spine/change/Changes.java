@@ -22,16 +22,6 @@ package io.spine.change;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-import io.spine.change.BooleanChange;
-import io.spine.change.DoubleChange;
-import io.spine.change.Fixed32Change;
-import io.spine.change.Fixed64Change;
-import io.spine.change.FloatChange;
-import io.spine.change.Int32Change;
-import io.spine.change.Int64Change;
-import io.spine.change.SInt32Change;
-import io.spine.change.SInt64Change;
-import io.spine.change.UInt64Change;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions.checkNewValueNotEmpty;

@@ -23,8 +23,6 @@ package io.spine.server.commandbus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
-import io.spine.server.commandbus.CommandBusFilter;
-import io.spine.server.commandbus.CommandScheduler;
 import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;

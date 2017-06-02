@@ -23,9 +23,6 @@ package io.spine.client;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.client.ActorRequestFactory;
-import io.spine.client.QueryBuilder;
-import io.spine.client.QueryId;
 import io.spine.base.ActorContext;
 import io.spine.base.Identifiers;
 
@@ -36,8 +33,8 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.client.Queries.queryBuilderFor;
+import static java.lang.String.format;
 
 /**
  * Public API for creating {@link Query} instances, using the {@code ActorRequestFactory}

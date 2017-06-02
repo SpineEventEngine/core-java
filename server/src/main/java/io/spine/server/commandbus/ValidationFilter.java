@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
-import io.spine.server.commandbus.CommandBusFilter;
 import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;

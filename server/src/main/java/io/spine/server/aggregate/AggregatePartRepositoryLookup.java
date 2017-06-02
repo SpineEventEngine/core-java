@@ -22,7 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.BoundedContext;
 
 import static java.lang.String.format;

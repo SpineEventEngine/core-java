@@ -25,16 +25,13 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import com.google.common.escape.Escaper;
 import io.spine.util.Exceptions;
-import io.spine.string.Quoter;
-import io.spine.string.Stringifier;
-import io.spine.string.Stringifiers;
 
 import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Maps.newLinkedHashMap;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * The stringifier for the {@code Map} classes.
@@ -173,7 +170,7 @@ final class MapStringifier<K, V> extends Stringifier<Map<K, V>> {
             }
             return resultMap;
         } catch (Throwable e) {
-            throw Exceptions.newIllegalArgumentException("The exception occurred during the conversion", e);
+            throw newIllegalArgumentException("The exception occurred during the conversion", e);
         }
     }
 }

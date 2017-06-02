@@ -25,16 +25,14 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import io.spine.protobuf.Messages;
-import io.spine.util.Exceptions;
-import io.spine.base.Identifiers;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.Messages;
 import io.spine.protobuf.Wrapper;
+import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.Identifiers.EMPTY_ID;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.*;
 
 /**
  * Wrapper of an identifier value.
@@ -113,7 +111,7 @@ final class Identifier<I> {
                 result = Identifiers.idMessageToString((Message)value);
                 break;
             default:
-                throw Exceptions.newIllegalStateException("toString() is not supported for type: %s", type);
+                throw newIllegalStateException("toString() is not supported for type: %s", type);
         }
 
         if (result.isEmpty()) {
@@ -323,11 +321,11 @@ final class Identifier<I> {
         }
 
         static <I> IllegalArgumentException unsupported(I id) {
-            return Exceptions.newIllegalArgumentException("ID of unsupported type encountered: %s", id);
+            return newIllegalArgumentException("ID of unsupported type encountered: %s", id);
         }
 
         private static <I> IllegalArgumentException unsupportedClass(Class<I> idClass) {
-            return Exceptions.newIllegalArgumentException("Unsupported ID class encountered: %s",
+            return newIllegalArgumentException("Unsupported ID class encountered: %s",
                                                           idClass.getName());
         }
     }

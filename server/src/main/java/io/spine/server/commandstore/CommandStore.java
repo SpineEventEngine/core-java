@@ -21,25 +21,23 @@
 package io.spine.server.commandstore;
 
 import com.google.protobuf.Message;
-import io.spine.base.Failure;
-import io.spine.base.FailureThrowable;
-import io.spine.server.commandbus.Log;
-import io.spine.server.tenant.CommandOperation;
-import io.spine.server.tenant.TenantIndex;
-import io.spine.base.CommandStatus;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
+import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.Errors;
+import io.spine.base.Failure;
+import io.spine.base.FailureThrowable;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
+import io.spine.server.commandbus.Log;
 import io.spine.server.commandbus.ProcessingStatus;
-import io.spine.server.commandstore.Records;
-import io.spine.server.commandstore.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.tenant.CommandOperation;
 import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.server.tenant.TenantIndex;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

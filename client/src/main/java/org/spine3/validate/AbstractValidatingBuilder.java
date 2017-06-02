@@ -28,7 +28,6 @@ import io.spine.protobuf.Messages;
 import io.spine.string.Stringifiers;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolationThrowable;
-import io.spine.validate.MessageValidator;
 import io.spine.validate.Validate;
 import org.spine3.base.ConversionException;
 
