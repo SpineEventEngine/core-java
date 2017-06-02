@@ -23,6 +23,7 @@ package org.spine3.server.entity.storage;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableSet;
+import com.google.protobuf.FieldMask;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -57,6 +58,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * <p>If both the {@linkplain EntityQuery#getIds() accepted IDs set} and
  * {@linkplain EntityQuery#getParameters() query parameters} are empty, all the records are
  * considered matching.
+ *
+ * <p>If the query specifies the values of
+ * the {@linkplain org.spine3.server.entity.LifecycleFlags Entity lifecycle Columns}, then
+ * the {@linkplain org.spine3.server.storage.RecordStorage#readAll(EntityQuery, FieldMask)
+ * default behavior} will be overridden i.e. the records resulting to such query may or may not be
+ * active.
  *
  * @param <I> the type of the IDs of the query target
  * @author Dmytro Dashenkov
@@ -102,6 +109,13 @@ public final class EntityQuery<I> implements Serializable {
      */
     public QueryParameters getParameters() {
         return parameters;
+    }
+
+    /**
+     * @return whether the query overrides the default lifecycle handling strategy or not
+     */
+    public boolean overrideLifecycle() {
+        return parameters.includeLifecycle();
     }
 
     @Override

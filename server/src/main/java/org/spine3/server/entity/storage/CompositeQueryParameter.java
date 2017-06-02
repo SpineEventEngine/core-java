@@ -22,19 +22,24 @@ package org.spine3.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.base.Predicate;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.CompositeColumnFilter.CompositeOperator;
 
+import javax.annotation.Nullable;
 import java.io.Serializable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.ImmutableMultimap.copyOf;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static org.spine3.server.storage.LifecycleFlagField.archived;
+import static org.spine3.server.storage.LifecycleFlagField.deleted;
 
 /**
  * A set of {@link ColumnFilter} instances joined by a logical
@@ -44,11 +49,23 @@ import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
  */
 public final class CompositeQueryParameter implements Serializable {
 
+    private static final Predicate<Column> isLifecycleColumn = new Predicate<Column>() {
+        @Override
+        public boolean apply(@Nullable Column column) {
+            checkNotNull(column);
+            final boolean result = archived.name().equals(column.getName())
+                    || deleted.name().equals(column.getName());
+            return result;
+        }
+    };
+
     private static final long serialVersionUID = 1L;
 
     private final CompositeOperator operator;
 
     private final ImmutableMultimap<Column, ColumnFilter> filters;
+
+    private final boolean hasLifecycle;
 
     /**
      * Creates a new instance of {@code CompositeQueryParameter} from the given filters joined
@@ -71,6 +88,12 @@ public final class CompositeQueryParameter implements Serializable {
                                     Multimap<Column, ColumnFilter> filters) {
         this.operator = operator;
         this.filters = copyOf(filters);
+        this.hasLifecycle = containsLifecycle(filters.keySet());
+    }
+
+    private static boolean containsLifecycle(Iterable<Column> columns) {
+        final boolean result = Iterables.any(columns, isLifecycleColumn);
+        return result;
     }
 
     /**
@@ -128,6 +151,14 @@ public final class CompositeQueryParameter implements Serializable {
         newFilters.put(column, columnFilter);
         final CompositeQueryParameter parameter = from(newFilters, ALL);
         return parameter;
+    }
+
+    /**
+     * @return whether this parameter contains filters by
+     * the {@linkplain org.spine3.server.entity.LifecycleFlags Entity lifecycle columns} or not
+     */
+    public boolean hasLifecycle() {
+        return hasLifecycle;
     }
 
     @Override

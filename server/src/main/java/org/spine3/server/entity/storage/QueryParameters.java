@@ -39,9 +39,12 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
     private final ImmutableCollection<CompositeQueryParameter> parameters;
 
+    private final boolean hasLifecycle;
+
     private QueryParameters(Builder builder) {
         this.parameters = builder.getParameters()
                                  .build();
+        this.hasLifecycle = builder.hasLifecycle;
     }
 
     /**
@@ -52,6 +55,14 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
     @Override
     public Iterator<CompositeQueryParameter> iterator() {
         return parameters.iterator();
+    }
+
+    /**
+     * @return whether this parameters include filters by
+     * the {@linkplain org.spine3.server.entity.LifecycleFlags Entity lifecycle flags} or not
+     */
+    public boolean includeLifecycle() {
+        return hasLifecycle;
     }
 
     @Override
@@ -82,12 +93,15 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
         private final ImmutableCollection.Builder<CompositeQueryParameter> parameters;
 
+        private boolean hasLifecycle;
+
         private Builder() {
             parameters = ImmutableList.builder();
         }
 
         public Builder add(CompositeQueryParameter parameter) {
             parameters.add(parameter);
+            hasLifecycle |= parameter.hasLifecycle();
             return this;
         }
 

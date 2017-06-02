@@ -34,7 +34,6 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
 import org.spine3.client.ColumnFilter;
-import org.spine3.client.ColumnFilters;
 import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
@@ -70,6 +69,8 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.spine3.base.Identifiers.idToAny;
+import static org.spine3.client.ColumnFilters.all;
+import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
@@ -77,6 +78,7 @@ import static org.spine3.server.entity.TestTransaction.injectArchived;
 import static org.spine3.server.entity.TestTransaction.injectDeleted;
 import static org.spine3.server.entity.TestTransaction.injectState;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
+import static org.spine3.server.storage.LifecycleFlagField.archived;
 import static org.spine3.test.Tests.archived;
 import static org.spine3.test.Tests.assertMatchesMask;
 import static org.spine3.test.Verify.assertEmpty;
@@ -394,8 +396,8 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                             .setNumber(2) // Value of the counter after one columns
                                             .build();     // scan (incremented 2 times internally)
 
-        final ColumnFilter status = ColumnFilters.eq("projectStatusValue", wrappedValue);
-        final ColumnFilter version = ColumnFilters.eq("counterVersion", versionValue);
+        final ColumnFilter status = eq("projectStatusValue", wrappedValue);
+        final ColumnFilter version = eq("counterVersion", versionValue);
         final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
                                                                                  .setOperator(ALL)
                                                                                  .addFilter(status)
@@ -541,6 +543,57 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertSize(1, readRecords);
         final EntityRecord actualRecord = readRecords.get(activeId);
         assertEquals(recordActive, actualRecord);
+    }
+
+    @Test
+    public void allow_any_lifecycle_if_column_involved() {
+        final I archivedId = newId();
+        final I deletedId = newId();
+        final I activeId = newId();
+
+        final TestCounterEntity<I> activeEntity = new TestCounterEntity<>(archivedId);
+        final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(deletedId);
+        final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(activeId);
+        deletedEntity.delete();
+        archivedEntity.archive();
+
+        final EntityRecord recordActive = newStorageRecord(activeId, activeEntity.getState());
+        final EntityRecord recordArchived = newStorageRecord(deletedId, archivedEntity.getState())
+                .toBuilder()
+                .setLifecycleFlags(LifecycleFlags.newBuilder().setArchived(true))
+                .build();
+        final EntityRecord recordDeleted = newStorageRecord(archivedId, deletedEntity.getState())
+                .toBuilder()
+                .setLifecycleFlags(LifecycleFlags.newBuilder().setDeleted(true))
+                .build();
+        final EntityRecordWithColumns activeRecord = create(recordActive, activeEntity);
+        final EntityRecordWithColumns archivedRecord = create(recordArchived, archivedEntity);
+        final EntityRecordWithColumns deletedRecord = create(recordDeleted, deletedEntity);
+
+        final RecordStorage<I> storage = getStorage();
+
+        // Fill the storage
+        storage.write(archivedId, archivedRecord);
+        storage.write(activeId, activeRecord);
+        storage.write(deletedId, deletedRecord);
+
+        final CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(columnFilter)
+                                                   .build();
+        // Prepare the query
+        final EntityQuery<I> query = EntityQueries.from(filters,
+                                                        TestCounterEntity.class);
+        // Perform the query
+        final Map<I, EntityRecord> readRecords = storage.readAll(query,
+                                                                 FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(2, readRecords);
+        final EntityRecord actualActiveRecord = readRecords.get(activeId);
+        assertEquals(recordActive, actualActiveRecord);
+
+        final EntityRecord actualDeletedRecord = readRecords.get(deletedId);
+        assertEquals(recordDeleted, actualDeletedRecord);
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {

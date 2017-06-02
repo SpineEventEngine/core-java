@@ -225,6 +225,10 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * Reads all the records matching the given {@link EntityQuery} and applies the given
      * {@link FieldMask} to the resulting record states.
      *
+     * <p>By default, if the query does not specify the {@linkplain LifecycleFlags}, nut the entity
+     * supports them, all the resulting records are active. Otherwise the records obey
+     * the constraints provided buy the query.
+     *
      * @param query     the query to execute
      * @param fieldMask the fields to retrieve
      * @return the matching records mapped upon their IDs
