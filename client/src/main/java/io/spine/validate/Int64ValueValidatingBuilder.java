@@ -20,7 +20,6 @@
 package io.spine.validate;
 
 import com.google.protobuf.Int64Value;
-import org.spine3.validate.AbstractValidatingBuilder;
 
 /**
  * Validating builder for {@linkplain Int64Value} messages.

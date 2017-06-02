@@ -21,16 +21,18 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
-import io.spine.server.entity.Transaction;
 import io.spine.base.Event;
 import io.spine.base.Version;
 import io.spine.test.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.validate.StringValueValidatingBuilder;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
+import org.junit.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -42,9 +44,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Tests.newUuidValue;
 
 /**
  * @author Alex Tymchenko

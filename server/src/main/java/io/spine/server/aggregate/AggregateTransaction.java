@@ -25,7 +25,7 @@ import io.spine.base.EventContext;
 import io.spine.base.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;

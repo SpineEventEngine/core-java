@@ -27,7 +27,7 @@ import io.spine.base.EventContext;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.EventSubscriberMethod;
 import io.spine.type.EventClass;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 

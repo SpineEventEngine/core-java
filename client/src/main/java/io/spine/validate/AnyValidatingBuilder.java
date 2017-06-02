@@ -20,7 +20,6 @@
 package io.spine.validate;
 
 import com.google.protobuf.Any;
-import org.spine3.validate.AbstractValidatingBuilder;
 
 /**
  * Validating builder for {@linkplain Any} messages.

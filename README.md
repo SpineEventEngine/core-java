@@ -47,13 +47,13 @@ buildscript{
     dependencies {
         // ...
         classpath group: 'com.google.protobuf', name:'protobuf-gradle-plugin', version: protobufGradlePluginVersion        
-        classpath group: 'org.spine3.tools', name: 'protobuf-plugin', version: spinePluginVersion
+        classpath group: 'io.spine.tools', name: 'protobuf-plugin', version: spinePluginVersion
     }
 }
 
 apply plugin: 'java'
 apply plugin: 'com.google.protobuf'
-apply plugin: 'org.spine3.tools.protobuf-plugin'
+apply plugin: 'io.spine.tools.protobuf-plugin'
 
 repositories {
     jcenter()
@@ -67,16 +67,16 @@ dependencies {
     // ...
     
     // Client-side and shared API. 
-    compile group: 'org.spine3', name: 'spine-client-core', version: spineVersion
+    compile group: 'io.spine', name: 'spine-client-core', version: spineVersion
     
     // Add this only for server-side code. 
-    compile group: 'org.spine3', name: 'spine-server-core', version: spineVersion
+    compile group: 'io.spine', name: 'spine-server-core', version: spineVersion
     
     // Add this if your code deals with users. 
-    compile group: 'org.spine3', name: 'spine-users', version: spineVersion
+    compile group: 'io.spine', name: 'spine-users', version: spineVersion
     
     // Dependency on value objects from the Values sub-project.
-    compile group: 'org.spine3', name: 'spine-values', version: spineVersion
+    compile group: 'io.spine', name: 'spine-values', version: spineVersion
 }
 ```
 There is no Maven support at the moment. 

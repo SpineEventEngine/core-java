@@ -24,7 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.base.Version;
 import io.spine.server.entity.EntityBuilder;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test instances of {@code ProcessManager}.

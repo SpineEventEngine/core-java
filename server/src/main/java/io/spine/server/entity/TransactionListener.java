@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Version;
 import io.spine.server.entity.Transaction.Phase;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * A common contract for the {@linkplain Transaction transaction} listeners.

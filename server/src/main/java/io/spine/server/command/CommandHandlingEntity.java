@@ -22,15 +22,15 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandContext;
 import io.spine.base.FailureThrowable;
 import io.spine.change.MessageMismatch;
-import io.spine.change.ValueMismatch;
-import io.spine.server.entity.EventPlayingEntity;
-import io.spine.base.CommandContext;
 import io.spine.change.StringMismatch;
+import io.spine.change.ValueMismatch;
 import io.spine.envelope.CommandEnvelope;
+import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.CommandHandlerMethod;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
 

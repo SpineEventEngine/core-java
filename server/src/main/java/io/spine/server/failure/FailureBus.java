@@ -45,7 +45,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
- * @see org.spine3.base.FailureThrowable
+ * @see io.spine.base.FailureThrowable
  * @see Subscribe Subscribe @Subscribe
  */
 public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,

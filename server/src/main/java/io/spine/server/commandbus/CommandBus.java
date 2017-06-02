@@ -26,6 +26,7 @@ import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
+import io.spine.base.FailureThrowable;
 import io.spine.base.Identifiers;
 import io.spine.base.Response;
 import io.spine.base.Responses;
@@ -36,7 +37,6 @@ import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 import io.spine.type.CommandClass;
-import org.spine3.base.FailureThrowable;
 
 import javax.annotation.Nullable;
 import java.util.List;
