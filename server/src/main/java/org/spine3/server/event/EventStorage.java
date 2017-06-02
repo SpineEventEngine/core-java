@@ -28,8 +28,8 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import org.spine3.base.Event;
 import org.spine3.base.EventId;
-import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.ColumnFilter;
+import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.server.entity.DefaultRecordBasedRepository;
 
@@ -37,11 +37,11 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.gt;
 import static org.spine3.client.ColumnFilters.lt;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static org.spine3.server.event.EventEntity.CREATED_TIME_COLUMN;
 import static org.spine3.server.event.EventEntity.TYPE_COLUMN;
 import static org.spine3.server.event.EventEntity.comparator;
@@ -101,11 +101,12 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     /**
      * Creates an instance of {@link EntityFilters} from the given {@link EventStreamQuery}.
      *
-     * <p>The resulting filters only contain the filtering by the {@code after} field of the source
-     * query compared to the {@link EventEntity#getCreated()} column.
+     * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
+     * of the source query and by the {@code eventType} field of the underlying
+     * {@linkplain EventFilter EventFilters}.
      *
      * @param query the source {@link EventStreamQuery} to get the info from
-     * @return new instance of {@link EntityFilters} filtering the events by their timestamp
+     * @return new instance of {@link EntityFilters} filtering the events
      */
     private static EntityFilters toEntityFilters(EventStreamQuery query) {
         final CompositeColumnFilter timeFilter = timeFilter(query);
@@ -119,7 +120,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
 
     private static CompositeColumnFilter timeFilter(EventStreamQuery query) {
         final CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
-                                                                                  .setOperator(ALL);
+                                                                              .setOperator(ALL);
         if (query.hasAfter()) {
             final Timestamp timestamp = query.getAfter();
             final ColumnFilter filter = gt(CREATED_TIME_COLUMN, timestamp);
@@ -134,9 +135,8 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     }
 
     private static CompositeColumnFilter typeFilter(EventStreamQuery query) {
-        final CompositeColumnFilter.Builder typeFilter =
-                CompositeColumnFilter.newBuilder()
-                                       .setOperator(EITHER);
+        final CompositeColumnFilter.Builder typeFilter = CompositeColumnFilter.newBuilder()
+                                                                              .setOperator(EITHER);
         for (EventFilter eventFilter : query.getFilterList()) {
             final String type = eventFilter.getEventType();
             if (!type.isEmpty()) {

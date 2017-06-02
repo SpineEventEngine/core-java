@@ -204,7 +204,7 @@ public final class QueryBuilder {
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The input values represent groups of {@linkplain ColumnFilter column filters} joined with
-     * a {@linkplain CompositeColumnFilter.CompositeOperator aggregating operator}.
+     * a {@linkplain CompositeColumnFilter.CompositeOperator composite operator}.
      *
      * <p>The input filter groups are effectively joined between each other by
      * {@link CompositeColumnFilter.CompositeOperator#ALL ALL} operator, i.e. a record matches

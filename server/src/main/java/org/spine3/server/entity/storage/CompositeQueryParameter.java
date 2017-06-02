@@ -37,8 +37,8 @@ import static com.google.common.collect.ImmutableMultimap.copyOf;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 
 /**
- * A set of {@link ColumnFilter} instances joined by a logical grouping
- * {@link CompositeOperator operator}.
+ * A set of {@link ColumnFilter} instances joined by a logical
+ * {@link CompositeOperator composite operator}.
  *
  * @author Dmytro Dashenkov
  */
@@ -74,14 +74,14 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     /**
-     * @return the aggregating operator
+     * @return the composite operator
      */
     public CompositeOperator getOperator() {
         return operator;
     }
 
     /**
-     * @return the aggregated {@link ColumnFilter Column filters}
+     * @return the joined {@link ColumnFilter Column filters}
      */
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
     public ImmutableMultimap<Column, ColumnFilter> getFilters() {

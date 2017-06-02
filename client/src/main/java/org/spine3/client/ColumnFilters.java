@@ -166,13 +166,13 @@ public final class ColumnFilters {
      * @return new instance of {@link CompositeColumnFilter}
      */
     public static CompositeColumnFilter all(ColumnFilter first, ColumnFilter... rest) {
-        return aggregateFilters(asList(first, rest), ALL);
+        return composeFilters(asList(first, rest), ALL);
     }
 
     /**
      * Creates new disjunction composite filter.
      *
-     * <p>A record is considered matching this filter if it matches at least one of the aggregated
+     * <p>A record is considered matching this filter if it matches at least one of the composite
      * Column filters.
      *
      * @param first the first {@link ColumnFilter}
@@ -180,14 +180,14 @@ public final class ColumnFilters {
      * @return new instance of {@link CompositeColumnFilter}
      */
     public static CompositeColumnFilter either(ColumnFilter first, ColumnFilter... rest) {
-        return aggregateFilters(asList(first, rest), EITHER);
+        return composeFilters(asList(first, rest), EITHER);
     }
 
     /**
      * Creates new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
-     * the aggregated Column filters.
+     * the composite Column filters.
      *
      * <p>This method is used to create the default {@code ALL} filter if the user chooses to pass
      * instances of {@link ColumnFilter} directly to the {@link QueryBuilder}.
@@ -197,7 +197,7 @@ public final class ColumnFilters {
      * @see #all(ColumnFilter, ColumnFilter...) for the public API equivalent
      */
     static CompositeColumnFilter all(Collection<ColumnFilter> filters) {
-        return aggregateFilters(filters, ALL);
+        return composeFilters(filters, ALL);
     }
 
     private static ColumnFilter createFilter(String columnName, Object value, Operator operator) {
@@ -210,12 +210,12 @@ public final class ColumnFilters {
         return filter;
     }
 
-    private static CompositeColumnFilter aggregateFilters(Collection<ColumnFilter> filters,
-                                                         CompositeOperator operator) {
+    private static CompositeColumnFilter composeFilters(Collection<ColumnFilter> filters,
+                                                        CompositeOperator operator) {
         final CompositeColumnFilter result = CompositeColumnFilter.newBuilder()
-                                                                .addAllFilter(filters)
-                                                                .setOperator(operator)
-                                                                .build();
+                                                                  .addAllFilter(filters)
+                                                                  .setOperator(operator)
+                                                                  .build();
         return result;
     }
 

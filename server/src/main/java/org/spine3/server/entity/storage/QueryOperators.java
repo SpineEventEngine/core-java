@@ -57,7 +57,7 @@ final class QueryOperators {
     /**
      * Compares the given operands with the given operator.
      *
-     * <p>For example, if operands where {@code 42} and {@link 9} (exactly in that order) and
+     * <p>For example, if operands where {@code 42} and {@code 9} (exactly in that order) and
      * the operator was {@link Operator#GREATER_THAN GREATER_THAN}, then this function could be
      * expressed as {@code 42 > 8}. The function returns {@code true} if the expression is
      * mathematically correct.
