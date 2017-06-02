@@ -208,7 +208,7 @@ public final class QueryBuilder {
      *
      * <p>The input filter groups are effectively joined between each other by
      * {@link CompositeColumnFilter.CompositeOperator#ALL ALL} operator, i.e. a record matches
-     * this query if it matches all the aggregated filters.
+     * this query if it matches all the composite filters.
      *
      * <p>Example of usage:
      * <pre>

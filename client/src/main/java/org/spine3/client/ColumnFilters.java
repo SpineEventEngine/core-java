@@ -156,7 +156,7 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new conjunction aggregating filter.
+     * Creates new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
      * the aggregated Column filters.
@@ -170,7 +170,7 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new disjunction aggregating filter.
+     * Creates new disjunction composite filter.
      *
      * <p>A record is considered matching this filter if it matches at least one of the aggregated
      * Column filters.
@@ -184,7 +184,7 @@ public final class ColumnFilters {
     }
 
     /**
-     * Creates new conjunction aggregating filter.
+     * Creates new conjunction composite filter.
      *
      * <p>A record is considered matching this filter if and only if it matches all of
      * the aggregated Column filters.
