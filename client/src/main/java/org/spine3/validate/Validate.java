@@ -21,21 +21,23 @@
 package org.spine3.validate;
 
 import com.google.protobuf.Message;
-import org.spine3.type.TypeName;
+import io.spine.type.TypeName;
+import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.util.Exceptions.newIllegalArgumentException;
-import static org.spine3.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * This class provides general validation routines.
  *
  * @author Alexander Yevsyukov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public final class Validate {
 
     private static final String MUST_BE_A_POSITIVE_VALUE = "%s must be a positive value";

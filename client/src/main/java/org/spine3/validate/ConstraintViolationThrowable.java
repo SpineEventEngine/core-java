@@ -20,6 +20,8 @@
 
 package org.spine3.validate;
 
+import io.spine.validate.ConstraintViolation;
+
 import java.util.List;
 
 import static java.util.Collections.unmodifiableList;
@@ -29,6 +31,7 @@ import static java.util.Collections.unmodifiableList;
  *
  * @author Illia Shepilov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public class ConstraintViolationThrowable extends RuntimeException {
 
     private static final long serialVersionUID = 1L;

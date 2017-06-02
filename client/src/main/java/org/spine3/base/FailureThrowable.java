@@ -25,16 +25,22 @@ import com.google.protobuf.Any;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.spine3.annotation.Internal;
+import io.spine.annotation.Internal;
+import io.spine.base.Command;
+import io.spine.base.Failure;
+import io.spine.base.FailureContext;
+import io.spine.base.FailureId;
+import io.spine.base.Failures;
 
-import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.time.Time.getCurrentTime;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.time.Time.getCurrentTime;
 
 /**
  * Abstract base for throwable business failures.
  *
  * @author Alexander Yevsyukov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public abstract class FailureThrowable extends Throwable {
 
     private static final long serialVersionUID = 0L;

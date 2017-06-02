@@ -22,7 +22,7 @@ package org.spine3.validate;
 
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
-import org.spine3.base.FieldPath;
+import io.spine.base.FieldPath;
 
 import static java.lang.String.format;
 
@@ -31,6 +31,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class FieldValidatorFactory {
 
     private FieldValidatorFactory() {
@@ -47,7 +48,7 @@ class FieldValidatorFactory {
      *                      required
      */
     @SuppressWarnings("OverlyComplexMethod")
-        // OK since an alternative map-based impl. would be a lot more code that would do the same.
+    // OK since an alternative map-based impl. would be a lot more code that would do the same.
     private static FieldValidator<?> create(FieldDescriptor descriptor,
                                             Object fieldValue,
                                             FieldPath rootFieldPath,
@@ -59,7 +60,7 @@ class FieldValidatorFactory {
             case INT:
                 return new IntegerFieldValidator(descriptor, fieldValue, rootFieldPath);
             case LONG:
-                return new LongFieldValidator(descriptor, fieldValue,   rootFieldPath);
+                return new LongFieldValidator(descriptor, fieldValue, rootFieldPath);
             case FLOAT:
                 return new FloatFieldValidator(descriptor, fieldValue, rootFieldPath);
             case DOUBLE:

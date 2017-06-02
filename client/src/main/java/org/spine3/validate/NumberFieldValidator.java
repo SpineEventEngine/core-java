@@ -24,13 +24,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
-import org.spine3.base.FieldPath;
-import org.spine3.option.DecimalMaxOption;
-import org.spine3.option.DecimalMinOption;
-import org.spine3.option.DigitsOption;
-import org.spine3.option.MaxOption;
-import org.spine3.option.MinOption;
-import org.spine3.option.OptionsProto;
+import io.spine.option.DecimalMaxOption;
+import io.spine.base.FieldPath;
+import io.spine.option.DecimalMinOption;
+import io.spine.option.DigitsOption;
+import io.spine.option.MaxOption;
+import io.spine.option.MinOption;
+import io.spine.option.OptionsProto;
+import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 import java.util.regex.Pattern;
@@ -41,6 +42,7 @@ import java.util.regex.Pattern;
  * @param <V> the type of the field value
  * @author Alexander Litus
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends FieldValidator<V> {
 
     private static final Pattern PATTERN_DOT = Pattern.compile("\\.");
@@ -135,8 +137,8 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
         final V min = toNumber(minAsString);
         final int comparisonResult = value.compareTo(min);
         final boolean fits = isMinDecimalInclusive
-                             ? comparisonResult >= 0
-                             : comparisonResult > 0;
+                ? comparisonResult >= 0
+                : comparisonResult > 0;
         final boolean notFit = !fits;
         return notFit;
     }
@@ -148,8 +150,8 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
         }
         final V max = toNumber(maxAsString);
         final boolean fits = isMaxDecimalInclusive
-                             ? value.compareTo(max) <= 0
-                             : value.compareTo(max) < 0;
+                ? value.compareTo(max) <= 0
+                : value.compareTo(max) < 0;
         final boolean notFit = !fits;
         return notFit;
     }
@@ -187,7 +189,7 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
         final int intDigitsCount = parts[0].length();
         final int fractionDigitsCount = parts[1].length();
         final boolean isInvalid = (intDigitsCount > intDigitsMax) ||
-                                  (fractionDigitsCount > fractionDigitsMax);
+                (fractionDigitsCount > fractionDigitsMax);
         if (isInvalid) {
             addViolation(newDigitsViolation(value));
         }
@@ -200,11 +202,11 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
                                                     String minOrMax) {
         final String msg = getErrorMsgFormat(option, customMsg);
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(isInclusive ? "or equal to " : "")
-                .addParam(minOrMax)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(wrap(value));
+                                                                         .setMsgFormat(msg)
+                                                                         .addParam(isInclusive ? "or equal to " : "")
+                                                                         .addParam(minOrMax)
+                                                                         .setFieldPath(getFieldPath())
+                                                                         .setFieldValue(wrap(value));
         return violation.build();
     }
 
@@ -212,10 +214,10 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
                                                      String customMsg, String minOrMax) {
         final String msg = getErrorMsgFormat(option, customMsg);
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(minOrMax)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(wrap(value));
+                                                                         .setMsgFormat(msg)
+                                                                         .addParam(minOrMax)
+                                                                         .setFieldPath(getFieldPath())
+                                                                         .setFieldValue(wrap(value));
         return violation.build();
     }
 
@@ -224,11 +226,11 @@ abstract class NumberFieldValidator<V extends Number & Comparable<V>> extends Fi
         final String intMax = String.valueOf(digitsOption.getIntegerMax());
         final String fractionMax = String.valueOf(digitsOption.getFractionMax());
         final ConstraintViolation.Builder violation = ConstraintViolation.newBuilder()
-                .setMsgFormat(msg)
-                .addParam(intMax)
-                .addParam(fractionMax)
-                .setFieldPath(getFieldPath())
-                .setFieldValue(wrap(value));
+                                                                         .setMsgFormat(msg)
+                                                                         .addParam(intMax)
+                                                                         .addParam(fractionMax)
+                                                                         .setFieldPath(getFieldPath())
+                                                                         .setFieldValue(wrap(value));
         return violation.build();
     }
 }

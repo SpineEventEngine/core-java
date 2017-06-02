@@ -25,6 +25,7 @@ package org.spine3.base;
  *
  * @author Illia Shepilov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public class ConversionException extends Exception {
 
     private static final long serialVersionUID = 1L;

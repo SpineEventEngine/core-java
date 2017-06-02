@@ -28,7 +28,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Message;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spine3.base.FieldPath;
+import io.spine.base.FieldPath;
+import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -42,6 +43,7 @@ import java.util.regex.Pattern;
  *
  * @author Alexander Yevsyukov
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 class AlternativeFieldValidator {
 
     /**
@@ -132,8 +134,8 @@ class AlternativeFieldValidator {
     private boolean alternativeFound(Message message, Iterable<RequiredFieldOption> fieldOptions) {
         for (RequiredFieldOption option : fieldOptions) {
             boolean found = option.isCombination()
-                            ? checkCombination(message, option.getFieldNames())
-                            : checkField(message, option.getFieldName());
+                    ? checkCombination(message, option.getFieldNames())
+                    : checkField(message, option.getFieldName());
             if (found) {
                 return true;
             }

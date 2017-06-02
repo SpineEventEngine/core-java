@@ -22,12 +22,12 @@
  * This package contains generated classes which are internal to Spine.
  * Corresponding Protobuf types are the part of the public API.
  *
- * @see org.spine3.annotation.Internal
+ * @see io.spine.annotation.Internal
  */
 @ParametersAreNonnullByDefault
 @Internal
 package org.spine3.validate.internal;
 
-import org.spine3.annotation.Internal;
+import io.spine.annotation.Internal;
 
 import javax.annotation.ParametersAreNonnullByDefault;

@@ -22,13 +22,14 @@ package org.spine3.validate;
 import java.lang.reflect.Method;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.util.Exceptions.illegalStateWithCauseOf;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * Utility class for working with {@linkplain ValidatingBuilder validating builders}.
  *
  * @author Alex Tymchenko
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public class ValidatingBuilders {
 
     private ValidatingBuilders() {

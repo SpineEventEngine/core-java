@@ -35,12 +35,12 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.9.14-SNAPSHOT'
+        spineVersion = '0.9.14.1-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.9.5-SNAPSHOT'
+        spineToolsVersion = '0.9.7-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.
@@ -74,7 +74,7 @@ allprojects {
     apply plugin: 'jacoco'
     apply plugin: 'idea'
 
-    group = 'org.spine3'
+    group = 'io.spine'
     version = spineVersion
 }
 
@@ -136,7 +136,7 @@ subprojects {
     //              * "warn" - the violations are logged to the build report.
     //              * "error" - build will fail and its report will contain the violations.
     //
-    //      For more details please see org.spine3.tools.codestyle.CodestyleCheckerPlugin
+    //      For more details please see io.spine.tools.codestyle.CodestyleCheckerPlugin
     codestyleChecker {
 
         // Javadoc @link/@linkplain format checker.
