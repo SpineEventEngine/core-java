@@ -26,19 +26,18 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.base.EventContext;
 import org.spine3.annotation.Subscribe;
+import org.spine3.base.EventContext;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.test.Given;
 import org.spine3.type.EventClass;
 import org.spine3.validate.StringValueValidatingBuilder;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.Wrapper.forInteger;
-import static org.spine3.server.projection.ProjectionTransaction.start;
+import static org.spine3.server.projection.ProjectionEventDispatcher.dispatch;
 import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ProjectionShould {
@@ -48,10 +47,10 @@ public class ProjectionShould {
     @Before
     public void setUp() {
         projection = Given.projectionOfClass(TestProjection.class)
-                                          .withId(newUuid())
-                                          .withVersion(1)
-                                          .withState(Wrapper.forString("Initial state"))
-                                          .build();
+                          .withId(newUuid())
+                          .withVersion(1)
+                          .withState(Wrapper.forString("Initial state"))
+                          .build();
     }
 
     @Test
@@ -59,10 +58,7 @@ public class ProjectionShould {
         final String stringValue = newUuid();
 
         ProjectionTransaction<?, ?, ?> tx;
-        tx = start(projection);
-        assertFalse(projection.isChanged());
-        projection.handle(Wrapper.forString(stringValue), EventContext.getDefaultInstance());
-        tx.commit();
+        dispatch(projection, Wrapper.forString(stringValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(stringValue));
@@ -70,11 +66,7 @@ public class ProjectionShould {
         assertTrue(projection.isChanged());
 
         final Integer integerValue = 1024;
-
-        tx = start(projection);
-        assertFalse(projection.isChanged());
-        projection.handle(forInteger(integerValue), EventContext.getDefaultInstance());
-        tx.commit();
+        dispatch(projection, forInteger(integerValue), EventContext.getDefaultInstance());
         assertTrue(projection.getState()
                              .getValue()
                              .contains(String.valueOf(integerValue)));
@@ -84,7 +76,7 @@ public class ProjectionShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_no_handler_for_event() {
-        projection.handle(BoolValue.getDefaultInstance(), EventContext.getDefaultInstance());
+        dispatch(projection, BoolValue.getDefaultInstance(), EventContext.getDefaultInstance());
     }
 
     @Test
@@ -121,7 +113,7 @@ public class ProjectionShould {
         @Subscribe
         public void on(Int32Value event) {
             final StringValue newState = createNewState("integerState",
-                                                       String.valueOf(event.getValue()));
+                                                        String.valueOf(event.getValue()));
             getBuilder().mergeFrom(newState);
         }
 

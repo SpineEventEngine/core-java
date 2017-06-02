@@ -69,7 +69,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.aggregate.CommandTestDispatcher.dispatch;
+import static org.spine3.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static org.spine3.server.aggregate.Given.EventMessage.projectCreated;
 import static org.spine3.server.aggregate.Given.EventMessage.projectStarted;
 import static org.spine3.server.aggregate.Given.EventMessage.taskAdded;
