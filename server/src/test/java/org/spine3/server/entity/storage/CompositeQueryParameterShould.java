@@ -37,7 +37,7 @@ import static org.spine3.client.ColumnFilters.eq;
 import static org.spine3.client.ColumnFilters.ge;
 import static org.spine3.client.ColumnFilters.lt;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.GCF_GO_UNDEFINED;
+import static org.spine3.client.CompositeColumnFilter.CompositeOperator.CCF_CO_UNDEFINED;
 import static org.spine3.server.entity.storage.CompositeQueryParameter.from;
 import static org.spine3.server.storage.EntityField.version;
 import static org.spine3.server.storage.LifecycleFlagField.archived;
@@ -64,7 +64,7 @@ public class CompositeQueryParameterShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_construct_for_invalid_operator() {
-        from(ImmutableMultimap.<Column, ColumnFilter>of(), GCF_GO_UNDEFINED);
+        from(ImmutableMultimap.<Column, ColumnFilter>of(), CCF_CO_UNDEFINED);
     }
 
     @Test
