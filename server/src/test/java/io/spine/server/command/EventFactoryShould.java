@@ -29,7 +29,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
-import org.spine3.validate.ConstraintViolationThrowable;
+import io.spine.validate.ConstraintViolationThrowable;
 import org.junit.Before;
 import org.junit.Test;
 

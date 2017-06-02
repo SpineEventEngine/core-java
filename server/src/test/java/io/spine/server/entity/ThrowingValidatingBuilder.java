@@ -20,8 +20,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import org.spine3.validate.AbstractValidatingBuilder;
-import org.spine3.validate.ConstraintViolationThrowable;
+import io.spine.validate.AbstractValidatingBuilder;
+import io.spine.validate.ConstraintViolationThrowable;
 
 import javax.annotation.Nullable;
 

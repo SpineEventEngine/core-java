@@ -43,8 +43,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.Messages.toAny;
 import static io.spine.time.Time.getCurrentTime;
+import static io.spine.validate.Validate.checkValid;
 import static io.spine.validate.Validate.isNotDefault;
-import static org.spine3.validate.Validate.checkValid;
 
 /**
  * Produces events in response to a command.
@@ -73,7 +73,7 @@ public class EventFactory {
      *
      * <p>In the message is an instance of {@code Any}, it is unpacked for validation.
      *
-     * <p>It is recommended to use a corresponding {@linkplain org.spine3.validate.ValidatingBuilder
+     * <p>It is recommended to use a corresponding {@linkplain io.spine.validate.ValidatingBuilder
      * ValidatingBuilder} implementation to create a message.
      *
      * @param messageOrAny the message of the event or the message packed into {@code Any}

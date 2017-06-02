@@ -21,11 +21,11 @@ package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.base.Version;
 import io.spine.base.EventContext;
+import io.spine.base.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 

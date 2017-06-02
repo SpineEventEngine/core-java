@@ -37,7 +37,7 @@ import io.spine.server.command.EventFactory;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
 import io.spine.type.CommandClass;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;

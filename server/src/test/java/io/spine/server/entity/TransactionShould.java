@@ -27,10 +27,10 @@ import io.spine.server.command.EventFactory;
 import io.spine.server.entity.Transaction.Phase;
 import io.spine.test.TestEventFactory;
 import io.spine.validate.ConstraintViolation;
+import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.spine3.validate.ConstraintViolationThrowable;
-import org.spine3.validate.ValidatingBuilder;
 
 import java.util.List;
 

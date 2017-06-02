@@ -20,7 +20,6 @@
 package io.spine.validate;
 
 import com.google.protobuf.DoubleValue;
-import org.spine3.validate.AbstractValidatingBuilder;
 
 /**
  * Validating builder for {@linkplain DoubleValue} messages.

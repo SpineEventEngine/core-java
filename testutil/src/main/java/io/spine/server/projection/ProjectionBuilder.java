@@ -23,7 +23,7 @@ package io.spine.server.projection;
 import com.google.protobuf.Message;
 import io.spine.base.Version;
 import io.spine.server.entity.EntityBuilder;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * Utility class for building test {@code Projection}s.

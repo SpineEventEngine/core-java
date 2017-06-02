@@ -27,20 +27,18 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
-import io.spine.server.storage.AbstractStorageShould;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.server.aggregate.Aggregate;
-import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.event.Given.EventMessage;
+import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectValidatingBuilder;
 import io.spine.testdata.Sample;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -49,15 +47,14 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.protobuf.util.Timestamps.add;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.test.TestEventFactory.newInstance;
+import static io.spine.time.Durations2.seconds;
+import static io.spine.time.Time.getCurrentTime;
 import static java.util.Collections.reverse;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.server.aggregate.Given.StorageRecords.sequenceFor;
-import static io.spine.test.TestEventFactory.newInstance;
-import static io.spine.time.Durations2.seconds;
-import static io.spine.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Litus

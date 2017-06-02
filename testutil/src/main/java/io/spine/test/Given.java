@@ -32,7 +32,7 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerBuilder;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionBuilder;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

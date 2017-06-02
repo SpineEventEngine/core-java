@@ -20,7 +20,6 @@
 package io.spine.validate;
 
 import com.google.protobuf.UInt32Value;
-import org.spine3.validate.AbstractValidatingBuilder;
 
 /**
  * Validating builder for {@linkplain UInt32Value} messages.

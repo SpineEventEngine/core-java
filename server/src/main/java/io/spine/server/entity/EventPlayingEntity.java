@@ -26,8 +26,8 @@ import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.Version;
 import io.spine.reflect.GenericTypeIndex;
-import org.spine3.validate.ValidatingBuilder;
-import org.spine3.validate.ValidatingBuilders;
+import io.spine.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilders;
 
 import javax.annotation.Nullable;
 

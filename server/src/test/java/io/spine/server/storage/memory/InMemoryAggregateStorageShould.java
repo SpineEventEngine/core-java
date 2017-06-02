@@ -21,11 +21,11 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
-import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.aggregate.AggregateStorageShould;
 import io.spine.test.aggregate.ProjectId;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.ValidatingBuilder;
 
 /**
  * @author Alexander Litus

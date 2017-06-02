@@ -26,9 +26,9 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventContext;
 import io.spine.base.Version;
 import io.spine.server.entity.TransactionListener.SilentWitness;
-import org.spine3.validate.AbstractValidatingBuilder;
-import org.spine3.validate.ConstraintViolationThrowable;
-import org.spine3.validate.ValidatingBuilder;
+import io.spine.validate.AbstractValidatingBuilder;
+import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
