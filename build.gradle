@@ -22,7 +22,7 @@ import groovy.time.TimeCategory
 buildscript {
     repositories {
         mavenCentral()
-//        mavenLocal()
+        mavenLocal()
 
         // Spine releases repository.
         maven { url = 'http://maven.teamdev.com/repository/spine' }
@@ -136,7 +136,7 @@ subprojects {
     //              * "warn" - the violations are logged to the build report.
     //              * "error" - build will fail and its report will contain the violations.
     //
-    //      For more details please see org.spine3.tools.codestyle.CodestyleCheckerPlugin
+    //      For more details please see io.spine.tools.codestyle.CodestyleCheckerPlugin
     codestyleChecker {
 
         // Javadoc @link/@linkplain format checker.
