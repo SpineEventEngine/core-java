@@ -25,13 +25,9 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EventContext;
 import io.spine.base.Version;
-import io.spine.server.entity.EventPlayingEntity;
-import io.spine.server.entity.LifecycleFlags;
-import io.spine.server.entity.RecordBasedRepository;
-import io.spine.server.entity.TransactionListener;
 import io.spine.server.entity.TransactionListener.SilentWitness;
-import io.spine.validate.ConstraintViolationThrowable;
 import org.spine3.validate.AbstractValidatingBuilder;
+import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;
@@ -39,10 +35,10 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static java.lang.String.format;
 import static io.spine.base.Versions.checkIsIncrement;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
+import static java.lang.String.format;
 
 /**
  * The abstract class for the {@linkplain EventPlayingEntity} transactions.

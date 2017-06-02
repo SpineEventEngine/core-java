@@ -21,22 +21,23 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.junit.Test;
-import org.mockito.ArgumentMatcher;
-import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.server.entity.Transaction;
 import io.spine.base.Event;
 import io.spine.base.Version;
 import io.spine.server.command.EventFactory;
 import io.spine.server.entity.Transaction.Phase;
 import io.spine.test.TestEventFactory;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolationThrowable;
+import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.spine3.validate.ConstraintViolationThrowable;
 import org.spine3.validate.ValidatingBuilder;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.base.Versions.newVersion;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
@@ -47,9 +48,6 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static io.spine.base.Versions.newVersion;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.time.Time.getCurrentTime;
 
 /**
  * Base class for testing the {@linkplain Transaction transactions} for different
