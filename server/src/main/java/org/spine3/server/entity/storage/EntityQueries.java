@@ -39,6 +39,7 @@ import java.util.LinkedList;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
+import static com.google.common.primitives.Primitives.wrap;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -100,11 +101,13 @@ public final class EntityQueries {
     }
 
     private static void checkFilterType(Column column, ColumnFilter filter) {
-        final Any filterConvent = filter.getValue();
         final Class<?> expectedType = column.getType();
+        final Any filterConvent = filter.getValue();
         final Object filterValue = TypeConverter.toObject(filterConvent, expectedType);
-        checkArgument(expectedType.isInstance(filter),
+        final Class<?> actualType = filterValue.getClass();
+        checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
                       "Column type mismatch. Column %s cannot have value %s.",
+                      column,
                       filterValue);
     }
 
