@@ -23,16 +23,16 @@ package io.spine.server;
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.server.commandbus.UnsupportedCommandException;
+import io.spine.server.transport.GrpcContainer;
+import io.spine.test.TestActorRequestFactory;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import io.spine.base.Command;
-import io.spine.base.Commands;
-import io.spine.server.transport.GrpcContainer;
 
 import java.io.IOException;
 import java.util.Set;
@@ -43,7 +43,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 
 public class CommandServiceShould {
 
@@ -120,8 +119,9 @@ public class CommandServiceShould {
 
     @Test
     public void return_error_if_command_is_unsupported() {
-        final Command unsupportedCmd = Commands.createCommand(StringValue.getDefaultInstance(),
-                                                              createCommandContext());
+        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+
+        final Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 

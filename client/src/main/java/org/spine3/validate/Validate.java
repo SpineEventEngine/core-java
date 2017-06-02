@@ -22,8 +22,10 @@ package org.spine3.validate;
 
 import com.google.protobuf.Message;
 import io.spine.type.TypeName;
+import io.spine.validate.ConstraintViolation;
 
 import javax.annotation.Nullable;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -259,5 +261,22 @@ public final class Validate {
     @SuppressWarnings("DuplicateStringLiteralInspection") // is OK for this popular field name value
     public static String checkNameNotEmptyOrBlank(String name) {
         return checkNotEmptyOrBlank(name, "name");
+    }
+
+    /**
+     * Validates the given message according to its definition and throws
+     * {@code ConstraintViolationThrowable} if any constraints are violated.
+     *
+     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
+     *                                      set for it in its Protobuf definition
+     */
+    public static void checkValid(Message message) throws ConstraintViolationThrowable {
+        checkNotNull(message);
+
+        final List<ConstraintViolation> violations = MessageValidator.newInstance()
+                                                                     .validate(message);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationThrowable(violations);
+        }
     }
 }

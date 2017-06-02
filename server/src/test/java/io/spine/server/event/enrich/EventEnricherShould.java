@@ -23,38 +23,43 @@ package io.spine.server.event.enrich;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
-import io.spine.base.Subscribe;
-import io.spine.server.BoundedContext;
-import io.spine.server.event.Given;
-import io.spine.test.event.ProjectCreatedSeparateEnrichment;
-import io.spine.test.event.ProjectStarted;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.EventContext;
 import io.spine.protobuf.Wrapper;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.EventSubscriber;
+import io.spine.server.event.Given;
 import io.spine.test.TestEventFactory;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectCreatedDynamicallyConfiguredEnrichment;
+import io.spine.test.event.ProjectCreatedSeparateEnrichment;
 import io.spine.test.event.ProjectId;
 import io.spine.test.event.ProjectStarred;
+import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.SeparateEnrichmentForMultipleProjectEvents;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import io.spine.users.UserId;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
+import static io.spine.base.Enrichments.getEnrichment;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.server.event.Given.AnEvent.projectStarted;
+import static io.spine.server.event.Given.Enrichment.GetProjectMaxMemberCount;
+import static io.spine.server.event.Given.Enrichment.GetProjectName;
+import static io.spine.server.event.Given.Enrichment.GetProjectOwnerId;
+import static io.spine.server.event.Given.Enrichment.newEventEnricher;
+import static io.spine.server.event.Given.EventMessage.projectCreated;
+import static io.spine.test.TestEventFactory.newInstance;
+import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Enrichments.getEnrichment;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.server.event.Given.EventMessage.projectCreated;
-import static io.spine.test.TestEventFactory.newInstance;
-import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 public class EventEnricherShould {
 
@@ -63,9 +68,9 @@ public class EventEnricherShould {
     private TestEventSubscriber subscriber;
     private EventEnricher enricher;
     private final Function<ProjectId, String> getProjectName =
-            new Given.Enrichment.GetProjectName();
+            new GetProjectName();
     private final Function<ProjectId, UserId> getProjectOwnerId =
-            new Given.Enrichment.GetProjectOwnerId();
+            new GetProjectOwnerId();
 
     private static Event createEvent(Message msg) {
         final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);
@@ -75,7 +80,7 @@ public class EventEnricherShould {
 
     @Before
     public void setUp() {
-        enricher = Given.Enrichment.newEventEnricher();
+        enricher = newEventEnricher();
         boundedContext = newBoundedContext(enricher);
         eventBus = boundedContext.getEventBus();
         subscriber = new TestEventSubscriber();
@@ -104,7 +109,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_not_enclosed_to_event_same_package() {
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
 
         eventBus.post(createEvent(msg));
 
@@ -114,7 +119,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_enrichment_definition_is_in_another_package() {
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
 
         eventBus.post(createEvent(msg));
 
@@ -124,7 +129,7 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_with_several_fields_by_same_source_id() {
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
@@ -164,10 +169,10 @@ public class EventEnricherShould {
 
     @Test
     public void enrich_event_if_function_added_at_runtime() {
-        final Given.Enrichment.GetProjectMaxMemberCount function = new Given.Enrichment.GetProjectMaxMemberCount();
+        final GetProjectMaxMemberCount function = new GetProjectMaxMemberCount();
         enricher.registerFieldEnrichment(ProjectId.class, Integer.class,function);
 
-        final ProjectCreated msg = Given.EventMessage.projectCreated();
+        final ProjectCreated msg = projectCreated();
         final ProjectId projectId = msg.getProjectId();
 
         eventBus.post(createEvent(msg));
@@ -179,7 +184,7 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_be_enriched_if_enrichment_registered() {
-        assertTrue(enricher.canBeEnriched(Given.AnEvent.projectStarted()));
+        assertTrue(enricher.canBeEnriched(projectStarted()));
     }
 
     @Test

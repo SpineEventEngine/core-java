@@ -23,16 +23,15 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Event;
-import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Commands;
+import io.spine.base.Event;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.testdata.Sample;
@@ -46,7 +45,6 @@ import static io.spine.base.Identifiers.newUuid;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
 import static io.spine.test.Tests.newUserId;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 
@@ -123,9 +121,8 @@ class Given {
          * {@link io.spine.base.CommandId CommandId} instance.
          */
         static Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context =
-                    createCommandContext(userId, when);
-            final Command result = Commands.createCommand(command, context);
+            final Command result = TestActorRequestFactory.newInstance(userId)
+                                                          .createCommand(command, when);
             return result;
         }
     }

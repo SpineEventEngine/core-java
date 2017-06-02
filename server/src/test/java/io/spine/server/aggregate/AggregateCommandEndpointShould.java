@@ -21,14 +21,10 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
+import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Identifiers;
-import io.spine.base.Subscribe;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
@@ -46,17 +42,21 @@ import io.spine.test.aggregate.command.StartProject;
 import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import static io.spine.server.aggregate.Given.ACommand.addTask;
+import static io.spine.server.aggregate.Given.ACommand.createProject;
+import static io.spine.server.aggregate.Given.ACommand.startProject;
+import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static io.spine.server.aggregate.Given.ACommand.addTask;
-import static io.spine.server.aggregate.Given.ACommand.createProject;
-import static io.spine.server.aggregate.Given.ACommand.startProject;
-import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
 
 public class AggregateCommandEndpointShould {
 

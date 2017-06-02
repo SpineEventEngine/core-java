@@ -17,43 +17,45 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
-package org.spine3.server.aggregate;
+package io.spine.server.aggregate;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import org.spine3.base.Version;
-import org.spine3.server.entity.EntityBuilder;
+import io.spine.envelope.CommandEnvelope;
+
+import java.util.List;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * Utility class for building aggregates for tests.
+ * A test utility to dispatch commands to an {@code Aggregate} in test purposes.
  *
- * @param <A> the type of the aggregate to build
- * @param <I> the type of aggregate IDs
- * @param <S> the type of the aggregate state
- *
- * @author Alexander Yevsyukov
+ * @author Alex Tymchenko
  */
 @VisibleForTesting
-public class AggregateBuilder<A extends Aggregate<I, S, ?>,
-                              I,
-                              S extends Message> extends EntityBuilder<A, I, S> {
+public class AggregateCommandDispatcher {
+
+    private AggregateCommandDispatcher() {
+        // Prevent instantiation of this utility class.
+    }
+
     /**
-     * {@inheritDoc}
+     * Dispatches the {@linkplain CommandEnvelope command envelope} and applies the resulting events
+     * to the given {@code Aggregate}.
+     *
+     * @return the list of {@code Event} messages.
      */
-    public AggregateBuilder() {
-        super();
-        // Have the constructor for easier location of usages.
-    }
+    public static List<? extends Message> dispatch(Aggregate<?, ?, ?> aggregate,
+                                                   CommandEnvelope envelope) {
+        checkNotNull(aggregate);
+        checkNotNull(envelope);
 
-    @Override
-    public AggregateBuilder<A, I, S> setResultClass(Class<A> entityClass) {
-        super.setResultClass(entityClass);
-        return this;
-    }
+        final List<? extends Message> eventMessages = aggregate.dispatchCommand(envelope);
 
-    @Override
-    protected void setState(A result, S state, Version version) {
-        AggregateTransaction.startWith(result, state, version).commit();
+        final AggregateTransaction tx = AggregateTransaction.start(aggregate);
+        aggregate.apply(eventMessages, envelope);
+        tx.commit();
+
+        return eventMessages;
     }
 }

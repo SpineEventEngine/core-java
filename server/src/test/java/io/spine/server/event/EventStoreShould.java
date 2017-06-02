@@ -45,6 +45,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static io.spine.test.Verify.assertContainsAll;
@@ -65,9 +66,7 @@ public abstract class EventStoreShould {
 
     @BeforeClass
     public static void prepare() {
-        final CommandContext context = Commands.createContext(TenantId.getDefaultInstance(),
-                                                              Sample.messageOfType(UserId.class),
-                                                              ZoneOffsets.getDefault());
+        final CommandContext context = createCommandContext();
         eventFactory = TestEventFactory.newInstance(EventStoreShould.class, context);
     }
 

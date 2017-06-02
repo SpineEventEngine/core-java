@@ -22,35 +22,35 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.server.aggregate.Apply;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
-import io.spine.test.aggregate.Status;
-import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.commandservice.customer.CustomerValidatingBuilder;
-import io.spine.time.LocalDate;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Commands;
 import io.spine.base.Identifiers;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.people.PersonName;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.StartProject;
+import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
+import io.spine.test.commandservice.customer.CustomerValidatingBuilder;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
+import io.spine.time.LocalDate;
 import io.spine.time.LocalDates;
+import io.spine.users.TenantId;
 import io.spine.users.UserId;
 
 import java.util.List;
@@ -59,7 +59,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.test.Tests.newUserId;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
@@ -127,9 +126,12 @@ public class Given {
          * timestamp using default {@link ACommand} instance.
          */
         static Command create(Message command, UserId userId, Timestamp when) {
-            final CommandContext context = createCommandContext(userId,
-                                                                when);
-            final Command result = Commands.createCommand(command, context);
+            final TenantId generatedTenantId = TenantId.newBuilder()
+                                                       .setValue(newUuid())
+                                                       .build();
+            final TestActorRequestFactory factory =
+                    TestActorRequestFactory.newInstance(userId, generatedTenantId);
+            final Command result = factory.createCommand(command, when);
             return result;
         }
 

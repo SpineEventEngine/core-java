@@ -25,9 +25,6 @@ import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.server.aggregate.AggregateStateRecord;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
@@ -54,6 +51,8 @@ import io.spine.test.aggregate.user.UserValidatingBuilder;
 import io.spine.time.Time;
 import io.spine.type.CommandClass;
 import io.spine.validate.ConstraintViolation;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -63,14 +62,9 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.aggregate.CommandTestDispatcher.dispatch;
+import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
@@ -78,6 +72,11 @@ import static io.spine.test.Given.aggregateOfClass;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newVersionWithNumber;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Alexander Litus
@@ -390,6 +389,7 @@ public class AggregateShould {
         final ProjectId id = aggregate.getId();
         final ImportEvents importCmd =
                 ImportEvents.newBuilder()
+                            .setProjectId(id)
                             .addEvent(event(projectCreated(id, projectName), 1))
                             .addEvent(event(taskAdded(id), 2))
                             .build();

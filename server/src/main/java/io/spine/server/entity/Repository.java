@@ -27,7 +27,6 @@ import com.google.protobuf.Message;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.storage.Storage;
 import io.spine.type.ClassName;
-import io.spine.util.Exceptions;
 import io.spine.base.Identifiers;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.KnownTypes;
@@ -40,9 +39,10 @@ import java.util.Iterator;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.base.Identifiers.idToString;
+import static io.spine.server.entity.Repository.GenericParameter.ENTITY;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
-import static io.spine.util.Reflection.getGenericParameterType;
 
 /**
  * Abstract base class for repositories.
@@ -123,7 +123,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         try {
             Identifiers.checkSupported(idClass);
         } catch (IllegalArgumentException e) {
-            throw Exceptions.illegalStateWithCauseOf(e);
+            throw illegalStateWithCauseOf(e);
         }
     }
 
@@ -232,8 +232,8 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      */
     public void initStorage(StorageFactory factory) {
         if (this.storage != null) {
-            throw Exceptions.newIllegalStateException("The repository %s already has storage %s.",
-                                                      this, this.storage);
+            throw newIllegalStateException("The repository %s already has storage %s.",
+                                           this, this.storage);
         }
 
         this.storage = createStorage(factory);
@@ -287,7 +287,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<Repository> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -305,14 +305,19 @@ public abstract class Repository<I, E extends Entity<I, ?>>
         public int getIndex() {
             return this.index;
         }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends Repository> cls) {
+            return Default.getArgument(this, cls);
+        }
     }
 
     private static class TypeInfo {
 
         private static <E extends Entity<I, ?>, I>
         Class<E> getEntityClass(Class<? extends Repository<I, E>> repositoryClass) {
-            final Class<E> result = getGenericParameterType(repositoryClass,
-                                                            GenericParameter.ENTITY.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by the declaration of this class.
+            final Class<E> result = (Class<E>)ENTITY.getArgumentIn(repositoryClass);
             return result;
         }
     }
@@ -345,7 +350,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
             final Optional<E> loaded = repository.find(id);
             if (!loaded.isPresent()) {
                 final String idStr = idToString(id);
-                throw Exceptions.newIllegalStateException("Unable to load entity with ID: %s", idStr);
+                throw newIllegalStateException("Unable to load entity with ID: %s", idStr);
             }
 
             final E entity = loaded.get();
@@ -354,7 +359,7 @@ public abstract class Repository<I, E extends Entity<I, ?>>
 
         @Override
         public void remove() {
-            throw Exceptions.unsupported();
+            throw unsupported();
         }
     }
 }

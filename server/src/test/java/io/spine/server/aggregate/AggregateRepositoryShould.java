@@ -24,11 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.internal.matchers.GreaterThan;
-import io.spine.server.aggregate.AggregateStateRecord;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
@@ -49,10 +44,18 @@ import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.type.CommandClass;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.internal.matchers.GreaterThan;
 
 import java.util.Iterator;
 import java.util.Set;
 
+import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
+import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.validate.Validate.isDefault;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -65,10 +68,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static io.spine.server.aggregate.CommandTestDispatcher.dispatch;
-import static io.spine.test.Tests.newTenantUuid;
-import static io.spine.validate.Validate.isDefault;
-import static io.spine.validate.Validate.isNotDefault;
 
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass", "ConstantConditions"})
 public class AggregateRepositoryShould {

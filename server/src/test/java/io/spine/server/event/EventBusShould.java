@@ -28,7 +28,7 @@ import org.junit.Test;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;

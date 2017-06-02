@@ -28,13 +28,13 @@ import io.spine.reflect.GenericTypeIndex;
 import java.lang.reflect.Method;
 
 import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
-import static io.spine.util.Reflection.getGenericParameterType;
+import static io.spine.validate.ValidatingBuilder.GenericParameter.MESSAGE;
 
 /**
  * An interface for all validating builders.
  *
- * <p>Validating builder is used to validate messages according
- * to the business rules during the {@code Message} creation.
+ * <p>Validating builder is used to validate messages according to their Protobuf definition
+ * during the {@code Message} creation.
  *
  * <p>Non-abstract implementations must declare {@code public static TYPE newBuilder()} method,
  * returning an instance of the implementation class.
@@ -44,10 +44,11 @@ import static io.spine.util.Reflection.getGenericParameterType;
  * @author Illia Shepilov
  * @author Alex Tymchenko
  */
+@Deprecated //Due to renaming of package to 'io.spine'.
 public interface ValidatingBuilder<T extends Message, B extends Message.Builder> {
 
     /**
-     * Validates the field according to the protocol buffer message declaration.
+     * Validates the field according to the Protobuf message declaration.
      *
      * @param descriptor the {@code FieldDescriptor} of the field
      * @param fieldValue the value of the field
@@ -107,7 +108,7 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
     /**
      * Enumeration of generic type parameters of this interface.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<ValidatingBuilder> {
 
         /**
          * The index of the declaration of the generic parameter type {@code <T>}
@@ -131,6 +132,11 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
         public int getIndex() {
             return this.index;
         }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends ValidatingBuilder> cls) {
+            return Default.getArgument(this, cls);
+        }
     }
 
     /**
@@ -151,9 +157,8 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
          */
         public static <T extends Message> Class<T> getMessageClass(
                 Class<? extends ValidatingBuilder> builderClass) {
-            final Class<T> result =
-                    getGenericParameterType(builderClass,
-                                            GenericParameter.MESSAGE.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by the class declaration.
+            final Class<T> result = (Class<T>)MESSAGE.getArgumentIn(builderClass);
             return result;
         }
 

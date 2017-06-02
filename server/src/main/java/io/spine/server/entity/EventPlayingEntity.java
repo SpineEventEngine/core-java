@@ -24,10 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
-import io.spine.base.Events;
 import io.spine.base.Version;
 import io.spine.reflect.GenericTypeIndex;
-import io.spine.util.Reflection;
 import org.spine3.validate.ValidatingBuilder;
 import org.spine3.validate.ValidatingBuilders;
 
@@ -35,6 +33,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.base.Events.getMessage;
 import static io.spine.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
 
 /**
@@ -123,7 +122,7 @@ public abstract class EventPlayingEntity <I,
      */
     @VisibleForTesting
     boolean isTransactionInProgress() {
-        final boolean result = this.transaction != null && this.transaction.isActive();
+        final boolean result = transaction != null && transaction.isActive();
         return result;
     }
 
@@ -142,7 +141,7 @@ public abstract class EventPlayingEntity <I,
      */
     protected void play(Iterable<Event> events) {
         for (Event event : events) {
-            final Message message = Events.getMessage(event);
+            final Message message = getMessage(event);
             final EventContext context = event.getContext();
 
             tx().apply(message, context);
@@ -258,7 +257,7 @@ public abstract class EventPlayingEntity <I,
     /**
      * Enumeration of generic type parameters of this class.
      */
-    enum GenericParameter implements GenericTypeIndex {
+    enum GenericParameter implements GenericTypeIndex<EventPlayingEntity> {
 
         /** The index of the generic type {@code <I>}. */
         ID(0),
@@ -278,6 +277,11 @@ public abstract class EventPlayingEntity <I,
         @Override
         public int getIndex() {
             return this.index;
+        }
+
+        @Override
+        public Class<?> getArgumentIn(Class<? extends EventPlayingEntity> cls) {
+            return Default.getArgument(this, cls);
         }
     }
 
@@ -299,9 +303,8 @@ public abstract class EventPlayingEntity <I,
                         B extends ValidatingBuilder<S, ? extends Message.Builder>>
         Class<B> getBuilderClass(Class<? extends EventPlayingEntity<I, S, B>> entityClass) {
             checkNotNull(entityClass);
-
-            final Class<B> builderClass = Reflection.getGenericParameterType(entityClass,
-                                                                             STATE_BUILDER.getIndex());
+            @SuppressWarnings("unchecked") // The type is ensured by this class declaration.
+            final Class<B> builderClass = (Class<B>)STATE_BUILDER.getArgumentIn(entityClass);
             return builderClass;
         }
     }

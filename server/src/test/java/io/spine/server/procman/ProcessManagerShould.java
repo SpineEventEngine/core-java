@@ -25,42 +25,47 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Event;
-import io.spine.base.Events;
-import io.spine.base.Subscribe;
-import io.spine.protobuf.Wrapper;
-import io.spine.server.commandstore.CommandStore;
-import io.spine.server.tenant.TenantAwareTest;
-import io.spine.server.tenant.TenantIndex;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.procman.command.CreateProject;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.ProjectStarted;
-import io.spine.type.CommandClass;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.Event;
 import io.spine.base.EventContext;
+import io.spine.base.Events;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.Wrapper;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.commandstore.CommandStore;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.tenant.TenantAwareTest;
+import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Given;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.AddTask;
+import io.spine.test.procman.command.CreateProject;
 import io.spine.test.procman.command.StartProject;
+import io.spine.test.procman.event.ProjectCreated;
+import io.spine.test.procman.event.ProjectStarted;
 import io.spine.test.procman.event.TaskAdded;
 import io.spine.testdata.Sample;
+import io.spine.type.CommandClass;
 import io.spine.type.EventClass;
 import io.spine.validate.AnyValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.base.Commands.getMessage;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.procman.ProcManTransaction.start;
+import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -70,10 +75,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static io.spine.base.Commands.getMessage;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.procman.ProcManTransaction.start;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
@@ -124,9 +125,7 @@ public class ProcessManagerShould {
     }
 
     private void testDispatchEvent(Message event) {
-        final ProcManTransaction<?, ?, ?> tx = start(processManager);
-        processManager.dispatchEvent(event, EVENT_CONTEXT);
-        tx.commit();
+        dispatch(processManager, event, EVENT_CONTEXT);
         assertEquals(AnyPacker.pack(event), processManager.getState());
     }
 
@@ -221,7 +220,7 @@ public class ProcessManagerShould {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEvent = StringValue.getDefaultInstance();
-        processManager.dispatchEvent(unknownEvent, EVENT_CONTEXT);
+        dispatch(processManager, unknownEvent, EVENT_CONTEXT);
     }
 
     @Test

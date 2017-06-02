@@ -22,17 +22,45 @@ package io.spine.client;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.client.ActorRequestFactory;
 import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.test.TimeTests;
 import io.spine.time.Timestamps2;
 import io.spine.users.TenantId;
+import io.spine.base.ActorContext;
+import io.spine.base.CommandContext;
+import io.spine.test.commands.RequiredFieldCommand;
+import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneOffsets;
+import io.spine.users.UserId;
+import io.spine.validate.ConstraintViolationThrowable;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Tests.newUserUuid;
 
 public class CommandFactoryShould extends ActorRequestFactoryShould {
+
+    @Test
+    public void create_command_context() {
+        final TenantId tenantId = newTenantUuid();
+        final UserId userId = newUserUuid();
+        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
+        final int targetVersion = 100500;
+
+        final CommandContext commandContext = CommandFactory.createContext(tenantId,
+                                                                           userId,
+                                                                           zoneOffset,
+                                                                           targetVersion);
+
+        final ActorContext actorContext = commandContext.getActorContext();
+
+        assertEquals(tenantId, actorContext.getTenantId());
+        assertEquals(userId, actorContext.getActor());
+        assertEquals(zoneOffset, actorContext.getZoneOffset());
+        assertEquals(targetVersion, commandContext.getTargetVersion());
+    }
 
     @Test
     public void create_new_instances_with_current_time() {
@@ -75,5 +103,17 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
         assertEquals(tenantId, command.getContext()
                                       .getActorContext()
                                       .getTenantId());
+    }
+
+    @Test(expected = ConstraintViolationThrowable.class)
+    public void throw_ConstraintViolation_exception_once_passed_invalid_Message() {
+        final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+        factory().command().create(invalidCommand);
+    }
+
+    @Test(expected = ConstraintViolationThrowable.class)
+    public void throw_ConstraintViolation_exception_once_passed_invalid_Message_with_version() {
+        final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
+        factory().command().create(invalidCommand, 42);
     }
 }

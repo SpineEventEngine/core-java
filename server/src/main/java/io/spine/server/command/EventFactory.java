@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.base.Version;
+import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Messages;
 import io.spine.protobuf.Wrapper;
 import io.spine.base.EventContext;
@@ -35,14 +36,17 @@ import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.server.command.EventIdSequence;
 import io.spine.server.integration.IntegrationEventContext;
+import io.spine.validate.ConstraintViolationThrowable;
 
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.Messages.*;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.isNotDefault;
+import static org.spine3.validate.Validate.checkValid;
 
 /**
  * Produces events in response to a command.
@@ -65,15 +69,43 @@ public class EventFactory {
     /**
      * Creates an event for the passed event message.
      *
+     * <p>The message passed is validated according to the constraints set in its Protobuf
+     * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
+     * exception} is thrown.
+     *
+     * <p>In the message is an instance of {@code Any}, it is unpacked for validation.
+     *
+     * <p>It is recommended to use a corresponding {@linkplain org.spine3.validate.ValidatingBuilder
+     * ValidatingBuilder} implementation to create a message.
+     *
      * @param messageOrAny the message of the event or the message packed into {@code Any}
      * @param version      the version of the entity which produces the event
+     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
+     *                                      set for it in its Protobuf definition
      */
-    public Event createEvent(Message messageOrAny, @Nullable Version version) {
+    public Event createEvent(Message messageOrAny,
+                             @Nullable Version version) throws ConstraintViolationThrowable {
         checkNotNull(messageOrAny);
+        validate(messageOrAny);     // we must validate it now before emitting the next ID.
+
         final EventId eventId = idSequence.next();
         final EventContext context = createContext(producerId, commandContext, version);
         final Event result = createEvent(eventId, messageOrAny, context);
         return result;
+    }
+
+    /**
+     * Validates an event message according to their Protobuf definition.
+     *
+     * <p>If the given {@code messageOrAny} is an instance of {@code Any}, it is unpacked
+     * for the validation.
+     */
+    private static void validate(Message messageOrAny) throws ConstraintViolationThrowable {
+        final Message toValidate;
+        toValidate = messageOrAny instanceof Any
+                ? AnyPacker.unpack((Any) messageOrAny)
+                : messageOrAny;
+        checkValid(toValidate);
     }
 
     /**
@@ -87,7 +119,7 @@ public class EventFactory {
     private static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
-        final Any packed = Messages.toAny(messageOrAny);
+        final Any packed = toAny(messageOrAny);
         final Event result = Event.newBuilder()
                                   .setId(id)
                                   .setMessage(packed)
@@ -157,7 +189,7 @@ public class EventFactory {
          * Sets the ID of an entity which is producing the events wrapped into {@code Any}.
          */
         public Builder setProducerId(Message messageOrAny) {
-            this.producerId = Messages.toAny(checkNotNull(messageOrAny));
+            this.producerId = toAny(checkNotNull(messageOrAny));
             return this;
         }
 

@@ -30,8 +30,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.test.TestActorRequestFactory;
@@ -40,22 +38,15 @@ import io.spine.test.commands.TestCommand;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
 import io.spine.users.UserId;
+import org.junit.Test;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
-import static io.spine.base.Commands.createContext;
-import static io.spine.base.Commands.newContextBasedOn;
 import static io.spine.base.Commands.sameActorAndTenant;
 import static io.spine.base.Identifiers.idToString;
-import static io.spine.base.Identifiers.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Tests.newUserUuid;
@@ -64,6 +55,9 @@ import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class CommandsShould {
 
@@ -72,7 +66,6 @@ public class CommandsShould {
 
     private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
             CommandsShould.class);
-    private final StringValue stringValue = Wrapper.forString(newUuid());
 
     @Test
     public void have_private_ctor() {
@@ -94,35 +87,6 @@ public class CommandsShould {
         Commands.sort(commandsToSort);
 
         assertEquals(sortedCommands, commandsToSort);
-    }
-
-    @Test
-    public void create_command_context() {
-        final TenantId tenantId = newTenantUuid();
-        final UserId userId = newUserUuid();
-        final ZoneOffset zoneOffset = ZoneOffsets.ofHours(-3);
-        final int targetVersion = 100500;
-
-        final CommandContext commandContext = createContext(tenantId,
-                                                            userId,
-                                                            zoneOffset,
-                                                            targetVersion);
-
-        final ActorContext actorContext = commandContext.getActorContext();
-
-        assertEquals(tenantId, actorContext.getTenantId());
-        assertEquals(userId, actorContext.getActor());
-        assertEquals(zoneOffset, actorContext.getZoneOffset());
-        assertEquals(targetVersion, commandContext.getTargetVersion());
-    }
-
-    @Test
-    public void create_new_context_based_on_passed() {
-        final CommandContext commandContext = createCommandContext();
-        final CommandContext newContext = newContextBasedOn(commandContext);
-
-        assertNotEquals(commandContext.getActorContext().getTimestamp(),
-                        newContext.getActorContext().getTimestamp());
     }
 
     @Test
@@ -166,29 +130,10 @@ public class CommandsShould {
     }
 
     @Test
-    public void create_command() {
-        final Command command = Commands.createCommand(stringValue,
-                                                       CommandContext.getDefaultInstance());
-
-        assertEquals(stringValue, Commands.getMessage(command));
-    }
-
-    @Test
-    public void create_command_with_Any() {
-        final Any msg = AnyPacker.pack(stringValue);
-
-        final Command command = Commands.createCommand(msg, CommandContext.getDefaultInstance());
-
-        assertEquals(msg, command.getMessage());
-    }
-
-    @Test
     public void extract_message_from_command() {
         final StringValue message = Wrapper.forString("extract_message_from_command");
 
-        final Command command = Commands.createCommand(message,
-                                                       CommandContext.getDefaultInstance());
-
+        final Command command = requestFactory.createCommand(message);
         assertEquals(message, Commands.getMessage(command));
     }
 
@@ -243,24 +188,24 @@ public class CommandsShould {
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(10));
-        final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
-
+        final Command cmd = requestFactory.command().createBasedOnContext(
+                                                             StringValue.getDefaultInstance(),
+                                                             context);
         assertTrue(Commands.isScheduled(cmd));
     }
 
     @Test
     public void when_no_scheduling_options_then_consider_command_not_scheduled() {
-        final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(),
-                                                   CommandContext.getDefaultInstance());
-
+        final Command cmd = requestFactory.createCommand(StringValue.getDefaultInstance());
         assertFalse(Commands.isScheduled(cmd));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
         final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
-        final Command cmd = Commands.createCommand(StringValue.getDefaultInstance(), context);
-
+        final Command cmd = requestFactory.command()
+                                          .createBasedOnContext(StringValue.getDefaultInstance(),
+                                                                context);
         Commands.isScheduled(cmd);
     }
 

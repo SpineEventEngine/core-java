@@ -22,14 +22,16 @@ package io.spine.server.command;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Commands;
 import io.spine.client.ActorRequestFactory;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
+import io.spine.test.command.event.MandatoryFieldEvent;
+import org.spine3.validate.ConstraintViolationThrowable;
+import org.junit.Before;
+import org.junit.Test;
 
 import static io.spine.test.Tests.newUuidValue;
 
@@ -90,5 +92,15 @@ public class EventFactoryShould {
                     .setProducerId(producerId)
                     .setCommandContext(commandContext)
                     .build();
+    }
+
+    @Test(expected = ConstraintViolationThrowable.class)
+    public void validate_event_messages_before_creation() {
+        final EventFactory factory = EventFactory.newBuilder()
+                                               .setCommandContext(commandContext)
+                                               .setCommandId(commandId)
+                                               .setProducerId(producerId)
+                                               .build();
+        factory.createEvent(MandatoryFieldEvent.getDefaultInstance(), null);
     }
 }

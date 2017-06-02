@@ -22,14 +22,11 @@ package io.spine.base;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
+import io.spine.protobuf.Wrapper;
+import io.spine.test.TestActorRequestFactory;
+import io.spine.time.Time;
 import org.junit.Before;
 import org.junit.Test;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.base.Command;
-import io.spine.base.CommandAttribute;
-import io.spine.base.CommandContext;
-import io.spine.protobuf.Wrapper;
-import io.spine.time.Time;
 
 import static org.junit.Assert.assertEquals;
 

@@ -26,7 +26,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Response;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.type.FailureClass;
 import org.slf4j.Logger;
@@ -48,7 +48,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
- * @see FailureThrowable
+ * @see org.spine3.base.FailureThrowable
  * @see Subscribe Subscribe @Subscribe
  */
 public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,

@@ -19,21 +19,22 @@
  */
 package io.spine.server.failure;
 
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.server.failure.FailureBus;
+import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Commands;
 import io.spine.base.Failure;
 import io.spine.base.Failures;
-import io.spine.base.Subscribe;
 import io.spine.change.StringChange;
+import io.spine.client.CommandFactory;
 import io.spine.envelope.FailureEnvelope;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.failure.ProjectFailures;
 import io.spine.test.failure.ProjectId;
 import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.type.FailureClass;
+import io.spine.users.TenantId;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Map;
@@ -41,6 +42,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.base.Identifiers.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -50,7 +52,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static io.spine.base.Identifiers.newUuid;
 
 /**
  * @author Alex Tymchenko
@@ -301,8 +302,13 @@ public class FailureBusShould {
                                                                      .setId(projectId)
                                                                      .setNameUpdate(nameChange)
                                                                      .build();
-        final Command command = Commands.createCommand(updateProjectName,
-                                                       CommandContext.getDefaultInstance());
+
+        final TenantId generatedTenantId = TenantId.newBuilder()
+                                                   .setValue(newUuid())
+                                                   .build();
+        final TestActorRequestFactory factory =
+                TestActorRequestFactory.newInstance(FailureBusShould.class, generatedTenantId);
+        final Command command = factory.createCommand(updateProjectName);
         return Failures.createFailure(invalidProjectName, command);
     }
 
@@ -337,7 +343,10 @@ public class FailureBusShould {
         public void on(ProjectFailures.InvalidProjectName failure,
                        UpdateProjectName commandMessage,
                        CommandContext context) {
-            final Command command = Commands.createCommand(commandMessage, context);
+            final CommandFactory commandFactory =
+                    TestActorRequestFactory.newInstance(InvalidProjectNameSubscriber.class)
+                                           .command();
+            final Command command = commandFactory.createWithContext(commandMessage, context);
             this.failureHandled = Failures.createFailure(failure, command);
         }
 

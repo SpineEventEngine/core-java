@@ -26,19 +26,11 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Event;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.command.CreateProject;
-import io.spine.test.procman.event.ProjectCreated;
-import io.spine.test.procman.event.ProjectStarted;
-import io.spine.type.CommandClass;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.annotation.Subscribe;
+import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.Event;
 import io.spine.base.EventContext;
-import io.spine.base.Subscribe;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
@@ -52,24 +44,35 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
+import io.spine.test.TestActorRequestFactory;
+import io.spine.test.procman.Project;
+import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.ProjectValidatingBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.AddTask;
+import io.spine.test.procman.command.CreateProject;
 import io.spine.test.procman.command.StartProject;
+import io.spine.test.procman.event.ProjectCreated;
+import io.spine.test.procman.event.ProjectStarted;
 import io.spine.test.procman.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.testdata.TestBoundedContextFactory;
+import io.spine.type.CommandClass;
 import io.spine.type.EventClass;
+import io.spine.users.TenantId;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Commands.createCommand;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * @author Alexander Litus
@@ -77,8 +80,8 @@ import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould
         extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager,
-                                            ProjectId,
-        Project> {
+                                                    ProjectId,
+                                                    Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
@@ -220,8 +223,16 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchCommand(Message cmdMsg) throws InvocationTargetException {
-        final CommandEnvelope cmd = CommandEnvelope.of(createCommand(cmdMsg, CMD_CONTEXT));
-        repository.dispatchCommand(cmd);
+        final TenantId generatedTenantId = TenantId.newBuilder()
+                                                   .setValue(newUuid())
+                                                   .build();
+        final Command cmd =
+                TestActorRequestFactory.newInstance(ProcessManagerRepositoryShould.class,
+                                                    generatedTenantId)
+                                       .command()
+                                       .create(cmdMsg);
+
+        repository.dispatchCommand(CommandEnvelope.of(cmd));
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
@@ -238,10 +249,9 @@ public class ProcessManagerRepositoryShould
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_command() throws InvocationTargetException {
-        final Int32Value unknownCommand = Int32Value.getDefaultInstance();
-        final CommandEnvelope request =
-                CommandEnvelope.of(createCommand(unknownCommand,
-                                                 CommandContext.getDefaultInstance()));
+        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        final Command unknownCommand = factory.createCommand(Int32Value.getDefaultInstance());
+        final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
         repository.dispatchCommand(request);
     }
 

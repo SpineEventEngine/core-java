@@ -22,9 +22,7 @@ package io.spine.time;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.ExperimentalApi;
-import io.spine.time.Durations2;
-import io.spine.time.Interval;
+import io.spine.annotation.Experimental;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.abs;
@@ -36,7 +34,7 @@ import static io.spine.time.Timestamps2.isLaterThan;
  *
  * @author Alexander Litus
  */
-@ExperimentalApi
+@Experimental
 public final class Intervals {
 
     private Intervals() {

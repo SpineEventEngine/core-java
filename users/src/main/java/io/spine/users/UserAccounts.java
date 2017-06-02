@@ -22,7 +22,6 @@ package io.spine.users;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import io.spine.users.UserInfo;
 
 /**
  * Utility routines for working with {@link UserAccount}.

@@ -23,20 +23,19 @@ package io.spine.server.aggregate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.Verify;
-import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.TaskValidatingBuilder;
-import io.spine.test.aggregate.command.AddTask;
-import io.spine.test.aggregate.event.ProjectCreated;
 import org.junit.Before;
 import org.junit.Test;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.InvalidEntityStateException;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.ProjectId;
+import io.spine.test.aggregate.Task;
+import io.spine.test.aggregate.TaskValidatingBuilder;
+import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
+import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.test.aggregate.user.User;
 import io.spine.test.aggregate.user.UserValidatingBuilder;
@@ -51,7 +50,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 import static io.spine.base.Identifiers.newUuid;
-import static io.spine.server.aggregate.CommandTestDispatcher.dispatch;
+import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
+import static io.spine.server.aggregate.AggregatePart.create;
+import static io.spine.server.aggregate.AggregatePart.getConstructor;
 import static io.spine.test.Given.aggregatePartOfClass;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
@@ -101,7 +102,7 @@ public class AggregatePartShould {
     public void create_aggregate_part_entity() throws NoSuchMethodException {
         final Constructor<AnAggregatePart> constructor =
                 AnAggregatePart.class.getDeclaredConstructor(AnAggregateRoot.class);
-        final AggregatePart aggregatePart = AggregatePart.create(constructor, root);
+        final AggregatePart aggregatePart = create(constructor, root);
         assertNotNull(aggregatePart);
     }
 
@@ -114,7 +115,7 @@ public class AggregatePartShould {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_part_does_not_have_appropriate_constructor() {
-        AggregatePart.getConstructor(WrongAggregatePart.class);
+        getConstructor(WrongAggregatePart.class);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -122,13 +123,13 @@ public class AggregatePartShould {
             throws NoSuchMethodException {
         final Constructor<WrongAggregatePart> constructor =
                 WrongAggregatePart.class.getDeclaredConstructor();
-        AggregatePart.create(constructor, root);
+        create(constructor, root);
     }
 
     @Test
     public void obtain_aggregate_part_constructor() {
         final Constructor<AnAggregatePart> constructor =
-                AggregatePart.getConstructor(AnAggregatePart.class);
+                getConstructor(AnAggregatePart.class);
         assertNotNull(constructor);
     }
 
@@ -154,8 +155,8 @@ public class AggregatePartShould {
             final List<ConstraintViolation> violations = e.getError()
                                                           .getValidationError()
                                                           .getConstraintViolationList();
-            Verify.assertSize(user.getAllFields()
-                                  .size(), violations);
+            assertSize(user.getAllFields()
+                           .size(), violations);
         }
     }
 
@@ -190,7 +191,7 @@ public class AggregatePartShould {
     private void prepareAggregatePart() {
         final AddTask addTask =
                 ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                        .setProjectId(ProjectId.getDefaultInstance())
+                        .setProjectId(ProjectId.newBuilder().setId("agg-part-ID"))
                         .build();
         dispatch(taskPart, env(addTask));
     }
@@ -248,9 +249,9 @@ public class AggregatePartShould {
     }
 
     private static class TaskDescriptionPart extends AggregatePart<String,
-                                                                       StringValue,
-                                                                       StringValueValidatingBuilder,
-                                                                       AnAggregateRoot> {
+            StringValue,
+            StringValueValidatingBuilder,
+            AnAggregateRoot> {
 
         protected TaskDescriptionPart(AnAggregateRoot root) {
             super(root);

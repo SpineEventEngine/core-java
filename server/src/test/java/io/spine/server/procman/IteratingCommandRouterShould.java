@@ -33,6 +33,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -74,13 +75,18 @@ public class IteratingCommandRouterShould
 
     @Test
     public void produce_a_command_on_routeNext() throws Exception {
-        router().routeFirst();
+        final CommandRouted firstRouted = router().routeFirst();
 
         assertTrue(router().hasNext());
         
         final Command command = router().routeNext();
 
-        // Test that 2nd command message is in the next rounded command.
+        // Test that 2nd command message is in the next routed command.
         assertEquals(messages().get(1), Commands.getMessage(command));
+
+        // Verify that the context for the next routed command has been created, not just copied.
+        final Command firstCommand = firstRouted.getSource();
+        assertNotEquals(firstCommand.getContext().getActorContext().getTimestamp(),
+                        command.getContext().getActorContext().getTimestamp());
     }
 }

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.annotation;
+package io.spine.annotation;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -27,20 +27,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Annotates a program element (class, method, package etc.) which is internal to Spine,
- * not part of the public API, and should not be used by users of the framework.
+ * Signifies that a public API is subject to incompatible changes, or even removal,
+ * in a future release.
  *
- * <p>If you plan to implement an extension of the framework, which is going to be
- * wired into the framework, you may use the internal parts. Please consult with the Spine
- * team, as the internal APIs do not have the same stability API guarantee as public ones.
- *
- * <p>See {@link SPI} annotation if you plan to write an extension of the framework.
- *
- * @author Alexander Yevsyukov
- * @author Alexander Litus
- * @see SPI
+ * An API bearing this annotation is exempt from any compatibility guarantees made by its
+ * containing library. Note that the presence of this annotation implies nothing about the
+ * quality of the API in question, only the fact that it is not "API-frozen."
+ * It is generally safe for applications to depend on beta APIs, at the cost of some extra work
+ * during upgrades.
  */
-@Internal
 @Retention(RetentionPolicy.SOURCE)
 @Target({
         ElementType.ANNOTATION_TYPE,
@@ -50,5 +45,9 @@ import java.lang.annotation.Target;
         ElementType.PACKAGE,
         ElementType.TYPE})
 @Documented
-public @interface Internal {
+public @interface Beta {
+    /**
+     * Context information such as links to discussion thread, tracking issue etc.
+     */
+    String value() default "";
 }

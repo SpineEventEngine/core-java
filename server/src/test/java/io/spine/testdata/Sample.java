@@ -57,12 +57,6 @@ public class Sample {
     private Sample() {
     }
 
-    public static Command command(Message commandMessage) {
-        final CommandContext commandContext = TestCommandContextFactory.createCommandContext();
-        final Command command = Commands.createCommand(commandMessage, commandContext);
-        return command;
-    }
-
     /**
      * Generates a new stub {@link Message.Builder} with all the fields set to
      * {@link Random random} values.

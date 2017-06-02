@@ -24,9 +24,6 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
@@ -40,20 +37,19 @@ import io.spine.base.Failures;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.commandbus.ProcessingStatus;
-import io.spine.server.commandstore.Storage;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.type.TypeName;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.CommandStatus.ERROR;
 import static io.spine.base.CommandStatus.FAILURE;
 import static io.spine.base.CommandStatus.OK;
@@ -62,11 +58,16 @@ import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.Commands.generateId;
 import static io.spine.base.Identifiers.idToString;
 import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
 import static io.spine.server.commandstore.Records.toCommandIterator;
 import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus
@@ -153,8 +154,8 @@ public class StorageShould extends TenantAwareTest {
 
     @Test
     public void store_command_with_error_and_generate_ID_if_needed() {
-        final Command command = Commands.createCommand(Given.CommandMessage.createProjectMessage(),
-                                                       CommandContext.getDefaultInstance());
+        final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
+        final Command command = factory.createCommand(createProjectMessage());
         final Error error = newError();
 
         storage.store(command, error);

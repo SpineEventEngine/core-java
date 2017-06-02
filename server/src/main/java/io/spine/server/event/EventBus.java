@@ -31,7 +31,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.EventContext;
 import io.spine.base.Event;
 import io.spine.base.Response;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.envelope.EventEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;

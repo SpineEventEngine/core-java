@@ -36,7 +36,7 @@ import org.junit.Before;
 import org.junit.Test;
 import io.spine.base.EventContext;
 import io.spine.base.Events;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.TestEntityWithStringColumn;

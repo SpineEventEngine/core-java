@@ -26,7 +26,7 @@ import org.junit.Before;
 import org.junit.Test;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.server.projection.Projection;

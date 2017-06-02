@@ -47,7 +47,7 @@ import java.lang.annotation.Target;
         ElementType.PACKAGE,
         ElementType.TYPE})
 @Documented
-public @interface ExperimentalApi {
+public @interface Experimental {
     /**
      * Context information such as links to discussion thread, tracking issue etc.
      */

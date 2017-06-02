@@ -23,7 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.type.FailureClass;
 
 import javax.annotation.CheckReturnValue;
@@ -94,7 +94,7 @@ public class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
                                                             throws InvocationTargetException {
         throw new IllegalStateException("Failure handling method requires " +
                                         "at least two Message arguments. " +
-                                        "See Subscribe for more details");
+                                        "See io.spine.annotation.Subscribe for more details");
     }
 
     /**

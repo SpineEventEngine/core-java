@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
 import io.spine.base.Responses;
-import io.spine.base.Subscribe;
+import io.spine.annotation.Subscribe;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.entity.Repository;
@@ -73,6 +73,7 @@ import io.spine.test.bc.event.TaskAdded;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -203,8 +204,8 @@ public class BoundedContextShould {
 
         boundedContext.notify(event, observer);
 
-        Assert.assertEquals(Responses.ok(), observer.getResponseHandled());
-        Assert.assertEquals(subscriber.eventHandled, msg);
+        assertEquals(Responses.ok(), observer.getResponseHandled());
+        assertEquals(subscriber.eventHandled, msg);
     }
 
     @Test
