@@ -33,9 +33,9 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 import org.spine3.base.Version;
-import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.ColumnFilter;
 import org.spine3.client.ColumnFilters;
+import org.spine3.client.CompositeColumnFilter;
 import org.spine3.client.EntityFilters;
 import org.spine3.client.EntityId;
 import org.spine3.client.EntityIdFilter;
@@ -497,6 +497,60 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertEquals(fineRecord, actualRecord);
     }
 
+    @Test
+    public void exclude_non_active_records_from_entity_query() {
+        final I archivedId = newId();
+        final I deletedId = newId();
+        final I activeId = newId();
+
+        final TestCounterEntity<I> activeEntity = new TestCounterEntity<>(archivedId);
+        final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(deletedId);
+        archivedEntity.archive();
+        final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(activeId);
+        deletedEntity.delete();
+
+        final EntityRecord recordActive = newStorageRecord(archivedId, activeEntity.getState());
+        final EntityRecord recordArchived = newStorageRecord(deletedId, archivedEntity.getState())
+                .toBuilder()
+                .setLifecycleFlags(LifecycleFlags.newBuilder().setArchived(true))
+                .build();
+        final EntityRecord recordDeleted = newStorageRecord(activeId, deletedEntity.getState())
+                .toBuilder()
+                .setLifecycleFlags(LifecycleFlags.newBuilder().setDeleted(true))
+                .build();
+        final EntityRecordWithColumns activeRecord = create(recordActive, activeEntity);
+        final EntityRecordWithColumns archivedRecord = create(recordArchived, archivedEntity);
+        final EntityRecordWithColumns deletedRecord = create(recordDeleted, deletedEntity);
+
+        final RecordStorage<I> storage = getStorage();
+
+        // Fill the storage
+        storage.write(deletedId, archivedRecord);
+        storage.write(archivedId, activeRecord);
+        storage.write(activeId, deletedRecord);
+
+        // Prepare the query
+        final Any matchingIdPacked = TypeConverter.toAny(archivedId);
+        final EntityId entityId = EntityId.newBuilder()
+                                          .setId(matchingIdPacked)
+                                          .build();
+        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
+                                                      .addIds(entityId)
+                                                      .build();
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .setIdFilter(idFilter)
+                                                   .build();
+        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
+
+        // Perform the query
+        final Map<I, EntityRecord> readRecords = storage.readAll(query,
+                                                                 FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(1, readRecords);
+        final EntityRecord actualRecord = readRecords.get(archivedId);
+        assertEquals(recordActive, actualRecord);
+    }
+
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {
         return argThat(new ArgumentMatcher<EntityRecordWithColumns>() {
             @Override
@@ -559,6 +613,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                             .setStatus(status)
                                             .build();
             injectState(this, newState, getCounterVersion());
+        }
+
+        private void archive() {
+            setArchived(true);
+        }
+
+        private void delete() {
+            setDeleted(true);
         }
     }
 }
