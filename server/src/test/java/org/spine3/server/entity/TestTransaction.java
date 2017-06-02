@@ -58,4 +58,48 @@ public class TestTransaction {
 
         tx.commit();
     }
+
+    /**
+     * A hack allowing to archive an {@code EventPlayingEntity} instance by creating and committing
+     * a fake transaction.
+     *
+     * <p>To be used in tests only.
+     */
+    public static void injectArchived(EventPlayingEntity entity) {
+
+        @SuppressWarnings("unchecked")
+        final Transaction tx = new Transaction(entity) {
+
+            @Override
+            protected void dispatch(EventPlayingEntity entity,
+                                    Message eventMessage,
+                                    EventContext context) throws InvocationTargetException {
+                entity.setArchived(true);
+            }
+        };
+
+        tx.commit();
+    }
+
+    /**
+     * A hack allowing to mark an {@code EventPlayingEntity} instance deleted by creating and
+     * committing a fake transaction.
+     *
+     * <p>To be used in tests only.
+     */
+    public static void injectDeleted(EventPlayingEntity entity) {
+
+        @SuppressWarnings("unchecked")
+        final Transaction tx = new Transaction(entity) {
+
+            @Override
+            protected void dispatch(EventPlayingEntity entity,
+                                    Message eventMessage,
+                                    EventContext context) throws InvocationTargetException {
+                entity.setDeleted(true);
+            }
+        };
+
+        tx.commit();
+    }
 }

@@ -73,6 +73,8 @@ import static org.spine3.base.Identifiers.idToAny;
 import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.protobuf.AnyPacker.unpack;
+import static org.spine3.server.entity.TestTransaction.injectArchived;
+import static org.spine3.server.entity.TestTransaction.injectDeleted;
 import static org.spine3.server.entity.TestTransaction.injectState;
 import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
 import static org.spine3.test.Tests.archived;
@@ -509,12 +511,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(activeId);
         deletedEntity.delete();
 
-        final EntityRecord recordActive = newStorageRecord(archivedId, activeEntity.getState());
+        final EntityRecord recordActive = newStorageRecord(activeId, activeEntity.getState());
         final EntityRecord recordArchived = newStorageRecord(deletedId, archivedEntity.getState())
                 .toBuilder()
                 .setLifecycleFlags(LifecycleFlags.newBuilder().setArchived(true))
                 .build();
-        final EntityRecord recordDeleted = newStorageRecord(activeId, deletedEntity.getState())
+        final EntityRecord recordDeleted = newStorageRecord(archivedId, deletedEntity.getState())
                 .toBuilder()
                 .setLifecycleFlags(LifecycleFlags.newBuilder().setDeleted(true))
                 .build();
@@ -525,29 +527,19 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final RecordStorage<I> storage = getStorage();
 
         // Fill the storage
-        storage.write(deletedId, archivedRecord);
-        storage.write(archivedId, activeRecord);
-        storage.write(activeId, deletedRecord);
+        storage.write(archivedId, archivedRecord);
+        storage.write(activeId, activeRecord);
+        storage.write(deletedId, deletedRecord);
 
         // Prepare the query
-        final Any matchingIdPacked = TypeConverter.toAny(archivedId);
-        final EntityId entityId = EntityId.newBuilder()
-                                          .setId(matchingIdPacked)
-                                          .build();
-        final EntityIdFilter idFilter = EntityIdFilter.newBuilder()
-                                                      .addIds(entityId)
-                                                      .build();
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .setIdFilter(idFilter)
-                                                   .build();
-        final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
-
+        final EntityQuery<I> query = EntityQueries.from(EntityFilters.getDefaultInstance(),
+                                                        TestCounterEntity.class);
         // Perform the query
         final Map<I, EntityRecord> readRecords = storage.readAll(query,
                                                                  FieldMask.getDefaultInstance());
         // Check results
         assertSize(1, readRecords);
-        final EntityRecord actualRecord = readRecords.get(archivedId);
+        final EntityRecord actualRecord = readRecords.get(activeId);
         assertEquals(recordActive, actualRecord);
     }
 
@@ -616,11 +608,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
 
         private void archive() {
-            setArchived(true);
+            injectArchived(this);
         }
 
         private void delete() {
-            setDeleted(true);
+            injectDeleted(this);
         }
     }
 }
