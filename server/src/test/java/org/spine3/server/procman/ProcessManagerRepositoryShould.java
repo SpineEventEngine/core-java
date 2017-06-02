@@ -20,38 +20,32 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
-import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
-import org.spine3.annotation.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
+import org.spine3.envelope.EventEnvelope;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.command.Assign;
 import org.spine3.server.command.EventFactory;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.RecordBasedRepository;
 import org.spine3.server.entity.RecordBasedRepositoryShould;
-import org.spine3.server.entity.TestEntityWithStringColumn;
 import org.spine3.server.event.EventSubscriber;
-import org.spine3.server.storage.StorageFactory;
-import org.spine3.server.storage.StorageFactorySwitch;
+import org.spine3.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
+import org.spine3.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
 import org.spine3.test.EventTests;
 import org.spine3.test.Given;
 import org.spine3.test.TestActorRequestFactory;
 import org.spine3.test.procman.Project;
 import org.spine3.test.procman.ProjectId;
-import org.spine3.test.procman.ProjectValidatingBuilder;
-import org.spine3.test.procman.Task;
 import org.spine3.test.procman.command.AddTask;
 import org.spine3.test.procman.command.CreateProject;
 import org.spine3.test.procman.command.StartProject;
@@ -72,30 +66,19 @@ import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.testdata.TestCommandContextFactory.createCommandContext;
 
 /**
  * @author Alexander Litus
  */
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
 public class ProcessManagerRepositoryShould
-        extends RecordBasedRepositoryShould<ProcessManagerRepositoryShould.TestProcessManager,
+        extends RecordBasedRepositoryShould<TestProcessManager,
                                             ProjectId,
                                             Project> {
 
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
-    private static final CommandContext CMD_CONTEXT = createCommandContext();
-
     private BoundedContext boundedContext;
-    private TestProcessManagerRepository repository;
-
-    // Configuration of the test suite
-    //---------------------------------
-
-    private StorageFactory storageFactory() {
-        return StorageFactorySwitch.get(boundedContext.isMultitenant());
-    }
 
     @Override
     protected ProjectId createId(int value) {
@@ -107,9 +90,13 @@ public class ProcessManagerRepositoryShould
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
         boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
-        final TestProcessManagerRepository repo = new TestProcessManagerRepository(boundedContext);
-        repo.initStorage(storageFactory());
+        final TestProcessManagerRepository repo = new TestProcessManagerRepository();
+        boundedContext.register(repo);
         return repo;
+    }
+
+    ProcessManagerRepository<?, ?, ?> repository() {
+        return (ProcessManagerRepository<?, ?, ?>) repository;
     }
 
     @Override
@@ -118,8 +105,8 @@ public class ProcessManagerRepositoryShould
                                       .setId("123-id")
                                       .build();
         final TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
-                                    .withId(id)
-                                    .build();
+                                                                               .withId(id)
+                                                                               .build();
         return result;
     }
 
@@ -139,7 +126,9 @@ public class ProcessManagerRepositoryShould
     @Before
     public void setUp() {
         super.setUp();
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        boundedContext = BoundedContext.newBuilder()
+                                       .setMultitenant(true)
+                                       .build();
 
         boundedContext.getCommandBus()
                       .register(new CommandDispatcher() {
@@ -155,8 +144,6 @@ public class ProcessManagerRepositoryShould
                           }
                       });
 
-        repository = new TestProcessManagerRepository(boundedContext);
-        repository.initStorage(storageFactory());
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
@@ -191,7 +178,7 @@ public class ProcessManagerRepositoryShould
 
     private void testDispatchEvent(Message eventMessage) {
         final Event event = createEvent(eventMessage);
-        repository.dispatch(event);
+        repository().dispatch(EventEnvelope.of(event));
         assertTrue(TestProcessManager.processed(eventMessage));
     }
 
@@ -232,7 +219,7 @@ public class ProcessManagerRepositoryShould
                                        .command()
                                        .create(cmdMsg);
 
-        repository.dispatchCommand(CommandEnvelope.of(cmd));
+        repository().dispatchCommand(CommandEnvelope.of(cmd));
         assertTrue(TestProcessManager.processed(cmdMsg));
     }
 
@@ -252,19 +239,19 @@ public class ProcessManagerRepositoryShould
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
         final Command unknownCommand = factory.createCommand(Int32Value.getDefaultInstance());
         final CommandEnvelope request = CommandEnvelope.of(unknownCommand);
-        repository.dispatchCommand(request);
+        repository().dispatchCommand(request);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
         final Event event = createEvent(unknownEventMessage);
-        repository.dispatch(event);
+        repository().dispatch(EventEnvelope.of(event));
     }
 
     @Test
     public void return_command_classes() {
-        final Set<CommandClass> commandClasses = repository.getCommandClasses();
+        final Set<CommandClass> commandClasses = repository().getCommandClasses();
         assertTrue(commandClasses.contains(CommandClass.of(CreateProject.class)));
         assertTrue(commandClasses.contains(CommandClass.of(AddTask.class)));
         assertTrue(commandClasses.contains(CommandClass.of(StartProject.class)));
@@ -272,7 +259,7 @@ public class ProcessManagerRepositoryShould
 
     @Test
     public void return_event_classes() {
-        final Set<EventClass> eventClasses = repository.getMessageClasses();
+        final Set<EventClass> eventClasses = repository().getMessageClasses();
         assertTrue(eventClasses.contains(EventClass.of(ProjectCreated.class)));
         assertTrue(eventClasses.contains(EventClass.of(TaskAdded.class)));
         assertTrue(eventClasses.contains(EventClass.of(ProjectStarted.class)));
@@ -314,134 +301,4 @@ public class ProcessManagerRepositoryShould
                 .build();
     }
 
-    private static class TestProcessManagerRepository
-            extends ProcessManagerRepository<ProjectId, TestProcessManager, Project> {
-
-        private TestProcessManagerRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
-
-    // Marked as {@code public} to reuse for {@code CommandBus} dispatcher registration tests as well
-    // with no code duplication.
-    public static class TestProcessManager
-                  extends ProcessManager<ProjectId, Project, ProjectValidatingBuilder>
-                  implements TestEntityWithStringColumn {
-
-        /** The event message we store for inspecting in delivery tests. */
-        private static final Multimap<ProjectId, Message> messagesDelivered = HashMultimap.create();
-
-        @SuppressWarnings(
-                {"PublicConstructorInNonPublicClass",           /* A Process Manager constructor must be public
-                                                                 * by convention. It is used by reflection
-                                                                 * and is part of public API of process managers. */
-                        "WeakerAccess"})
-        public TestProcessManager(ProjectId id) {
-            super(id);
-        }
-
-        private void keep(Message commandOrEventMsg) {
-            messagesDelivered.put(getState().getId(), commandOrEventMsg);
-        }
-
-        private static boolean processed(Message eventMessage) {
-            final boolean result = messagesDelivered.containsValue(eventMessage);
-            return result;
-        }
-
-        static void clearMessageDeliveryHistory() {
-            messagesDelivered.clear();
-        }
-
-        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a projection subscriber
-                                                 can have two parameters. */
-        @Subscribe
-        public void on(ProjectCreated event, EventContext ignored) {
-            // Keep the event message for further inspection in tests.
-            keep(event);
-
-            handleProjectCreated(event.getProjectId());
-        }
-
-        private void handleProjectCreated(ProjectId projectId) {
-            final Project newState = getState().toBuilder()
-                                               .setId(projectId)
-                                               .setStatus(Project.Status.CREATED)
-                                               .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void on(TaskAdded event) {
-            keep(event);
-
-            final Task task = event.getTask();
-            handleTaskAdded(task);
-        }
-
-        private void handleTaskAdded(Task task) {
-            final Project newState = getState().toBuilder()
-                                               .addTask(task)
-                                               .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @Subscribe
-        public void on(ProjectStarted event) {
-            keep(event);
-
-            handleProjectStarted();
-        }
-
-        private void handleProjectStarted() {
-            final Project newState = getState().toBuilder()
-                                               .setStatus(Project.Status.STARTED)
-                                               .build();
-            getBuilder().mergeFrom(newState);
-        }
-
-        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
-                                                 can have two parameters. */
-        @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ignored) {
-            keep(command);
-
-            handleProjectCreated(command.getProjectId());
-            final ProjectCreated event = ((ProjectCreated.Builder) Sample.builderForType(ProjectCreated.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            return event;
-        }
-
-        @SuppressWarnings("UnusedParameters") /* The parameter left to show that a command subscriber
-                                                 can have two parameters. */
-        @Assign
-        TaskAdded handle(AddTask command, CommandContext ignored) {
-            keep(command);
-
-            handleTaskAdded(command.getTask());
-            final TaskAdded event = ((TaskAdded.Builder) Sample.builderForType(TaskAdded.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            return event;
-        }
-
-        @Assign
-        CommandRouted handle(StartProject command, CommandContext context) {
-            keep(command);
-
-            handleProjectStarted();
-            final Message addTask = ((AddTask.Builder) Sample.builderForType(AddTask.class))
-                    .setProjectId(command.getProjectId())
-                    .build();
-            return newRouterFor(command, context)
-                    .add(addTask)
-                    .routeAll();
-        }
-
-        @Override
-        public String getIdString() {
-            return getId().toString();
-        }
-    }
 }

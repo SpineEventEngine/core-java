@@ -145,7 +145,7 @@ public class VisibilityGuardShould {
 
     private static class ExposedRepository extends AggregateRepository<Long, Exposed> {
         private ExposedRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -158,7 +158,7 @@ public class VisibilityGuardShould {
 
     private static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
         private SubscribableRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -171,7 +171,7 @@ public class VisibilityGuardShould {
 
     private static class HiddenRepository extends AggregateRepository<String, Hidden> {
         private HiddenRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 }

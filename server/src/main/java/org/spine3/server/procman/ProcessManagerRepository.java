@@ -20,14 +20,12 @@
 
 package org.spine3.server.procman;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.envelope.EventEnvelope;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.command.CommandHandlingEntity;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.commandbus.CommandDispatcherDelegate;
@@ -60,9 +58,6 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
-    /** The {@code BoundedContext} in which this repository works. */
-    private final BoundedContext boundedContext;
-
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage =
             GetTargetIdFromCommand.newInstance();
 
@@ -73,14 +68,8 @@ public abstract class ProcessManagerRepository<I,
     private Set<EventClass> eventClasses;
 
     /** {@inheritDoc} */
-    protected ProcessManagerRepository(BoundedContext boundedContext) {
+    protected ProcessManagerRepository() {
         super(EventDispatchingRepository.<I>producerFromFirstMessageField());
-        this.boundedContext = boundedContext;
-    }
-
-    /** Returns the {@link BoundedContext} in which this repository works. */
-    private BoundedContext getBoundedContext() {
-        return boundedContext;
     }
 
     @Override
@@ -158,11 +147,6 @@ public abstract class ProcessManagerRepository<I,
         checkEventClass(event);
 
         super.dispatch(event);
-    }
-
-    @VisibleForTesting
-    void dispatch(Event event) throws IllegalArgumentException {
-        dispatch(EventEnvelope.of(event));
     }
 
     @Override

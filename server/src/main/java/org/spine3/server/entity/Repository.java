@@ -26,6 +26,7 @@ import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import org.spine3.base.Identifiers;
 import org.spine3.reflect.GenericTypeIndex;
+import org.spine3.server.BoundedContext;
 import org.spine3.server.storage.Storage;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.type.ClassName;
@@ -56,6 +57,15 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                            AutoCloseable {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
+
+    /**
+     * The {@link BoundedContext} to which the repository belongs.
+     *
+     * <p>This field is null when a repository is not {@linkplain
+     * BoundedContext#register(Repository) registered} yet.
+     */
+    @Nullable
+    private BoundedContext boundedContext;
 
     /**
      * The data storage for this repository.
@@ -93,6 +103,41 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Creates the repository.
      */
     protected Repository() {
+    }
+
+    /**
+     * Assigns a {@code BoundedContext} to this repository.
+     *
+     * <p>If the repository does not have a storage assigned prior to this call, the storage
+     * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
+     * associated with the passed {@code BoundedContext}.
+     */
+    public final void setBoundedContext(BoundedContext boundedContext) {
+        this.boundedContext = boundedContext;
+        if (!isStorageAssigned()) {
+            initStorage(boundedContext.getStorageFactory());
+        }
+    }
+
+    /**
+     * Verifies whether the registry is registered with a {@code BoundedContext}.
+     */
+    protected boolean isRegistered() {
+        return boundedContext != null;
+    }
+
+    /**
+     * Obtains {@code BoundedContext} to which this repository belongs.
+     *
+     * @return parent {@code BoundedContext}
+     * @throws IllegalStateException if the repository is not registered {@linkplain
+     * BoundedContext#register(Repository) registered} yet
+     */
+    protected final BoundedContext getBoundedContext() {
+        checkState(boundedContext != null,
+                   "The repository (class: %s) is not registered with a BoundedContext.",
+                   getClass().getName());
+        return boundedContext;
     }
 
     /** Returns the class of IDs used by this repository. */

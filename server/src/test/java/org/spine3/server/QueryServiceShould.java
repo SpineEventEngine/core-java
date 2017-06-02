@@ -24,9 +24,9 @@ import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.EventContext;
 import org.spine3.base.Responses;
-import org.spine3.annotation.Subscribe;
 import org.spine3.client.Query;
 import org.spine3.client.QueryResponse;
 import org.spine3.server.projection.Projection;
@@ -179,7 +179,7 @@ public class QueryServiceShould {
             extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
 
         private ProjectDetailsRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 

@@ -190,6 +190,13 @@ public final class BoundedContext
     }
 
     /**
+     * Obtains {@link StorageFactory} associated with this {@code BoundedContext}.
+     */
+    public StorageFactory getStorageFactory() {
+        return storageFactory.get();
+    }
+
+    /**
      * @return {@code true} if the bounded context serves many organizations
      */
     @CheckReturnValue
@@ -225,7 +232,8 @@ public final class BoundedContext
     @SuppressWarnings("ChainOfInstanceofChecks")
         // OK here since ways of registering are way too different
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
-        checkStorageAssigned(repository);
+        checkNotNull(repository);
+        repository.setBoundedContext(this);
         guard.register(repository);
 
         if (repository instanceof CommandDispatcher) {
@@ -242,12 +250,6 @@ public final class BoundedContext
 
         if (managesVersionableEntities(repository)) {
             stand.registerTypeSupplier(cast(repository));
-        }
-    }
-
-    private void checkStorageAssigned(Repository repository) {
-        if (!repository.isStorageAssigned()) {
-            repository.initStorage(storageFactory.get());
         }
     }
 

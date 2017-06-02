@@ -23,13 +23,13 @@ package org.spine3.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Enrichment;
 import org.spine3.base.Event;
 import org.spine3.base.EventContext;
 import org.spine3.base.Identifiers;
-import org.spine3.annotation.Subscribe;
 import org.spine3.base.Version;
 import org.spine3.protobuf.Wrapper;
 import org.spine3.server.BoundedContext;
@@ -126,7 +126,7 @@ class Given {
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         StandTestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
             addIdSetFunction(ProjectCreated.class,
                              new IdSetEventFunction<ProjectId, ProjectCreated>() {
                                  @Override
@@ -149,7 +149,7 @@ class Given {
          * @param boundedContext the bounded context to which this repository belongs
          */
         StandTestAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 

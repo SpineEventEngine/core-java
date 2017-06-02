@@ -20,57 +20,37 @@
 
 package org.spine3.server.bc;
 
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
-import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.annotation.Subscribe;
-import org.spine3.base.CommandContext;
-import org.spine3.base.EventContext;
 import org.spine3.base.Response;
 import org.spine3.option.EntityOption;
 import org.spine3.protobuf.AnyPacker;
 import org.spine3.server.BoundedContext;
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateRepository;
-import org.spine3.server.aggregate.Apply;
-import org.spine3.server.command.Assign;
+import org.spine3.server.bc.given.BoundedContextTestEnv;
+import org.spine3.server.bc.given.BoundedContextTestEnv.AnotherProjectAggregateRepository;
+import org.spine3.server.bc.given.BoundedContextTestEnv.ProjectAggregateRepository;
+import org.spine3.server.bc.given.BoundedContextTestEnv.ProjectPmRepo;
+import org.spine3.server.bc.given.BoundedContextTestEnv.ProjectReportRepository;
+import org.spine3.server.bc.given.BoundedContextTestEnv.TestEventSubscriber;
+import org.spine3.server.bc.given.Given;
 import org.spine3.server.commandbus.CommandBus;
 import org.spine3.server.entity.Repository;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.event.EventStore;
-import org.spine3.server.event.EventSubscriber;
 import org.spine3.server.integration.IntegrationEvent;
-import org.spine3.server.procman.CommandRouted;
-import org.spine3.server.procman.ProcessManager;
-import org.spine3.server.procman.ProcessManagerRepository;
-import org.spine3.server.projection.Projection;
-import org.spine3.server.projection.ProjectionRepository;
 import org.spine3.server.stand.Stand;
 import org.spine3.server.storage.StorageFactory;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.Spy;
 import org.spine3.test.bc.Project;
-import org.spine3.test.bc.ProjectId;
-import org.spine3.test.bc.ProjectValidatingBuilder;
 import org.spine3.test.bc.SecretProject;
-import org.spine3.test.bc.SecretProjectValidatingBuilder;
-import org.spine3.test.bc.command.AddTask;
-import org.spine3.test.bc.command.CreateProject;
-import org.spine3.test.bc.command.StartProject;
 import org.spine3.test.bc.event.ProjectCreated;
-import org.spine3.test.bc.event.ProjectStarted;
-import org.spine3.test.bc.event.TaskAdded;
 import org.spine3.testdata.TestBoundedContextFactory.MultiTenant;
-import org.spine3.validate.EmptyValidatingBuilder;
 
-import java.util.List;
-
-import static com.google.common.collect.Lists.newArrayList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -122,7 +102,7 @@ public class BoundedContextShould {
 
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
-        final ProjectAggregateRepository repo = new ProjectAggregateRepository(boundedContext);
+        final ProjectAggregateRepository repo = new ProjectAggregateRepository();
         repo.initStorage(storageFactory);
         boundedContext.register(repo);
         boundedContext.getEventBus().register(subscriber);
@@ -147,7 +127,7 @@ public class BoundedContextShould {
     @Test
     public void register_AggregateRepository() {
         final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository(boundedContext);
+                new ProjectAggregateRepository();
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
@@ -155,41 +135,25 @@ public class BoundedContextShould {
     @Test(expected = IllegalStateException.class)
     public void not_allow_two_aggregate_repositories_with_aggregates_with_the_same_state() {
         final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository(boundedContext);
+                new ProjectAggregateRepository();
         repository.initStorage(storageFactory);
         boundedContext.register(repository);
 
         final AnotherProjectAggregateRepository anotherRepo =
-                new AnotherProjectAggregateRepository(boundedContext);
+                new AnotherProjectAggregateRepository();
         repository.initStorage(storageFactory);
         boundedContext.register(anotherRepo);
     }
 
-    private static class AnotherProjectAggregate
-                   extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
-        protected AnotherProjectAggregate(ProjectId id) {
-            super(id);
-        }
-    }
-
-    private static class AnotherProjectAggregateRepository
-                   extends AggregateRepository<ProjectId, AnotherProjectAggregate> {
-        private AnotherProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
-
     @Test
     public void register_ProcessManagerRepository() {
-        final ProjectPmRepo repository = new ProjectPmRepo(boundedContext);
-        repository.initStorage(storageFactory);
+        final ProjectPmRepo repository = new ProjectPmRepo();
         boundedContext.register(repository);
     }
 
     @Test
     public void register_ProjectionRepository() {
-        final ProjectReportRepository repository = new ProjectReportRepository(boundedContext);
-        repository.initStorage(storageFactory);
+        final ProjectReportRepository repository = new ProjectReportRepository();
         boundedContext.register(repository);
     }
 
@@ -203,7 +167,7 @@ public class BoundedContextShould {
         boundedContext.notify(event, observer);
 
         assertEquals(ok(), observer.getResponseHandled());
-        assertEquals(subscriber.eventHandled, msg);
+        assertEquals(subscriber.getHandledEvent(), msg);
     }
 
     @Test
@@ -222,7 +186,7 @@ public class BoundedContextShould {
 
         boundedContext.notify(event, new TestResponseObserver());
 
-        assertNull(sub.eventHandled);
+        assertNull(sub.getHandledEvent());
     }
 
     @Test
@@ -236,7 +200,7 @@ public class BoundedContextShould {
     @Test
     public void assign_storage_during_registration_if_repository_does_not_have_storage() {
         final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository(boundedContext);
+                new ProjectAggregateRepository();
         boundedContext.register(repository);
         assertTrue(repository.isStorageAssigned());
     }
@@ -244,7 +208,7 @@ public class BoundedContextShould {
     @Test
     public void not_change_storage_during_registration_if_a_repository_has_one() {
         final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository(boundedContext);
+                new ProjectAggregateRepository();
         repository.initStorage(storageFactory);
 
         final Repository spy = spy(repository);
@@ -281,7 +245,7 @@ public class BoundedContextShould {
         verify(stand, never()).registerTypeSupplier(any(Repository.class));
 
         final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository(boundedContext);
+                new ProjectAggregateRepository();
         boundedContext.register(repository);
         verify(stand).registerTypeSupplier(eq(repository));
     }
@@ -366,7 +330,7 @@ public class BoundedContextShould {
 
     @Test
     public void do_not_expose_invisible_aggregate() {
-        boundedContext.register(new SecretProjectRepository(boundedContext));
+        boundedContext.register(new BoundedContextTestEnv.SecretProjectRepository());
 
         assertFalse(boundedContext.getAggregateRepository(SecretProject.class)
                                   .isPresent());
@@ -389,167 +353,8 @@ public class BoundedContextShould {
         public void onCompleted() {
         }
 
-        public Response getResponseHandled() {
+        private Response getResponseHandled() {
             return responseHandled;
-        }
-    }
-
-    @SuppressWarnings({"unused", "TypeMayBeWeakened"})
-    private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
-
-        private boolean isCreateProjectCommandHandled = false;
-        private boolean isAddTaskCommandHandled = false;
-        private boolean isStartProjectCommandHandled = false;
-
-        private boolean isProjectCreatedEventApplied = false;
-        private boolean isTaskAddedEventApplied = false;
-        private boolean isProjectStartedEventApplied = false;
-
-        private ProjectAggregate(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            isCreateProjectCommandHandled = true;
-            return Given.EventMessage.projectCreated(cmd.getProjectId());
-        }
-
-        @Assign
-        public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            isAddTaskCommandHandled = true;
-            return Given.EventMessage.taskAdded(cmd.getProjectId());
-        }
-
-        @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            isStartProjectCommandHandled = true;
-            final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
-            return newArrayList(message);
-        }
-
-        @Apply
-        private void event(ProjectCreated event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Project.Status.CREATED);
-
-            isProjectCreatedEventApplied = true;
-        }
-
-        @Apply
-        private void event(TaskAdded event) {
-            isTaskAddedEventApplied = true;
-        }
-
-        @Apply
-        private void event(ProjectStarted event) {
-            getBuilder()
-                    .setId(event.getProjectId())
-                    .setStatus(Project.Status.STARTED)
-                    .build();
-
-            isProjectStartedEventApplied = true;
-        }
-    }
-
-    private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
-        private ProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
-
-    @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
-    private static class TestEventSubscriber extends EventSubscriber {
-
-        private ProjectCreated eventHandled;
-
-        @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            this.eventHandled = event;
-        }
-
-        @Subscribe
-        public void on(TaskAdded event, EventContext context) {
-        }
-
-        @Subscribe
-        public void on(ProjectStarted event, EventContext context) {
-        }
-    }
-
-    private static class SecretProjectAggregate
-            extends Aggregate<String, SecretProject, SecretProjectValidatingBuilder> {
-        private SecretProjectAggregate(String id) {
-            super(id);
-        }
-
-        @Assign
-        public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            return Lists.newArrayList();
-        }
-    }
-
-    private static class SecretProjectRepository
-            extends AggregateRepository<String, SecretProjectAggregate> {
-        private SecretProjectRepository(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
-
-    private static class ProjectProcessManager
-            extends ProcessManager<ProjectId, Empty, EmptyValidatingBuilder> {
-
-        // a ProcessManager constructor must be public because it is used via reflection
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        public ProjectProcessManager(ProjectId id) {
-            super(id);
-        }
-
-        @Assign
-        @SuppressWarnings({"UnusedParameters", "unused"}) // OK for test method
-        public CommandRouted handle(CreateProject command, CommandContext ctx) {
-            return CommandRouted.getDefaultInstance();
-        }
-
-        @SuppressWarnings("UnusedParameters") // OK for test method
-        @Subscribe
-        public void on(ProjectCreated event, EventContext ctx) {
-            // Do nothing, just watch.
-        }
-    }
-
-    private static class ProjectPmRepo
-            extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
-
-        private ProjectPmRepo(BoundedContext boundedContext) {
-            super(boundedContext);
-        }
-    }
-
-    private static class ProjectReport
-            extends Projection<ProjectId, Empty, EmptyValidatingBuilder> {
-
-        @SuppressWarnings("PublicConstructorInNonPublicClass")
-        // Public constructor is a part of projection public API. It's called by a repository.
-        public ProjectReport(ProjectId id) {
-            super(id);
-        }
-
-        @SuppressWarnings("UnusedParameters") // OK for test method.
-        @Subscribe
-        public void on(ProjectCreated event, EventContext context) {
-            // Do nothing. We have the method so that there's one event class exposed
-            // by the repository.
-        }
-    }
-
-    private static class ProjectReportRepository
-            extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
-        protected ProjectReportRepository(BoundedContext boundedContext) {
-            super(boundedContext);
         }
     }
 }

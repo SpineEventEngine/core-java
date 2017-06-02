@@ -31,7 +31,7 @@ import org.spine3.server.command.Assign;
 import org.spine3.server.command.CommandHandler;
 import org.spine3.server.event.EventBus;
 import org.spine3.server.procman.ProcessManagerRepository;
-import org.spine3.server.procman.ProcessManagerRepositoryShould;
+import org.spine3.server.procman.given.ProcessManagerRepositoryTestEnv;
 import org.spine3.server.storage.StorageFactorySwitch;
 import org.spine3.test.command.AddTask;
 import org.spine3.test.command.CreateProject;
@@ -225,10 +225,10 @@ public class CommandDispatcherRegistryShould {
     //TODO:2017-02-11:alexander.yevsyukov: Fix inter-test dependency.
     private static class ProcessManagerRepoDispatcher
             extends ProcessManagerRepository<ProjectId,
-            ProcessManagerRepositoryShould.TestProcessManager, Project> {
+            ProcessManagerRepositoryTestEnv.TestProcessManager, Project> {
 
         protected ProcessManagerRepoDispatcher(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
 
         /**

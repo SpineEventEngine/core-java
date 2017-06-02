@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.bc;
+package org.spine3.server.bc.given;
 
 import com.google.protobuf.Message;
 import org.spine3.base.EventId;
@@ -34,11 +34,11 @@ import static org.spine3.base.Identifiers.newUuid;
 import static org.spine3.protobuf.AnyPacker.pack;
 import static org.spine3.time.Time.getCurrentTime;
 
-class Given {
+public class Given {
 
     private Given() {}
 
-    static class AggregateId {
+    public static class AggregateId {
 
         private AggregateId() {
         }
@@ -51,7 +51,7 @@ class Given {
         }
     }
 
-    static class EventMessage {
+    public static class EventMessage {
 
         private EventMessage() {
         }
@@ -75,7 +75,7 @@ class Given {
         }
     }
 
-    static class AnIntegrationEvent {
+    public static class AnIntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
         private static final String TEST_BC_NAME = "Test BC";

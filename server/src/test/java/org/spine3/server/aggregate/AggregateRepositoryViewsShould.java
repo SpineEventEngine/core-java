@@ -180,7 +180,7 @@ public class AggregateRepositoryViewsShould {
         };
 
         private SHRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
 
         /**

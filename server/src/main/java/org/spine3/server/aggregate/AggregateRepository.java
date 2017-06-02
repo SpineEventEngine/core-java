@@ -28,7 +28,6 @@ import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Event;
 import org.spine3.envelope.CommandEnvelope;
-import org.spine3.server.BoundedContext;
 import org.spine3.server.commandbus.CommandDispatcher;
 import org.spine3.server.entity.LifecycleFlags;
 import org.spine3.server.entity.Repository;
@@ -88,12 +87,6 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     /** The constructor for creating entity instances. */
     private Constructor<A> entityConstructor;
 
-    /** The EventBus to which we post events produced by aggregates. */
-    private final EventBus eventBus;
-
-    /** The Stand instance for sending updated aggregate states. */
-    private final Stand stand;
-
     /** The number of events to store between snapshots. */
     private int snapshotTrigger = DEFAULT_SNAPSHOT_TRIGGER;
 
@@ -102,14 +95,10 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
     private Set<CommandClass> messageClasses;
 
     /**
-     * Creates a new repository instance.
-     *
-     * @param boundedContext the bounded context to which this repository belongs
+     * Creates a new instance.
      */
-    protected AggregateRepository(BoundedContext boundedContext) {
+    protected AggregateRepository() {
         super();
-        this.eventBus = boundedContext.getEventBus();
-        this.stand = boundedContext.getStand();
     }
 
     /**
@@ -211,7 +200,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
                 final List<Event> events = aggregate.getUncommittedEvents();
 
                 store(aggregate);
-                stand.post(aggregate, command.getContext());
+                getStand().post(aggregate, command.getContext());
 
                 postEvents(events);
             }
@@ -225,7 +214,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     private void postEvents(Iterable<Event> events) {
         for (Event event : events) {
-            eventBus.post(event);
+            getEventBus().post(event);
         }
     }
 
@@ -367,6 +356,16 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
             throw new IllegalStateException("AggregateStateRecord instance should have either "
                                                     + "snapshot or non-empty event list.");
         }
+    }
+
+    /** The EventBus to which we post events produced by aggregates. */
+    private EventBus getEventBus() {
+        return getBoundedContext().getEventBus();
+    }
+
+    /** The Stand instance for sending updated aggregate states. */
+    private Stand getStand() {
+        return getBoundedContext().getStand();
     }
 
     private enum LogSingleton {

@@ -276,7 +276,7 @@ public class AggregatePartShould {
             extends AggregatePartRepository<String, TaskPart, AnAggregateRoot> {
 
         private TaskRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -284,7 +284,7 @@ public class AggregatePartShould {
             extends AggregatePartRepository<String, TaskDescriptionPart, AnAggregateRoot> {
 
         private TaskDescriptionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 }

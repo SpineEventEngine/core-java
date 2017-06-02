@@ -25,10 +25,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
+import org.spine3.annotation.Subscribe;
 import org.spine3.base.Command;
 import org.spine3.base.CommandContext;
 import org.spine3.base.Identifiers;
-import org.spine3.annotation.Subscribe;
 import org.spine3.envelope.CommandEnvelope;
 import org.spine3.server.BoundedContext;
 import org.spine3.server.command.Assign;
@@ -86,6 +86,7 @@ public class AggregateCommandEndpointShould {
         boundedContext.getEventBus().register(subscriber);
 
         repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
         repositorySpy = spy(repository);
     }
 
@@ -252,7 +253,7 @@ public class AggregateCommandEndpointShould {
     private static class ProjectAggregateRepository
         extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
             initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
     }

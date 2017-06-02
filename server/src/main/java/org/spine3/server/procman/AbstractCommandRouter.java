@@ -102,7 +102,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     /**
      * Adds {@code commandMessage} to be routed.
      */
-    protected T add(Message commandMessage) {
+    public T add(Message commandMessage) {
         queue.add(commandMessage);
         return getThis();
     }

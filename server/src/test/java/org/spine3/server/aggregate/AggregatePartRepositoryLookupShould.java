@@ -137,7 +137,7 @@ public class AggregatePartRepositoryLookupShould {
     private static class ProjectPartRepository
             extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
         private ProjectPartRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -181,7 +181,7 @@ public class AggregatePartRepositoryLookupShould {
     private static class TaskAggregateRepository extends AggregateRepository<TaskId,
                                                                              TaskAggregatePart> {
         private TaskAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 }
