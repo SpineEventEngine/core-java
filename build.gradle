@@ -35,12 +35,12 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
         
-        spineVersion = '0.9.14-SNAPSHOT'
+        spineVersion = '0.9.15-SNAPSHOT'
         
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.9.5-SNAPSHOT'
+        spineToolsVersion = '0.9.8-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.
@@ -54,15 +54,15 @@ buildscript {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
-        classpath group: 'org.spine3.tools', name: 'spine-model-compiler',
-                                             version: spineToolsVersion
+        classpath group: 'io.spine.tools', name: 'spine-model-compiler',
+                                           version: spineToolsVersion
         /* Uncomment the below statement if you want the dependency to be fetched on each build.
            Please note that offline builds will not be available then. */
                                              //, changing: true
 
-        classpath group: 'org.spine3.tools', name: 'spine-codestyle-checker',
-                                             version: spineToolsVersion
-        classpath group: 'org.spine3.tools', name: 'gcs-plugin', version: spineToolsVersion
+        classpath group: 'io.spine.tools', name: 'spine-codestyle-checker',
+                                           version: spineToolsVersion
+        classpath group: 'io.spine.tools', name: 'gcs-plugin', version: spineToolsVersion
     }
     configurations.all({
         resolutionStrategy.cacheChangingModulesFor(0, 'seconds')
@@ -74,7 +74,7 @@ allprojects {
     apply plugin: 'jacoco'
     apply plugin: 'idea'
 
-    group = 'org.spine3'
+    group = 'io.spine'
     version = spineVersion
 }
 
@@ -89,8 +89,8 @@ ext {
     jUnitVersion = '4.12'
     mockitoVersion = '2.+'
 
-    spineProtobufPluginId = 'org.spine3.tools.spine-model-compiler'
-    spineCodestyleCheckerId = 'org.spine3.tools.spine-codestyle-checker'
+    spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
+    spineCodestyleCheckerId = 'io.spine.tools.spine-codestyle-checker'
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
@@ -126,7 +126,7 @@ subprojects {
     apply plugin: 'com.google.protobuf'
     apply plugin: 'java'
 
-    apply plugin: 'org.spine3.tools.spine-codestyle-checker'
+    apply plugin: 'io.spine.tools.spine-codestyle-checker'
 
     // Verifies code style.
     // The parameters are same for any kind of verification:
@@ -136,7 +136,7 @@ subprojects {
     //              * "warn" - the violations are logged to the build report.
     //              * "error" - build will fail and its report will contain the violations.
     //
-    //      For more details please see org.spine3.tools.codestyle.CodestyleCheckerPlugin
+    //      For more details please see io.spine.tools.codestyle.CodestyleCheckerPlugin
     codestyleChecker {
 
         // Javadoc @link/@linkplain format checker.
@@ -316,7 +316,7 @@ apply from: "${rootDir}/scripts/jacoco.gradle"
 
 apply from: publishPlugin
 
-apply plugin: 'org.spine3.tools.gcs-plugin'
+apply plugin: 'io.spine.tools.gcs-plugin'
 
 cleanGCS {
     final Properties properties = new Properties()

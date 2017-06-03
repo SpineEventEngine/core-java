@@ -21,11 +21,11 @@ syntax = "proto3";
 
 package spine.ui;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "LanguageProto";
-option java_package = "org.spine3.ui";
+option java_package = "io.spine.ui";
 
 import "spine/options.proto";
 
