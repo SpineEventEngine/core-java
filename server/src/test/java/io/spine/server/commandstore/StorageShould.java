@@ -78,20 +78,20 @@ public class StorageShould extends TenantAwareTest {
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
 
-    private Storage storage;
+    private Repository repository;
 
     private CommandId id;
 
     @Before
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
-        storage = new Storage();
-        storage.initStorage(StorageFactorySwitch.get(true));
+        repository = new Repository();
+        repository.initStorage(StorageFactorySwitch.get(true));
     }
 
     @After
     public void tearDownCommandStorageTest() throws Exception {
-        storage.close();
+        repository.close();
         clearCurrentTenant();
     }
 
@@ -116,7 +116,7 @@ public class StorageShould extends TenantAwareTest {
      ****************************/
 
     private Optional<CommandRecord> read(CommandId commandId) {
-        final Optional<Entity> entity = storage.find(commandId);
+        final Optional<Entity> entity = repository.find(commandId);
         if (entity.isPresent()) {
             return Optional.of(entity.get()
                                      .getState());
@@ -130,7 +130,7 @@ public class StorageShould extends TenantAwareTest {
         final Command command = Given.Command.createProject();
         final CommandId commandId = command.getId();
 
-        storage.store(command);
+        repository.store(command);
         final CommandRecord record = read(commandId).get();
 
         checkRecord(record, command, RECEIVED);
@@ -143,7 +143,7 @@ public class StorageShould extends TenantAwareTest {
         final CommandId commandId = command.getId();
         final Error error = newError();
 
-        storage.store(command, error);
+        repository.store(command, error);
         final CommandRecord record = read(commandId).get();
 
         checkRecord(record, command, ERROR);
@@ -157,8 +157,8 @@ public class StorageShould extends TenantAwareTest {
         final Command command = factory.createCommand(createProjectMessage());
         final Error error = newError();
 
-        storage.store(command, error);
-        final List<CommandRecord> records = Lists.newArrayList(storage.iterator(ERROR));
+        repository.store(command, error);
+        final List<CommandRecord> records = Lists.newArrayList(repository.iterator(ERROR));
 
         assertEquals(1, records.size());
         final String commandIdStr = idToString(records.get(0)
@@ -173,7 +173,7 @@ public class StorageShould extends TenantAwareTest {
         final CommandId commandId = command.getId();
         final CommandStatus status = SCHEDULED;
 
-        storage.store(command, status);
+        repository.store(command, status);
         final CommandRecord record = read(commandId).get();
 
         checkRecord(record, command, status);
@@ -188,9 +188,9 @@ public class StorageShould extends TenantAwareTest {
 
         store(commands, status);
         // store an extra command with another status
-        storage.store(Given.Command.createProject(), ERROR);
+        repository.store(Given.Command.createProject(), ERROR);
 
-        final Iterator<CommandRecord> iterator = storage.iterator(status);
+        final Iterator<CommandRecord> iterator = repository.iterator(status);
         final List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
         assertEquals(commands.size(), actualCommands.size());
         for (Command cmd : actualCommands) {
@@ -207,7 +207,7 @@ public class StorageShould extends TenantAwareTest {
     public void set_ok_command_status() {
         givenNewRecord();
 
-        storage.setOkStatus(id);
+        repository.setOkStatus(id);
 
         final CommandRecord actual = read(id).get();
         assertEquals(OK, actual.getStatus()
@@ -220,7 +220,7 @@ public class StorageShould extends TenantAwareTest {
         givenNewRecord();
         final Error error = newError();
 
-        storage.updateStatus(id, error);
+        repository.updateStatus(id, error);
 
         final CommandRecord actual = read(id).get();
         assertEquals(ERROR, actual.getStatus().getCode());
@@ -233,7 +233,7 @@ public class StorageShould extends TenantAwareTest {
         givenNewRecord();
         final Failure failure = newFailure();
 
-        storage.updateStatus(id, failure);
+        repository.updateStatus(id, failure);
 
         final CommandRecord actual = read(id).get();
         assertEquals(FAILURE, actual.getStatus()
@@ -262,22 +262,22 @@ public class StorageShould extends TenantAwareTest {
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_store_null() {
-        storage.store(Tests.<Command>nullRef());
+        repository.store(Tests.<Command>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_OK_status_by_null_ID() {
-        storage.setOkStatus(Tests.<CommandId>nullRef());
+        repository.setOkStatus(Tests.<CommandId>nullRef());
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_error_status_by_null_ID() {
-        storage.updateStatus(Tests.<CommandId>nullRef(), defaultError);
+        repository.updateStatus(Tests.<CommandId>nullRef(), defaultError);
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_failure_status_by_null_ID() {
-        storage.updateStatus(Tests.<CommandId>nullRef(), defaultFailure);
+        repository.updateStatus(Tests.<CommandId>nullRef(), defaultFailure);
     }
 
     /*
@@ -286,54 +286,54 @@ public class StorageShould extends TenantAwareTest {
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() throws Exception {
-        storage.close();
-        storage.store(Given.Command.createProject());
+        repository.close();
+        repository.store(Given.Command.createProject());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() throws
                                                                                    Exception {
-        storage.close();
-        storage.store(Given.Command.createProject(), newError());
+        repository.close();
+        repository.store(Given.Command.createProject(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() throws
                                                                                     Exception {
-        storage.close();
-        storage.store(Given.Command.createProject(), OK);
+        repository.close();
+        repository.store(Given.Command.createProject(), OK);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_load_commands_by_status_from_closed_storage() throws
                                                                                         Exception {
-        storage.close();
-        storage.iterator(OK);
+        repository.close();
+        repository.iterator(OK);
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_set_OK_status_using_closed_storage() throws Exception {
-        storage.close();
-        storage.setOkStatus(generateId());
+        repository.close();
+        repository.setOkStatus(generateId());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_set_ERROR_status_using_closed_storage() throws Exception {
-        storage.close();
-        storage.updateStatus(generateId(), newError());
+        repository.close();
+        repository.updateStatus(generateId(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_set_FAILURE_status_using_closed_storage() throws
                                                                                     Exception {
-        storage.close();
-        storage.updateStatus(generateId(), newFailure());
+        repository.close();
+        repository.updateStatus(generateId(), newFailure());
     }
 
     @Test
     public void provide_null_accepting_record_retrieval_func() {
-        assertNull(Storage.getRecordFunc()
-                          .apply(null));
+        assertNull(Repository.getRecordFunc()
+                             .apply(null));
     }
 
     /*
@@ -342,14 +342,14 @@ public class StorageShould extends TenantAwareTest {
 
     private void store(Iterable<Command> commands, CommandStatus status) {
         for (Command cmd : commands) {
-            storage.store(cmd, status);
+            repository.store(cmd, status);
         }
     }
 
     private void givenNewRecord() {
         final CommandRecord record = newStorageRecord();
         id = record.getCommandId();
-        storage.store(record.getCommand());
+        repository.store(record.getCommand());
     }
 
     private static Error newError() {

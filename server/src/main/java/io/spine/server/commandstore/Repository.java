@@ -49,7 +49,7 @@ import static io.spine.base.CommandStatus.RECEIVED;
  *
  * @author Alexander Yevsyukov
  */
-class Storage extends DefaultRecordBasedRepository<CommandId, Entity, CommandRecord> {
+class Repository extends DefaultRecordBasedRepository<CommandId, Entity, CommandRecord> {
 
     /** The function to obtain a {@code CommandRecord} from {@code CommandEntity}. */
     private static final Function<Entity, CommandRecord> GET_RECORD =

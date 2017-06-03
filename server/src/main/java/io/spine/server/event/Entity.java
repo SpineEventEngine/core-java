@@ -36,7 +36,7 @@ import java.util.Comparator;
  * @author Alexander Yevsyukov
  */
 @Internal
-public class EventEntity extends AbstractEntity<EventId, Event> {
+class Entity extends AbstractEntity<EventId, Event> {
 
     public static final String CREATED_TIME_COLUMN = "created";
 
@@ -45,9 +45,9 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     /**
      * Compares event entities by timestamps of events.
      */
-    private static final Comparator<EventEntity> comparator = new Comparator<EventEntity>() {
+    private static final Comparator<Entity> comparator = new Comparator<Entity>() {
         @Override
-        public int compare(EventEntity e1, EventEntity e2) {
+        public int compare(Entity e1, Entity e2) {
             final Event event1 = e1.getState();
             final Event event2 = e2.getState();
             final int result = Events.eventComparator()
@@ -56,11 +56,11 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
         }
     };
 
-    EventEntity(EventId id) {
+    Entity(EventId id) {
         super(id);
     }
 
-    EventEntity(Event event) {
+    Entity(Event event) {
         this(event.getId());
         updateState(event);
     }
@@ -78,7 +78,7 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     /**
      * Returns comparator which sorts event entities chronologically.
      */
-    static Comparator<EventEntity> comparator() {
+    static Comparator<Entity> comparator() {
         return comparator;
     }
 }
