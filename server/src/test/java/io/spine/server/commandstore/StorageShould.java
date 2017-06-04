@@ -78,14 +78,14 @@ public class StorageShould extends TenantAwareTest {
     private static final Error defaultError = Error.getDefaultInstance();
     private static final Failure defaultFailure = Failure.getDefaultInstance();
 
-    private Repository repository;
+    private CRepository repository;
 
     private CommandId id;
 
     @Before
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
-        repository = new Repository();
+        repository = new CRepository();
         repository.initStorage(StorageFactorySwitch.get(true));
     }
 
@@ -116,7 +116,7 @@ public class StorageShould extends TenantAwareTest {
      ****************************/
 
     private Optional<CommandRecord> read(CommandId commandId) {
-        final Optional<Entity> entity = repository.find(commandId);
+        final Optional<CEntity> entity = repository.find(commandId);
         if (entity.isPresent()) {
             return Optional.of(entity.get()
                                      .getState());
@@ -332,8 +332,8 @@ public class StorageShould extends TenantAwareTest {
 
     @Test
     public void provide_null_accepting_record_retrieval_func() {
-        assertNull(Repository.getRecordFunc()
-                             .apply(null));
+        assertNull(CRepository.getRecordFunc()
+                              .apply(null));
     }
 
     /*

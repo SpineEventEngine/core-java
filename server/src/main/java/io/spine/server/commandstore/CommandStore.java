@@ -53,7 +53,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class CommandStore implements AutoCloseable {
 
-    private final Repository repository;
+    private final CRepository repository;
     private final TenantIndex tenantIndex;
 
     /**
@@ -62,7 +62,7 @@ public class CommandStore implements AutoCloseable {
     public CommandStore(StorageFactory storageFactory, TenantIndex tenantIndex) {
         checkNotNull(storageFactory);
         this.tenantIndex = checkNotNull(tenantIndex);
-        final Repository repository = new Repository();
+        final CRepository repository = new CRepository();
         repository.initStorage(storageFactory);
         this.repository = repository;
     }

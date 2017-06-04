@@ -38,36 +38,36 @@ import static io.spine.base.CommandStatus.OK;
  *
  * @author Alexander Yevyukov
  */
-class Entity extends AbstractEntity<CommandId, CommandRecord> {
+class CEntity extends AbstractEntity<CommandId, CommandRecord> {
 
     /**
      * {@inheritDoc}
      */
-    private Entity(CommandId id) {
+    private CEntity(CommandId id) {
         super(id);
     }
 
-    private static Entity create(CommandId commandId) {
-        return new Entity(commandId);
+    private static CEntity create(CommandId commandId) {
+        return new CEntity(commandId);
     }
 
-    static Entity createForStatus(Command command, CommandStatus status) {
+    static CEntity createForStatus(Command command, CommandStatus status) {
         checkNotNull(command);
         checkNotNull(status);
 
         final CommandId commandId = command.getId();
-        final Entity entity = create(commandId);
+        final CEntity entity = create(commandId);
         entity.setCommandAndStatus(command, status);
         return entity;
     }
 
-    static Entity createForError(Command command, Error error) {
+    static CEntity createForError(Command command, Error error) {
         checkNotNull(command);
         checkNotNull(error);
 
         final CommandId id = Records.getOrGenerateCommandId(command);
 
-        final Entity result = create(id);
+        final CEntity result = create(id);
         result.setError(id, command, error);
         return result;
     }
