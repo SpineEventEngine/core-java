@@ -49,7 +49,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.

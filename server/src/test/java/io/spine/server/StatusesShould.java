@@ -25,9 +25,10 @@ import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
 import io.spine.base.MetadataConverter;
+import io.spine.server.transport.Statuses;
 import org.junit.Test;
 
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 

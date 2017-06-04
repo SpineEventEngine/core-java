@@ -33,7 +33,7 @@ import io.spine.validate.ValidationError;
 import javax.annotation.Nullable;
 import java.util.List;
 
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.validate.ConstraintViolations.toText;
 import static java.lang.String.format;

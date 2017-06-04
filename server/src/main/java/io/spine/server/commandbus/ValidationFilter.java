@@ -30,7 +30,7 @@ import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.validate.Validate.isDefault;
 
 /**
