@@ -31,7 +31,6 @@ import java.util.Calendar;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Calendars.getHours;
 import static io.spine.time.Calendars.getMinutes;
-import static io.spine.time.Calendars.getSeconds;
 import static io.spine.time.LocalTimes.addHours;
 import static io.spine.time.LocalTimes.addMillis;
 import static io.spine.time.LocalTimes.addMinutes;
@@ -81,12 +80,13 @@ public class LocalTimesShould {
 
         final int expectedHours = getHours(cal);
         final int expectedMinutes = getMinutes(cal);
-        final int expectedSeconds = getSeconds(cal);
 
+        /*
+          Assert only hours and minutes to reduce the probability of going over the second boundary
+          between the LocalTime and Calendar instances construction in the initialization above.
+        */
         assertEquals(expectedHours, now.getHours());
         assertEquals(expectedMinutes, now.getMinutes());
-        assertEquals(expectedSeconds, now.getSeconds());
-        /* We cannot check milliseconds and nanos due to time gap between object creation */
     }
 
     @Test
