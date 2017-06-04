@@ -24,6 +24,7 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.Response;
@@ -31,19 +32,14 @@ import io.spine.option.EntityOption.Visibility;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.Repository;
-import io.spine.server.entity.VersionableEntity;
 import io.spine.server.entity.VisibilityGuard;
 import io.spine.server.event.EventBus;
-import io.spine.server.event.EventDispatcher;
 import io.spine.server.failure.FailureBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
-import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
@@ -75,7 +71,7 @@ public final class BoundedContext
         implements AutoCloseable {
 
     /** The default name for a {@code BoundedContext}. */
-    public static final String DEFAULT_NAME = "Main";
+    static final String DEFAULT_NAME = "Main";
 
     /**
      * The name of the bounded context, which is used to distinguish the context in an application
@@ -83,19 +79,17 @@ public final class BoundedContext
      */
     private final String name;
 
-    /** If `true` the bounded context serves many organizations. */
+    /** If {@code true} the bounded context serves many tenants. */
     private final boolean multitenant;
 
     private final CommandBus commandBus;
     private final EventBus eventBus;
     private final Stand stand;
 
-    /** All the repositories registered with this bounded context. */
+    /** Controls access to entities of all repositories registered with this bounded context. */
     private final VisibilityGuard guard = VisibilityGuard.newInstance();
 
-    /**
-     * Memoized version of the {@code StorageFactory} supplier passed to the constructor.
-     */
+    /** Memoized version of the {@code StorageFactory} supplier passed to the constructor. */
     private final Supplier<StorageFactory> storageFactory;
 
     @Nullable
@@ -229,60 +223,17 @@ public final class BoundedContext
      * @param <E>        the type of entities or aggregates
      * @see Repository#initStorage(StorageFactory)
      */
-    @SuppressWarnings("ChainOfInstanceofChecks")
-        // OK here since ways of registering are way too different
     public <I, E extends Entity<I, ?>> void register(Repository<I, E> repository) {
         checkNotNull(repository);
         repository.setBoundedContext(this);
         guard.register(repository);
-
-        if (repository instanceof CommandDispatcher) {
-            commandBus.register((CommandDispatcher) repository);
-        }
-
-        if (repository instanceof ProcessManagerRepository) {
-            final ProcessManagerRepository procmanRepo = (ProcessManagerRepository) repository;
-            commandBus.register(DelegatingCommandDispatcher.of(procmanRepo));
-        }
-        if (repository instanceof EventDispatcher) {
-            eventBus.register((EventDispatcher) repository);
-        }
-
-        if (managesVersionableEntities(repository)) {
-            stand.registerTypeSupplier(cast(repository));
-        }
+        repository.onRegistered();
     }
 
     /**
-     * Verifies if the passed repository manages instances of versionable entities.
+     * Sends an integration event to this {@code BoundedContext}.
      */
-    private static <I, E extends Entity<I, ?>> boolean managesVersionableEntities(
-            Repository<I, E> repository) {
-        final Class entityClass = repository.getEntityClass();
-        final boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
-        return result;
-    }
-
-    /**
-     * Casts the passed repository to one that manages {@link VersionableEntity}
-     * instead of just {@link Entity}.
-     *
-     * <p>The cast is required for registering the repository as a type supplier
-     * in the {@link Stand}.
-     *
-     * <p>The cast is safe because the method is called after the
-     * {@linkplain #managesVersionableEntities(Repository) type check}.
-     * @see #register(Repository)
-     */
-    @SuppressWarnings("unchecked") // See Javadoc above.
-    private static <I, E extends Entity<I, ?>>
-    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
-        return (Repository<I, VersionableEntity<I, ?>>) repository;
-    }
-
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        /* We ignore method from super because the default implementation sets
-           unimplemented status. */
+    @Experimental
     @Override
     public void notify(IntegrationEvent integrationEvent,
                        StreamObserver<Response> responseObserver) {
@@ -332,9 +283,8 @@ public final class BoundedContext
             Class<? extends Message> aggregateStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(aggregateStateClass)) {
-            throw newIllegalStateException("No repository found for " +
-                                                      "the aggregate state class %s",
-                                                      aggregateStateClass.getName());
+            throw newIllegalStateException("No repository found for the aggregate state class %s",
+                                           aggregateStateClass.getName());
         }
 
         // See if the aggregate state is visible.

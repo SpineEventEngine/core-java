@@ -47,7 +47,6 @@ import io.spine.test.Spy;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
 import io.spine.test.bc.event.ProjectCreated;
-import io.spine.testdata.TestBoundedContextFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -172,7 +171,9 @@ public class BoundedContextShould {
 
     @Test
     public void not_notify_integration_event_subscriber_if_event_is_invalid() {
-        final BoundedContext boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setMultitenant(true)
+                                                            .build();
         final TestEventSubscriber sub = new TestEventSubscriber();
         boundedContext.getEventBus()
                       .register(sub);
@@ -199,16 +200,14 @@ public class BoundedContextShould {
 
     @Test
     public void assign_storage_during_registration_if_repository_does_not_have_storage() {
-        final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository();
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
         assertTrue(repository.isStorageAssigned());
     }
 
     @Test
     public void not_change_storage_during_registration_if_a_repository_has_one() {
-        final ProjectAggregateRepository repository =
-                new ProjectAggregateRepository();
+        final ProjectAggregateRepository repository = new ProjectAggregateRepository();
         repository.initStorage(storageFactory);
 
         final Repository spy = spy(repository);

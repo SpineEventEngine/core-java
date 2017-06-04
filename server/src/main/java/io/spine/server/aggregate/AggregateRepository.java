@@ -26,6 +26,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.envelope.CommandEnvelope;
+import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.entity.Repository;
@@ -99,6 +100,19 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      */
     protected AggregateRepository() {
         super();
+    }
+
+    /**
+     * {@inheritDoc}
+     *
+     * <p>{@linkplain io.spine.server.commandbus.CommandBus#register(MessageDispatcher) Registers}
+     * itself with the {@code CommandBus} of the parent {@code BoundedContext}.
+     */
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        getBoundedContext().getCommandBus()
+                           .register(this);
     }
 
     /**

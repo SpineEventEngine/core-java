@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Identifiers;
 import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
+import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.ClassName;
@@ -35,6 +36,7 @@ import io.spine.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,8 +55,7 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 public abstract class Repository<I, E extends Entity<I, ?>>
-                implements RepositoryView<I, E>,
-                           AutoCloseable {
+                implements RepositoryView<I, E>, AutoCloseable {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
 
@@ -138,6 +139,48 @@ public abstract class Repository<I, E extends Entity<I, ?>>
                    "The repository (class: %s) is not registered with a BoundedContext.",
                    getClass().getName());
         return boundedContext;
+    }
+
+    /**
+     * The callback called by a {@link BoundedContext} during the {@linkplain
+     * BoundedContext#register(Repository) registration} of the repository.
+     *
+     * <p>If entities managed by this repository are {@linkplain VersionableEntity versionable},
+     * registers itself as a type supplier with the {@link Stand} of the parent
+     * {@linkplain #getBoundedContext() parent} {@code BoundedContext}.
+     */
+    @OverridingMethodsMustInvokeSuper
+    public void onRegistered() {
+        if (managesVersionableEntities()) {
+            getBoundedContext().getStand()
+                               .registerTypeSupplier(cast(this));
+        }
+    }
+
+    /**
+     * Verifies if the passed repository manages instances of versionable entities.
+     */
+    private boolean managesVersionableEntities() {
+        final Class entityClass = getEntityClass();
+        final boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
+        return result;
+    }
+
+    /**
+     * Casts the passed repository to one that manages {@link VersionableEntity}
+     * instead of just {@link Entity}.
+     *
+     * <p>The cast is required for registering the repository as a type supplier
+     * in the {@link Stand}.
+     *
+     * <p>The cast is safe because the method is called after the
+     * {@linkplain #managesVersionableEntities() type check}.
+     * @see #onRegistered()
+     */
+    @SuppressWarnings("unchecked") // See Javadoc above.
+    private static <I, E extends Entity<I, ?>>
+    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
+        return (Repository<I, VersionableEntity<I, ?>>) repository;
     }
 
     /** Returns the class of IDs used by this repository. */

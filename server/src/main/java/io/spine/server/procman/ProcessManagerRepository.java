@@ -29,6 +29,7 @@ import io.spine.envelope.EventEnvelope;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.server.event.EventBus;
@@ -70,6 +71,13 @@ public abstract class ProcessManagerRepository<I,
     /** {@inheritDoc} */
     protected ProcessManagerRepository() {
         super(EventDispatchingRepository.<I>producerFromFirstMessageField());
+    }
+
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        getBoundedContext().getCommandBus()
+                           .register(DelegatingCommandDispatcher.of(this));
     }
 
     @Override
