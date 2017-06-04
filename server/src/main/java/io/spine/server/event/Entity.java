@@ -21,7 +21,6 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Timestamp;
-import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.base.Events;
@@ -35,7 +34,6 @@ import java.util.Comparator;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
 class Entity extends AbstractEntity<EventId, Event> {
 
     public static final String CREATED_TIME_COLUMN = "created";
