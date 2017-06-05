@@ -38,7 +38,6 @@ import org.junit.Test;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.base.Identifier.NULL_ID;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.base.Identifier.pack;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.protobuf.Wrapper.forLong;
 import static io.spine.protobuf.Wrapper.forString;
@@ -54,10 +53,15 @@ public class IdentifierShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
 
+    @SuppressWarnings("UnnecessaryBoxing") // We want to make the unsupported type obvious.
     @Test(expected = IllegalArgumentException.class)
-    public void throw_exception_when_object_of_unsupported_class_passed() {
-        //noinspection UnnecessaryBoxing
+    public void reject_objects_of_unsupported_class_passed() {
         Identifier.toString(Boolean.valueOf(true));
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void reject_unsupported_classes() {
+        Identifier.getType(Float.class);
     }
 
     @SuppressWarnings("UnnecessaryBoxing") // OK as we want to show types clearly.
@@ -82,10 +86,10 @@ public class IdentifierShould {
         assertNotEquals(newUuid(), newUuid());
     }
 
+    @SuppressWarnings("UnnecessaryBoxing") // We want to make the unsupported type obvious.
     @Test(expected = IllegalArgumentException.class)
     public void do_not_convert_unsupported_ID_type_to_Any() {
-        //noinspection UnnecessaryBoxing
-        pack(Boolean.valueOf(false));
+        Identifier.pack(Boolean.valueOf(false));
     }
 
     @Test
@@ -239,15 +243,16 @@ public class IdentifierShould {
     }
 
     @Test
-    public void create_values_depending_from_message_type() {
+    public void create_values_depending_on_wrapper_message_type() {
         assertEquals(10, Type.INTEGER.fromMessage(forUnsignedInteger(10)));
         assertEquals(1024L, Type.LONG.fromMessage(forUnsignedLong(1024L)));
+
         final String value = getClass().getSimpleName();
         assertEquals(value, Type.STRING.fromMessage(forString(value)));
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void not_unpack_unsupported_types() {
+    public void not_unpack_empty_Any() {
         Identifier.unpack(Any.getDefaultInstance());
     }
 }
