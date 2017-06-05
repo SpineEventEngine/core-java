@@ -65,7 +65,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         if (!acceptedIds.isEmpty()) {
             final Any entityId = record.getRecord()
                                        .getEntityId();
-            final Object genericId = Identifier.idFromAny(entityId);
+            final Object genericId = Identifier.unpack(entityId);
             @SuppressWarnings("SuspiciousMethodCalls")
             // The Collection.contains behavior about the non-assignable types is acceptable
             final boolean idMatches = acceptedIds.contains(genericId);

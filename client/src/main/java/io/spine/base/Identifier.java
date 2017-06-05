@@ -192,7 +192,7 @@ public final class Identifier<I> {
      * @param any the ID value wrapped into {@code Any}
      * @return unwrapped ID
      */
-    public static Object idFromAny(Any any) {
+    public static Object unpack(Any any) {
         checkNotNull(any);
         final Message unpacked = AnyPacker.unpack(any);
 

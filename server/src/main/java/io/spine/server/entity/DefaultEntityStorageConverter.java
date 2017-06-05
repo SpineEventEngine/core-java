@@ -81,7 +81,7 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         final TypeUrl entityStateType = repository.getEntityStateType();
         final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
 
-        final I id = (I) Identifier.idFromAny(entityRecord.getEntityId());
+        final I id = (I) Identifier.unpack(entityRecord.getEntityId());
         final E entity = repository.create(id);
 
         if (entity != null) {

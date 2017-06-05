@@ -248,6 +248,6 @@ public class IdentifierShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_unpack_unsupported_types() {
-        Identifier.idFromAny(Any.getDefaultInstance());
+        Identifier.unpack(Any.getDefaultInstance());
     }
 }
