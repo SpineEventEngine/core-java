@@ -38,6 +38,7 @@ import io.spine.envelope.EventEnvelope;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.option.OptionsProto;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
@@ -58,11 +59,11 @@ import static java.lang.String.format;
  * @see Any#getTypeUrl()
  * @see Descriptors.Descriptor#getFullName()
  */
-public final class TypeUrl {
+public final class TypeUrl implements Serializable {
 
+    private static final long serialVersionUID = 0L;
     private static final String SEPARATOR = "/";
     private static final Splitter splitter = Splitter.on(SEPARATOR);
-
     private static final String GOOGLE_PROTOBUF_PACKAGE = "google.protobuf";
 
     /** The prefix of the type URL. */
