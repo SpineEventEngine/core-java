@@ -20,12 +20,11 @@
 
 package io.spine.server.commandstore;
 
-import org.junit.Test;
-import io.spine.base.CommandStatus;
 import io.spine.base.Command;
+import io.spine.base.CommandStatus;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
-import io.spine.server.commandstore.Records;
+import org.junit.Test;
 
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;

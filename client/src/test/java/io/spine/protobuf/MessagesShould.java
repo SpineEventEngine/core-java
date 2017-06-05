@@ -23,18 +23,18 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
 import io.spine.time.Time;
 import io.spine.users.UserId;
+import org.junit.Test;
 
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrappers.pack;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class MessagesShould {
 

@@ -23,10 +23,10 @@ package io.spine.test;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.test.TimeTests.BackToTheFuture.THIRTY_YEARS_IN_HOURS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.TimeTests.BackToTheFuture.THIRTY_YEARS_IN_HOURS;
 
 /**
  * @author Alexander Yevsyukov

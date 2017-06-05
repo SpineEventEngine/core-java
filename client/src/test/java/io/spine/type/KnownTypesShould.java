@@ -27,10 +27,6 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.type.UnknownTypeException;
-import org.junit.Test;
-import io.spine.type.ClassName;
-import io.spine.type.TypeUrl;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
@@ -38,19 +34,20 @@ import io.spine.base.EventContext;
 import io.spine.test.types.Task;
 import io.spine.test.types.TaskId;
 import io.spine.test.types.TaskName;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.type.KnownTypes.getAllFromPackage;
 import static io.spine.type.KnownTypes.getDescriptor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus

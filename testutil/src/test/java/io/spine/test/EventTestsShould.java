@@ -23,8 +23,8 @@ package io.spine.test;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import org.junit.Test;
 import io.spine.base.EventContext;
+import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 

@@ -22,16 +22,14 @@ package io.spine.server.procman;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Response;
 import io.spine.server.commandbus.CommandBus;
-import io.spine.server.procman.AbstractCommandRouterShould;
-import io.spine.server.procman.CommandRouter;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;

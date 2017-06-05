@@ -22,7 +22,6 @@ package io.spine.server.stand;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.junit.Test;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
@@ -33,6 +32,7 @@ import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
+import org.junit.Test;
 
 import java.util.Collections;
 

@@ -26,9 +26,9 @@ import io.spine.client.QueryValidationError;
 import io.spine.client.Target;
 import io.spine.type.TypeUrl;
 
-import static java.lang.String.format;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
+import static java.lang.String.format;
 
 /**
  * Validates the {@linkplain Query} instances submitted to {@linkplain Stand}.

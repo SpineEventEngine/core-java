@@ -34,7 +34,6 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.base.FieldFilter;
 import io.spine.protobuf.Messages;
@@ -42,6 +41,7 @@ import io.spine.test.messages.MessageWithStringValue;
 import io.spine.test.messages.TestEnum;
 import io.spine.test.messages.TestEnumValue;
 import io.spine.type.TypeUrl;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

@@ -20,12 +20,10 @@
 
 package io.spine.time;
 
-import io.spine.time.ZoneOffsets;
 import org.junit.Test;
 
 import java.util.Calendar;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Calendars.at;
 import static io.spine.time.Calendars.createWithTime;
@@ -36,6 +34,7 @@ import static io.spine.time.Calendars.getSeconds;
 import static io.spine.time.Calendars.getZoneOffset;
 import static io.spine.time.Calendars.toCalendar;
 import static io.spine.time.Calendars.toLocalTime;
+import static org.junit.Assert.assertEquals;
 
 public class CalendarsShould {
 

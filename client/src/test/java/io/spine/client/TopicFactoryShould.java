@@ -21,17 +21,13 @@ package io.spine.client;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
-import io.spine.test.client.TestEntityId;
-import org.junit.Assert;
-import org.junit.Test;
 import io.spine.base.ActorContext;
-import io.spine.client.ActorRequestFactoryShould;
-import io.spine.client.EntityId;
-import io.spine.client.Target;
-import io.spine.client.Targets;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
+import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeName;
+import org.junit.Assert;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;

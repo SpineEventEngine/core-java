@@ -24,13 +24,12 @@ import com.google.common.testing.NullPointerTester;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
-import io.spine.base.Errors;
 import org.junit.Test;
 
 import static io.grpc.Status.INVALID_ARGUMENT;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ErrorsShould {
 

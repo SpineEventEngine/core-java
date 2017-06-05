@@ -23,9 +23,6 @@ package io.spine.server.entity;
 import com.google.common.collect.Lists;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Empty;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -37,6 +34,9 @@ import io.spine.test.options.HiddenAggregateValidatingBuilder;
 import io.spine.test.options.SubscribableAggregate;
 import io.spine.test.options.SubscribableAggregateValidatingBuilder;
 import io.spine.type.TypeName;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 import java.util.Set;
@@ -145,7 +145,7 @@ public class VisibilityGuardShould {
 
     private static class ExposedRepository extends AggregateRepository<Long, Exposed> {
         private ExposedRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -158,7 +158,7 @@ public class VisibilityGuardShould {
 
     private static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
         private SubscribableRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -171,7 +171,7 @@ public class VisibilityGuardShould {
 
     private static class HiddenRepository extends AggregateRepository<String, Hidden> {
         private HiddenRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 }

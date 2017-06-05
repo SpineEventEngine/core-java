@@ -21,19 +21,19 @@
 package io.spine.test;
 
 import io.grpc.stub.StreamObserver;
-import org.junit.Test;
 import io.spine.base.Response;
 import io.spine.users.UserId;
+import org.junit.Test;
 
+import static io.spine.io.StreamObservers.noOpObserver;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.hasPrivateParameterlessCtor;
+import static io.spine.test.Tests.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.io.StreamObservers.noOpObserver;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Tests.hasPrivateParameterlessCtor;
-import static io.spine.test.Tests.newUserId;
 
 public class TestsShould {
 

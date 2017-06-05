@@ -21,7 +21,6 @@ package io.spine.validate;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.validate.ConstraintViolation;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 

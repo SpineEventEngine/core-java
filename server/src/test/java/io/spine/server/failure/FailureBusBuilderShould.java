@@ -19,9 +19,9 @@
  */
 package io.spine.server.failure;
 
-import org.junit.Test;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.test.Tests;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

@@ -22,15 +22,13 @@ package io.spine.server.entity;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
-import io.spine.server.entity.AbstractEntity;
-import io.spine.server.entity.EntityStorageConverter;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.server.entity.DefaultEntityStorageConverter.forAllFields;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

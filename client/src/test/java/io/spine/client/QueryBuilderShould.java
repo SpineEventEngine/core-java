@@ -26,27 +26,24 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import org.junit.Test;
 import io.spine.base.Identifiers;
-import io.spine.client.ActorRequestFactoryShould;
-import io.spine.client.EntityFilters;
-import io.spine.client.EntityId;
-import io.spine.client.EntityIdFilter;
-import io.spine.client.Query;
-import io.spine.client.QueryBuilder;
-import io.spine.client.Target;
 import io.spine.json.Json;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.test.client.TestEntity;
 import io.spine.test.validate.msg.ProjectId;
 import io.spine.type.TypeName;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Collections2.transform;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.client.QueryParameter.eq;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertSize;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -58,10 +55,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.client.QueryParameter.eq;
-import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov

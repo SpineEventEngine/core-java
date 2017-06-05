@@ -22,10 +22,10 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.test.entity.command.CreateProject;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

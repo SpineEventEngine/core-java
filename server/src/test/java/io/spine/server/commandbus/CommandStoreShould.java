@@ -23,26 +23,25 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.FailureThrowable;
-import io.spine.test.TimeTests;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.type.CommandClass;
-import io.spine.users.TenantId;
-import org.junit.Test;
-import io.spine.server.commandbus.AbstractCommandBusTestSuite;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
 import io.spine.base.Error;
+import io.spine.base.FailureThrowable;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.tenant.TenantAwareFunction;
+import io.spine.test.TimeTests;
+import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
+import io.spine.test.command.event.ProjectCreated;
+import io.spine.type.CommandClass;
+import io.spine.users.TenantId;
+import org.junit.Test;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -51,15 +50,15 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.verify;
 import static io.spine.base.Commands.getMessage;
 import static io.spine.server.commandbus.Given.Command.addTask;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.server.commandbus.Given.Command.startProject;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.time.Durations2.fromMinutes;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
 
 public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 

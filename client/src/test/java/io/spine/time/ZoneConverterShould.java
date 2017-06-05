@@ -20,7 +20,6 @@
 
 package io.spine.time;
 
-import io.spine.time.ZoneOffsets;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

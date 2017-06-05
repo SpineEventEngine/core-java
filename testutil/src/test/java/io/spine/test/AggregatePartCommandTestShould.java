@@ -27,14 +27,14 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.command.Assign;
 import io.spine.validate.UInt32ValueValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
+import static io.spine.base.Identifiers.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Yevsyukov

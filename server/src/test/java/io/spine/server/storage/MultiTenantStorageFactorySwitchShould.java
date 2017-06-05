@@ -20,8 +20,6 @@
 
 package io.spine.server.storage;
 
-import io.spine.server.storage.StorageFactorySwitchShould;
-
 /**
  * @author Alexander Yevsyukov
  */

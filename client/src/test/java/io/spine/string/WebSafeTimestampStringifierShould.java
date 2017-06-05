@@ -23,9 +23,9 @@ package io.spine.string;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.string.time.TimeStringifiers.forTimestampWebSafe;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

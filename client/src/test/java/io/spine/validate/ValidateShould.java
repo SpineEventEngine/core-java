@@ -23,15 +23,11 @@ package io.spine.validate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.validate.ConstraintViolations;
-import org.junit.Test;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.type.TypeName;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newUuidValue;
 import static io.spine.validate.Validate.checkBounds;
@@ -40,6 +36,9 @@ import static io.spine.validate.Validate.checkNotDefault;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class ValidateShould {
 

@@ -23,9 +23,6 @@ package io.spine.string;
 import com.google.common.escape.Escaper;
 import com.google.common.escape.Escapers;
 import org.junit.Test;
-import io.spine.string.MissingStringifierException;
-import io.spine.string.Stringifier;
-import io.spine.string.Stringifiers;
 
 import java.util.List;
 

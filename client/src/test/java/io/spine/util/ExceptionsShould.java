@@ -25,9 +25,6 @@ import org.junit.Test;
 
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.util.Exceptions.unsupported;
 
 /**
  * @author Alexander Litus

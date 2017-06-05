@@ -23,7 +23,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
-import io.spine.type.FailureClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

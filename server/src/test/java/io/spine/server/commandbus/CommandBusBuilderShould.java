@@ -20,16 +20,14 @@
 
 package io.spine.server.commandbus;
 
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.server.commandbus.CommandBusFilter;
-import io.spine.server.commandbus.CommandScheduler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

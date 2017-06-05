@@ -21,16 +21,14 @@
 package io.spine.users;
 
 import org.junit.Test;
-import io.spine.users.UserAccount;
-import io.spine.users.UserAccounts;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.users.UserAccounts.GOOGLE_AUTH_PROVIDER_ID;
 import static io.spine.users.UserAccounts.getGoogleUid;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 public class UserAccountsShould {
 

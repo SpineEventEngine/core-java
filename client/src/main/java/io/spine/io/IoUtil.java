@@ -22,9 +22,9 @@ package io.spine.io;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableSet;
+import io.spine.annotation.Internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.annotation.Internal;
 
 import java.io.Closeable;
 import java.io.IOException;

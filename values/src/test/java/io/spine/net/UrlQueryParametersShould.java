@@ -20,11 +20,11 @@
 
 package io.spine.net;
 
-import org.junit.Test;
 import io.spine.net.Url.Record.QueryParameter;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mikhail Mikhaylov

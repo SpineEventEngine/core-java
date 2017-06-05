@@ -21,28 +21,25 @@
 package io.spine.string;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.base.CommandId;
 import io.spine.base.EventId;
-import io.spine.string.MissingStringifierException;
-import io.spine.string.Stringifier;
-import io.spine.string.Stringifiers;
 import io.spine.test.identifiers.IdWithPrimitiveFields;
 import io.spine.users.UserId;
+import org.junit.Test;
 
 import java.util.Random;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Identifiers.idToString;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.string.Stringifiers.forBoolean;
 import static io.spine.string.Stringifiers.forInteger;
 import static io.spine.string.Stringifiers.forLong;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Illia Shepilov

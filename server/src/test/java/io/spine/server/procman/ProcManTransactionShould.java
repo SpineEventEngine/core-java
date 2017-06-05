@@ -21,8 +21,8 @@ package io.spine.server.procman;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.base.Event;
 import io.spine.annotation.Subscribe;
+import io.spine.base.Event;
 import io.spine.base.Version;
 import io.spine.server.entity.ThrowingValidatingBuilder;
 import io.spine.server.entity.Transaction;
@@ -38,8 +38,8 @@ import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.junit.Assert.assertTrue;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alex Tymchenko

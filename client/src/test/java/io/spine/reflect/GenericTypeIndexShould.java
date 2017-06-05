@@ -21,11 +21,11 @@
 package io.spine.reflect;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.test.Tests;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.reflect.GenericTypeIndex.Default.getArgument;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

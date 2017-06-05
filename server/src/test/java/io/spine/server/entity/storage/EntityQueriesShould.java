@@ -26,7 +26,6 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import io.spine.base.Version;
 import io.spine.client.EntityFilters;
-import org.junit.Test;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.protobuf.AnyPacker;
@@ -35,18 +34,19 @@ import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov

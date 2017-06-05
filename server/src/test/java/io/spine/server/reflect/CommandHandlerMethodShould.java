@@ -23,34 +23,33 @@ package io.spine.server.reflect;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.reflect.command.CreateProject;
 import io.spine.test.reflect.event.ProjectCreated;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static io.spine.server.reflect.CommandHandlerMethod.from;
 import static io.spine.server.reflect.CommandHandlerMethod.predicate;
 import static io.spine.server.reflect.Given.CommandMessage.createProject;
 import static io.spine.server.reflect.Given.CommandMessage.startProject;
 import static io.spine.server.reflect.Given.EventMessage.projectCreated;
 import static io.spine.test.Tests.newUuidValue;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Litus

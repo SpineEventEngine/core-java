@@ -21,7 +21,6 @@
 package io.spine.net;
 
 import org.junit.Test;
-import io.spine.net.Patterns;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 

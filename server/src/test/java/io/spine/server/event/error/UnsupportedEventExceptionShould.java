@@ -21,9 +21,9 @@
 package io.spine.server.event.error;
 
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.event.UnsupportedEventException;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;

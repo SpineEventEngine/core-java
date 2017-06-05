@@ -23,8 +23,8 @@ package io.spine.server.bus;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
-import io.spine.type.MessageClass;
 import io.spine.envelope.MessageEnvelope;
+import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 

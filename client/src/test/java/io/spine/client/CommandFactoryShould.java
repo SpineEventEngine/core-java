@@ -22,23 +22,23 @@ package io.spine.client;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import io.spine.base.Command;
-import io.spine.test.TimeTests;
-import io.spine.time.Timestamps2;
-import io.spine.users.TenantId;
 import io.spine.base.ActorContext;
+import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.test.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
+import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import io.spine.users.TenantId;
 import io.spine.users.UserId;
 import io.spine.validate.ConstraintViolationThrowable;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Tests.newUserUuid;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CommandFactoryShould extends ActorRequestFactoryShould {
 

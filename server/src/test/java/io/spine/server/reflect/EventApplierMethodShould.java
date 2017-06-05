@@ -22,12 +22,12 @@ package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
+import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.test.aggregate.event.ProjectCreated;
-import org.junit.Test;
-import io.spine.server.aggregate.Aggregate;
 import io.spine.testdata.Sample;
 import io.spine.validate.StringValueValidatingBuilder;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

@@ -243,16 +243,16 @@ public abstract class EventStore implements AutoCloseable {
     /** A locally running {@code EventStore} implementation. */
     private static class LocalImpl extends EventStore {
 
-        private final EventStorage storage;
+        private final ERepository storage;
 
         private LocalImpl(Executor catchUpExecutor,
                           StorageFactory storageFactory,
                           @Nullable Logger logger) {
             super(catchUpExecutor, logger);
 
-            final EventStorage eventStorage = new EventStorage();
-            eventStorage.initStorage(storageFactory);
-            this.storage = eventStorage;
+            final ERepository eventRepository = new ERepository();
+            eventRepository.initStorage(storageFactory);
+            this.storage = eventRepository;
         }
 
         @Override

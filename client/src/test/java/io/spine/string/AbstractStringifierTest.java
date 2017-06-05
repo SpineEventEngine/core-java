@@ -21,7 +21,6 @@
 package io.spine.string;
 
 import org.junit.Test;
-import io.spine.string.Stringifier;
 
 import static org.junit.Assert.assertEquals;
 

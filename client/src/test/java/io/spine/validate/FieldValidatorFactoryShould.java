@@ -26,20 +26,14 @@ import com.google.protobuf.FloatValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
+import io.spine.base.FieldPath;
 import io.spine.test.validate.msg.RequiredByteStringFieldValue;
+import io.spine.test.validate.msg.RequiredEnumFieldValue;
 import io.spine.test.validate.msg.RequiredMsgFieldValue;
 import org.junit.Test;
-import io.spine.base.FieldPath;
-import io.spine.test.validate.msg.RequiredEnumFieldValue;
-import io.spine.validate.BooleanFieldValidator;
-import io.spine.validate.ByteStringFieldValidator;
-import io.spine.validate.FloatFieldValidator;
-import io.spine.validate.LongFieldValidator;
-import io.spine.validate.StringFieldValidator;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.junit.Assert.assertTrue;
-import static io.spine.validate.FieldValidatorFactory.create;
 
 /**
  * @author Alexander Litus

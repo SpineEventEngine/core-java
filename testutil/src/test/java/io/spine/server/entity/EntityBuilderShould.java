@@ -23,9 +23,9 @@ package io.spine.server.entity;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
 import io.spine.protobuf.Wrapper;
 import io.spine.time.Time;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

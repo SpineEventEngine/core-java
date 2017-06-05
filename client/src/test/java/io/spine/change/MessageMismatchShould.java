@@ -22,12 +22,9 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
-import io.spine.change.MessageMismatch;
-import io.spine.change.ValueMismatch;
 import io.spine.protobuf.Wrapper;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.change.MessageMismatch.expectedDefault;
 import static io.spine.change.MessageMismatch.expectedNotDefault;
 import static io.spine.change.MessageMismatch.unexpectedValue;
@@ -35,6 +32,7 @@ import static io.spine.change.MessageMismatch.unpackActual;
 import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class MessageMismatchShould {
 

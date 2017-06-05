@@ -21,17 +21,12 @@
 package io.spine.time;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
-import io.spine.time.MonthOfYear;
-import io.spine.time.ZoneOffsets;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.random;
 import static io.spine.time.Calendars.at;
@@ -44,6 +39,7 @@ import static io.spine.time.OffsetDates.addYears;
 import static io.spine.time.OffsetDates.subtractDays;
 import static io.spine.time.OffsetDates.subtractMonths;
 import static io.spine.time.OffsetDates.subtractYears;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Aleksandrov

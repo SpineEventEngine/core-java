@@ -22,8 +22,6 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
-import org.junit.Test;
-import io.spine.server.entity.FieldMasks;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Status;
@@ -31,20 +29,21 @@ import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskId;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.type.TypeUrl;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Verify.assertSize;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Tests.assertMatchesMask;
-import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov

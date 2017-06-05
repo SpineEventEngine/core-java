@@ -20,10 +20,10 @@
 
 package io.spine.server.event.enrich;
 
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.event.Given;
 import io.spine.test.event.ProjectCreated;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

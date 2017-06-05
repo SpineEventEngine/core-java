@@ -25,12 +25,11 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import io.spine.server.Environment;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov

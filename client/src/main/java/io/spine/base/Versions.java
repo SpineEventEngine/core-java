@@ -23,8 +23,8 @@ package io.spine.base;
 import com.google.protobuf.Timestamp;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.time.Time.getCurrentTime;
+import static java.lang.String.format;
 
 /**
  * Utilities for working with {@link Version}.

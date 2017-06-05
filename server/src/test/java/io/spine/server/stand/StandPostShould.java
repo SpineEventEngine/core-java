@@ -22,11 +22,6 @@ package io.spine.server.stand;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
-import org.junit.Assert;
-import org.junit.Ignore;
-import org.junit.Test;
-import org.mockito.ArgumentMatcher;
-import org.mockito.ArgumentMatchers;
 import io.spine.base.CommandContext;
 import io.spine.base.Identifiers;
 import io.spine.base.Version;
@@ -43,6 +38,11 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.projection.ProjectId;
 import io.spine.time.Time;
+import org.junit.Assert;
+import org.junit.Ignore;
+import org.junit.Test;
+import org.mockito.ArgumentMatcher;
+import org.mockito.ArgumentMatchers;
 
 import java.util.Set;
 import java.util.concurrent.Executor;
@@ -51,6 +51,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.Versions.newVersion;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
@@ -58,7 +59,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static io.spine.base.Versions.newVersion;
 
 /**
  * @author Alex Tymchenko

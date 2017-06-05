@@ -23,19 +23,19 @@ package io.spine.envelope;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.time.Time;
 import io.spine.type.CommandClass;
+import org.junit.Before;
+import org.junit.Test;
 
+import static io.spine.test.Tests.newUuidValue;
+import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
-import static io.spine.test.Tests.newUuidValue;
-import static io.spine.validate.Validate.isDefault;
 
 /**
  * @author Alexander Yevsyukov

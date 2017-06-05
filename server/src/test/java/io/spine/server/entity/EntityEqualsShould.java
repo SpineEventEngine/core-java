@@ -20,16 +20,16 @@
 
 package io.spine.server.entity;
 
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
+import org.junit.Before;
+import org.junit.Test;
 
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.test.Tests.nullRef;
 
 /**
  * This test suite tests {@link AbstractVersionableEntity#equals(Object)}.

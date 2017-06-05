@@ -23,9 +23,9 @@ package io.spine.protobuf;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import org.junit.Test;
 import io.spine.test.TimeTests;
 import io.spine.time.Timestamps2;
+import org.junit.Test;
 
 import java.util.Date;
 
@@ -33,10 +33,6 @@ import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static com.google.protobuf.util.Timestamps.toNanos;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.fromMinutes;
 import static io.spine.time.Time.HOURS_PER_DAY;
@@ -53,6 +49,10 @@ import static io.spine.time.Timestamps2.compare;
 import static io.spine.time.Timestamps2.isBetween;
 import static io.spine.time.Timestamps2.isLaterThan;
 import static io.spine.time.Timestamps2.toDate;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Timestamps2Should {
 

@@ -23,7 +23,6 @@ package io.spine.server.event.enrich;
 import com.google.common.base.Optional;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Descriptors.FieldDescriptor;
-import org.junit.Test;
 import io.spine.server.event.Given;
 import io.spine.server.event.enrich.ReferenceValidator.ValidationResult;
 import io.spine.test.event.ProjectCreated;
@@ -33,12 +32,15 @@ import io.spine.test.event.enrichment.EnrichmentBoundWithMultipleFieldsWithDiffe
 import io.spine.test.event.enrichment.GranterEventsEnrichment;
 import io.spine.test.event.enrichment.ProjectCreatedEnrichmentAnotherPackage;
 import io.spine.test.event.user.UserDeletedEvent;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -46,8 +48,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.test.Verify.assertEmpty;
-import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov

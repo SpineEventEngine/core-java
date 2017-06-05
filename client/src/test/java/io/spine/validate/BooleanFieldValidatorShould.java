@@ -22,9 +22,8 @@ package io.spine.validate;
 
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
-import org.junit.Test;
 import io.spine.base.FieldPath;
-import io.spine.validate.BooleanFieldValidator;
+import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 

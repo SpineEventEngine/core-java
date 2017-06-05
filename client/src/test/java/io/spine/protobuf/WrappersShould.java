@@ -23,8 +23,8 @@ package io.spine.protobuf;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.test.Tests;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

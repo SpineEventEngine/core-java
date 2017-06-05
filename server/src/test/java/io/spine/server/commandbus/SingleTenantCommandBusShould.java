@@ -21,9 +21,6 @@
 package io.spine.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
-import org.junit.Test;
-import org.mockito.ArgumentMatchers;
-import io.spine.server.commandbus.AbstractCommandBusTestSuite;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Failure;
@@ -38,16 +35,18 @@ import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
 import io.spine.test.failure.ProjectId;
+import org.junit.Test;
+import org.mockito.ArgumentMatchers;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
 import static io.spine.server.commandbus.Given.Command.addTask;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Yevsyukov

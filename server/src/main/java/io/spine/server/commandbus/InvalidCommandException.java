@@ -33,8 +33,8 @@ import io.spine.validate.ConstraintViolations.ExceptionFactory;
 
 import java.util.Map;
 
-import static java.lang.String.format;
 import static io.spine.base.Identifiers.idToString;
+import static java.lang.String.format;
 
 /**
  * The exception for reporting invalid commands.

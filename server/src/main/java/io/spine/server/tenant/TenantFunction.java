@@ -21,8 +21,8 @@
 package io.spine.server.tenant;
 
 import com.google.common.base.Function;
-import io.spine.users.TenantId;
 import io.spine.annotation.Internal;
+import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 

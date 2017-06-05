@@ -24,12 +24,11 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import org.junit.Test;
-import io.spine.client.QueryParameter;
 
-import static java.lang.String.*;
+import static io.spine.client.QueryParameter.eq;
+import static java.lang.String.valueOf;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
-import static io.spine.client.QueryParameter.eq;
 
 /**
  * @author Dmytro Dashenkov

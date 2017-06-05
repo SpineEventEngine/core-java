@@ -22,10 +22,10 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableList;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import org.junit.Assert;
-import io.spine.base.Command;
 
 import java.util.List;
 

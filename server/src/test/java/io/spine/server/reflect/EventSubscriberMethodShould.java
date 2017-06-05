@@ -22,9 +22,9 @@ package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.annotation.Subscribe;
-import org.junit.Test;
 import io.spine.base.EventContext;
 import io.spine.test.reflect.event.ProjectCreated;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

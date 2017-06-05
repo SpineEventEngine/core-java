@@ -22,11 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.server.commandbus.CommandScheduler;
-import org.junit.After;
-import org.junit.Before;
-import io.spine.server.failure.FailureBus;
-import io.spine.test.command.CreateProject;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
@@ -35,27 +30,26 @@ import io.spine.base.Error;
 import io.spine.client.ActorRequestFactory;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandException;
-import io.spine.server.commandbus.ExecutorCommandScheduler;
-import io.spine.server.commandbus.Log;
-import io.spine.server.commandbus.TestResponseObserver;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
+import io.spine.server.failure.FailureBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.TestActorRequestFactory;
+import io.spine.test.command.CreateProject;
 import io.spine.test.command.event.ProjectCreated;
 import io.spine.users.TenantId;
+import org.junit.After;
+import org.junit.Before;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.mockito.Mockito.spy;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.test.Tests.newTenantUuid;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.Mockito.spy;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.

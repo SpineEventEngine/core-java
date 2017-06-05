@@ -21,15 +21,13 @@
 package io.spine.server.storage;
 
 import com.google.common.base.Supplier;
+import io.spine.server.Environment;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.server.Environment;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

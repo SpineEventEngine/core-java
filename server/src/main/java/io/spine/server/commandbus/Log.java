@@ -21,16 +21,16 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.base.CommandId;
 import io.spine.base.FailureThrowable;
 import io.spine.type.TypeName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.base.Identifiers.idToString;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
+import static java.lang.String.format;
 
 /**
  * Convenience wrapper for logging errors and warnings.

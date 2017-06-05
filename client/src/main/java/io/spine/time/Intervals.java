@@ -25,9 +25,9 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Experimental;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.Math.abs;
 import static io.spine.time.Timestamps2.compare;
 import static io.spine.time.Timestamps2.isLaterThan;
+import static java.lang.Math.abs;
 
 /**
  * A utility class for working with {@link Interval}s.

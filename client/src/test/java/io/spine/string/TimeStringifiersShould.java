@@ -22,8 +22,6 @@ package io.spine.string;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.string.StringifierRegistry;
-import org.junit.Test;
 import io.spine.string.time.TimeStringifiers;
 import io.spine.test.Tests;
 import io.spine.time.LocalDate;
@@ -31,8 +29,8 @@ import io.spine.time.LocalTime;
 import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetTime;
 import io.spine.time.ZoneOffset;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.string.time.TimeStringifiers.forDuration;
 import static io.spine.string.time.TimeStringifiers.forLocalDate;
 import static io.spine.string.time.TimeStringifiers.forLocalTime;
@@ -40,6 +38,7 @@ import static io.spine.string.time.TimeStringifiers.forOffsetDateTime;
 import static io.spine.string.time.TimeStringifiers.forOffsetTime;
 import static io.spine.string.time.TimeStringifiers.forTimestamp;
 import static io.spine.string.time.TimeStringifiers.forZoneOffset;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

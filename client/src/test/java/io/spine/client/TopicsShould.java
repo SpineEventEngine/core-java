@@ -20,8 +20,8 @@
 
 package io.spine.client;
 
-import org.junit.Test;
 import io.spine.test.Tests;
+import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 

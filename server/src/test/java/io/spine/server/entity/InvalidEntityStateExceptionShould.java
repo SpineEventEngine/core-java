@@ -21,14 +21,13 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
-import org.junit.Test;
-import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.validate.ConstraintViolation;
+import org.junit.Test;
 
+import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 
 /**
  * @author Dmytro Grankin

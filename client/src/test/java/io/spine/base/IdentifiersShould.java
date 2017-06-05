@@ -25,14 +25,11 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.identifiers.NestedMessageId;
 import io.spine.test.identifiers.SeveralFieldsId;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Identifiers.EMPTY_ID;
 import static io.spine.base.Identifiers.NULL_ID;
 import static io.spine.base.Identifiers.idToAny;
@@ -43,6 +40,9 @@ import static io.spine.protobuf.Wrapper.forLong;
 import static io.spine.protobuf.Wrapper.forString;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newUuidValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus

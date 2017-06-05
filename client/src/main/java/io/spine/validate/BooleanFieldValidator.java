@@ -21,9 +21,9 @@
 package io.spine.validate;
 
 import com.google.protobuf.Descriptors;
+import io.spine.base.FieldPath;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.base.FieldPath;
 
 import java.util.List;
 

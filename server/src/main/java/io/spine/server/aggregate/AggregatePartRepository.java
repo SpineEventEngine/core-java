@@ -20,8 +20,6 @@
 
 package io.spine.server.aggregate;
 
-import io.spine.server.BoundedContext;
-
 import java.lang.reflect.Constructor;
 
 /**
@@ -37,20 +35,11 @@ public abstract class AggregatePartRepository<I,
                                               R extends AggregateRoot<I>>
                       extends AggregateRepository<I, A> {
 
-    /** The {@code BoundedContext} in which this repository works. */
-    private final BoundedContext boundedContext;
-
     /**
      * {@inheritDoc}
      */
-    protected AggregatePartRepository(BoundedContext boundedContext) {
-        super(boundedContext);
-        this.boundedContext = boundedContext;
-    }
-
-    /** Returns the {@link BoundedContext} in which this repository works. */
-    private BoundedContext getBoundedContext() {
-        return boundedContext;
+    protected AggregatePartRepository() {
+        super();
     }
 
     /**

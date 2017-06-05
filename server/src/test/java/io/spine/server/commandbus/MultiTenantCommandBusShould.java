@@ -21,23 +21,24 @@
 package io.spine.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
-import io.spine.server.failure.FailureBus;
-import io.spine.test.command.AddTask;
-import io.spine.type.CommandClass;
-import org.junit.Test;
-import io.spine.server.commandbus.AbstractCommandBusTestSuite;
-import io.spine.test.command.CreateProject;
 import io.spine.base.Command;
 import io.spine.base.Error;
+import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.server.failure.FailureBus;
 import io.spine.test.Tests;
+import io.spine.test.command.AddTask;
+import io.spine.test.command.CreateProject;
+import io.spine.type.CommandClass;
+import org.junit.Test;
 
 import java.util.Set;
 
+import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
+import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.server.commandbus.Given.Command.addTask;
+import static io.spine.server.commandbus.Given.Command.createProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -45,10 +46,6 @@ import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
-import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
-import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
 
 public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 

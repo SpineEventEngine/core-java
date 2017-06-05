@@ -22,8 +22,8 @@ package io.spine.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
 import io.spine.annotation.Subscribe;
+import io.spine.base.CommandContext;
 import io.spine.type.FailureClass;
 
 import javax.annotation.CheckReturnValue;

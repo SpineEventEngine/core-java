@@ -23,21 +23,16 @@ package io.spine.server.event;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import io.spine.server.event.EventStreamQuery;
 import io.spine.base.CommandContext;
-import io.spine.base.Commands;
 import io.spine.base.Event;
 import io.spine.test.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
-import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -45,13 +40,13 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.collect.Sets.newConcurrentHashSet;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.type.TypeName.of;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 /**
  * @author Dmytro Dashenkov

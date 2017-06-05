@@ -23,8 +23,8 @@ package io.spine.server.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Supplier;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.Environment;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 
 import javax.annotation.Nullable;
 

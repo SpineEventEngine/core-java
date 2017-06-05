@@ -22,10 +22,10 @@ package io.spine.server.entity.storage;
 
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityWithLifecycle;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.beans.BeanInfo;
 import java.beans.IntrospectionException;

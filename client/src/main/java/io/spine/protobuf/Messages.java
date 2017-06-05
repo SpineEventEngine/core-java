@@ -29,8 +29,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.protobuf.AnyPacker.pack;
+import static java.lang.String.format;
 
 /**
  * Utility class for working with {@link Message} objects.

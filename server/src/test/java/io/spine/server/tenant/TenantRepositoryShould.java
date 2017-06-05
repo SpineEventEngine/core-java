@@ -22,17 +22,17 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.users.TenantId;
+import org.junit.Before;
+import org.junit.Test;
 
+import static io.spine.test.Tests.newTenantUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static io.spine.test.Tests.newTenantUuid;
 
 /**
  * @author Alexander Yevsyukov

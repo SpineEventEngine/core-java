@@ -24,20 +24,20 @@ import com.google.common.base.Optional;
 import com.google.common.base.Splitter;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Response;
-import io.spine.client.ActorRequestFactory;
-import io.spine.protobuf.Wrapper;
-import io.spine.server.BoundedContext;
-import io.spine.server.entity.idfunc.IdCommandFunction;
-import io.spine.test.TestActorRequestFactory;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.Response;
+import io.spine.client.ActorRequestFactory;
 import io.spine.io.StreamObservers;
+import io.spine.protobuf.Wrapper;
 import io.spine.protobuf.Wrappers;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
+import io.spine.server.entity.idfunc.IdCommandFunction;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.validate.StringValueValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -180,7 +180,7 @@ public class AggregateRepositoryViewsShould {
         };
 
         private SHRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
 
         /**

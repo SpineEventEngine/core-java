@@ -23,11 +23,10 @@ package io.spine.server.stand;
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
-import org.junit.Test;
-import io.spine.type.TypeUrl;
-import io.spine.server.stand.AggregateStateId;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
+import io.spine.type.TypeUrl;
+import org.junit.Test;
 
 import static org.junit.Assert.assertTrue;
 

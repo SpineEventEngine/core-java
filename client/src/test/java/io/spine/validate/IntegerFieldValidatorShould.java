@@ -23,9 +23,9 @@ package io.spine.validate;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
-import org.junit.Test;
 import io.spine.base.FieldPath;
 import io.spine.protobuf.AnyPacker;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

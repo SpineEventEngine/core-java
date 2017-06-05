@@ -86,6 +86,7 @@ public class AggregateCommandEndpointShould {
         boundedContext.getEventBus().register(subscriber);
 
         repository = new ProjectAggregateRepository(boundedContext);
+        boundedContext.register(repository);
         repositorySpy = spy(repository);
     }
 
@@ -252,7 +253,7 @@ public class AggregateCommandEndpointShould {
     private static class ProjectAggregateRepository
         extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
             initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
     }

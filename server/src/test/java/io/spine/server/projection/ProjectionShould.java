@@ -24,21 +24,21 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Given;
 import io.spine.type.EventClass;
 import io.spine.validate.StringValueValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class ProjectionShould {
 

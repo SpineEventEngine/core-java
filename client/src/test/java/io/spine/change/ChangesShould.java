@@ -23,32 +23,15 @@ package io.spine.change;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import io.spine.change.BooleanChange;
-import io.spine.change.BytesChange;
-import io.spine.change.Changes;
-import io.spine.change.DoubleChange;
-import io.spine.change.Fixed32Change;
-import io.spine.change.Fixed64Change;
-import io.spine.change.FloatChange;
-import io.spine.change.Int32Change;
-import io.spine.change.Int64Change;
-import io.spine.change.SInt32Change;
-import io.spine.change.SInt64Change;
-import io.spine.change.Sfixed32Change;
-import io.spine.change.Sfixed64Change;
-import io.spine.change.StringChange;
-import io.spine.change.TimestampChange;
-import io.spine.change.UInt32Change;
-import io.spine.change.UInt64Change;
 import io.spine.test.TimeTests;
 import io.spine.time.Time;
+import org.junit.Test;
 
 import java.util.UUID;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check handling
                                         of preconditions */,

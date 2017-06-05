@@ -21,11 +21,11 @@
 package io.spine.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.Executor;
 

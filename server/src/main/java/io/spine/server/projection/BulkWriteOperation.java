@@ -22,9 +22,9 @@ package io.spine.server.projection;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.time.Timestamps2;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import io.spine.time.Timestamps2;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -35,8 +35,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.protobuf.util.Timestamps.add;
-import static java.lang.String.format;
 import static io.spine.time.Time.getCurrentTime;
+import static java.lang.String.format;
 
 /**
  * Represents a write operation for the projection storage, designed to modify

@@ -24,22 +24,21 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
-import org.junit.Test;
 import io.spine.test.Tests;
 import io.spine.type.TypeUrl;
 import io.spine.users.UserId;
+import org.junit.Test;
 
 import java.util.Iterator;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newUserId;
 import static io.spine.test.Tests.newUuidValue;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 
 public class AnyPackerShould {
 

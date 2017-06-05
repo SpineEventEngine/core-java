@@ -40,9 +40,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertBefore;
 import static io.spine.test.Verify.assertClassNonInstantiable;
@@ -76,6 +73,9 @@ import static io.spine.test.Verify.assertThrowsWithCause;
 import static io.spine.test.Verify.assertZero;
 import static io.spine.test.Verify.denyContainsKey;
 import static io.spine.test.Verify.mangledException;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 @SuppressWarnings({"ClassWithTooManyMethods", "OverlyComplexClass"})
 public class VerifyShould {

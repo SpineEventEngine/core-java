@@ -23,17 +23,16 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.server.aggregate.AggregatePart;
-import org.junit.Test;
-import io.spine.server.entity.InvalidEntityStateException;
 import io.spine.test.entity.number.NaturalNumber;
+import org.junit.Test;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 /**
  * @author Illia Shepilov

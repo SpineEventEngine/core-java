@@ -21,12 +21,9 @@ package io.spine.server;
 
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
-import io.spine.annotation.Subscribe;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.server.projection.Projection;
@@ -37,6 +34,9 @@ import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.commandservice.ProjectId;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectValidatingBuilder;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Set;
 
@@ -179,7 +179,7 @@ public class QueryServiceShould {
             extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
 
         private ProjectDetailsRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 

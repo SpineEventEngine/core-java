@@ -22,9 +22,6 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.server.aggregate.AggregatePart;
 import io.spine.base.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
@@ -38,11 +35,13 @@ import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.TaskAdded;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.server.aggregate.AggregatePartRepositoryLookup.createLookup;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 public class AggregatePartRepositoryLookupShould {
 
@@ -138,7 +137,7 @@ public class AggregatePartRepositoryLookupShould {
     private static class ProjectPartRepository
             extends AggregatePartRepository<ProjectId, ProjectPart, ProjectRoot> {
         private ProjectPartRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -182,7 +181,7 @@ public class AggregatePartRepositoryLookupShould {
     private static class TaskAggregateRepository extends AggregateRepository<TaskId,
                                                                              TaskAggregatePart> {
         private TaskAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 }

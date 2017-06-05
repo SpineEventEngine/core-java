@@ -25,15 +25,15 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import org.junit.Test;
 import io.spine.base.Identifier.Type;
 import io.spine.protobuf.Wrapper;
+import org.junit.Test;
 
+import static io.spine.protobuf.Wrapper.forUnsignedInteger;
+import static io.spine.protobuf.Wrapper.forUnsignedLong;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.protobuf.Wrapper.forUnsignedInteger;
-import static io.spine.protobuf.Wrapper.forUnsignedLong;
 
 public class IdentifierShould {
 

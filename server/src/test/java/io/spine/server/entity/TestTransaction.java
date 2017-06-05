@@ -20,9 +20,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.base.Version;
 import io.spine.base.EventContext;
-import io.spine.server.entity.Transaction;
+import io.spine.base.Version;
 
 import java.lang.reflect.InvocationTargetException;
 

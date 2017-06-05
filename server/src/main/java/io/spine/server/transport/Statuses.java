@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server;
+package io.spine.server.transport;
 
 import io.grpc.Metadata;
 import io.grpc.Status;
@@ -39,6 +39,7 @@ import static io.grpc.Status.INVALID_ARGUMENT;
 public class Statuses {
 
     private Statuses() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

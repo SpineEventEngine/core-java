@@ -24,7 +24,6 @@ import com.google.protobuf.Message;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
-
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;

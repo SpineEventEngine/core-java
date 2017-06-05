@@ -21,14 +21,14 @@
 package io.spine.server.command;
 
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.client.ActorRequestFactory;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.validate.StringValueValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.newUuidValue;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

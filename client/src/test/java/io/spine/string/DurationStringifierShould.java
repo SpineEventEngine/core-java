@@ -21,11 +21,9 @@
 package io.spine.string;
 
 import com.google.protobuf.Duration;
-import org.junit.Test;
-import io.spine.string.AbstractStringifierTest;
-import io.spine.string.Stringifier;
 import io.spine.string.time.TimeStringifiers;
 import io.spine.time.Durations2;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

@@ -23,8 +23,6 @@ package io.spine.test;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
@@ -32,6 +30,8 @@ import io.spine.base.CommandId;
 import io.spine.base.Identifiers;
 import io.spine.client.ActorRequestFactory;
 import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneOffsets;
+import io.spine.users.TenantId;
 import io.spine.users.UserId;
 
 import static io.spine.test.Tests.newUserId;

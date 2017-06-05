@@ -22,11 +22,8 @@ package io.spine.protobuf;
 
 import com.google.protobuf.ByteString;
 import com.google.protobuf.Message;
-import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.protobuf.Wrapper.forBoolean;
 import static io.spine.protobuf.Wrapper.forBytes;
 import static io.spine.protobuf.Wrapper.forDouble;
@@ -37,6 +34,8 @@ import static io.spine.protobuf.Wrapper.forString;
 import static io.spine.protobuf.Wrapper.forUnsignedInteger;
 import static io.spine.protobuf.Wrapper.forUnsignedLong;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus

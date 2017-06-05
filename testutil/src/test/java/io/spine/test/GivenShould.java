@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
-import org.junit.Test;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregatePart;
@@ -35,9 +34,10 @@ import io.spine.server.projection.Projection;
 import io.spine.validate.StringValueValidatingBuilder;
 import io.spine.validate.TimestampValidatingBuilder;
 import io.spine.validate.UInt32ValueValidatingBuilder;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class GivenShould {
 

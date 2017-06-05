@@ -24,13 +24,6 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Event;
-import io.spine.base.EventId;
-import io.spine.base.Events;
-import io.spine.base.Version;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.base.EventContext;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.EventFactory;
 import io.spine.string.Stringifiers;
@@ -39,13 +32,13 @@ import io.spine.test.TestActorRequestFactory;
 import io.spine.test.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.time.Time;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Events.checkValid;
 import static io.spine.base.Events.getActor;
 import static io.spine.base.Events.getMessage;
@@ -58,6 +51,8 @@ import static io.spine.protobuf.Wrapper.forBoolean;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newUuidValue;
 import static io.spine.test.TimeTests.Past.minutesAgo;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Litus

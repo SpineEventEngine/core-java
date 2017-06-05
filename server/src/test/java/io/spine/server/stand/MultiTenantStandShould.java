@@ -25,26 +25,25 @@ import com.google.protobuf.Message;
 import io.spine.base.Responses;
 import io.spine.base.Version;
 import io.spine.client.ActorRequestFactory;
+import io.spine.client.Query;
+import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
+import io.spine.test.Tests;
+import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.users.TenantId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import io.spine.server.stand.StandStorage;
-import io.spine.client.Query;
-import io.spine.client.QueryResponse;
-import io.spine.protobuf.AnyPacker;
-import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.test.Tests;
-import io.spine.test.commandservice.customer.Customer;
 
 import java.util.Map;
 
+import static io.spine.test.Tests.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Tests.newTenantUuid;
 
 /**
  * @author Alexander Yevsyukov

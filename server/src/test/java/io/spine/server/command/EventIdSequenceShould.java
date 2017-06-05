@@ -20,16 +20,16 @@
 
 package io.spine.server.command;
 
-import org.junit.Test;
 import io.spine.base.Commands;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static io.spine.server.command.EventIdSequence.LEADING_ZERO;
 import static io.spine.server.command.EventIdSequence.MAX_ONE_DIGIT_SIZE;
 import static io.spine.server.command.EventIdSequence.SEPARATOR;
 import static io.spine.server.command.EventIdSequence.on;
 import static io.spine.validate.Validate.isDefault;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov

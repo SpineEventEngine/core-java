@@ -21,13 +21,13 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.Identifiers;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

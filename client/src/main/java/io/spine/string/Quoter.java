@@ -26,8 +26,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.regex.Pattern.compile;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.util.regex.Pattern.compile;
 
 /**
  * Encloses and discloses the {@code String} objects with double quotes.

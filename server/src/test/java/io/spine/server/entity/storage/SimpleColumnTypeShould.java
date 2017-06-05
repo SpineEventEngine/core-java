@@ -21,7 +21,6 @@
 package io.spine.server.entity.storage;
 
 import org.junit.Test;
-import io.spine.server.entity.storage.ColumnType;
 
 import static org.junit.Assert.assertSame;
 

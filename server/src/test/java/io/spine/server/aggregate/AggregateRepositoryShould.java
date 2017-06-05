@@ -411,7 +411,7 @@ public class AggregateRepositoryShould {
                                                               .build();
 
         protected ProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
             initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
 

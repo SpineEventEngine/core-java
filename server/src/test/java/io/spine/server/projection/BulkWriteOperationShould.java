@@ -22,14 +22,12 @@ package io.spine.server.projection;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import io.spine.server.projection.BulkWriteOperation;
 import io.spine.server.projection.BulkWriteOperation.FlushCallback;
-import io.spine.server.projection.Projection;
 import io.spine.test.TimeTests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectValidatingBuilder;
 import io.spine.time.Durations2;
+import org.junit.Test;
 
 import java.util.HashSet;
 import java.util.Set;

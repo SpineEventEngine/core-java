@@ -22,7 +22,6 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.ByteString;
-import io.spine.change.Preconditions;
 import org.junit.Test;
 
 import static io.spine.change.Preconditions.checkNewValueNotEmpty;

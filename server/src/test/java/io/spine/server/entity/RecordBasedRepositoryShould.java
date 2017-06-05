@@ -27,10 +27,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.server.entity.FieldMasks;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
@@ -38,19 +34,22 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Given;
 import io.spine.test.Tests;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertNotContains;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov

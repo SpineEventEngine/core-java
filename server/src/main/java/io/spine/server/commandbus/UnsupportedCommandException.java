@@ -20,11 +20,11 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.type.CommandClass;
 import io.spine.base.Command;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Commands;
 import io.spine.base.Error;
+import io.spine.type.CommandClass;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;

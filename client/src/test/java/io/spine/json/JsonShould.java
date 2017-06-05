@@ -25,24 +25,23 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
-import io.spine.type.TypeUrl;
-import org.junit.Test;
-import io.spine.json.Json;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.type.KnownTypes;
+import io.spine.type.TypeUrl;
 import io.spine.users.UserId;
+import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.json.Json.fromJson;
 import static io.spine.json.Json.toCompactJson;
 import static io.spine.json.Json.toJson;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Alexander Yevsyukov

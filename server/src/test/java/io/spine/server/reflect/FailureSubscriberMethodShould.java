@@ -20,11 +20,11 @@
 package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
-import io.spine.base.CommandContext;
 import io.spine.annotation.Subscribe;
+import io.spine.base.CommandContext;
 import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.test.reflect.ReflectFailures;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

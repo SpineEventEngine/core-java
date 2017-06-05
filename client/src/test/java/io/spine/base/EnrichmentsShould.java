@@ -25,24 +25,23 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.base.EventContext;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.EventTests;
 import io.spine.test.TestEventFactory;
 import io.spine.time.Time;
 import io.spine.type.TypeName;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Enrichments.isEnrichmentEnabled;
 import static io.spine.base.EventsShould.newEventContext;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.Wrapper.forBoolean;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov

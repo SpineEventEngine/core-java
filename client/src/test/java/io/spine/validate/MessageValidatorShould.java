@@ -27,14 +27,10 @@ import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.option.Time;
-import io.spine.protobuf.Wrapper;
-import io.spine.test.validate.msg.EnclosedMessageFieldValueWithCustomInvalidMessage;
-import io.spine.test.validate.msg.EntityIdIntFieldValue;
-import io.spine.test.validate.msg.EntityIdMsgFieldValue;
-import org.junit.Test;
 import io.spine.base.FieldPath;
 import io.spine.option.OptionsProto;
+import io.spine.option.Time;
+import io.spine.protobuf.Wrapper;
 import io.spine.test.validate.msg.CustomMessageRequiredByteStringFieldValue;
 import io.spine.test.validate.msg.CustomMessageRequiredEnumFieldValue;
 import io.spine.test.validate.msg.CustomMessageRequiredMsgFieldValue;
@@ -47,11 +43,14 @@ import io.spine.test.validate.msg.DecimalMinIncNumberFieldValue;
 import io.spine.test.validate.msg.DecimalMinNotIncNumberFieldValue;
 import io.spine.test.validate.msg.DigitsCountNumberFieldValue;
 import io.spine.test.validate.msg.EnclosedMessageFieldValue;
+import io.spine.test.validate.msg.EnclosedMessageFieldValueWithCustomInvalidMessage;
 import io.spine.test.validate.msg.EnclosedMessageFieldValueWithoutAnnotationFieldValueWithCustomInvalidMessage;
 import io.spine.test.validate.msg.EnclosedMessageWithoutAnnotationFieldValue;
 import io.spine.test.validate.msg.EntityIdByteStringFieldValue;
 import io.spine.test.validate.msg.EntityIdDoubleFieldValue;
+import io.spine.test.validate.msg.EntityIdIntFieldValue;
 import io.spine.test.validate.msg.EntityIdLongFieldValue;
+import io.spine.test.validate.msg.EntityIdMsgFieldValue;
 import io.spine.test.validate.msg.EntityIdRepeatedFieldValue;
 import io.spine.test.validate.msg.EntityIdStringFieldValue;
 import io.spine.test.validate.msg.MaxNumberFieldValue;
@@ -67,20 +66,20 @@ import io.spine.test.validate.msg.TimeInFutureFieldValue;
 import io.spine.test.validate.msg.TimeInPastFieldValue;
 import io.spine.test.validate.msg.TimeWithoutOptsFieldValue;
 import io.spine.time.Durations2;
-import io.spine.validate.ConstraintViolation;
+import org.junit.Test;
 
 import java.util.List;
 
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.test.Verify.assertSize;
+import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.test.Verify.assertSize;
-import static io.spine.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Litus

@@ -30,8 +30,6 @@ import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Commands;
 import io.spine.base.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
@@ -43,8 +41,8 @@ import java.util.Random;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.protobuf.Messages.builderFor;
+import static java.lang.String.format;
 
 /**
  * Utility for creating simple stubs for generated messages, DTOs (like {@link Event} and

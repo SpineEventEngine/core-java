@@ -22,10 +22,7 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.change.LongMismatch;
-import io.spine.change.ValueMismatch;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.LongMismatch.expectedNonZero;
 import static io.spine.change.LongMismatch.expectedZero;
@@ -34,6 +31,7 @@ import static io.spine.change.LongMismatch.unpackActual;
 import static io.spine.change.LongMismatch.unpackExpected;
 import static io.spine.change.LongMismatch.unpackNewValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class LongMismatchShould {
 

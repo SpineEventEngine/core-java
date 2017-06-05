@@ -24,8 +24,8 @@ import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordStorage;
 
 import java.util.Collection;
 import java.util.Iterator;

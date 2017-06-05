@@ -26,8 +26,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.storage.RecordStorage;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
 import java.util.Map;

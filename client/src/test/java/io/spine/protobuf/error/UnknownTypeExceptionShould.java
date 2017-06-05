@@ -23,9 +23,9 @@ package io.spine.protobuf.error;
 import io.spine.type.UnknownTypeException;
 import org.junit.Test;
 
+import static io.spine.base.Identifiers.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
 
 public class UnknownTypeExceptionShould {
 

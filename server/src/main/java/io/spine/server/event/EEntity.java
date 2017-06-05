@@ -24,7 +24,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.base.Events;
-import io.spine.annotation.Internal;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.type.TypeName;
 
@@ -35,8 +34,7 @@ import java.util.Comparator;
  *
  * @author Alexander Yevsyukov
  */
-@Internal
-public class EventEntity extends AbstractEntity<EventId, Event> {
+class EEntity extends AbstractEntity<EventId, Event> {
 
     public static final String CREATED_TIME_COLUMN = "created";
 
@@ -45,9 +43,9 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     /**
      * Compares event entities by timestamps of events.
      */
-    private static final Comparator<EventEntity> comparator = new Comparator<EventEntity>() {
+    private static final Comparator<EEntity> comparator = new Comparator<EEntity>() {
         @Override
-        public int compare(EventEntity e1, EventEntity e2) {
+        public int compare(EEntity e1, EEntity e2) {
             final Event event1 = e1.getState();
             final Event event2 = e2.getState();
             final int result = Events.eventComparator()
@@ -56,11 +54,11 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
         }
     };
 
-    EventEntity(EventId id) {
+    EEntity(EventId id) {
         super(id);
     }
 
-    EventEntity(Event event) {
+    EEntity(Event event) {
         this(event.getId());
         updateState(event);
     }
@@ -78,7 +76,7 @@ public class EventEntity extends AbstractEntity<EventId, Event> {
     /**
      * Returns comparator which sorts event entities chronologically.
      */
-    static Comparator<EventEntity> comparator() {
+    static Comparator<EEntity> comparator() {
         return comparator;
     }
 }

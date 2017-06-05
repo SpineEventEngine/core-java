@@ -23,11 +23,11 @@ package io.spine.server.storage;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import io.spine.test.Tests;
+import io.spine.test.Verify;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import io.spine.test.Tests;
-import io.spine.test.Verify;
 
 import java.util.Collection;
 import java.util.HashSet;

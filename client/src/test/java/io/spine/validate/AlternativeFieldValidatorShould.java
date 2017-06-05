@@ -21,11 +21,11 @@
 package io.spine.validate;
 
 import com.google.protobuf.Descriptors.Descriptor;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.FieldPath;
 import io.spine.test.validate.msg.altfields.MessageWithMissingField;
 import io.spine.test.validate.msg.altfields.PersonName;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.List;
 

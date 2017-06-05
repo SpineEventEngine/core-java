@@ -25,13 +25,11 @@ import com.google.common.base.Optional;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.annotation.Internal;
-import io.spine.base.EventContext;
-import io.spine.base.Event;
-import io.spine.base.Response;
 import io.spine.annotation.Subscribe;
+import io.spine.base.Event;
+import io.spine.base.EventContext;
+import io.spine.base.Response;
 import io.spine.envelope.EventEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;
@@ -41,6 +39,8 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.EventClass;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -49,7 +49,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.

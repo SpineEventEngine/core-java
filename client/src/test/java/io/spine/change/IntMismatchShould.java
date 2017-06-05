@@ -24,9 +24,9 @@ import com.google.common.testing.NullPointerTester;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class IntMismatchShould {
 

@@ -23,11 +23,11 @@ package io.spine.server.procman;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
 import io.spine.server.commandbus.CommandBus;
+import org.junit.Test;
 
 import java.util.List;
 

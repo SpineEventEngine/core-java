@@ -21,11 +21,10 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import io.spine.server.aggregate.AggregateBuilder;
 import io.spine.test.TimeTests;
 import io.spine.time.Time;
 import io.spine.validate.TimestampValidatingBuilder;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

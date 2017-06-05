@@ -24,12 +24,12 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.client.ActorRequestFactory;
-import io.spine.server.aggregate.Apply;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.validate.StringValueValidatingBuilder;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

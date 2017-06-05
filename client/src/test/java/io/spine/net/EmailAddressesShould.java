@@ -22,13 +22,12 @@ package io.spine.net;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.net.EmailAddresses;
 
+import static io.spine.net.EmailAddresses.valueOf;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.net.EmailAddresses.valueOf;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Yevsyukov

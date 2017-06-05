@@ -22,8 +22,8 @@ package io.spine.server.storage;
 
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.command.AddTask;
-import io.spine.test.storage.command.StartProject;
 import io.spine.test.storage.command.CreateProject;
+import io.spine.test.storage.command.StartProject;
 import io.spine.test.storage.event.ProjectCreated;
 
 import static io.spine.base.Identifiers.newUuid;

@@ -23,39 +23,37 @@ package io.spine.server.commandbus;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Event;
-import io.spine.base.Events;
-import io.spine.server.command.CommandHistory;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.event.ProjectCreated;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import io.spine.test.command.CreateProject;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.Event;
+import io.spine.base.Events;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
-import io.spine.server.commandbus.CommandBus;
-import io.spine.server.commandbus.Given;
+import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
+import io.spine.test.command.AddTask;
+import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
+import io.spine.test.command.event.ProjectCreated;
 import io.spine.test.command.event.ProjectStarted;
 import io.spine.test.command.event.TaskAdded;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.test.Tests.nullRef;
 
 /**
  * @author Alexander Litus

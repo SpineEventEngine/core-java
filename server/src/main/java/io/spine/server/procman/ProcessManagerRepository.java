@@ -20,17 +20,16 @@
 
 package io.spine.server.procman;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.envelope.EventEnvelope;
-import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcherDelegate;
+import io.spine.server.commandbus.DelegatingCommandDispatcher;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.server.event.EventBus;
@@ -60,9 +59,6 @@ public abstract class ProcessManagerRepository<I,
                 extends EventDispatchingRepository<I, P, S>
                 implements CommandDispatcherDelegate {
 
-    /** The {@code BoundedContext} in which this repository works. */
-    private final BoundedContext boundedContext;
-
     private final GetTargetIdFromCommand<I, Message> getIdFromCommandMessage =
             GetTargetIdFromCommand.newInstance();
 
@@ -73,14 +69,15 @@ public abstract class ProcessManagerRepository<I,
     private Set<EventClass> eventClasses;
 
     /** {@inheritDoc} */
-    protected ProcessManagerRepository(BoundedContext boundedContext) {
+    protected ProcessManagerRepository() {
         super(EventDispatchingRepository.<I>producerFromFirstMessageField());
-        this.boundedContext = boundedContext;
     }
 
-    /** Returns the {@link BoundedContext} in which this repository works. */
-    private BoundedContext getBoundedContext() {
-        return boundedContext;
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        getBoundedContext().getCommandBus()
+                           .register(DelegatingCommandDispatcher.of(this));
     }
 
     @Override
@@ -158,11 +155,6 @@ public abstract class ProcessManagerRepository<I,
         checkEventClass(event);
 
         super.dispatch(event);
-    }
-
-    @VisibleForTesting
-    void dispatch(Event event) throws IllegalArgumentException {
-        dispatch(EventEnvelope.of(event));
     }
 
     @Override

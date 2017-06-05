@@ -22,10 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import io.spine.server.commandbus.AbstractCommandBusTestSuite;
-import io.spine.server.commandbus.CommandScheduler;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
@@ -33,19 +29,13 @@ import io.spine.protobuf.Wrapper;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
@@ -55,6 +45,14 @@ import static io.spine.server.commandbus.Given.Command.startProject;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.time.Durations2.minutes;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 
 public class CommandSchedulingShould extends AbstractCommandBusTestSuite {

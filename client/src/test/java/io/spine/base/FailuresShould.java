@@ -22,14 +22,10 @@ package io.spine.base;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.Commands;
-import io.spine.base.Failures;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.base.Failures.FAILURE_ID_FORMAT;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

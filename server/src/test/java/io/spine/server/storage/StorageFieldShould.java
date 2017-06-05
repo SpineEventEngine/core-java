@@ -20,11 +20,10 @@
 
 package io.spine.server.storage;
 
-import org.junit.Test;
-import io.spine.server.storage.StorageField;
 import io.spine.server.aggregate.storage.AggregateField;
 import io.spine.server.event.storage.EventContextField;
 import io.spine.server.event.storage.EventField;
+import org.junit.Test;
 
 import java.lang.reflect.Method;
 

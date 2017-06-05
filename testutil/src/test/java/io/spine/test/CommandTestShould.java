@@ -23,20 +23,20 @@ package io.spine.test;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.base.Commands;
 import io.spine.client.ActorRequestFactory;
 import io.spine.time.Time;
+import io.spine.time.ZoneOffsets;
+import io.spine.users.TenantId;
+import org.junit.Before;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static io.spine.test.Tests.newUserUuid;
 import static io.spine.test.Tests.newUuidValue;
 import static io.spine.validate.Validate.checkNotDefault;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov

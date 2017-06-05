@@ -20,14 +20,14 @@
 
 package io.spine.server.event;
 
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
 import io.spine.validate.MessageValidator;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;

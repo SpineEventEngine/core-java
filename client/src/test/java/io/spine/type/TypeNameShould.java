@@ -25,8 +25,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt64Value;
-import org.junit.Test;
-import io.spine.type.TypeUrl;
 import io.spine.base.Command;
 import io.spine.base.Commands;
 import io.spine.base.Event;
@@ -38,10 +36,11 @@ import io.spine.server.command.EventFactory;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.time.Time;
+import org.junit.Test;
 
+import static io.spine.test.Tests.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static io.spine.test.Tests.newUuidValue;
 
 /**
  * Provides only class-level tests.

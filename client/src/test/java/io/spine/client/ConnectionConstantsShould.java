@@ -21,10 +21,9 @@
 package io.spine.client;
 
 import org.junit.Test;
-import io.spine.client.ConnectionConstants;
 
-import static org.junit.Assert.assertNotEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author Alexander Yevsyukov

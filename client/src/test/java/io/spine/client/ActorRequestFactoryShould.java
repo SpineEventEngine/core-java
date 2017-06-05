@@ -22,26 +22,25 @@ package io.spine.client;
 import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.spine.client.ActorRequestFactory;
-import org.junit.Test;
 import io.spine.base.ActorContext;
 import io.spine.test.Tests;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.users.UserId;
+import org.junit.Test;
 
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.test.Tests.newUserId;
+import static io.spine.time.Timestamps2.isLaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.test.Tests.newUserId;
-import static io.spine.time.Timestamps2.isLaterThan;
 
 /**
  * Base tests for the {@linkplain ActorRequestFactory} descendants.

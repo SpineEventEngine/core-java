@@ -21,11 +21,11 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Message;
-import io.spine.util.Exceptions;
 import io.spine.string.Stringifier;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
+import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

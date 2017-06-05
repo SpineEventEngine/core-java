@@ -23,10 +23,10 @@ package io.spine.server.reflect;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.EventContext;
 import io.spine.test.Tests;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

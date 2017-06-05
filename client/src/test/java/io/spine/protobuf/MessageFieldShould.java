@@ -22,16 +22,15 @@ package io.spine.protobuf;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
-import static org.junit.Assert.assertEquals;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.protobuf.MessageField.getFieldDescriptor;
 import static io.spine.protobuf.MessageField.getFieldName;
 import static io.spine.protobuf.MessageField.toAccessorMethodName;
+import static org.junit.Assert.assertEquals;
 
 public class MessageFieldShould {
 

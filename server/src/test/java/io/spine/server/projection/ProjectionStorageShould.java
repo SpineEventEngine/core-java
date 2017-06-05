@@ -24,9 +24,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageShould;
@@ -34,6 +31,9 @@ import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.Task;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -42,16 +42,16 @@ import java.util.Map;
 
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
-import static java.lang.String.format;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
 import static io.spine.time.Time.getCurrentTime;
+import static java.lang.String.format;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Projection storage tests.

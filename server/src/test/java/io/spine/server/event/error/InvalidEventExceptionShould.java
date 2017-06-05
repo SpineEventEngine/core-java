@@ -21,10 +21,10 @@
 package io.spine.server.event.error;
 
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.event.InvalidEventException;
 import io.spine.validate.ConstraintViolation;
+import org.junit.Test;
 
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;

@@ -22,34 +22,33 @@ package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.server.procman.ProcessManagerRepositoryShould;
-import io.spine.test.command.AddTask;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.test.procman.Project;
-import io.spine.type.CommandClass;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
+import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
+import io.spine.test.command.event.ProjectCreated;
 import io.spine.test.command.event.ProjectStarted;
 import io.spine.test.command.event.TaskAdded;
+import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
+import io.spine.type.CommandClass;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.base.Identifiers.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
 
 /**
  * @author Alexander Yevsyukov
@@ -159,8 +158,7 @@ public class CommandDispatcherRegistryShould {
     @Test
     public void accept_empty_process_manager_repository_dispatcher() {
         final ProcessManagerRepoDispatcher pmRepo =
-                new ProcessManagerRepoDispatcher(BoundedContext.newBuilder()
-                                                               .build());
+                new ProcessManagerRepoDispatcher();
         registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 
@@ -225,10 +223,10 @@ public class CommandDispatcherRegistryShould {
     //TODO:2017-02-11:alexander.yevsyukov: Fix inter-test dependency.
     private static class ProcessManagerRepoDispatcher
             extends ProcessManagerRepository<ProjectId,
-            ProcessManagerRepositoryShould.TestProcessManager, Project> {
+            TestProcessManager, Project> {
 
-        protected ProcessManagerRepoDispatcher(BoundedContext boundedContext) {
-            super(boundedContext);
+        protected ProcessManagerRepoDispatcher() {
+            super();
         }
 
         /**

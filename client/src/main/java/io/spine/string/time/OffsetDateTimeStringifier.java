@@ -20,10 +20,10 @@
 
 package io.spine.string.time;
 
-import io.spine.util.Exceptions;
 import io.spine.string.Stringifier;
 import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetDateTimes;
+import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;

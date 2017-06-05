@@ -22,12 +22,9 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.Function;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.ColumnRecords;
-import io.spine.server.entity.storage.ColumnTypeRegistry;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.Tests;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -37,6 +34,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -46,8 +45,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Verify.assertContainsAll;
 
 /**
  * @author Dmytro Dashenkov

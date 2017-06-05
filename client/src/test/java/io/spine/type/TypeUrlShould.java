@@ -30,20 +30,19 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
-import io.spine.protobuf.Wrapper;
-import io.spine.test.TestActorRequestFactory;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.base.CommandValidationError;
 import io.spine.client.ActorRequestFactory;
+import io.spine.protobuf.Wrapper;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.users.UserId;
-import io.spine.type.TypeName;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.base.Identifiers.newUuid;
 import static io.spine.type.TypeUrl.composeTypeUrl;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class TypeUrlShould {
 

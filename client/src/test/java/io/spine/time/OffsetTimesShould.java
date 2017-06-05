@@ -27,17 +27,10 @@ import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Before;
 import org.junit.Test;
-import io.spine.time.AbstractZonedTimeTest;
-import io.spine.time.Durations2;
-import io.spine.time.LocalTime;
-import io.spine.time.LocalTimes;
-import io.spine.time.OffsetTimes;
-import io.spine.time.ZoneOffset;
 
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.random;
 import static io.spine.time.Calendars.at;
@@ -59,6 +52,7 @@ import static io.spine.time.Time.MINUTES_PER_HOUR;
 import static io.spine.time.Time.NANOS_PER_MILLISECOND;
 import static io.spine.time.Time.SECONDS_PER_MINUTE;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Aleksandrov

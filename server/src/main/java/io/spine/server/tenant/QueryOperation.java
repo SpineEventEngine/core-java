@@ -20,9 +20,9 @@
 
 package io.spine.server.tenant;
 
-import io.spine.client.QueryId;
 import io.spine.annotation.Internal;
 import io.spine.client.Query;
+import io.spine.client.QueryId;
 
 /**
  * A tenant-aware operation performed in response to a query.

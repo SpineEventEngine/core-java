@@ -20,18 +20,17 @@
 
 package io.spine.time;
 
-import io.spine.time.ZoneOffsets;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 
-import static java.lang.Math.abs;
 import static io.spine.test.Tests.random;
 import static io.spine.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static io.spine.time.ZoneOffsets.MAX_MINUTES_OFFSET;
 import static io.spine.time.ZoneOffsets.MIN_HOURS_OFFSET;
 import static io.spine.time.ZoneOffsets.MIN_MINUTES_OFFSET;
+import static java.lang.Math.abs;
 
 /**
  * Abstract base for test of time with offset.

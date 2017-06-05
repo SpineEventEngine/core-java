@@ -19,15 +19,15 @@
  */
 package io.spine.server.stand;
 
-import io.spine.client.Topic;
-import io.spine.server.tenant.TenantFunction;
-import io.spine.type.TypeUrl;
-import io.spine.users.TenantId;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionId;
 import io.spine.client.Subscriptions;
 import io.spine.client.Target;
+import io.spine.client.Topic;
+import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
+import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.HashSet;

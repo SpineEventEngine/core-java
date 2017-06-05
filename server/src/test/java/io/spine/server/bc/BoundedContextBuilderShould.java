@@ -21,9 +21,6 @@
 package io.spine.server.bc;
 
 import com.google.common.base.Supplier;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
@@ -32,6 +29,9 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

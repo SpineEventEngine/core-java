@@ -22,15 +22,15 @@ package io.spine.server.tenant;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.users.TenantId;
+import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov

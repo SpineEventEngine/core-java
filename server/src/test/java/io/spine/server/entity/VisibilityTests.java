@@ -21,10 +21,10 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.entity.failure.CannotModifyArchivedEntity;
 import io.spine.server.entity.failure.CannotModifyDeletedEntity;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.concurrent.ThreadLocalRandom;
 

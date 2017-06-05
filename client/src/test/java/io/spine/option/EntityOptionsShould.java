@@ -21,14 +21,14 @@
 package io.spine.option;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.test.Tests;
 import io.spine.test.options.FullAccessAggregate;
 import io.spine.test.options.SubscribableAggregate;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.option.EntityOptions.getVisibility;
+import static org.junit.Assert.assertEquals;
 
 /**
  * See `spine/test/option/entity_options_should.proto` for definitions of types used in the tests.

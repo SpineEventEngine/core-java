@@ -24,14 +24,12 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import org.junit.Test;
-import io.spine.base.Error;
-import io.spine.base.MetadataConverter;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.fail;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Grankin

@@ -24,16 +24,14 @@ import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.event.Given;
-import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.event.enrich.EventEnricher.SameTransition;
-import io.spine.server.event.enrich.FieldEnricher;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
 import io.spine.users.UserId;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 

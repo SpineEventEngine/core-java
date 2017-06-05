@@ -24,16 +24,19 @@ import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
-import io.spine.reflect.GenericTypeIndex;
-import io.spine.server.storage.Storage;
-import io.spine.type.ClassName;
 import io.spine.base.Identifiers;
+import io.spine.reflect.GenericTypeIndex;
+import io.spine.server.BoundedContext;
+import io.spine.server.stand.Stand;
+import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
+import javax.annotation.OverridingMethodsMustInvokeSuper;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -52,10 +55,18 @@ import static io.spine.util.Exceptions.unsupported;
  * @author Alexander Yevsyukov
  */
 public abstract class Repository<I, E extends Entity<I, ?>>
-                implements RepositoryView<I, E>,
-                           AutoCloseable {
+                implements RepositoryView<I, E>, AutoCloseable {
 
     private static final String ERR_MSG_STORAGE_NOT_ASSIGNED = "Storage is not assigned.";
+
+    /**
+     * The {@link BoundedContext} to which the repository belongs.
+     *
+     * <p>This field is null when a repository is not {@linkplain
+     * BoundedContext#register(Repository) registered} yet.
+     */
+    @Nullable
+    private BoundedContext boundedContext;
 
     /**
      * The data storage for this repository.
@@ -93,6 +104,83 @@ public abstract class Repository<I, E extends Entity<I, ?>>
      * Creates the repository.
      */
     protected Repository() {
+    }
+
+    /**
+     * Assigns a {@code BoundedContext} to this repository.
+     *
+     * <p>If the repository does not have a storage assigned prior to this call, the storage
+     * will be {@linkplain #initStorage(StorageFactory) initialized} from a {@code StorageFactory}
+     * associated with the passed {@code BoundedContext}.
+     */
+    public final void setBoundedContext(BoundedContext boundedContext) {
+        this.boundedContext = boundedContext;
+        if (!isStorageAssigned()) {
+            initStorage(boundedContext.getStorageFactory());
+        }
+    }
+
+    /**
+     * Verifies whether the registry is registered with a {@code BoundedContext}.
+     */
+    protected boolean isRegistered() {
+        return boundedContext != null;
+    }
+
+    /**
+     * Obtains {@code BoundedContext} to which this repository belongs.
+     *
+     * @return parent {@code BoundedContext}
+     * @throws IllegalStateException if the repository is not registered {@linkplain
+     * BoundedContext#register(Repository) registered} yet
+     */
+    protected final BoundedContext getBoundedContext() {
+        checkState(boundedContext != null,
+                   "The repository (class: %s) is not registered with a BoundedContext.",
+                   getClass().getName());
+        return boundedContext;
+    }
+
+    /**
+     * The callback called by a {@link BoundedContext} during the {@linkplain
+     * BoundedContext#register(Repository) registration} of the repository.
+     *
+     * <p>If entities managed by this repository are {@linkplain VersionableEntity versionable},
+     * registers itself as a type supplier with the {@link Stand} of the parent
+     * {@linkplain #getBoundedContext() parent} {@code BoundedContext}.
+     */
+    @OverridingMethodsMustInvokeSuper
+    public void onRegistered() {
+        if (managesVersionableEntities()) {
+            getBoundedContext().getStand()
+                               .registerTypeSupplier(cast(this));
+        }
+    }
+
+    /**
+     * Verifies if the passed repository manages instances of versionable entities.
+     */
+    private boolean managesVersionableEntities() {
+        final Class entityClass = getEntityClass();
+        final boolean result = VersionableEntity.class.isAssignableFrom(entityClass);
+        return result;
+    }
+
+    /**
+     * Casts the passed repository to one that manages {@link VersionableEntity}
+     * instead of just {@link Entity}.
+     *
+     * <p>The cast is required for registering the repository as a type supplier
+     * in the {@link Stand}.
+     *
+     * <p>The cast is safe because the method is called after the
+     * {@linkplain #managesVersionableEntities() type check}.
+     * @see #onRegistered()
+     */
+    @SuppressWarnings("unchecked") // See Javadoc above.
+    private static <I, E extends Entity<I, ?>>
+    Repository<I, VersionableEntity<I, ?>> cast(Repository<I, E> repository) {
+        return (Repository<I, VersionableEntity<I, ?>>) repository;
     }
 
     /** Returns the class of IDs used by this repository. */
@@ -199,17 +287,21 @@ public abstract class Repository<I, E extends Entity<I, ?>>
     }
 
     /**
-     * Returns the storage assigned to this repository or {@code null} if
-     * the storage is not assigned yet.
+     * Returns the storage assigned to this repository.
+     *
+     * <p>In order to verify if the storage is assigned use {@link #isStorageAssigned()}.
+     *
+     * @throws IllegalStateException if the storage is not assigned
      */
     @CheckReturnValue
-    @Nullable
-    protected Storage<I, ?> getStorage() {
-        return this.storage;
+    protected final Storage<I, ?> getStorage() {
+        return checkStorage(this.storage);
     }
 
-    /** Returns {@code true} if the storage is assigned, {@code false} otherwise. */
-    public boolean storageAssigned() {
+    /**
+     * Returns {@code true} if the storage is assigned, {@code false} otherwise.
+     */
+    public final boolean isStorageAssigned() {
         return this.storage != null;
     }
 

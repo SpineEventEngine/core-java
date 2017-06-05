@@ -18,15 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bc;
+package io.spine.server.bc.given;
 
 import com.google.protobuf.Message;
 import io.spine.base.EventId;
-import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.event.ProjectCreated;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
+import io.spine.test.bc.ProjectId;
+import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.bc.event.ProjectStarted;
 import io.spine.test.bc.event.TaskAdded;
 
@@ -34,11 +34,11 @@ import static io.spine.base.Identifiers.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.time.Time.getCurrentTime;
 
-class Given {
+public class Given {
 
     private Given() {}
 
-    static class AggregateId {
+    public static class AggregateId {
 
         private AggregateId() {
         }
@@ -51,7 +51,7 @@ class Given {
         }
     }
 
-    static class EventMessage {
+    public static class EventMessage {
 
         private EventMessage() {
         }
@@ -75,7 +75,7 @@ class Given {
         }
     }
 
-    static class AnIntegrationEvent {
+    public static class AnIntegrationEvent {
 
         private static final ProjectId PROJECT_ID = AggregateId.newProjectId();
         private static final String TEST_BC_NAME = "Test BC";

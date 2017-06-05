@@ -20,15 +20,13 @@
 
 package io.spine.server.tenant;
 
-import org.junit.Test;
-import io.spine.server.tenant.CurrentTenant;
-import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.Tests;
 import io.spine.users.TenantId;
+import org.junit.Test;
 
+import static io.spine.test.Tests.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static io.spine.test.Tests.newTenantUuid;
 
 /**
  * @author Alexander Yevsyukov

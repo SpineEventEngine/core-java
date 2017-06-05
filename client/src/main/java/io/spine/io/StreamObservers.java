@@ -20,9 +20,9 @@
 package io.spine.io;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Responses;
 import io.spine.annotation.Internal;
 import io.spine.base.Response;
+import io.spine.base.Responses;
 
 import javax.annotation.Nullable;
 import java.util.List;

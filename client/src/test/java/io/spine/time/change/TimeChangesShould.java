@@ -22,10 +22,6 @@ package io.spine.time.change;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import io.spine.time.change.TimeChanges;
-import org.junit.Test;
-import io.spine.time.change.IntervalChange;
-import io.spine.time.change.LocalTimeChange;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
@@ -41,12 +37,13 @@ import io.spine.time.OffsetTime;
 import io.spine.time.OffsetTimes;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.subtract;
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.minutes;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"ConstantConditions" /* We pass `null` to some of the methods to check
                                            handling of preconditions */,

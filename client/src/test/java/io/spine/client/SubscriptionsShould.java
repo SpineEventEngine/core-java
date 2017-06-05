@@ -21,7 +21,6 @@ package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.client.Subscriptions;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 

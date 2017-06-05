@@ -22,16 +22,16 @@ package io.spine.test;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
 import io.spine.base.Command;
 import io.spine.time.Time;
+import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.subtract;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.fromMinutes;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author Alexander Yevsyukov

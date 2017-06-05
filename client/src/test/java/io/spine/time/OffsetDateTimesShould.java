@@ -22,16 +22,12 @@ package io.spine.time;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
-import io.spine.time.MonthOfYear;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Calendars.at;
 import static io.spine.time.Calendars.getDay;
@@ -57,6 +53,7 @@ import static io.spine.time.OffsetDateTimes.subtractMonths;
 import static io.spine.time.OffsetDateTimes.subtractSeconds;
 import static io.spine.time.OffsetDateTimes.subtractYears;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 
 public class OffsetDateTimesShould extends AbstractZonedTimeTest {
 

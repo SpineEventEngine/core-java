@@ -28,9 +28,6 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.junit.Ignore;
-import org.junit.Test;
-import io.spine.server.stand.StandStorage;
 import io.spine.base.Identifiers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
@@ -43,6 +40,8 @@ import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.test.storage.TaskId;
 import io.spine.type.TypeUrl;
+import org.junit.Ignore;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -51,10 +50,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static java.lang.String.format;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
+import static java.lang.String.format;
 
 /**
  * @author Dmytro Dashenkov

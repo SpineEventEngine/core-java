@@ -22,8 +22,8 @@ package io.spine.util;
 
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class MathShould {
 

@@ -23,9 +23,9 @@ package io.spine.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.CommandContext;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
+import io.spine.base.CommandContext;
 import io.spine.base.Enrichment;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
@@ -126,7 +126,7 @@ class Given {
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         StandTestProjectionRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
             addIdSetFunction(ProjectCreated.class,
                              new IdSetEventFunction<ProjectId, ProjectCreated>() {
                                  @Override
@@ -149,7 +149,7 @@ class Given {
          * @param boundedContext the bounded context to which this repository belongs
          */
         StandTestAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 

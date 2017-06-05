@@ -22,10 +22,9 @@ package io.spine.net;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.net.Url;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mikhail Mikhaylov

@@ -28,7 +28,7 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
  * Filters out commands that do not have registered dispatchers.

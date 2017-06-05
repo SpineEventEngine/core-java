@@ -20,11 +20,11 @@
 
 package io.spine.server.tenant;
 
-import org.junit.Test;
 import io.spine.client.Queries;
 import io.spine.client.Query;
 import io.spine.client.QueryId;
 import io.spine.test.Tests;
+import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 

@@ -22,10 +22,10 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.client.EntityIdFilter;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,8 +33,8 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.mockito.Mockito.mock;
 import static io.spine.test.Verify.assertContains;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Dmytro Dashenkov

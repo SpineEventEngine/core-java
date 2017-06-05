@@ -21,15 +21,12 @@ package io.spine.protobuf;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
-import io.spine.string.time.TimeStringifiers;
-import org.junit.Test;
 import io.spine.string.Stringifier;
+import io.spine.string.time.TimeStringifiers;
 import io.spine.time.Durations2;
+import org.junit.Test;
 
 import static com.google.protobuf.util.Durations.subtract;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.ZERO;
 import static io.spine.time.Durations2.add;
@@ -50,6 +47,9 @@ import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Durations2.toMinutes;
 import static io.spine.time.Durations2.toNanos;
 import static io.spine.time.Durations2.toSeconds;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov

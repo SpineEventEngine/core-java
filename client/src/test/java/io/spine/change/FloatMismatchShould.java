@@ -22,9 +22,7 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import io.spine.change.FloatMismatch;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.FloatMismatch.expectedNonZero;
 import static io.spine.change.FloatMismatch.expectedZero;
@@ -33,6 +31,7 @@ import static io.spine.change.FloatMismatch.unpackActual;
 import static io.spine.change.FloatMismatch.unpackExpected;
 import static io.spine.change.FloatMismatch.unpackNewValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class FloatMismatchShould {
 

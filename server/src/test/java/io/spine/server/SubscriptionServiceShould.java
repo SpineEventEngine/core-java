@@ -22,7 +22,6 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import org.junit.Test;
 import io.spine.base.Response;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
@@ -36,9 +35,13 @@ import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.time.Time;
+import org.junit.Test;
 
 import java.util.List;
 
+import static io.spine.base.Versions.newVersion;
+import static io.spine.test.Verify.assertInstanceOf;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -50,9 +53,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static io.spine.base.Versions.newVersion;
-import static io.spine.test.Verify.assertInstanceOf;
-import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov

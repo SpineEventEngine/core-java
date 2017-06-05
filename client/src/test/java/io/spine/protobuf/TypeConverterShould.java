@@ -34,12 +34,11 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import io.spine.protobuf.TypeConverter;
-import org.junit.Test;
 import io.spine.test.commands.TestCommand;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmytro Dashenkov

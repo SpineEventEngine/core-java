@@ -21,21 +21,18 @@
 package io.spine.time;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
-import io.spine.time.MonthOfYear;
 import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static java.util.Calendar.getInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Calendars.getDay;
 import static io.spine.time.Calendars.getMonth;
 import static io.spine.time.Calendars.getYear;
+import static java.util.Calendar.getInstance;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class LocalDatesShould {
 

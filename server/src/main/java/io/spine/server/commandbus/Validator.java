@@ -23,12 +23,12 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.Message;
-import io.spine.validate.MessageValidator;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageValidator;
 
 import java.util.List;
 

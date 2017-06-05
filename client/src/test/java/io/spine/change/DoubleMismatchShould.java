@@ -21,10 +21,8 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.change.ValueMismatch;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.change.BooleanMismatch.expectedTrue;
 import static io.spine.change.DoubleMismatch.expectedNonZero;
 import static io.spine.change.DoubleMismatch.expectedZero;
@@ -33,6 +31,7 @@ import static io.spine.change.DoubleMismatch.unpackActual;
 import static io.spine.change.DoubleMismatch.unpackExpected;
 import static io.spine.change.DoubleMismatch.unpackNewValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 public class DoubleMismatchShould {
 

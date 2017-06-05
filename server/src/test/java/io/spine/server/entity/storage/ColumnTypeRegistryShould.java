@@ -30,14 +30,13 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 
+import static io.spine.test.Verify.assertEmpty;
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.test.Verify.assertEmpty;
-import static io.spine.test.Verify.assertInstanceOf;
 
 /**
  * @author Dmytro Dashenkov

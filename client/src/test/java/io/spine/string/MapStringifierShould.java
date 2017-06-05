@@ -25,17 +25,15 @@ import com.google.common.escape.Escapers;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Test;
-import io.spine.string.Stringifier;
-import io.spine.string.Stringifiers;
 
 import java.text.ParseException;
 import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.string.Stringifiers.newForMapOf;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.assertEquals;
-import static io.spine.string.Stringifiers.newForMapOf;
 
 /**
  * @author Illia Shepilov

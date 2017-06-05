@@ -20,12 +20,12 @@
 
 package io.spine.net;
 
-import org.junit.Test;
 import io.spine.net.Url.Record;
 import io.spine.net.Url.Record.Authorization;
+import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Mikhail Mikhaylov

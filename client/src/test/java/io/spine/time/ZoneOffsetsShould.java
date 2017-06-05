@@ -25,19 +25,17 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import org.junit.Assert;
 import org.junit.Test;
-import io.spine.time.ZoneConverter;
-import io.spine.time.ZoneOffset;
 
 import java.text.ParseException;
 import java.util.TimeZone;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.junit.Assert.assertEquals;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.hours;
 import static io.spine.time.Durations2.hoursAndMinutes;
 import static io.spine.time.Time.MILLIS_PER_SECOND;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
 
 public class ZoneOffsetsShould {
 

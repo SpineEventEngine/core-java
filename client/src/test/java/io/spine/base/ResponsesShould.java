@@ -21,14 +21,11 @@
 package io.spine.base;
 
 import org.junit.Test;
-import io.spine.base.Error;
-import io.spine.base.Response;
-import io.spine.base.Responses;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 public class ResponsesShould {
 

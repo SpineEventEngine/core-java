@@ -53,7 +53,7 @@ import static com.google.common.base.Preconditions.checkState;
  */
 public class CommandStore implements AutoCloseable {
 
-    private final Storage storage;
+    private final CRepository repository;
     private final TenantIndex tenantIndex;
 
     /**
@@ -62,9 +62,9 @@ public class CommandStore implements AutoCloseable {
     public CommandStore(StorageFactory storageFactory, TenantIndex tenantIndex) {
         checkNotNull(storageFactory);
         this.tenantIndex = checkNotNull(tenantIndex);
-        final Storage storage = new Storage();
-        storage.initStorage(storageFactory);
-        this.storage = storage;
+        final CRepository repository = new CRepository();
+        repository.initStorage(storageFactory);
+        this.repository = repository;
     }
 
     private void checkNotClosed() {
@@ -73,12 +73,12 @@ public class CommandStore implements AutoCloseable {
 
     @Override
     public void close() throws Exception {
-        storage.close();
+        repository.close();
     }
 
     /** Returns {@code true} if the store is open, {@code false} otherwise */
     public boolean isOpen() {
-        final boolean isOpened = storage.isOpen();
+        final boolean isOpened = repository.isOpen();
         return isOpened;
     }
 
@@ -95,7 +95,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
-                storage.store(command);
+                repository.store(command);
             }
         };
         op.execute();
@@ -122,7 +122,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
-                storage.store(command, error);
+                repository.store(command, error);
             }
         };
         op.execute();
@@ -137,7 +137,7 @@ public class CommandStore implements AutoCloseable {
     public void store(Command command, Exception exception) {
         checkNotClosed();
         keepTenantId(command);
-        storage.store(command, Errors.fromException(exception));
+        repository.store(command, Errors.fromException(exception));
     }
 
     /**
@@ -162,7 +162,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, command) {
             @Override
             public void run() {
-                storage.store(command, status);
+                repository.store(command, status);
             }
         };
         op.execute();
@@ -176,7 +176,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
-                storage.setOkStatus(commandId());
+                repository.setOkStatus(commandId());
             }
         };
         op.execute();
@@ -193,7 +193,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new CommandOperation(commandEnvelope.getCommand()) {
             @Override
             public void run() {
-                storage.updateStatus(commandId(), error);
+                repository.updateStatus(commandId(), error);
             }
         };
         op.execute();
@@ -216,7 +216,7 @@ public class CommandStore implements AutoCloseable {
         final TenantAwareOperation op = new Operation(this, commandEnvelope) {
             @Override
             public void run() {
-                storage.updateStatus(commandId(), failure);
+                repository.updateStatus(commandId(), failure);
             }
         };
         op.execute();
@@ -234,7 +234,7 @@ public class CommandStore implements AutoCloseable {
             @Override
             public Iterator<Command> apply(@Nullable final CommandStatus input) {
                 checkNotNull(input);
-                final Iterator<CommandRecord> recordIterator = storage.iterator(status);
+                final Iterator<CommandRecord> recordIterator = repository.iterator(status);
                 final Iterator<Command> commands = Records.toCommandIterator(recordIterator);
                 return commands;
             }
@@ -250,7 +250,7 @@ public class CommandStore implements AutoCloseable {
             @Override
             public ProcessingStatus apply(@Nullable CommandId input) {
                 checkNotNull(input);
-                final ProcessingStatus status = storage.getStatus(input);
+                final ProcessingStatus status = repository.getStatus(input);
                 return status;
             }
         };

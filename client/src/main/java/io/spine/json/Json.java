@@ -32,9 +32,9 @@ import io.spine.type.UnknownTypeException;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static java.lang.String.format;
 import static io.spine.protobuf.Messages.builderFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.format;
 
 /**
  * Utilities for working with Json.

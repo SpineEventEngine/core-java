@@ -24,15 +24,11 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Message;
 import io.spine.test.event.EnrichmentByContextFields;
-import io.spine.test.event.ProjectStarted;
-import io.spine.test.event.TaskAdded;
-import io.spine.test.event.user.UserLoggedOutEvent;
-import io.spine.test.event.user.UserMentionedEvent;
-import io.spine.test.event.user.sharing.SharingRequestSent;
-import org.junit.Test;
 import io.spine.test.event.EnrichmentForSeveralEvents;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectCreatedSeparateEnrichment;
+import io.spine.test.event.ProjectStarted;
+import io.spine.test.event.TaskAdded;
 import io.spine.test.event.enrichment.EnrichmentBoundThoughFieldFqnWithFieldsWithDifferentNames;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsSeparatedWithSpaces;
 import io.spine.test.event.enrichment.EnrichmentBoundWithFieldsWithDifferentNames;
@@ -47,17 +43,21 @@ import io.spine.test.event.enrichment.SelectiveComplexEnrichment;
 import io.spine.test.event.enrichment.UserPackageEventsEnrichment;
 import io.spine.test.event.user.UserDeletedEvent;
 import io.spine.test.event.user.UserLoggedInEvent;
+import io.spine.test.event.user.UserLoggedOutEvent;
+import io.spine.test.event.user.UserMentionedEvent;
 import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
+import io.spine.test.event.user.sharing.SharingRequestSent;
 import io.spine.type.TypeName;
+import org.junit.Test;
 
 import java.util.Collection;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alexander Litus

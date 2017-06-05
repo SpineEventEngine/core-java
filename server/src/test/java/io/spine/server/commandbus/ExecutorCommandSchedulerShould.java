@@ -22,15 +22,20 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.client.CommandFactory;
 import io.spine.test.TestActorRequestFactory;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.server.commandbus.Given.CommandMessage.addTask;
+import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
+import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
+import static io.spine.time.Durations2.milliseconds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.any;
@@ -38,11 +43,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.verify;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.server.commandbus.Given.CommandMessage.addTask;
-import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
-import static io.spine.time.Durations2.milliseconds;
 
 /**
  * @author Alexander Litus

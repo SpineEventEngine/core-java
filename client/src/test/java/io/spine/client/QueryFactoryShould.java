@@ -22,12 +22,11 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.ProtocolStringList;
-import io.spine.client.EntityFilters;
-import org.junit.Test;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.client.TestEntityId;
 import io.spine.type.TypeName;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -35,11 +34,11 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.test.Verify.assertContainsAll;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.test.Verify.assertContainsAll;
 
 /**
  * @author Alex Tymchenko

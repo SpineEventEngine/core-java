@@ -20,8 +20,8 @@
 
 package io.spine.server.tenant;
 
-import org.junit.Test;
 import io.spine.test.Tests;
+import org.junit.Test;
 
 public class AllTenantOperationShould {
 

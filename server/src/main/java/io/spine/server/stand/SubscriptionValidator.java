@@ -20,11 +20,11 @@
 package io.spine.server.stand;
 
 import com.google.common.base.Optional;
-import io.spine.client.SubscriptionValidationError;
-import io.spine.users.TenantId;
 import io.spine.base.Error;
 import io.spine.client.Subscription;
+import io.spine.client.SubscriptionValidationError;
 import io.spine.server.tenant.TenantAwareFunction;
+import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 

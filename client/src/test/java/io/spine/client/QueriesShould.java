@@ -20,13 +20,13 @@
 package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.test.client.TestEntity;
 import io.spine.type.TypeUrl;
+import org.junit.Test;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Alex Tymchenko

@@ -23,22 +23,22 @@ package io.spine.server.entity.storage;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.server.entity.EntityRecord;
-import org.junit.Test;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.EntityRecord;
 import io.spine.test.entity.ProjectId;
 import io.spine.test.entity.TaskId;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 
+import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 
 /**
  * @author Dmytro Dashenkov

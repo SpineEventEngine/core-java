@@ -23,8 +23,6 @@ package io.spine.server;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.client.grpc.CommandServiceGrpc;
@@ -32,11 +30,13 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.type.CommandClass;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
 
-import static io.spine.server.Statuses.invalidArgumentWithCause;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
  * The {@code CommandService} allows client applications to post commands and

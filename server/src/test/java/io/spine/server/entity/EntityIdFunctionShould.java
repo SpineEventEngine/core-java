@@ -22,10 +22,9 @@ package io.spine.server.entity;
 
 import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
-import org.junit.Test;
 import io.spine.client.EntityId;
 import io.spine.protobuf.Wrapper;
-import io.spine.server.entity.RecordBasedRepository;
+import org.junit.Test;
 
 /**
  * @author Alexander Yevsyukov

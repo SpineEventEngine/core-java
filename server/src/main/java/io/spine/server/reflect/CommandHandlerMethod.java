@@ -43,10 +43,10 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * The wrapper for a command handler method.

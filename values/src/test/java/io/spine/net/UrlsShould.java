@@ -21,14 +21,13 @@
 package io.spine.net;
 
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
-import io.spine.net.Urls;
 import io.spine.net.Url.Record;
 import io.spine.net.Url.Record.Authorization;
+import org.junit.Test;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Mikhail Mikhaylov

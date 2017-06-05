@@ -21,19 +21,19 @@
 package io.spine.server.stand;
 
 import com.google.protobuf.Any;
-import io.spine.type.TypeUrl;
-import org.hamcrest.CoreMatchers;
-import org.junit.Test;
 import io.spine.string.Stringifier;
 import io.spine.string.Stringifiers;
 import io.spine.test.projection.ProjectId;
 import io.spine.testdata.Sample;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
+import org.hamcrest.CoreMatchers;
+import org.junit.Test;
 
+import static io.spine.server.stand.AggregateStateId.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
-import static io.spine.server.stand.AggregateStateId.of;
 
 /**
  * @author Dmytro Dashenkov

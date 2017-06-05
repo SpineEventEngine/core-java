@@ -20,10 +20,10 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
-import io.spine.type.MessageClass;
 import io.spine.annotation.Internal;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.server.delivery.Delivery;
+import io.spine.type.MessageClass;
 
 import java.util.Collection;
 import java.util.Set;

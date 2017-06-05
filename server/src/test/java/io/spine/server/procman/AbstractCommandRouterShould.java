@@ -26,8 +26,6 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.test.TestActorRequestFactory;
-import org.junit.Before;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
@@ -37,15 +35,17 @@ import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.type.CommandClass;
+import org.junit.Before;
 
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.base.Commands.sameActorAndTenant;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static io.spine.base.Commands.sameActorAndTenant;
 
 /**
  * @author Alexander Yevsyukov

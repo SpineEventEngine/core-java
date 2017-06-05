@@ -26,22 +26,28 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Version;
 import io.spine.base.Versions;
 import io.spine.protobuf.Wrapper;
+import io.spine.test.Tests;
 import io.spine.test.TimeTests;
+import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
+import io.spine.testdata.Sample;
+import io.spine.time.Interval;
 import io.spine.time.Intervals;
+import io.spine.time.Time;
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Test;
-import io.spine.test.Tests;
-import io.spine.test.entity.Project;
-import io.spine.test.entity.ProjectId;
-import io.spine.testdata.Sample;
-import io.spine.time.Interval;
-import io.spine.time.Time;
 
 import java.lang.reflect.Constructor;
 
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.server.entity.AbstractEntity.createEntity;
+import static io.spine.server.entity.AbstractEntity.getConstructor;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Tests.assertSecondsEqual;
+import static io.spine.time.Time.getCurrentTime;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -52,12 +58,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.server.entity.AbstractEntity.createEntity;
-import static io.spine.server.entity.AbstractEntity.getConstructor;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Tests.assertSecondsEqual;
-import static io.spine.time.Time.getCurrentTime;
 
 /**
  * @author Alexander Litus

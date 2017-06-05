@@ -58,6 +58,19 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
+     * {@inheritDoc}
+     *
+     * <p>{@linkplain io.spine.server.event.EventBus#register(io.spine.server.bus.MessageDispatcher)
+     * Registers} itself with the {@code EventBus} of the parent {@code BoundedContext}.
+     */
+    @Override
+    public void onRegistered() {
+        super.onRegistered();
+        getBoundedContext().getEventBus()
+                           .register(this);
+    }
+
+    /**
      * Adds {@code IdSetFunction} for the repository.
      *
      * <p>Typical usage for this method would be in a constructor of a {@code ProjectionRepository}

@@ -20,7 +20,6 @@
 
 package io.spine.server.entity;
 
-import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.test.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;

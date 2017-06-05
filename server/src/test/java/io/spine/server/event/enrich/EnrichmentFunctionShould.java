@@ -24,11 +24,11 @@ import com.google.common.base.Function;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.StringValue;
-import org.junit.Before;
-import org.junit.Test;
 import io.spine.server.event.Given;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectCreated;
+import org.junit.Before;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 

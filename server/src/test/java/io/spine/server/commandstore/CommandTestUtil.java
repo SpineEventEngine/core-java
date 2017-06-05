@@ -27,11 +27,11 @@ import io.spine.base.CommandStatus;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.test.command.CreateProject;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Utilities for testing command management.

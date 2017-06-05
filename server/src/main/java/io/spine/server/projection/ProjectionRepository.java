@@ -28,22 +28,21 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Event;
-import io.spine.server.BoundedContext;
-import io.spine.server.event.EventStreamQuery;
-import io.spine.server.tenant.AllTenantOperation;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import io.spine.base.EventContext;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.entity.EventDispatchingRepository;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
+import io.spine.server.event.EventStreamQuery;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.tenant.AllTenantOperation;
 import io.spine.type.EventClass;
 import io.spine.type.TypeName;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -65,12 +64,6 @@ import static com.google.common.base.Preconditions.checkState;
 public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S extends Message>
         extends EventDispatchingRepository<I, P, S> {
 
-    /** The {@code BoundedContext} in which this repository works. */
-    private final BoundedContext boundedContext;
-
-    /** An instance of {@link Stand} to be informed about state updates */
-    private final Stand stand;
-
     /**
      * If {@code true} the projection repository will start the {@linkplain #catchUp() catch up}
      * process after {@linkplain #initStorage(StorageFactory) initialization}.
@@ -89,39 +82,36 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     private BulkWriteOperation<I, P> ongoingOperation;
 
     /**
-     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance and
-     * enables catching up after the storage initialization.
+     * Creates a {@code ProjectionRepository} and enables catching up after the storage
+     * initialization.
      *
      * <p>NOTE: The {@link #catchUp()} will be called automatically after
      * the storage is {@linkplain #initStorage(StorageFactory) initialized}.
      * To override this behavior, please use
-     * {@link #ProjectionRepository(BoundedContext, boolean, Duration)} constructor.
+     * {@link #ProjectionRepository(boolean, Duration)} constructor.
      *
-     * @param boundedContext the target {@code BoundedContext}
      */
-    protected ProjectionRepository(BoundedContext boundedContext) {
-        this(boundedContext, true);
+    protected ProjectionRepository() {
+        this(true);
     }
 
     /**
-     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
+     * Creates a {@code ProjectionRepository} with catch-up controlled by the passed flag.
      *
      * <p>If {@code catchUpAfterStorageInit} is set to {@code true},
      * the {@link #catchUp()} will be called automatically after the
      * {@link #initStorage(StorageFactory)} call is performed.
      *
-     * @param boundedContext          the target {@code BoundedContext}
      * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after
      *                                storage initialization
      */
     @SuppressWarnings("MethodParameterNamingConvention")
-    protected ProjectionRepository(BoundedContext boundedContext,
-                                   boolean catchUpAfterStorageInit) {
-        this(boundedContext, catchUpAfterStorageInit, Duration.getDefaultInstance());
+    protected ProjectionRepository(boolean catchUpAfterStorageInit) {
+        this(catchUpAfterStorageInit, Duration.getDefaultInstance());
     }
 
     /**
-     * Creates a {@code ProjectionRepository} for the given {@link BoundedContext} instance.
+     * Creates a {@code ProjectionRepository} with the catch-up control flag and maximum duration.
      *
      * <p>If {@code catchUpAfterStorageInit} is set to {@code true}, the {@link #catchUp()}
      * will be called automatically after the storage is {@linkplain #initStorage(StorageFactory)
@@ -135,26 +125,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * the events and apply them to corresponding projections. If the reading process takes longer
      * then this time, the the read will be automatically finished and all the result projections
      * will be flushed to the storage as a bulk.
-     *
-     * @param boundedContext          the target {@code BoundedContext}
-     * @param catchUpAfterStorageInit whether the automatic catch-up should be performed after
+     *  @param catchUpAfterStorageInit whether the automatic catch-up should be performed after
      *                                storage initialization
      * @param catchUpMaxDuration      the maximum duration of the catch-up
      */
     @SuppressWarnings("MethodParameterNamingConvention")
-    protected ProjectionRepository(BoundedContext boundedContext,
-                                   boolean catchUpAfterStorageInit,
+    protected ProjectionRepository(boolean catchUpAfterStorageInit,
                                    Duration catchUpMaxDuration) {
         super(EventDispatchingRepository.<I>producerFromContext());
-        this.boundedContext = boundedContext;
-        this.stand = boundedContext.getStand();
         this.catchUpAfterStorageInit = catchUpAfterStorageInit;
         this.catchUpMaxDuration = checkNotNull(catchUpMaxDuration);
-    }
-
-    /** Returns the {@link BoundedContext} in which this repository works. */
-    private BoundedContext getBoundedContext() {
-        return boundedContext;
     }
 
     @VisibleForTesting
@@ -162,6 +142,13 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         return timestamp == null
                ? Timestamp.getDefaultInstance()
                : timestamp;
+    }
+
+    /**
+     * Obtains the {@code Stand} from the {@code BoundedContext} of this repository.
+     */
+    protected final Stand getStand() {
+        return getBoundedContext().getStand();
     }
 
     private static Logger log() {
@@ -232,10 +219,9 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      */
     @Nonnull
     protected ProjectionStorage<I> projectionStorage() {
-        @SuppressWarnings("unchecked")
-        // It is safe to cast as we control the creation in createStorage().
+        @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
-        return checkStorage(storage);
+        return storage;
     }
 
     /** {@inheritDoc} */
@@ -276,11 +262,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         internalDispatch(eventEnvelope);
     }
 
-    @VisibleForTesting
-    void dispatch(Event event) {
-        dispatch(EventEnvelope.of(event));
-    }
-
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = findOrCreate(id);
@@ -298,7 +279,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                 storeNow(projection, eventTime);
             }
 
-            stand.post(projection, context.getCommandContext());
+            getStand().post(projection, context.getCommandContext());
         }
     }
 
@@ -345,7 +326,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
     public void catchUp() {
         setStatus(Status.CATCHING_UP);
 
-        final AllTenantOperation op = new AllTenantOperation(boundedContext.getTenantIndex()) {
+        final AllTenantOperation op = new AllTenantOperation(getBoundedContext().getTenantIndex()) {
 
             private final EventStore eventStore = getBoundedContext().getEventBus()
                                                                      .getEventStore();

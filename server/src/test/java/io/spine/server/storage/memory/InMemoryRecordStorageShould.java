@@ -21,12 +21,12 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
+import io.spine.base.Identifiers;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
+import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
-import io.spine.base.Identifiers;
-import io.spine.test.storage.Project;
 
 import static java.lang.String.format;
 

@@ -193,7 +193,7 @@ public class Given {
     static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
         ProjectAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 
@@ -245,7 +245,7 @@ public class Given {
     public static class CustomerAggregateRepository
             extends AggregateRepository<CustomerId, CustomerAggregate> {
         public CustomerAggregateRepository(BoundedContext boundedContext) {
-            super(boundedContext);
+            super();
         }
     }
 

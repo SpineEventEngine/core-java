@@ -23,22 +23,21 @@ package io.spine.protobuf;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.protobuf.Wrapper;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Iterator;
 import java.util.List;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.protobuf.Wrapper.forLong;
 import static io.spine.protobuf.Wrapper.forUnsignedInteger;
 import static io.spine.protobuf.Wrapper.forUnsignedLong;
 import static io.spine.validate.Validate.isDefault;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov

@@ -53,13 +53,13 @@ import static com.google.common.collect.Lists.newArrayList;
  *
  * @author Alexander Yevsyukov
  */
-class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Event> {
+class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
 
-    private static final Function<EventEntity, Event> GET_EVENT =
-            new Function<EventEntity, Event>() {
+    private static final Function<EEntity, Event> GET_EVENT =
+            new Function<EEntity, Event>() {
                 @Nullable
                 @Override
-                public Event apply(@Nullable EventEntity input) {
+                public Event apply(@Nullable EEntity input) {
                     if (input == null) {
                         return null;
                     }
@@ -84,32 +84,32 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     Iterator<Event> iterator(EventStreamQuery query) {
         final EventRecordStorage storage = recordStorage();
         final Map<EventId, EntityRecord> records = storage.readAll(query);
-        final Collection<EventEntity> entities = transform(records.entrySet(),
-                                                           storageRecordToEntity());
+        final Collection<EEntity> entities = transform(records.entrySet(),
+                                                       storageRecordToEntity());
         // TODO:2017-05-19:dmytro.dashenkov: Remove after the Entity Column approach is implemented.
-        final Collection<EventEntity> filtered = filter(entities, createEntityFilter(query));
+        final Collection<EEntity> filtered = filter(entities, createEntityFilter(query));
 
-        final List<EventEntity> entityList = newArrayList(filtered);
-        Collections.sort(entityList, EventEntity.comparator());
+        final List<EEntity> entityList = newArrayList(filtered);
+        Collections.sort(entityList, EEntity.comparator());
         final Iterator<Event> result = Iterators.transform(entityList.iterator(), getEventFunc());
         return result;
     }
 
     @VisibleForTesting
-    static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
+    static Predicate<EEntity> createEntityFilter(EventStreamQuery query) {
         return new EventEntityMatchesStreamQuery(query);
     }
 
     void store(Event event) {
-        final EventEntity entity = new EventEntity(event);
+        final EEntity entity = new EEntity(event);
         store(entity);
     }
 
-    static Function<EventEntity, Event> getEventFunc() {
+    static Function<EEntity, Event> getEventFunc() {
         return GET_EVENT;
     }
 
-    private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
+    private static class EventEntityMatchesStreamQuery implements Predicate<EEntity> {
 
         private final Predicate<Event> filter;
 
@@ -118,7 +118,7 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         }
 
         @Override
-        public boolean apply(@Nullable EventEntity input) {
+        public boolean apply(@Nullable EEntity input) {
             if (input == null) {
                 return false;
             }
