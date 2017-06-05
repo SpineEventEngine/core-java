@@ -23,7 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.base.Predicate;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -65,7 +65,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         if (!acceptedIds.isEmpty()) {
             final Any entityId = record.getRecord()
                                        .getEntityId();
-            final Object genericId = Identifiers.idFromAny(entityId);
+            final Object genericId = Identifier.idFromAny(entityId);
             @SuppressWarnings("SuspiciousMethodCalls")
             // The Collection.contains behavior about the non-assignable types is acceptable
             final boolean idMatches = acceptedIds.contains(genericId);

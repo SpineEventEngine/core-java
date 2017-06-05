@@ -26,7 +26,6 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.Identifiers;
 import io.spine.json.Json;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
@@ -40,7 +39,7 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.collect.Collections2.transform;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.QueryParameter.eq;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
@@ -320,7 +319,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
     private static ProjectId newMessageId() {
         return ProjectId.newBuilder()
-                        .setValue(Identifiers.newUuid())
+                        .setValue(newUuid())
                         .build();
     }
 

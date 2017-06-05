@@ -20,7 +20,7 @@
 
 package io.spine.client;
 
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 
 import static java.lang.String.format;
 
@@ -39,7 +39,7 @@ class Topics {
     }
 
     static TopicId generateId() {
-        final String formattedId = format(TOPIC_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(TOPIC_ID_FORMAT, Identifier.newUuid());
         return TopicId.newBuilder()
                       .setValue(formattedId)
                       .build();

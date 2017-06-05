@@ -22,7 +22,7 @@ package io.spine.users;
 
 import org.junit.Test;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.users.UserAccounts.GOOGLE_AUTH_PROVIDER_ID;
 import static io.spine.users.UserAccounts.getGoogleUid;

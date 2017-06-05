@@ -26,7 +26,7 @@ import org.junit.Test;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.MessageField.getFieldDescriptor;
 import static io.spine.protobuf.MessageField.getFieldName;
 import static io.spine.protobuf.MessageField.toAccessorMethodName;

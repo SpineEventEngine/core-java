@@ -23,7 +23,7 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import io.spine.base.CommandContext;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.base.Version;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.envelope.EventEnvelope;
@@ -123,7 +123,7 @@ public class StandPostShould {
         final Stand stand = builder.build();
         Assert.assertNotNull(stand);
 
-        final Object id = Identifiers.newUuid();
+        final Object id = Identifier.newUuid();
         final StringValue state = StringValue.getDefaultInstance();
 
         final VersionableEntity entity = mock(AbstractVersionableEntity.class);
@@ -279,7 +279,7 @@ public class StandPostShould {
                                                 .getName();
                 Assert.assertFalse(threadInvocationRegistry.contains(threadName));
                 final ProjectId enitityId = ProjectId.newBuilder()
-                                                     .setId(Identifiers.newUuid())
+                                                     .setId(Identifier.newUuid())
                                                      .build();
                 final Given.StandTestAggregate entity = Given.aggregateRepo()
                                                              .create(enitityId);
