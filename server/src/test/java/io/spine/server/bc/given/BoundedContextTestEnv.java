@@ -57,17 +57,8 @@ public class BoundedContextTestEnv {
 
     private BoundedContextTestEnv() {}
 
-    @SuppressWarnings({"unused", "TypeMayBeWeakened"})
     public static class ProjectAggregate
             extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
-
-        private boolean isCreateProjectCommandHandled = false;
-        private boolean isAddTaskCommandHandled = false;
-        private boolean isStartProjectCommandHandled = false;
-
-        private boolean isProjectCreatedEventApplied = false;
-        private boolean isTaskAddedEventApplied = false;
-        private boolean isProjectStartedEventApplied = false;
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -75,19 +66,16 @@ public class BoundedContextTestEnv {
 
         @Assign
         public ProjectCreated handle(CreateProject cmd, CommandContext ctx) {
-            isCreateProjectCommandHandled = true;
             return Given.EventMessage.projectCreated(cmd.getProjectId());
         }
 
         @Assign
         public TaskAdded handle(AddTask cmd, CommandContext ctx) {
-            isAddTaskCommandHandled = true;
             return Given.EventMessage.taskAdded(cmd.getProjectId());
         }
 
         @Assign
         public List<ProjectStarted> handle(StartProject cmd, CommandContext ctx) {
-            isStartProjectCommandHandled = true;
             final ProjectStarted message = Given.EventMessage.projectStarted(cmd.getProjectId());
             return newArrayList(message);
         }
@@ -97,13 +85,11 @@ public class BoundedContextTestEnv {
             getBuilder()
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.CREATED);
-
-            isProjectCreatedEventApplied = true;
         }
 
         @Apply
         private void event(TaskAdded event) {
-            isTaskAddedEventApplied = true;
+            // NOP
         }
 
         @Apply
@@ -112,19 +98,13 @@ public class BoundedContextTestEnv {
                     .setId(event.getProjectId())
                     .setStatus(Project.Status.STARTED)
                     .build();
-
-            isProjectStartedEventApplied = true;
         }
     }
 
     public static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, ProjectAggregate> {
-        public ProjectAggregateRepository() {
-            super();
-        }
+                  extends AggregateRepository<ProjectId, ProjectAggregate> {
     }
 
-    @SuppressWarnings("UnusedParameters") // It is intended in this empty handler class.
     public static class TestEventSubscriber extends EventSubscriber {
 
         private Message handledEvent;
@@ -161,9 +141,6 @@ public class BoundedContextTestEnv {
 
     public static class SecretProjectRepository
             extends AggregateRepository<String, SecretProjectAggregate> {
-        public SecretProjectRepository() {
-            super();
-        }
     }
 
     public static class ProjectProcessManager
@@ -190,10 +167,6 @@ public class BoundedContextTestEnv {
 
     public static class ProjectPmRepo
             extends ProcessManagerRepository<ProjectId, ProjectProcessManager, Empty> {
-
-        public ProjectPmRepo() {
-            super();
-        }
     }
 
     public static class ProjectReport
@@ -215,9 +188,6 @@ public class BoundedContextTestEnv {
 
     public static class ProjectReportRepository
             extends ProjectionRepository<ProjectId, ProjectReport, Empty> {
-        public ProjectReportRepository() {
-            super();
-        }
     }
 
     public static class AnotherProjectAggregate
@@ -229,8 +199,5 @@ public class BoundedContextTestEnv {
 
     public static class AnotherProjectAggregateRepository
             extends AggregateRepository<ProjectId, AnotherProjectAggregate> {
-        public AnotherProjectAggregateRepository() {
-            super();
-        }
     }
 }

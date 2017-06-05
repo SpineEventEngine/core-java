@@ -48,8 +48,7 @@ public class AggregateRootTestEnv {
         }
     }
 
-    @SuppressWarnings("TypeMayBeWeakened") // Exact message classes without OrBuilder are needed.
-    public static class ProjectDefinitionPart extends AggregatePart<ProjectId,
+    static class ProjectDefinitionPart extends AggregatePart<ProjectId,
             ProjectDefinition,
             ProjectDefinitionValidatingBuilder,
             ProjectRoot> {
@@ -76,15 +75,9 @@ public class AggregateRootTestEnv {
 
     public static class ProjectDefinitionRepository
             extends AggregatePartRepository<ProjectId, ProjectDefinitionPart, ProjectRoot> {
-
-        public ProjectDefinitionRepository() {
-            super();
-        }
     }
 
-    @SuppressWarnings("AssignmentToStaticFieldFromInstanceMethod")
-    // Static field in the instance method is used for the test simplification.
-    public static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
+    static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
             ProjectLifecycle,
             ProjectLifecycleValidatingBuilder,
             ProjectRoot> {
@@ -109,10 +102,6 @@ public class AggregateRootTestEnv {
 
     public static class ProjectLifeCycleRepository
             extends AggregatePartRepository<ProjectId, ProjectLifeCyclePart, ProjectRoot> {
-
-        public ProjectLifeCycleRepository() {
-            super();
-        }
     }
 
     public static class ProjectRoot extends AggregateRoot<ProjectId> {
