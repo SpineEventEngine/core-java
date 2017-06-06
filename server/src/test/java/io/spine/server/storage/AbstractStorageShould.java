@@ -94,11 +94,11 @@ public abstract class AbstractStorageShould<I,
     }
 
     /** Closes the storage and fails the test if any exception occurs. */
+    @SuppressWarnings("CallToPrintStackTrace")
     protected void closeAndFailIfException(AbstractStorage<I, R> storage) {
         try {
             storage.close();
         } catch (Exception e) {
-            //noinspection CallToPrintStackTrace
             e.printStackTrace();
             fail("An unexpected exception: " + e.getClass() + "; " + e.getMessage());
         }

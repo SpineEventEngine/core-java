@@ -31,6 +31,7 @@ public class InMemoryStandStorageShould extends StandStorageShould {
     @Override
     protected StandStorage getStorage() {
         return InMemoryStandStorage.newBuilder()
+                                   .setBoundedContextName(getClass().getSimpleName())
                                    .setMultitenant(false)
                                    .build();
     }
