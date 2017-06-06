@@ -44,8 +44,10 @@ public abstract class AggregatePartRepository<I,
 
     /**
      * {@inheritDoc}
+     *
+     * <p>Overrides to expose the method to the package.
      */
-    @Override // to expose this method in the same package.
+    @Override
     protected Class<I> getIdClass() {
         return super.getIdClass();
     }
@@ -53,11 +55,20 @@ public abstract class AggregatePartRepository<I,
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We create objects of another class.
     @Override
     public A create(I id) {
-        final Constructor<A> entityConstructor = getEntityConstructor();
-        final Class<R> rootClass = AggregatePart.TypeInfo.getRootClass(getEntityClass());
-        final AggregateRoot<I> root = AggregateRoot.create(id, getBoundedContext(), rootClass);
-        final A result = AggregatePart.create(entityConstructor, root);
+        final AggregateRoot<I> root = createAggregateRoot(id);
+        final A result = createAggregatePart(root);
         return result;
+    }
+
+    //TODO:2017-06-06:alexander.yevsyukov: Have cache of aggregate roots shared among part repositories
+    private AggregateRoot<I> createAggregateRoot(I id) {
+        final Class<R> rootClass = AggregatePart.TypeInfo.getRootClass(getEntityClass());
+        return AggregateRoot.create(id, getBoundedContext(), rootClass);
+    }
+
+    private A createAggregatePart(AggregateRoot<I> root) {
+        final Constructor<A> entityConstructor = getEntityConstructor();
+        return AggregatePart.create(entityConstructor, root);
     }
 
     @SuppressWarnings("MethodDoesntCallSuperMethod") // We find constructor for another class.
