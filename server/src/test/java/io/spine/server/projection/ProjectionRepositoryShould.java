@@ -166,7 +166,6 @@ public class ProjectionRepositoryShould
         grpcServer = InMemoryGrpcServer.startOn(boundedContext);
         super.setUp();
 
-        repository.initStorage(storageFactory());
         boundedContext.register(repository);
 
         TestProjection.clearMessageDeliveryHistory();
