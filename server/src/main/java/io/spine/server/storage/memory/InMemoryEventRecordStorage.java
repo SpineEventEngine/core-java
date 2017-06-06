@@ -43,8 +43,11 @@ import java.util.Map;
  */
 class InMemoryEventRecordStorage extends EventRecordStorage {
 
-    InMemoryEventRecordStorage(RecordStorage<EventId> storage) {
+    private final String boundedContextName;
+
+    InMemoryEventRecordStorage(String boundedContextName, RecordStorage<EventId> storage) {
         super(storage);
+        this.boundedContextName = boundedContextName;
     }
 
     @Override
@@ -64,22 +67,24 @@ class InMemoryEventRecordStorage extends EventRecordStorage {
 
     @Override
     public EventStoreIO.QueryFn queryFn(TenantId tenantId) {
-        return new InMemQueryFn(tenantId);
+        return new InMemQueryFn(boundedContextName, tenantId);
     }
 
     private static class InMemQueryFn extends EventStoreIO.QueryFn {
 
         private static final long serialVersionUID = 0L;
+        private final String boundedContextName;
         private transient ManagedChannel channel;
         private transient EventStreamServiceBlockingStub blockingStub;
 
-        private InMemQueryFn(TenantId tenantId) {
+        private InMemQueryFn(String boundedContextName, TenantId tenantId) {
             super(tenantId);
+            this.boundedContextName = boundedContextName;
         }
 
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createChannel(boundedContextName);
             blockingStub = EventStreamServiceGrpc.newBlockingStub(channel);
         }
 

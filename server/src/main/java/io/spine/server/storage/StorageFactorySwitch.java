@@ -54,6 +54,8 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class StorageFactorySwitch implements Supplier<StorageFactory> {
 
+    private final String boundedContextName;
+
     @Nullable
     private StorageFactory storageFactory;
 
@@ -65,27 +67,20 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
 
     private final boolean multitenant;
 
-    private StorageFactorySwitch(boolean multitenant) {
+    private StorageFactorySwitch(String boundedContextName, boolean multitenant) {
+        this.boundedContextName = boundedContextName;
         this.multitenant = multitenant;
     }
 
     /**
      * Obtains the instance of the switch that corresponds to multi-tenancy mode.
      *
+     * @param boundedContextName the name of the BoundedContext in which this switch works
      * @param multitenant if {@code true} the switch is requested for the multi-tenant execution
      *                    context, {@code false} for the single-tenant context
      */
-    public static StorageFactorySwitch getInstance(boolean multitenant) {
-        return multitenant
-               ? Singleton.INSTANCE.multiTenant
-               : Singleton.INSTANCE.singleTenant;
-    }
-
-    /**
-     * Obtains the instance of {@code StorageFactory} for the passed multi-tenancy mode.
-     */
-    public static StorageFactory get(boolean multitenant) {
-        return getInstance(multitenant).get();
+    public static StorageFactorySwitch newInstance(String boundedContextName, boolean multitenant) {
+        return new StorageFactorySwitch(boundedContextName, multitenant);
     }
 
     /**
@@ -147,7 +142,7 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
                        .isTests()) {
             storageFactory = testsSupplier != null
                              ? testsSupplier.get()
-                             : InMemoryStorageFactory.getInstance(multitenant);
+                             : InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
         } else {
             if (productionSupplier == null) {
                 throw newIllegalStateException(
@@ -159,12 +154,5 @@ public final class StorageFactorySwitch implements Supplier<StorageFactory> {
         }
 
         return storageFactory;
-    }
-
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private enum Singleton {
-        INSTANCE;
-        private final StorageFactorySwitch singleTenant = new StorageFactorySwitch(false);
-        private final StorageFactorySwitch multiTenant = new StorageFactorySwitch(true);
     }
 }

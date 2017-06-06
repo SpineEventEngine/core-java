@@ -34,7 +34,6 @@ import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.projection.ProjectId;
 import io.spine.time.Time;
@@ -255,7 +254,10 @@ public class StandPostShould {
     }
 
     private static StorageFactory storageFactory(boolean multitenant) {
-        return StorageFactorySwitch.get(multitenant);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(multitenant)
+                                                .build();
+        return bc.getStorageFactory();
     }
 
     @SuppressWarnings("MethodWithMultipleLoops")

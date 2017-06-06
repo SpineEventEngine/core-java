@@ -41,9 +41,16 @@ import io.spine.type.TypeUrl;
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
+    private final String boundedContextName;
     private final boolean multitenant;
 
-    private InMemoryStorageFactory(boolean multitenant) {
+    public static InMemoryStorageFactory newInstance(String boundedContextName,
+                                                     boolean multitenant) {
+        return new InMemoryStorageFactory(boundedContextName, multitenant);
+    }
+
+    private InMemoryStorageFactory(String boundedContextName, boolean multitenant) {
+        this.boundedContextName = boundedContextName;
         this.multitenant = multitenant;
     }
 
@@ -67,9 +74,11 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
-                                                                .setMultitenant(isMultitenant())
-                                                                .build();
+        final InMemoryStandStorage result =
+                InMemoryStandStorage.newBuilder()
+                                    .setBoundedContextName(boundedContextName)
+                                    .setMultitenant(isMultitenant())
+                                    .build();
         return result;
     }
 
@@ -88,7 +97,7 @@ public class InMemoryStorageFactory implements StorageFactory {
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
         final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
         final TypeUrl typeUrl = TypeUrl.of(stateClass);
-        return InMemoryRecordStorage.newInstance(typeUrl, isMultitenant());
+        return InMemoryRecordStorage.newInstance(boundedContextName, typeUrl, isMultitenant());
     }
 
     @Override
@@ -97,9 +106,11 @@ public class InMemoryStorageFactory implements StorageFactory {
         final Class<Message> stateClass = getStateClass(projectionClass);
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
-                InMemoryRecordStorage.newInstance(TypeUrl.of(stateClass), multitenant);
+                InMemoryRecordStorage.newInstance(boundedContextName,
+                                                  TypeUrl.of(stateClass),
+                                                  multitenant);
         final TypeUrl stateUrl = TypeUrl.of(stateClass);
-        return InMemoryProjectionStorage.newInstance(stateUrl, entityStorage);
+        return InMemoryProjectionStorage.newInstance(boundedContextName, stateUrl, entityStorage);
     }
 
     @SuppressWarnings("unchecked") // The type is protected by the Projection class declaration.
@@ -110,7 +121,8 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public EventRecordStorage createEventStorage(RecordStorage<EventId> delegate) {
-        final EventRecordStorage eventRecordStorage = new InMemoryEventRecordStorage(delegate);
+        final EventRecordStorage eventRecordStorage = new InMemoryEventRecordStorage(
+                boundedContextName, delegate);
         return eventRecordStorage;
     }
 
@@ -124,19 +136,6 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return getInstance(false);
-    }
-
-    public static InMemoryStorageFactory getInstance(boolean multitenant) {
-        return multitenant
-                ? Singleton.INSTANCE.multiTenant
-                : Singleton.INSTANCE.singleTenant;
-    }
-
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private enum Singleton {
-        INSTANCE;
-        private final InMemoryStorageFactory singleTenant = new InMemoryStorageFactory(false);
-        private final InMemoryStorageFactory multiTenant = new InMemoryStorageFactory(true);
+        return newInstance(this.boundedContextName, false);
     }
 }

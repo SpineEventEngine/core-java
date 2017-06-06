@@ -39,13 +39,13 @@ import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 @Internal
 public class InMemoryGrpcServer {
 
-    private static final String SERVER_NAME = "InMemory";
+    private static final String SERVER_NAME_PREFIX = "InMemory";
 
     private Server grpcServer;
 
     public InMemoryGrpcServer(BoundedContext boundedContext) {
         this.grpcServer = InProcessServerBuilder
-                .forName(SERVER_NAME)
+                .forName(serverName(boundedContext.getName()))
                 .addService(new ProjectionStorageService(boundedContext))
                 .addService(new EventStreamService(boundedContext))
                 .build();
@@ -61,15 +61,20 @@ public class InMemoryGrpcServer {
         return grpcServer;
     }
 
+    private static String serverName(String boundedContextName) {
+        return SERVER_NAME_PREFIX + boundedContextName;
+    }
+
     /**
      * Creates a default channel for read/write operations to in-memory storages via
-     * {@link ProjectionStorageService
-     * ProjectionStorageService}.
+     * {@link ProjectionStorageService}.
+     *
+     * @param boundedContextName the name of the {@link BoundedContext} handled by the server.
      */
-    public static ManagedChannel createDefaultChannel() {
-        final ManagedChannel result = InProcessChannelBuilder.forName(SERVER_NAME)
-                                                             .build();
-        return result;
+    public static ManagedChannel createChannel(String boundedContextName) {
+        final ManagedChannel ch = InProcessChannelBuilder.forName(serverName(boundedContextName))
+                                                         .build();
+        return ch;
     }
 
     public void start() throws IOException {

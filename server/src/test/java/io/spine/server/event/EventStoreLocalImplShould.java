@@ -21,7 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
-import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.BoundedContext;
 
 /**
  * @author Dmytro Dashenkov
@@ -30,8 +30,11 @@ public class EventStoreLocalImplShould extends EventStoreShould {
 
     @Override
     protected EventStore creteStore() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(true)
+                                                .build();
         return EventStore.newBuilder()
-                         .setStorageFactory(StorageFactorySwitch.get(false))
+                         .setStorageFactory(bc.getStorageFactory())
                          .setStreamExecutor(MoreExecutors.directExecutor())
                          .withDefaultLogger()
                          .build();

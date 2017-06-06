@@ -27,7 +27,6 @@ import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupport
 import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.entity.ProjectId;
@@ -65,7 +64,7 @@ public class RepositoryShould {
                                        .setMultitenant(true)
                                        .build();
         repository = new TestRepo();
-        storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
+        storageFactory = boundedContext.getStorageFactory();
         tenantId = newTenantUuid();
     }
 

@@ -34,12 +34,12 @@ import io.spine.base.Events;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Given;
@@ -91,7 +91,10 @@ public class ProcessManagerShould {
 
     @Before
     public void setUp() {
-        final StorageFactory storageFactory = StorageFactorySwitch.get(true);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(true)
+                                                .build();
+        final StorageFactory storageFactory = bc.getStorageFactory();
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(false, storageFactory);
         final CommandStore commandStore = spy(
                 new CommandStore(storageFactory, tenantIndex)

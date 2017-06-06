@@ -45,7 +45,6 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
@@ -455,7 +454,7 @@ public class ProjectionRepositoryShould
 
 
     private StorageFactory storageFactory() {
-        return StorageFactorySwitch.get(boundedContext.isMultitenant());
+        return boundedContext.getStorageFactory();
     }
 
     /**

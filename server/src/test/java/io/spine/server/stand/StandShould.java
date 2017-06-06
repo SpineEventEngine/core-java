@@ -58,7 +58,6 @@ import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Given.StandTestProjectionRepository;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Tests;
 import io.spine.test.Verify;
@@ -997,8 +996,11 @@ public class StandShould extends TenantAwareTest {
     }
 
     private StandStorage createStandStorage() {
-        return StorageFactorySwitch.get(multitenant)
-                                   .createStandStorage();
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(multitenant)
+                                                .build();
+        return bc.getStorageFactory()
+                 .createStandStorage();
     }
 
     private static void verifyObserver(MemoizeQueryResponseObserver observer) {
@@ -1188,8 +1190,11 @@ public class StandShould extends TenantAwareTest {
 
     private StandStorage setupStandStorageWithCustomers(Map<CustomerId, Customer> sampleCustomers,
                                                         TypeUrl customerType) {
-        final StandStorage standStorage = StorageFactorySwitch.get(isMultitenant())
-                                                              .createStandStorage();
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(isMultitenant())
+                                                .build();
+        final StandStorage standStorage = bc.getStorageFactory()
+                                            .createStandStorage();
 
         final ImmutableList.Builder<AggregateStateId> stateIdsBuilder = ImmutableList.builder();
         final ImmutableList.Builder<EntityRecord> recordsBuilder = ImmutableList.builder();

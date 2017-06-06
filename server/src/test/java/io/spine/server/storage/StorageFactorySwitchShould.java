@@ -78,20 +78,23 @@ public class StorageFactorySwitchShould {
     private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.getInstance(multitenant);
+            return InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
+                                                      multitenant);
         }
     };
 
     private final Supplier<StorageFactory> productionSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.getInstance(multitenant);
+            return InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
+                                                      multitenant);
         }
     };
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.getInstance(multitenant);
+        storageFactorySwitch = StorageFactorySwitch.newInstance(getClass().getSimpleName(),
+                                                                multitenant);
     }
 
     @After

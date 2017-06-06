@@ -38,39 +38,45 @@ import io.spine.users.TenantId;
  */
 class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
 
+    private final String boundedContextName;
     private final TypeUrl entityStateUrl;
 
-    InMemoryRecordStorageIO(Class<I> idClass, TypeUrl entityStateUrl) {
+    InMemoryRecordStorageIO(String boundedContextName, Class<I> idClass,
+                            TypeUrl entityStateUrl) {
         super(idClass);
+        this.boundedContextName = boundedContextName;
         this.entityStateUrl = entityStateUrl;
     }
 
     @Override
     public ReadFn<I> readFn(TenantId tenantId) {
-        return new InMemReadFn<>(tenantId, entityStateUrl);
+        return new InMemReadFn<>(boundedContextName, tenantId, entityStateUrl);
     }
 
     @Override
     public WriteFn<I> writeFn(TenantId tenantId) {
-        return new InMemWriteFn<>(tenantId, entityStateUrl);
+        return new InMemWriteFn<>(boundedContextName, tenantId, entityStateUrl);
     }
 
     private static class InMemReadFn<I> extends ReadFn<I> {
 
         private static final long serialVersionUID = 0L;
+        private final String boundedContextName;
         private final TypeUrl entityStateUrl;
         private transient ManagedChannel channel;
         private transient ProjectionStorageServiceBlockingStub blockingStub;
 
-        protected InMemReadFn(TenantId tenantId, TypeUrl entityState) {
+        protected InMemReadFn(String boundedContextName, TenantId tenantId,
+                              TypeUrl entityState) {
             super(tenantId);
+            this.boundedContextName = boundedContextName;
             this.entityStateUrl = entityState;
         }
 
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createChannel(boundedContextName);
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 
@@ -96,18 +102,22 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemWriteFn<I> extends WriteFn<I> {
 
         private static final long serialVersionUID = 0L;
+        private final String boundedContextName;
         private final TypeUrl entityStateUrl;
         private transient ManagedChannel channel;
         private transient ProjectionStorageServiceBlockingStub blockingStub;
 
-        private InMemWriteFn(TenantId tenantId, TypeUrl entityStateUrl) {
+        private InMemWriteFn(String boundedContextName,
+                             TenantId tenantId,
+                             TypeUrl entityStateUrl) {
             super(tenantId);
+            this.boundedContextName = boundedContextName;
             this.entityStateUrl = entityStateUrl;
         }
 
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createChannel(boundedContextName);
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 

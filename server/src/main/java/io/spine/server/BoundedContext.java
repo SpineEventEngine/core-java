@@ -107,6 +107,10 @@ public final class BoundedContext
         this.tenantIndex = builder.tenantIndex;
     }
 
+    private void init() {
+        stand.onCreated(this);
+    }
+
     /**
      * Creates a new builder for {@code BoundedContext}.
      *
@@ -424,14 +428,14 @@ public final class BoundedContext
             initStand(storageFactory);
 
             final BoundedContext result = new BoundedContext(this);
-
+            result.init();
             log().info(result.nameForLogging() + " created.");
             return result;
         }
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.getInstance(multitenant);
+                storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();

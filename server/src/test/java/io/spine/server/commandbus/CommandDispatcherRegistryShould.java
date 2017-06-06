@@ -29,7 +29,6 @@ import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
@@ -68,7 +67,6 @@ public class CommandDispatcherRegistryShould {
     @Before
     public void setUp() {
         eventBus = EventBus.newBuilder()
-                           .setStorageFactory(StorageFactorySwitch.get(true))
                            .build();
         registry = new CommandDispatcherRegistry();
     }

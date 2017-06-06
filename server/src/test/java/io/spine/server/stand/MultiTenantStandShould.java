@@ -83,8 +83,10 @@ public class MultiTenantStandShould extends StandShould {
 
     @Test
     public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
-        final StandStorage standStorage = InMemoryStorageFactory.getInstance(isMultitenant())
-                                                                .createStandStorage();
+        final StandStorage standStorage =
+                InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
+                                                   isMultitenant())
+                                      .createStandStorage();
         final Stand stand = prepareStandWithAggregateRepo(standStorage);
 
         // --- Default Tenant

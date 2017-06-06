@@ -141,7 +141,7 @@ public abstract class AbstractCommandBusTestSuite {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.getInstance(this.multitenant);
+                InMemoryStorageFactory.newInstance(getClass().getSimpleName(), this.multitenant);
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
                                                                           storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));

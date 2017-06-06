@@ -40,20 +40,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
 
+    private final String boundedContextName;
     private final TypeUrl stateTypeUrl;
     private final RecordStorageIO<I> storageIO;
 
     InMemoryProjectionStorageIO(
-            TypeUrl stateTypeUrl,
+            String boundedContextName, TypeUrl stateTypeUrl,
             RecordStorageIO<I> storageIO) {
         super(storageIO.getIdClass());
+        this.boundedContextName = boundedContextName;
         this.stateTypeUrl = stateTypeUrl;
         this.storageIO = storageIO;
     }
 
     @Override
     public WriteTimestampFn writeTimestampFn(TenantId tenantId) {
-        return new WriteTimestampOverGrpc(tenantId, stateTypeUrl);
+        return new WriteTimestampOverGrpc(boundedContextName, tenantId, stateTypeUrl);
     }
 
     @Override
@@ -69,20 +71,23 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     private static class WriteTimestampOverGrpc extends WriteTimestampFn {
 
         private static final long serialVersionUID = 0L;
+        private final String boundedContextName;
         private final TypeUrl stateTypeUrl;
 
         private transient ManagedChannel channel;
         private transient ProjectionStorageServiceBlockingStub blockingStub;
 
-        private WriteTimestampOverGrpc(TenantId tenantId, TypeUrl typeUrl) {
+        private WriteTimestampOverGrpc(String boundedContextName, TenantId tenantId,
+                                       TypeUrl typeUrl) {
             super(tenantId);
+            this.boundedContextName = boundedContextName;
             this.stateTypeUrl = typeUrl;
         }
 
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createDefaultChannel();
+            channel = InMemoryGrpcServer.createChannel(boundedContextName);
             blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
         }
 

@@ -28,9 +28,9 @@ import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
 import io.spine.envelope.EventEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.EventTests;
 import io.spine.test.Tests;
 import io.spine.test.Tests.MemoizingObserver;
@@ -80,7 +80,10 @@ public class EventBusShould {
     }
 
     private void setUp(@Nullable EventEnricher enricher) {
-        this.storageFactory = StorageFactorySwitch.get(true);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(true)
+                                                .build();
+        this.storageFactory = bc.getStorageFactory();
         /**
          * Cannot use {@link com.google.common.util.concurrent.MoreExecutors#directExecutor()
          * MoreExecutors.directExecutor()} because it's impossible to spy on {@code final} classes.

@@ -50,15 +50,20 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     /** The time of the last handled event per tenant. */
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
+    private final String boundedContextName;
 
-    public static <I> InMemoryProjectionStorage<I> newInstance(
-            TypeUrl stateTypeUrl, InMemoryRecordStorage<I> entityStorage) {
-        return new InMemoryProjectionStorage<>(stateTypeUrl, entityStorage);
+    public static <I>
+    InMemoryProjectionStorage<I> newInstance(String boundedContextName,
+                                             TypeUrl stateTypeUrl,
+                                             InMemoryRecordStorage<I> entityStorage) {
+        return new InMemoryProjectionStorage<>(boundedContextName, entityStorage, stateTypeUrl);
     }
 
-    private InMemoryProjectionStorage(TypeUrl stateTypeUrl,
-                                      InMemoryRecordStorage<I> recordStorage) {
+    private InMemoryProjectionStorage(String boundedContextName,
+                                      InMemoryRecordStorage<I> recordStorage,
+                                      TypeUrl stateTypeUrl) {
         super(recordStorage.isMultitenant());
+        this.boundedContextName = boundedContextName;
         this.stateTypeUrl = stateTypeUrl;
         this.recordStorage = recordStorage;
     }
@@ -142,6 +147,8 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     @Override
     public ProjectionStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemoryProjectionStorageIO<>(stateTypeUrl, recordStorage.getIO(idClass));
+        return new InMemoryProjectionStorageIO<>(boundedContextName,
+                                                 stateTypeUrl,
+                                                 recordStorage.getIO(idClass));
     }
 }

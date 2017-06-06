@@ -23,25 +23,17 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.base.Identifier;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.Assign;
-import io.spine.server.command.CommandHistory;
+import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv;
+import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventSubscriber;
-import io.spine.server.storage.StorageFactorySwitch;
-import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
-import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
-import io.spine.test.aggregate.command.StartProject;
 import io.spine.test.aggregate.event.ProjectCreated;
-import io.spine.test.aggregate.event.ProjectStarted;
-import io.spine.test.aggregate.event.TaskAdded;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -71,8 +63,8 @@ public class AggregateCommandEndpointShould {
     private Subscriber subscriber;
 
     private static ProjectAggregate verifyAggregateStored(AggregateRepository<ProjectId,
-            AggregateCommandEndpointShould.ProjectAggregate> repository) {
-        final ArgumentCaptor<AggregateCommandEndpointShould.ProjectAggregate> aggregateCaptor =
+            ProjectAggregate> repository) {
+        final ArgumentCaptor<ProjectAggregate> aggregateCaptor =
                 ArgumentCaptor.forClass(ProjectAggregate.class);
         verify(repository).store(aggregateCaptor.capture());
         return aggregateCaptor.getValue();
@@ -94,7 +86,7 @@ public class AggregateCommandEndpointShould {
         boundedContext.getEventBus()
                       .register(subscriber);
 
-        repository = new ProjectAggregateRepository(boundedContext);
+        repository = new AggregateCommandEndpointTestEnv.ProjectAggregateRepository();
         boundedContext.register(repository);
         repositorySpy = spy(repository);
     }
@@ -189,77 +181,6 @@ public class AggregateCommandEndpointShould {
         @Subscribe
         void on(ProjectCreated msg) {
             remembered = msg;
-        }
-    }
-
-    /*
-     * Test environment classes and utilities
-     *****************************************/
-
-    private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
-
-        // Needs to be `static` to share the state updates in scope of the test.
-        private static final CommandHistory commandsHandled = new CommandHistory();
-
-        private ProjectAggregate(ProjectId id) {
-            super(id);
-        }
-
-        private static void assertHandled(Command expected) {
-            commandsHandled.assertHandled(expected);
-        }
-
-        static void clearCommandsHandled() {
-            commandsHandled.clear();
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject msg, CommandContext context) {
-            commandsHandled.add(msg, context);
-            return ProjectCreated.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .setName(msg.getName())
-                                 .build();
-        }
-
-        @Apply
-        private void apply(ProjectCreated event) {
-            getBuilder().setId(event.getProjectId())
-                        .setName(event.getName());
-        }
-
-        @Assign
-        TaskAdded handle(AddTask msg, CommandContext context) {
-            commandsHandled.add(msg, context);
-            return TaskAdded.newBuilder()
-                            .setProjectId(msg.getProjectId())
-                            .build();
-        }
-
-        @Apply
-        private void apply(TaskAdded event) {
-            getBuilder().setId(event.getProjectId());
-        }
-
-        @Assign
-        ProjectStarted handle(StartProject msg, CommandContext context) {
-            commandsHandled.add(msg, context);
-            return ProjectStarted.newBuilder()
-                                 .setProjectId(msg.getProjectId())
-                                 .build();
-        }
-
-        @Apply
-        private void apply(ProjectStarted event) {
-        }
-    }
-
-    private static class ProjectAggregateRepository
-            extends AggregateRepository<ProjectId, AggregateCommandEndpointShould.ProjectAggregate> {
-        protected ProjectAggregateRepository(BoundedContext boundedContext) {
-            super();
-            initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
         }
     }
 }

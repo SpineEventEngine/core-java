@@ -44,11 +44,14 @@ import java.util.Map;
  */
 class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
+    private final String boundedContextName;
     private final TypeUrl entityStateUrl;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(TypeUrl entityStateUrl, boolean multitenant) {
+    InMemoryRecordStorage(String boundedContextName, TypeUrl entityStateUrl,
+                          boolean multitenant) {
         super(multitenant);
+        this.boundedContextName = boundedContextName;
         this.entityStateUrl = entityStateUrl;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
@@ -58,9 +61,10 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
-    protected static <I> InMemoryRecordStorage<I> newInstance(TypeUrl entityStateUrl,
+    protected static <I> InMemoryRecordStorage<I> newInstance(String boundedContextName,
+                                                              TypeUrl entityStateUrl,
                                                               boolean multitenant) {
-        return new InMemoryRecordStorage<>(entityStateUrl, multitenant);
+        return new InMemoryRecordStorage<>(boundedContextName, entityStateUrl, multitenant);
     }
 
     @Override
@@ -138,6 +142,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     @Override
     public RecordStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemoryRecordStorageIO<>(idClass, entityStateUrl);
+        return new InMemoryRecordStorageIO<>(boundedContextName, idClass, entityStateUrl);
     }
 }

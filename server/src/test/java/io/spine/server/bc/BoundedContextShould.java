@@ -42,7 +42,6 @@ import io.spine.server.event.EventStore;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Spy;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.SecretProject;
@@ -79,16 +78,15 @@ public class BoundedContextShould {
 
     private final TestEventSubscriber subscriber = new TestEventSubscriber();
 
-    private StorageFactory storageFactory;
-
     private BoundedContext boundedContext;
 
     private boolean handlersRegistered = false;
 
     @Before
     public void setUp() {
-        boundedContext = BoundedContext.newBuilder().setMultitenant(true).build();
-        storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
+        boundedContext = BoundedContext.newBuilder()
+                                       .setMultitenant(true)
+                                       .build();
     }
 
     @After
@@ -102,7 +100,6 @@ public class BoundedContextShould {
     /** Registers all test repositories, handlers etc. */
     private void registerAll() {
         final ProjectAggregateRepository repo = new ProjectAggregateRepository();
-        repo.initStorage(storageFactory);
         boundedContext.register(repo);
         boundedContext.getEventBus().register(subscriber);
         handlersRegistered = true;
@@ -127,7 +124,6 @@ public class BoundedContextShould {
     public void register_AggregateRepository() {
         final ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
-        repository.initStorage(storageFactory);
         boundedContext.register(repository);
     }
 
@@ -135,12 +131,10 @@ public class BoundedContextShould {
     public void not_allow_two_aggregate_repositories_with_aggregates_with_the_same_state() {
         final ProjectAggregateRepository repository =
                 new ProjectAggregateRepository();
-        repository.initStorage(storageFactory);
         boundedContext.register(repository);
 
         final AnotherProjectAggregateRepository anotherRepo =
                 new AnotherProjectAggregateRepository();
-        repository.initStorage(storageFactory);
         boundedContext.register(anotherRepo);
     }
 
@@ -208,8 +202,6 @@ public class BoundedContextShould {
     @Test
     public void not_change_storage_during_registration_if_a_repository_has_one() {
         final ProjectAggregateRepository repository = new ProjectAggregateRepository();
-        repository.initStorage(storageFactory);
-
         final Repository spy = spy(repository);
         boundedContext.register(repository);
         verify(spy, never()).initStorage(any(StorageFactory.class));

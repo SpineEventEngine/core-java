@@ -29,7 +29,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.TestActorRequestFactory;
@@ -109,7 +108,7 @@ public class ProjectionRepositoryManualCatchupShould extends TenantAwareTest {
     }
 
     private StorageFactory storageFactory() {
-        return StorageFactorySwitch.get(boundedContext.isMultitenant());
+        return boundedContext.getStorageFactory();
     }
 
     private void keepTenantIdFromEvent(Event event) {
