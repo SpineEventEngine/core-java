@@ -24,16 +24,13 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.client.ColumnFilters;
-import org.junit.Test;
 import io.spine.client.ColumnFilter.Operator;
 import io.spine.protobuf.AnyPacker;
+import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
@@ -53,6 +50,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Dmytro Dashenkov
@@ -152,7 +151,7 @@ public class ColumnFiltersShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_create_ordering_filters_for_not_supported_types() {
         final Comparable<?> value = Calendar.getInstance(); // Comparable but not supported
-        le("invaliudColumn", value);
+        le("invalidColumn", value);
     }
 
     private static void checkCreatesInstance(ColumnFilter filter,

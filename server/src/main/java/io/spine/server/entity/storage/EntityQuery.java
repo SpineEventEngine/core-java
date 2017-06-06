@@ -142,10 +142,10 @@ public final class EntityQuery<I> implements Serializable {
     @Internal
     public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
         checkState(!isLifecycleAttributesSet(), "The query overrides Lifecycle Flags default values.");
-        final Column archivrdColumn = findColumn(cls, archived.name());
+        final Column archivedColumn = findColumn(cls, archived.name());
         final Column deletedColumn = findColumn(cls, deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
-                ImmutableMultimap.of(archivrdColumn, eq(archived.name(), false),
+                ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
                                      deletedColumn, eq(deletedColumn.getName(), false)),
                 ALL
         );

@@ -94,7 +94,7 @@ public class ColumnRecordsShould {
 
         final Function<String, Object> colIdMapper = spy(new NoOpColumnIdentifierMapper());
 
-        // Invoke the prepersistence action
+        // Invoke the pre-persistence action
         ColumnRecords.feedColumnsTo(destination, recordWithColumns, registry, colIdMapper);
 
         // Verify calls
