@@ -260,7 +260,7 @@ public abstract class Transaction<I,
                 markStateChanged();
 
                 listener.onBeforeCommit(getEntity(), newState,
-                                             getVersion(), getLifecycleFlags());
+                                        getVersion(), getLifecycleFlags());
 
                 entity.updateState(newState, getVersion());
                 commitAttributeChanges();
