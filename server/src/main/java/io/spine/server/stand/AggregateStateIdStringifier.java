@@ -25,11 +25,11 @@ import io.spine.string.Stringifier;
 import io.spine.string.Stringifiers;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
-import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifiers.checkSupported;
+import static io.spine.base.Identifier.checkSupported;
+import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 
 /**
  * A {@link Stringifier} for the {@link AggregateStateId}.
@@ -114,7 +114,7 @@ class AggregateStateIdStringifier extends Stringifier<AggregateStateId> {
             try {
                 result = Class.forName(JAVA_LANG_PACKAGE_NAME + idTypeString);
             } catch (ClassNotFoundException e) {
-                throw Exceptions.illegalStateWithCauseOf(e);
+                throw illegalStateWithCauseOf(e);
             }
         }
         return result;

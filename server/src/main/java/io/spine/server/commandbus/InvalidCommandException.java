@@ -25,6 +25,7 @@ import com.google.protobuf.Value;
 import io.spine.base.Command;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
+import io.spine.base.Identifier;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 import io.spine.type.TypeName;
@@ -33,7 +34,6 @@ import io.spine.validate.ConstraintViolations.ExceptionFactory;
 
 import java.util.Map;
 
-import static io.spine.base.Identifiers.idToString;
 import static java.lang.String.format;
 
 /**
@@ -84,7 +84,7 @@ public class InvalidCommandException extends CommandException {
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                idToString(envelope.getCommandId()));
+                Identifier.toString(envelope.getCommandId()));
         final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }

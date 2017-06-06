@@ -23,12 +23,12 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Message;
 import io.spine.base.CommandId;
 import io.spine.base.FailureThrowable;
+import io.spine.base.Identifier;
 import io.spine.type.TypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifiers.idToString;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.String.format;
 
@@ -96,7 +96,7 @@ public class Log {
 
         final String cmdType = TypeName.of(commandMessage)
                                        .value();
-        final String id = idToString(commandId);
+        final String id = Identifier.toString(commandId);
         final String result = format(format, cmdType, id);
         return result;
     }

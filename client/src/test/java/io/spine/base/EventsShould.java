@@ -45,7 +45,7 @@ import static io.spine.base.Events.getMessage;
 import static io.spine.base.Events.getProducer;
 import static io.spine.base.Events.getTimestamp;
 import static io.spine.base.Events.sort;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Wrapper.forBoolean;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

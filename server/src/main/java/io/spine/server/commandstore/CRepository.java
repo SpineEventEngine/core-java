@@ -29,7 +29,7 @@ import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.Failure;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.entity.DefaultRecordBasedRepository;
@@ -162,7 +162,7 @@ class CRepository extends DefaultRecordBasedRepository<CommandId, CEntity, Comma
     private CEntity loadEntity(CommandId commandId) {
         final Optional<CEntity> loaded = find(commandId);
         if (!loaded.isPresent()) {
-            final String idStr = Identifiers.idToString(commandId);
+            final String idStr = Identifier.toString(commandId);
             throw new IllegalStateException("Unable to load entity for command ID: " + idStr);
         }
 

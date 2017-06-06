@@ -35,7 +35,7 @@ import org.junit.Test;
 
 import static io.spine.base.Enrichments.isEnrichmentEnabled;
 import static io.spine.base.EventsShould.newEventContext;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.Wrapper.forBoolean;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

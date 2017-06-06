@@ -41,7 +41,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  */
 final class WebSafeTimestampStringifer extends Stringifier<Timestamp> implements Serializable {
 
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 0L;
     private static final WebSafeTimestampStringifer INSTANCE = new WebSafeTimestampStringifer();
 
     private static final char COLON = ':';

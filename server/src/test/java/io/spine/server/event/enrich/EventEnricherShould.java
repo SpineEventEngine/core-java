@@ -47,7 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.base.Enrichments.getEnrichment;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.event.Given.AnEvent.projectStarted;
 import static io.spine.server.event.Given.Enrichment.GetProjectMaxMemberCount;
 import static io.spine.server.event.Given.Enrichment.GetProjectName;
@@ -67,10 +67,8 @@ public class EventEnricherShould {
     private EventBus eventBus;
     private TestEventSubscriber subscriber;
     private EventEnricher enricher;
-    private final Function<ProjectId, String> getProjectName =
-            new GetProjectName();
-    private final Function<ProjectId, UserId> getProjectOwnerId =
-            new GetProjectOwnerId();
+    private final Function<ProjectId, String> getProjectName = new GetProjectName();
+    private final Function<ProjectId, UserId> getProjectOwnerId = new GetProjectOwnerId();
 
     private static Event createEvent(Message msg) {
         final TestEventFactory eventFactory = newInstance(EventEnricherShould.class);

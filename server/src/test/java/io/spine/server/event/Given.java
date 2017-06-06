@@ -27,7 +27,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventId;
-import io.spine.base.Identifiers;
 import io.spine.people.PersonName;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.test.TestEventFactory;
@@ -45,7 +44,7 @@ import io.spine.users.UserId;
 
 import javax.annotation.Nullable;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.TestEventFactory.newInstance;
 
@@ -115,22 +114,22 @@ public class Given {
 
         public static PermissionGrantedEvent permissionGranted() {
             return PermissionGrantedEvent.newBuilder()
-                                         .setGranterUid(Identifiers.newUuid())
+                                         .setGranterUid(newUuid())
                                          .setPermissionId("mock-permission")
-                                         .setUserUid(Identifiers.newUuid())
+                                         .setUserUid(newUuid())
                                          .build();
         }
 
         public static PermissionRevokedEvent permissionRevoked() {
             return PermissionRevokedEvent.newBuilder()
                                          .setPermissionId("old-permission")
-                                         .setUserUid(Identifiers.newUuid())
+                                         .setUserUid(newUuid())
                                          .build();
         }
 
         public static SharingRequestApproved sharingRequestApproved() {
             return SharingRequestApproved.newBuilder()
-                                         .setUserUid(Identifiers.newUuid())
+                                         .setUserUid(newUuid())
                                          .build();
         }
     }

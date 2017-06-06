@@ -26,7 +26,7 @@ import io.spine.reflect.GenericTypeIndex;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A server-side object with an {@link io.spine.base.Identifiers#checkSupported(Class) identity}.
+ * A server-side object with an {@link io.spine.base.Identifier#checkSupported(Class) identity}.
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *

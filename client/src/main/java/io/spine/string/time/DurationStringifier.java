@@ -36,7 +36,7 @@ import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
  */
 final class DurationStringifier extends Stringifier<Duration> implements Serializable {
 
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 0L;
     private static final DurationStringifier INSTANCE = new DurationStringifier();
 
     static DurationStringifier getInstance() {

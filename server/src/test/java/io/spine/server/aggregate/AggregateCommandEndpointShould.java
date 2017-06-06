@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
@@ -73,7 +73,7 @@ public class AggregateCommandEndpointShould {
     @Before
     public void setUp() {
         projectId = ProjectId.newBuilder()
-                             .setId(Identifiers.newUuid())
+                             .setId(Identifier.newUuid())
                              .build();
 
         final CommandStore commandStore = mock(CommandStore.class);

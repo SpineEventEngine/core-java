@@ -23,7 +23,7 @@ package io.spine.server.storage.memory;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.projection.ProjectionStorageShould;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * @author Alexander Litus

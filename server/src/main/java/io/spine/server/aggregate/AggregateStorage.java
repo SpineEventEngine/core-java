@@ -25,6 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.SPI;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
+import io.spine.base.Identifier;
 import io.spine.server.storage.AbstractStorage;
 import io.spine.server.storage.StorageWithLifecycleFlags;
 
@@ -37,7 +38,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.protobuf.TextFormat.shortDebugString;
 import static com.google.protobuf.util.Timestamps.checkValid;
-import static io.spine.base.Identifiers.idToString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
@@ -164,7 +164,7 @@ public abstract class AggregateStorage<I>
         checkArgument(event.hasContext(), "Event context must be set.");
         final EventContext context = event.getContext();
 
-        final String eventIdStr = idToString(event.getId());
+        final String eventIdStr = Identifier.toString(event.getId());
         checkNotEmptyOrBlank(eventIdStr, "Event ID");
 
         checkArgument(event.hasMessage(), "Event message must be set.");
