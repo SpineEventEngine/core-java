@@ -18,12 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.gson.internal.Primitives;
-import org.spine3.server.entity.Entity;
+import io.spine.server.entity.Entity;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
@@ -93,14 +93,14 @@ import static java.lang.String.format;
  * <h2>Type policy</h2>
  *
  * <p>A Column can turn into any type. If use a ready implementation of
- * the {@link org.spine3.server.storage.Storage Spine Storages}, the most commonly used types should
+ * the {@link io.spine.server.storage.Storage Spine Storages}, the most commonly used types should
  * be already supported. However, you may override the behavior for any type whenever you  wish. For
  * more info, see {@link ColumnTypeRegistry}.
  *
  * <p>To handle specific types of the Columns, which are not supported by default,
  * implement the {@link ColumnType} {@code interface}, register it in a {@link ColumnTypeRegistry}
  * and pass the instance of the registry into the
- * {@link org.spine3.server.storage.StorageFactory StorageFactory} on creation.
+ * {@link io.spine.server.storage.StorageFactory StorageFactory} on creation.
  *
  * <p>Note that the type of a Column must either be primitive or implement {@link Serializable}.
  *

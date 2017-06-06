@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package io.spine.client;
 
 import com.google.common.base.Function;
 import com.google.common.testing.NullPointerTester;
@@ -28,11 +28,11 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.base.Identifiers;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.test.client.TestEntity;
-import org.spine3.test.validate.msg.ProjectId;
-import org.spine3.type.TypeName;
+import io.spine.base.Identifiers;
+import io.spine.protobuf.AnyPacker;
+import io.spine.test.client.TestEntity;
+import io.spine.test.validate.msg.ProjectId;
+import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -52,21 +52,21 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.base.Identifiers.newUuid;
-import static org.spine3.client.ColumnFilters.all;
-import static org.spine3.client.ColumnFilters.either;
-import static org.spine3.client.ColumnFilters.eq;
-import static org.spine3.client.ColumnFilters.ge;
-import static org.spine3.client.ColumnFilters.gt;
-import static org.spine3.client.ColumnFilters.le;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static org.spine3.protobuf.TypeConverter.toObject;
-import static org.spine3.test.Verify.assertContains;
-import static org.spine3.test.Verify.assertSize;
-import static org.spine3.test.Verify.fail;
-import static org.spine3.time.Durations2.fromHours;
-import static org.spine3.time.Time.getCurrentTime;
+import static io.spine.base.Identifiers.newUuid;
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.either;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.ge;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.le;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.protobuf.TypeConverter.toObject;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertSize;
+import static io.spine.test.Verify.fail;
+import static io.spine.time.Durations2.fromHours;
+import static io.spine.time.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov

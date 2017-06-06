@@ -18,17 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Any;
 import org.junit.Test;
-import org.spine3.base.Version;
-import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.EntityWithLifecycle;
-import org.spine3.server.entity.VersionableEntity;
-import org.spine3.test.Given;
+import io.spine.base.Version;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.server.entity.VersionableEntity;
+import io.spine.test.Given;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.Method;

@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import org.spine3.annotation.Internal;
-import org.spine3.base.Identifiers;
-import org.spine3.client.CompositeColumnFilter.CompositeOperator;
-import org.spine3.client.ColumnFilter;
-import org.spine3.server.entity.storage.Column.MemoizedValue;
+import io.spine.annotation.Internal;
+import io.spine.base.Identifiers;
+import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.ColumnFilter;
+import io.spine.server.entity.storage.Column.MemoizedValue;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -35,8 +35,8 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static java.lang.String.format;
-import static org.spine3.protobuf.TypeConverter.toObject;
-import static org.spine3.server.entity.storage.QueryOperators.compare;
+import static io.spine.protobuf.TypeConverter.toObject;
+import static io.spine.server.entity.storage.QueryOperators.compare;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given

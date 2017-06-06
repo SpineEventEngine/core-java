@@ -18,20 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
-import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.test.entity.Project;
-import org.spine3.test.entity.ProjectId;
-import org.spine3.testdata.Sample;
-import org.spine3.time.Time;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.LifecycleFlags;
+import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
+import io.spine.testdata.Sample;
+import io.spine.time.Time;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -41,13 +41,13 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.spine3.server.storage.EntityField.version;
-import static org.spine3.server.storage.LifecycleFlagField.archived;
-import static org.spine3.server.storage.LifecycleFlagField.deleted;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.test.Verify.assertContains;
-import static org.spine3.test.Verify.assertEmpty;
-import static org.spine3.test.Verify.assertSize;
+import static io.spine.server.storage.EntityField.version;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
@@ -32,19 +32,19 @@ import java.util.Map;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A query to a {@link org.spine3.server.storage.RecordStorage RecordStorage} for the records
+ * A query to a {@link io.spine.server.storage.RecordStorage RecordStorage} for the records
  * matching the given parameters.
  *
  * <p>Acts like a DTO between the
- * {@linkplain org.spine3.server.entity.RecordBasedRepository repository} and the
- * {@link org.spine3.server.storage.RecordStorage RecordStorage}.
+ * {@linkplain io.spine.server.entity.RecordBasedRepository repository} and the
+ * {@link io.spine.server.storage.RecordStorage RecordStorage}.
  *
  * <p>The query contains the acceptable values of the record IDs and the
  * {@linkplain Column Entity Columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified (see
- * {@link org.spine3.server.stand.StandStorage StandSotrage}). By default,
- * {@link org.spine3.server.storage.RecordStorage RecordStorage} supports the Entity queries.
+ * {@link io.spine.server.stand.StandStorage StandSotrage}). By default,
+ * {@link io.spine.server.storage.RecordStorage RecordStorage} supports the Entity queries.
  *
  * <p>If the {@linkplain EntityQuery#getIds() accepted IDs set} is empty, all the IDs are
  * considered to be queried.
@@ -60,8 +60,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * considered matching.
  *
  * <p>If the query specifies the values of
- * the {@linkplain org.spine3.server.entity.LifecycleFlags Entity lifecycle Columns}, then
- * the {@linkplain org.spine3.server.storage.RecordStorage#readAll(EntityQuery, FieldMask)
+ * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
+ * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery, FieldMask)
  * default behavior} will be overridden i.e. the records resulting to such query may or may not be
  * active.
  *

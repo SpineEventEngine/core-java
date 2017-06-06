@@ -18,20 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.client.ColumnFilter;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.EntityRecord;
-import org.spine3.test.entity.Project;
-import org.spine3.test.entity.ProjectId;
-import org.spine3.test.entity.TaskId;
-import org.spine3.testdata.Sample;
+import io.spine.client.ColumnFilter;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.EntityRecord;
+import io.spine.test.entity.Project;
+import io.spine.test.entity.ProjectId;
+import io.spine.test.entity.TaskId;
+import io.spine.testdata.Sample;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -45,9 +45,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.ColumnFilters.eq;
-import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 
 /**
  * @author Dmytro Dashenkov

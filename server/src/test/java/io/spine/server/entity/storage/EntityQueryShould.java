@@ -18,19 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.client.ColumnFilter;
-import org.spine3.client.ColumnFilters;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.server.entity.EntityWithLifecycle;
-import org.spine3.test.entity.ProjectId;
-import org.spine3.testdata.Sample;
+import io.spine.client.ColumnFilter;
+import io.spine.client.ColumnFilters;
+import io.spine.client.EntityIdFilter;
+import io.spine.server.entity.EntityWithLifecycle;
+import io.spine.test.entity.ProjectId;
+import io.spine.testdata.Sample;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -47,11 +47,11 @@ import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
-import static org.spine3.protobuf.TypeConverter.toAny;
-import static org.spine3.server.storage.LifecycleFlagField.deleted;
-import static org.spine3.test.Verify.assertContains;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.ColumnFilter.Operator.EQUAL;
+import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.test.Verify.assertContains;
 
 /**
  * @author Dmytro Dashenkov

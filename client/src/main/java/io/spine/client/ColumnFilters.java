@@ -18,27 +18,27 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package io.spine.client;
 
 import com.google.common.primitives.Primitives;
 import com.google.protobuf.Any;
 import com.google.protobuf.Timestamp;
-import org.spine3.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.CompositeColumnFilter.CompositeOperator;
 
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.asList;
-import static org.spine3.client.ColumnFilter.Operator;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
-import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static org.spine3.protobuf.TypeConverter.toAny;
+import static io.spine.client.ColumnFilter.Operator;
+import static io.spine.client.ColumnFilter.Operator.EQUAL;
+import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
+import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.protobuf.TypeConverter.toAny;
 
 /**
  * A factory of {@link ColumnFilter} instances.

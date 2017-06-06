@@ -18,21 +18,21 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package io.spine.server.storage;
 
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.commandstore.CommandStore;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.storage.ColumnTypeRegistry;
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.stand.StandStorage;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.commandstore.CommandStore;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.stand.StandStorage;
 
 /**
  * A factory for creating storages used by repositories,
  * {@link CommandStore CommandStore},
- * {@link org.spine3.server.event.EventStore EventStore},
- * and {@link org.spine3.server.stand.Stand Stand}.
+ * {@link io.spine.server.event.EventStore EventStore},
+ * and {@link io.spine.server.stand.Stand Stand}.
  *
  * @author Alexander Yevsyukov
  */

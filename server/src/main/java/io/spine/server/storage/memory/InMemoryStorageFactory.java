@@ -18,16 +18,16 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage.memory;
+package io.spine.server.storage.memory;
 
-import org.spine3.server.aggregate.Aggregate;
-import org.spine3.server.aggregate.AggregateStorage;
-import org.spine3.server.entity.Entity;
-import org.spine3.server.entity.storage.ColumnTypeRegistry;
-import org.spine3.server.projection.ProjectionStorage;
-import org.spine3.server.stand.StandStorage;
-import org.spine3.server.storage.RecordStorage;
-import org.spine3.server.storage.StorageFactory;
+import io.spine.server.aggregate.Aggregate;
+import io.spine.server.aggregate.AggregateStorage;
+import io.spine.server.entity.Entity;
+import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.projection.ProjectionStorage;
+import io.spine.server.stand.StandStorage;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.StorageFactory;
 
 /**
  * A factory for in-memory storages.
@@ -51,7 +51,7 @@ public class InMemoryStorageFactory implements StorageFactory {
      * {@inheritDoc}
      *
      * <p>In-memory implementation stores no values separately
-     * ({@link org.spine3.server.entity.storage.Column Columns}), therefore
+     * ({@link io.spine.server.entity.storage.Column Columns}), therefore
      * returns an empty ColumnTypeRegistry.
      */
     @Override

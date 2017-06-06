@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package io.spine.client;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import org.spine3.base.Identifiers;
+import io.spine.base.Identifiers;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -34,9 +34,9 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
+import static io.spine.client.ColumnFilters.all;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
-import static org.spine3.client.ColumnFilters.all;
 
 /**
  * A builder for the {@link Query} instances.

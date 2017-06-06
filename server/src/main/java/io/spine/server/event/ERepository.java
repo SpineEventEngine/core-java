@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package io.spine.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
@@ -26,25 +26,25 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import org.spine3.base.Event;
-import org.spine3.base.EventId;
-import org.spine3.client.ColumnFilter;
-import org.spine3.client.CompositeColumnFilter;
-import org.spine3.client.EntityFilters;
-import org.spine3.server.entity.DefaultRecordBasedRepository;
+import io.spine.base.Event;
+import io.spine.base.EventId;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
+import io.spine.server.entity.DefaultRecordBasedRepository;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static org.spine3.client.ColumnFilters.eq;
-import static org.spine3.client.ColumnFilters.gt;
-import static org.spine3.client.ColumnFilters.lt;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static org.spine3.server.event.EventEntity.CREATED_TIME_COLUMN;
-import static org.spine3.server.event.EventEntity.TYPE_COLUMN;
-import static org.spine3.server.event.EventEntity.comparator;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.lt;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
+import static io.spine.server.event.EEntity.TYPE_COLUMN;
+import static io.spine.server.event.EEntity.comparator;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -56,13 +56,13 @@ import static org.spine3.server.event.EventEntity.comparator;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
-class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Event> {
+class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
 
-    private static final Function<EventEntity, Event> GET_EVENT =
-            new Function<EventEntity, Event>() {
+    private static final Function<EEntity, Event> GET_EVENT =
+            new Function<EEntity, Event>() {
                 @Nullable
                 @Override
-                public Event apply(@Nullable EventEntity input) {
+                public Event apply(@Nullable EEntity input) {
                     if (input == null) {
                         return null;
                     }
@@ -74,10 +74,10 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         checkNotNull(query);
 
         final EntityFilters filters = toEntityFilters(query);
-        final Iterable<EventEntity> entities = find(filters, FieldMask.getDefaultInstance());
+        final Iterable<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
-        final Predicate<EventEntity> detailedLookupFilter = createEntityFilter(query);
-        final Iterator<EventEntity> entityIterator = FluentIterable.from(entities)
+        final Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
+        final Iterator<EEntity> entityIterator = FluentIterable.from(entities)
                                                                    .filter(detailedLookupFilter)
                                                                    .toSortedList(comparator())
                                                                    .iterator();
@@ -86,16 +86,16 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
     }
 
     void store(Event event) {
-        final EventEntity entity = new EventEntity(event);
+        final EEntity entity = new EEntity(event);
         store(entity);
     }
 
-    static Function<EventEntity, Event> getEventFunc() {
+    static Function<EEntity, Event> getEventFunc() {
         return GET_EVENT;
     }
 
-    private static Predicate<EventEntity> createEntityFilter(EventStreamQuery query) {
-        return new EventEntityMatchesStreamQuery(query);
+    private static Predicate<EEntity> createEntityFilter(EventStreamQuery query) {
+        return new EEntityMatchesStreamQuery(query);
     }
 
     /**
@@ -147,16 +147,16 @@ class EventStorage extends DefaultRecordBasedRepository<EventId, EventEntity, Ev
         return typeFilter.build();
     }
 
-    private static class EventEntityMatchesStreamQuery implements Predicate<EventEntity> {
+    private static class EEntityMatchesStreamQuery implements Predicate<EEntity> {
 
         private final Predicate<Event> filter;
 
-        private EventEntityMatchesStreamQuery(EventStreamQuery query) {
+        private EEntityMatchesStreamQuery(EventStreamQuery query) {
             this.filter = new MatchesStreamQuery(query);
         }
 
         @Override
-        public boolean apply(@Nullable EventEntity input) {
+        public boolean apply(@Nullable EEntity input) {
             if (input == null) {
                 return false;
             }

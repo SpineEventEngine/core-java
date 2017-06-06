@@ -18,20 +18,20 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
-import org.spine3.annotation.Internal;
-import org.spine3.base.Identifiers;
-import org.spine3.client.ColumnFilter;
-import org.spine3.client.CompositeColumnFilter;
-import org.spine3.client.CompositeColumnFilter.CompositeOperator;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.TypeConverter;
-import org.spine3.server.entity.Entity;
+import io.spine.annotation.Internal;
+import io.spine.base.Identifiers;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.EntityIdFilter;
+import io.spine.protobuf.TypeConverter;
+import io.spine.server.entity.Entity;
 
 import java.util.Collection;
 import java.util.LinkedList;

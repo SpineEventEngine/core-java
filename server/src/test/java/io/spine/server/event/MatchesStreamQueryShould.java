@@ -18,22 +18,23 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.base.Event;
-import org.spine3.base.FieldFilter;
-import org.spine3.base.Identifiers;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.test.TestEventFactory;
-import org.spine3.test.event.ProjectCreated;
-import org.spine3.test.event.ProjectId;
+import io.spine.base.Event;
+import io.spine.base.FieldFilter;
+import io.spine.base.Identifiers;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.event.MatchesStreamQuery;
+import io.spine.test.TestEventFactory;
+import io.spine.test.event.ProjectCreated;
+import io.spine.test.event.ProjectId;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.test.TestEventFactory.newInstance;
+import static io.spine.test.TestEventFactory.newInstance;
 
 /**
  * @author Dmytro Dashenkov

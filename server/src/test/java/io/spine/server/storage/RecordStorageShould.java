@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.storage;
+package io.spine.server.storage;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
@@ -32,25 +32,25 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
-import org.spine3.base.Version;
-import org.spine3.client.ColumnFilter;
-import org.spine3.client.CompositeColumnFilter;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.TypeConverter;
-import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.EventPlayingEntity;
-import org.spine3.server.entity.FieldMasks;
-import org.spine3.server.entity.LifecycleFlags;
-import org.spine3.server.entity.storage.EntityQueries;
-import org.spine3.server.entity.storage.EntityQuery;
-import org.spine3.server.entity.storage.EntityRecordWithColumns;
-import org.spine3.test.Tests;
-import org.spine3.test.storage.Project;
-import org.spine3.test.storage.ProjectValidatingBuilder;
-import org.spine3.testdata.Sample;
-import org.spine3.time.Time;
+import io.spine.base.Version;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.EntityIdFilter;
+import io.spine.protobuf.TypeConverter;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.EventPlayingEntity;
+import io.spine.server.entity.FieldMasks;
+import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.storage.EntityQueries;
+import io.spine.server.entity.storage.EntityQuery;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.test.Tests;
+import io.spine.test.storage.Project;
+import io.spine.test.storage.ProjectValidatingBuilder;
+import io.spine.testdata.Sample;
+import io.spine.time.Time;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -68,23 +68,23 @@ import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
-import static org.spine3.base.Identifiers.idToAny;
-import static org.spine3.client.ColumnFilters.all;
-import static org.spine3.client.ColumnFilters.eq;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.protobuf.AnyPacker.unpack;
-import static org.spine3.server.entity.TestTransaction.injectArchived;
-import static org.spine3.server.entity.TestTransaction.injectDeleted;
-import static org.spine3.server.entity.TestTransaction.injectState;
-import static org.spine3.server.entity.storage.EntityRecordWithColumns.create;
-import static org.spine3.server.storage.LifecycleFlagField.archived;
-import static org.spine3.test.Tests.archived;
-import static org.spine3.test.Tests.assertMatchesMask;
-import static org.spine3.test.Verify.assertEmpty;
-import static org.spine3.test.Verify.assertMapsEqual;
-import static org.spine3.test.Verify.assertSize;
-import static org.spine3.validate.Validate.isDefault;
+import static io.spine.base.Identifiers.idToAny;
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.TestTransaction.injectArchived;
+import static io.spine.server.entity.TestTransaction.injectDeleted;
+import static io.spine.server.entity.TestTransaction.injectState;
+import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.test.Tests.archived;
+import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertMapsEqual;
+import static io.spine.test.Verify.assertSize;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * @author Dmytro Dashenkov

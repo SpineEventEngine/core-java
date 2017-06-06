@@ -18,26 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import org.junit.Test;
-import org.spine3.base.Version;
-import org.spine3.client.ColumnFilter;
-import org.spine3.client.ColumnFilters;
-import org.spine3.client.CompositeColumnFilter;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.protobuf.AnyPacker;
-import org.spine3.server.entity.AbstractEntity;
-import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.Entity;
-import org.spine3.test.storage.ProjectId;
-import org.spine3.testdata.Sample;
+import io.spine.base.Version;
+import io.spine.client.ColumnFilter;
+import io.spine.client.ColumnFilters;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.EntityIdFilter;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.AbstractEntity;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.Entity;
+import io.spine.test.storage.ProjectId;
+import io.spine.testdata.Sample;
 
 import java.util.Collection;
 import java.util.List;
@@ -48,12 +48,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static org.spine3.server.storage.EntityField.version;
-import static org.spine3.server.storage.LifecycleFlagField.archived;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.test.Verify.assertContains;
-import static org.spine3.test.Verify.assertSize;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.server.storage.EntityField.version;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertSize;
 
 /**
  * @author Dmytro Dashenkov

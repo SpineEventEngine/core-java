@@ -18,40 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.client;
+package io.spine.client;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.client.ColumnFilters;
 import org.junit.Test;
-import org.spine3.client.ColumnFilter.Operator;
-import org.spine3.protobuf.AnyPacker;
+import io.spine.client.ColumnFilter.Operator;
+import io.spine.protobuf.AnyPacker;
 
 import java.util.Calendar;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.spine3.client.ColumnFilter.Operator.EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.GREATER_THAN;
-import static org.spine3.client.ColumnFilter.Operator.LESS_OR_EQUAL;
-import static org.spine3.client.ColumnFilter.Operator.LESS_THAN;
-import static org.spine3.client.ColumnFilters.all;
-import static org.spine3.client.ColumnFilters.either;
-import static org.spine3.client.ColumnFilters.eq;
-import static org.spine3.client.ColumnFilters.ge;
-import static org.spine3.client.ColumnFilters.gt;
-import static org.spine3.client.ColumnFilters.le;
-import static org.spine3.client.ColumnFilters.lt;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.EITHER;
-import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.spine3.test.Verify.assertContainsAll;
-import static org.spine3.time.Time.getCurrentTime;
+import static io.spine.client.ColumnFilter.Operator.EQUAL;
+import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
+import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
+import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
+import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.either;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.ge;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.le;
+import static io.spine.client.ColumnFilters.lt;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertContainsAll;
+import static io.spine.time.Time.getCurrentTime;
 
 /**
  * @author Dmytro Dashenkov

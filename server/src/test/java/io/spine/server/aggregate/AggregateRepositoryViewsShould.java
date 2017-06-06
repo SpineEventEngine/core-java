@@ -41,8 +41,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.server.storage.LifecycleFlagField.archived;
-import static org.spine3.server.storage.LifecycleFlagField.deleted;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * @author Alexander Yevsyukov

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity;
+package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
@@ -30,15 +30,15 @@ import com.google.protobuf.StringValue;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.spine3.client.CompositeColumnFilter;
-import org.spine3.client.ColumnFilter;
-import org.spine3.client.ColumnFilters;
-import org.spine3.client.EntityFilters;
-import org.spine3.client.EntityId;
-import org.spine3.client.EntityIdFilter;
-import org.spine3.server.tenant.TenantAwareTest;
-import org.spine3.test.Given;
-import org.spine3.test.Tests;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.ColumnFilter;
+import io.spine.client.ColumnFilters;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
+import io.spine.client.EntityIdFilter;
+import io.spine.server.tenant.TenantAwareTest;
+import io.spine.test.Given;
+import io.spine.test.Tests;
 
 import java.util.Collection;
 import java.util.List;
@@ -47,12 +47,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.spine3.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static org.spine3.protobuf.AnyPacker.pack;
-import static org.spine3.test.Tests.newTenantUuid;
-import static org.spine3.test.Verify.assertContains;
-import static org.spine3.test.Verify.assertNotContains;
-import static org.spine3.test.Verify.assertSize;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertNotContains;
+import static io.spine.test.Verify.assertSize;
 
 /**
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.

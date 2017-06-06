@@ -18,17 +18,17 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.entity.storage;
+package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
-import org.spine3.server.entity.AbstractVersionableEntity;
-import org.spine3.server.entity.EntityRecord;
-import org.spine3.server.entity.VersionableEntity;
-import org.spine3.test.Given;
-import org.spine3.test.entity.Project;
-import org.spine3.testdata.Sample;
+import io.spine.server.entity.AbstractVersionableEntity;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.VersionableEntity;
+import io.spine.test.Given;
+import io.spine.test.entity.Project;
+import io.spine.testdata.Sample;
 
 import java.util.Collections;
 import java.util.Map;
@@ -40,12 +40,12 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static org.spine3.server.entity.storage.Column.MemoizedValue;
-import static org.spine3.server.entity.storage.EntityRecordWithColumns.of;
-import static org.spine3.server.storage.EntityField.version;
-import static org.spine3.test.Verify.assertContainsKeyValue;
-import static org.spine3.test.Verify.assertEmpty;
-import static org.spine3.test.Verify.assertMapsEqual;
+import static io.spine.server.entity.storage.Column.MemoizedValue;
+import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
+import static io.spine.server.storage.EntityField.version;
+import static io.spine.test.Verify.assertContainsKeyValue;
+import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertMapsEqual;
 
 /**
  * @author Dmytro Dashenkov

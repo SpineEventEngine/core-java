@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.event;
+package io.spine.server.event;
 
 import com.google.common.base.Predicate;
-import org.spine3.base.Event;
+import io.spine.base.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -32,8 +32,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * The predicate for filtering {@code Event} instances by {@link EventStreamQuery}.
  *
  * <p>The predicate ignores the time of bounds and matches only
- * the {@link org.spine3.base.FieldFilter fields} of the event message and
- * the {@link org.spine3.base.EventContext}.
+ * the {@link io.spine.base.FieldFilter fields} of the event message and
+ * the {@link io.spine.base.EventContext}.
  *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.reflect;
+package io.spine.reflect;
 
 import com.google.common.reflect.TypeToken;
 

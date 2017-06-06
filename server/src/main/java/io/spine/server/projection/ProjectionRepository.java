@@ -52,7 +52,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static org.spine3.validate.Validate.isDefault;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
