@@ -39,7 +39,7 @@ public class UrlPrinterShould {
                          .setPassword("root")
                          .build();
 
-    private static final String HOST = "spine3.org";
+    private static final String HOST = "spine.io";
 
     private static final Record FULL_RECORD =
             Record.newBuilder()
@@ -59,7 +59,7 @@ public class UrlPrinterShould {
         final Url.Builder url = Url.newBuilder();
         url.setRecord(FULL_RECORD);
 
-        assertEquals("http://admin:root@spine3.org:80/index?key=value&key2=value2#frag1",
+        assertEquals("http://admin:root@spine.io:80/index?key=value&key2=value2#frag1",
                      UrlPrinter.printToString(url.build()));
     }
 
@@ -96,7 +96,7 @@ public class UrlPrinterShould {
                            .setRecord(record)
                            .build();
 
-        assertEquals("http://admin@spine3.org:80/index?key=value&key2=value2#frag1",
+        assertEquals("http://admin@spine.io:80/index?key=value&key2=value2#frag1",
                      UrlPrinter.printToString(url));
     }
 
@@ -114,7 +114,7 @@ public class UrlPrinterShould {
 
         // As UrlPrinter assumes that we have already validated url, it just ignores password
         // if user is not set
-        assertEquals("http://spine3.org:80/index?key=value&key2=value2#frag1",
+        assertEquals("http://spine.io:80/index?key=value&key2=value2#frag1",
                      UrlPrinter.printToString(url));
     }
 
