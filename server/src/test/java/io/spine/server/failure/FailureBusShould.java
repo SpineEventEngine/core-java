@@ -42,7 +42,7 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

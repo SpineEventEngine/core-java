@@ -22,13 +22,13 @@ package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
 import io.spine.base.EventContext;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.protobuf.MessageField;
 
 /**
  * Obtains an entity ID based on an event/command message, context and message field index.
  *
- * <p>An entity ID field name must end with the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+ * <p>An entity ID field name must end with the {@link Identifier#ID_PROPERTY_SUFFIX}.
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
@@ -53,7 +53,7 @@ abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
      * {@inheritDoc}
      *
      * @throws MissingEntityIdException if the field name does not end with
-     *          the {@link Identifiers#ID_PROPERTY_SUFFIX}.
+     *          the {@link Identifier#ID_PROPERTY_SUFFIX}.
      * @throws ClassCastException if the field type is invalid
      */
     @Override
@@ -80,7 +80,7 @@ abstract class GetIdByFieldIndex<I, M extends Message, C extends Message>
         @Override
         protected boolean isFieldAvailable(Message message) {
             final String fieldName = MessageField.getFieldName(message, getIndex());
-            final boolean result = fieldName.endsWith(Identifiers.ID_PROPERTY_SUFFIX);
+            final boolean result = fieldName.endsWith(Identifier.ID_PROPERTY_SUFFIX);
             return result;
         }
     }

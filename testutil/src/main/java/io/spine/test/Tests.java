@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.Math.abs;
 

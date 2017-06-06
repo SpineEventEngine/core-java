@@ -24,7 +24,7 @@ import io.spine.test.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 
 /**
  * Extracted from {@link EntityShould}

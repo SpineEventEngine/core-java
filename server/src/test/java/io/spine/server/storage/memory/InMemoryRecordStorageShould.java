@@ -21,13 +21,13 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
-import io.spine.base.Identifiers;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 
+import static io.spine.base.Identifier.newUuid;
 import static java.lang.String.format;
 
 /**
@@ -43,7 +43,7 @@ public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId, 
     @Override
     protected ProjectId newId() {
         final ProjectId id = ProjectId.newBuilder()
-                                      .setId(Identifiers.newUuid())
+                                      .setId(newUuid())
                                       .build();
         return id;
     }

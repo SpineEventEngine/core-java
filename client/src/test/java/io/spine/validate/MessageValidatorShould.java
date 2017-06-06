@@ -73,7 +73,7 @@ import java.util.List;
 import static com.google.common.collect.ImmutableList.copyOf;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;

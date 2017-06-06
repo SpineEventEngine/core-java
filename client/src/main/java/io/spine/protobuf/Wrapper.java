@@ -51,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
                 implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     public Any pack(T value) {
         checkNotNull(value);
@@ -203,7 +203,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class StringWrapper extends Wrapper<String, StringValue> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final StringWrapper INSTANCE = new StringWrapper();
 
         static StringWrapper getInstance() {
@@ -237,7 +237,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class DoubleWrapper extends Wrapper<Double, DoubleValue> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final DoubleWrapper INSTANCE = new DoubleWrapper();
 
         static DoubleWrapper getInstance() {
@@ -271,7 +271,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class FloatWrapper extends Wrapper<Float, FloatValue> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final FloatWrapper INSTANCE = new FloatWrapper();
 
         static FloatWrapper getInstance() {
@@ -303,7 +303,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class IntegerWrapper extends Wrapper<Integer, Int32Value> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final IntegerWrapper INSTANCE = new IntegerWrapper();
 
         static IntegerWrapper getInstance() {
@@ -337,7 +337,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class UnsignedIntegerWrapper extends Wrapper<Integer, UInt32Value> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final UnsignedIntegerWrapper INSTANCE = new UnsignedIntegerWrapper();
 
         static UnsignedIntegerWrapper getInstance() {
@@ -371,7 +371,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class LongWrapper extends Wrapper<Long, Int64Value> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final LongWrapper INSTANCE = new LongWrapper();
 
         public static LongWrapper getInstance() {
@@ -405,7 +405,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class UnsignedLongWrapper extends Wrapper<Long, UInt64Value> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final UnsignedLongWrapper INSTANCE = new UnsignedLongWrapper();
 
         static UnsignedLongWrapper getInstance() {
@@ -439,7 +439,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class BooleanWrapper extends Wrapper<Boolean, BoolValue> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final BooleanWrapper INSTANCE = new BooleanWrapper();
 
         static BooleanWrapper getInstance() {
@@ -473,7 +473,7 @@ public abstract class Wrapper<T, W extends Message> extends Converter<T, W>
      */
     private static class BytesWrapper extends Wrapper<ByteString, BytesValue> {
 
-        private static final long serialVersionUID = 1L;
+        private static final long serialVersionUID = 0L;
         private static final BytesWrapper INSTANCE = new BytesWrapper();
 
         static BytesWrapper getInstance() {

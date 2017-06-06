@@ -22,6 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
 import io.spine.base.Version;
 import io.spine.base.Versions;
 import io.spine.server.entity.failure.CannotModifyArchivedEntity;
@@ -31,7 +32,6 @@ import javax.annotation.CheckReturnValue;
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifiers.idToString;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -268,7 +268,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotArchived() throws CannotModifyArchivedEntity {
         if (getLifecycleFlags().getArchived()) {
-            final String idStr = idToString(getId());
+            final String idStr = Identifier.toString(getId());
             throw new CannotModifyArchivedEntity(idStr);
         }
     }
@@ -282,7 +282,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected void checkNotDeleted() throws CannotModifyDeletedEntity {
         if (getLifecycleFlags().getDeleted()) {
-            final String idStr = idToString(getId());
+            final String idStr = Identifier.toString(getId());
             throw new CannotModifyDeletedEntity(idStr);
         }
     }

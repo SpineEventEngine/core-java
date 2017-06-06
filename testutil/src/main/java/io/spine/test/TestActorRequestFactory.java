@@ -27,7 +27,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -104,7 +104,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public CommandId createCommandId() {
-        final String uid = Identifiers.newUuid();
+        final String uid = Identifier.newUuid();
         final CommandId commandId = CommandId.newBuilder()
                                              .setUuid(uid)
                                              .build();

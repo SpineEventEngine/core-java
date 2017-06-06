@@ -30,6 +30,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.Identifier;
 import io.spine.base.Version;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
@@ -61,7 +62,6 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.base.Identifiers.idToAny;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.archived;
@@ -115,7 +115,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     private EntityRecord newStorageRecord(I id, Message state) {
         final Any wrappedState = AnyPacker.pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
-                                                .setEntityId(idToAny(id))
+                                                .setEntityId(Identifier.pack(id))
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();

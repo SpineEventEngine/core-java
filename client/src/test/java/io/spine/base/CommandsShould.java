@@ -46,7 +46,6 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Commands.sameActorAndTenant;
-import static io.spine.base.Identifiers.idToString;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Tests.newUserUuid;
@@ -126,7 +125,7 @@ public class CommandsShould {
     public void generate_command_ids() {
         final CommandId id = Commands.generateId();
 
-        assertFalse(idToString(id).isEmpty());
+        assertFalse(Identifier.toString(id).isEmpty());
     }
 
     @Test

@@ -28,7 +28,7 @@ import io.spine.base.CommandContext.Schedule;
 import io.spine.users.TenantId;
 import io.spine.users.UserId;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.ZoneOffsets.UTC;
