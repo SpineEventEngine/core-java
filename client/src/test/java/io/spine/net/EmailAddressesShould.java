@@ -62,7 +62,7 @@ public class EmailAddressesShould {
 
     @Test
     public void create_EmailAddress_instance() {
-        final String email = "jdoe@spine3.org";
+        final String email = "jdoe@spine.org";
 
         assertEquals(email, valueOf(email).getValue());
     }

@@ -121,7 +121,7 @@ public class KnownTypes {
     /**
      * A map from Protobuf type URL to Java class name.
      *
-     * <p>For example, for a key {@code type.spine3.org/spine.base.EventId},
+     * <p>For example, for a key {@code type.spine.io/spine.base.EventId},
      * there will be the value {@code EventId}.
      */
     private static final BiMap<TypeUrl, ClassName> knownTypes = Builder.build();
@@ -130,7 +130,7 @@ public class KnownTypes {
      * A map from Protobuf type name to type URL.
      *
      * <p>For example, for a key {@code spine.base.EventId},
-     * there will be the value {@code type.spine3.org/spine.base.EventId}.
+     * there will be the value {@code type.spine.io/spine.base.EventId}.
      *
      * @see TypeUrl
      */
