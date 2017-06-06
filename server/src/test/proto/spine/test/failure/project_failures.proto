@@ -21,9 +21,9 @@ syntax = "proto3";
 
 package spine.test.failure;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
-option java_package = "org.spine3.test.failure";
+option java_package = "io.spine.test.failure";
 // Keep all the failures under the same outer class called `ProjectFailures`.
 option java_generate_equals_and_hash = true;
 

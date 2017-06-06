@@ -371,8 +371,8 @@
     <inspection_tool class="MethodCount" enabled="true" level="WARNING" enabled_by_default="true">
       <scope name="Tests" level="TYPO" enabled="true">
         <option name="m_limit" value="20" />
-        <option name="ignoreGettersAndSetters" value="false" />
-        <option name="ignoreOverridingMethods" value="false" />
+        <option name="ignoreGettersAndSetters" value="true" />
+        <option name="ignoreOverridingMethods" value="true" />
       </scope>
       <option name="m_limit" value="20" />
       <option name="ignoreGettersAndSetters" value="true" />

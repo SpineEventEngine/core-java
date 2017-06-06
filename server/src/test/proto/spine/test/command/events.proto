@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package spine.test.command.event;
 
-option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.command.event";
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.command.event";
 option java_outer_classname = "CommandEventsProto";
 option java_multiple_files = true;
 
@@ -40,4 +40,8 @@ message TaskAdded {
 
 message ProjectStarted {
     ProjectId project_id = 1;
+}
+
+message MandatoryFieldEvent {
+    ProjectId project_id = 1 [(required) = true];
 }
