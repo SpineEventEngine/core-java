@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package spine.test.integration.command;
 
-option (type_url_prefix) = "type.spine3.org";
-option java_package="org.spine3.test.integration.command";
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.test.integration.command";
 option java_outer_classname = "IntegrationCommandsProto";
 option java_multiple_files = true;
 
