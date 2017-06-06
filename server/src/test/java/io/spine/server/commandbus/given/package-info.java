@@ -18,26 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+/**
+ * Test environments for test of the {@code io.spine.server.commandbus} package.
+ */
 
-import org.junit.Test;
+@ParametersAreNonnullByDefault
+package io.spine.server.commandbus.given;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-public class InMemoryStorageFactoryShould {
-
-    private final String boundedContextName = getClass().getSimpleName();
-
-    @Test
-    public void have_single_tenant_instance() {
-        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
-                                          .isMultitenant());
-    }
-
-    @Test
-    public void have_multitenant_instance() {
-        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
-                                         .isMultitenant());
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

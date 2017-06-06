@@ -75,26 +75,24 @@ public class StorageFactorySwitchShould {
         this(false);
     }
 
+    private final String boundedContextName = getClass().getSimpleName();
     private final Supplier<StorageFactory> testsSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
-                                                      multitenant);
+            return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
         }
     };
 
     private final Supplier<StorageFactory> productionSupplier = new Supplier<StorageFactory>() {
         @Override
         public StorageFactory get() {
-            return InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
-                                                      multitenant);
+            return InMemoryStorageFactory.newInstance(boundedContextName, multitenant);
         }
     };
 
     @Before
     public void setUp() throws NoSuchFieldException, IllegalAccessException {
-        storageFactorySwitch = StorageFactorySwitch.newInstance(getClass().getSimpleName(),
-                                                                multitenant);
+        storageFactorySwitch = StorageFactorySwitch.newInstance(boundedContextName, multitenant);
     }
 
     @After

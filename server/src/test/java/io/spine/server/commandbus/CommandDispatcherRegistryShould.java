@@ -20,38 +20,35 @@
 
 package io.spine.server.commandbus;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.server.command.Assign;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.CommandHandler;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AddTaskDispatcher;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandDispatcher;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.AllCommandHandler;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.CreateProjectDispatcher;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.CreateProjectHandler;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyCommandHandler;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.EmptyDispatcher;
+import io.spine.server.commandbus.given.CommandDispatcherRegistryTestEnv.NoCommandsDispatcherRepo;
 import io.spine.server.event.EventBus;
 import io.spine.server.procman.ProcessManagerRepository;
-import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
-import io.spine.test.command.event.ProjectCreated;
-import io.spine.test.command.event.ProjectStarted;
-import io.spine.test.command.event.TaskAdded;
-import io.spine.test.procman.Project;
-import io.spine.test.procman.ProjectId;
 import io.spine.type.CommandClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.Set;
 
-import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("OverlyCoupledClass")
 public class CommandDispatcherRegistryShould {
 
     /**
@@ -66,8 +63,10 @@ public class CommandDispatcherRegistryShould {
 
     @Before
     public void setUp() {
-        eventBus = EventBus.newBuilder()
-                           .build();
+        final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                            .setName(getClass().getSimpleName())
+                                                            .build();
+        eventBus = boundedContext.getEventBus();
         registry = new CommandDispatcherRegistry();
     }
 
@@ -94,10 +93,10 @@ public class CommandDispatcherRegistryShould {
     /*
      * Registration tests.
      *********************/
+
     @Test
     public void remove_all_handlers_and_dispatchers() {
-        // Pass real objects. We cannot use mocks because we need declared methods.
-        registry.register(new CreateProjectHandler(newUuid()));
+        registry.register(new CreateProjectHandler(eventBus));
         registry.register(new AddTaskDispatcher());
 
         registry.unregisterAll();
@@ -129,14 +128,14 @@ public class CommandDispatcherRegistryShould {
 
     @Test
     public void register_command_handler() {
-        registry.register(new AllCommandHandler());
+        registry.register(new AllCommandHandler(eventBus));
 
         assertSupported(CreateProject.class, AddTask.class, StartProject.class);
     }
 
     @Test
     public void unregister_command_handler() {
-        final AllCommandHandler handler = new AllCommandHandler();
+        final AllCommandHandler handler = new AllCommandHandler(eventBus);
 
         registry.register(handler);
         registry.unregister(handler);
@@ -155,14 +154,13 @@ public class CommandDispatcherRegistryShould {
      */
     @Test
     public void accept_empty_process_manager_repository_dispatcher() {
-        final ProcessManagerRepoDispatcher pmRepo =
-                new ProcessManagerRepoDispatcher();
+        final NoCommandsDispatcherRepo pmRepo = new NoCommandsDispatcherRepo();
         registry.register(DelegatingCommandDispatcher.of(pmRepo));
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_accept_command_handlers_without_methods() {
-        registry.register(new EmptyCommandHandler());
+        registry.register(new EmptyCommandHandler(eventBus));
     }
 
     @Test(expected = IllegalArgumentException.class)
@@ -177,19 +175,19 @@ public class CommandDispatcherRegistryShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void not_allow_to_register_dispatcher_for_the_command_with_registered_handler() {
-        registry.register(new CreateProjectHandler(newUuid()));
+        registry.register(new CreateProjectHandler(eventBus));
         registry.register(new CreateProjectDispatcher());
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void not_allow_to_register_handler_for_the_command_with_registered_dispatcher() {
         registry.register(new CreateProjectDispatcher());
-        registry.register(new CreateProjectHandler(newUuid()));
+        registry.register(new CreateProjectHandler(eventBus));
     }
 
     @Test
     public void unregister_handler() {
-        final CommandHandler handler = new CreateProjectHandler(newUuid());
+        final CommandHandler handler = new CreateProjectHandler(eventBus);
         registry.register(handler);
         registry.unregister(handler);
         assertNotSupported(CreateProject.class);
@@ -197,127 +195,9 @@ public class CommandDispatcherRegistryShould {
 
     @Test
     public void return_commands_both_dispatched_and_handled() {
-        registry.register(new CreateProjectHandler(newUuid()));
+        registry.register(new CreateProjectHandler(eventBus));
         registry.register(new AddTaskDispatcher());
 
         assertSupported(CreateProject.class, AddTask.class);
-    }
-
-    /*
-     * Test command dispatchers.
-     ***************************/
-
-    private static class EmptyDispatcher implements CommandDispatcher {
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return Collections.emptySet();
-        }
-
-        @Override
-        public void dispatch(CommandEnvelope envelope) {
-        }
-    }
-
-    //TODO:2017-02-11:alexander.yevsyukov: Fix inter-test dependency.
-    private static class ProcessManagerRepoDispatcher
-            extends ProcessManagerRepository<ProjectId,
-            TestProcessManager, Project> {
-
-        protected ProcessManagerRepoDispatcher() {
-            super();
-        }
-
-        /**
-         * Always returns an empty set of command classes forwarded by this repository.
-         */
-        @SuppressWarnings("MethodDoesntCallSuperMethod")
-        @Override
-        public Set<CommandClass> getCommandClasses() {
-            return newHashSet();
-        }
-    }
-
-    private static class AllCommandDispatcher implements CommandDispatcher {
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class, StartProject.class, AddTask.class);
-        }
-
-        @Override
-        public void dispatch(CommandEnvelope envelope) {
-        }
-    }
-
-    private static class CreateProjectDispatcher implements CommandDispatcher {
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(CreateProject.class);
-        }
-
-        @Override
-        public void dispatch(CommandEnvelope envelope) {
-        }
-    }
-
-    private static class AddTaskDispatcher implements CommandDispatcher {
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return CommandClass.setOf(AddTask.class);
-        }
-
-        @Override
-        public void dispatch(CommandEnvelope envelope) {
-            // Do nothing.
-        }
-    }
-
-    /*
-     * Test command handlers.
-     ************************/
-    
-    private class CreateProjectHandler extends CommandHandler {
-
-        protected CreateProjectHandler(String id) {
-            super(eventBus);
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ctx) {
-            return ProjectCreated.getDefaultInstance();
-        }
-    }
-
-    private class AllCommandHandler extends CommandHandler {
-
-        protected AllCommandHandler() {
-            super(eventBus);
-        }
-
-        @Assign
-        ProjectCreated handle(CreateProject command, CommandContext ctx) {
-            return ProjectCreated.getDefaultInstance();
-        }
-
-        @Assign
-        TaskAdded handle(AddTask command) {
-            return TaskAdded.getDefaultInstance();
-        }
-
-        @Assign
-        ProjectStarted handle(StartProject command) {
-            return ProjectStarted.getDefaultInstance();
-        }
-    }
-
-    private class EmptyCommandHandler extends CommandHandler {
-        protected EmptyCommandHandler() {
-            super(eventBus);
-        }
-
-        @Override
-        public Set<CommandClass> getMessageClasses() {
-            return ImmutableSet.of();
-        }
     }
 }
