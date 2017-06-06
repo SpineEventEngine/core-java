@@ -272,11 +272,26 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(fieldMask);
 
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
-        final Map<I, EntityRecord> records = recordStorage().readAll(entityQuery, fieldMask);
+        final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
+        final Map<I, EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
                                                             .transform(storageRecordToEntity())
                                                             .toList();
         return result;
+    }
+
+    private EntityQuery<I> toCompleteQuery(EntityQuery<I> entityQuery) {
+        final EntityQuery<I> completeQuery;
+        if (!entityQuery.overridesLifecycle()
+                && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())) {
+            @SuppressWarnings("unchecked") // Checked at runtime
+            final Class<? extends EntityWithLifecycle<I, ?>> cls =
+                    (Class<? extends EntityWithLifecycle<I, ?>>) getEntityClass();
+            completeQuery = entityQuery.withLifecycleFlags(cls);
+        } else {
+            completeQuery = entityQuery;
+        }
+        return completeQuery;
     }
 
     /**

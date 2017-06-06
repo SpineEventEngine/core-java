@@ -22,14 +22,23 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.FieldMask;
+import io.spine.annotation.Internal;
+import io.spine.server.entity.EntityWithLifecycle;
 
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * A query to a {@link io.spine.server.storage.RecordStorage RecordStorage} for the records
@@ -114,8 +123,38 @@ public final class EntityQuery<I> implements Serializable {
     /**
      * @return whether the query overrides the default lifecycle handling strategy or not
      */
-    public boolean overrideLifecycle() {
+    @Internal
+    public boolean overridesLifecycle() {
         return parameters.includeLifecycle();
+    }
+
+    /**
+     * Creates a new instance of {@code EntityQuery} with all the parameters from current instance
+     * and the default values of the {@link io.spine.server.entity.LifecycleFlags LifecycleFlags}
+     * expected.
+     *
+     * <p>The precondition for this method is that current instance
+     * {@linkplain #overridesLifecycle() does not specify the values}.
+     *
+     * @param cls the {@code Class} of the entity to create the query for
+     * @return new instance of {@code EntityQuery}
+     */
+    @Internal
+    public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
+        checkState(!overridesLifecycle(), "The query overrides Lifecycle Flags default values.");
+        final Column archivrdColumn = findColumn(cls, archived.name());
+        final Column deletedColumn = findColumn(cls, deleted.name());
+        final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(archivrdColumn, eq(archived.name(), false),
+                                     deletedColumn, eq(deletedColumn.getName(), false)),
+                ALL
+        );
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                                                          .addAll(getParameters())
+                                                          .add(lifecycleParameter)
+                                                          .build();
+        final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
+        return result;
     }
 
     @Override

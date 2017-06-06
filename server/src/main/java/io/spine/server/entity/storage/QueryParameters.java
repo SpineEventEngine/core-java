@@ -105,6 +105,13 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
             return this;
         }
 
+        public Builder addAll(Iterable<CompositeQueryParameter> parameters) {
+            for (CompositeQueryParameter parameter : parameters) {
+                add(parameter);
+            }
+            return this;
+        }
+
         public ImmutableCollection.Builder<CompositeQueryParameter> getParameters() {
             return parameters;
         }

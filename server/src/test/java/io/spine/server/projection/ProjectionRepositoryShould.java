@@ -71,6 +71,7 @@ import java.util.Set;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static io.spine.server.projection.ProjectionRepository.Status.CLOSED;
@@ -136,7 +137,9 @@ public class ProjectionRepositoryShould
     @Override
     protected TestProjection createEntity() {
         final TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                               .withId(createId(42))
+                                               .withId(ProjectId.newBuilder()
+                                                                .setId(newUuid())
+                                                                .build())
                                                .build();
         return projection;
     }

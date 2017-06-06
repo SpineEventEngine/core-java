@@ -139,7 +139,7 @@ public class ProcessManagerRepositoryShould
     @Override
     protected TestProcessManager createEntity() {
         final ProjectId id = ProjectId.newBuilder()
-                                      .setId("123-id")
+                                      .setId(newUuid())
                                       .build();
         final TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                                .withId(id)

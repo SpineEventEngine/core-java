@@ -61,7 +61,6 @@ import java.util.Map;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Identifier.pack;
-import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
@@ -70,7 +69,6 @@ import static io.spine.server.entity.TestTransaction.injectArchived;
 import static io.spine.server.entity.TestTransaction.injectDeleted;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.archived;
 import static io.spine.test.Tests.assertMatchesMask;
 import static io.spine.test.Verify.assertEmpty;
@@ -499,101 +497,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         assertSize(1, readRecords);
         final EntityRecord actualRecord = readRecords.get(idMatching);
         assertEquals(fineRecord, actualRecord);
-    }
-
-    @Test
-    public void exclude_non_active_records_from_entity_query() {
-        final I archivedId = newId();
-        final I deletedId = newId();
-        final I activeId = newId();
-
-        final TestCounterEntity<I> activeEntity = new TestCounterEntity<>(archivedId);
-        final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(deletedId);
-        archivedEntity.archive();
-        final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(activeId);
-        deletedEntity.delete();
-
-        final EntityRecord recordActive = newStorageRecord(activeId, activeEntity.getState());
-        final EntityRecord recordArchived = newStorageRecord(deletedId, archivedEntity.getState())
-                .toBuilder()
-                .setLifecycleFlags(LifecycleFlags.newBuilder().setArchived(true))
-                .build();
-        final EntityRecord recordDeleted = newStorageRecord(archivedId, deletedEntity.getState())
-                .toBuilder()
-                .setLifecycleFlags(LifecycleFlags.newBuilder().setDeleted(true))
-                .build();
-        final EntityRecordWithColumns activeRecord = create(recordActive, activeEntity);
-        final EntityRecordWithColumns archivedRecord = create(recordArchived, archivedEntity);
-        final EntityRecordWithColumns deletedRecord = create(recordDeleted, deletedEntity);
-
-        final RecordStorage<I> storage = getStorage();
-
-        // Fill the storage
-        storage.write(archivedId, archivedRecord);
-        storage.write(activeId, activeRecord);
-        storage.write(deletedId, deletedRecord);
-
-        // Prepare the query
-        final EntityQuery<I> query = EntityQueries.from(EntityFilters.getDefaultInstance(),
-                                                        TestCounterEntity.class);
-        // Perform the query
-        final Map<I, EntityRecord> readRecords = storage.readAll(query,
-                                                                 FieldMask.getDefaultInstance());
-        // Check results
-        assertSize(1, readRecords);
-        final EntityRecord actualRecord = readRecords.get(activeId);
-        assertEquals(recordActive, actualRecord);
-    }
-
-    @Test
-    public void allow_any_lifecycle_if_column_involved() {
-        final I archivedId = newId();
-        final I deletedId = newId();
-        final I activeId = newId();
-
-        final TestCounterEntity<I> activeEntity = new TestCounterEntity<>(archivedId);
-        final TestCounterEntity<I> archivedEntity = new TestCounterEntity<>(deletedId);
-        final TestCounterEntity<I> deletedEntity = new TestCounterEntity<>(activeId);
-        deletedEntity.delete();
-        archivedEntity.archive();
-
-        final EntityRecord recordActive = newStorageRecord(activeId, activeEntity.getState());
-        final EntityRecord recordArchived = newStorageRecord(deletedId, archivedEntity.getState())
-                .toBuilder()
-                .setLifecycleFlags(LifecycleFlags.newBuilder().setArchived(true))
-                .build();
-        final EntityRecord recordDeleted = newStorageRecord(archivedId, deletedEntity.getState())
-                .toBuilder()
-                .setLifecycleFlags(LifecycleFlags.newBuilder().setDeleted(true))
-                .build();
-        final EntityRecordWithColumns activeRecord = create(recordActive, activeEntity);
-        final EntityRecordWithColumns archivedRecord = create(recordArchived, archivedEntity);
-        final EntityRecordWithColumns deletedRecord = create(recordDeleted, deletedEntity);
-
-        final RecordStorage<I> storage = getStorage();
-
-        // Fill the storage
-        storage.write(archivedId, archivedRecord);
-        storage.write(activeId, activeRecord);
-        storage.write(deletedId, deletedRecord);
-
-        final CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
-        final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .addFilter(columnFilter)
-                                                   .build();
-        // Prepare the query
-        final EntityQuery<I> query = EntityQueries.from(filters,
-                                                        TestCounterEntity.class);
-        // Perform the query
-        final Map<I, EntityRecord> readRecords = storage.readAll(query,
-                                                                 FieldMask.getDefaultInstance());
-        // Check results
-        assertSize(2, readRecords);
-        final EntityRecord actualActiveRecord = readRecords.get(activeId);
-        assertEquals(recordActive, actualActiveRecord);
-
-        final EntityRecord actualDeletedRecord = readRecords.get(deletedId);
-        assertEquals(recordDeleted, actualDeletedRecord);
     }
 
     private static EntityRecordWithColumns withRecordAndNoFields(final EntityRecord record) {

@@ -27,32 +27,37 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
-import io.spine.client.CompositeColumnFilter;
 import io.spine.client.ColumnFilter;
-import io.spine.client.ColumnFilters;
+import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Given;
 import io.spine.test.Tests;
+import org.junit.After;
+import org.junit.Before;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
 
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.entity.TestTransaction.injectArchived;
+import static io.spine.server.entity.TestTransaction.injectDeleted;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertContainsAll;
+import static io.spine.test.Verify.assertNotContains;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.test.Tests.newTenantUuid;
-import static io.spine.test.Verify.assertContains;
-import static io.spine.test.Verify.assertNotContains;
-import static io.spine.test.Verify.assertSize;
 
 /**
  * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
@@ -211,7 +216,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final StringValue fieldValue = StringValue.newBuilder()
                                                   .setValue(id1.toString())
                                                   .build();
-        final ColumnFilter filter = ColumnFilters.eq(fieldPath, fieldValue);
+        final ColumnFilter filter = eq(fieldPath, fieldValue);
         final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
                                                                                  .addFilter(filter)
                                                                                  .setOperator(ALL)
@@ -338,5 +343,59 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         storeEntity(entity);
 
         assertFalse(find(id).isPresent());
+    }
+
+    @Test
+    public void exclude_non_active_records_from_entity_query() {
+        final I archivedId = createId(42);
+        final I deletedId = createId(314);
+        final I activeId = createId(271);
+
+        final E activeEntity = repository.create(activeId);
+        final E archivedEntity = repository.create(archivedId);
+        final E deletedEntity = repository.create(deletedId);
+        injectDeleted((EventPlayingEntity) deletedEntity);
+        injectArchived((EventPlayingEntity) archivedEntity);
+
+        // Fill the storage
+        repository.store(activeEntity);
+        repository.store(archivedEntity);
+        repository.store(deletedEntity);
+
+        final Collection<E> found = repository.find(EntityFilters.getDefaultInstance(),
+                                                                 FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(1, found);
+        final E actualEntity = found.iterator().next();
+        assertEquals(activeEntity, actualEntity);
+    }
+
+    @Test
+    public void allow_any_lifecycle_if_column_involved() {
+        final I archivedId = createId(42);
+        final I deletedId = createId(314);
+        final I activeId = createId(271);
+
+        final E activeEntity = repository.create(activeId);
+        final E archivedEntity = repository.create(archivedId);
+        final E deletedEntity = repository.create(deletedId);
+        injectDeleted((EventPlayingEntity) deletedEntity);
+        injectArchived((EventPlayingEntity) archivedEntity);
+
+        // Fill the storage
+        repository.store(activeEntity);
+        repository.store(archivedEntity);
+        repository.store(deletedEntity);
+
+        final CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(columnFilter)
+                                                   .build();
+
+        final Collection<E> found = repository.find(filters,
+                                                          FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(2, found);
+        assertContainsAll(found, activeEntity, deletedEntity);
     }
 }
