@@ -63,7 +63,7 @@ public abstract class AggregatePartRepository<I,
     //TODO:2017-06-06:alexander.yevsyukov: Have cache of aggregate roots shared among part repositories
     private AggregateRoot<I> createAggregateRoot(I id) {
         final Class<R> rootClass = AggregatePart.TypeInfo.getRootClass(getEntityClass());
-        return AggregateRoot.create(id, getBoundedContext(), rootClass);
+        return AggregateRoot.create(getBoundedContext(), rootClass, id);
     }
 
     private A createAggregatePart(AggregateRoot<I> root) {

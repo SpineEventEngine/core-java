@@ -69,13 +69,13 @@ public class AggregateRootShould {
     // Supply a "wrong" value on purpose to cause the validation failure.
     @Test(expected = IllegalStateException.class)
     public void throw_exception_when_aggregate_root_does_not_have_appropriate_constructor() {
-        AggregateRoot.create(newUuid(), boundedContext, AggregateRoot.class);
+        AggregateRoot.create(boundedContext, AggregateRoot.class, newUuid());
     }
 
     @Test
     public void create_aggregate_root_entity() {
         final AnAggregateRoot aggregateRoot =
-                AggregateRoot.create(newUuid(), boundedContext, AnAggregateRoot.class);
+                AggregateRoot.create(boundedContext, AnAggregateRoot.class, newUuid());
         assertNotNull(aggregateRoot);
     }
 

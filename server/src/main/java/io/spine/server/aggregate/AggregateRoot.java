@@ -69,15 +69,14 @@ public class AggregateRoot<I> {
     /**
      * Creates a new {@code AggregateRoot}.
      *
-     * @param aggregateId    the ID of the aggregate
+     * @param <I>            the type of entity IDs
      * @param boundedContext the {@code BoundedContext} to use
      * @param rootClass      the class of the {@code AggregateRoot}
-     * @param <I>            the type of entity IDs
+     * @param aggregateId    the ID of the aggregate
      * @return new instance
      */
-    static <I, R extends AggregateRoot<I>> R create(I aggregateId,
-                                                    BoundedContext boundedContext,
-                                                    Class<R> rootClass) {
+    static <I, R extends AggregateRoot<I>> R create(BoundedContext boundedContext,
+                                                    Class<R> rootClass, I aggregateId) {
         checkNotNull(aggregateId);
         checkNotNull(boundedContext);
         checkNotNull(rootClass);
