@@ -30,8 +30,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import org.mockito.ArgumentMatcher;
 import io.spine.base.Version;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
@@ -51,6 +49,8 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectValidatingBuilder;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
+import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -60,15 +60,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
-import static io.spine.base.Identifiers.idToAny;
+import static io.spine.base.Identifier.pack;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -85,6 +77,14 @@ import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertMapsEqual;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.validate.Validate.isDefault;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author Dmytro Dashenkov
@@ -125,7 +125,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     private EntityRecord newStorageRecord(I id, Message state) {
         final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
-                                                .setEntityId(idToAny(id))
+                                                .setEntityId(pack(id))
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();

@@ -27,12 +27,11 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import org.junit.Test;
-import io.spine.base.Identifiers;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
 import io.spine.test.validate.msg.ProjectId;
 import io.spine.type.TypeName;
+import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -40,19 +39,7 @@ import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static java.lang.String.format;
-import static java.lang.String.valueOf;
-import static java.util.Arrays.asList;
-import static java.util.Collections.singleton;
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.either;
 import static io.spine.client.ColumnFilters.eq;
@@ -67,6 +54,18 @@ import static io.spine.test.Verify.assertSize;
 import static io.spine.test.Verify.fail;
 import static io.spine.time.Durations2.fromHours;
 import static io.spine.time.Time.getCurrentTime;
+import static java.lang.String.format;
+import static java.lang.String.valueOf;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov
@@ -398,7 +397,7 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
 
     private static ProjectId newMessageId() {
         return ProjectId.newBuilder()
-                        .setValue(Identifiers.newUuid())
+                        .setValue(newUuid())
                         .build();
     }
 

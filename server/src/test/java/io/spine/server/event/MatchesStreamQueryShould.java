@@ -25,13 +25,12 @@ import com.google.protobuf.Message;
 import org.junit.Test;
 import io.spine.base.Event;
 import io.spine.base.FieldFilter;
-import io.spine.base.Identifiers;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.event.MatchesStreamQuery;
 import io.spine.test.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static io.spine.test.TestEventFactory.newInstance;
@@ -59,7 +58,7 @@ public class MatchesStreamQueryShould {
     @Test
     public void match_proper_records() {
         final ProjectId properField = ProjectId.newBuilder()
-                                               .setId(Identifiers.newUuid())
+                                               .setId(newUuid())
                                                .build();
         final ProjectCreated eventMsg = ProjectCreated.newBuilder()
                                                       .setProjectId(properField)
@@ -72,7 +71,7 @@ public class MatchesStreamQueryShould {
     @Test
     public void not_match_improper_records() {
         final ProjectId properField = ProjectId.newBuilder()
-                                               .setId(Identifiers.newUuid())
+                                               .setId(newUuid())
                                                .build();
         final ProjectId improperField = ProjectId.getDefaultInstance();
         final ProjectCreated eventMsg = ProjectCreated.newBuilder()
