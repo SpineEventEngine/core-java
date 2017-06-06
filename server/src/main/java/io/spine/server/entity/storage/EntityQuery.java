@@ -80,7 +80,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  */
 public final class EntityQuery<I> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private final ImmutableSet<I> ids;
     private final QueryParameters parameters;
@@ -124,8 +124,8 @@ public final class EntityQuery<I> implements Serializable {
      * @return whether the query overrides the default lifecycle handling strategy or not
      */
     @Internal
-    public boolean overridesLifecycle() {
-        return parameters.includeLifecycle();
+    public boolean isLifecycleAttributesSet() {
+        return parameters.isLifecycleAttributesSet();
     }
 
     /**
@@ -134,14 +134,14 @@ public final class EntityQuery<I> implements Serializable {
      * expected.
      *
      * <p>The precondition for this method is that current instance
-     * {@linkplain #overridesLifecycle() does not specify the values}.
+     * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
      *
      * @param cls the {@code Class} of the entity to create the query for
      * @return new instance of {@code EntityQuery}
      */
     @Internal
     public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
-        checkState(!overridesLifecycle(), "The query overrides Lifecycle Flags default values.");
+        checkState(!isLifecycleAttributesSet(), "The query overrides Lifecycle Flags default values.");
         final Column archivrdColumn = findColumn(cls, archived.name());
         final Column deletedColumn = findColumn(cls, deleted.name());
         final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(

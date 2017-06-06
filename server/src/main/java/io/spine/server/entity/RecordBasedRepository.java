@@ -282,7 +282,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
     private EntityQuery<I> toCompleteQuery(EntityQuery<I> entityQuery) {
         final EntityQuery<I> completeQuery;
-        if (!entityQuery.overridesLifecycle()
+        if (!entityQuery.isLifecycleAttributesSet()
                 && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())) {
             @SuppressWarnings("unchecked") // Checked at runtime
             final Class<? extends EntityWithLifecycle<I, ?>> cls =

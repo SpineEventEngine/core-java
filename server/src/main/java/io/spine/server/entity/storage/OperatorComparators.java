@@ -29,23 +29,24 @@ import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.time.Timestamps2.isLaterThan;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static java.lang.String.format;
 
 /**
- * A factory of {@link OperatorComparator} instances.
+ * A factory of {@link ComparisonOperation} instances.
  *
  * @author Dmytro Dashenkov
  */
 final class OperatorComparators {
 
-    private static final ImmutableMap<Operator, OperatorComparator> COMPARATORS =
-            ImmutableMap.<Operator, OperatorComparator>builder()
-                        .put(Operator.EQUAL, EqualComparator.INSTANCE)
-                        .put(Operator.GREATER_THAN, GreaterThanComparator.INSTANCE)
-                        .put(Operator.LESS_THAN, LessThanComparator.INSTANCE)
-                        .put(Operator.GREATER_OR_EQUAL, GreaterOrEqualComparator.INSTANCE)
-                        .put(Operator.LESS_OR_EQUAL, LessOrEqualComparator.INSTANCE)
+    private static final ImmutableMap<Operator, ComparisonOperation> COMPARATORS =
+            ImmutableMap.<Operator, ComparisonOperation>builder()
+                        .put(Operator.EQUAL, Equal.operation())
+                        .put(Operator.GREATER_THAN, GreaterThan.operation())
+                        .put(Operator.LESS_THAN, LessThan.operation())
+                        .put(Operator.GREATER_OR_EQUAL, GreaterOrEqual.operation())
+                        .put(Operator.LESS_OR_EQUAL, LessOrEqual.operation())
                         .build();
 
     private OperatorComparators() {
@@ -53,23 +54,27 @@ final class OperatorComparators {
     }
 
     /**
-     * Generates an instance of {@link OperatorComparator} based on the given {@link Operator}.
+     * Generates an instance of {@link ComparisonOperation} based on the given {@link Operator}.
      *
      * @param operator the rule of comparison
-     * @return an instance of {@link OperatorComparator}
+     * @return an instance of {@link ComparisonOperation}
      * @throws IllegalArgumentException if the passed operator is one of the error value enum
      *                                  constants
      */
-    static OperatorComparator of(Operator operator) throws IllegalArgumentException {
+    static ComparisonOperation of(Operator operator) throws IllegalArgumentException {
         checkNotNull(operator);
-        final OperatorComparator comparator = COMPARATORS.get(operator);
+        final ComparisonOperation comparator = COMPARATORS.get(operator);
         checkArgument(comparator != null, "Unsupported operator %s.", operator);
         return comparator;
     }
 
-    private enum EqualComparator implements OperatorComparator {
+    private enum Equal implements ComparisonOperation {
 
         INSTANCE;
+
+        private static ComparisonOperation operation() {
+            return INSTANCE;
+        }
 
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
@@ -77,9 +82,13 @@ final class OperatorComparators {
         }
     }
 
-    private enum GreaterThanComparator implements OperatorComparator {
+    private enum GreaterThan implements ComparisonOperation {
 
         INSTANCE;
+
+        private static ComparisonOperation operation() {
+            return INSTANCE;
+        }
 
         @SuppressWarnings("ChainOfInstanceofChecks") // Generic but limited operand types
         @Override
@@ -107,44 +116,53 @@ final class OperatorComparators {
                 final int comparisonResult = cmpLeft.compareTo(cmpRight);
                 return comparisonResult > 0;
             }
-            throw new UnsupportedOperationException(
-                    format("Operation \'%s\' is not supported for type %s.",
-                           this,
-                           left.getClass()
-                               .getCanonicalName()
-                    ));
+            throw newIllegalArgumentException("Operation \'%s\' is not supported for type %s.",
+                                              this,
+                                              left.getClass().getCanonicalName());
         }
     }
 
-    private enum LessThanComparator implements OperatorComparator {
+    private enum LessThan implements ComparisonOperation {
 
         INSTANCE;
 
+        private static ComparisonOperation operation() {
+            return INSTANCE;
+        }
+
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return GreaterThanComparator.INSTANCE.compare(right, left);
+            return GreaterThan.operation().compare(right, left);
         }
     }
 
-    private enum GreaterOrEqualComparator implements OperatorComparator {
+    private enum GreaterOrEqual implements ComparisonOperation {
 
         INSTANCE;
 
+        private static ComparisonOperation operation() {
+            return INSTANCE;
+        }
+
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return GreaterThanComparator.INSTANCE.compare(left, right)
-                    || EqualComparator.INSTANCE.compare(left, right);
+            return GreaterThan.operation().compare(left, right)
+                    || Equal.operation().compare(left, right);
         }
     }
 
-    private enum LessOrEqualComparator implements OperatorComparator {
+    private enum LessOrEqual implements ComparisonOperation {
 
         INSTANCE;
 
+        private static ComparisonOperation operation() {
+            return INSTANCE;
+        }
+
         @Override
         public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return LessThanComparator.INSTANCE.compare(left, right)
-                    || EqualComparator.INSTANCE.compare(left, right);
+            return LessThan.operation().compare(left, right)
+                    || Equal.operation().compare(left, right);
         }
     }
 }

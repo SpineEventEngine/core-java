@@ -23,11 +23,12 @@ package io.spine.server.entity.storage;
 import javax.annotation.Nullable;
 
 /**
- * A boolean non-typed comparator of two given instances.
+ * A boolean non-typed comparison operation on two given instances.
  *
  * @author Dmytro Dashenkov
+ * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
-interface OperatorComparator {
+interface ComparisonOperation {
 
     /**
      * Compares the given operands by the rules of a certain operator.

@@ -39,7 +39,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class EntityRecordWithColumns implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private final EntityRecord record;
     private final ImmutableMap<String, Column.MemoizedValue> storageFields;

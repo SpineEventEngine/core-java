@@ -41,6 +41,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.entity.LifecycleFlags;
+import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -65,8 +66,6 @@ import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.entity.TestTransaction.injectArchived;
-import static io.spine.server.entity.TestTransaction.injectDeleted;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.archived;
@@ -564,11 +563,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
 
         private void archive() {
-            injectArchived(this);
+            TestTransaction.archive(this);
         }
 
         private void delete() {
-            injectDeleted(this);
+            TestTransaction.delete(this);
         }
     }
 }

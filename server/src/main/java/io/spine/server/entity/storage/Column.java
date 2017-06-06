@@ -134,7 +134,7 @@ import static java.lang.String.format;
  */
 public class Column implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);

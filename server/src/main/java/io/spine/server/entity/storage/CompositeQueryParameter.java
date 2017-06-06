@@ -59,7 +59,7 @@ public final class CompositeQueryParameter implements Serializable {
         }
     };
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private final CompositeOperator operator;
 
@@ -154,8 +154,9 @@ public final class CompositeQueryParameter implements Serializable {
     }
 
     /**
-     * @return whether this parameter contains filters by
-     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle columns} or not
+     * @return {@code true} if this parameter contains filters by
+     * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle columns},
+     * {@code false} otherwise
      */
     public boolean hasLifecycle() {
         return hasLifecycle;

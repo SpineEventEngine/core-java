@@ -25,8 +25,8 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
-import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.server.entity.storage.Column.MemoizedValue;
 
 import javax.annotation.Nullable;
@@ -34,9 +34,9 @@ import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static java.lang.String.format;
 import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.server.entity.storage.QueryOperators.compare;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
  * A {@link Predicate} on the {@link EntityRecordWithColumns} matching it upon the given
@@ -96,8 +96,8 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
                     match = checkEither(filter.getFilters(), entityColumns);
                     break;
                 default:
-                    throw new IllegalArgumentException(format("Composite operator %s is invalid.",
-                                                              operator));
+                    throw newIllegalArgumentException("Composite operator %s is invalid.",
+                                                      operator);
             }
             if (!match) {
                 return false;

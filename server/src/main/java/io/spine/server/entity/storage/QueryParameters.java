@@ -35,7 +35,7 @@ import java.util.Iterator;
  */
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
 
     private final ImmutableCollection<CompositeQueryParameter> parameters;
 
@@ -61,7 +61,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
      * @return whether this parameters include filters by
      * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle flags} or not
      */
-    public boolean includeLifecycle() {
+    public boolean isLifecycleAttributesSet() {
         return hasLifecycle;
     }
 

@@ -46,8 +46,8 @@ import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.server.entity.TestTransaction.injectArchived;
-import static io.spine.server.entity.TestTransaction.injectDeleted;
+import static io.spine.server.entity.TestTransaction.archive;
+import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Verify.assertContains;
@@ -354,8 +354,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final E activeEntity = repository.create(activeId);
         final E archivedEntity = repository.create(archivedId);
         final E deletedEntity = repository.create(deletedId);
-        injectDeleted((EventPlayingEntity) deletedEntity);
-        injectArchived((EventPlayingEntity) archivedEntity);
+        delete((EventPlayingEntity) deletedEntity);
+        archive((EventPlayingEntity) archivedEntity);
 
         // Fill the storage
         repository.store(activeEntity);
@@ -379,8 +379,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final E activeEntity = repository.create(activeId);
         final E archivedEntity = repository.create(archivedId);
         final E deletedEntity = repository.create(deletedId);
-        injectDeleted((EventPlayingEntity) deletedEntity);
-        injectArchived((EventPlayingEntity) archivedEntity);
+        delete((EventPlayingEntity) deletedEntity);
+        archive((EventPlayingEntity) archivedEntity);
 
         // Fill the storage
         repository.store(activeEntity);

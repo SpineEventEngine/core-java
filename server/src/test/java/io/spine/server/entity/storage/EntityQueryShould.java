@@ -111,8 +111,8 @@ public class EntityQueryShould {
     }
 
     /**
-     * Adds an equality group containing a single Query of 2 IDs and 2 Query parameters to the given
-     * {@link EqualsTester}.
+     * Adds an equality group containing a single Query of two IDs and two Query parameters to
+     * the given {@link EqualsTester}.
      */
     private static void addEqualityGroupA(EqualsTester tester) {
         final Collection<?> ids = Arrays.asList(Sample.messageOfType(ProjectId.class), 0);
@@ -124,7 +124,7 @@ public class EntityQueryShould {
     }
 
     /**
-     * Adds an equality group containing a 2 Queries with noo IDs and with a single Query parameter
+     * Adds an equality group containing two Queries with no IDs and with a single Query parameter
      * to the given {@link EqualsTester}.
      */
     private static void addEqualityGroupB(EqualsTester tester) {
@@ -137,7 +137,7 @@ public class EntityQueryShould {
     }
 
     /**
-     * Adds an equality group containing a 2 Queries with noo IDs and with a single Query parameter
+     * Adds an equality group containing two Queries with no IDs and with a single Query parameter
      * to the given {@link EqualsTester}.
      *
      * <p>The values of Query parameters are different than in

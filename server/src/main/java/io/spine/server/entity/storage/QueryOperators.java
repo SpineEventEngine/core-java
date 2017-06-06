@@ -74,7 +74,7 @@ final class QueryOperators {
     static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
-        final OperatorComparator comparator = OperatorComparators.of(operator);
+        final ComparisonOperation comparator = OperatorComparators.of(operator);
         final boolean result = comparator.compare(left, right);
         return result;
     }

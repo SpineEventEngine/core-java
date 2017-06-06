@@ -205,24 +205,24 @@ public class QueryOperatorsShould {
         assertLessOrEqual(42.999, 43.0);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_GT() {
         compare(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_GE() {
         compare(FaultyComparisonType.INSTANCE, GREATER_OR_EQUAL, FaultyComparisonType.INSTANCE);
 
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_LT() {
         compare(FaultyComparisonType.INSTANCE, LESS_THAN, FaultyComparisonType.INSTANCE);
 
     }
 
-    @Test(expected = UnsupportedOperationException.class)
+    @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_LE() {
         compare(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
     }

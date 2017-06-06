@@ -53,7 +53,7 @@ public class TestTransaction {
      *
      * <p>To be used in tests only.
      */
-    public static void injectArchived(EventPlayingEntity entity) {
+    public static void archive(EventPlayingEntity entity) {
         final TestTx tx = new TestTx(entity) {
 
             @Override
@@ -74,7 +74,7 @@ public class TestTransaction {
      *
      * <p>To be used in tests only.
      */
-    public static void injectDeleted(EventPlayingEntity entity) {
+    public static void delete(EventPlayingEntity entity) {
         final TestTx tx = new TestTx(entity) {
 
             @Override
