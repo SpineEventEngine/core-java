@@ -21,9 +21,9 @@ syntax = "proto3";
 
 package spine.server.entity;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
-option java_package = "org.spine3.server.entity.failure";
+option java_package = "io.spine.server.entity.failure";
 // Keep all the failures under the same outer class called `Failures`.
 option java_generate_equals_and_hash = true;
 

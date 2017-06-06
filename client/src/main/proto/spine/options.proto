@@ -29,11 +29,11 @@ syntax = "proto3";
 //      option (spine.base.internal) = true;
 //
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
 option java_outer_classname = "OptionsProto";
-option java_package = "org.spine3.option";
+option java_package = "io.spine.option";
 
 import "google/protobuf/descriptor.proto";
 

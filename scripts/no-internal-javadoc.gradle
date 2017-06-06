@@ -31,7 +31,7 @@ configurations {
 }
 
 dependencies {
-    excludeInternalDoclet group: 'org.spine3.tools', name: 'spine-javadoc', version: spineToolsVersion
+    excludeInternalDoclet group: 'io.spine.tools', name: 'spine-javadoc', version: spineToolsVersion
     //TODO:2017-03-01:dmytro.grankin: Remove dependency after update guava to 22.0.
     // We need this in order to generate Javadoc correctly.
     // Details: https://github.com/google/guava/issues/2721
@@ -46,7 +46,7 @@ task noInternalJavadoc(type: Javadoc) {
 
     options {
         // Doclet fully qualified name.
-        doclet = 'org.spine3.tools.javadoc.ExcludeInternalDoclet'
+        doclet = 'io.spine.tools.javadoc.ExcludeInternalDoclet'
 
         // Path to the JAR containing the doclet.
         docletpath = configurations.excludeInternalDoclet.files.asType(List)
