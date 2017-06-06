@@ -22,7 +22,7 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
@@ -52,7 +52,7 @@ public final class Queries {
     }
 
     public static QueryId generateId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();

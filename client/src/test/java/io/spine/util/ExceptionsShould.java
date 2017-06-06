@@ -23,8 +23,11 @@ package io.spine.util;
 import com.google.common.testing.NullPointerTester;
 import org.junit.Test;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
+import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.Exceptions.unsupported;
 
 /**
  * @author Alexander Litus
@@ -39,12 +42,12 @@ public class ExceptionsShould {
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception() {
-        Exceptions.unsupported();
+        unsupported();
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void create_and_throw_unsupported_operation_exception_with_message() {
-        Exceptions.unsupported(newUuid());
+        unsupported(newUuid());
     }
 
     @Test
@@ -57,22 +60,22 @@ public class ExceptionsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_formatted_IAE() {
-        Exceptions.newIllegalArgumentException("%d, %d, %s kaboom", 1, 2, "three");
+        newIllegalArgumentException("%d, %d, %s kaboom", 1, 2, "three");
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void throw_formatted_IAE_with_cause() {
-        Exceptions.newIllegalArgumentException(new RuntimeException("checking"), "%s", "stuff");
+        newIllegalArgumentException(new RuntimeException("checking"), "%s", "stuff");
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_formatted_ISE() {
-        Exceptions.newIllegalStateException("%s check %s", "state", "failed");
+        newIllegalStateException("%s check %s", "state", "failed");
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_formatted_ISE_with_cause() {
-        Exceptions.newIllegalStateException(new RuntimeException(getClass().getSimpleName()),
+        newIllegalStateException(new RuntimeException(getClass().getSimpleName()),
                                             "%s %s", "taram", "param");
     }
 }

@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.base.Identifier;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
@@ -37,7 +38,6 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifiers.idToString;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -160,7 +160,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
             // The AggregateStateId is a special case, which is not handled by the Identifier class.
             final String idStr = id instanceof AggregateStateId
                                  ? id.toString()
-                                 : idToString(id);
+                                 : Identifier.toString(id);
             throw newIllegalStateException("Unable to load record for entity with ID: %s",
                                                       idStr);
         }
@@ -241,9 +241,9 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
         return readAllRecords(query, fieldMask);
     }
 
-    //
-    // Internal storage methods
-    //---------------------------
+    /*
+     * Internal storage methods
+     *****************************/
 
     /**
      * Reads a record from the storage by the passed ID.

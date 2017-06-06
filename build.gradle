@@ -35,8 +35,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
 
-        spineVersion = '0.9.16-SNAPSHOT'
-
+        spineVersion = '0.9.18-SNAPSHOT'
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
@@ -50,18 +49,18 @@ buildscript {
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
         classpath(group: 'com.google.protobuf', name: 'protobuf-gradle-plugin',
-                version: protobufGradlePluginVerison) {
+                                                version: protobufGradlePluginVerison) {
             // exclude an old Guava version
             exclude group: 'com.google.guava'
         }
         classpath group: 'io.spine.tools', name: 'spine-model-compiler',
-                version: spineToolsVersion
+                                           version: spineToolsVersion
         /* Uncomment the below statement if you want the dependency to be fetched on each build.
            Please note that offline builds will not be available then. */
-        //, changing: true
+                                             //, changing: true
 
         classpath group: 'io.spine.tools', name: 'spine-codestyle-checker',
-                version: spineToolsVersion
+                                           version: spineToolsVersion
         classpath group: 'io.spine.tools', name: 'gcs-plugin', version: spineToolsVersion
     }
     configurations.all({
@@ -297,6 +296,13 @@ subprojects {
     idea.module {
         generatedSourceDirs += file(generatedJavaDir)
         testSourceDirs += file(generatedTestJavaDir)
+    }
+
+    idea {
+        module {
+            downloadJavadoc = true
+            downloadSources = true
+        }
     }
 }
 

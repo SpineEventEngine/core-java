@@ -21,7 +21,7 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -47,7 +47,7 @@ public abstract class AggregateStorageVisibilityHandlingShould {
     private AggregateStorage<ProjectId> storage;
 
     private final ProjectId id = ProjectId.newBuilder()
-                                          .setId(Identifiers.newUuid())
+                                          .setId(Identifier.newUuid())
                                           .build();
 
     @Before

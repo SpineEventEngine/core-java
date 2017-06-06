@@ -39,7 +39,7 @@ import io.spine.test.Tests;
 import io.spine.users.UserId;
 import org.junit.Test;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.type.TypeUrl.composeTypeUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

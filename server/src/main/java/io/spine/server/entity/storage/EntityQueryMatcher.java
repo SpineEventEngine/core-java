@@ -24,7 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.ColumnFilter;
 import io.spine.server.entity.storage.Column.MemoizedValue;
@@ -71,7 +71,7 @@ public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithCo
         if (!acceptedIds.isEmpty()) {
             final Any entityId = record.getRecord()
                                        .getEntityId();
-            final Object genericId = Identifiers.idFromAny(entityId);
+            final Object genericId = Identifier.unpack(entityId);
             @SuppressWarnings("SuspiciousMethodCalls")
                 // The Collection.contains behavior about the non-assignable types is acceptable.
             final boolean idMatches = acceptedIds.contains(genericId);

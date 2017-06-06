@@ -35,7 +35,7 @@ import java.text.ParseException;
  */
 final class OffsetTimeStringifier extends Stringifier<OffsetTime> implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 0L;
     private static final OffsetTimeStringifier INSTANCE = new OffsetTimeStringifier();
 
     static OffsetTimeStringifier getInstance() {

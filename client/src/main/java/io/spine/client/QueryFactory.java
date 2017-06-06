@@ -23,7 +23,7 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.base.ActorContext;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
@@ -57,7 +57,7 @@ public final class QueryFactory {
     }
 
     private static QueryId newQueryId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();

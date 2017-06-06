@@ -24,10 +24,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
 import io.spine.base.CommandId;
 import io.spine.base.EventId;
+import io.spine.base.Identifier;
 
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static io.spine.base.Identifiers.idToString;
 
 /**
  * Generates a sequence of identifiers of events produced in response to a command.
@@ -96,7 +95,7 @@ final class EventIdSequence {
     }
 
     private static String createPrefix(CommandId commandId) {
-        final String result = idToString(commandId) + SEPARATOR;
+        final String result = Identifier.toString(commandId) + SEPARATOR;
         return result;
     }
 

@@ -23,14 +23,14 @@ package io.spine.string;
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.CommandId;
 import io.spine.base.EventId;
+import io.spine.base.Identifier;
 import io.spine.test.identifiers.IdWithPrimitiveFields;
 import io.spine.users.UserId;
 import org.junit.Test;
 
 import java.util.Random;
 
-import static io.spine.base.Identifiers.idToString;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.string.Stringifiers.forBoolean;
 import static io.spine.string.Stringifiers.forInteger;
 import static io.spine.string.Stringifiers.forLong;
@@ -76,7 +76,7 @@ public class StringifiersShould {
         final IdWithPrimitiveFields id = IdWithPrimitiveFields.newBuilder()
                                                               .setName(testId)
                                                               .build();
-        final String result = idToString(id);
+        final String result = Identifier.toString(id);
         assertEquals(testId, result);
     }
 

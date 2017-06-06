@@ -20,17 +20,16 @@
 
 package io.spine.server.entity;
 
-import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Lists;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
+import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupportedId;
+import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.Storage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.test.entity.Project;
 import io.spine.test.entity.ProjectId;
 import io.spine.users.TenantId;
 import org.junit.After;
@@ -40,6 +39,7 @@ import org.junit.Test;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.Tests.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -53,6 +53,12 @@ public class RepositoryShould {
     private StorageFactory storageFactory;
     private TenantId tenantId;
 
+    private static ProjectId createId(String value) {
+        return ProjectId.newBuilder()
+                        .setId(value)
+                        .build();
+    }
+
     @Before
     public void setUp() {
         boundedContext = BoundedContext.newBuilder()
@@ -61,7 +67,6 @@ public class RepositoryShould {
         repository = new TestRepo();
         storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
         tenantId = newTenantUuid();
-        //TODO:2017-03-26:alexander.yevsyukov: Have single-tenant version of tests too.
     }
 
     @After
@@ -69,87 +74,33 @@ public class RepositoryShould {
         boundedContext.close();
     }
 
-    //
-    // Tests of initialization checks
-    //-------------------------
+    /*
+     * Tests of initialization
+     **************************/
 
     @Test(expected = IllegalStateException.class)
     public void check_for_entity_id_class() {
         new RepoForEntityWithUnsupportedId().getIdClass();
     }
 
-    private static class EntityWithUnsupportedId
-            extends AbstractVersionableEntity<Exception, Project> {
-        protected EntityWithUnsupportedId(Exception id) {
-            super(id);
-        }
+    @Test
+    public void report_unregistered_on_init() {
+        assertFalse(new TestRepo().isRegistered());
     }
 
-    @SuppressWarnings("ReturnOfNull")
-    private static class RepoForEntityWithUnsupportedId
-            extends Repository<Exception, EntityWithUnsupportedId> {
-
-        /**
-         * Creates the repository in the passed {@link BoundedContext}.
-         *
-         */
-        private RepoForEntityWithUnsupportedId() {
-            super();
-        }
-
-        @Override
-        public Optional<EntityWithUnsupportedId> find(Exception id) {
-            return null;
-        }
-
-        @Override
-        public EntityWithUnsupportedId create(Exception id) {
-            return null;
-        }
-
-        @Override
-        protected void store(EntityWithUnsupportedId obj) {
-        }
-
-        @Override
-        protected Storage<Exception, ?> createStorage(StorageFactory factory) {
-            return null;
-        }
+    @Test(expected = IllegalStateException.class)
+    public void not_allow_getting_BoundedContext_before_registration() {
+        new TestRepo().getBoundedContext();
     }
+
+    /*
+     * Tests of regular work
+     **************************/
 
     @Test(expected = IllegalStateException.class)
     public void reject_repeated_storage_initialization() {
         repository.initStorage(storageFactory);
         repository.initStorage(storageFactory);
-    }
-
-    //
-    // Tests of regular work
-    //-----------------------
-
-    private static class ProjectEntity extends AbstractVersionableEntity<ProjectId, Project> {
-        private ProjectEntity(ProjectId id) {
-            super(id);
-        }
-    }
-
-    private static class TestRepo
-            extends DefaultRecordBasedRepository<ProjectId, ProjectEntity, Project> {
-
-        /**
-         * The ID value to simulate failure to load an entity.
-         */
-        private static final ProjectId troublesome = ProjectId.newBuilder()
-                                                              .setId("CANNOT_BE_LOADED")
-                                                              .build();
-
-        @Override
-        public Optional<ProjectEntity> find(ProjectId id) {
-            if (id.equals(troublesome)) {
-                return Optional.absent();
-            }
-            return super.find(id);
-        }
     }
 
     @Test
@@ -182,7 +133,6 @@ public class RepositoryShould {
         final RecordStorage<?> storage = (RecordStorage<?>) repository.getStorage();
         repository.close();
 
-        //noinspection ConstantConditions
         assertTrue(storage.isClosed());
         assertFalse(repository.isStorageAssigned());
     }
@@ -219,7 +169,7 @@ public class RepositoryShould {
         final int numEntities = new TenantAwareFunction0<Integer>(tenantId) {
             @Override
             public Integer apply() {
-                final List<ProjectEntity> entities = Lists.newArrayList(getIterator(tenantId));
+                final List<ProjectEntity> entities = newArrayList(getIterator(tenantId));
                 return entities.size();
             }
         }.execute();
@@ -232,7 +182,8 @@ public class RepositoryShould {
                 new TenantAwareFunction0<Iterator<ProjectEntity>>(tenantId) {
                     @Override
                     public Iterator<ProjectEntity> apply() {
-                        return repository.iterator(Predicates.<ProjectEntity>alwaysTrue());
+                        return repository.iterator(
+                                Predicates.<ProjectEntity>alwaysTrue());
                     }
                 };
         return op.execute();
@@ -243,12 +194,6 @@ public class RepositoryShould {
         createAndStoreEntities();
         final Iterator<ProjectEntity> iterator = getIterator(tenantId);
         iterator.remove();
-    }
-
-    private static ProjectId createId(String value) {
-        return ProjectId.newBuilder()
-                        .setId(value)
-                        .build();
     }
 
     private void createAndStore(String entityId) {
