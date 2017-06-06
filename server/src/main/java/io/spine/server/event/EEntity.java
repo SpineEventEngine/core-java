@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.base.Events;
@@ -35,7 +36,8 @@ import java.util.Comparator;
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
-class EEntity extends AbstractEntity<EventId, Event> {
+@Internal
+public class EEntity extends AbstractEntity<EventId, Event> {
 
     /**
      * The name of the Entity Column representing the time, when the event was fired.
