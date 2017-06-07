@@ -21,16 +21,15 @@ syntax = "proto3";
 
 package spine.test.validate.msg;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ValidationTestCommandsProto";
-option java_package = "org.spine3.test.validate.msg.altfields";
+option java_package = "io.spine.test.validate.msg.altfields";
 
 import "google/protobuf/wrappers.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 message PersonName {
     option (required_field) = "first_name | honorific_prefix & last_name";

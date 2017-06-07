@@ -21,16 +21,16 @@ syntax = "proto3";
 
 package spine.users;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 
-option java_package = "org.spine3.users";
+option java_package = "io.spine.users";
 option java_multiple_files = true;
 option java_outer_classname = "UserAccountProto";
 option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/net/url.proto";
 import "spine/net/internet_domain.proto";
 import "spine/people/person_name.proto";
@@ -136,7 +136,7 @@ message UserAccount {
     // The linked identities of the user obtained from different authentication providers.
     //
     // For getting Google Account Id from Java,
-    // please use `org.spine3.users.UserAccounts.getGoogleUid()`
+    // please use `io.spine.users.UserAccounts.getGoogleUid()`
     //
     repeated UserInfo linked_identity = 20;
 

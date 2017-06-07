@@ -2,13 +2,13 @@ syntax = "proto3";
 
 package spine.net;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_package = "org.spine3.net";
+option java_package = "io.spine.net";
 option java_outer_classname = "UrlProto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 // Protobuf definition for URL.
 //
@@ -65,10 +65,10 @@ message Url {
             HTTP = 1;
             HTTPS = 2;
             FTP = 3;
-            SSL = 4;
-            SSH = 5;
-            DNS = 6;
-            SOAP = 7;
+            MAILTO = 4;
+            FILE = 5;
+            DATA = 6;
+            IRC = 7;
             RTP = 8;
         }
 

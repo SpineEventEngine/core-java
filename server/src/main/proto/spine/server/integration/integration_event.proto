@@ -21,8 +21,8 @@ syntax = "proto3";
 
 package spine.server.integration;
 
-option (type_url_prefix) = "type.spine3.org";
-option java_package = "org.spine3.server.integration";
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.server.integration";
 option java_multiple_files = true;
 option java_outer_classname = "IntegrationEventProto";
 option java_generate_equals_and_hash = true;
@@ -30,7 +30,7 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/base/event.proto";
 
 // An integration event is sent between loosely coupled parts of a system.

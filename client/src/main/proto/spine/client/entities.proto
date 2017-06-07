@@ -21,15 +21,17 @@ syntax = "proto3";
 
 package spine.client;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EntitiesProto";
-option java_package = "org.spine3.client";
+option java_package = "io.spine.client";
 
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
+import "spine/base/field_filter.proto";
+import "google/protobuf/timestamp.proto";
 
 // Represents an ID of an entity.
 //
@@ -69,8 +71,71 @@ message EntityFilters {
     // Match entities by IDs.
     EntityIdFilter id_filter = 1;
 
+    // Match the entities by the value of the Entity Columns.
+    repeated CompositeColumnFilter filter = 2;
+
     // Reserved for more filter types
-    reserved 2 to 40;
+    reserved 3 to 40;
+}
+
+// The filter grouping a number of Entity Column filters with a specifed logical operator.
+message CompositeColumnFilter {
+
+    // The composite Entity Column filters.
+    //
+    // If the list is empty, any record is considered matching this filter.
+    repeated ColumnFilter filter = 1;
+
+    // The value of the composite operator which deternines the behavior of the filter matching.
+    CompositeOperator operator = 2 [(required) = true];
+
+    // An enumeration of all supported composite operators upon the Entity Column filters.
+    enum CompositeOperator {
+
+        // Error value.
+        CCF_CO_UNDEFINED = 0;
+
+        // The conjunctive operator. The SQL equivalent is `AND`.
+        ALL = 1;
+
+        // The disjunctive operator. The SQL equivalent is `OR`.
+        EITHER = 2;
+    }
+}
+
+// A filter matching the Entity Colummns.
+message ColumnFilter {
+
+    // The name of the Entity Column which is matched.
+    string column_name = 1 [(required) = true];
+
+    // The value to compare upon.
+    google.protobuf.Any value = 2 [(required) = true];
+
+    // The compasison operator.
+    Operator operator = 3 [(required) = true];
+
+    // An enumeration of all supported comparison operators applicable to the Entity Columns.
+    enum Operator {
+
+        // Error value
+        CFO_UNDEFINED = 0;
+
+        // Equality operator (`=`).
+        EQUAL = 1;
+
+        // Comparison operator stating that the stored value is greater then (`>`) the passed value.
+        GREATER_THAN = 2;
+
+        // Comparison operator stating that the stored value is less then (`<`) the passed value.
+        LESS_THAN = 4;
+
+        // Comparison operator stating that the stored value is greater then or equal to (`>=`) the passed value.
+        GREATER_OR_EQUAL = 5;
+
+        // Comparison operator stating that the stored value is less then or equal to (`<=`) the passed value.
+        LESS_OR_EQUAL = 6;
+    }
 }
 
 // Allows to add an ID filter for the read operations.

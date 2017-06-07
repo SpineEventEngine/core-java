@@ -21,13 +21,13 @@ syntax = "proto3";
 
 package spine.net;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EmailAddressProto";
-option java_package = "org.spine3.net";
+option java_package = "io.spine.net";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 
 // An email address.
 message EmailAddress {

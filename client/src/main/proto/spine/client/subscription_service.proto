@@ -21,14 +21,14 @@ syntax = "proto3";
 
 package spine.client;
 
-option (type_url_prefix) = "type.spine3.org";
-option java_package = "org.spine3.client.grpc";
+option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.client.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "SubscriptionServiceProto";
 option java_generate_equals_and_hash = true;
 
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/client/subscription.proto";
 import "spine/base/response.proto";
 

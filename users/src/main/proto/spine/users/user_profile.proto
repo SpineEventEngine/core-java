@@ -21,15 +21,14 @@ syntax = "proto3";
 
 package spine.users;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 
-option java_package = "org.spine3.users";
+option java_package = "io.spine.users";
 option java_multiple_files = true;
 option java_outer_classname = "UserProfileProto";
 option java_generate_equals_and_hash = true;
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 import "spine/net/url.proto";
 import "spine/net/email_address.proto";
 

@@ -21,16 +21,15 @@ syntax = "proto3";
 
 package spine.change;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "ValueMismatchProto";
-option java_package = "org.spine3.change";
+option java_package = "io.spine.change";
 
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
-import "spine/validate.proto";
+import "spine/options.proto";
 
 // The failure to handle a command because an entity contains a value different than expected in a command.
 message ValueMismatch {

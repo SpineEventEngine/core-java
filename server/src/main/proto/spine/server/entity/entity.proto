@@ -21,17 +21,17 @@ syntax = "proto3";
 
 package spine.server.entity;
 
-option (type_url_prefix) = "type.spine3.org";
+option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EntityProto";
-option java_package = "org.spine3.server.entity";
+option java_package = "io.spine.server.entity";
 
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/any.proto";
 
-import "spine/annotations.proto";
+import "spine/options.proto";
 import "spine/base/version.proto";
 
 // The record for passing information about an entity.
@@ -62,7 +62,7 @@ message LifecycleFlags {
     //
     bool archived = 1;
 
-    // Marks the entity as `deleted.
+    // Marks the entity as `deleted`.
     //
     // An application may use this flag for filtering out entities that were
     // put aside (e.g. into a Trash) because they are no longer needed.
@@ -76,7 +76,7 @@ message LifecycleFlags {
 // Enumeration of possible entity state validation errors.
 //
 // Contains the reasons of an errors, that are exclusively technical
-// and haven't relation to a business errors.
+// and have no relation to business errors.
 //
 enum EntityStateValidationError {
 
