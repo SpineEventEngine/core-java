@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package io.spine.server.reflect;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
+import io.spine.base.CommandContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,14 +29,14 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-public class CommandAwareFailureSubscriberMethod extends FailureSubscriberMethod {
+public class CommandMessageAwareFailureSubscriberMethod extends FailureSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    CommandAwareFailureSubscriberMethod(Method method) {
+    CommandMessageAwareFailureSubscriberMethod(Method method) {
         super(method);
     }
 
@@ -44,13 +44,16 @@ public class CommandAwareFailureSubscriberMethod extends FailureSubscriberMethod
      * {@inheritDoc}
      *
      * <p>Invokes the wrapped {@link Method} upon all the passed params as follows:
-     * {@code invoke(target, failureMessage, commandMessage, context)}.
+     * {@code invoke(target, failureMessage, commandMessage)} ignoring the Command
+     * {@linkplain Message} argument.
      */
     @Override
-    protected void doInvoke(Object target, Message failureMessage, CommandContext context,
+    protected void doInvoke(Object target,
+                            Message failureMessage,
+                            CommandContext context,
                             Message commandMessage) throws IllegalArgumentException,
                                                            IllegalAccessException,
                                                            InvocationTargetException {
-        getMethod().invoke(target, failureMessage, commandMessage, context);
+        getMethod().invoke(target, failureMessage, commandMessage);
     }
 }

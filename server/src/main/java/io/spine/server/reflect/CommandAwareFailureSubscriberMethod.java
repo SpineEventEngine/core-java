@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package io.spine.server.reflect;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
+import io.spine.base.CommandContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -29,14 +29,14 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
+public class CommandAwareFailureSubscriberMethod extends FailureSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    ShortFailureSubscriberMethod(Method method) {
+    CommandAwareFailureSubscriberMethod(Method method) {
         super(method);
     }
 
@@ -44,16 +44,13 @@ class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
      * {@inheritDoc}
      *
      * <p>Invokes the wrapped {@link Method} upon all the passed params as follows:
-     * {@code invoke(target, failureMessage)} ignoring the Command {@linkplain Message} and
-     * {@link CommandContext} arguments.
+     * {@code invoke(target, failureMessage, commandMessage, context)}.
      */
     @Override
-    protected void doInvoke(Object target,
-                            Message failureMessage,
-                            CommandContext ignoredContext,
-                            Message ignoredCommandMsg) throws IllegalArgumentException,
+    protected void doInvoke(Object target, Message failureMessage, CommandContext context,
+                            Message commandMessage) throws IllegalArgumentException,
                                                            IllegalAccessException,
                                                            InvocationTargetException {
-        getMethod().invoke(target, failureMessage);
+        getMethod().invoke(target, failureMessage, commandMessage, context);
     }
 }

@@ -18,10 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package org.spine3.server.reflect;
+package io.spine.server.reflect;
 
 import com.google.protobuf.Message;
-import org.spine3.base.CommandContext;
+import io.spine.base.CommandContext;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
