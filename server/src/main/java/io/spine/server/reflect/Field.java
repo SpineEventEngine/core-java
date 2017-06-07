@@ -74,7 +74,7 @@ public final class Field {
 
         final Method getter;
         try {
-            getter = getGetterForField(messageClass, name);
+            getter = getterForFieldOf(name, messageClass);
         } catch (NoSuchMethodException ignored) {
             return Optional.absent();
         }
@@ -157,12 +157,12 @@ public final class Field {
      *
      * <p>The method must match {@code getFieldName} notation, have no argument to be found.
      *
-     * @param cls       class containing the getter method
      * @param fieldName field to find a getter for
+     * @param cls       class containing the getter method
      * @return {@link Method} instance reflecting the getter method
      * @throws RuntimeException upon reflective failure
      */
-    private static Method getGetterForField(Class<?> cls, String fieldName)
+    private static Method getterForFieldOf(String fieldName, Class<?> cls)
             throws NoSuchMethodException {
         checkNotNull(cls);
         checkNotNull(fieldName);
