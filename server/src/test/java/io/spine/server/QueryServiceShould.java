@@ -37,7 +37,6 @@ import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectValidatingBuilder;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.Set;
@@ -55,7 +54,6 @@ import static org.mockito.Mockito.when;
 /**
  * @author Alex Tymchenko
  */
-@Ignore //TODO:2017-06-01:alexander.yevsyukov: Enable when the issue with multi-bounded context InMemoryGrpcService is resolved.
 public class QueryServiceShould {
 
     private QueryService service;
