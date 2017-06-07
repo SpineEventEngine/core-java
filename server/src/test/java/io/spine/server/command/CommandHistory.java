@@ -50,8 +50,8 @@ public class CommandHistory {
         final Message message = Commands.getMessage(command);
         final CommandContext context = command.getContext();
         final int messageIndex = messages.indexOf(message);
-        final int contextIndex = contexts.indexOf(context);
-        return (messageIndex != -1) && (messageIndex == contextIndex);
+        final CommandContext storedContext = contexts.get(messageIndex);
+        return (messageIndex != -1) && (storedContext.equals(context));
     }
 
     public void clear() {
