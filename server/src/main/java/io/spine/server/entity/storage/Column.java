@@ -337,7 +337,7 @@ public class Column implements Serializable {
     @Internal
     public static class MemoizedValue implements Serializable {
 
-        private static final long serialVersionUID = -6041163252051925293L;
+        private static final long serialVersionUID = 0L;
 
         private final Column sourceColumn;
 
