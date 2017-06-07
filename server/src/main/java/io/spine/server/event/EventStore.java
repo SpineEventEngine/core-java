@@ -24,8 +24,6 @@ import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Event;
-import io.spine.base.Response;
-import io.spine.base.Responses;
 import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -146,7 +144,7 @@ public abstract class EventStore implements AutoCloseable {
      * @param <T> the type of the builder product
      * @param <B> the type of the builder for covariance in derived classes
      */
-    @SuppressWarnings("unchecked") // The cast is safe
+    @SuppressWarnings("unchecked") // It is safe as we cast to a derived class.
     private abstract static class AbstractBuilder<T, B extends AbstractBuilder<T, B>> {
 
         private Executor streamExecutor;
@@ -234,37 +232,6 @@ public abstract class EventStore implements AutoCloseable {
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
             return result;
-        }
-    }
-
-    /**
-     * gRPC service over the locally running implementation.
-     */
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        /* as we override default implementation with `unimplemented` status. */
-    private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
-
-        private final LocalEventStore eventStore;
-
-        private GrpcService(LocalEventStore eventStore) {
-            super();
-            this.eventStore = eventStore;
-        }
-
-        @Override
-        public void append(Event request, StreamObserver<Response> responseObserver) {
-            try {
-                eventStore.append(request);
-                responseObserver.onNext(Responses.ok());
-                responseObserver.onCompleted();
-            } catch (RuntimeException e) {
-                responseObserver.onError(e);
-            }
-        }
-
-        @Override
-        public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-            eventStore.read(request, responseObserver);
         }
     }
 
