@@ -37,7 +37,7 @@ import java.util.Iterator;
  *
  * @author Dmytro Dashenkov
  */
-@SPI // Used by the the Storage implementors
+@SPI /* Available to SPI users, providing own {@code Storage} implementations. */
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 0L;
