@@ -79,8 +79,7 @@ public class ValidationException extends RuntimeException {
         @Override
         public String apply(@Nullable ConstraintViolation input) {
             checkNotNull(input);
-            return Stringifiers.toString(
-                    input);
+            return Stringifiers.toString(input);
         }
     }
 }
