@@ -85,7 +85,6 @@ class TenantCatchup<I> {
         this.repository = repository;
         this.options = options;
 
-        final EventStore eventStore = repository.getEventStore();
         final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
 
         final Coder<I> idCoder = repositoryIO.getIdCoder();
@@ -100,10 +99,12 @@ class TenantCatchup<I> {
         this.kvCoder = repositoryIO.getKvCoder();
         this.writeLastEventTimestamp = repositoryIO.writeLastHandledEventTime(tenantId);
         this.writeRecords = repositoryIO.write(tenantId);
+        final EventStore eventStore = repository.getEventStore();
         this.queryEvents = eventStore.query(tenantId);
     }
 
-    @SuppressWarnings({"SerializableInnerClassWithNonSerializableOuterClass"
+    @SuppressWarnings({
+            "SerializableInnerClassWithNonSerializableOuterClass"
                                /* OK as no dependencies to the outer class in the body. */,
             "serial" /* OK to rely on default Java mechanism for the tags. */})
     private Pipeline createPipeline() {
