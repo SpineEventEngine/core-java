@@ -32,7 +32,7 @@ import java.io.Serializable;
  */
 final class IntegerStringifier extends Stringifier<Integer> implements Serializable {
 
-    private static final long serialVersionUID = 1;
+    private static final long serialVersionUID = 0L;
 
     private static final IntegerStringifier INSTANCE = new IntegerStringifier();
 

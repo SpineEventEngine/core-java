@@ -51,6 +51,8 @@ import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.people.PersonName;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
+import io.spine.server.Given.CustomerAggregate;
+import io.spine.server.Given.CustomerAggregateRepository;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
@@ -91,7 +93,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Maps.newHashMap;
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
@@ -212,8 +214,8 @@ public class StandShould extends TenantAwareTest {
 
         checkTypesEmpty(stand);
 
-        final io.spine.server.Given.CustomerAggregateRepository customerAggregateRepo =
-                new io.spine.server.Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
@@ -221,8 +223,8 @@ public class StandShould extends TenantAwareTest {
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
 
         @SuppressWarnings("LocalVariableNamingConvention")
-        final io.spine.server.Given.CustomerAggregateRepository anotherCustomerAggregateRepo =
-                new io.spine.server.Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository anotherCustomerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
         checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
@@ -276,13 +278,13 @@ public class StandShould extends TenantAwareTest {
         assertNotNull(stand);
 
 
-        final io.spine.server.Given.CustomerAggregateRepository customerAggregateRepo =
-                new io.spine.server.Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final int numericIdValue = 17;
         final CustomerId customerId = customerIdFor(numericIdValue);
-        final io.spine.server.Given.CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
+        final CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
         final Customer customerState = customerAggregate.getState();
         final TypeUrl customerType = TypeUrl.of(Customer.class);
         final Version stateVersion = Tests.newVersionWithNumber(1);
@@ -1378,8 +1380,8 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = boundedContext.getStand();
         assertNotNull(stand);
 
-        final io.spine.server.Given.CustomerAggregateRepository customerAggregateRepo =
-                new io.spine.server.Given.CustomerAggregateRepository(boundedContext);
+        final CustomerAggregateRepository customerAggregateRepo =
+                new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         final StandTestProjectionRepository projectProjectionRepo =
                 new StandTestProjectionRepository(boundedContext);

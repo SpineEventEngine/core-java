@@ -31,10 +31,11 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Version;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventPlayingEntity;
@@ -45,7 +46,6 @@ import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.Tests;
-import io.spine.test.Verify;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectValidatingBuilder;
 import io.spine.testdata.Sample;
@@ -61,11 +61,18 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.base.Identifiers.idToAny;
+import static io.spine.base.Identifier.pack;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.archived;
 import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Verify.assertEmpty;
+import static io.spine.test.Verify.assertMapsEqual;
+import static io.spine.test.Verify.assertSize;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -104,7 +111,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     private static EntityRecord newStorageRecord(Message state) {
-        final Any wrappedState = AnyPacker.pack(state);
+        final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
@@ -113,9 +120,9 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     }
 
     private EntityRecord newStorageRecord(I id, Message state) {
-        final Any wrappedState = AnyPacker.pack(state);
+        final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
-                                                .setEntityId(idToAny(id))
+                                                .setEntityId(pack(id))
                                                 .setState(wrappedState)
                                                 .setVersion(Tests.newVersionWithNumber(0))
                                                 .build();
@@ -147,7 +154,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Map empty = storage.readAll(nonEmptyFieldMask);
 
         assertNotNull(empty);
-        Verify.assertEmpty(empty);
+        assertEmpty(empty);
     }
 
     @SuppressWarnings("ConstantConditions") // Converter nullability issues
@@ -196,7 +203,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                 ids.subList(0, bulkCount),
                 fieldMask);
         final List<EntityRecord> readList = newLinkedList(readRecords);
-        Verify.assertSize(bulkCount, readList);
+        assertSize(bulkCount, readList);
         for (EntityRecord record : readRecords) {
             final Message state = unpack(record.getState());
             assertMatchesMask(state, fieldMask);
@@ -225,8 +232,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     public void write_none_storage_fields_is_none_passed() {
         final RecordStorage<I> storage = spy(getStorage());
         final I id = newId();
-        final Any state = AnyPacker.pack(
-                Sample.messageOfType(Project.class));
+        final Any state = pack(Sample.messageOfType(Project.class));
         final EntityRecord record =
                 Sample.<EntityRecord, EntityRecord.Builder>builderForType(EntityRecord.class)
                         .setState(state)
@@ -294,11 +300,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         storage.write(Maps.transformValues(v1Records, recordPacker));
         final Map<I, EntityRecord> firstRevision = storage.readAll();
-        Verify.assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
+        assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
 
         storage.write(Maps.transformValues(v2Records, recordPacker));
         final Map<I, EntityRecord> secondRevision = storage.readAll();
-        Verify.assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
+        assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
     }
 
     @Test(expected = IllegalStateException.class)
@@ -386,11 +392,16 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Version versionValue = Version.newBuilder()
                                             .setNumber(2) // Value of the counter after one columns
                                             .build();     // scan (incremented 2 times internally)
+
+        final ColumnFilter status = eq("projectStatusValue", wrappedValue);
+        final ColumnFilter version = eq("counterVersion", versionValue);
+        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
+                                                                                 .setOperator(ALL)
+                                                                                 .addFilter(status)
+                                                                                 .addFilter(version)
+                                                                                 .build();
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .putColumnFilter("projectStatusValue",
-                                                                    AnyPacker.pack(wrappedValue))
-                                                   .putColumnFilter("counterVersion",
-                                                                    AnyPacker.pack(versionValue))
+                                                   .addFilter(aggregatingFilter)
                                                    .build();
         final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
         final I idMatching = newId();
@@ -427,7 +438,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final Map<I, EntityRecord> readRecords = storage.readAll(query,
                                                                  FieldMask.getDefaultInstance());
-        Verify.assertSize(1, readRecords);
+        assertSize(1, readRecords);
         final I singleId = readRecords.keySet()
                                       .iterator()
                                       .next();
@@ -454,7 +465,6 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord notFineRecord1 = newStorageRecord(idWrong1, newState(idWrong1));
         final EntityRecord notFineRecord2 = newStorageRecord(idWrong2, newState(idWrong2));
 
-
         final EntityRecordWithColumns recordRight = create(fineRecord, matchingEntity);
         final EntityRecordWithColumns recordWrong1 = create(notFineRecord1, wrongEntity1);
         final EntityRecordWithColumns recordWrong2 = create(notFineRecord2, wrongEntity2);
@@ -480,10 +490,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
 
         // Perform the query
-        final Map<I, EntityRecord> readRecords =  storage.readAll(query,
-                                                                  FieldMask.getDefaultInstance());
+        final Map<I, EntityRecord> readRecords = storage.readAll(query,
+                                                                 FieldMask.getDefaultInstance());
         // Check results
-        Verify.assertSize(1, readRecords);
+        assertSize(1, readRecords);
         final EntityRecord actualRecord = readRecords.get(idMatching);
         assertEquals(fineRecord, actualRecord);
     }
@@ -502,7 +512,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity<I> extends EventPlayingEntity<I,
                                                                         Project,
-            ProjectValidatingBuilder> {
+                                                                        ProjectValidatingBuilder> {
 
         private int counter = 0;
 
@@ -549,7 +559,15 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
             final Project newState = Project.newBuilder(getState())
                                             .setStatus(status)
                                             .build();
-            TestTransaction.injectState(this, newState, getCounterVersion());
+            injectState(this, newState, getCounterVersion());
+        }
+
+        private void archive() {
+            TestTransaction.archive(this);
+        }
+
+        private void delete() {
+            TestTransaction.delete(this);
         }
     }
 }

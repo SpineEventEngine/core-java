@@ -20,15 +20,13 @@
 
 package io.spine.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.base.ActorContext;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -59,7 +57,7 @@ public final class QueryFactory {
     }
 
     private static QueryId newQueryId() {
-        final String formattedId = format(QUERY_ID_FORMAT, Identifiers.newUuid());
+        final String formattedId = format(QUERY_ID_FORMAT, Identifier.newUuid());
         return QueryId.newBuilder()
                       .setValue(formattedId)
                       .build();
@@ -177,7 +175,7 @@ public final class QueryFactory {
 
     Query composeQuery(Class<? extends Message> entityClass,
                        @Nullable Set<? extends Message> ids,
-                       @Nullable Map<String, Any> columnFilters,
+                       @Nullable Set<CompositeColumnFilter> columnFilters,
                        @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass, "The class of Entity must be specified for a Query");
 

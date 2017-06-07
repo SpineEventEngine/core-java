@@ -40,8 +40,7 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.CommandContext.Schedule;
-import static io.spine.base.Identifiers.EMPTY_ID;
-import static io.spine.base.Identifiers.idToString;
+import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -225,7 +224,7 @@ public final class Commands {
      */
     public static CommandId checkValid(CommandId id) {
         checkNotNull(id);
-        final String idStr = idToString(id);
+        final String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
     }

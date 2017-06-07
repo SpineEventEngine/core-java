@@ -21,7 +21,7 @@ package io.spine.server.stand;
 
 import com.google.common.base.Objects;
 import com.google.protobuf.Any;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
@@ -39,6 +39,7 @@ import java.util.List;
  * @see SubscriptionRegistry
  */
 final class SubscriptionRecord {
+
     private final Subscription subscription;
     private final Target target;
     private final TypeUrl type;
@@ -107,7 +108,7 @@ final class SubscriptionRecord {
         final boolean idFilterSet = !EntityIdFilter.getDefaultInstance()
                                                    .equals(givenIdFilter);
         if (idFilterSet) {
-            final Any idAsAny = Identifiers.idToAny(id);
+            final Any idAsAny = Identifier.pack(id);
             final EntityId givenEntityId = EntityId.newBuilder()
                                                    .setId(idAsAny)
                                                    .build();
@@ -123,6 +124,7 @@ final class SubscriptionRecord {
         return type;
     }
 
+    @Nullable
     Stand.EntityUpdateCallback getCallback() {
         return callback;
     }

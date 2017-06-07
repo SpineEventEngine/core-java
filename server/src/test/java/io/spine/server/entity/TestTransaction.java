@@ -19,11 +19,10 @@
  */
 package io.spine.server.entity;
 
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.EventContext;
 import io.spine.base.Version;
-
-import java.lang.reflect.InvocationTargetException;
 
 /**
  * A utility class providing various test-only methods, which in production mode are allowed
@@ -44,18 +43,71 @@ public class TestTransaction {
      * <p>To be used in tests only.
      */
     public static void injectState(EventPlayingEntity entity, Message state, Version version) {
+        final TestTx tx = new TestTx(entity, state, version);
+        tx.commit();
+    }
 
-        @SuppressWarnings("unchecked")
-        final Transaction tx = new Transaction(entity, state, version) {
+    /**
+     * A hack allowing to archive an {@code EventPlayingEntity} instance by creating and committing
+     * a fake transaction.
+     *
+     * <p>To be used in tests only.
+     */
+    public static void archive(EventPlayingEntity entity) {
+        final TestTx tx = new TestTx(entity) {
 
             @Override
             protected void dispatch(EventPlayingEntity entity,
                                     Message eventMessage,
-                                    EventContext context) throws InvocationTargetException {
-                // do nothing.
+                                    EventContext context) {
+                entity.setArchived(true);
             }
         };
 
+        tx.dispatchForTest();
         tx.commit();
+    }
+
+    /**
+     * A hack allowing to mark an {@code EventPlayingEntity} instance deleted by creating and
+     * committing a fake transaction.
+     *
+     * <p>To be used in tests only.
+     */
+    public static void delete(EventPlayingEntity entity) {
+        final TestTx tx = new TestTx(entity) {
+
+            @Override
+            protected void dispatch(EventPlayingEntity entity,
+                                    Message eventMessage,
+                                    EventContext context) {
+                entity.setDeleted(true);
+            }
+        };
+
+        tx.dispatchForTest();
+        tx.commit();
+    }
+
+    @SuppressWarnings("unchecked")
+    private static class TestTx extends Transaction {
+
+        protected TestTx(EventPlayingEntity entity) {
+            super(entity);
+        }
+
+        public TestTx(EventPlayingEntity entity, Message state, Version version) {
+            super(entity, state, version);
+        }
+
+        @Override
+        protected void dispatch(EventPlayingEntity entity, Message eventMessage,
+                                EventContext context) {
+            // NoOp by default
+        }
+
+        private void dispatchForTest() {
+            dispatch(getEntity(), Any.getDefaultInstance(), EventContext.getDefaultInstance());
+        }
     }
 }

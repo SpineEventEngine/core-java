@@ -24,6 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
 import io.spine.base.FailureThrowable;
+import io.spine.base.Identifier;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
@@ -33,8 +34,6 @@ import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.validate.ValidatingBuilder;
 
 import java.util.List;
-
-import static io.spine.base.Identifiers.idToAny;
 
 /**
  * An entity that can handle commands.
@@ -72,7 +71,7 @@ public abstract class CommandHandlingEntity<I,
      */
     protected CommandHandlingEntity(I id) {
         super(id);
-        this.idAsAny = idToAny(id);
+        this.idAsAny = Identifier.pack(id);
     }
 
     protected Any getProducerId() {
@@ -94,9 +93,9 @@ public abstract class CommandHandlingEntity<I,
                                                   envelope.getCommandContext());
     }
 
-    //
-    // Helper methods for producing `ValueMismatch`es in command handling methods
-    //-----------------------------------------------------------------------------
+    /*
+     * Helper methods for producing `ValueMismatch`es in command handling methods
+     ******************************************************************************/
 
     /**
      * Creates {@code ValueMismatch} for the case of discovering a non-default value,

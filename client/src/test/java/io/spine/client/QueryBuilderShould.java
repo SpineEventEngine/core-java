@@ -26,10 +26,8 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.Identifiers;
-import io.spine.json.Json;
+import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.TypeConverter;
 import io.spine.test.client.TestEntity;
 import io.spine.test.validate.msg.ProjectId;
 import io.spine.type.TypeName;
@@ -37,13 +35,26 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
+import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
-import static io.spine.base.Identifiers.newUuid;
-import static io.spine.client.QueryParameter.eq;
+import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.base.Identifier.newUuid;
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.either;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.ge;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.le;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.protobuf.TypeConverter.toObject;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
+import static io.spine.test.Verify.fail;
+import static io.spine.time.Durations2.fromHours;
+import static io.spine.time.Time.getCurrentTime;
+import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singleton;
@@ -136,9 +147,12 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final Map<String, Any> columnFilters = entityFilters.getColumnFilterMap();
+        final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        assertSize(1, aggregatingColumnFilters);
+        final CompositeColumnFilter aggregatingColumnFilter = aggregatingColumnFilters.get(0);
+        final Collection<ColumnFilter> columnFilters = aggregatingColumnFilter.getFilterList();
         assertSize(1, columnFilters);
-        final Any actualValue = columnFilters.get(columnName);
+        final Any actualValue = findByName(columnFilters, columnName).getValue();
         assertNotNull(columnValue);
         final Int32Value messageValue = AnyPacker.unpack(actualValue);
         final int actualGenericValue = messageValue.getValue();
@@ -162,22 +176,88 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertFalse(target.getIncludeAll());
 
         final EntityFilters entityFilters = target.getFilters();
-        final Map<String, Any> columnFilters = entityFilters.getColumnFilterMap();
-        assertSize(2, columnFilters);
-
-        final Any actualValue1 = columnFilters.get(columnName1);
+        final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        assertSize(1, aggregatingColumnFilters);
+        final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
+                                                                               .getFilterList();
+        final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
+        final int actualGenericValue1 = toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
-        final Any actualValue2 = columnFilters.get(columnName2);
+        final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
     @SuppressWarnings("OverlyLongMethod")
-    // A big test case covering the query arguments co-living
+        // A big test for the grouping operators proper building.
+    @Test
+    public void create_queries_with_grouping_params() {
+        final String establishedTimeColumn = "establishedTime";
+        final String companySizeColumn = "companySize";
+        final String countryColumn = "country";
+        final String countryName = "Ukraine";
+
+        final Timestamp twoDaysAgo = subtract(getCurrentTime(), fromHours(-48));
+
+        final Query query = factory().query()
+                                     .select(TestEntity.class)
+                                     .where(all(ge(companySizeColumn, 50),
+                                                le(companySizeColumn, 1000)),
+                                            either(gt(establishedTimeColumn, twoDaysAgo),
+                                                   eq(countryColumn, countryName)))
+                                     .build();
+        final Target target = query.getTarget();
+        final List<CompositeColumnFilter> filters = target.getFilters().getFilterList();
+        assertSize(2, filters);
+
+        final CompositeColumnFilter firstFilter = filters.get(0);
+        final CompositeColumnFilter secondFilter = filters.get(1);
+
+        final List<ColumnFilter> allColumnFilters;
+        final List<ColumnFilter> eitherColumnFilters;
+        if (firstFilter.getOperator() == ALL) {
+            assertEquals(EITHER, secondFilter.getOperator());
+            allColumnFilters = firstFilter.getFilterList();
+            eitherColumnFilters = secondFilter.getFilterList();
+        } else {
+            assertEquals(ALL, secondFilter.getOperator());
+            eitherColumnFilters = firstFilter.getFilterList();
+            allColumnFilters = secondFilter.getFilterList();
+        }
+        assertSize(2, allColumnFilters);
+        assertSize(2, eitherColumnFilters);
+
+        final ColumnFilter companySizeLowerBound = allColumnFilters.get(0);
+        assertEquals(companySizeColumn, companySizeLowerBound.getColumnName());
+        assertEquals(50L,
+                     (long) toObject(companySizeLowerBound.getValue(), int.class));
+        assertEquals(ColumnFilter.Operator.GREATER_OR_EQUAL, companySizeLowerBound.getOperator());
+
+        final ColumnFilter companySizeHigherBound = allColumnFilters.get(1);
+        assertEquals(companySizeColumn, companySizeHigherBound.getColumnName());
+        assertEquals(1000L,
+                     (long) toObject(companySizeHigherBound.getValue(), int.class));
+        assertEquals(ColumnFilter.Operator.LESS_OR_EQUAL, companySizeHigherBound.getOperator());
+
+        final ColumnFilter establishedTimeFilter = eitherColumnFilters.get(0);
+        assertEquals(establishedTimeColumn, establishedTimeFilter.getColumnName());
+        assertEquals(twoDaysAgo,
+                     toObject(establishedTimeFilter.getValue(), Timestamp.class));
+        assertEquals(ColumnFilter.Operator.GREATER_THAN, establishedTimeFilter.getOperator());
+
+        final ColumnFilter countryFilter = eitherColumnFilters.get(1);
+        assertEquals(countryColumn, countryFilter.getColumnName());
+        assertEquals(countryName,
+                     toObject(countryFilter.getValue(), String.class));
+        assertEquals(ColumnFilter.Operator.EQUAL, countryFilter.getOperator());
+    }
+
+
+    @SuppressWarnings("OverlyLongMethod")
+        // A big test case covering the query arguments coexistence.
     @Test
     public void create_queries_with_all_arguments() {
         final Class<? extends Message> testEntityClass = TestEntity.class;
@@ -217,17 +297,20 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         assertThat(intIdValues, containsInAnyOrder(id1, id2));
 
         // Check query params
-        final Map<String, Any> columnFilters = entityFilters.getColumnFilterMap();
+        final List<CompositeColumnFilter> aggregatingColumnFilters = entityFilters.getFilterList();
+        assertSize(1, aggregatingColumnFilters);
+        final Collection<ColumnFilter> columnFilters = aggregatingColumnFilters.get(0)
+                                                                               .getFilterList();
         assertSize(2, columnFilters);
 
-        final Any actualValue1 = columnFilters.get(columnName1);
+        final Any actualValue1 = findByName(columnFilters, columnName1).getValue();
         assertNotNull(actualValue1);
-        final int actualGenericValue1 = TypeConverter.toObject(actualValue1, int.class);
+        final int actualGenericValue1 = toObject(actualValue1, int.class);
         assertEquals(columnValue1, actualGenericValue1);
 
-        final Any actualValue2 = columnFilters.get(columnName2);
+        final Any actualValue2 = findByName(columnFilters, columnName2).getValue();
         assertNotNull(actualValue2);
-        final Message actualGenericValue2 = TypeConverter.toObject(actualValue2, ProjectId.class);
+        final Message actualGenericValue2 = toObject(actualValue2, ProjectId.class);
         assertEquals(columnValue2, actualGenericValue2);
     }
 
@@ -301,26 +384,20 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
                                               .select(testEntityClass)
                                               .withMask(fieldName)
                                               .byId(id1, id2)
-                                              .where(eq(columnName1,
-                                                                            columnValue1),
-                                                                         eq(columnName2,
-                                                                            columnValue2));
-
+                                              .where(eq(columnName1, columnValue1),
+                                                     eq(columnName2, columnValue2));
         final String stringRepr = builder.toString();
 
         assertThat(stringRepr, containsString(testEntityClass.getSimpleName()));
         assertThat(stringRepr, containsString(valueOf(id1)));
         assertThat(stringRepr, containsString(valueOf(id2)));
         assertThat(stringRepr, containsString(columnName1));
-        assertThat(stringRepr, containsString(valueOf(columnValue1)));
         assertThat(stringRepr, containsString(columnName2));
-        assertThat(stringRepr, containsString(Json.toCompactJson(columnValue2)));
-        assertThat(stringRepr, containsString(fieldName));
     }
 
     private static ProjectId newMessageId() {
         return ProjectId.newBuilder()
-                        .setValue(Identifiers.newUuid())
+                        .setValue(newUuid())
                         .build();
     }
 
@@ -336,8 +413,20 @@ public class QueryBuilderShould extends ActorRequestFactoryShould {
         public T apply(@Nullable EntityId entityId) {
             assertNotNull(entityId);
             final Any value = entityId.getId();
-            final T actual = TypeConverter.toObject(value, targetClass);
+            final T actual = toObject(value, targetClass);
             return actual;
         }
+    }
+
+    private static ColumnFilter findByName(Iterable<ColumnFilter> filters, String name) {
+        for (ColumnFilter filter : filters) {
+            if (filter.getColumnName()
+                      .equals(name)) {
+                return filter;
+            }
+        }
+        fail(format("No ColumnFilter found for %s.", name));
+        // avoid returning `null`
+        throw new RuntimeException("never happens unless JUnit is broken");
     }
 }

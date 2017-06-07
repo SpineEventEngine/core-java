@@ -46,7 +46,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

@@ -21,23 +21,22 @@
 package io.spine.client;
 
 import com.google.common.base.Function;
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.base.Identifiers;
-import io.spine.json.Json;
+import io.spine.base.Identifier;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Sets.newHashSet;
-import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.client.ColumnFilters.all;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singleton;
 
 /**
  * A builder for the {@link Query} instances.
@@ -73,7 +72,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  *                                  .select(Customer.class)
  *                                  .byId(getWestCostCustomersIds())
  *                                  .withMask("name", "address", "email")
- *                                  .where({@link QueryParameter#eq eq}("type", "permanent"),
+ *                                  .where({@link ColumnFilters#eq eq}("type", "permanent"),
  *                                         eq("discountPercent", 10),
  *                                         eq("companySize", Company.Size.SMALL))
  *                                  .build();
@@ -81,6 +80,7 @@ import static io.spine.protobuf.AnyPacker.unpack;
  * </pre>
  *
  * @see QueryFactory#select(Class)
+ * @see ColumnFilters for the query parameters
  */
 public final class QueryBuilder {
 
@@ -96,7 +96,7 @@ public final class QueryBuilder {
     private Set<?> ids;
 
     @Nullable
-    private Map<String, Any> columns;
+    private Set<CompositeColumnFilter> columns;
 
     @Nullable
     private Set<String> fieldMask;
@@ -124,9 +124,7 @@ public final class QueryBuilder {
      */
     public QueryBuilder byId(Iterable<?> ids) {
         checkNotNull(ids);
-        this.ids = ImmutableSet.builder()
-                               .addAll(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -138,9 +136,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(Message... ids) {
-        this.ids = ImmutableSet.<Message>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -152,9 +148,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(String... ids) {
-        this.ids = ImmutableSet.<String>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -166,9 +160,7 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(Integer... ids) {
-        this.ids = ImmutableSet.<Integer>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
@@ -180,34 +172,95 @@ public final class QueryBuilder {
      * @see #byId(Iterable)
      */
     public QueryBuilder byId(Long... ids) {
-        this.ids = ImmutableSet.<Long>builder()
-                               .add(ids)
-                               .build();
+        this.ids = ImmutableSet.copyOf(ids);
         return this;
     }
 
     /**
      * Sets the Entity Column predicate to the {@linkplain Query}.
      *
-     * <p>If there are no {@link QueryParameter}s (i.e. the passed array is empty), all
+     * <p>If there are no {@link ColumnFilter}s (i.e. the passed array is empty), all
      * the records will be retrieved regardless the Entity Columns values.
      *
      * <p>The multiple parameters passed into this method are considered to be joined in
-     * a conjunction ({@code AND} operator), i.e. a record matches this query only if it matches
-     * all of these parameters.
+     * a conjunction ({@link CompositeColumnFilter.CompositeOperator#ALL ALL} operator), i.e.
+     * a record matches this query only if it matches all of these parameters.
      *
-     * <p>The disjunctive filters currently are not supported.
-     *
-     * @param predicate the {@link QueryParameter}s to filter the requested entities by
+     * @param predicate the {@link ColumnFilter}s to filter the requested entities by
      * @return self for method chaining
-     * @see QueryParameter
+     * @see ColumnFilters for a convinient way to create {@link ColumnFilter} instances
+     * @see #where(CompositeColumnFilter...)
      */
-    public QueryBuilder where(QueryParameter... predicate) {
-        final ImmutableMap.Builder<String, Any> mapBuilder = ImmutableMap.builder();
-        for (QueryParameter param : predicate) {
-            mapBuilder.put(param.getColumnName(), param.getValue());
-        }
-        columns = mapBuilder.build();
+    public QueryBuilder where(ColumnFilter... predicate) {
+        final CompositeColumnFilter aggregatingFilter = all(asList(predicate));
+        columns = singleton(aggregatingFilter);
+        return this;
+    }
+
+    /**
+     * Sets the Entity Column predicate to the {@linkplain Query}.
+     *
+     * <p>If there are no {@link ColumnFilter}s (i.e. the passed array is empty), all
+     * the records will be retrieved regardless the Entity Columns values.
+     *
+     * <p>The input values represent groups of {@linkplain ColumnFilter column filters} joined with
+     * a {@linkplain CompositeColumnFilter.CompositeOperator composite operator}.
+     *
+     * <p>The input filter groups are effectively joined between each other by
+     * {@link CompositeColumnFilter.CompositeOperator#ALL ALL} operator, i.e. a record matches
+     * this query if it matches all the composite filters.
+     *
+     * <p>Example of usage:
+     * <pre>
+     *     {@code
+     *     factory.select(Customer.class)
+     *            // Possibly other parameters
+     *            .where(all(ge("companySize", 50), le("companySize", 1000)),
+     *                   either(gt("establishedTime", twoYearsAgo), eq("country", "Germany")))
+     *            .build();
+     *     }
+     * </pre>
+     *
+     * <p>In the example above, the {@code Customer} records match the built query if they represent
+     * companies that have their company size between 50 and 1000 employees and either have been
+     * established less than two years ago, or originate from Germany.
+     *
+     * <p>Note that the filters which belong to different {@link ColumnFilters#all all(...)} groups
+     * may be represented as a single {@link ColumnFilters#all all(...)} group. For example, two
+     * following queries would be identical:
+     * <pre>
+     *     {@code
+     *     // Option 1
+     *     factory.select(Customer.class)
+     *            .where(all(
+     *                       eq("country", "Germany")),
+     *                   all(
+     *                       ge("companySize", 50),
+     *                       le("companySize", 100)))
+     *            .build();
+     *
+     *     // Option 2 (identical)
+     *     factory.select(Customer.class)
+     *            .where(all(
+     *                       eq("country", "Germany"),
+     *                       ge("companySize", 50),
+     *                       le("companySize", 100)))
+     *            .build();
+     *     }
+     * </pre>
+     *
+     * <p>The {@code Option 1} is recommended in this case, since the filters are grouped logically,
+     * though both builders produce effectively the same {@link Query} instances. Note, that
+     * those instances may not be equal in terms of {@link Object#equals(Object) Object.equals}
+     * method.
+     *
+     * @param predicate a number of {@link CompositeColumnFilter} instances forming the query
+     *                  predicate
+     * @return self for method chaining
+     * @see ColumnFilters for a convinient way to create {@link CompositeColumnFilter} instances
+     */
+    public QueryBuilder where(CompositeColumnFilter... predicate) {
+        columns = ImmutableSet.copyOf(predicate);
         return this;
     }
 
@@ -283,7 +336,7 @@ public final class QueryBuilder {
             @Override
             public Any apply(@Nullable Object o) {
                 checkNotNull(o);
-                final Any id = Identifiers.idToAny(o);
+                final Any id = Identifier.pack(o);
                 return id;
             }
         });
@@ -314,12 +367,8 @@ public final class QueryBuilder {
               .append(valueSeparator);
         }
         if (columns != null && !columns.isEmpty()) {
-            for (Map.Entry<String, Any> column : columns.entrySet()) {
-                sb.append(column.getKey())
-                  .append('=')
-                  .append(Json.toCompactJson(unpack(column.getValue())))
-                  .append(valueSeparator);
-            }
+            sb.append("AND columns: ")
+              .append(columns);
         }
         sb.append(");");
         return sb.toString();

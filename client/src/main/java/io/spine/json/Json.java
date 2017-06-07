@@ -34,7 +34,6 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
 import static io.spine.protobuf.Messages.builderFor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
-import static java.lang.String.format;
 
 /**
  * Utilities for working with Json.
@@ -98,9 +97,9 @@ public class Json {
             final T result = (T) messageBuilder.build();
             return result;
         } catch (InvalidProtocolBufferException e) {
-            final String exMessage = format("%s cannot be parsed to the %s class",
-                                            json, messageClass);
-            throw newIllegalArgumentException(exMessage, e);
+            throw newIllegalArgumentException(e,
+                                              "%s cannot be parsed to the %s class.",
+                                              json, messageClass);
         }
     }
 

@@ -29,7 +29,6 @@ import io.spine.base.CommandContext;
 import io.spine.base.Enrichment;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
-import io.spine.base.Identifiers;
 import io.spine.base.Version;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
@@ -54,6 +53,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
+import static io.spine.base.Identifier.newUuid;
+
 /**
  * @author Dmytro Dashenkov
  */
@@ -62,7 +63,7 @@ class Given {
     static final int THREADS_COUNT_IN_POOL_EXECUTOR = 10;
     static final int SEVERAL = THREADS_COUNT_IN_POOL_EXECUTOR;
     static final int AWAIT_SECONDS = 6;
-    private static final String PROJECT_UUID = Identifiers.newUuid();
+    private static final String PROJECT_UUID = newUuid();
 
     private Given() {
     }

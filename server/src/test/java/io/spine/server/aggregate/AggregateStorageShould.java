@@ -47,7 +47,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.transform;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.TestEventFactory.newInstance;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
@@ -61,8 +61,8 @@ import static org.junit.Assert.assertTrue;
  */
 public abstract class AggregateStorageShould
         extends AbstractStorageShould<ProjectId,
-                                              AggregateStateRecord,
-                AggregateStorage<ProjectId>> {
+                                      AggregateStateRecord,
+                                      AggregateStorage<ProjectId>> {
 
     private final ProjectId id = Sample.messageOfType(ProjectId.class);
 

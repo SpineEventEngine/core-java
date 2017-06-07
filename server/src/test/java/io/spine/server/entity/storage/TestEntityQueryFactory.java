@@ -18,28 +18,26 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.storage.memory;
+package io.spine.server.entity.storage;
 
-import io.spine.base.EventId;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.event.EventStreamQuery;
-import io.spine.server.storage.EventRecordStorage;
-import io.spine.server.storage.RecordStorage;
-
-import java.util.Map;
+import java.util.Collection;
 
 /**
- * {@inheritDoc}
+ * @author Dmytro Dashenkov
  */
-public class InMemoryEventRecordStorage extends EventRecordStorage {
+public final class TestEntityQueryFactory {
 
-    protected InMemoryEventRecordStorage(RecordStorage<EventId> storage) {
-        super(storage);
+    private TestEntityQueryFactory() {
+        // Prevent static class initialization
     }
 
-    @Override
-    protected Map<EventId, EntityRecord> readRecords(EventStreamQuery query) {
-        final Map<EventId, EntityRecord> allRecords = readAll();
-        return allRecords;
+    /**
+     * Exposes the {@link EntityQuery#of(Collection, QueryParameters)} factory method into a public
+     * context for the testing purposes.
+     *
+     * @see EntityQuery#of(Collection, QueryParameters)
+     */
+    public static <I> EntityQuery<I> createQuery(Collection<I> ids, QueryParameters parameters) {
+        return EntityQuery.of(ids, parameters);
     }
 }

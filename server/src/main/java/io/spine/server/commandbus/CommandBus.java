@@ -27,7 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
 import io.spine.base.FailureThrowable;
-import io.spine.base.Identifiers;
+import io.spine.base.Identifier;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.envelope.CommandEnvelope;
@@ -228,7 +228,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        final String idStr = Identifiers.idToString(commandEnvelope.getCommandId());
+        final String idStr = Identifier.toString(commandEnvelope.getCommandId());
         final String msg = format("No dispatcher found for the command (class: %s id: %s).",
                                   commandEnvelope.getMessageClass()
                                                  .getClassName(),

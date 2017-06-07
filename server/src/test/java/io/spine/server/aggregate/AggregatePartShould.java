@@ -45,7 +45,7 @@ import org.junit.Test;
 import java.lang.reflect.Constructor;
 import java.util.List;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.AggregatePart.create;
 import static io.spine.server.aggregate.AggregatePart.getConstructor;

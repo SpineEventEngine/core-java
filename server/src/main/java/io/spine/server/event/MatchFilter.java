@@ -92,7 +92,7 @@ class MatchFilter implements Predicate<Event> {
         return result;
     }
 
-    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want tracability of exits.
+    @SuppressWarnings("MethodWithMoreThanThreeNegations") // OK as we want traceability of exits.
     @Override
     public boolean apply(@Nullable Event event) {
         if (event == null) {

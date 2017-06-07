@@ -62,7 +62,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.base.Identifiers.newUuid;
+import static io.spine.base.Identifier.newUuid;
 import static java.lang.String.format;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -139,7 +139,7 @@ public class ProcessManagerRepositoryShould
     @Override
     protected TestProcessManager createEntity() {
         final ProjectId id = ProjectId.newBuilder()
-                                      .setId("123-id")
+                                      .setId(newUuid())
                                       .build();
         final TestProcessManager result = Given.processManagerOfClass(TestProcessManager.class)
                                                .withId(id)

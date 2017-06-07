@@ -25,6 +25,7 @@ import com.google.common.collect.Iterators;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
+import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.type.TypeName;
@@ -33,8 +34,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static io.spine.base.Commands.generateId;
-import static io.spine.base.Identifiers.EMPTY_ID;
-import static io.spine.base.Identifiers.idToString;
+import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.time.Time.getCurrentTime;
 
 /**
@@ -112,7 +112,7 @@ class Records {
      */
     static CommandId getOrGenerateCommandId(Command command) {
         CommandId id = command.getId();
-        if (idToString(id).equals(EMPTY_ID)) {
+        if (Identifier.toString(id).equals(EMPTY_ID)) {
             id = generateId();
         }
         return id;
