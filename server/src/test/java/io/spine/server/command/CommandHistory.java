@@ -48,10 +48,15 @@ public class CommandHistory {
 
     public boolean contains(Command command) {
         final Message message = Commands.getMessage(command);
-        final CommandContext context = command.getContext();
-        final int messageIndex = messages.indexOf(message);
-        final int contextIndex = contexts.indexOf(context);
-        return (messageIndex != -1) && (messageIndex == contextIndex);
+
+        if (messages.contains(message)) {
+            final int messageIndex = messages.indexOf(message);
+            final CommandContext actualContext = command.getContext();
+            final CommandContext storedContext = contexts.get(messageIndex);
+            return actualContext.equals(storedContext);
+        }
+
+        return false;
     }
 
     public void clear() {

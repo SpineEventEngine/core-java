@@ -180,8 +180,23 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
         @Override
         public int compare(AggregateEventRecord first, AggregateEventRecord second) {
-            final int result = Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
+            int result = Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
+
+            // In case the wall clock isn't accurate enough, the timestamps may be the same.
+            // In this case, compare the version in a similar fashion.
+            if (result == 0) {
+                final int secondEventVersion = versionNumberOf(second);
+                final int firstEventVersion = versionNumberOf(first);
+                result = Integer.compare(secondEventVersion, firstEventVersion);
+            }
             return result;
+        }
+
+        private static int versionNumberOf(AggregateEventRecord record) {
+            return record.getEvent()
+                         .getContext()
+                         .getVersion()
+                         .getNumber();
         }
     }
 }
