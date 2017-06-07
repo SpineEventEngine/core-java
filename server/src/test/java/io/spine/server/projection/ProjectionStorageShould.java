@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageShould;
+import io.spine.test.TestValues;
 import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -211,7 +212,7 @@ public abstract class ProjectionStorageShould<I>
 
             final EntityRecord record = EntityRecord.newBuilder()
                                                     .setState(packedState)
-                                                    .setVersion(Tests.newVersionWithNumber(1))
+                                                    .setVersion(TestValues.newVersionWithNumber(1))
                                                     .build();
             storage.write(id, record);
             ids.add(id);

@@ -18,36 +18,56 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.test;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.test.TestValues;
+import io.spine.users.UserId;
 import org.junit.Test;
 
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.TestValues.newUserId;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class VersionsShould {
+public class TestValuesShould {
 
     @Test
-    public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Versions.class);
+    public void have_utility_ctor() {
+        Tests.hasPrivateParameterlessCtor(TestValues.class);
     }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(Version.class, Versions.create())
-                .testAllPublicStaticMethods(Versions.class);
+                .testAllPublicStaticMethods(TestValues.class);
     }
 
-    @Test(expected = IllegalArgumentException.class)
-    public void check_version_increment() {
-        Versions.checkIsIncrement(
-                TestValues.newVersionWithNumber(2),
-                TestValues.newVersionWithNumber(1)
-        );
+    @Test
+    public void create_UserId_by_string() {
+
+        final String testIdString = "12345";
+        final UserId userId = newUserId(testIdString);
+
+        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
+
+        assertEquals(expected, userId);
+    }
+
+    @Test
+    public void create_new_UUID_based_UserId() {
+        assertFalse(TestValues.newUserUuid().getValue().isEmpty());
+    }
+
+    @Test
+    public void create_archived_visibility() {
+        assertTrue(TestValues.archived().getArchived());
+    }
+
+    @Test
+    public void create_deleted_visibility() {
+        assertTrue(TestValues.deleted().getDeleted());
     }
 }

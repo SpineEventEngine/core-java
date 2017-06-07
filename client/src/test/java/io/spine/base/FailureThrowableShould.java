@@ -31,7 +31,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

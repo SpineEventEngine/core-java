@@ -34,7 +34,7 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.RecordStorageShould;
-import io.spine.test.Tests;
+import io.spine.test.TestValues;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
@@ -199,7 +199,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     private static EntityRecord newRecord(Message state) {
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(AnyPacker.pack(state))
-                                                .setVersion(Tests.newVersionWithNumber(1))
+                                                .setVersion(TestValues.newVersionWithNumber(1))
                                                 .build();
         return record;
     }

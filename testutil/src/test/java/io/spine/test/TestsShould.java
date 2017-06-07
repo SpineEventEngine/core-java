@@ -22,13 +22,12 @@ package io.spine.test;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
-import io.spine.users.UserId;
 import org.junit.Test;
 
 import static io.spine.io.StreamObservers.noOpObserver;
+import static io.spine.test.TestValues.newUserId;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.hasPrivateParameterlessCtor;
-import static io.spine.test.Tests.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -67,22 +66,6 @@ public class TestsShould {
         assertNull(Tests.nullRef());
     }
 
-    @Test
-    public void create_UserId_by_string() {
-
-        final String testIdString = "12345";
-        final UserId userId = newUserId(testIdString);
-
-        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
-
-        assertEquals(expected, userId);
-    }
-
-    @Test
-    public void create_new_UUID_based_UserId() {
-        assertFalse(Tests.newUserUuid().getValue().isEmpty());
-    }
-
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_UseId_value() {
         newUserId(Tests.<String>nullRef());
@@ -119,16 +102,6 @@ public class TestsShould {
     @Test(expected = AssertionError.class)
     public void have_own_assertTrue() {
         Tests.assertTrue(false);
-    }
-
-    @Test
-    public void create_archived_visibility() {
-        assertTrue(Tests.archived().getArchived());
-    }
-
-    @Test
-    public void create_deleted_visibility() {
-        assertTrue(Tests.deleted().getDeleted());
     }
 
     /*

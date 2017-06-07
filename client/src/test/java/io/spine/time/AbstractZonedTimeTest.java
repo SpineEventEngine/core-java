@@ -25,7 +25,7 @@ import org.junit.Test;
 
 import java.text.ParseException;
 
-import static io.spine.test.Tests.random;
+import static io.spine.test.TestValues.random;
 import static io.spine.time.ZoneOffsets.MAX_HOURS_OFFSET;
 import static io.spine.time.ZoneOffsets.MAX_MINUTES_OFFSET;
 import static io.spine.time.ZoneOffsets.MIN_HOURS_OFFSET;

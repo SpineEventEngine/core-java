@@ -45,7 +45,7 @@ import static io.spine.server.reflect.CommandHandlerMethod.predicate;
 import static io.spine.server.reflect.Given.CommandMessage.createProject;
 import static io.spine.server.reflect.Given.CommandMessage.startProject;
 import static io.spine.server.reflect.Given.EventMessage.projectCreated;
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;

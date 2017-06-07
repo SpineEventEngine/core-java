@@ -91,7 +91,7 @@ ext {
     gRpcVersion = '1.1.2'
     slf4JVersion = '1.7.21'
     jUnitVersion = '4.12'
-    mockitoVersion = '2.+'
+    mockitoVersion = '2.7.22'
 
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
     spineCodestyleCheckerId = 'io.spine.tools.spine-codestyle-checker'

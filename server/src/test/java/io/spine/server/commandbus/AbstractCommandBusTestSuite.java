@@ -46,7 +46,7 @@ import org.junit.Before;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.server.commandbus.Given.Command.createProject;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.TestValues.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.Mockito.spy;

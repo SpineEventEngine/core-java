@@ -35,8 +35,8 @@ import io.spine.users.UserId;
 import io.spine.validate.ConstraintViolationThrowable;
 import org.junit.Test;
 
-import static io.spine.test.Tests.newTenantUuid;
-import static io.spine.test.Tests.newUserUuid;
+import static io.spine.test.TestValues.newTenantUuid;
+import static io.spine.test.TestValues.newUserUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

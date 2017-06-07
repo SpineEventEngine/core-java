@@ -52,7 +52,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.TestValues.newTenantUuid;
 import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;

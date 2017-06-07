@@ -33,7 +33,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.test.TestActorRequestFactory;
-import io.spine.test.Tests;
+import io.spine.test.TestValues;
 import io.spine.test.commands.TestCommand;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
@@ -46,9 +46,9 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Commands.sameActorAndTenant;
+import static io.spine.test.TestValues.newTenantUuid;
+import static io.spine.test.TestValues.newUserUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Tests.newTenantUuid;
-import static io.spine.test.Tests.newUserUuid;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
@@ -117,7 +117,7 @@ public class CommandsShould {
                                                          minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
-                .setDefault(UserId.class, Tests.newUserUuid())
+                .setDefault(UserId.class, TestValues.newUserUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 

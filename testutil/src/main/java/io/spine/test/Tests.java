@@ -24,26 +24,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
-import io.spine.base.Version;
-import io.spine.base.Versions;
-import io.spine.protobuf.Wrapper;
-import io.spine.server.entity.LifecycleFlags;
-import io.spine.time.Time;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Modifier;
 import java.util.List;
-import java.util.concurrent.ThreadLocalRandom;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Identifier.newUuid;
-import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 import static java.lang.Math.abs;
 
 /**
@@ -52,16 +40,6 @@ import static java.lang.Math.abs;
  * @author Alexander Yevsyukov
  */
 public class Tests {
-
-    /**
-     * The prefix for generated tenant identifiers.
-     */
-    private static final String TENANT_PREFIX = "tenant-";
-
-    /**
-     * The prefix for generated user identifiers.
-     */
-    private static final String USER_PREFIX = "user-";
 
     private Tests() {
         // Prevent instantiation of this utility class.
@@ -163,63 +141,6 @@ public class Tests {
     }
 
     /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
-     */
-    public static UserId newUserId(String value) {
-        checkNotNull(value);
-
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
-    }
-
-    /**
-     * Generates a new UUID-based {@code UserId}.
-     */
-    public static UserId newUserUuid() {
-        return newUserId(USER_PREFIX + newUuid());
-    }
-
-    /**
-     * Generates a new UUID-based {@code TenantId}.
-     */
-    public static TenantId newTenantUuid() {
-        return newTenantId(TENANT_PREFIX + newUuid());
-    }
-
-    /**
-     * Creates a new {@code TenantId} with the passed value.
-     *
-     * @param value must be non-null, not empty, and not-blank
-     * @return new {@code TenantId}
-     */
-    public static TenantId newTenantId(String value) {
-        checkNotEmptyOrBlank(value, TenantId.class.getSimpleName());
-        return TenantId.newBuilder()
-                       .setValue(value)
-                       .build();
-    }
-
-    /**
-     * Creates a test instance of {@code TenantId} with the simple name of the passed test class.
-     */
-    public static TenantId newTenantId(Class<?> testClass) {
-        return newTenantId(testClass.getSimpleName());
-    }
-    /**
-     * Generates a {@code StringValue} with generated UUID.
-     *
-     * <p>Use this method when you need to generate a test {@code Message} value
-     * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
-     */
-    public static StringValue newUuidValue() {
-        return Wrapper.forString(newUuid());
-    }
-
-    /**
      * Asserts that the passed message has a field that matches the passed field mask.
      *
      * @throws AssertionError if the check fails
@@ -234,13 +155,6 @@ public class Tests {
             }
             assertEquals(message.hasField(field), paths.contains(field.getFullName()));
         }
-    }
-
-    /**
-     * Factory method for creating versions from tests.
-     */
-    public static Version newVersionWithNumber(int number) {
-        return Versions.newVersion(number, Time.getCurrentTime());
     }
 
     /**
@@ -259,21 +173,6 @@ public class Tests {
     public static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {
         final long diffSec = abs(expectedSec - actualSec);
         assertTrue(diffSec <= maxDiffSec);
-    }
-
-    /**
-     * Generates a random integer in the range [0, max).
-     */
-    public static int random(int max) {
-        return random(0, max);
-    }
-
-    /**
-     * Generates a random integer in the range [min, max).
-     */
-    public static int random(int min, int max) {
-        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
-        return randomNum;
     }
 
     /**
@@ -318,20 +217,4 @@ public class Tests {
         }
     }
 
-    /**
-     * Creates {@code Visibility} with archived flag set to {@code true}.
-     */
-    public static LifecycleFlags archived() {
-        return LifecycleFlags.newBuilder()
-                             .setArchived(true)
-                             .build();
-    }
-    /**
-     * Creates {@code Visibility} with deleted flag set to {@code true}.
-     */
-    public static LifecycleFlags deleted() {
-        return LifecycleFlags.newBuilder()
-                             .setDeleted(true)
-                             .build();
-    }
 }

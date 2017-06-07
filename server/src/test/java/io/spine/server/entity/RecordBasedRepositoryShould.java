@@ -42,7 +42,7 @@ import java.util.Collection;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.TestValues.newTenantUuid;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertNotContains;
 import static io.spine.test.Verify.assertSize;

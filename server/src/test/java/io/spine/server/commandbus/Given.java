@@ -34,7 +34,7 @@ import io.spine.users.TenantId;
 import io.spine.users.UserId;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.test.Tests.newUserId;
+import static io.spine.test.TestValues.newUserId;
 import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
 
