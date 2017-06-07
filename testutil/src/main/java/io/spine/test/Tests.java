@@ -24,8 +24,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.Constructor;
@@ -157,64 +155,9 @@ public class Tests {
         }
     }
 
-    /**
-     * Returns {@code StreamObserver} that records the responses.
-     *
-     * <p>Use this method when you need to verify the responses of calls like
-     * {@link io.spine.server.commandbus.CommandBus#post(io.spine.base.Command, StreamObserver)
-     * CommandBus.post()} and similar methods.
-     *
-     * <p>Returns a fresh instance upon every call to avoid state clashes.
-     */
-    public static MemoizingObserver memoizingObserver() {
-        return new MemoizingObserver();
-    }
-
     public static void assertSecondsEqual(long expectedSec, long actualSec, long maxDiffSec) {
         final long diffSec = abs(expectedSec - actualSec);
         assertTrue(diffSec <= maxDiffSec);
-    }
-
-    /**
-     * The {@code StreamObserver} recording the responses.
-     *
-     * @see #memoizingObserver()
-     */
-    public static class MemoizingObserver implements StreamObserver<Response> {
-
-        private Response response;
-        private Throwable throwable;
-        private boolean completed = false;
-
-        protected MemoizingObserver() {
-        }
-
-        @Override
-        public void onNext(Response response) {
-            this.response = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.completed = true;
-        }
-
-        public Response getResponse() {
-            return response;
-        }
-
-        public Throwable getThrowable() {
-            return throwable;
-        }
-
-        public boolean isCompleted() {
-            return this.completed;
-        }
     }
 
 }

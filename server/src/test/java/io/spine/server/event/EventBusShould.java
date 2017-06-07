@@ -32,8 +32,8 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.EventTests;
-import io.spine.test.Tests;
-import io.spine.test.Tests.MemoizingObserver;
+import io.spine.test.Observers;
+import io.spine.test.Observers.MemoizingObserver;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.type.EventClass;
@@ -93,7 +93,7 @@ public class EventBusShould {
                 new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
         buildEventBus(enricher);
         buildEventBusWithPostponedExecution(enricher);
-        this.responseObserver = Tests.memoizingObserver();
+        this.responseObserver = Observers.memoizingObserver();
     }
 
     @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
