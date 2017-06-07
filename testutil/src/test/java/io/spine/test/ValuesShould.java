@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.users.UserId;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newUserId;
+import static io.spine.test.Values.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -32,17 +32,17 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Alexander Yevsyukov
  */
-public class TestValuesShould {
+public class ValuesShould {
 
     @Test
     public void have_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(TestValues.class);
+        Tests.hasPrivateParameterlessCtor(Values.class);
     }
 
     @Test
     public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(TestValues.class);
+                .testAllPublicStaticMethods(Values.class);
     }
 
     @Test
@@ -58,16 +58,16 @@ public class TestValuesShould {
 
     @Test
     public void create_new_UUID_based_UserId() {
-        assertFalse(TestValues.newUserUuid().getValue().isEmpty());
+        assertFalse(Values.newUserUuid().getValue().isEmpty());
     }
 
     @Test
     public void create_archived_visibility() {
-        assertTrue(TestValues.archived().getArchived());
+        assertTrue(Values.archived().getArchived());
     }
 
     @Test
     public void create_deleted_visibility() {
-        assertTrue(TestValues.deleted().getDeleted());
+        assertTrue(Values.deleted().getDeleted());
     }
 }

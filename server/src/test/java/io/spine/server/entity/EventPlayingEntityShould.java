@@ -24,15 +24,15 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Event;
 import io.spine.base.Version;
 import io.spine.test.TestEventFactory;
-import io.spine.test.TestValues;
+import io.spine.test.Values;
 import io.spine.validate.StringValueValidatingBuilder;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -168,8 +168,8 @@ public class EventPlayingEntityShould {
         final EventPlayingEntity entity = entityWithActiveTx(false);
         final Transaction txMock = entity.getTransaction();
         assertNotNull(txMock);
-        final Event firstEvent = eventFactory.createEvent(TestValues.newUuidValue());
-        final Event secondEvent = eventFactory.createEvent(TestValues.newUuidValue());
+        final Event firstEvent = eventFactory.createEvent(Values.newUuidValue());
+        final Event secondEvent = eventFactory.createEvent(Values.newUuidValue());
 
         entity.play(newArrayList(firstEvent, secondEvent));
 

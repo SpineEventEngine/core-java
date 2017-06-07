@@ -27,7 +27,7 @@ import io.spine.users.TenantId;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;

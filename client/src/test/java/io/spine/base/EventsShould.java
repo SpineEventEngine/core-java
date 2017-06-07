@@ -48,9 +48,9 @@ import static io.spine.base.Events.sort;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Wrapper.forBoolean;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

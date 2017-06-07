@@ -33,7 +33,7 @@ import io.spine.validate.ConstraintViolationThrowable;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.test.Values.newUuidValue;
 
 /**
  * @author Alexander Yevsyukov

@@ -32,8 +32,8 @@ import io.spine.users.TenantId;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newUserUuid;
-import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.test.Values.newUserUuid;
+import static io.spine.test.Values.newUuidValue;
 import static io.spine.validate.Validate.checkNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

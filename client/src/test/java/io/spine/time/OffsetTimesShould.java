@@ -31,8 +31,8 @@ import org.junit.Test;
 import java.text.ParseException;
 import java.util.Calendar;
 
-import static io.spine.test.TestValues.random;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Values.random;
 import static io.spine.time.Calendars.at;
 import static io.spine.time.Calendars.getHours;
 import static io.spine.time.Calendars.getMinutes;

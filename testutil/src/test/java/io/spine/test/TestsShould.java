@@ -25,9 +25,9 @@ import io.spine.base.Response;
 import org.junit.Test;
 
 import static io.spine.io.StreamObservers.noOpObserver;
-import static io.spine.test.TestValues.newUserId;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.hasPrivateParameterlessCtor;
+import static io.spine.test.Values.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;

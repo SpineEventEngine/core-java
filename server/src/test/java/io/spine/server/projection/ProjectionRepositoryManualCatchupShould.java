@@ -49,7 +49,7 @@ import java.util.Collection;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static io.spine.server.projection.ProjectionRepositoryShould.ensureCatchesUpFromEventStorage;
-import static io.spine.test.TestValues.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static java.lang.String.valueOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

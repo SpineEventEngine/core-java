@@ -30,7 +30,7 @@ import io.spine.base.EventId;
 import io.spine.people.PersonName;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.test.TestEventFactory;
-import io.spine.test.TestValues;
+import io.spine.test.Values;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
@@ -225,7 +225,7 @@ public class Given {
                 if (id == null) {
                     return null;
                 }
-                return TestValues.newUserId("Project owner " + id.getId());
+                return Values.newUserId("Project owner " + id.getId());
             }
         }
 

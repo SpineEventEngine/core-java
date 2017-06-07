@@ -159,5 +159,4 @@ public class Tests {
         final long diffSec = abs(expectedSec - actualSec);
         assertTrue(diffSec <= maxDiffSec);
     }
-
 }

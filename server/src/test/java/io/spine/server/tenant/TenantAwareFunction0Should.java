@@ -24,7 +24,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.time.Time;
 import org.junit.Test;
 
-import static io.spine.test.TestValues.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 
 /**
  * @author Alexander Yevsyukov

@@ -34,7 +34,7 @@ import io.spine.time.ZoneOffsets;
 import io.spine.users.TenantId;
 import io.spine.users.UserId;
 
-import static io.spine.test.TestValues.newUserId;
+import static io.spine.test.Values.newUserId;
 
 /**
  * The command factory, which allows generating commands as if the were

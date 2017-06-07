@@ -27,7 +27,7 @@ import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.TestEventFactory;
-import io.spine.test.TestValues;
+import io.spine.test.Values;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
@@ -70,7 +70,7 @@ public abstract class EventStoreShould extends TenantAwareTest {
     @Before
     public void setUp() {
         eventStore = creteStore();
-        setCurrentTenant(TestValues.newTenantUuid());
+        setCurrentTenant(Values.newTenantUuid());
     }
 
     @Test

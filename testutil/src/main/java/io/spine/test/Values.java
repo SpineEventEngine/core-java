@@ -40,7 +40,7 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  */
-public class TestValues {
+public class Values {
 
     /**
      * The prefix for generated tenant identifiers.
@@ -51,7 +51,7 @@ public class TestValues {
      */
     private static final String USER_PREFIX = "user-";
 
-    private TestValues() {
+    private Values() {
         // Prevent instantiation of this utility class.
     }
 

@@ -21,7 +21,7 @@
 package io.spine.base;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.test.TestValues;
+import io.spine.test.Values;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -46,8 +46,8 @@ public class VersionsShould {
     @Test(expected = IllegalArgumentException.class)
     public void check_version_increment() {
         Versions.checkIsIncrement(
-                TestValues.newVersionWithNumber(2),
-                TestValues.newVersionWithNumber(1)
+                Values.newVersionWithNumber(2),
+                Values.newVersionWithNumber(1)
         );
     }
 }
