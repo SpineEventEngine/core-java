@@ -27,10 +27,14 @@ import io.spine.base.Failures;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
 import io.spine.envelope.FailureEnvelope;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.commandbus.Given;
 import io.spine.test.TestActorRequestFactory;
-import io.spine.test.failure.ProjectFailures;
 import io.spine.test.failure.ProjectId;
+import io.spine.test.failure.command.AddUser;
+import io.spine.test.failure.command.RemoveOwner;
 import io.spine.test.failure.command.UpdateProjectName;
+import io.spine.testdata.Sample;
 import io.spine.type.FailureClass;
 import io.spine.users.TenantId;
 import org.junit.Before;
@@ -43,6 +47,11 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.test.failure.ProjectFailures.AmbiguousOwner;
+import static io.spine.test.failure.ProjectFailures.InvalidPersistenceFolder;
+import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
+import static io.spine.test.failure.ProjectFailures.MissingOwner;
+import static io.spine.test.failure.ProjectFailures.QuotaOverusage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -328,8 +337,7 @@ public class FailureBusShould {
         final AmbiguousOwner msg = AmbiguousOwner.newBuilder()
                                                  .setProjectId(projectId)
                                                  .build();
-        final Command command = Commands.createCommand(RemoveOwner.getDefaultInstance(),
-                                                       CommandContext.getDefaultInstance());
+        final Command command = Given.Command.withMessage(Sample.messageOfType(RemoveOwner.class));
         return Failures.createFailure(msg, command);
     }
 
