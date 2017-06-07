@@ -23,7 +23,6 @@ package io.spine.server.storage;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.users.TenantId;
 import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
@@ -71,15 +70,6 @@ public abstract class RecordStorageIO<I> {
 
     public Class<I> getIdClass() {
         return idClass;
-    }
-
-    /**
-     * Obtains transformation for extracting an entity state from {@link EntityRecord}s.
-     *
-     * @param <S> the type of the entity state.
-     */
-    public static <S extends Message> UnpackFn<S> unpack() {
-        return new UnpackFn<>();
     }
 
     /**
@@ -170,27 +160,6 @@ public abstract class RecordStorageIO<I> {
         }
 
         protected abstract EntityRecord doRead(TenantId tenantId, I id);
-    }
-
-    /**
-     * Extracts the state of an entity from a {@link EntityRecord}.
-     *
-     * @param <S> the type of the entity state
-     */
-    public static class UnpackFn<S extends Message> extends DoFn<EntityRecord, S> {
-
-        private static final long serialVersionUID = 0L;
-
-        @ProcessElement
-        public void processElement(ProcessContext c) {
-            final S entityState = doUnpack(c);
-            c.output(entityState);
-        }
-
-        protected S doUnpack(ProcessContext c) {
-            final EntityRecord record = c.element();
-            return AnyPacker.unpack(record.getState());
-        }
     }
 
     /**
