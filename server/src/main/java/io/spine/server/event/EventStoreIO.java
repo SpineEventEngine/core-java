@@ -54,9 +54,20 @@ public class EventStoreIO {
     }
 
     public static Query query(TenantId tenantId, EventStore eventStore) {
+        checkNotNull(tenantId);
+        checkNotNull(eventStore);
         final ERepository storage = eventStore.getStorage();
 
-        return EventStoreIO.Query.of(storage.queryFn(tenantId));
+        return Query.of(queryFn(storage, tenantId));
+    }
+
+    static QueryFn queryFn(ERepository storage, TenantId tenantId) {
+
+        //TODO:2017-06-07:alexander.yevsyukov: Implement
+//        final EventRecordStorage storage = recordStorage();
+//        return storage.queryFn(tenantId);
+
+        return null;
     }
 
     /**
@@ -110,4 +121,19 @@ public class EventStoreIO {
 
         protected abstract Iterator<Event> read(TenantId tenantId, EventStreamQuery query);
     }
+
+    //TODO:2017-06-07:alexander.yevsyukov:
+    /*
+        1. Use ERepository.toEntityFilters(EventStreamQuery) to create EntityFilters.
+        2. Expose gRPC method for accepting a query with
+                    TenantId, TypeUrl, and EntityFilters
+           instead of what was there with EventStreamQuery.
+        3. Implement the call in InMemory storage impl.
+        4. Move all Beam-based factories into IO classes. Do not have Beam-based dependencies
+           in the main code.
+           ----
+        5. Move all Beam-related code into new the `catchup` module.
+
+     */
+
 }

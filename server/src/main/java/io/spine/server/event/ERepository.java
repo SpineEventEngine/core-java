@@ -32,7 +32,6 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -79,9 +78,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         // A predicate on the Event message and EventContext fields.
         final Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
         final Iterator<EEntity> entityIterator = FluentIterable.from(entities)
-                                                                   .filter(detailedLookupFilter)
-                                                                   .toSortedList(comparator())
-                                                                   .iterator();
+                                                               .filter(detailedLookupFilter)
+                                                               .toSortedList(comparator())
+                                                               .iterator();
         final Iterator<Event> result = Iterators.transform(entityIterator, getEventFunc());
         return result;
     }
@@ -166,16 +165,5 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
             final boolean result = filter.apply(event);
             return result;
         }
-    }
-
-    /*
-     * Beam Support
-     *********************/
-
-    EventStoreIO.QueryFn queryFn(TenantId tenantId) {
-//        final EventRecordStorage storage = recordStorage();
-//        return storage.queryFn(tenantId);
-
-        return null;
     }
 }
