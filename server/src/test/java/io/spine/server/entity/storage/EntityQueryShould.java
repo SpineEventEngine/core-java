@@ -21,16 +21,19 @@
 package io.spine.server.entity.storage;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
+import com.google.protobuf.Any;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.client.EntityIdFilter;
+import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.test.entity.ProjectId;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -42,16 +45,16 @@ import java.util.Set;
 
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
+import static io.spine.client.ColumnFilter.Operator.EQUAL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.protobuf.TypeConverter.toAny;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static io.spine.test.Verify.assertContains;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
 import static java.util.Collections.singleton;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.client.ColumnFilter.Operator.EQUAL;
-import static io.spine.protobuf.TypeConverter.toAny;
-import static io.spine.server.storage.LifecycleFlagField.deleted;
-import static io.spine.test.Verify.assertContains;
 
 /**
  * @author Dmytro Dashenkov
@@ -108,6 +111,20 @@ public class EntityQueryShould {
         addEqualityGroupC(tester);
         addEqualityGroupD(tester);
         tester.testEquals();
+    }
+
+    @Test(expected = IllegalStateException.class)
+    public void fail_to_append_lifecycle_columns_if_already_contains() {
+        final Column column = Columns.findColumn(EntityWithLifecycle.class, deleted.name());
+        final CompositeQueryParameter queryParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(column, ColumnFilter.getDefaultInstance()),
+                ALL
+        );
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                                                          .add(queryParameter)
+                                                          .build();
+        final EntityQuery<String> query = EntityQuery.of(Collections.<String>emptySet(), parameters);
+        query.withLifecycleFlags(TestEntity.class);
     }
 
     /**
@@ -186,5 +203,11 @@ public class EntityQueryShould {
         }
         return builder.add(CompositeQueryParameter.from(filters, ALL))
                       .build();
+    }
+
+    private static class TestEntity extends AbstractVersionableEntity<String, Any> {
+        protected TestEntity(String id) {
+            super(id);
+        }
     }
 }
