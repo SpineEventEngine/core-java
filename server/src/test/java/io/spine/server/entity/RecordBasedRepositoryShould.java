@@ -72,18 +72,10 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     protected abstract I createId(int value);
 
-    protected void initRepository() {
-        this.repository = createRepository();
-    }
-
-    protected void setCurrentTenant() {
-        setCurrentTenant(newTenantUuid());
-    }
-
     @Before
     public void setUp() {
-        initRepository();
-        setCurrentTenant();
+        this.repository = createRepository();
+        setCurrentTenant(newTenantUuid());
     }
 
     @After
