@@ -28,14 +28,12 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregate;
 import io.spine.server.aggregate.given.AggregateCommandEndpointTestEnv.ProjectAggregateRepository;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.event.EventSubscriber;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.event.ProjectCreated;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import static io.spine.server.aggregate.Given.ACommand.addTask;
@@ -43,22 +41,11 @@ import static io.spine.server.aggregate.Given.ACommand.createProject;
 import static io.spine.server.aggregate.Given.ACommand.startProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 public class AggregateCommandEndpointShould {
 
     private BoundedContext boundedContext;
     private AggregateRepository<ProjectId, ProjectAggregate> repository;
-
-    /**
-     * The spy to be used when it is required to avoid problems, make tests faster and easier.
-     */
-    private AggregateRepository<ProjectId, ProjectAggregate> repositorySpy;
 
     private ProjectId projectId;
     private Subscriber subscriber;
@@ -79,7 +66,6 @@ public class AggregateCommandEndpointShould {
 
         repository = new ProjectAggregateRepository();
         boundedContext.register(repository);
-        repositorySpy = spy(repository);
     }
 
     @After
@@ -113,47 +99,6 @@ public class AggregateCommandEndpointShould {
 
         assertEquals(msg.getName(), aggregate.getState()
                                              .getName());
-    }
-
-    @Ignore //TODO:2017-06-06:alexander.yevsyukov: Restore when the Mockito bug is fixed.
-            // Currently it complains about the non-stubbed method call `dispatch()` as if it was stabbed.
-    @Test
-    public void repeat_command_dispatching_if_event_count_is_changed_during_dispatching() {
-        @SuppressWarnings("unchecked") //
-        final AggregateStorage<ProjectId> storage = mock(AggregateStorage.class);
-
-        // Change reported event count upon the second invocation and trigger re-dispatch.
-        doReturn(0, 1)
-                .when(storage)
-                .readEventCountAfterLastSnapshot(projectId);
-//        doReturn(Optional.absent())
-//                .when(storage)
-//                .read(projectId);
-        when(storage.read(projectId))
-                .thenReturn(Optional.<AggregateStateRecord>absent());
-        when(storage.readLifecycleFlags(projectId))
-                .thenReturn(Optional.<LifecycleFlags>absent());
-
-//        doReturn(Optional.absent())
-//                .when(storage)
-//                .readLifecycleFlags(projectId);
-
-        doReturn(storage)
-                .when(repositorySpy)
-                .aggregateStorage();
-
-
-        final CommandEnvelope cmd = CommandEnvelope.of(createProject(projectId));
-        repositorySpy.dispatch(cmd);
-
-        // Load should be executed twice due to repeated dispatching.
-        verify(repositorySpy, times(2))
-                .loadOrCreate(projectId);
-
-        // Reading event count is executed 2 times per dispatch (so 2 * 2)
-        // plus once upon storing the state.
-        verify(storage, times(2 * 2 + 1))
-                .readEventCountAfterLastSnapshot(projectId);
     }
 
     @Test
