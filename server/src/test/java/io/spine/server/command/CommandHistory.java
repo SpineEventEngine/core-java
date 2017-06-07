@@ -52,8 +52,8 @@ public class CommandHistory {
         if (messages.contains(message)) {
             final int messageIndex = messages.indexOf(message);
             final CommandContext actualContext = command.getContext();
-            final CommandContext expectedContext = contexts.get(messageIndex);
-            return actualContext.equals(expectedContext);
+            final CommandContext storedContext = contexts.get(messageIndex);
+            return actualContext.equals(storedContext);
         }
 
         return false;
