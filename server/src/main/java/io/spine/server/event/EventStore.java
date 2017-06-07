@@ -135,12 +135,19 @@ public abstract class EventStore implements AutoCloseable {
         });
     }
 
+    @VisibleForTesting
+    Executor getStreamExecutor() {
+        return streamExecutor;
+    }
+
     /**
      * Abstract builder base for building.
      *
      * @param <T> the type of the builder product
+     * @param <B> the type of the builder for covariance in derived classes
      */
-    private abstract static class AbstractBuilder<T> {
+    @SuppressWarnings("unchecked") // The cast is safe
+    private abstract static class AbstractBuilder<T, B extends AbstractBuilder<T, B>> {
 
         private Executor streamExecutor;
         private StorageFactory storageFactory;
@@ -158,27 +165,27 @@ public abstract class EventStore implements AutoCloseable {
             checkNotNull(getStorageFactory(), "eventStorage must be set");
         }
 
-        protected AbstractBuilder setStreamExecutor(Executor executor) {
+        public B setStreamExecutor(Executor executor) {
             this.streamExecutor = checkNotNull(executor);
-            return this;
+            return (B)this;
         }
 
         public Executor getStreamExecutor() {
             return streamExecutor;
         }
 
-        protected AbstractBuilder setStorageFactory(StorageFactory storageFactory) {
+        public B setStorageFactory(StorageFactory storageFactory) {
             this.storageFactory = checkNotNull(storageFactory);
-            return this;
+            return (B)this;
         }
 
         public StorageFactory getStorageFactory() {
             return storageFactory;
         }
 
-        protected AbstractBuilder setLogger(@Nullable Logger logger) {
+        public B setLogger(@Nullable Logger logger) {
             this.logger = logger;
-            return this;
+            return (B)this;
         }
 
         @Nullable
@@ -191,53 +198,24 @@ public abstract class EventStore implements AutoCloseable {
          *
          * @see EventStore#log()
          */
-        @SuppressWarnings("UnusedReturnValue") // OK as overloaded in descendants
-        protected AbstractBuilder withDefaultLogger() {
+        public B withDefaultLogger() {
             setLogger(log());
-            return this;
+            return (B)this;
         }
     }
 
-    /** Builder for creating new local {@code EventStore} instance. */
-    public static class Builder extends AbstractBuilder<EventStore> {
+    /**
+     * Builder for creating new local {@code EventStore} instance.
+     */
+    public static class Builder extends AbstractBuilder<EventStore, Builder> {
 
         @Override
         public EventStore build() {
             checkState();
-            final LocalEventStore result = new LocalEventStore(getStreamExecutor(),
-                                                               getStorageFactory(),
-                                                               getLogger());
+            final LocalEventStore result =
+                    new LocalEventStore(getStreamExecutor(), getStorageFactory(), getLogger());
             return result;
         }
-
-        @Override
-        public Builder setStreamExecutor(Executor executor) {
-            super.setStreamExecutor(executor);
-            return this;
-        }
-
-        @Override
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            super.setStorageFactory(storageFactory);
-            return this;
-        }
-
-        @Override
-        public Builder setLogger(@Nullable Logger logger) {
-            super.setLogger(logger);
-            return this;
-        }
-
-        @Override
-        public Builder withDefaultLogger() {
-            super.withDefaultLogger();
-            return this;
-        }
-    }
-
-    @VisibleForTesting
-    Executor getStreamExecutor() {
-        return streamExecutor;
     }
 
     /**
@@ -245,41 +223,17 @@ public abstract class EventStore implements AutoCloseable {
      *
      * @see EventStoreGrpc.EventStoreImplBase
      */
-    public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
+    public static class ServiceBuilder
+            extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {
 
         @Override
         public ServerServiceDefinition build() {
             checkState();
-            final LocalEventStore eventStore = new LocalEventStore(getStreamExecutor(),
-                                                                   getStorageFactory(),
-                                                                   getLogger());
+            final LocalEventStore eventStore =
+                    new LocalEventStore(getStreamExecutor(), getStorageFactory(), getLogger());
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
             return result;
-        }
-
-        @Override
-        public ServiceBuilder setStreamExecutor(Executor executor) {
-            super.setStreamExecutor(executor);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder setStorageFactory(StorageFactory storageFactory) {
-            super.setStorageFactory(storageFactory);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder setLogger(@Nullable Logger logger) {
-            super.setLogger(logger);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder withDefaultLogger() {
-            super.withDefaultLogger();
-            return this;
         }
     }
 
