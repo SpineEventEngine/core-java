@@ -39,7 +39,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.storage.memory.QueryOperators.compare;
+import static io.spine.server.storage.memory.QueryOperators.eval;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -149,7 +149,7 @@ final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> 
         } else {
             value = wrappedValue;
         }
-        final boolean result = compare(actualValue.getValue(), filter.getOperator(), value);
+        final boolean result = eval(actualValue.getValue(), filter.getOperator(), value);
         return result;
     }
 }

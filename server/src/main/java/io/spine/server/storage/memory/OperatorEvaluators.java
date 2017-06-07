@@ -34,14 +34,14 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static java.lang.String.format;
 
 /**
- * A factory of {@link ComparisonOperation} instances.
+ * A factory of {@link OperatorEvaluator} instances.
  *
  * @author Dmytro Dashenkov
  */
-final class ComparisonOperations {
+final class OperatorEvaluators {
 
-    private static final ImmutableMap<Operator, ComparisonOperation> COMPARATORS =
-            ImmutableMap.<Operator, ComparisonOperation>builder()
+    private static final ImmutableMap<Operator, OperatorEvaluator> COMPARATORS =
+            ImmutableMap.<Operator, OperatorEvaluator>builder()
                         .put(Operator.EQUAL, Equal.operation())
                         .put(Operator.GREATER_THAN, GreaterThan.operation())
                         .put(Operator.LESS_THAN, LessThan.operation())
@@ -49,50 +49,50 @@ final class ComparisonOperations {
                         .put(Operator.LESS_OR_EQUAL, LessOrEqual.operation())
                         .build();
 
-    private ComparisonOperations() {
+    private OperatorEvaluators() {
         // Prevent utility class instantiation.
     }
 
     /**
-     * Generates an instance of {@link ComparisonOperation} based on the given {@link Operator}.
+     * Generates an instance of {@link OperatorEvaluator} based on the given {@link Operator}.
      *
      * @param operator the rule of comparison
-     * @return an instance of {@link ComparisonOperation}
+     * @return an instance of {@link OperatorEvaluator}
      * @throws IllegalArgumentException if the passed operator is one of the error value enum
      *                                  constants
      */
-    static ComparisonOperation of(Operator operator) throws IllegalArgumentException {
+    static OperatorEvaluator of(Operator operator) throws IllegalArgumentException {
         checkNotNull(operator);
-        final ComparisonOperation comparator = COMPARATORS.get(operator);
+        final OperatorEvaluator comparator = COMPARATORS.get(operator);
         checkArgument(comparator != null, "Unsupported operator %s.", operator);
         return comparator;
     }
 
-    private enum Equal implements ComparisonOperation {
+    private enum Equal implements OperatorEvaluator {
 
         INSTANCE;
 
-        private static ComparisonOperation operation() {
+        private static OperatorEvaluator operation() {
             return INSTANCE;
         }
 
         @Override
-        public boolean compare(@Nullable Object left, @Nullable Object right) {
+        public boolean eval(@Nullable Object left, @Nullable Object right) {
             return Objects.equals(left, right);
         }
     }
 
-    private enum GreaterThan implements ComparisonOperation {
+    private enum GreaterThan implements OperatorEvaluator {
 
         INSTANCE;
 
-        private static ComparisonOperation operation() {
+        private static OperatorEvaluator operation() {
             return INSTANCE;
         }
 
         @SuppressWarnings("ChainOfInstanceofChecks") // Generic but limited operand types
         @Override
-        public boolean compare(@Nullable Object left, @Nullable Object right) {
+        public boolean eval(@Nullable Object left, @Nullable Object right) {
             if (left == null || right == null) {
                 return false;
             }
@@ -122,47 +122,47 @@ final class ComparisonOperations {
         }
     }
 
-    private enum LessThan implements ComparisonOperation {
+    private enum LessThan implements OperatorEvaluator {
 
         INSTANCE;
 
-        private static ComparisonOperation operation() {
+        private static OperatorEvaluator operation() {
             return INSTANCE;
         }
 
         @Override
-        public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return GreaterThan.operation().compare(right, left);
+        public boolean eval(@Nullable Object left, @Nullable Object right) {
+            return GreaterThan.operation().eval(right, left);
         }
     }
 
-    private enum GreaterOrEqual implements ComparisonOperation {
+    private enum GreaterOrEqual implements OperatorEvaluator {
 
         INSTANCE;
 
-        private static ComparisonOperation operation() {
+        private static OperatorEvaluator operation() {
             return INSTANCE;
         }
 
         @Override
-        public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return GreaterThan.operation().compare(left, right)
-                    || Equal.operation().compare(left, right);
+        public boolean eval(@Nullable Object left, @Nullable Object right) {
+            return GreaterThan.operation().eval(left, right)
+                    || Equal.operation().eval(left, right);
         }
     }
 
-    private enum LessOrEqual implements ComparisonOperation {
+    private enum LessOrEqual implements OperatorEvaluator {
 
         INSTANCE;
 
-        private static ComparisonOperation operation() {
+        private static OperatorEvaluator operation() {
             return INSTANCE;
         }
 
         @Override
-        public boolean compare(@Nullable Object left, @Nullable Object right) {
-            return LessThan.operation().compare(left, right)
-                    || Equal.operation().compare(left, right);
+        public boolean eval(@Nullable Object left, @Nullable Object right) {
+            return LessThan.operation().eval(left, right)
+                    || Equal.operation().eval(left, right);
         }
     }
 }

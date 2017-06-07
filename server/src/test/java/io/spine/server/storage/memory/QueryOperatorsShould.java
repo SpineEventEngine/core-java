@@ -23,7 +23,6 @@ package io.spine.server.storage.memory;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.server.storage.memory.QueryOperators;
 import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
@@ -35,7 +34,7 @@ import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
 import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
-import static io.spine.server.storage.memory.QueryOperators.compare;
+import static io.spine.server.storage.memory.QueryOperators.eval;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
@@ -65,12 +64,12 @@ public class QueryOperatorsShould {
         final Object third = new String(left);
 
         // The checks taken from the java.lang.Object.equals Javadoc
-        assertTrue("basic", compare(left, EQUAL, right));
-        assertTrue("symmetric", compare(right, EQUAL, left));
-        assertTrue("reflective", compare(left, EQUAL, left));
-        assertTrue("transitive", compare(left, EQUAL, third) || compare(third, EQUAL, right));
-        assertTrue("nullable", compare(null, EQUAL, null));
-        assertTrue("consistent", compare(left, EQUAL, right));
+        assertTrue("basic", eval(left, EQUAL, right));
+        assertTrue("symmetric", eval(right, EQUAL, left));
+        assertTrue("reflective", eval(left, EQUAL, left));
+        assertTrue("transitive", eval(left, EQUAL, third) || eval(third, EQUAL, right));
+        assertTrue("nullable", eval(null, EQUAL, null));
+        assertTrue("consistent", eval(left, EQUAL, right));
     }
 
     @Test
@@ -78,8 +77,8 @@ public class QueryOperatorsShould {
         final Object left = "one!";
         final Object right = "another!";
 
-        assertFalse("direct order check", compare(left, EQUAL, right));
-        assertFalse("reverse order check", compare(right, EQUAL, left));
+        assertFalse("direct order check", eval(left, EQUAL, right));
+        assertFalse("reverse order check", eval(right, EQUAL, left));
     }
 
     @Test
@@ -89,13 +88,13 @@ public class QueryOperatorsShould {
         final Timestamp medium = add(small, delta);
         final Timestamp big = add(medium, delta);
 
-        assertTrue(compare(medium, GREATER_THAN, small));
-        assertTrue(compare(big, GREATER_THAN, medium));
-        assertTrue(compare(big, GREATER_THAN, small));
+        assertTrue(eval(medium, GREATER_THAN, small));
+        assertTrue(eval(big, GREATER_THAN, medium));
+        assertTrue(eval(big, GREATER_THAN, small));
 
-        assertFalse(compare(small, GREATER_THAN, small));
-        assertFalse(compare(small, GREATER_THAN, big));
-        assertFalse(compare(nullRef(), GREATER_THAN, small));
+        assertFalse(eval(small, GREATER_THAN, small));
+        assertFalse(eval(small, GREATER_THAN, big));
+        assertFalse(eval(nullRef(), GREATER_THAN, small));
     }
 
     @Test
@@ -105,13 +104,13 @@ public class QueryOperatorsShould {
         final Timestamp medium = add(small, delta);
         final Timestamp big = add(medium, delta);
 
-        assertTrue(compare(medium, GREATER_OR_EQUAL, small));
-        assertTrue(compare(big, GREATER_OR_EQUAL, medium));
-        assertTrue(compare(big, GREATER_OR_EQUAL, small));
-        assertTrue(compare(small, GREATER_OR_EQUAL, small));
+        assertTrue(eval(medium, GREATER_OR_EQUAL, small));
+        assertTrue(eval(big, GREATER_OR_EQUAL, medium));
+        assertTrue(eval(big, GREATER_OR_EQUAL, small));
+        assertTrue(eval(small, GREATER_OR_EQUAL, small));
 
-        assertFalse(compare(small, GREATER_OR_EQUAL, big));
-        assertFalse(compare(nullRef(), GREATER_OR_EQUAL, small));
+        assertFalse(eval(small, GREATER_OR_EQUAL, big));
+        assertFalse(eval(nullRef(), GREATER_OR_EQUAL, small));
     }
 
     @Test
@@ -121,13 +120,13 @@ public class QueryOperatorsShould {
         final Timestamp medium = add(small, delta);
         final Timestamp big = add(medium, delta);
 
-        assertTrue(compare(medium, LESS_THAN, big));
-        assertTrue(compare(small, LESS_THAN, medium));
-        assertTrue(compare(small, LESS_THAN, big));
+        assertTrue(eval(medium, LESS_THAN, big));
+        assertTrue(eval(small, LESS_THAN, medium));
+        assertTrue(eval(small, LESS_THAN, big));
 
-        assertFalse(compare(big, LESS_THAN, big));
-        assertFalse(compare(big, LESS_THAN, small));
-        assertFalse(compare(nullRef(), LESS_THAN, nullRef()));
+        assertFalse(eval(big, LESS_THAN, big));
+        assertFalse(eval(big, LESS_THAN, small));
+        assertFalse(eval(nullRef(), LESS_THAN, nullRef()));
     }
 
     @Test
@@ -137,13 +136,13 @@ public class QueryOperatorsShould {
         final Timestamp medium = add(small, delta);
         final Timestamp big = add(medium, delta);
 
-        assertTrue(compare(medium, LESS_OR_EQUAL, big));
-        assertTrue(compare(small, LESS_OR_EQUAL, medium));
-        assertTrue(compare(small, LESS_OR_EQUAL, big));
+        assertTrue(eval(medium, LESS_OR_EQUAL, big));
+        assertTrue(eval(small, LESS_OR_EQUAL, medium));
+        assertTrue(eval(small, LESS_OR_EQUAL, big));
 
-        assertTrue(compare(medium, LESS_OR_EQUAL, medium));
-        assertFalse(compare(big, LESS_OR_EQUAL, small));
-        assertFalse(compare(medium, LESS_OR_EQUAL, nullRef()));
+        assertTrue(eval(medium, LESS_OR_EQUAL, medium));
+        assertFalse(eval(big, LESS_OR_EQUAL, small));
+        assertFalse(eval(medium, LESS_OR_EQUAL, nullRef()));
     }
 
     @Test
@@ -208,24 +207,24 @@ public class QueryOperatorsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_GT() {
-        compare(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
+        eval(FaultyComparisonType.INSTANCE, GREATER_THAN, FaultyComparisonType.INSTANCE);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_GE() {
-        compare(FaultyComparisonType.INSTANCE, GREATER_OR_EQUAL, FaultyComparisonType.INSTANCE);
+        eval(FaultyComparisonType.INSTANCE, GREATER_OR_EQUAL, FaultyComparisonType.INSTANCE);
 
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_LT() {
-        compare(FaultyComparisonType.INSTANCE, LESS_THAN, FaultyComparisonType.INSTANCE);
+        eval(FaultyComparisonType.INSTANCE, LESS_THAN, FaultyComparisonType.INSTANCE);
 
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_LE() {
-        compare(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
+        eval(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
     }
 
     private static void assertGreater(Object left, Object right) {
@@ -245,9 +244,9 @@ public class QueryOperatorsShould {
     }
 
     private static void assertStrict(Object left, Object right, Operator operator) {
-        assertTrue(compare(left, operator, right));
-        assertFalse(compare(right, operator, left));
-        assertFalse(compare(left, EQUAL, right));
+        assertTrue(eval(left, operator, right));
+        assertFalse(eval(right, operator, left));
+        assertFalse(eval(left, EQUAL, right));
     }
 
     private static void assertNotStrict(Object obj,
@@ -256,8 +255,8 @@ public class QueryOperatorsShould {
                                         Operator strictOperator) {
         assertStrict(obj, other, strictOperator);
 
-        assertTrue(compare(obj, operator, obj));
-        assertTrue(compare(obj, EQUAL, obj));
+        assertTrue(eval(obj, operator, obj));
+        assertTrue(eval(obj, EQUAL, obj));
     }
 
     private static class FaultyComparisonType {

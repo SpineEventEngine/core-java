@@ -20,18 +20,22 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.server.storage.memory.ComparisonOperations;
-import org.junit.Test;
-
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import javax.annotation.Nullable;
 
 /**
+ * A boolean non-typed comparison operation on two given instances.
+ *
  * @author Dmytro Dashenkov
+ * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
-public class OperatorComparatorsShould {
+interface OperatorEvaluator {
 
-    @Test
-    public void have_private_util_ctor() {
-        assertHasPrivateParameterlessCtor(ComparisonOperations.class);
-    }
+    /**
+     * Evaluates the expression of joining the given operands with a certain operator.
+     *
+     * @see QueryOperators#eval for the detailed behaiour
+     * description
+     * @return {@code true} if the expression evaluates into {@code true}, {@code false} otherwise
+     */
+    boolean eval(@Nullable Object left, @Nullable Object right);
 }

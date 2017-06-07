@@ -120,7 +120,8 @@ public final class EntityQuery<I> implements Serializable {
     }
 
     /**
-     * @return whether the query overrides the default lifecycle handling strategy or not
+     * @return {@code true} if the query overrides the default lifecycle handling strategy,
+     * {@code false otherwise}
      */
     @Internal
     public boolean isLifecycleAttributesSet() {

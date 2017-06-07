@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 /**
  * A utility class for working with the {@link Operator} enum.
  *
- * <p>The main facility of this class is executing the {@linkplain #compare comparison} operations
+ * <p>The main facility of this class is executing the {@linkplain #eval comparison} operations
  * represented by an {@link Operator} enum value and two operands of a certain type.
  *
  * <a name="supported_types"/>
@@ -55,12 +55,12 @@ final class QueryOperators {
     }
 
     /**
-     * Compares the given operands with the given operator.
+     * Evaluates the given expression.
      *
      * <p>For example, if operands where {@code 42} and {@code 9} (exactly in that order) and
      * the operator was {@link Operator#GREATER_THAN GREATER_THAN}, then this function could be
-     * expressed as {@code 42 > 8}. The function returns {@code true} if the expression is
-     * mathematically correct.
+     * expressed as {@code 42 > 8}. The function returns the {@code boolean} result of
+     * the evaluation.
      *
      * @param left     the left operand
      * @param operator the comparison operator
@@ -71,11 +71,11 @@ final class QueryOperators {
      *                                       <a href="supported_types">not supported</a> for
      *                                       the given data types
      */
-    static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
+    static <T> boolean eval(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
-        final ComparisonOperation comparator = ComparisonOperations.of(operator);
-        final boolean result = comparator.compare(left, right);
+        final OperatorEvaluator evaluator = OperatorEvaluators.of(operator);
+        final boolean result = evaluator.eval(left, right);
         return result;
     }
 }

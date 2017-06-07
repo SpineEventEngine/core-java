@@ -80,9 +80,9 @@ public enum EntityField implements StorageField {
      * A field representing the
      * {@link io.spine.server.entity.VersionableEntity#getVersion Entity version}.
      *
-     * <p>All the Spine basic {@linkplain io.spine.server.entity.Entity Entities} like
+     * <p>All the Spine basic {@linkplain io.spine.server.entity.Entity Entities} (e.g.
      * {@linkplain io.spine.server.aggregate.Aggregate Aggregates},
-     * {@linkplain io.spine.server.projection.Projection Projections}, etc. do have this field.
+     * {@linkplain io.spine.server.projection.Projection Projections}, etc.) do have this field.
      *
      * @see io.spine.server.entity.VersionableEntity
      * @see io.spine.base.Version

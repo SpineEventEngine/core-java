@@ -118,7 +118,6 @@ public final class EntityRecordWithColumns implements Serializable {
     /**
      * Retrieves the memoized values of the Entity Columns.
      *
-     * <p>This method is {@linkplain Internal internal} and may be a subject of change.
      * @see ColumnRecords for the recommended way of working with the column values
      */
     @Internal

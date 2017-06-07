@@ -65,6 +65,10 @@ public final class CompositeQueryParameter implements Serializable {
 
     private final ImmutableMultimap<Column, ColumnFilter> filters;
 
+    /**
+     * A flag that shows if current instance of {@code CompositeQueryParameter} has
+     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set of not.
+     */
     private final boolean hasLifecycle;
 
     /**

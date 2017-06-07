@@ -20,21 +20,25 @@
 
 package io.spine.server.storage.memory;
 
-import javax.annotation.Nullable;
+import com.google.common.testing.NullPointerTester;
+import org.junit.Test;
+
+import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
- * A boolean non-typed comparison operation on two given instances.
- *
  * @author Dmytro Dashenkov
- * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
-interface ComparisonOperation {
+public class OperatorEvaluatorsShould {
 
-    /**
-     * Compares the given operands by the rules of a certain operator.
-     *
-     * @see QueryOperators#compare for the detailed behaiour
-     * description
-     */
-    boolean compare(@Nullable Object left, @Nullable Object right);
+    @Test
+    public void have_private_util_ctor() {
+        assertHasPrivateParameterlessCtor(OperatorEvaluators.class);
+    }
+
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .testStaticMethods(OperatorEvaluators.class, PACKAGE);
+    }
 }

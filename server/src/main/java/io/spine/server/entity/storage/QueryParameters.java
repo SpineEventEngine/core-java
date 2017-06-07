@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
+import io.spine.annotation.SPI;
 import io.spine.client.ColumnFilter;
 
 import java.io.Serializable;
@@ -31,14 +32,27 @@ import java.util.Iterator;
 /**
  * The parameters of an {@link EntityQuery}.
  *
+ * <p>{@code QueryParameters} are passed into the {@link io.spine.server.storage.Storage Storage}
+ * implementations.
+ *
  * @author Dmytro Dashenkov
  */
+@SPI // Used by the the Storage implementors
 public final class QueryParameters implements Iterable<CompositeQueryParameter>, Serializable {
 
     private static final long serialVersionUID = 0L;
 
     private final ImmutableCollection<CompositeQueryParameter> parameters;
 
+    /**
+     * A flag that shows if current instance of {@code CompositeQueryParameter} has
+     * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set of not.
+     *
+     * <p>This flag turns into {@code true} if at least one of the underlying
+     * {@linkplain CompositeQueryParameter parameters}
+     * {@linkplain CompositeQueryParameter#hasLifecycle() contains Lifecycle attributes}. Otherwise
+     * it is {@code false}.
+     */
     private final boolean hasLifecycle;
 
     private QueryParameters(Builder builder) {
@@ -49,6 +63,9 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
 
     /**
      * Returns an iterator over the {@linkplain ColumnFilter column filters}.
+     *
+     * <p>The resulting {@code Iterator} throws {@link UnsupportedOperationException} on call
+     * to {@link Iterator#remove() Iterator.remove()}.
      *
      * @return an {@link Iterator}.
      */

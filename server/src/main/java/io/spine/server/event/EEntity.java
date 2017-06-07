@@ -47,7 +47,11 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     static final String CREATED_TIME_COLUMN = "created";
 
     /**
-     * The name of the Entity Column representing the Protobuf type of the event.
+     * The name of the Entity Column representing the Protobuf type name of the event.
+     *
+     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition is enclosed
+     * in the {@code spine.test} Protobuf package would have this Column equal to
+     * {@code "spine.test.TaskAdded"}.
      *
      * @see #getType()
      */
@@ -90,7 +94,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     }
 
     /**
-     * Retrieves the Protobuf type of the enclosed event.
+     * Retrieves the Protobuf type name of the enclosed event.
      *
      * <p>This method represents an Entity Column {@code type}.
      *
