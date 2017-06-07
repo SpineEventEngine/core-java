@@ -25,9 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
-import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.TestEventFactory;
-import io.spine.test.Values;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
@@ -53,7 +51,7 @@ import static org.junit.Assert.fail;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class EventStoreShould extends TenantAwareTest {
+public abstract class EventStoreShould {
 
     private static TestEventFactory eventFactory = null;
 
@@ -70,7 +68,6 @@ public abstract class EventStoreShould extends TenantAwareTest {
     @Before
     public void setUp() {
         eventStore = creteStore();
-        setCurrentTenant(Values.newTenantUuid());
     }
 
     @Test

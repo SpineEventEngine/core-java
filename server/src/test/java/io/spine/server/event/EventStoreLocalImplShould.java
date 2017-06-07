@@ -31,7 +31,7 @@ public class EventStoreLocalImplShould extends EventStoreShould {
     @Override
     protected EventStore creteStore() {
         final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(true)
+                                                .setMultitenant(false)
                                                 .build();
         return EventStore.newBuilder()
                          .setStorageFactory(bc.getStorageFactory())
