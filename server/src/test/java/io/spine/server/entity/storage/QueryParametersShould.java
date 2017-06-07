@@ -25,10 +25,10 @@ import com.google.common.collect.Multimap;
 import com.google.common.testing.EqualsTester;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import org.junit.Test;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
 import io.spine.server.entity.VersionableEntity;
+import org.junit.Test;
 
 import java.text.ParseException;
 import java.util.Collection;
@@ -38,21 +38,21 @@ import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.le;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.server.entity.storage.CompositeQueryParameter.from;
 import static io.spine.server.entity.storage.QueryParameters.newBuilder;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Dmytro Dashenkov

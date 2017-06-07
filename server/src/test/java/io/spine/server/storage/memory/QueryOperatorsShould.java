@@ -26,8 +26,6 @@ import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static io.spine.client.ColumnFilter.Operator;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
@@ -39,6 +37,8 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov

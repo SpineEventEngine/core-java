@@ -21,7 +21,6 @@
 package io.spine.server.storage.memory;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;

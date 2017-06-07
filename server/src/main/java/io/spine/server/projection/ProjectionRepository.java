@@ -390,8 +390,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             Uncomment the below line and comment the one after to switch between regular and
             Beam-based catch-up procedures.
         */
-        //       allTenantOpCatchup();
-        BeamCatchUp.forAllTenants(this);
+               allTenantOpCatchup();
+//        BeamCatchUp.forAllTenants(this);
 
         completeCatchUp();
         logCatchUpComplete();

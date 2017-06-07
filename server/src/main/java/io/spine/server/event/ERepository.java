@@ -177,7 +177,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     private EventStoreIO.QueryFn queryFn(TenantId tenantId) {
-        final EventRecordStorage storage = recordStorage();
-        return storage.queryFn(tenantId);
+//        final EventRecordStorage storage = recordStorage();
+//        return storage.queryFn(tenantId);
+
+        return null;
     }
 }

@@ -24,16 +24,14 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
+import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Subscribe;
-import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.Events;
-import io.spine.base.Version;
-import io.spine.base.Versions;
 import io.spine.base.Version;
 import io.spine.base.Versions;
 import io.spine.envelope.EventEnvelope;
@@ -44,22 +42,18 @@ import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.ProjectionRepository.Status;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv;
-import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.TestEventFactory;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesValidatingBuilder;
 import io.spine.test.projection.ProjectTaskNames;
 import io.spine.test.projection.ProjectTaskNamesValidatingBuilder;
 import io.spine.test.projection.event.ProjectCreated;
@@ -89,7 +83,6 @@ import static io.spine.server.projection.ProjectionRepository.Status.CLOSED;
 import static io.spine.server.projection.ProjectionRepository.Status.CREATED;
 import static io.spine.server.projection.ProjectionRepository.Status.ONLINE;
 import static io.spine.test.Verify.assertContainsAll;
-import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.Durations2.nanos;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
@@ -213,11 +206,14 @@ public class ProjectionRepositoryShould
         return TestEventFactory.newInstance(producerId, requestFactory);
     }
 
-    private static Event createEvent(TenantId tenantId, Message eventMessage, Any producerId) {
+    private static Event createEvent(TenantId tenantId,
+                                     Message eventMessage,
+                                     Any producerId,
+                                     Timestamp when) {
         final Version version = Versions.increment(Versions.create());
         return newEventFactory(tenantId, producerId).createEvent(eventMessage,
                                                                  version,
-                                                                 getCurrentTime());
+                                                                 when);
     }
 
     private static void appendEvent(BoundedContext boundedContext, Event event) {
@@ -292,7 +288,7 @@ public class ProjectionRepositoryShould
     private void checkDoesNotDispatchEventWith(Status status) {
         repository().setStatus(status);
         final ProjectCreated eventMsg = projectCreated();
-        final Event event = createEvent(tenantId(), eventMsg, PRODUCER_ID);
+        final Event event = createEvent(tenantId(), eventMsg, PRODUCER_ID, getCurrentTime());
 
         repository().dispatch(EventEnvelope.of(event));
 
@@ -428,7 +424,7 @@ public class ProjectionRepositoryShould
         final EventTargetsFunction<ProjectId, ProjectCreated> idSetFunction = spy(delegateFn);
         repository().addIdSetFunction(ProjectCreated.class, idSetFunction);
 
-        final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID);
+        final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID, getCurrentTime());
         repository().dispatch(EventEnvelope.of(event));
 
         final ProjectCreated expectedEventMessage = Events.getMessage(event);
@@ -457,10 +453,12 @@ public class ProjectionRepositoryShould
         final Message eventMessage = ProjectCreated.newBuilder()
                                                    .setProjectId(projectId)
                                                    .build();
-        final Event event = createEvent(pack(projectId), eventMessage);
+        final Event event = createEvent(tenantId(),
+                                        eventMessage,
+                                        pack(projectId),
+                                        getCurrentTime());
 
-        appendEvent(boundedContext.getEventBus()
-                                  .getEventStore(), event);
+        appendEvent(boundedContext, event);
         // Set up repository
         final Duration duration = seconds(10L);
         final ProjectionRepository repository = spy(
@@ -480,7 +478,7 @@ public class ProjectionRepositoryShould
         final BoundedContext boundedContext =
                 TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final int eventCount = 10;
-        setUpEvents(boundedContext, eventCount);
+        setUpEvents(tenantId(), boundedContext, eventCount);
         // Set up repository
         final Duration duration = nanos(1L);
         final ProjectionRepository repository =
@@ -501,10 +499,12 @@ public class ProjectionRepositoryShould
         final Duration delta = seconds(1);
         final Timestamp oldEventsTime = subtract(lastCatchUpTime, delta);
         final Timestamp newEventsTime = add(lastCatchUpTime, delta);
-        setUpEvents(boundedContext, oldEventsCount, oldEventsTime);
-        final Collection<ProjectId> ids = setUpEvents(boundedContext,
-                                                      newEventsCount,
-                                                      newEventsTime);
+        setUpEvents(tenantId(), boundedContext, oldEventsCount, oldEventsTime);
+        final Collection<ProjectId> ids = setUpEvents(
+                tenantId(),
+                boundedContext,
+                newEventsCount,
+                newEventsTime);
         final ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository repo =
                 spy(new ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository());
         repo.setBoundedContext(boundedContext);
@@ -541,7 +541,10 @@ public class ProjectionRepositoryShould
         assertTrue(repo.loadAll()
                        .isEmpty());
 
-        final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID);
+        final Event event = createEvent(tenantId(),
+                                        projectCreated(),
+                                        PRODUCER_ID,
+                                        getCurrentTime());
         repo.dispatch(EventEnvelope.of(event));
 
         final ImmutableCollection<ProjectionRepositoryTestEnv.NoOpTaskNamesProjection> items = repo.loadAll();
@@ -576,9 +579,10 @@ public class ProjectionRepositoryShould
     }
 
     @CanIgnoreReturnValue
-    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext,
-                                              int eventCount,
-                                              Timestamp when) {
+    private static Collection<ProjectId> setUpEvents(TenantId tenantId,
+                                                     BoundedContext boundedContext,
+                                                     int eventCount,
+                                                     Timestamp when) {
         // Set up bounded context
         final EventStore eventStore = boundedContext.getEventBus()
                                                     .getEventStore();
@@ -591,15 +595,17 @@ public class ProjectionRepositoryShould
             final Message eventMessage = ProjectCreated.newBuilder()
                                                        .setProjectId(projectId)
                                                        .build();
-            final Event event = createEvent(pack(projectId), eventMessage, when);
-            appendEvent(eventStore, event);
+            final Event event = createEvent(tenantId, eventMessage, pack(projectId), when);
+            appendEvent(boundedContext, event);
         }
         return ids;
     }
 
     @CanIgnoreReturnValue
-    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext, int eventCount) {
-        return setUpEvents(boundedContext, eventCount, getCurrentTime());
+    private static Collection<ProjectId> setUpEvents(TenantId tenantId,
+                                                     BoundedContext boundedContext,
+                                                     int eventCount) {
+        return setUpEvents(tenantId, boundedContext, eventCount, getCurrentTime());
     }
 
     private static ArgumentMatcher<ProjectId> in(final Collection<ProjectId> expectedValues) {

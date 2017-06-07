@@ -49,7 +49,6 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertContainsAll;

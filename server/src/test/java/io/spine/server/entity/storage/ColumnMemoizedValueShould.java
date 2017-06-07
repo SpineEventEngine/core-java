@@ -24,11 +24,11 @@ import com.google.common.testing.EqualsTester;
 import org.junit.Test;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static org.mockito.Mockito.mock;
 import static io.spine.server.entity.storage.Column.MemoizedValue;
 import static io.spine.server.entity.storage.ColumnShould.TestEntity;
 import static io.spine.server.entity.storage.Columns.findColumn;
 import static io.spine.server.storage.LifecycleFlagField.archived;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Dmytro Dashenkov

@@ -206,7 +206,8 @@ public interface EventPredicate extends SerializableFunction<Event, Boolean> {
         }
 
         private Query(EventStreamQuery query) {
-            this.filter = new MatchesStreamQuery(query);
+            //TODO:2017-06-07:alexander.yevsyukov: Change impl.
+            this.filter = null; // new MatchesStreamQuery(query);
         }
 
         @Override
