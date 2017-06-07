@@ -172,7 +172,6 @@ class TenantCatchup<I> {
         return pipeline;
     }
 
-    //TODO:2017-06-01:alexander.yevsyukov: Transform into gRPC call.
     private EventStreamQuery createStreamQuery() {
         final TenantAwareFunction0<EventStreamQuery> fn =
                 new TenantAwareFunction0<EventStreamQuery>(tenantId) {
