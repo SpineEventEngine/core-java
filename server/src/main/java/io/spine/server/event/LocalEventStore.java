@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import io.spine.base.Event;
 import io.spine.server.storage.StorageFactory;
-import io.spine.users.TenantId;
 import org.slf4j.Logger;
 
 import javax.annotation.Nullable;
@@ -49,6 +48,10 @@ class LocalEventStore extends EventStore {
         this.storage = eventRepository;
     }
 
+    ERepository getStorage() {
+        return storage;
+    }
+
     @Override
     protected void store(Event event) {
         storage.store(event);
@@ -67,14 +70,5 @@ class LocalEventStore extends EventStore {
     @Override
     public void close() throws Exception {
         storage.close();
-    }
-
-    /*
-     * Beam support
-     *****************/
-
-    @Override
-    public EventStoreIO.Query query(TenantId tenantId) {
-        return EventStoreIO.Query.of(storage.queryFn(tenantId));
     }
 }

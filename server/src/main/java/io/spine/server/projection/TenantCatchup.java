@@ -100,7 +100,7 @@ class TenantCatchup<I> {
         this.writeLastEventTimestamp = repositoryIO.writeLastHandledEventTime(tenantId);
         this.writeRecords = repositoryIO.write(tenantId);
         final EventStore eventStore = repository.getEventStore();
-        this.queryEvents = eventStore.query(tenantId);
+        this.queryEvents = EventStoreIO.query(tenantId, eventStore);
     }
 
     @SuppressWarnings({

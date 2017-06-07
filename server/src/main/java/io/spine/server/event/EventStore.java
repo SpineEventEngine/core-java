@@ -30,7 +30,6 @@ import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.users.TenantId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -361,10 +360,4 @@ public abstract class EventStore implements AutoCloseable {
     public static Logger log() {
         return LogSingleton.INSTANCE.value;
     }
-
-    /*
-     * Beam support
-     ******************/
-
-    public abstract EventStoreIO.Query query(TenantId tenantId);
 }
