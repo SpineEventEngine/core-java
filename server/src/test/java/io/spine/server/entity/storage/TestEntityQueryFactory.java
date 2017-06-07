@@ -20,17 +20,24 @@
 
 package io.spine.server.entity.storage;
 
-import org.junit.Test;
-
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import java.util.Collection;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class OperatorComparatorsShould {
+public final class TestEntityQueryFactory {
 
-    @Test
-    public void have_private_util_ctor() {
-        assertHasPrivateParameterlessCtor(OperatorComparators.class);
+    private TestEntityQueryFactory() {
+        // Prevent static class initialization
+    }
+
+    /**
+     * Exposes the {@link EntityQuery#of(Collection, QueryParameters)} factory method into a public
+     * context for the testing purposes.
+     *
+     * @see EntityQuery#of(Collection, QueryParameters)
+     */
+    public static <I> EntityQuery<I> createQuery(Collection<I> ids, QueryParameters parameters) {
+        return EntityQuery.of(ids, parameters);
     }
 }

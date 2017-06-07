@@ -20,21 +20,28 @@
 
 package io.spine.server.entity.storage;
 
-import javax.annotation.Nullable;
+import io.spine.server.entity.EntityRecord;
+
+import java.util.Map;
 
 /**
- * A boolean non-typed comparison operation on two given instances.
- *
  * @author Dmytro Dashenkov
- * @see io.spine.client.CompositeColumnFilter.CompositeOperator for the comparison strategies
  */
-interface ComparisonOperation {
+public final class TestEntityRecordWithColumnsFactory {
+
+    private TestEntityRecordWithColumnsFactory() {
+        // Prevent utility class instantiation.
+    }
 
     /**
-     * Compares the given operands by the rules of a certain operator.
+     * Exposes the {@link EntityRecordWithColumns#of(EntityRecord, Map)} into the public context for
+     * the test purposes.
      *
-     * @see QueryOperators#compare for the detailed behaiour
-     * description
+     * @see EntityRecordWithColumns#of(EntityRecord, Map)
      */
-    boolean compare(@Nullable Object left, @Nullable Object right);
+    public static EntityRecordWithColumns createRecord(
+            EntityRecord record,
+            Map<String, Column.MemoizedValue> storageFields) {
+        return EntityRecordWithColumns.of(record, storageFields);
+    }
 }

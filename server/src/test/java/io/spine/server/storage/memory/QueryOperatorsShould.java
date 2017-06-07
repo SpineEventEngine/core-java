@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage.memory;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.spine.server.storage.memory.QueryOperators;
 import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.add;
@@ -34,7 +35,7 @@ import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
 import static io.spine.client.ColumnFilter.Operator.LESS_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.LESS_THAN;
-import static io.spine.server.entity.storage.QueryOperators.compare;
+import static io.spine.server.storage.memory.QueryOperators.compare;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.nullRef;
 import static io.spine.time.Durations2.seconds;

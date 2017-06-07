@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
@@ -114,9 +115,15 @@ public final class EntityRecordWithColumns implements Serializable {
                                      ColumnTransformer.INSTANCE);
     }
 
-    @SuppressWarnings("ReturnOfCollectionOrArrayField")
-        // Immutable structure
-    Map<String, Column.MemoizedValue> getColumnValues() {
+    /**
+     * Retrieves the memoized values of the Entity Columns.
+     *
+     * <p>This method is {@linkplain Internal internal} and may be a subject of change.
+     * @see ColumnRecords for the recommended way of working with the column values
+     */
+    @Internal
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
+    public Map<String, Column.MemoizedValue> getColumnValues() {
         return storageFields;
     }
 

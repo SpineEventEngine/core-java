@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage.memory;
 
 import com.google.common.base.Predicate;
 import com.google.common.collect.Multimap;
@@ -27,7 +27,12 @@ import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter.CompositeOperator;
+import io.spine.server.entity.storage.Column;
 import io.spine.server.entity.storage.Column.MemoizedValue;
+import io.spine.server.entity.storage.CompositeQueryParameter;
+import io.spine.server.entity.storage.EntityQuery;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
+import io.spine.server.entity.storage.QueryParameters;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -35,7 +40,7 @@ import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.TypeConverter.toObject;
-import static io.spine.server.entity.storage.QueryOperators.compare;
+import static io.spine.server.storage.memory.QueryOperators.compare;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
@@ -46,8 +51,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  * @author Dmytro Dashenkov
  * @see EntityQuery for the matching contract
  */
-@Internal
-public final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> {
+final class EntityQueryMatcher<I> implements Predicate<EntityRecordWithColumns> {
 
     private final Collection<I> acceptedIds;
     private final QueryParameters queryParams;

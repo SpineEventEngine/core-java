@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
@@ -38,7 +38,7 @@ import static java.lang.String.format;
  *
  * @author Dmytro Dashenkov
  */
-final class OperatorComparators {
+final class ComparisonOperations {
 
     private static final ImmutableMap<Operator, ComparisonOperation> COMPARATORS =
             ImmutableMap.<Operator, ComparisonOperation>builder()
@@ -49,7 +49,7 @@ final class OperatorComparators {
                         .put(Operator.LESS_OR_EQUAL, LessOrEqual.operation())
                         .build();
 
-    private OperatorComparators() {
+    private ComparisonOperations() {
         // Prevent utility class instantiation.
     }
 

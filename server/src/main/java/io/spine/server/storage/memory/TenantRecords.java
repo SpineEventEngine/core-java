@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityQueryMatcher;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.type.TypeUrl;
 

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.storage;
+package io.spine.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
 import io.spine.client.ColumnFilter.Operator;
@@ -74,7 +74,7 @@ final class QueryOperators {
     static <T> boolean compare(@Nullable T left, Operator operator, @Nullable T right)
             throws UnsupportedOperationException {
         checkNotNull(operator);
-        final ComparisonOperation comparator = OperatorComparators.of(operator);
+        final ComparisonOperation comparator = ComparisonOperations.of(operator);
         final boolean result = comparator.compare(left, right);
         return result;
     }

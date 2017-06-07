@@ -23,6 +23,7 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Objects;
 import com.google.gson.internal.Primitives;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 
 import javax.annotation.Nullable;
@@ -266,7 +267,7 @@ public class Column implements Serializable {
      * into {@link MemoizedValue}
      * @see MemoizedValue
      */
-    public MemoizedValue memoizeFor(Entity<?, ?> source) {
+    MemoizedValue memoizeFor(Entity<?, ?> source) {
         final Serializable value = getFor(source);
         final MemoizedValue result = new MemoizedValue(this, value);
         return result;
@@ -333,7 +334,8 @@ public class Column implements Serializable {
      *
      * @see Column#memoizeFor(Entity)
      */
-    static class MemoizedValue implements Serializable {
+    @Internal
+    public static class MemoizedValue implements Serializable {
 
         private static final long serialVersionUID = -6041163252051925293L;
 
@@ -360,7 +362,7 @@ public class Column implements Serializable {
         /**
          * @return the {@link Column} representing this Column
          */
-        Column getSourceColumn() {
+        public Column getSourceColumn() {
             return sourceColumn;
         }
 
