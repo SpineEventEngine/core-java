@@ -56,6 +56,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * Abstract base for repositories managing {@link Projection}s.
@@ -277,7 +278,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @return storage instance
      * @throws IllegalStateException if the storage is null
      */
-    @Nonnull
     protected ProjectionStorage<I> projectionStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final ProjectionStorage<I> storage = (ProjectionStorage<I>) getStorage();
@@ -340,10 +340,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             }
 
             getStand().post(projection, context.getCommandContext());
-            // Do not post to stand during CatchUp.
-            if (getStatus() != Status.CATCHING_UP) {
-                getStand().post(projection, context.getCommandContext());
-            }
         }
     }
 
@@ -415,10 +411,25 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
         // A direct catch-up impl. Do not delete until Beam-based catch-up is finished.
     private void allTenantOpCatchup() {
         final AllTenantOperation op = new AllTenantOperation(getBoundedContext().getTenantIndex()) {
+
+            private final EventStore eventStore = getBoundedContext().getEventBus()
+                                                                     .getEventStore();
+            private final Set<EventFilter> eventFilters = getEventFilters();
+
             @Override
             public void run() {
-                final EventStreamQuery query = createStreamQuery();
-                getEventStore().read(query, new EventStreamObserver(ProjectionRepository.this));
+                // Get the timestamp of the last event. This also ensures we have the storage.
+                final Timestamp timestamp = nullToDefault(
+                        projectionStorage().readLastHandledEventTime());
+
+                final EventStreamQuery.Builder builder = EventStreamQuery.newBuilder();
+                if (!isDefault(timestamp)) {
+                    builder.setAfter(timestamp);
+                }
+                builder.addAllFilter(eventFilters)
+                       .build();
+                final EventStreamQuery query = builder.build();
+                eventStore.read(query, new EventStreamObserver(ProjectionRepository.this));
             }
         };
         op.execute();
@@ -445,6 +456,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             final Class<? extends ProjectionRepository> repositoryClass = getClass();
             log().info("{} catch-up complete", repositoryClass.getName());
         }
+    }
+
+    /**
+     * Obtains event filters for event classes handled by projections of this repository.
+     */
+    private Set<EventFilter> getEventFilters() {
+        final ImmutableSet.Builder<EventFilter> builder = ImmutableSet.builder();
+        final Set<EventClass> eventClasses = getMessageClasses();
+        for (EventClass eventClass : eventClasses) {
+            final String typeName = TypeName.of(eventClass.value())
+                                            .value();
+            builder.add(EventFilter.newBuilder()
+                                   .setEventType(typeName)
+                                   .build());
+        }
+        return builder.build();
     }
 
     /**

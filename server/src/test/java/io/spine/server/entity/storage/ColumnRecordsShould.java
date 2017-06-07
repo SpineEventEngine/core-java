@@ -63,13 +63,17 @@ public class ColumnRecordsShould {
 
     @Test
     public void not_accept_nulls() {
+        final EntityRecordWithColumns record = EntityRecordWithColumns.of(
+                EntityRecord.getDefaultInstance());
+        final ColumnTypeRegistry columnTypeRegistry = ColumnTypeRegistry.newBuilder()
+                                                                        .build();
+        final EntityQuery entityQuery = EntityQuery.of(Collections.emptyList(),
+                                                       QueryParameters.newBuilder()
+                                                                      .build());
         new NullPointerTester()
-                .setDefault(EntityRecordWithColumns.class,
-                            EntityRecordWithColumns.of(EntityRecord.getDefaultInstance()))
-                .setDefault(ColumnTypeRegistry.class, ColumnTypeRegistry.newBuilder().build())
-                .setDefault(EntityQuery.class,
-                            EntityQuery.of(Collections.emptyList(),
-                                           Collections.<Column<?>, Object>emptyMap()))
+                .setDefault(EntityRecordWithColumns.class, record)
+                .setDefault(ColumnTypeRegistry.class, columnTypeRegistry)
+                .setDefault(EntityQuery.class, entityQuery)
                 .testAllPublicStaticMethods(ColumnRecords.class);
     }
 
@@ -78,7 +82,7 @@ public class ColumnRecordsShould {
         // Set up mocks and arguments
         final List<Object> destination = new ArrayList<>(MOCK_COLUMNS_COUNT);
 
-        final Map<String, Column.MemoizedValue<?>> columns = setupMockColumnsAllowingNulls();
+        final Map<String, Column.MemoizedValue> columns = setupMockColumnsAllowingNulls();
 
         final CollectAnyColumnType type = spy(CollectAnyColumnType.class);
         final ColumnTypeRegistry<CollectAnyColumnType> registry =
@@ -90,7 +94,7 @@ public class ColumnRecordsShould {
 
         final Function<String, Object> colIdMapper = spy(new NoOpColumnIdentifierMapper());
 
-        // Invoke the prepersistence action
+        // Invoke the pre-persistence action
         ColumnRecords.feedColumnsTo(destination, recordWithColumns, registry, colIdMapper);
 
         // Verify calls
@@ -104,10 +108,10 @@ public class ColumnRecordsShould {
         assertContainsAll(destination, getNonNullColumnValues().toArray());
     }
 
-    private static Map<String, Column.MemoizedValue<?>> setupMockColumnsAllowingNulls() {
+    private static Map<String, Column.MemoizedValue> setupMockColumnsAllowingNulls() {
         final Column mockColumn = mock(Column.class);
         when(mockColumn.getType()).thenReturn(Object.class);
-        final Map<String, Column.MemoizedValue<?>> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
+        final Map<String, Column.MemoizedValue> columns = new HashMap<>(MOCK_COLUMNS_COUNT);
         for (int i = 0; i < MOCK_COLUMNS_COUNT; i++) {
             final Integer columnValueToPersist = (i % 2 != 0) ? null : i;
 
@@ -136,7 +140,7 @@ public class ColumnRecordsShould {
 
         @Override
         public void setColumnValue(Collection<Object> storageRecord, Object value,
-                Object columnIdentifier) {
+                                   Object columnIdentifier) {
             storageRecord.add(value);
         }
 

@@ -21,54 +21,38 @@
 package io.spine.server.event;
 
 import com.google.common.base.Predicate;
-import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
-import static io.spine.server.event.EventPredicate.Time.isAfter;
-import static io.spine.server.event.EventPredicate.Time.isBefore;
-import static io.spine.server.event.EventPredicate.Time.isBetween;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * The predicate for filtering {@code Event} instances by {@link EventStreamQuery}.
  *
+ * <p>The predicate ignores the time of bounds and matches only
+ * the {@link io.spine.base.FieldFilter fields} of the event message and
+ * the {@link io.spine.base.EventContext}.
+ *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov
  */
-class MatchesStreamQuery implements EventPredicate {
+final class MatchesStreamQuery implements Predicate<Event> {
 
-    private static final long serialVersionUID = 0L;
     private final EventStreamQuery query;
-    private final EventPredicate timePredicate;
 
-    @SuppressWarnings("IfMayBeConditional")
     MatchesStreamQuery(EventStreamQuery query) {
-        this.query = query;
-        final Timestamp after = query.getAfter();
-        final Timestamp before = query.getBefore();
-        final boolean afterSpecified = query.hasAfter();
-        final boolean beforeSpecified = query.hasBefore();
-
-        if (afterSpecified && !beforeSpecified) {
-            this.timePredicate = isAfter(after);
-        } else if (!afterSpecified && beforeSpecified) {
-            this.timePredicate = isBefore(before);
-        } else if (afterSpecified /* && beforeSpecified is `true` here too */) {
-            this.timePredicate = isBetween(after, before);
-        } else { // No timestamps specified.
-            this.timePredicate = EventPredicate.Always.isTrue();
-        }
+        this.query = checkNotNull(query);
     }
 
     @Override
-    public Boolean apply(Event input) {
-        if (!timePredicate.apply(input)) {
-            return false;
-        }
+    public boolean apply(@Nullable Event input) {
+        checkNotNull(input);
+
         final List<EventFilter> filterList = query.getFilterList();
         if (filterList.isEmpty()) {
-            return true; // The time range matches, and no filters specified.
+            return true; // No filters specified.
         }
         // Check if one of the filters matches. If so, the event matches.
         for (EventFilter filter : filterList) {

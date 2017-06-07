@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.base.Events;
@@ -33,12 +34,28 @@ import java.util.Comparator;
  * Stores an event.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-class EEntity extends AbstractEntity<EventId, Event> {
+@Internal
+public class EEntity extends AbstractEntity<EventId, Event> {
 
-    public static final String CREATED_TIME_COLUMN = "created";
+    /**
+     * The name of the Entity Column representing the time, when the event was fired.
+     *
+     * @see #getCreated()
+     */
+    static final String CREATED_TIME_COLUMN = "created";
 
-    public static final String TYPE_COLUMN = "type";
+    /**
+     * The name of the Entity Column representing the Protobuf type name of the event.
+     *
+     * <p>For example, an Event of type {@code io.spine.test.TaskAdded} whose definition is enclosed
+     * in the {@code spine.test} Protobuf package would have this Column equal to
+     * {@code "spine.test.TaskAdded"}.
+     *
+     * @see #getType()
+     */
+    static final String TYPE_COLUMN = "type";
 
     /**
      * Compares event entities by timestamps of events.
@@ -63,11 +80,27 @@ class EEntity extends AbstractEntity<EventId, Event> {
         updateState(event);
     }
 
+    /**
+     * Retrieves the time of the event occurrence.
+     *
+     * <p>This method represents an Entity Column {@code created}.
+     *
+     * @return the time when the underlying event was fired
+     * @see #CREATED_TIME_COLUMN
+     */
     public Timestamp getCreated() {
         return getState().getContext()
                          .getTimestamp();
     }
 
+    /**
+     * Retrieves the Protobuf type name of the enclosed event.
+     *
+     * <p>This method represents an Entity Column {@code type}.
+     *
+     * @return the {@link TypeName} value of the event represented by this Entity
+     * @see #TYPE_COLUMN
+     */
     public String getType() {
         return TypeName.ofEvent(getState())
                        .value();

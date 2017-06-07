@@ -20,39 +20,42 @@
 
 package io.spine.server.event;
 
-import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterators;
+import com.google.protobuf.FieldMask;
+import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
 import io.spine.base.EventId;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.EntityFilters;
 import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.storage.EventRecordStorage;
-import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.StorageFactory;
 import io.spine.users.TenantId;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
-import static com.google.common.collect.Collections2.filter;
-import static com.google.common.collect.Collections2.transform;
-import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.ColumnFilters.gt;
+import static io.spine.client.ColumnFilters.lt;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
+import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
+import static io.spine.server.event.EEntity.TYPE_COLUMN;
+import static io.spine.server.event.EEntity.comparator;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
  *
- * <p>This class allows to hide implementation details of storing commands.
+ * <p>This class allows to hide implementation details of storing events.
  * {@link EventStore} serves as a facade, hiding the fact that the {@code EventStorage}
  * is a {@code Repository}.
  *
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
 class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> {
 
@@ -68,79 +71,100 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
                 }
             };
 
-    @Override
-    protected EventRecordStorage createStorage(StorageFactory factory) {
-        final RecordStorage<EventId> recordStorage = super.createStorage(factory);
-        final EventRecordStorage storage =
-                factory.createEventStorage(recordStorage);
-        return storage;
-    }
-
-    @Nonnull
-    @Override
-    protected EventRecordStorage recordStorage() {
-        return (EventRecordStorage) super.recordStorage();
-    }
-
     Iterator<Event> iterator(EventStreamQuery query) {
-        final EventRecordStorage storage = recordStorage();
-        final Map<EventId, EntityRecord> records = storage.readAll(query);
-        final Collection<EEntity> entities = transform(records.entrySet(),
-                                                       storageRecordToEntity());
-        // TODO:2017-05-19:dmytro.dashenkov: Remove after the Entity Column approach is implemented.
-        final Collection<EEntity> filtered = filter(entities, createEntityFilter(query));
+        checkNotNull(query);
 
-        final List<EEntity> entityList = newArrayList(filtered);
-        Collections.sort(entityList, EEntity.comparator());
-        final Iterator<Event> result = Iterators.transform(entityList.iterator(), getEventFunc());
+        final EntityFilters filters = toEntityFilters(query);
+        final Iterable<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
+        // A predicate on the Event message and EventContext fields.
+        final Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
+        final Iterator<EEntity> entityIterator = FluentIterable.from(entities)
+                                                                   .filter(detailedLookupFilter)
+                                                                   .toSortedList(comparator())
+                                                                   .iterator();
+        final Iterator<Event> result = Iterators.transform(entityIterator, getEventFunc());
         return result;
     }
 
-    @VisibleForTesting
-    static Predicate<EEntity> createEntityFilter(EventStreamQuery query) {
-        return new EventEntityMatchesStreamQuery(query).toEntityPredicate();
-    }
 
     void store(Event event) {
         final EEntity entity = new EEntity(event);
         store(entity);
     }
 
-    private static Function<EEntity, Event> getEventFunc() {
+    static Function<EEntity, Event> getEventFunc() {
         return GET_EVENT;
     }
 
+    private static Predicate<EEntity> createEntityFilter(EventStreamQuery query) {
+        return new EEntityMatchesStreamQuery(query);
+    }
+
     /**
-     * A serializable predicate that filters events matching an {@link EventStreamQuery}.
+     * Creates an instance of {@link EntityFilters} from the given {@link EventStreamQuery}.
+     *
+     * <p>The resulting filters contain the filtering by {@code before} and {@code after} fields
+     * of the source query and by the {@code eventType} field of the underlying
+     * {@linkplain EventFilter EventFilters}.
+     *
+     * @param query the source {@link EventStreamQuery} to get the info from
+     * @return new instance of {@link EntityFilters} filtering the events
      */
-    private static class EventEntityMatchesStreamQuery implements EventPredicate {
+    private static EntityFilters toEntityFilters(EventStreamQuery query) {
+        final CompositeColumnFilter timeFilter = timeFilter(query);
+        final CompositeColumnFilter typeFilter = typeFilter(query);
+        final EntityFilters entityFilters = EntityFilters.newBuilder()
+                                                         .addFilter(timeFilter)
+                                                         .addFilter(typeFilter)
+                                                         .build();
+        return entityFilters;
+    }
 
-        private static final long serialVersionUID = 0L;
-        private final EventPredicate filter;
+    private static CompositeColumnFilter timeFilter(EventStreamQuery query) {
+        final CompositeColumnFilter.Builder timeFilter = CompositeColumnFilter.newBuilder()
+                                                                              .setOperator(ALL);
+        if (query.hasAfter()) {
+            final Timestamp timestamp = query.getAfter();
+            final ColumnFilter filter = gt(CREATED_TIME_COLUMN, timestamp);
+            timeFilter.addFilter(filter);
+        }
+        if (query.hasBefore()) {
+            final Timestamp timestamp = query.getBefore();
+            final ColumnFilter filter = lt(CREATED_TIME_COLUMN, timestamp);
+            timeFilter.addFilter(filter);
+        }
+        return timeFilter.build();
+    }
 
-        private EventEntityMatchesStreamQuery(EventStreamQuery query) {
+    private static CompositeColumnFilter typeFilter(EventStreamQuery query) {
+        final CompositeColumnFilter.Builder typeFilter = CompositeColumnFilter.newBuilder()
+                                                                              .setOperator(EITHER);
+        for (EventFilter eventFilter : query.getFilterList()) {
+            final String type = eventFilter.getEventType();
+            if (!type.isEmpty()) {
+                final ColumnFilter filter = eq(TYPE_COLUMN, type);
+                typeFilter.addFilter(filter);
+            }
+        }
+        return typeFilter.build();
+    }
+
+    private static class EEntityMatchesStreamQuery implements Predicate<EEntity> {
+
+        private final Predicate<Event> filter;
+
+        private EEntityMatchesStreamQuery(EventStreamQuery query) {
             this.filter = new MatchesStreamQuery(query);
         }
 
         @Override
-        public Boolean apply(Event input) {
-            final boolean result = filter.apply(input);
+        public boolean apply(@Nullable EEntity input) {
+            if (input == null) {
+                return false;
+            }
+            final Event event = input.getState();
+            final boolean result = filter.apply(event);
             return result;
-        }
-
-        /**
-         * Converts this instance to a predicate that filters {@link EEntity} instances.
-         */
-        private Predicate<EEntity> toEntityPredicate() {
-            return new Predicate<EEntity>() {
-                @Override
-                public boolean apply(@Nullable EEntity input) {
-                    if (input == null) {
-                        return false;
-                    }
-                    return EventEntityMatchesStreamQuery.this.apply(input.getState());
-                }
-            };
         }
     }
 

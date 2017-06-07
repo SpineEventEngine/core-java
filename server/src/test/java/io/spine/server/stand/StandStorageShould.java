@@ -160,14 +160,14 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         }
     }
 
-    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Override
     @Test
     public void filter_records_by_columns() {
         // Stand storage does not support entity columns.
     }
 
-    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors
+    @SuppressWarnings("NoopMethodInAbstractClass") // Overrides the behavior for all the inheritors.
     @Ignore
     @Override
     public void allow_by_single_id_queries_with_no_columns() {

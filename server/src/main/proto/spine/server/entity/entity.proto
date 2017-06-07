@@ -61,7 +61,7 @@ message LifecycleFlags {
     //
     bool archived = 1;
 
-    // Marks the entity as `deleted.
+    // Marks the entity as `deleted`.
     //
     // An application may use this flag for filtering out entities that were
     // put aside (e.g. into a Trash) because they are no longer needed.

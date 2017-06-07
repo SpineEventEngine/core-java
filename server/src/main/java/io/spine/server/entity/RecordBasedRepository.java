@@ -315,11 +315,56 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         checkNotNull(fieldMask);
 
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
-        final Map<I, EntityRecord> records = recordStorage().readAll(entityQuery, fieldMask);
+        final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
+        final Map<I, EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
         final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
                                                             .transform(storageRecordToEntity())
                                                             .toList();
         return result;
+    }
+
+    /**
+     * Creates an {@link EntityQuery} instance which has:
+     * <ul>
+     *     <li>All the parameters from the {@code src} Query;
+     *     <li>At least one parameter limiting
+     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns}.
+     * </ul>
+     *
+     * <p>If the {@code src} instance
+     * {@linkplain EntityQuery#isLifecycleAttributesSet() contains the lifecycle attributes}, then
+     * it is returned with no change. Otherwise - a new instance containing the default values for
+     * the Lifecycle attributes is returned.
+     *
+     * <p>The default values are:
+     * <pre>
+     *     {@code
+     *     archived -> false,
+     *     deleted  -> false
+     *     }
+     * </pre>
+     *
+     * <p>If the type of the Entity which this repository works with is not derived from
+     * the {@link EntityWithLifecycle}, then no lifecycle attributes are appended and
+     * the {@code src} query is returned.
+     *
+     * @param src the source {@link EntityQuery} to take the parameters from
+     * @return an {@link EntityQuery} which includes
+     *         the {@link io.spine.server.storage.LifecycleFlagField Lifecycle Flags Columns} unless
+     *         they are not supported
+     */
+    private EntityQuery<I> toCompleteQuery(EntityQuery<I> src) {
+        final EntityQuery<I> completeQuery;
+        if (!src.isLifecycleAttributesSet()
+                && EntityWithLifecycle.class.isAssignableFrom(getEntityClass())) {
+            @SuppressWarnings("unchecked") // Checked at runtime
+            final Class<? extends EntityWithLifecycle<I, ?>> cls =
+                    (Class<? extends EntityWithLifecycle<I, ?>>) getEntityClass();
+            completeQuery = src.withLifecycleFlags(cls);
+        } else {
+            completeQuery = src;
+        }
+        return completeQuery;
     }
 
     /**

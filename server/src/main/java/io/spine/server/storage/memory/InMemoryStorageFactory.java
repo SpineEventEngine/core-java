@@ -29,7 +29,6 @@ import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.StandStorage;
-import io.spine.server.storage.EventRecordStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
@@ -117,13 +116,6 @@ public class InMemoryStorageFactory implements StorageFactory {
     private static <I> Class<Message> getStateClass(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
         return (Class<Message>) Entity.GenericParameter.STATE.getArgumentIn(projectionClass);
-    }
-
-    @Override
-    public EventRecordStorage createEventStorage(RecordStorage<EventId> delegate) {
-        final EventRecordStorage eventRecordStorage = new InMemoryEventRecordStorage(
-                boundedContextName, delegate);
-        return eventRecordStorage;
     }
 
     @Override

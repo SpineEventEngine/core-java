@@ -28,7 +28,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
-import io.spine.server.entity.storage.EntityQueryMatcher;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.type.TypeUrl;
 
@@ -92,9 +91,8 @@ class TenantRecords<I> implements TenantStorage<I, EntityRecordWithColumns> {
     }
 
     Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        final Map<I, EntityRecordWithColumns> filtered =
-                filterValues(filtered(),
-                             new EntityQueryMatcher<>(query));
+        final Map<I, EntityRecordWithColumns> filtered = filterValues(records,
+                                                                      new EntityQueryMatcher<>(query));
         final Map<I, EntityRecord> records = transformValues(filtered,
                                                              EntityRecordUnpacker.INSTANCE);
         final Function<EntityRecord, EntityRecord> fieldMaskApplier =

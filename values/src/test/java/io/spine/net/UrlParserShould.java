@@ -156,14 +156,14 @@ public class UrlParserShould {
     @Test
     public void parse_url_with_all_sub_items() {
         final String rawUrl =
-                "https://user:password@spine3.org/index?auth=none&locale=us#fragment9";
+                "https://user:password@spine.io/index?auth=none&locale=us#fragment9";
 
         final Url.Record record = new UrlParser(rawUrl).parse().getRecord();
 
         assertEquals(Url.Record.Schema.HTTPS, record.getProtocol().getSchema());
         assertEquals("user", record.getAuth().getUserName());
         assertEquals("password", record.getAuth().getPassword());
-        assertEquals("spine3.org", record.getHost());
+        assertEquals("spine.io", record.getHost());
         assertEquals("index", record.getPath());
         assertEquals("auth=none", UrlQueryParameters.toString(record.getQuery(0)));
         assertEquals("locale=us", UrlQueryParameters.toString(record.getQuery(1)));

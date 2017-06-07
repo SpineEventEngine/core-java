@@ -22,14 +22,22 @@ package io.spine.server.entity.storage;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import io.spine.server.stand.StandStorage;
+import io.spine.annotation.Internal;
+import io.spine.server.entity.EntityWithLifecycle;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
+import static io.spine.server.entity.storage.Columns.findColumn;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * A query to a {@link io.spine.server.storage.RecordStorage RecordStorage} for the records
@@ -43,7 +51,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain Column Entity Columns}.
  *
  * <p>A storage may ignore the query or throw an exception if it's specified (see
- * {@link StandStorage StandSotrage}). By default,
+ * {@link io.spine.server.stand.StandStorage StandSotrage}). By default,
  * {@link io.spine.server.storage.RecordStorage RecordStorage} supports the Entity queries.
  *
  * <p>If the {@linkplain EntityQuery#getIds() accepted IDs set} is empty, all the IDs are
@@ -59,15 +67,22 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * {@linkplain EntityQuery#getParameters() query parameters} are empty, all the records are
  * considered matching.
  *
- * @param <I> the type of the IDs of the query target
+ * <p>If the query specifies the values of
+ * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
+ * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery, com.google.protobuf.FieldMask)
+ * default behavior} will be overridden i.e. the records resulting to such query may or may not be
+ * active.
  *
+ * @param <I> the type of the IDs of the query target
  * @author Dmytro Dashenkov
  * @see EntityRecordWithColumns
  */
-public final class EntityQuery<I> {
+public final class EntityQuery<I> implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private final ImmutableSet<I> ids;
-    private final ImmutableMap<Column<?>, Object> parameters;
+    private final QueryParameters parameters;
 
     /**
      * Creates new instance of {@code EntityQuery}.
@@ -78,15 +93,15 @@ public final class EntityQuery<I> {
      *                   no values, all the values are matched upon such Column
      * @return new instance of {@code EntityQuery}
      */
-    static <I> EntityQuery<I> of(Collection<I> ids, Map<Column<?>, Object> parameters) {
+    static <I> EntityQuery<I> of(Collection<I> ids, QueryParameters parameters) {
         checkNotNull(ids);
         checkNotNull(parameters);
         return new EntityQuery<>(ids, parameters);
     }
 
-    private EntityQuery(Collection<I> ids, Map<Column<?>, Object> parameters) {
+    private EntityQuery(Collection<I> ids, QueryParameters parameters) {
         this.ids = ImmutableSet.copyOf(ids);
-        this.parameters = ImmutableMap.copyOf(parameters);
+        this.parameters = parameters;
     }
 
     /**
@@ -100,9 +115,46 @@ public final class EntityQuery<I> {
     /**
      * @return a {@link Map} of the {@linkplain Column Column metadata} to the column required value
      */
-    @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    public Map<Column<?>, Object> getParameters() {
+    public QueryParameters getParameters() {
         return parameters;
+    }
+
+    /**
+     * @return {@code true} if the query overrides the default lifecycle handling strategy,
+     * {@code false} otherwise
+     */
+    @Internal
+    public boolean isLifecycleAttributesSet() {
+        return parameters.isLifecycleAttributesSet();
+    }
+
+    /**
+     * Creates a new instance of {@code EntityQuery} with all the parameters from current instance
+     * and the default values of the {@link io.spine.server.entity.LifecycleFlags LifecycleFlags}
+     * expected.
+     *
+     * <p>The precondition for this method is that current instance
+     * {@linkplain #isLifecycleAttributesSet() does not specify the values}.
+     *
+     * @param cls the {@code Class} of the entity to create the query for
+     * @return new instance of {@code EntityQuery}
+     */
+    @Internal
+    public EntityQuery<I> withLifecycleFlags(Class<? extends EntityWithLifecycle<I, ?>> cls) {
+        checkState(!isLifecycleAttributesSet(), "The query overrides Lifecycle Flags default values.");
+        final Column archivedColumn = findColumn(cls, archived.name());
+        final Column deletedColumn = findColumn(cls, deleted.name());
+        final CompositeQueryParameter lifecycleParameter = CompositeQueryParameter.from(
+                ImmutableMultimap.of(archivedColumn, eq(archived.name(), false),
+                                     deletedColumn, eq(deletedColumn.getName(), false)),
+                ALL
+        );
+        final QueryParameters parameters = QueryParameters.newBuilder()
+                                                          .addAll(getParameters())
+                                                          .add(lifecycleParameter)
+                                                          .build();
+        final EntityQuery<I> result = new EntityQuery<>(ids, parameters);
+        return result;
     }
 
     @Override

@@ -19,7 +19,6 @@
  */
 package io.spine.client;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
@@ -28,7 +27,6 @@ import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -79,7 +77,7 @@ public final class Queries {
 
     static Query.Builder queryBuilderFor(Class<? extends Message> entityClass,
                                          @Nullable Set<? extends Message> ids,
-                                         @Nullable Map<String, Any> columnFilters,
+                                         @Nullable Set<CompositeColumnFilter> columnFilters,
                                          @Nullable FieldMask fieldMask) {
         checkNotNull(entityClass);
 

@@ -27,10 +27,11 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.Given;
 import io.spine.test.Tests;
@@ -41,9 +42,17 @@ import org.junit.Test;
 import java.util.Collection;
 import java.util.List;
 
+import static io.spine.client.ColumnFilters.all;
+import static io.spine.client.ColumnFilters.eq;
+import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.server.entity.TestTransaction.archive;
+import static io.spine.server.entity.TestTransaction.delete;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.test.Tests.newTenantUuid;
 import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Verify.assertContains;
+import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertNotContains;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
@@ -52,14 +61,18 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
+ * The abstract test for the {@linkplain RecordBasedRepository} derived classes.
+ *
+ * @param <E> the type of the {@link Entity} of this repository; the type is checked to implement
+ *            {@link TestEntityWithStringColumn} at runtime
+ *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ConstantConditions")
-public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>
-                                                          & TestEntityWithStringColumn,
+public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>,
                                                   I,
                                                   S extends Message>
-                                                  extends TenantAwareTest {
+        extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
     protected RecordBasedRepository<I, E, S> repository;
@@ -196,8 +209,13 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final StringValue fieldValue = StringValue.newBuilder()
                                                   .setValue(id1.toString())
                                                   .build();
+        final ColumnFilter filter = eq(fieldPath, fieldValue);
+        final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
+                                                                                 .addFilter(filter)
+                                                                                 .setOperator(ALL)
+                                                                                 .build();
         final EntityFilters filters = EntityFilters.newBuilder()
-                                                   .putColumnFilter(fieldPath, AnyPacker.pack(fieldValue))
+                                                   .addFilter(aggregatingFilter)
                                                    .build();
         final Collection<E> found = repository.find(filters, FieldMask.getDefaultInstance());
         assertSize(1, found);
@@ -318,5 +336,59 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         storeEntity(entity);
 
         assertFalse(find(id).isPresent());
+    }
+
+    @Test
+    public void exclude_non_active_records_from_entity_query() {
+        final I archivedId = createId(42);
+        final I deletedId = createId(314);
+        final I activeId = createId(271);
+
+        final E activeEntity = repository.create(activeId);
+        final E archivedEntity = repository.create(archivedId);
+        final E deletedEntity = repository.create(deletedId);
+        delete((EventPlayingEntity) deletedEntity);
+        archive((EventPlayingEntity) archivedEntity);
+
+        // Fill the storage
+        repository.store(activeEntity);
+        repository.store(archivedEntity);
+        repository.store(deletedEntity);
+
+        final Collection<E> found = repository.find(EntityFilters.getDefaultInstance(),
+                                                                 FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(1, found);
+        final E actualEntity = found.iterator().next();
+        assertEquals(activeEntity, actualEntity);
+    }
+
+    @Test
+    public void allow_any_lifecycle_if_column_involved() {
+        final I archivedId = createId(42);
+        final I deletedId = createId(314);
+        final I activeId = createId(271);
+
+        final E activeEntity = repository.create(activeId);
+        final E archivedEntity = repository.create(archivedId);
+        final E deletedEntity = repository.create(deletedId);
+        delete((EventPlayingEntity) deletedEntity);
+        archive((EventPlayingEntity) archivedEntity);
+
+        // Fill the storage
+        repository.store(activeEntity);
+        repository.store(archivedEntity);
+        repository.store(deletedEntity);
+
+        final CompositeColumnFilter columnFilter = all(eq(archived.name(), false));
+        final EntityFilters filters = EntityFilters.newBuilder()
+                                                   .addFilter(columnFilter)
+                                                   .build();
+
+        final Collection<E> found = repository.find(filters,
+                                                          FieldMask.getDefaultInstance());
+        // Check results
+        assertSize(2, found);
+        assertContainsAll(found, activeEntity, deletedEntity);
     }
 }

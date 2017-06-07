@@ -20,9 +20,13 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.collect.Multimap;
 import com.google.protobuf.Any;
 import io.spine.annotation.Internal;
 import io.spine.base.Identifier;
+import io.spine.client.ColumnFilter;
+import io.spine.client.CompositeColumnFilter;
+import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
@@ -30,11 +34,12 @@ import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.HashMultimap.create;
+import static com.google.common.primitives.Primitives.wrap;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -58,28 +63,52 @@ public final class EntityQueries {
      * @return new instance of the {@code EntityQuery} with the specified attributes
      */
     public static <I> EntityQuery<I> from(EntityFilters entityFilters,
-                                   Class<? extends Entity> entityClass) {
+                                          Class<? extends Entity> entityClass) {
         checkNotNull(entityFilters);
         checkNotNull(entityClass);
 
-        final Map<Column<?>, Object> queryParams = toQueryParams(entityFilters, entityClass);
+        final QueryParameters queryParams = toQueryParams(entityFilters, entityClass);
         final Collection<I> ids = toGenericIdValues(entityFilters);
 
         final EntityQuery<I> result = EntityQuery.of(ids, queryParams);
         return result;
     }
 
-    private static Map<Column<?>, Object> toQueryParams(EntityFilters entityFilters,
-                                                        Class<? extends Entity> entityClass) {
-        final Map<Column<?>, Object> queryParams =
-                new HashMap<>(entityFilters.getColumnFilterCount());
-        final Map<String, Any> columnValues = entityFilters.getColumnFilterMap();
-        for (Map.Entry<String, Any> filter : columnValues.entrySet()) {
-            final Column<?> column = Columns.findColumn(entityClass, filter.getKey());
-            final Object filterValues = TypeConverter.toObject(filter.getValue(), column.getType());
-            queryParams.put(column, filterValues);
+    private static QueryParameters toQueryParams(EntityFilters entityFilters,
+                                                 Class<? extends Entity> entityClass) {
+        final QueryParameters.Builder builder = QueryParameters.newBuilder();
+
+        for (CompositeColumnFilter filter : entityFilters.getFilterList()) {
+            final Multimap<Column, ColumnFilter> columnFilters = splitFilters(filter, entityClass);
+            final CompositeOperator operator = filter.getOperator();
+            final CompositeQueryParameter parameter =
+                    CompositeQueryParameter.from(columnFilters, operator);
+            builder.add(parameter);
         }
-        return queryParams;
+        return builder.build();
+    }
+
+    private static Multimap<Column, ColumnFilter> splitFilters(
+            CompositeColumnFilter filter,
+            Class<? extends Entity> entityClass) {
+        final Multimap<Column, ColumnFilter> columnFilters = create(filter.getFilterCount(), 1);
+        for (ColumnFilter columnFilter : filter.getFilterList()) {
+            final Column column = Columns.findColumn(entityClass, columnFilter.getColumnName());
+            checkFilterType(column, columnFilter);
+            columnFilters.put(column, columnFilter);
+        }
+        return columnFilters;
+    }
+
+    private static void checkFilterType(Column column, ColumnFilter filter) {
+        final Class<?> expectedType = column.getType();
+        final Any filterConvent = filter.getValue();
+        final Object filterValue = TypeConverter.toObject(filterConvent, expectedType);
+        final Class<?> actualType = filterValue.getClass();
+        checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
+                      "Column type mismatch. Column %s cannot have value %s.",
+                      column,
+                      filterValue);
     }
 
     private static <I> Collection<I> toGenericIdValues(EntityFilters entityFilters) {

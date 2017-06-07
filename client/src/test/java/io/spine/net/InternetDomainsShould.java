@@ -49,7 +49,7 @@ public class InternetDomainsShould {
 
     @Test
     public void provide_matching_pattern() {
-        assertTrue(pattern().matcher("spine3.org")
+        assertTrue(pattern().matcher("spine.io")
                             .matches());
 
         assertTrue(pattern().matcher("teamdev.com").matches());
