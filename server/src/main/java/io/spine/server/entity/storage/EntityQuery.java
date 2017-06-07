@@ -24,7 +24,6 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableSet;
-import com.google.protobuf.FieldMask;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.EntityWithLifecycle;
 
@@ -70,7 +69,7 @@ import static io.spine.server.storage.LifecycleFlagField.deleted;
  *
  * <p>If the query specifies the values of
  * the {@linkplain io.spine.server.entity.LifecycleFlags Entity lifecycle Columns}, then
- * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery, FieldMask)
+ * the {@linkplain io.spine.server.storage.RecordStorage#readAll(EntityQuery, com.google.protobuf.FieldMask)
  * default behavior} will be overridden i.e. the records resulting to such query may or may not be
  * active.
  *
