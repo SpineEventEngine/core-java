@@ -41,6 +41,8 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static io.spine.server.storage.LifecycleFlagField.archived;
+import static io.spine.server.storage.LifecycleFlagField.deleted;
 
 /**
  * @author Alexander Yevsyukov
@@ -131,10 +133,10 @@ public class AggregateRepositoryViewsShould {
         @Apply
         private void on(StringValue eventMessage) {
             final String msg = SHRepository.getMessage(eventMessage);
-            if ("archived".equalsIgnoreCase(msg)) {
+            if (archived.name().equalsIgnoreCase(msg)) {
                 setArchived(true);
             }
-            if ("deleted".equalsIgnoreCase(msg)) {
+            if (deleted.name().equalsIgnoreCase(msg)) {
                 setDeleted(true);
             }
             getBuilder().setValue(msg);

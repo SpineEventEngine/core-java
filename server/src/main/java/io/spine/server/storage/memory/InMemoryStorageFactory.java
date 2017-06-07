@@ -20,14 +20,12 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.base.EventId;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.StandStorage;
-import io.spine.server.storage.EventRecordStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 
@@ -93,12 +91,6 @@ public class InMemoryStorageFactory implements StorageFactory {
         final InMemoryRecordStorage<I> entityStorage =
                 InMemoryRecordStorage.newInstance(multitenant);
         return InMemoryProjectionStorage.newInstance(entityStorage);
-    }
-
-    @Override
-    public EventRecordStorage createEventStorage(RecordStorage<EventId> delegate) {
-        final EventRecordStorage eventRecordStorage = new InMemoryEventRecordStorage(delegate);
-        return eventRecordStorage;
     }
 
     @Override

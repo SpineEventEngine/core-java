@@ -89,7 +89,7 @@ public final class ColumnTypeRegistry<C extends ColumnType> {
      * @param field the {@link Column} to get type conversion strategy for
      * @return the {@link ColumnType} for the given {@link Column}
      */
-    public C get(Column<?> field) {
+    public C get(Column field) {
         checkNotNull(field);
 
         Class javaType = field.getType();

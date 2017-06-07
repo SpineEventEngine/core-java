@@ -23,10 +23,12 @@ package io.spine.server.entity.storage;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 
 import javax.annotation.Nullable;
+import java.io.Serializable;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -36,11 +38,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-public final class EntityRecordWithColumns {
+public final class EntityRecordWithColumns implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private final EntityRecord record;
-
-    private final ImmutableMap<String, Column.MemoizedValue<?>> storageFields;
+    private final ImmutableMap<String, Column.MemoizedValue> storageFields;
     private final boolean hasStorageFields;
 
     /**
@@ -50,7 +53,7 @@ public final class EntityRecordWithColumns {
      * @param columns {@linkplain Columns#from(Entity) {@link Column Columns} map} to pack
      */
     private EntityRecordWithColumns(EntityRecord record,
-                                    Map<String, Column.MemoizedValue<?>> columns) {
+                                    Map<String, Column.MemoizedValue> columns) {
         this.record = checkNotNull(record);
         this.storageFields = ImmutableMap.copyOf(columns);
         this.hasStorageFields = true;
@@ -77,7 +80,7 @@ public final class EntityRecordWithColumns {
      * {@linkplain Column Column values} from the given {@linkplain Entity}.
      */
     public static EntityRecordWithColumns create(EntityRecord record, Entity entity) {
-        final Map<String, Column.MemoizedValue<?>> columns = Columns.from(entity);
+        final Map<String, Column.MemoizedValue> columns = Columns.from(entity);
         return of(record, columns);
     }
 
@@ -99,7 +102,7 @@ public final class EntityRecordWithColumns {
     @VisibleForTesting
     static EntityRecordWithColumns of(
             EntityRecord record,
-            Map<String, Column.MemoizedValue<?>> storageFields) {
+            Map<String, Column.MemoizedValue> storageFields) {
         return new EntityRecordWithColumns(record, storageFields);
     }
 
@@ -107,13 +110,19 @@ public final class EntityRecordWithColumns {
         return record;
     }
 
-    public Map<String, Column<?>> getColumns() {
+    public Map<String, Column> getColumns() {
         return Maps.transformEntries(storageFields,
                                      ColumnTransformer.INSTANCE);
     }
 
+    /**
+     * Retrieves the memoized values of the Entity Columns.
+     *
+     * @see ColumnRecords for the recommended way of working with the column values
+     */
+    @Internal
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // Immutable structure
-    Map<String, Column.MemoizedValue<?>> getColumnValues() {
+    public Map<String, Column.MemoizedValue> getColumnValues() {
         return storageFields;
     }
 
@@ -140,9 +149,9 @@ public final class EntityRecordWithColumns {
             return false;
         }
 
-        EntityRecordWithColumns envelope = (EntityRecordWithColumns) o;
+        EntityRecordWithColumns other = (EntityRecordWithColumns) o;
 
-        return getRecord().equals(envelope.getRecord());
+        return getRecord().equals(other.getRecord());
     }
 
     @Override
@@ -151,13 +160,13 @@ public final class EntityRecordWithColumns {
     }
 
     private enum ColumnTransformer
-            implements Maps.EntryTransformer<String, Column.MemoizedValue<?>, Column<?>> {
+            implements Maps.EntryTransformer<String, Column.MemoizedValue, Column> {
 
         INSTANCE;
 
         @Override
-        public Column<?> transformEntry(@Nullable String s,
-                @Nullable Column.MemoizedValue<?> memoizedValue) {
+        public Column transformEntry(@Nullable String s,
+                                     @Nullable Column.MemoizedValue memoizedValue) {
             checkNotNull(s);
             checkNotNull(memoizedValue);
             return memoizedValue.getSourceColumn();

@@ -104,9 +104,9 @@ public class ColumnTypeRegistryShould {
         assertEquals(integerColumnType, intColumnType);
     }
 
-    private static <T> Column<T> mockProperty(Class<T> cls) {
+    private static <T> Column mockProperty(Class<T> cls) {
         @SuppressWarnings("unchecked")
-        final Column<T> column = (Column<T>) mock(Column.class);
+        final Column column = (Column) mock(Column.class);
         when(column.getType()).thenReturn(cls);
         return column;
     }

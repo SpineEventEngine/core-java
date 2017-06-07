@@ -20,16 +20,23 @@
 
 package io.spine.server.entity.storage;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Objects;
+import com.google.gson.internal.Primitives;
 import io.spine.annotation.Internal;
 import io.spine.server.entity.Entity;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.Serializable;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static java.lang.String.format;
 
 /**
@@ -96,6 +103,8 @@ import static java.lang.String.format;
  * and pass the instance of the registry into the
  * {@link io.spine.server.storage.StorageFactory StorageFactory} on creation.
  *
+ * <p>Note that the type of a Column must either be primitive or implement {@link Serializable}.
+ *
  * <h2>Nullability</h2>
  *
  * <p>A Column may turn into {@code null} value if the getter which declares it is annotated as
@@ -124,12 +133,33 @@ import static java.lang.String.format;
  * @see ColumnType
  * @author Dmytro Dashenkov
  */
-public class Column<T> {
+public class Column implements Serializable {
+
+    private static final long serialVersionUID = 0L;
 
     private static final String GETTER_PREFIX_REGEX = "(get)|(is)";
     private static final Pattern GETTER_PREFIX_PATTERN = Pattern.compile(GETTER_PREFIX_REGEX);
 
-    private final Method getter;
+    /**
+     * <p>The getter which declares this {@code Column}.
+     *
+     * <p>This field contains the getter method declared in an {@link Entity} class, which
+     * represents the Entity Column described by this instance of {@link Column}.
+     *
+     * <p>The equality of this field in two different instances of {@code Column} determine
+     * the equality of the instances. More formally for any non-null instances of {@code Column}
+     * {@code c1} and {@code c2} {@code c1.getter.equals(c2.getter) == c1.equals(c2)}.
+     *
+     * <p>This field is left non-final for serialization purposes.
+     *
+     * <p>The only place where this field is updated, except the constructor, is
+     * {@link #readObject(ObjectInputStream)} method.
+     */
+    private /*final*/ transient Method getter;
+
+    private final Class<?> entityType;
+
+    private final String getterMethodName;
 
     private final String name;
 
@@ -137,6 +167,8 @@ public class Column<T> {
 
     private Column(Method getter, String name, boolean nullable) {
         this.getter = getter;
+        this.entityType = getter.getDeclaringClass();
+        this.getterMethodName = getter.getName();
         this.name = name;
         this.nullable = nullable;
     }
@@ -145,14 +177,14 @@ public class Column<T> {
      * Creates new instance of the {@code Column} from the given getter method.
      *
      * @param getter the getter of the Column
-     * @param <T>    the type of the Column
      * @return new instance of the {@code Column} reflecting the given property
      */
-    public static <T> Column<T> from(Method getter) {
+    public static Column from(Method getter) {
         checkNotNull(getter);
+        checkType(getter);
         final String name = nameFromGetterName(getter.getName());
         final boolean nullable = getter.isAnnotationPresent(Nullable.class);
-        final Column<T> result = new Column<>(getter, name, nullable);
+        final Column result = new Column(getter, name, nullable);
 
         return result;
     }
@@ -168,6 +200,15 @@ public class Column<T> {
         }
         result = Character.toLowerCase(result.charAt(0)) + result.substring(1);
         return result;
+    }
+
+    private static void checkType(Method getter) {
+        final Class<?> returnType = getter.getReturnType();
+        final Class<?> wrapped = Primitives.wrap(returnType);
+        checkState(Serializable.class.isAssignableFrom(wrapped),
+                   format("Cannot create Column of non-serializable type %s by method %s.",
+                          returnType,
+                          getter));
     }
 
     /**
@@ -198,10 +239,10 @@ public class Column<T> {
      * @param source the {@link Entity} to get the Columns from
      * @return the value of the Column represented by this instance of {@code Column}
      */
-    public T getFor(Entity<?, ?> source) {
+    public Serializable getFor(Entity<?, ?> source) {
         try {
             @SuppressWarnings("unchecked")
-            final T result = (T) getter.invoke(source);
+            final Serializable result = (Serializable) getter.invoke(source);
             if (!nullable) {
                 checkNotNull(result, format("Not null getter %s returned null.", getter.getName()));
             }
@@ -226,20 +267,20 @@ public class Column<T> {
      * into {@link MemoizedValue}
      * @see MemoizedValue
      */
-    public MemoizedValue<T> memoizeFor(Entity<?, ?> source) {
-        final T value = getFor(source);
-        final MemoizedValue<T> result = new MemoizedValue<>(this, value);
+    MemoizedValue memoizeFor(Entity<?, ?> source) {
+        final Serializable value = getFor(source);
+        final MemoizedValue result = new MemoizedValue(this, value);
         return result;
     }
 
     /**
      * @return the type of the Column
      */
-    @SuppressWarnings("unchecked")
-    public Class<T> getType() {
-        return (Class<T>) getter.getReturnType();
+    public Class getType() {
+        return getter.getReturnType();
     }
 
+    @SuppressWarnings("NonFinalFieldReferenceInEquals") // `getter` field is effectively final
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -248,15 +289,42 @@ public class Column<T> {
         if (o == null || getClass() != o.getClass()) {
             return false;
         }
+        Column column = (Column) o;
+        return Objects.equal(getter, column.getter);
+    }
 
-        Column<?> column = (Column<?>) o;
-
-        return getter.equals(column.getter);
+    @SuppressWarnings("NonFinalFieldReferencedInHashCode") // `getter` field is effectively final
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getter);
     }
 
     @Override
-    public int hashCode() {
-        return getter.hashCode();
+    public String toString() {
+        final StringBuilder sb = new StringBuilder();
+        sb.append(entityType.getSimpleName())
+          .append('.')
+          .append(getName());
+        return sb.toString();
+    }
+
+    private void readObject(ObjectInputStream inputStream) throws IOException,
+                                                                  ClassNotFoundException {
+        inputStream.defaultReadObject();
+        getter = restoreGetter();
+    }
+
+    private Method restoreGetter() {
+        checkState(getter == null, "Getter method is already restored.");
+        try {
+            final Method method = entityType.getMethod(getterMethodName);
+            return method;
+        } catch (NoSuchMethodException e) {
+            final String errorMsg = format("Cannot find method %s.%s().",
+                                           entityType.getCanonicalName(),
+                                           getterMethodName);
+            throw new IllegalStateException(errorMsg, e);
+        }
     }
 
     /**
@@ -264,24 +332,26 @@ public class Column<T> {
      *
      * <p>The class associates the Column value with its metadata i.e. {@linkplain Column}.
      *
-     * @param <T> the type of the Column
      * @see Column#memoizeFor(Entity)
      */
     @Internal
-    static class MemoizedValue<T> {
+    public static class MemoizedValue implements Serializable {
 
-        private final Column<T> sourceColumn;
+        private static final long serialVersionUID = 0L;
+
+        private final Column sourceColumn;
 
         @Nullable
-        private final T value;
+        private final Serializable value;
 
-        private MemoizedValue(Column<T> sourceColumn, @Nullable T value) {
+        @VisibleForTesting
+        MemoizedValue(Column sourceColumn, @Nullable Serializable value) {
             this.sourceColumn = sourceColumn;
             this.value = value;
         }
 
         @Nullable
-        public T getValue() {
+        public Serializable getValue() {
             return value;
         }
 
@@ -292,8 +362,26 @@ public class Column<T> {
         /**
          * @return the {@link Column} representing this Column
          */
-        Column<T> getSourceColumn() {
+        public Column getSourceColumn() {
             return sourceColumn;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            MemoizedValue value1 = (MemoizedValue) o;
+            return Objects.equal(getSourceColumn(), value1.getSourceColumn()) &&
+                    Objects.equal(getValue(), value1.getValue());
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(getSourceColumn(), getValue());
         }
     }
 }

@@ -22,6 +22,7 @@ package io.spine.server.projection;
 
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableCollection;
+import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
@@ -44,6 +45,7 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
 import io.spine.test.TestActorRequestFactory;
@@ -54,13 +56,12 @@ import io.spine.test.projection.event.ProjectCreated;
 import io.spine.test.projection.event.ProjectStarted;
 import io.spine.test.projection.event.TaskAdded;
 import io.spine.testdata.TestBoundedContextFactory;
-import io.spine.time.Durations2;
-import io.spine.time.Time;
 import io.spine.type.EventClass;
 import io.spine.users.TenantId;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -68,6 +69,9 @@ import java.util.List;
 import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
+import static com.google.protobuf.util.Timestamps.add;
+import static com.google.protobuf.util.Timestamps.subtract;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.projection.ProjectionRepository.Status.CATCHING_UP;
 import static io.spine.server.projection.ProjectionRepository.Status.CLOSED;
@@ -76,6 +80,9 @@ import static io.spine.server.projection.ProjectionRepository.Status.ONLINE;
 import static io.spine.server.projection.ProjectionRepository.Status.STORAGE_ASSIGNED;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.testdata.TestBoundedContextFactory.MultiTenant.newBoundedContext;
+import static io.spine.time.Durations2.nanos;
+import static io.spine.time.Durations2.seconds;
+import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;
 import static java.lang.String.valueOf;
 import static org.junit.Assert.assertEquals;
@@ -83,9 +90,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -128,7 +137,9 @@ public class ProjectionRepositoryShould
     @Override
     protected TestProjection createEntity() {
         final TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                               .withId(createId(42))
+                                               .withId(ProjectId.newBuilder()
+                                                                .setId(newUuid())
+                                                                .build())
                                                .build();
         return projection;
     }
@@ -139,8 +150,8 @@ public class ProjectionRepositoryShould
 
         for (int i = 0; i < count; i++) {
             final TestProjection projection = Given.projectionOfClass(TestProjection.class)
-                                                                               .withId(createId(i))
-                                                                               .build();
+                                                   .withId(createId(i))
+                                                   .build();
             projections.add(projection);
         }
 
@@ -171,6 +182,10 @@ public class ProjectionRepositoryShould
 
     private Event createEvent(Any producerId, Message eventMessage) {
         return newEventFactory(producerId).createEvent(eventMessage);
+    }
+
+    private Event createEvent(Any producerId, Message eventMessage, Timestamp when) {
+        return newEventFactory(producerId).createEvent(eventMessage, null, when);
     }
 
     private void appendEvent(EventStore eventStore, Event event) {
@@ -246,7 +261,8 @@ public class ProjectionRepositoryShould
                                        .getActorContext()
                                        .getTenantId();
         if (boundedContext.isMultitenant()) {
-            boundedContext.getTenantIndex().keep(tenantId);
+            boundedContext.getTenantIndex()
+                          .keep(tenantId);
         }
     }
 
@@ -287,7 +303,6 @@ public class ProjectionRepositoryShould
     @Test
     public void have_CREATED_status_by_default() {
         final TestProjectionRepository repository = new TestProjectionRepository();
-
         assertEquals(CREATED, repository.getStatus());
     }
 
@@ -391,7 +406,7 @@ public class ProjectionRepositoryShould
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // because the test checks that the function is present.
+    // because the test checks that the function is present.
     @Test
     public void obtain_id_set_function_after_put() {
         repository().addIdSetFunction(ProjectCreated.class, idSetForCreateProject);
@@ -418,7 +433,7 @@ public class ProjectionRepositoryShould
         appendEvent(boundedContext.getEventBus()
                                   .getEventStore(), event);
         // Set up repository
-        final Duration duration = Durations2.seconds(10L);
+        final Duration duration = seconds(10L);
         final ProjectionRepository repository = spy(
                 new ManualCatchupProjectionRepository(duration));
         boundedContext.register(repository);
@@ -435,21 +450,10 @@ public class ProjectionRepositoryShould
         // Set up bounded context
         final BoundedContext boundedContext =
                 TestBoundedContextFactory.MultiTenant.newBoundedContext();
-        final int eventsCount = 10;
-        final EventStore eventStore = boundedContext.getEventBus()
-                                                    .getEventStore();
-        for (int i = 0; i < eventsCount; i++) {
-            final ProjectId projectId = ProjectId.newBuilder()
-                                                 .setId(valueOf(i))
-                                                 .build();
-            final Message eventMessage = ProjectCreated.newBuilder()
-                                                       .setProjectId(projectId)
-                                                       .build();
-            final Event event = createEvent(pack(projectId), eventMessage);
-            appendEvent(eventStore, event);
-        }
+        final int eventCount = 10;
+        setUpEvents(boundedContext, eventCount);
         // Set up repository
-        final Duration duration = Durations2.nanos(1L);
+        final Duration duration = nanos(1L);
         final ProjectionRepository repository =
                 spy(new ManualCatchupProjectionRepository(duration));
         boundedContext.register(repository);
@@ -457,6 +461,29 @@ public class ProjectionRepositoryShould
 
         // Check bulk write
         verify(repository, never()).store(any(Projection.class));
+    }
+
+    @SuppressWarnings("ConstantConditions") // argument matcher always returns null
+    @Test
+    public void catch_up_only_with_the_freshest_events() {
+        final int oldEventsCount = 7;
+        final int newEventsCount = 11;
+        final Timestamp lastCatchUpTime = getCurrentTime();
+        final Duration delta = seconds(1);
+        final Timestamp oldEventsTime = subtract(lastCatchUpTime, delta);
+        final Timestamp newEventsTime = add(lastCatchUpTime, delta);
+        setUpEvents(boundedContext, oldEventsCount, oldEventsTime);
+        final Collection<ProjectId> ids = setUpEvents(boundedContext,
+                                                      newEventsCount,
+                                                      newEventsTime);
+        final ManualCatchupProjectionRepository repo =
+                spy(new ManualCatchupProjectionRepository());
+        repo.setBoundedContext(boundedContext);
+        repo.projectionStorage().writeLastHandledEventTime(lastCatchUpTime);
+
+        repo.catchUp();
+
+        verify(repo, times(newEventsCount)).find(argThat(in(ids)));
     }
 
     @Test
@@ -472,7 +499,7 @@ public class ProjectionRepositoryShould
 
     @Test
     public void convert_null_timestamp_to_default() {
-        final Timestamp timestamp = Time.getCurrentTime();
+        final Timestamp timestamp = getCurrentTime();
         assertEquals(timestamp, ProjectionRepository.nullToDefault(timestamp));
         assertEquals(Timestamp.getDefaultInstance(), ProjectionRepository.nullToDefault(null));
     }
@@ -482,7 +509,8 @@ public class ProjectionRepositoryShould
         final NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
-        assertTrue(repo.loadAll().isEmpty());
+        assertTrue(repo.loadAll()
+                       .isEmpty());
 
         final Event event = createEvent(PRODUCER_ID, projectCreated());
         repo.dispatch(EventEnvelope.of(event));
@@ -495,6 +523,46 @@ public class ProjectionRepositoryShould
         final ManualCatchupProjectionRepository repo =
                 new ManualCatchupProjectionRepository();
         return repo;
+    }
+
+    @CanIgnoreReturnValue
+    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext,
+                                              int eventCount,
+                                              Timestamp when) {
+        // Set up bounded context
+        final EventStore eventStore = boundedContext.getEventBus()
+                                                    .getEventStore();
+        final Collection<ProjectId> ids = new LinkedList<>();
+        for (int i = 0; i < eventCount; i++) {
+            final ProjectId projectId = ProjectId.newBuilder()
+                                                 .setId(valueOf(i))
+                                                 .build();
+            ids.add(projectId);
+            final Message eventMessage = ProjectCreated.newBuilder()
+                                                       .setProjectId(projectId)
+                                                       .build();
+            final Event event = createEvent(pack(projectId), eventMessage, when);
+            appendEvent(eventStore, event);
+        }
+        return ids;
+    }
+
+    @CanIgnoreReturnValue
+    private Collection<ProjectId> setUpEvents(BoundedContext boundedContext, int eventCount) {
+        return setUpEvents(boundedContext, eventCount, getCurrentTime());
+    }
+
+    private StorageFactory storageFactory() {
+        return StorageFactorySwitch.get(boundedContext.isMultitenant());
+    }
+
+    private static ArgumentMatcher<ProjectId> in(final Collection<ProjectId> expectedValues) {
+        return new ArgumentMatcher<ProjectId>() {
+            @Override
+            public boolean matches(ProjectId argument) {
+                return expectedValues.contains(argument);
+            }
+        };
     }
 
     private static ProjectStarted projectStarted() {
