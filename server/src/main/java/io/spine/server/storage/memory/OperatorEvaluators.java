@@ -40,7 +40,7 @@ import static java.lang.String.format;
  */
 final class OperatorEvaluators {
 
-    private static final ImmutableMap<Operator, OperatorEvaluator> COMPARATORS =
+    private static final ImmutableMap<Operator, OperatorEvaluator> EVALUATORS =
             ImmutableMap.<Operator, OperatorEvaluator>builder()
                         .put(Operator.EQUAL, Equal.operation())
                         .put(Operator.GREATER_THAN, GreaterThan.operation())
@@ -63,7 +63,7 @@ final class OperatorEvaluators {
      */
     static OperatorEvaluator of(Operator operator) throws IllegalArgumentException {
         checkNotNull(operator);
-        final OperatorEvaluator comparator = COMPARATORS.get(operator);
+        final OperatorEvaluator comparator = EVALUATORS.get(operator);
         checkArgument(comparator != null, "Unsupported operator %s.", operator);
         return comparator;
     }

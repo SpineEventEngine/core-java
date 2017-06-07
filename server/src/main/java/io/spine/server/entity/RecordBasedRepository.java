@@ -290,10 +290,19 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * <p>If the {@code src} instance
      * {@linkplain EntityQuery#isLifecycleAttributesSet() contains the lifecycle attributes}, then
-     * it is returned with no change. Otherwise - a new instance of {@link EntityQuery} is returned
+     * it is returned with no change. Otherwise - a new instance containing the default values for
+     * the Lifecycle attributes is returned.
+     *
+     * <p>The default values are:
+     * <pre>
+     *     {@code
+     *     archived -> false,
+     *     deleted  -> false
+     *     }
+     * </pre>
      *
      * <p>If the type of the Entity which this repository works with is not derived from
-     * the {@link EntityWithLifecycle} type, then no lifecycle attributes are appended and
+     * the {@link EntityWithLifecycle}, then no lifecycle attributes are appended and
      * the {@code src} query is returned.
      *
      * @param src the source {@link EntityQuery} to take the parameters from

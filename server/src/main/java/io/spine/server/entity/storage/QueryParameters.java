@@ -45,7 +45,7 @@ public final class QueryParameters implements Iterable<CompositeQueryParameter>,
     private final ImmutableCollection<CompositeQueryParameter> parameters;
 
     /**
-     * A flag that shows if current instance of {@code CompositeQueryParameter} has
+     * A flag that shows if the current instance of {@code CompositeQueryParameter} has
      * the {@link io.spine.server.storage.LifecycleFlagField lifecycle attributes} set of not.
      *
      * <p>This flag turns into {@code true} if at least one of the underlying
