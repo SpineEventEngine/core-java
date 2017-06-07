@@ -84,7 +84,7 @@ public class QueryServiceShould {
         final Given.ProjectAggregateRepository projectRepo =
                 new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
-        projectDetailsRepository = spy(new ProjectDetailsRepository(projectsContext));
+        projectDetailsRepository = spy(new ProjectDetailsRepository());
         projectsContext.register(projectDetailsRepository);
 
         boundedContexts.add(projectsContext);
@@ -188,21 +188,11 @@ public class QueryServiceShould {
 
     private static class ProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
-
-        private ProjectDetailsRepository(BoundedContext boundedContext) {
-            super();
-        }
     }
 
     private static class ProjectDetails
             extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
 
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
         public ProjectDetails(ProjectId id) {
             super(id);
         }
@@ -214,6 +204,9 @@ public class QueryServiceShould {
         }
     }
 
+    /**
+     * The stub observer remembering response, throwable, and completion of query execution.
+     */
     private static class TestQueryResponseObserver implements StreamObserver<QueryResponse> {
 
         private QueryResponse responseHandled;

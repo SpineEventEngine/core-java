@@ -39,7 +39,7 @@ import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.ProjectionRepository.Status;
-import io.spine.server.projection.given.ProjectionRepositoryTestEnv;
+import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
@@ -170,12 +170,16 @@ public class ProjectionRepositoryShould
         TestProjection.clearMessageDeliveryHistory();
     }
 
-    @Override
+    /**
+     * Closes the BoundedContest and shuts down the gRPC service.
+     *
+     * <p>The {@link #tearDown()} method of the super class will be invoked by JUnit automatically
+     * after calling this method.
+     */
     @After
-    public void tearDown() throws Exception {
+    public void shutDown() throws Exception {
         boundedContext.close();
         grpcServer.shutdown();
-        super.tearDown();
     }
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {
@@ -249,8 +253,7 @@ public class ProjectionRepositoryShould
      * Simulates updating TenantIndex, which occurs during command processing
      * in multi-tenant context.
      */
-    private static void keepTenantIdFromEvent(BoundedContext boundedContext,
-                                              Event event) {
+    private static void keepTenantIdFromEvent(BoundedContext boundedContext, Event event) {
         final TenantId tenantId = event.getContext()
                                        .getCommandContext()
                                        .getActorContext()
@@ -337,7 +340,8 @@ public class ProjectionRepositoryShould
     }
 
     static void ensureCatchesUpFromEventStorage(
-            TenantId tenantId, ProjectionRepository<ProjectId, TestProjection, Project> repo,
+            TenantId tenantId,
+            ProjectionRepository<ProjectId, TestProjection, Project> repo,
             BoundedContext boundedContext) {
 
         final TestEventFactory eventFactory = newEventFactory(tenantId, PRODUCER_ID);
@@ -408,8 +412,6 @@ public class ProjectionRepositoryShould
     }
 
     @Test
-    @SuppressWarnings("OptionalGetWithoutIsPresent")
-        // because the test checks that the function is present.
     public void obtain_id_set_function_after_put() {
         repository().addIdSetFunction(ProjectCreated.class, creteProjectTargets);
 
@@ -448,13 +450,8 @@ public class ProjectionRepositoryShould
         final Event event = createEvent(tenantId(), projectCreated(), PRODUCER_ID);
         repo.dispatch(EventEnvelope.of(event));
 
-        final ImmutableCollection<ProjectionRepositoryTestEnv.NoOpTaskNamesProjection> items = repo.loadAll();
+        final ImmutableCollection<NoOpTaskNamesProjection> items = repo.loadAll();
         assertTrue(items.isEmpty());
-    }
-
-
-    private StorageFactory storageFactory() {
-        return boundedContext.getStorageFactory();
     }
 
     /**
