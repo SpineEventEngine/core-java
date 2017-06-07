@@ -35,7 +35,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
@@ -206,9 +205,9 @@ public abstract class EventStore implements AutoCloseable {
         @Override
         public EventStore build() {
             checkState();
-            final LocalImpl result = new LocalImpl(getStreamExecutor(),
-                                                   getStorageFactory(),
-                                                   getLogger());
+            final LocalEventStore result = new LocalEventStore(getStreamExecutor(),
+                                                               getStorageFactory(),
+                                                               getLogger());
             return result;
         }
 
@@ -242,51 +241,6 @@ public abstract class EventStore implements AutoCloseable {
         return streamExecutor;
     }
 
-    /** A locally running {@code EventStore} implementation. */
-    private static class LocalImpl extends EventStore {
-
-        private final ERepository storage;
-
-        private LocalImpl(Executor catchUpExecutor,
-                          StorageFactory storageFactory,
-                          @Nullable Logger logger) {
-            super(catchUpExecutor, logger);
-
-            final ERepository eventRepository = new ERepository();
-            eventRepository.initStorage(storageFactory);
-            this.storage = eventRepository;
-        }
-
-        @Override
-        protected void store(Event event) {
-            storage.store(event);
-        }
-
-        @Override
-        protected Iterator<Event> iterator(EventStreamQuery query) {
-            return storage.iterator(query);
-        }
-
-        /**
-         * Notifies all the subscribers and closes the underlying storage.
-         *
-         * @throws IOException if the attempt to close the storage throws an exception
-         */
-        @Override
-        public void close() throws Exception {
-            storage.close();
-        }
-
-        /*
-         * Beam support
-         *****************/
-
-        @Override
-        public EventStoreIO.Query query(TenantId tenantId) {
-            return storage.query(tenantId);
-        }
-    }
-
     /**
      * The builder of {@code EventStore} instance exposed as gRPC service.
      *
@@ -297,9 +251,9 @@ public abstract class EventStore implements AutoCloseable {
         @Override
         public ServerServiceDefinition build() {
             checkState();
-            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(),
-                                                       getStorageFactory(),
-                                                       getLogger());
+            final LocalEventStore eventStore = new LocalEventStore(getStreamExecutor(),
+                                                                   getStorageFactory(),
+                                                                   getLogger());
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
             return result;
@@ -337,9 +291,9 @@ public abstract class EventStore implements AutoCloseable {
         /* as we override default implementation with `unimplemented` status. */
     private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
 
-        private final LocalImpl eventStore;
+        private final LocalEventStore eventStore;
 
-        private GrpcService(LocalImpl eventStore) {
+        private GrpcService(LocalEventStore eventStore) {
             super();
             this.eventStore = eventStore;
         }

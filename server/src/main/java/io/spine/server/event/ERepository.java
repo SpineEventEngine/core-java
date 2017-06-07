@@ -172,11 +172,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      * Beam Support
      *********************/
 
-    EventStoreIO.Query query(TenantId tenantId) {
-        return EventStoreIO.Query.of(queryFn(tenantId));
-    }
-
-    private EventStoreIO.QueryFn queryFn(TenantId tenantId) {
+    EventStoreIO.QueryFn queryFn(TenantId tenantId) {
 //        final EventRecordStorage storage = recordStorage();
 //        return storage.queryFn(tenantId);
 
