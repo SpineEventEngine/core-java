@@ -33,9 +33,9 @@ import io.spine.server.event.grpc.EventStoreGrpc;
  */
 class GrpcService extends EventStoreGrpc.EventStoreImplBase {
 
-    private final LocalEventStore eventStore;
+    private final EventStore eventStore;
 
-    GrpcService(LocalEventStore eventStore) {
+    GrpcService(EventStore eventStore) {
         super();
         this.eventStore = eventStore;
     }

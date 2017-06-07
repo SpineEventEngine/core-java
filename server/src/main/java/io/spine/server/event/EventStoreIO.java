@@ -54,8 +54,7 @@ public class EventStoreIO {
     }
 
     public static Query query(TenantId tenantId, EventStore eventStore) {
-        //TODO:2017-06-07:alexander.yevsyukov: Merge LocalEventStore into EventStore. We do not need multiple implementations.
-        final ERepository storage = ((LocalEventStore) eventStore).getStorage();
+        final ERepository storage = eventStore.getStorage();
 
         return EventStoreIO.Query.of(storage.queryFn(tenantId));
     }
