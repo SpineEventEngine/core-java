@@ -316,14 +316,14 @@ public class BoundedContextShould {
     @Test(expected = IllegalStateException.class)
     public void throw_ISE_when_no_repository_registered() {
         // Attempt to get a repository without registering.
-        boundedContext.getAggregateRepository(Project.class);
+        boundedContext.findRepository(Project.class);
     }
 
     @Test
     public void do_not_expose_invisible_aggregate() {
         boundedContext.register(new BoundedContextTestEnv.SecretProjectRepository());
 
-        assertFalse(boundedContext.getAggregateRepository(SecretProject.class)
+        assertFalse(boundedContext.findRepository(SecretProject.class)
                                   .isPresent());
     }
 

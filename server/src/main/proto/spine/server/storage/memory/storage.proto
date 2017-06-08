@@ -28,18 +28,17 @@ option java_outer_classname = "StorageProto";
 // Put generated code under the 'grpc' sub-package, which is annotated @SPI.
 option java_package = "io.spine.server.storage.memory.grpc";
 
-import "google/protobuf/any.proto";
-import "google/protobuf/empty.proto";
 import "google/protobuf/timestamp.proto";
 
 import "spine/options.proto";
+import "spine/client/entities.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";
 import "spine/users/tenant_id.proto";
 import "spine/server/entity/entity.proto";
 import "spine/server/event/event_stream_query.proto";
 
-// Read/Write request for an entity.
+// Read/Write/Find request for a Record Storage.
 message RecordStorageRequest {
 
     // The ID of a tenant.
@@ -48,14 +47,19 @@ message RecordStorageRequest {
     // The type URL of the entity state.
     string entity_state_type_url = 2;
 
-    // The ID of the entity to read.
-    google.protobuf.Any entity_id = 3;
+    oneof kind {
+        // The ID of the entity to read.
+        spine.client.EntityId read = 3;
 
-    // The record to store. This field is populated for write request.
-    server.entity.EntityRecord record = 4;
+        // The record to store.
+        server.entity.EntityRecord write = 4;
+
+        // Find multiple records.
+        spine.client.EntityFilters query = 5;
+    }
 }
 
-// The service to read/write entity records.
+// The service to read/write/find entity records.
 service RecordStorageService {
     option (SPI_service) = true;
 
@@ -64,6 +68,9 @@ service RecordStorageService {
 
     // Writes `EntityRecord` to the storage.
     rpc Write(RecordStorageRequest) returns (base.Response);
+
+    // Finds records matching `EntityFilters`.
+    rpc Find(RecordStorageRequest) returns (stream server.entity.EntityRecord);
 }
 
 // The request to write last handled event timestamp for a projection repository.
@@ -88,21 +95,4 @@ service ProjectionStorageService {
 
     // Writes the timestamp of the last handled event.
     rpc WriteLastHandledEventTimestamp(LastHandledEventRequest) returns (base.Response);
-}
-
-// A request for events matching `EventStreamQuery` in a tenant's data slice.
-message EventStreamRequest {
-
-    // The ID of a tenant.
-    spine.users.TenantId tenant_id = 1;
-
-    // The query for events.
-    spine.server.event.EventStreamQuery query = 2;
-}
-
-// Provides events in response to `EventStreamRequest`.
-service EventStreamService {
-    option (SPI_service) = true;
-
-    rpc Query(EventStreamRequest) returns (stream base.Event);
 }

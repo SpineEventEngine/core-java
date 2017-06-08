@@ -20,17 +20,27 @@
 
 package io.spine.server.event;
 
+import com.google.common.base.Predicate;
+import io.spine.annotation.Internal;
 import io.spine.annotation.SPI;
 import io.spine.base.Event;
+import io.spine.base.EventId;
+import io.spine.client.EntityFilters;
+import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContext;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.Repository;
+import io.spine.server.storage.RecordStorage;
+import io.spine.server.storage.RecordStorageIO;
 import io.spine.users.TenantId;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
+import org.apache.beam.sdk.transforms.View;
 import org.apache.beam.sdk.values.PCollection;
-
-import java.util.Iterator;
+import org.apache.beam.sdk.values.PCollectionView;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.storage.RecordStorageIO.toInstant;
@@ -45,6 +55,30 @@ public class EventStoreIO {
 
     private static final Coder<Event> eventCoder = ProtoCoder.of(Event.class);
 
+    private static final DoFn<EventStreamQuery, EntityFilters> createEntityFilters =
+            new DoFn<EventStreamQuery, EntityFilters>() {
+                private static final long serialVersionUID = 0L;
+
+                @ProcessElement
+                public void processElement(ProcessContext c) {
+                    final EventStreamQuery query = c.element();
+                    final EntityFilters filters = ERepository.toEntityFilters(query);
+                    c.output(filters);
+                }
+            };
+
+    private static final DoFn<EntityRecord, Event> extractEvents = new DoFn<EntityRecord, Event>() {
+        private static final long serialVersionUID = 0L;
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final EntityRecord entityRecord = c.element();
+            final Event event = AnyPacker.unpack(entityRecord.getState());
+            c.outputWithTimestamp(event, toInstant(event.getContext()
+                                                        .getTimestamp()));
+        }
+    };
+
     private EventStoreIO() {
         // Prevent instantiation of this utility class.
     }
@@ -53,86 +87,85 @@ public class EventStoreIO {
         return eventCoder;
     }
 
+    @Internal
+    public static Repository eventStorageOf(BoundedContext boundedContext) {
+        checkNotNull(boundedContext);
+        return boundedContext.getEventBus()
+                             .getEventStore()
+                             .getStorage();
+    }
+
     public static Query query(TenantId tenantId, EventStore eventStore) {
         checkNotNull(tenantId);
         checkNotNull(eventStore);
-        final ERepository storage = eventStore.getStorage();
-
-        return Query.of(queryFn(storage, tenantId));
-    }
-
-    static QueryFn queryFn(ERepository storage, TenantId tenantId) {
-
-        //TODO:2017-06-07:alexander.yevsyukov: Implement
-//        final EventRecordStorage storage = recordStorage();
-//        return storage.queryFn(tenantId);
-
-        return null;
+        final ERepository repository = eventStore.getStorage();
+        final RecordStorage<EventId> storage = repository.recordStorage();
+        final RecordStorageIO.FindFn findFn = storage.getIO(EventId.class)
+                                                     .findFn(tenantId);
+        return new Query(findFn);
     }
 
     /**
      * Reads events matching an {@link EventStreamQuery}.
      */
-    public static class Query extends PTransform<PCollection<EventStreamQuery>,
-                                                 PCollection<Event>> {
+    private static class Query
+            extends PTransform<PCollection<EventStreamQuery>, PCollection<Event>> {
 
         private static final long serialVersionUID = 0L;
-        private final DoFn<EventStreamQuery, Event> fn;
+        private final DoFn<EntityFilters, EntityRecord> findFn;
 
-        public static Query of(QueryFn fn) {
-            checkNotNull(fn);
-            final Query result = new Query(fn);
-            return result;
+        private Query(DoFn<EntityFilters, EntityRecord> findFn) {
+            this.findFn = findFn;
         }
 
-        private Query(QueryFn fn) {
-            this.fn = fn;
+        public static Query of(DoFn<EntityFilters, EntityRecord> findFn) {
+            checkNotNull(findFn);
+            final Query result = new Query(findFn);
+            return result;
         }
 
         @Override
         public PCollection<Event> expand(PCollection<EventStreamQuery> input) {
-            final PCollection<Event> result = input.apply(ParDo.of(fn));
-            return result;
+            final PCollection<EntityFilters> filters =
+                    input.apply("CreateEntityFilters", ParDo.of(createEntityFilters));
+            final PCollection<EntityRecord> entityRecords =
+                    filters.apply("FindRecords", ParDo.of(findFn));
+            final PCollection<Event> events =
+                    entityRecords.apply("ExtractEvents", ParDo.of(extractEvents));
+            final PCollectionView<EventStreamQuery> queryView =
+                    input.apply("GetEventStreamQuery", View.<EventStreamQuery>asSingleton());
+            final PCollection<Event> matchingQuery =
+                    events.apply("FilterByEventStreamQuery", ParDo.of(new DoFn<Event, Event>() {
+                        private static final long serialVersionUID = 0L;
+
+                        @ProcessElement
+                        public void processElement(ProcessContext c) {
+                            final Event event = c.element();
+                            final EventStreamQuery query = c.sideInput(queryView);
+                            final Predicate<Event> filter = new MatchesStreamQuery(query);
+                            if (filter.apply(event)) {
+                                c.outputWithTimestamp(event, toInstant(event.getContext()
+                                                                            .getTimestamp()));
+                            }
+                        }
+                    })
+                                                                  .withSideInputs(queryView));
+            return matchingQuery;
         }
-    }
-
-    /**
-     * Abstract base for operations reading events matching {@link EventStreamQuery}.
-     */
-    public abstract static class QueryFn extends DoFn<EventStreamQuery, Event> {
-
-        private static final long serialVersionUID = 0L;
-        private final TenantId tenantId;
-
-        protected QueryFn(TenantId tenantId) {
-            this.tenantId = tenantId;
-        }
-
-        @ProcessElement
-        public void processElement(ProcessContext context) {
-            final EventStreamQuery query = context.element();
-            final Iterator<Event> iterator = read(tenantId, query);
-            while (iterator.hasNext()) {
-                final Event event = iterator.next();
-                context.outputWithTimestamp(event, toInstant(event.getContext()
-                                                                  .getTimestamp()));
-            }
-        }
-
-        protected abstract Iterator<Event> read(TenantId tenantId, EventStreamQuery query);
     }
 
     //TODO:2017-06-07:alexander.yevsyukov:
     /*
-        1. Use ERepository.toEntityFilters(EventStreamQuery) to create EntityFilters.
+//        1. Use ERepository.toEntityFilters(EventStreamQuery) to create EntityFilters.
         2. Expose gRPC method for accepting a query with
                     TenantId, TypeUrl, and EntityFilters
            instead of what was there with EventStreamQuery.
         3. Implement the call in InMemory storage impl.
         4. Move all Beam-based factories into IO classes. Do not have Beam-based dependencies
            in the main code.
+        5. See if EventPredicate is still needed.
            ----
-        5. Move all Beam-related code into new the `catchup` module.
+        6. Move all Beam-related code into new the `catchup` module.
 
      */
 

@@ -43,11 +43,11 @@ public class InMemoryGrpcServer {
 
     private Server grpcServer;
 
-    public InMemoryGrpcServer(BoundedContext boundedContext) {
+    private InMemoryGrpcServer(BoundedContext boundedContext) {
         this.grpcServer = InProcessServerBuilder
                 .forName(serverName(boundedContext.getName()))
+                .addService(new RecordStorageService(boundedContext))
                 .addService(new ProjectionStorageService(boundedContext))
-                .addService(new EventStreamService(boundedContext))
                 .build();
     }
 

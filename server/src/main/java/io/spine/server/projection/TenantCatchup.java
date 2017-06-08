@@ -44,6 +44,7 @@ import org.apache.beam.sdk.transforms.FlatMapElements;
 import org.apache.beam.sdk.transforms.GroupByKey;
 import org.apache.beam.sdk.transforms.Keys;
 import org.apache.beam.sdk.transforms.Max;
+import org.apache.beam.sdk.transforms.PTransform;
 import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.transforms.join.CoGbkResult;
 import org.apache.beam.sdk.transforms.join.CoGroupByKey;
@@ -76,7 +77,7 @@ class TenantCatchup<I> {
     private final KvCoder<I, EntityRecord> kvCoder;
     private final ProjectionRepositoryIO.WriteTimestamp writeLastEventTimestamp;
     private final RecordStorageIO.Write<I> writeRecords;
-    private final EventStoreIO.Query queryEvents;
+    private final PTransform<PCollection<EventStreamQuery>, PCollection<Event>> queryEvents;
 
     TenantCatchup(TenantId tenantId,
                   ProjectionRepository<I, ?, ?> repository,

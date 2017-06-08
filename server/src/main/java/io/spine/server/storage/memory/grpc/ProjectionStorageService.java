@@ -20,25 +20,17 @@
 
 package io.spine.server.storage.memory.grpc;
 
-import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
 import io.spine.base.Responses;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceImplBase;
-import io.spine.server.tenant.TenantAwareFunction;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.type.TypeUrl;
-
-import javax.annotation.Nullable;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Exposes projection storages of a BoundedContext for reading and writing over gRPC.
@@ -52,74 +44,29 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 class ProjectionStorageService extends ProjectionStorageServiceImplBase {
 
-    private final BoundedContext boundedContext;
+    private final Helper delegate;
 
     ProjectionStorageService(BoundedContext boundedContext) {
-        this.boundedContext = boundedContext;
-    }
-
-    @Nullable
-    private ProjectionRepository findRepository(TypeUrl typeUrl,
-                                                StreamObserver<?> responseObserver) {
-        final Optional<? extends ProjectionRepository<?, ?, ?>> repoOptional =
-                boundedContext.getProjectionRepository(typeUrl.getJavaClass());
-        if (!repoOptional.isPresent()) {
-            responseObserver.onError(newIllegalStateException(
-                    "Unable to find ProjectionRepository for the the projection state: %s",
-                    typeUrl));
-            return null;
-        }
-        return repoOptional.get();
+        this.delegate = new Helper(boundedContext);
     }
 
     @Override
     public void read(RecordStorageRequest request, StreamObserver<EntityRecord> responseObserver) {
-        final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
-        final Object id = AnyPacker.unpack(request.getEntityId());
-        final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
-        if (repository == null) {
-            // Just quit. The error was reported by `findRepository()`.
-            return;
-        }
-        final TenantAwareFunction<Object, EntityRecord> func =
-                new TenantAwareFunction<Object, EntityRecord>(request.getTenantId()) {
-                    @Override
-                    @SuppressWarnings("unchecked")
-                        // The ID type should be preserved by the `request` composition.
-                    public EntityRecord apply(@Nullable Object id) {
-                        checkNotNull(id);
-                        final EntityRecord record = repository.findOrCreateRecord(id);
-                        return record;
-                    }
-                };
-        final EntityRecord record = func.execute(id);
-        responseObserver.onNext(record);
-        responseObserver.onCompleted();
+        delegate.read(request, responseObserver);
     }
 
     @Override
-    public void write(final RecordStorageRequest request, final StreamObserver<Response> responseObserver) {
-        final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
-        final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
-        if (repository == null) {
-            // Just quit. The error was reported by `findRepository()`.
-            return;
-        }
-        new TenantAwareOperation(request.getTenantId()) {
-            @Override
-            public void run() {
-                repository.storeRecord(request.getRecord());
-                responseObserver.onNext(Responses.ok());
-                responseObserver.onCompleted();
-            }
-        }.execute();
+    public void write(final RecordStorageRequest request,
+                      final StreamObserver<Response> responseObserver) {
+        delegate.write(request, responseObserver);
     }
 
     @Override
     public void readLastHandledEventTimestamp(LastHandledEventRequest request,
                                               StreamObserver<Timestamp> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getProjectionStateTypeUrl());
-        final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
+        final ProjectionRepository repository =
+                (ProjectionRepository) delegate.findRepository(typeUrl, responseObserver);
         if (repository == null) {
             // Just quit. The error was reported by `findRepository()`.
             return;
@@ -140,7 +87,8 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
     public void writeLastHandledEventTimestamp(final LastHandledEventRequest request,
                                                final StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getProjectionStateTypeUrl());
-        final ProjectionRepository repository = findRepository(typeUrl, responseObserver);
+        final ProjectionRepository repository =
+                (ProjectionRepository) delegate.findRepository(typeUrl, responseObserver);
         if (repository == null) {
             // Just quit. The error was reported by `findRepository()`.
             return;

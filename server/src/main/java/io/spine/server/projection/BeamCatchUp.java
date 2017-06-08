@@ -32,6 +32,8 @@ import java.util.Set;
  *
  * @author Alexander Yevsyukov
  */
+@SuppressWarnings("unused")
+    // Keep this class even if it is temporarily not used by the Projection class.
 class BeamCatchUp {
 
     private BeamCatchUp() {

@@ -24,12 +24,12 @@ import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
 import io.spine.server.projection.ProjectionStorageIO;
 import io.spine.server.storage.RecordStorageIO;
-import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
 import io.spine.server.storage.memory.grpc.LastHandledEventRequest;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
 import io.spine.type.TypeUrl;
 import io.spine.users.TenantId;
+import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -68,14 +68,31 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
         return storageIO.writeFn(tenantId);
     }
 
+    @Override
+    public FindFn findFn(TenantId tenantId) {
+        throw Exceptions.unsupported("Finding in ProjectionStorage is not supported");
+    }
+
+    private static class ProjectionStorageServiceChannel
+            extends BoundedContextChannel<ProjectionStorageServiceBlockingStub> {
+
+        ProjectionStorageServiceChannel(String boundedContextName) {
+            super(boundedContextName);
+        }
+
+        @Override
+        protected ProjectionStorageServiceBlockingStub createStub(ManagedChannel channel) {
+            return ProjectionStorageServiceGrpc.newBlockingStub(channel);
+        }
+    }
+
     private static class WriteTimestampOverGrpc extends WriteTimestampFn {
 
         private static final long serialVersionUID = 0L;
         private final String boundedContextName;
         private final TypeUrl stateTypeUrl;
 
-        private transient ManagedChannel channel;
-        private transient ProjectionStorageServiceBlockingStub blockingStub;
+        private transient ProjectionStorageServiceChannel channel;
 
         private WriteTimestampOverGrpc(String boundedContextName, TenantId tenantId,
                                        TypeUrl typeUrl) {
@@ -84,17 +101,15 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
             this.stateTypeUrl = typeUrl;
         }
 
-        @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createChannel(boundedContextName);
-            blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
+            channel = new ProjectionStorageServiceChannel(boundedContextName);
+            channel.open();
         }
 
-        @SuppressWarnings("unused") // called by Beam
         @FinishBundle
         public void finishBundle() {
-            channel.shutdownNow();
+            channel.shutDown();
         }
 
         @Override
@@ -107,7 +122,8 @@ class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
                                            .setProjectionStateTypeUrl(stateTypeUrl.value())
                                            .setTimestamp(timestamp)
                                            .build();
-            blockingStub.writeLastHandledEventTimestamp(req);
+            channel.getStub()
+                   .writeLastHandledEventTimestamp(req);
         }
     }
 }

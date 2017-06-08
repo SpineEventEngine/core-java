@@ -48,7 +48,6 @@ import io.spine.type.TypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Map;
@@ -247,7 +246,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * @throws IllegalStateException if the storage is null
      */
     @Override
-    @Nonnull
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     protected RecordStorage<I> recordStorage() {
         return checkStorage(recordStorage);
@@ -390,8 +388,8 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             Uncomment the below line and comment the one after to switch between regular and
             Beam-based catch-up procedures.
         */
-               allTenantOpCatchup();
-//        BeamCatchUp.forAllTenants(this);
+//               allTenantOpCatchup();
+        BeamCatchUp.forAllTenants(this);
 
         completeCatchUp();
         logCatchUpComplete();

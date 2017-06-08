@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
+import io.spine.client.EntityFilters;
 import io.spine.server.entity.EntityRecord;
 import io.spine.users.TenantId;
 import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
@@ -40,6 +41,7 @@ import org.apache.beam.sdk.values.PDone;
 import org.joda.time.Instant;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 
 import static com.google.protobuf.util.Timestamps.toMillis;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
@@ -135,6 +137,8 @@ public abstract class RecordStorageIO<I> {
 
     public abstract ReadFn<I> readFn(TenantId tenantId);
 
+    public abstract FindFn findFn(TenantId tenantId);
+
     /**
      * Obtains a {@link DoFn} that writes an {@code EntityRecord} into the storage.
      */
@@ -200,5 +204,29 @@ public abstract class RecordStorageIO<I> {
         }
 
         protected abstract void doWrite(TenantId tenantId, I key, EntityRecord value);
+    }
+
+    /**
+     * A {@link DoFn} that reads {@code EntityRecord}s that match  
+     */
+    public abstract static class FindFn extends DoFn<EntityFilters, EntityRecord> {
+
+        private static final long serialVersionUID = 0L;
+        private final TenantId tenantId;
+
+        protected FindFn(TenantId tenantId) {
+            this.tenantId = tenantId;
+        }
+
+        @ProcessElement
+        public void processElement(ProcessContext c) {
+            final EntityFilters filters = c.element();
+            final Iterator<EntityRecord> records = doFind(tenantId, filters);
+            while (records.hasNext()) {
+                c.output(records.next());
+            }
+        }
+
+        protected abstract Iterator<EntityRecord> doFind(TenantId tenantId, EntityFilters filters);
     }
 }

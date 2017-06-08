@@ -29,7 +29,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.Response;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
@@ -40,7 +39,6 @@ import io.spine.server.event.EventBus;
 import io.spine.server.failure.FailureBus;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.grpc.IntegrationEventSubscriberGrpc;
-import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.StorageFactory;
@@ -279,22 +277,10 @@ public final class BoundedContext
     }
 
     /**
-     * Obtains an {@code AggregateRepository} which manages aggregates with the passed state.
-     *
-     * @param aggregateStateClass the class of the aggregate state
-     * @return repository instance or empty {@code Optional} if not found
+     * Finds a repository by the state class of entities.
      */
-    public Optional<? extends AggregateRepository<?, ?>> getAggregateRepository(
-            Class<? extends Message> aggregateStateClass) {
-        final Optional<Repository> repository = getRepository(aggregateStateClass);
-        if (!repository.isPresent()) {
-            return Optional.absent();
-        }
-        final AggregateRepository<?, ?> result = (AggregateRepository<?, ?>) repository.get();
-        return Optional.of(result);
-    }
-
-    private Optional<Repository> getRepository(Class<? extends Message> entityStateClass) {
+    @Internal
+    public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
         // See if there is a repository for this state at all.
         if (!guard.hasRepository(entityStateClass)) {
             throw newIllegalStateException("No repository found for the the entity state class %s",
@@ -302,15 +288,6 @@ public final class BoundedContext
         }
         final Optional<Repository> repository = guard.getRepository(entityStateClass);
         return repository;
-    }
-
-    public Optional<? extends ProjectionRepository<?, ?, ?>> getProjectionRepository(
-            Class<? extends Message> projectionStateClass) {
-        final Optional<Repository> repository = getRepository(projectionStateClass);
-        if (!repository.isPresent()) {
-            return Optional.absent();
-        }
-        return Optional.of((ProjectionRepository<?, ?, ?>) repository.get());
     }
 
     /**

@@ -22,14 +22,17 @@ package io.spine.server.storage.memory;
 
 import io.grpc.ManagedChannel;
 import io.spine.base.Identifier;
+import io.spine.client.EntityFilters;
+import io.spine.client.EntityId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageIO;
-import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
-import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
-import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
 import io.spine.server.storage.memory.grpc.RecordStorageRequest;
+import io.spine.server.storage.memory.grpc.RecordStorageServiceGrpc;
+import io.spine.server.storage.memory.grpc.RecordStorageServiceGrpc.RecordStorageServiceBlockingStub;
 import io.spine.type.TypeUrl;
 import io.spine.users.TenantId;
+
+import java.util.Iterator;
 
 /**
  * A {@link RecordStorageIO} for {@link InMemoryRecordStorage}.
@@ -41,8 +44,7 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private final String boundedContextName;
     private final TypeUrl entityStateUrl;
 
-    InMemoryRecordStorageIO(String boundedContextName, Class<I> idClass,
-                            TypeUrl entityStateUrl) {
+    InMemoryRecordStorageIO(String boundedContextName, Class<I> idClass, TypeUrl entityStateUrl) {
         super(idClass);
         this.boundedContextName = boundedContextName;
         this.entityStateUrl = entityStateUrl;
@@ -54,8 +56,29 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     }
 
     @Override
+    public FindFn findFn(TenantId tenantId) {
+        return new InMemFindFn(boundedContextName, tenantId, entityStateUrl);
+    }
+
+    @Override
     public WriteFn<I> writeFn(TenantId tenantId) {
         return new InMemWriteFn<>(boundedContextName, tenantId, entityStateUrl);
+    }
+
+    /**
+     * A {@link BoundedContextChannel} channel to exposing {@link RecordStorageServiceBlockingStub}.
+     */
+    private static class RecordStorageServiceChannel
+            extends BoundedContextChannel<RecordStorageServiceBlockingStub> {
+
+        RecordStorageServiceChannel(String boundedContextName) {
+            super(boundedContextName);
+        }
+
+        @Override
+        protected RecordStorageServiceBlockingStub createStub(ManagedChannel channel) {
+            return RecordStorageServiceGrpc.newBlockingStub(channel);
+        }
     }
 
     private static class InMemReadFn<I> extends ReadFn<I> {
@@ -63,11 +86,9 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
         private static final long serialVersionUID = 0L;
         private final String boundedContextName;
         private final TypeUrl entityStateUrl;
-        private transient ManagedChannel channel;
-        private transient ProjectionStorageServiceBlockingStub blockingStub;
+        private transient RecordStorageServiceChannel channel;
 
-        protected InMemReadFn(String boundedContextName, TenantId tenantId,
-                              TypeUrl entityState) {
+        private InMemReadFn(String boundedContextName, TenantId tenantId, TypeUrl entityState) {
             super(tenantId);
             this.boundedContextName = boundedContextName;
             this.entityStateUrl = entityState;
@@ -76,14 +97,14 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createChannel(boundedContextName);
-            blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
+            channel = new RecordStorageServiceChannel(boundedContextName);
+            channel.open();
         }
 
         @SuppressWarnings("unused") // called by Beam
         @FinishBundle
         public void finishBundle() {
-            channel.shutdownNow();
+            channel.shutDown();
         }
 
         @Override
@@ -91,25 +112,27 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
             final RecordStorageRequest req =
                     RecordStorageRequest.newBuilder()
                                         .setTenantId(tenantId)
-                                        .setEntityId(Identifier.pack(id))
                                         .setEntityStateTypeUrl(entityStateUrl.value())
+                                        .setRead(EntityId.newBuilder()
+                                                         .setId(Identifier.pack(id)))
                                         .build();
-            final EntityRecord result = blockingStub.read(req);
+            final EntityRecord result = channel.getStub()
+                                               .read(req);
             return result;
         }
     }
 
+    /**
+     * Writes {@link EntityRecord}s via in-process gRPC service.
+     */
     private static class InMemWriteFn<I> extends WriteFn<I> {
 
         private static final long serialVersionUID = 0L;
         private final String boundedContextName;
         private final TypeUrl entityStateUrl;
-        private transient ManagedChannel channel;
-        private transient ProjectionStorageServiceBlockingStub blockingStub;
+        private transient RecordStorageServiceChannel channel;
 
-        private InMemWriteFn(String boundedContextName,
-                             TenantId tenantId,
-                             TypeUrl entityStateUrl) {
+        private InMemWriteFn(String boundedContextName, TenantId tenantId, TypeUrl entityStateUrl) {
             super(tenantId);
             this.boundedContextName = boundedContextName;
             this.entityStateUrl = entityStateUrl;
@@ -117,13 +140,13 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
 
         @StartBundle
         public void startBundle() {
-            channel = InMemoryGrpcServer.createChannel(boundedContextName);
-            blockingStub = ProjectionStorageServiceGrpc.newBlockingStub(channel);
+            channel = new RecordStorageServiceChannel(boundedContextName);
+            channel.open();
         }
 
         @FinishBundle
         public void finishBundle() {
-            channel.shutdownNow();
+            channel.shutDown();
         }
 
         @Override
@@ -131,11 +154,52 @@ class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
             final RecordStorageRequest req =
                     RecordStorageRequest.newBuilder()
                                         .setTenantId(tenantId)
-                                        .setEntityId(Identifier.pack(key))
                                         .setEntityStateTypeUrl(entityStateUrl.value())
-                                        .setRecord(record)
+                                        .setWrite(record)
                                         .build();
-            blockingStub.write(req);
+            channel.getStub()
+                   .write(req);
+        }
+    }
+
+    /**
+     * Finds entity records by {@link EntityFilters} via in-process gRPC service.
+     */
+    private static class InMemFindFn extends FindFn {
+
+        private static final long serialVersionUID = 0L;
+        private final String boundedContextName;
+        private final TypeUrl entityStateUrl;
+        private transient RecordStorageServiceChannel channel;
+
+        private InMemFindFn(String boundedContextName, TenantId tenantId, TypeUrl entityStateUrl) {
+            super(tenantId);
+            this.boundedContextName = boundedContextName;
+            this.entityStateUrl = entityStateUrl;
+        }
+
+        @StartBundle
+        public void startBundle() {
+            channel = new RecordStorageServiceChannel(boundedContextName);
+            channel.open();
+        }
+
+        @FinishBundle
+        public void finishBundle() {
+            channel.shutDown();
+        }
+
+        @Override
+        protected Iterator<EntityRecord> doFind(TenantId tenantId, EntityFilters filters) {
+            final RecordStorageRequest req =
+                    RecordStorageRequest.newBuilder()
+                    .setTenantId(tenantId)
+                    .setEntityStateTypeUrl(entityStateUrl.value())
+                    .setQuery(filters)
+                    .build();
+            final Iterator<EntityRecord> iterator = channel.getStub()
+                                                           .find(req);
+            return iterator;
         }
     }
 }

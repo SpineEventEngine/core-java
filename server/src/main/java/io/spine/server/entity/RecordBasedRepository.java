@@ -42,7 +42,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
@@ -95,7 +94,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return storage instance
      * @throws IllegalStateException if the storage is null
      */
-    @Nonnull
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
@@ -311,16 +309,20 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      */
     @CheckReturnValue
     public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
+        final Map<I, EntityRecord> records = findRecords(filters, fieldMask);
+        final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
+                                                            .transform(storageRecordToEntity())
+                                                            .toList();
+        return result;
+    }
+
+    public Map<I, EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        final Map<I, EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
-                                                            .transform(storageRecordToEntity())
-                                                            .toList();
-        return result;
+        return recordStorage().readAll(completeQuery, fieldMask);
     }
 
     /**

@@ -23,7 +23,6 @@ package io.spine.server.projection;
 import com.google.common.base.Converter;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.util.Timestamps;
 import io.spine.base.Event;
 import io.spine.base.Events;
 import io.spine.server.entity.EntityRecord;
@@ -71,9 +70,6 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
         final List<Event> events = Lists.newArrayList(coGbkResult.getOnly(eventsTag));
         Collections.sort(events, Events.eventComparator());
 
-        // Timestamps of all applied events.
-        final List<Timestamp> timestamps = Lists.newArrayList();
-
         final EntityRecord entityRecord = coGbkResult.getOnly(entityRecordsTag);
         @SuppressWarnings("unchecked")
         // the types are preserved since the the function is returned by a projection repo.
@@ -86,10 +82,6 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
         final ProjectionTransaction<I, ?, ?> tx = ProjectionTransaction.start(projection);
         Projection.play(projection, events);
         tx.commit();
-        for (Event event : events) {
-            timestamps.add(event.getContext()
-                                .getTimestamp());
-        }
 
         // Add the resulting record to output.
         @SuppressWarnings("unchecked") /* OK as the types are preserved since the the function
@@ -98,9 +90,9 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
                                      converter).convert(projection);
         c.output(KV.of(id, record));
 
-        // Get the latest event timestamp.
-        Collections.sort(timestamps, Timestamps.comparator());
-        final Timestamp lastEventTimestamp = timestamps.get(timestamps.size() - 1);
+        // Get the latest event timestamp — events are already sorted by their timestamps.
+        final Event lastEvent = events.get(events.size() - 1);
+        final Timestamp lastEventTimestamp = lastEvent.getContext().getTimestamp();
 
         c.output(timestampTag, lastEventTimestamp);
     }
