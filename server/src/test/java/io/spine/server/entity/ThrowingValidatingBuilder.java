@@ -21,7 +21,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.validate.AbstractValidatingBuilder;
-import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidationException;
 
 import javax.annotation.Nullable;
 
@@ -40,7 +40,7 @@ public abstract class ThrowingValidatingBuilder<M extends Message, B extends Mes
     private RuntimeException shouldThrow;
 
     @Override
-    public M build() throws ConstraintViolationThrowable {
+    public M build() throws ValidationException {
         if(shouldThrow != null) {
             throw shouldThrow;
         } else {

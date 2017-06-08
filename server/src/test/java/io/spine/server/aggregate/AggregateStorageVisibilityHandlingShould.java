@@ -25,7 +25,7 @@ import io.spine.base.Identifier;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -99,7 +99,7 @@ public abstract class AggregateStorageVisibilityHandlingShould {
 
 
     private static class TestAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         protected TestAggregate(ProjectId id) {
             super(id);

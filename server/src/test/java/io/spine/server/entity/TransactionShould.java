@@ -27,8 +27,8 @@ import io.spine.server.command.EventFactory;
 import io.spine.server.entity.Transaction.Phase;
 import io.spine.test.TestEventFactory;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ConstraintViolationThrowable;
 import io.spine.validate.ValidatingBuilder;
+import io.spine.validate.ValidationException;
 import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
@@ -279,7 +279,7 @@ public abstract class TransactionShould<I,
         final Version version = someVersion();
 
         final Transaction<I, E, S, B> tx = createTxWithState(entity, newState, version);
-        final ConstraintViolationThrowable toThrow = constraintViolationsEx();
+        final ValidationException toThrow = validationException();
         breakEntityValidation(entity, toThrow);
         tx.commit();
     }
@@ -302,9 +302,8 @@ public abstract class TransactionShould<I,
         }
     }
 
-    private static ConstraintViolationThrowable constraintViolationsEx() {
-        final ConstraintViolationThrowable ex =
-                new ConstraintViolationThrowable(Lists.<ConstraintViolation>newLinkedList());
+    private static ValidationException validationException() {
+        final ValidationException ex = new ValidationException(Lists.<ConstraintViolation>newLinkedList());
         return ex;
     }
 

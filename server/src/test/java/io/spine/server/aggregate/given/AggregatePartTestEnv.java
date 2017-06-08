@@ -28,14 +28,14 @@ import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Task;
-import io.spine.test.aggregate.TaskValidatingBuilder;
+import io.spine.test.aggregate.TaskVBuilder;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserValidatingBuilder;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.test.aggregate.user.UserVBuilder;
+import io.spine.validate.StringValueVBuilder;
 
 public class AggregatePartTestEnv {
 
@@ -51,7 +51,7 @@ public class AggregatePartTestEnv {
 
     public static class WrongAggregatePart extends AggregatePart<String,
             StringValue,
-            StringValueValidatingBuilder,
+            StringValueVBuilder,
             AnAggregateRoot> {
         @SuppressWarnings("ConstantConditions")
         // Supply a "wrong" parameters on purpose to cause the validation failure
@@ -62,7 +62,7 @@ public class AggregatePartTestEnv {
 
     public static class AnAggregatePart extends AggregatePart<String,
             User,
-            UserValidatingBuilder,
+            UserVBuilder,
             AnAggregateRoot> {
 
         public AnAggregatePart(AnAggregateRoot root) {
@@ -71,7 +71,7 @@ public class AggregatePartTestEnv {
     }
 
     public static class TaskPart
-            extends AggregatePart<String, Task, TaskValidatingBuilder, AnAggregateRoot> {
+            extends AggregatePart<String, Task, TaskVBuilder, AnAggregateRoot> {
 
         public TaskPart(AnAggregateRoot root) {
             super(root);
@@ -93,7 +93,7 @@ public class AggregatePartTestEnv {
 
     public static class TaskDescriptionPart extends AggregatePart<String,
             StringValue,
-            StringValueValidatingBuilder,
+            StringValueVBuilder,
             AnAggregateRoot> {
 
         public TaskDescriptionPart(AnAggregateRoot root) {

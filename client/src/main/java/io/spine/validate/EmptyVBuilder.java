@@ -19,27 +19,22 @@
  */
 package io.spine.validate;
 
-import com.google.protobuf.StringValue;
+import com.google.protobuf.Empty;
 
 /**
- * Validating builder for {@linkplain StringValue} messages.
+ * Validating builder for {@linkplain Empty} messages.
  *
- * @author Alex Tymchenko.
+ * @author Alex Tymchenko
  */
-public final class StringValueValidatingBuilder
-        extends AbstractValidatingBuilder<StringValue, StringValue.Builder> {
+public final class EmptyVBuilder
+        extends AbstractValidatingBuilder<Empty, Empty.Builder> {
 
     // Prevent instantiation from the outside.
-    private StringValueValidatingBuilder() {
+    private EmptyVBuilder() {
         super();
     }
 
-    public static StringValueValidatingBuilder newBuilder() {
-        return new StringValueValidatingBuilder();
-    }
-
-    public StringValueValidatingBuilder setValue(String value) {
-        getMessageBuilder().setValue(value);
-        return this;
+    public static EmptyVBuilder newBuilder() {
+        return new EmptyVBuilder();
     }
 }

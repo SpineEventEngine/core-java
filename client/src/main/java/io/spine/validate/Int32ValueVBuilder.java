@@ -26,19 +26,19 @@ import com.google.protobuf.Int32Value;
  *
  * @author Alex Tymchenko
  */
-public final class Int32ValueValidatingBuilder
+public final class Int32ValueVBuilder
         extends AbstractValidatingBuilder<Int32Value, Int32Value.Builder> {
 
     // Prevent instantiation from the outside.
-    private Int32ValueValidatingBuilder() {
+    private Int32ValueVBuilder() {
         super();
     }
 
-    public static Int32ValueValidatingBuilder newBuilder() {
-        return new Int32ValueValidatingBuilder();
+    public static Int32ValueVBuilder newBuilder() {
+        return new Int32ValueVBuilder();
     }
 
-    public Int32ValueValidatingBuilder setValue(int value) {
+    public Int32ValueVBuilder setValue(int value) {
         getMessageBuilder().setValue(value);
         return this;
     }

@@ -34,7 +34,7 @@ import io.spine.test.Given;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
@@ -336,7 +336,7 @@ public class AggregateRepositoryShould {
 
     @SuppressWarnings("RedundantMethodOverride")
     private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);

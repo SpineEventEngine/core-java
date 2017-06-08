@@ -33,7 +33,7 @@ import io.spine.server.procman.ProcessManager;
 import io.spine.server.procman.ProcessManagerRepository;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
-import io.spine.test.procman.ProjectValidatingBuilder;
+import io.spine.test.procman.ProjectVBuilder;
 import io.spine.test.procman.Task;
 import io.spine.test.procman.command.AddTask;
 import io.spine.test.procman.command.CreateProject;
@@ -58,7 +58,7 @@ public class ProcessManagerRepositoryTestEnv {
 
     @SuppressWarnings("OverlyCoupledClass")
     public static class TestProcessManager
-            extends ProcessManager<ProjectId, Project, ProjectValidatingBuilder>
+            extends ProcessManager<ProjectId, Project, ProjectVBuilder>
             implements TestEntityWithStringColumn {
 
         /** The event message we store for inspecting in delivery tests. */

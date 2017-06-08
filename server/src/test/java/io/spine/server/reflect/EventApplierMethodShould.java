@@ -26,7 +26,7 @@ import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.testdata.Sample;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 import org.junit.Test;
 
 import java.lang.reflect.InvocationTargetException;
@@ -203,7 +203,7 @@ public class EventApplierMethodShould {
 
     private abstract static class TestEventApplier extends Aggregate<Long,
                                                                      StringValue,
-                                                                     StringValueValidatingBuilder> {
+                                                                     StringValueVBuilder> {
 
         protected TestEventApplier() {
             super(0L);

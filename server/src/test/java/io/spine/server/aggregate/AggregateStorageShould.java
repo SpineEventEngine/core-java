@@ -33,7 +33,7 @@ import io.spine.test.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.After;
@@ -333,21 +333,21 @@ public abstract class AggregateStorageShould
     }
 
     private static class TestAggregateWithIdString
-                   extends Aggregate<String, Project, ProjectValidatingBuilder> {
+                   extends Aggregate<String, Project, ProjectVBuilder> {
         private TestAggregateWithIdString(String id) {
             super(id);
         }
     }
 
     private static class TestAggregateWithIdInteger
-                   extends Aggregate<Integer, Project, ProjectValidatingBuilder> {
+                   extends Aggregate<Integer, Project, ProjectVBuilder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
     }
 
     private static class TestAggregateWithIdLong
-                   extends Aggregate<Long, Project, ProjectValidatingBuilder> {
+                   extends Aggregate<Long, Project, ProjectVBuilder> {
         private TestAggregateWithIdLong(Long id) {
             super(id);
         }

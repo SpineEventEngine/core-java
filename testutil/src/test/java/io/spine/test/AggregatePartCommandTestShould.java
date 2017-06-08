@@ -28,7 +28,7 @@ import io.spine.server.aggregate.AggregatePart;
 import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.validate.UInt32ValueValidatingBuilder;
+import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -77,7 +77,7 @@ public class AggregatePartCommandTestShould {
      */
     private static final class TimerCounter extends AggregatePart<String,
                                                                       UInt32Value,
-                                                                      UInt32ValueValidatingBuilder,
+            UInt32ValueVBuilder,
                                                                       TimerCounterRoot> {
         private TimerCounter(TimerCounterRoot root) {
             super(root);
