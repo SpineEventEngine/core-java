@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.server.projection.BulkWriteOperation.FlushCallback;
 import io.spine.test.TimeTests;
 import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectValidatingBuilder;
+import io.spine.test.projection.ProjectVBuilder;
 import io.spine.time.Durations2;
 import org.junit.Test;
 
@@ -210,7 +210,7 @@ public class BulkWriteOperationShould {
     }
 
     private static class TestProjection
-            extends Projection<Object, Project, ProjectValidatingBuilder> {
+            extends Projection<Object, Project, ProjectVBuilder> {
 
         /**
          * Creates a new instance.

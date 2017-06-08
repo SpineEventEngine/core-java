@@ -29,7 +29,7 @@ import io.spine.base.EventContext;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Given;
 import io.spine.type.EventClass;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -95,7 +95,7 @@ public class ProjectionShould {
     }
 
     private static class TestProjection
-            extends Projection<String, StringValue, StringValueValidatingBuilder> {
+            extends Projection<String, StringValue, StringValueVBuilder> {
 
         /** The number of events this class handles. */
         private static final int HANDLING_EVENT_COUNT = 2;

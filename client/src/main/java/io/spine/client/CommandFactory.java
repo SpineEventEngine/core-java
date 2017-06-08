@@ -32,7 +32,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.time.ZoneOffset;
 import io.spine.users.TenantId;
 import io.spine.users.UserId;
-import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidationException;
 
 import javax.annotation.Nullable;
 
@@ -47,7 +47,7 @@ import static io.spine.validate.Validate.checkValid;
  * <p>During the creation of {@code Command} instances the source {@code Message} instances, passed
  * into creation methods, are validated. The validation is performed according to the constraints
  * set in Protobuf definition of each {@code Message}. In case the message isn't valid,
- * an {@linkplain ConstraintViolationThrowable exception} is thrown.
+ * an {@linkplain ValidationException exception} is thrown.
  *
  * <p>Therefore it is recommended to use a corresponding
  * {@linkplain io.spine.validate.ValidatingBuilder ValidatingBuilder} implementation to create
@@ -70,10 +70,10 @@ public final class CommandFactory {
      *
      * @param message the command message
      * @return new command instance
-     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
+     * @throws ValidationException if the passed message does not satisfy the constraints
      *                                      set for it in its Protobuf definition
      */
-    public Command create(Message message) throws ConstraintViolationThrowable {
+    public Command create(Message message) throws ValidationException {
         checkNotNull(message);
         checkValid(message);
 
@@ -88,17 +88,17 @@ public final class CommandFactory {
      * <p>The command contains a {@code CommandContext} instance with the current time.
      *
      * <p>The message passed is validated according to the constraints set in its Protobuf
-     * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
+     * definition. In case the message isn't valid, an {@linkplain ValidationException
      * exception} is thrown.
      *
      * @param message       the command message
      * @param targetVersion the ID of the entity for applying commands if {@code null}
      *                      the commands can be applied to any entity
      * @return new command instance
-     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
-     *                                      set for it in its Protobuf definition
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
      */
-    public Command create(Message message, int targetVersion) throws ConstraintViolationThrowable {
+    public Command create(Message message, int targetVersion) throws ValidationException {
         checkNotNull(message);
         checkNotNull(targetVersion);
         checkValid(message);
@@ -117,12 +117,12 @@ public final class CommandFactory {
      * @param message the command message
      * @param context the command context
      * @return a new command instance
-     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
-     *                                      set for it in its Protobuf definition
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
      */
     @Internal
     public Command createWithContext(Message message, CommandContext context)
-            throws ConstraintViolationThrowable {
+            throws ValidationException {
         checkNotNull(message);
         checkNotNull(context);
         checkValid(message);
@@ -140,12 +140,12 @@ public final class CommandFactory {
      * @param message the command message
      * @param context the command context to use as a base for the new command
      * @return new command instance
-     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
-     *                                      set for it in its Protobuf definition
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
      */
     @Internal
     public Command createBasedOnContext(Message message, CommandContext context)
-            throws ConstraintViolationThrowable {
+            throws ValidationException {
         checkNotNull(message);
         checkNotNull(context);
         checkValid(message);

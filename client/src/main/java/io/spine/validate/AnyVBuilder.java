@@ -26,15 +26,15 @@ import com.google.protobuf.Any;
  *
  * @author Alex Tymchenko
  */
-public final class AnyValidatingBuilder
+public final class AnyVBuilder
         extends AbstractValidatingBuilder<Any, Any.Builder> {
 
     // Prevent instantiation from the outside.
-    private AnyValidatingBuilder() {
+    private AnyVBuilder() {
         super();
     }
 
-    public static AnyValidatingBuilder newBuilder() {
-        return new AnyValidatingBuilder();
+    public static AnyVBuilder newBuilder() {
+        return new AnyVBuilder();
     }
 }

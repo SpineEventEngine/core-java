@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Timestamp;
 import io.spine.test.TimeTests;
 import io.spine.time.Time;
-import io.spine.validate.TimestampValidatingBuilder;
+import io.spine.validate.TimestampVBuilder;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
@@ -58,7 +58,7 @@ public class AggregateBuilderShould {
     }
 
     private static class TestAggregate
-            extends Aggregate<Integer, Timestamp, TimestampValidatingBuilder> {
+            extends Aggregate<Integer, Timestamp, TimestampVBuilder> {
         protected TestAggregate(Integer id) {
             super(id);
         }

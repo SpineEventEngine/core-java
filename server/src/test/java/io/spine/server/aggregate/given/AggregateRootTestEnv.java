@@ -27,10 +27,10 @@ import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.ProjectDefinition;
-import io.spine.test.aggregate.ProjectDefinitionValidatingBuilder;
+import io.spine.test.aggregate.ProjectDefinitionVBuilder;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.ProjectLifecycle;
-import io.spine.test.aggregate.ProjectLifecycleValidatingBuilder;
+import io.spine.test.aggregate.ProjectLifecycleVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.command.StartProject;
@@ -50,7 +50,7 @@ public class AggregateRootTestEnv {
 
     static class ProjectDefinitionPart extends AggregatePart<ProjectId,
             ProjectDefinition,
-            ProjectDefinitionValidatingBuilder,
+            ProjectDefinitionVBuilder,
             ProjectRoot> {
 
         private ProjectDefinitionPart(ProjectRoot root) {
@@ -79,7 +79,7 @@ public class AggregateRootTestEnv {
 
     static class ProjectLifeCyclePart extends AggregatePart<ProjectId,
             ProjectLifecycle,
-            ProjectLifecycleValidatingBuilder,
+            ProjectLifecycleVBuilder,
             ProjectRoot> {
 
         protected ProjectLifeCyclePart(ProjectRoot root) {

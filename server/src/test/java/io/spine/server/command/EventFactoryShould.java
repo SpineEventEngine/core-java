@@ -29,7 +29,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
-import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidationException;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -94,7 +94,7 @@ public class EventFactoryShould {
                     .build();
     }
 
-    @Test(expected = ConstraintViolationThrowable.class)
+    @Test(expected = ValidationException.class)
     public void validate_event_messages_before_creation() {
         final EventFactory factory = EventFactory.newBuilder()
                                                .setCommandContext(commandContext)

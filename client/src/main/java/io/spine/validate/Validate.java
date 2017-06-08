@@ -263,18 +263,18 @@ public final class Validate {
 
     /**
      * Validates the given message according to its definition and throws
-     * {@code ConstraintViolationThrowable} if any constraints are violated.
+     * {@code ValidationException} if any constraints are violated.
      *
-     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
-     *                                      set for it in its Protobuf definition
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
      */
-    public static void checkValid(Message message) throws ConstraintViolationThrowable {
+    public static void checkValid(Message message) throws ValidationException {
         checkNotNull(message);
 
         final List<ConstraintViolation> violations = MessageValidator.newInstance()
                                                                      .validate(message);
         if (!violations.isEmpty()) {
-            throw new ConstraintViolationThrowable(violations);
+            throw new ValidationException(violations);
         }
     }
 }

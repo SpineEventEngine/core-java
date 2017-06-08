@@ -19,26 +19,26 @@
  */
 package io.spine.validate;
 
-import com.google.protobuf.Int64Value;
+import com.google.protobuf.UInt64Value;
 
 /**
- * Validating builder for {@linkplain Int64Value} messages.
+ * Validating builder for {@linkplain UInt64Value} messages.
  *
  * @author Alex Tymchenko
  */
-public final class Int64ValueValidatingBuilder
-        extends AbstractValidatingBuilder<Int64Value, Int64Value.Builder> {
+public final class UInt64ValueVBuilder
+        extends AbstractValidatingBuilder<UInt64Value, UInt64Value.Builder> {
 
     // Prevent instantiation from the outside.
-    private Int64ValueValidatingBuilder() {
+    private UInt64ValueVBuilder() {
         super();
     }
 
-    public static Int64ValueValidatingBuilder newBuilder() {
-        return new Int64ValueValidatingBuilder();
+    public static UInt64ValueVBuilder newBuilder() {
+        return new UInt64ValueVBuilder();
     }
 
-    public Int64ValueValidatingBuilder setValue(long value) {
+    public UInt64ValueVBuilder setValue(long value) {
         getMessageBuilder().setValue(value);
         return this;
     }

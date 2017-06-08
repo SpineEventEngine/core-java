@@ -35,7 +35,7 @@ import io.spine.server.command.Assign;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
@@ -45,7 +45,7 @@ import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
-import io.spine.test.commandservice.customer.CustomerValidatingBuilder;
+import io.spine.test.commandservice.customer.CustomerVBuilder;
 import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.time.LocalDate;
@@ -198,7 +198,7 @@ public class Given {
     }
 
     private static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
         // an aggregate constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         public ProjectAggregate(ProjectId id) {
@@ -250,7 +250,7 @@ public class Given {
     }
 
     public static class CustomerAggregate
-            extends Aggregate<CustomerId, Customer, CustomerValidatingBuilder> {
+            extends Aggregate<CustomerId, Customer, CustomerVBuilder> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // by convention (as it's used by Reflection).

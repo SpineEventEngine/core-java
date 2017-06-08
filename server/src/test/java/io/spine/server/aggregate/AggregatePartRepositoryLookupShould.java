@@ -27,10 +27,10 @@ import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.TaskId;
-import io.spine.test.aggregate.TaskValidatingBuilder;
+import io.spine.test.aggregate.TaskVBuilder;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
 import io.spine.test.aggregate.event.ProjectCreated;
@@ -113,7 +113,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class ProjectPart extends AggregatePart<ProjectId,
                                                            Project,
-                                                           ProjectValidatingBuilder,
+                                                           ProjectVBuilder,
                                                            ProjectRoot> {
         private ProjectPart(ProjectRoot root) {
             super(root);
@@ -156,7 +156,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class TaskAggregatePart extends AggregatePart<TaskId,
                                                                      Task,
-                                                                     TaskValidatingBuilder,
+                                                                     TaskVBuilder,
                                                                      TaskRoot> {
         private TaskAggregatePart(TaskRoot root) {
             super(root);

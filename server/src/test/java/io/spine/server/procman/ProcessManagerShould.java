@@ -54,7 +54,7 @@ import io.spine.test.procman.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.type.CommandClass;
 import io.spine.type.EventClass;
-import io.spine.validate.AnyValidatingBuilder;
+import io.spine.validate.AnyVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -292,7 +292,7 @@ public class ProcessManagerShould {
     @SuppressWarnings("UnusedParameters") // OK for test class.
     private static class TestProcessManager extends ProcessManager<ProjectId,
                                                                    Any,
-                                                                   AnyValidatingBuilder> {
+                                                                   AnyVBuilder> {
 
         private TestProcessManager(ProjectId id) {
             super(id);

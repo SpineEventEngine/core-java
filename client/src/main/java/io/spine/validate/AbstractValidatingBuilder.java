@@ -42,7 +42,7 @@ import static com.google.common.base.Throwables.getRootCause;
  * @author Alex Tymchenko
  */
 public abstract class AbstractValidatingBuilder<T extends Message, B extends Message.Builder>
-                                                  implements ValidatingBuilder<T, B> {
+        implements ValidatingBuilder<T, B> {
 
     /**
      * The builder for the original {@code Message}.
@@ -72,7 +72,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     }
 
     @Override
-    public T build() throws ConstraintViolationThrowable {
+    public T build() throws ValidationException {
         final T message = internalBuild();
         validateResult(message);
         return message;
@@ -106,7 +106,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
 
     @Override
     public <V> void validate(FieldDescriptor descriptor, V fieldValue, String fieldName)
-            throws ConstraintViolationThrowable {
+            throws ValidationException {
         final FieldPath fieldPath = FieldPath.newBuilder()
                                              .addFieldName(fieldName)
                                              .build();
@@ -160,7 +160,7 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
     @Internal
     public T internalBuild() {
         @SuppressWarnings("unchecked")  // OK, as real types of `B`
-                                        // are always generated to be compatible with `T`.
+                     // are always generated to be compatible with `T`.
         final T result = (T) getMessageBuilder().build();
         return result;
     }
@@ -172,16 +172,16 @@ public abstract class AbstractValidatingBuilder<T extends Message, B extends Mes
         return result;
     }
 
-    private void validateResult(T message) throws ConstraintViolationThrowable {
+    private void validateResult(T message) throws ValidationException {
         final List<ConstraintViolation> violations = MessageValidator.newInstance()
                                                                      .validate(message);
         onViolations(violations);
     }
 
     private static void onViolations(List<ConstraintViolation> violations)
-            throws ConstraintViolationThrowable {
+            throws ValidationException {
         if (!violations.isEmpty()) {
-            throw new ConstraintViolationThrowable(violations);
+            throw new ValidationException(violations);
         }
     }
 }

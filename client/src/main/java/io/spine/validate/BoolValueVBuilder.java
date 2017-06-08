@@ -17,30 +17,29 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-
 package io.spine.validate;
 
-import java.util.List;
-
-import static java.util.Collections.unmodifiableList;
+import com.google.protobuf.BoolValue;
 
 /**
- * Signals that the validated value violates the constraints set for it.
+ * Validating builder for {@linkplain BoolValue} messages.
  *
- * @author Illia Shepilov
+ * @author Alex Tymchenko
  */
-public class ConstraintViolationThrowable extends RuntimeException {
+public final class BoolValueVBuilder
+        extends AbstractValidatingBuilder<BoolValue, BoolValue.Builder> {
 
-    private static final long serialVersionUID = 0L;
-
-    private final List<ConstraintViolation> constraintViolations;
-
-    public ConstraintViolationThrowable(List<ConstraintViolation> constraintViolations) {
+    // Prevent instantiation from the outside.
+    private BoolValueVBuilder() {
         super();
-        this.constraintViolations = constraintViolations;
     }
 
-    public List<ConstraintViolation> getConstraintViolations() {
-        return unmodifiableList(constraintViolations);
+    public static BoolValueVBuilder newBuilder() {
+        return new BoolValueVBuilder();
+    }
+
+    public BoolValueVBuilder setValue(boolean value) {
+        getMessageBuilder().setValue(value);
+        return this;
     }
 }

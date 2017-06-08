@@ -47,7 +47,7 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.test.Tests;
 import io.spine.test.storage.Project;
-import io.spine.test.storage.ProjectValidatingBuilder;
+import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
 import io.spine.time.Time;
 import org.junit.Test;
@@ -512,7 +512,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
     @SuppressWarnings("unused") // Reflective access
     public static class TestCounterEntity<I> extends EventPlayingEntity<I,
                                                                         Project,
-                                                                        ProjectValidatingBuilder> {
+                                                                        ProjectVBuilder> {
 
         private int counter = 0;
 
