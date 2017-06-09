@@ -153,20 +153,4 @@ public class EventStoreIO {
             return matchingQuery;
         }
     }
-
-    //TODO:2017-06-07:alexander.yevsyukov:
-    /*
-//        1. Use ERepository.toEntityFilters(EventStreamQuery) to create EntityFilters.
-        2. Expose gRPC method for accepting a query with
-                    TenantId, TypeUrl, and EntityFilters
-           instead of what was there with EventStreamQuery.
-        3. Implement the call in InMemory storage impl.
-        4. Move all Beam-based factories into IO classes. Do not have Beam-based dependencies
-           in the main code.
-        5. See if EventPredicate is still needed.
-           ----
-        6. Move all Beam-related code into new the `catchup` module.
-
-     */
-
 }

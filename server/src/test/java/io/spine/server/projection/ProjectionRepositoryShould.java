@@ -42,6 +42,7 @@ import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.ProjectionRepository.Status;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv;
+import io.spine.server.projection.given.ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
@@ -462,7 +463,7 @@ public class ProjectionRepositoryShould
         // Set up repository
         final Duration duration = seconds(10L);
         final ProjectionRepository repository = spy(
-                new ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository(duration));
+                new ManualCatchupProjectionRepository(duration));
         boundedContext.register(repository);
         repository.catchUp();
 
@@ -471,6 +472,7 @@ public class ProjectionRepositoryShould
         verify(repository, never()).store(any(TestProjection.class));
     }
 
+    @Ignore //TODO:2017-06-09:alexander.yevsyukov: Move this test into a separate suite.
     @SuppressWarnings("unchecked") // Due to mockito matcher usage
     @Test
     public void skip_all_the_events_after_catch_up_outdated() throws InterruptedException {
@@ -482,7 +484,7 @@ public class ProjectionRepositoryShould
         // Set up repository
         final Duration duration = nanos(1L);
         final ProjectionRepository repository =
-                spy(new ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository(duration));
+                spy(new ManualCatchupProjectionRepository(duration));
         boundedContext.register(repository);
         repository.catchUp();
 
@@ -490,6 +492,7 @@ public class ProjectionRepositoryShould
         verify(repository, never()).store(any(Projection.class));
     }
 
+    @Ignore //TODO:2017-06-09:alexander.yevsyukov: Move manual catch-up testing into a separate suite.
     @SuppressWarnings("ConstantConditions") // argument matcher always returns null
     @Test
     public void catch_up_only_with_the_freshest_events() {
@@ -505,8 +508,8 @@ public class ProjectionRepositoryShould
                 boundedContext,
                 newEventsCount,
                 newEventsTime);
-        final ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository repo =
-                spy(new ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository());
+        final ManualCatchupProjectionRepository repo =
+                spy(new ManualCatchupProjectionRepository());
         repo.setBoundedContext(boundedContext);
         repo.projectionStorage().writeLastHandledEventTime(lastCatchUpTime);
 
