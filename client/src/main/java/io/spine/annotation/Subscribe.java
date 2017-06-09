@@ -48,26 +48,31 @@ import java.lang.annotation.Target;
  * <h2>Subscribing to Failures</h2>
  *
  * <p>A failure subscriber method:
- * <ul> // TODO:2017-05-10:dmytro.dashenkov: Update.
+ * <ul>
  *     <li>is annotated with {@link Subscribe};
  *     <li>is {@code public};
  *     <li>returns {@code void};
  *     <li>accepts a failure derived from {@link com.google.protobuf.Message Message}
  *          as the first parameter;
- *     <li>accepts a command derived from {@link com.google.protobuf.Message Message}
+ *     <li>(optional) accepts a command derived from {@link com.google.protobuf.Message Message}
  *          as the second parameter;
  *     <li>(optional) accepts an {@link io.spine.base.CommandContext CommandContext}
- *          as the third parameter.
+ *          as the second or third parameter.
  * </ul>
  *
- * <p>The type of the command argument specified acts as a filter. I.e.
+ * <p>Therefore, if the subscriber method specifies both the Command message and
+ * the Command Context, it must have the parameters exactly is that order:
+ * {@code (FailureMessage, CommandMessage, CommandContext)}. Otherwise, an Exception may be thrown
+ * at runtime.
+ *
+ * <p>The type of the command argument, if specified, acts as a filter, i.e.
  * the subscriber receives the failure if:
  * <ul>
  *     <li>the failure type matches the first argument type;
- *     <li>the command, which processing caused the failure, has the same type as the
- *          second argument.
+ *     <li>the command, which processing caused the failure, has the same type as
+ *          the command message argument if it is present;
+ *     <li>if the command message argument is absent, any failure of a matching type will do.
  * </ul>
- *
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
  * this method is not considered as a subscriber and is not registered for the command output
