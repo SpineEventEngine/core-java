@@ -90,12 +90,4 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
 
     /** Returns an entity storage implementation. */
     protected abstract RecordStorage<I> recordStorage();
-
-    /*
-     * Beam support
-     *****************/
-
-    @Override
-    public abstract ProjectionStorageIO<I> getIO(Class<I> idClass);
-
 }

@@ -48,7 +48,6 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
 import io.spine.test.TestActorRequestFactory;
@@ -119,7 +118,6 @@ public class ProjectionRepositoryShould
     private static final Any PRODUCER_ID = pack(ID);
 
     private BoundedContext boundedContext;
-    private InMemoryGrpcServer grpcServer;
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository() {
         return (ProjectionRepository<ProjectId, TestProjection, Project>) repository;
@@ -181,7 +179,6 @@ public class ProjectionRepositoryShould
                                        .setName(getClass().getSimpleName())
                                        .setMultitenant(true)
                                        .build();
-        grpcServer = InMemoryGrpcServer.startOn(boundedContext);
         super.setUp();
 
         boundedContext.register(repository);
@@ -198,7 +195,6 @@ public class ProjectionRepositoryShould
     @After
     public void shutDown() throws Exception {
         boundedContext.close();
-        grpcServer.shutdown();
     }
 
     private static TestEventFactory newEventFactory(TenantId tenantId, Any producerId) {

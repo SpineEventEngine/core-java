@@ -291,13 +291,4 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param records an ID to record map with the entries to store
      */
     protected abstract void writeRecords(Map<I, EntityRecordWithColumns> records);
-
-    /*
-     * Beam support
-     ******************/
-
-    /**
-     * Obtains {@link RecordStorageIO} instance for read/write operations with this record storage.
-     */
-    public abstract RecordStorageIO<I> getIO(Class<I> idClass);
 }

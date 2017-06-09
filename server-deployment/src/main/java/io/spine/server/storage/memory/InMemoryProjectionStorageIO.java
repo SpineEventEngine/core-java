@@ -38,11 +38,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
+public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
 
     private final String boundedContextName;
     private final TypeUrl stateTypeUrl;
     private final RecordStorageIO<I> storageIO;
+
+    public static <I> InMemoryProjectionStorageIO<I> of(Class<I> idClass,
+                                                        InMemoryProjectionStorage<I> storage) {
+        final RecordStorageIO<I> recordStorageIO = RecordStorageIO.of(idClass,
+                                                         storage.recordStorage());
+        return new InMemoryProjectionStorageIO<>(storage.getBoundedContextName(),
+                                                 storage.getStateTypeUrl(),
+                                                 recordStorageIO);
+    }
 
     InMemoryProjectionStorageIO(
             String boundedContextName, TypeUrl stateTypeUrl,

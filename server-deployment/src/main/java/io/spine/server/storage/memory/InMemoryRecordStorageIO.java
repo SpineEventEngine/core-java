@@ -39,10 +39,17 @@ import java.util.Iterator;
  *
  * @author Alexander Yevsyukov
  */
-class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
+public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
 
     private final String boundedContextName;
     private final TypeUrl entityStateUrl;
+
+    public static <I> InMemoryRecordStorageIO<I> create(Class<I> idClass,
+                                                        InMemoryRecordStorage<I> storage) {
+        return new InMemoryRecordStorageIO<>(storage.getBoundedContextName(),
+                                             idClass,
+                                             storage.getEntityStateUrl());
+    }
 
     InMemoryRecordStorageIO(String boundedContextName, Class<I> idClass, TypeUrl entityStateUrl) {
         super(idClass);

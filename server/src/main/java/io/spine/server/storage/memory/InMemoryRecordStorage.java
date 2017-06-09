@@ -26,7 +26,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
-import io.spine.server.storage.RecordStorageIO;
 import io.spine.type.TypeUrl;
 
 import java.util.Collection;
@@ -42,7 +41,7 @@ import java.util.Map;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-class InMemoryRecordStorage<I> extends RecordStorage<I> {
+public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
     private final String boundedContextName;
     private final TypeUrl entityStateUrl;
@@ -65,6 +64,14 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
                                                               TypeUrl entityStateUrl,
                                                               boolean multitenant) {
         return new InMemoryRecordStorage<>(boundedContextName, entityStateUrl, multitenant);
+    }
+
+    String getBoundedContextName() {
+        return boundedContextName;
+    }
+
+    TypeUrl getEntityStateUrl() {
+        return entityStateUrl;
     }
 
     @Override
@@ -134,14 +141,5 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         for (Map.Entry<I, EntityRecordWithColumns> record : records.entrySet()) {
             storage.put(record.getKey(), record.getValue());
         }
-    }
-
-    /*
-     * Beam support
-     ******************/
-
-    @Override
-    public RecordStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemoryRecordStorageIO<>(boundedContextName, idClass, entityStateUrl);
     }
 }

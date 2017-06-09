@@ -24,7 +24,6 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
-import io.spine.server.projection.ProjectionStorageIO;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantFunction;
 import io.spine.type.TypeUrl;
@@ -43,7 +42,7 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  * @param <I> the type of stream projection IDs
  * @author Alexander Litus
  */
-class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
+public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
     private final TypeUrl stateTypeUrl;
     private final InMemoryRecordStorage<I> recordStorage;
@@ -67,6 +66,15 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
         this.stateTypeUrl = stateTypeUrl;
         this.recordStorage = recordStorage;
     }
+
+    public TypeUrl getStateTypeUrl() {
+        return stateTypeUrl;
+    }
+
+    public String getBoundedContextName() {
+        return boundedContextName;
+    }
+
 
     @Override
     public Iterator<I> index() {
@@ -139,16 +147,5 @@ class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
         final Map<I, EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
-    }
-
-    /*
-     * Beam support
-     ******************/
-
-    @Override
-    public ProjectionStorageIO<I> getIO(Class<I> idClass) {
-        return new InMemoryProjectionStorageIO<>(boundedContextName,
-                                                 stateTypeUrl,
-                                                 recordStorage.getIO(idClass));
     }
 }

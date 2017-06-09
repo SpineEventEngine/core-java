@@ -22,7 +22,10 @@ package io.spine.server.projection;
 
 import com.google.protobuf.Timestamp;
 import io.spine.server.storage.RecordStorageIO;
+import io.spine.server.storage.memory.InMemoryProjectionStorage;
+import io.spine.server.storage.memory.InMemoryProjectionStorageIO;
 import io.spine.users.TenantId;
+import io.spine.util.Exceptions;
 import org.apache.beam.sdk.transforms.DoFn;
 
 /**
@@ -55,5 +58,13 @@ public abstract class ProjectionStorageIO<I> extends RecordStorageIO<I> {
         }
 
         protected abstract void doWrite(TenantId tenantId, Timestamp timestamp);
+    }
+
+    public static <I> ProjectionStorageIO<I> of(Class<I> idClass, ProjectionStorage<I> storage) {
+        if (storage instanceof InMemoryProjectionStorage) {
+            InMemoryProjectionStorage<I> memStg = (InMemoryProjectionStorage<I>) storage;
+            return InMemoryProjectionStorageIO.of(idClass, memStg);
+        }
+        throw Exceptions.unsupported("Unsupported projection storage class: " + storage.getClass());
     }
 }

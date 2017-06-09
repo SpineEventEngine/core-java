@@ -25,7 +25,10 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Identifier;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.storage.memory.InMemoryRecordStorage;
+import io.spine.server.storage.memory.InMemoryRecordStorageIO;
 import io.spine.users.TenantId;
+import io.spine.util.Exceptions;
 import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
 import org.apache.beam.sdk.coders.BigEndianLongCoder;
 import org.apache.beam.sdk.coders.Coder;
@@ -228,5 +231,14 @@ public abstract class RecordStorageIO<I> {
         }
 
         protected abstract Iterator<EntityRecord> doFind(TenantId tenantId, EntityFilters filters);
+    }
+
+    public static <I> RecordStorageIO<I> of(Class<I> idClass, RecordStorage<I> storage) {
+        if (storage instanceof InMemoryRecordStorage) {
+            InMemoryRecordStorage<I> memStg = (InMemoryRecordStorage<I>) storage;
+            return InMemoryRecordStorageIO.create(idClass, memStg);
+        }
+
+        throw Exceptions.unsupported("Unsupported storage class: " + storage.getClass());
     }
 }

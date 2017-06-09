@@ -30,7 +30,6 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.server.stand.StandStorage;
-import io.spine.server.storage.RecordStorageIO;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -192,14 +191,5 @@ class InMemoryStandStorage extends StandStorage {
             final InMemoryStandStorage result = new InMemoryStandStorage(this);
             return result;
         }
-    }
-
-    /*
-     * Beam support
-     ******************/
-
-    @Override
-    public RecordStorageIO<AggregateStateId> getIO(Class<AggregateStateId> idClass) {
-        return recordStorage.getIO(idClass);
     }
 }

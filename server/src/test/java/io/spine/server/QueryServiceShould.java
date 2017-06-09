@@ -29,7 +29,6 @@ import io.spine.client.QueryResponse;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
 import io.spine.test.Spy;
 import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.commandservice.ProjectId;
@@ -61,10 +60,8 @@ public class QueryServiceShould {
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
 
     private BoundedContext projectsContext;
-    private InMemoryGrpcServer projectsGrpcServer;
 
     private BoundedContext customersContext;
-    private InMemoryGrpcServer customersGrpcServer;
 
     private final TestQueryResponseObserver responseObserver = new TestQueryResponseObserver();
     private ProjectDetailsRepository projectDetailsRepository;
@@ -75,7 +72,6 @@ public class QueryServiceShould {
         projectsContext = BoundedContext.newBuilder()
                                         .setName("Projects")
                                         .build();
-        projectsGrpcServer = InMemoryGrpcServer.startOn(projectsContext);
 
         // Inject spy, which will be obtained later via getStand().
         Spy.ofClass(Stand.class)
@@ -93,7 +89,6 @@ public class QueryServiceShould {
         customersContext = BoundedContext.newBuilder()
                                          .setName("Customers")
                                          .build();
-        customersGrpcServer = InMemoryGrpcServer.startOn(customersContext);
 
         // Inject spy, which will be obtained later via getStand().
         Spy.ofClass(Stand.class)
@@ -118,8 +113,6 @@ public class QueryServiceShould {
         for (BoundedContext boundedContext : boundedContexts) {
             boundedContext.close();
         }
-        projectsGrpcServer.shutdown();
-        customersGrpcServer.shutdown();
     }
 
     @Test

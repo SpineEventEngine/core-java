@@ -45,8 +45,9 @@ public class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends 
     ProjectionRepositoryIO<I, P, S> of(ProjectionRepository<I, P, S> repository) {
         final Class<I> idClass = repository.getIdClass();
         final EntityStorageConverter<I, P, S> converter = repository.entityConverter();
-        return new ProjectionRepositoryIO<>(repository.projectionStorage().getIO(idClass),
-                                            converter);
+        final ProjectionStorageIO<I> storageIO =
+                ProjectionStorageIO.of(idClass, repository.projectionStorage());
+        return new ProjectionRepositoryIO<>(storageIO, converter);
     }
 
     ProjectionRepositoryIO(ProjectionStorageIO<I> storageIO,

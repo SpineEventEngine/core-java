@@ -29,7 +29,6 @@ import io.spine.server.BoundedContext;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.memory.grpc.InMemoryGrpcServer;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.TestEventFactory;
@@ -65,7 +64,6 @@ public class ProjectionRepositoryManualCatchupShould extends TenantAwareTest {
 
     private ProjectionRepository<ProjectId, TestProjection, Project> repository;
     private BoundedContext boundedContext;
-    private InMemoryGrpcServer grpcServer;
 
     @Before
     public void setUp() {
@@ -75,7 +73,6 @@ public class ProjectionRepositoryManualCatchupShould extends TenantAwareTest {
                                        .setName(getClass().getSimpleName())
                                        .setMultitenant(true)
                                        .build();
-        grpcServer = InMemoryGrpcServer.startOn(boundedContext);
 
         repository = new ManualCatchupProjectionRepository(boundedContext);
         repository.initStorage(storageFactory());
@@ -87,7 +84,6 @@ public class ProjectionRepositoryManualCatchupShould extends TenantAwareTest {
     @After
     public void tearDown() throws Exception {
         boundedContext.close();
-        grpcServer.shutdown();
     }
 
     private TestEventFactory newEventFactory(Any producerId) {

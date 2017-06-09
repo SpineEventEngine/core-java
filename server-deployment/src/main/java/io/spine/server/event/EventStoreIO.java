@@ -100,8 +100,9 @@ public class EventStoreIO {
         checkNotNull(eventStore);
         final ERepository repository = eventStore.getStorage();
         final RecordStorage<EventId> storage = repository.recordStorage();
-        final RecordStorageIO.FindFn findFn = storage.getIO(EventId.class)
-                                                     .findFn(tenantId);
+        final RecordStorageIO.FindFn findFn =
+                RecordStorageIO.of(EventId.class, storage)
+                               .findFn(tenantId);
         return new Query(findFn);
     }
 
