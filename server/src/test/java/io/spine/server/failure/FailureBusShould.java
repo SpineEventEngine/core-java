@@ -315,6 +315,17 @@ public class FailureBusShould {
         checkFailure(subscriber);
     }
 
+    @Test(
+            expected = IllegalArgumentException.class
+                // In Bus ->  No message types are forwarded by this dispatcher.
+    )
+    public void not_support_handler_methods_with_wrond_parameter_sequance() {
+        final FailureDispatcher subscriber = new InvalidOrderSubscriber();
+
+        failureBus.register(subscriber);
+        failureBus.post(missingOwnerFailure());
+    }
+
     @Test
     public void have_log() {
         assertNotNull(FailureBus.log());
