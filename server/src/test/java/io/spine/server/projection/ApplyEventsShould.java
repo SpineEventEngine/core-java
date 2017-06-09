@@ -28,7 +28,7 @@ import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityRecord;
-import io.spine.validate.DoubleValueValidatingBuilder;
+import io.spine.validate.DoubleValueVBuilder;
 import org.apache.beam.sdk.values.TupleTag;
 import org.junit.Before;
 import org.junit.Test;
@@ -61,7 +61,7 @@ public class ApplyEventsShould {
         SerializableTester.reserialize(applyEvents);
     }
 
-    private static class Sum extends Projection<Long, DoubleValue, DoubleValueValidatingBuilder> {
+    private static class Sum extends Projection<Long, DoubleValue, DoubleValueVBuilder> {
 
         private Sum(Long id) {
             super(id);

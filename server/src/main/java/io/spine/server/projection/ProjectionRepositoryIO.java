@@ -38,8 +38,16 @@ import org.apache.beam.sdk.values.PDone;
  *
  * @author Alexander Yevsyukov
  */
-class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends Message>
+public class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends Message>
         extends RecordBasedRepositoryIO<I, P, S> {
+
+    public static <I, P extends Projection<I, S, ?>, S extends Message>
+    ProjectionRepositoryIO<I, P, S> of(ProjectionRepository<I, P, S> repository) {
+        final Class<I> idClass = repository.getIdClass();
+        final EntityStorageConverter<I, P, S> converter = repository.entityConverter();
+        return new ProjectionRepositoryIO<>(repository.projectionStorage().getIO(idClass),
+                                            converter);
+    }
 
     ProjectionRepositoryIO(ProjectionStorageIO<I> storageIO,
                            EntityStorageConverter<I, P, S> converter) {

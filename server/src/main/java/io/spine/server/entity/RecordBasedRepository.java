@@ -445,13 +445,4 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
             }
         }
     }
-
-    /*
-     * Beam support
-     ******************/
-
-    public RecordBasedRepositoryIO<I, E, S> getIO() {
-        return new RecordBasedRepositoryIO<>(recordStorage().getIO(getIdClass()),
-                                             entityConverter());
-    }
 }

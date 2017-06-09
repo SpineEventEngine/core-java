@@ -56,7 +56,7 @@ import io.spine.test.TestEventFactory;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesValidatingBuilder;
+import io.spine.test.projection.ProjectTaskNamesVBuilder;
 import io.spine.test.projection.event.ProjectCreated;
 import io.spine.test.projection.event.ProjectStarted;
 import io.spine.test.projection.event.TaskAdded;
@@ -564,7 +564,7 @@ public class ProjectionRepositoryShould
     @SuppressWarnings("unused") // OK as event subscriber methods do nothing in this class.
     static class NoopTaskNamesProjection extends Projection<ProjectId,
             ProjectTaskNames,
-            ProjectTaskNamesValidatingBuilder> {
+            ProjectTaskNamesVBuilder> {
 
         public NoopTaskNamesProjection(ProjectId id) {
             super(id);

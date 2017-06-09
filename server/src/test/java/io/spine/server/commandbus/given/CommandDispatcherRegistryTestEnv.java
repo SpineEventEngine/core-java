@@ -38,7 +38,7 @@ import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.Project;
 import io.spine.test.command.ProjectId;
-import io.spine.test.command.ProjectValidatingBuilder;
+import io.spine.test.command.ProjectVBuilder;
 import io.spine.test.command.StartProject;
 import io.spine.test.command.Task;
 import io.spine.test.command.event.ProjectCreated;
@@ -64,7 +64,7 @@ public class CommandDispatcherRegistryTestEnv {
      ***************************/
 
     public static class NoCommandsProcessManager
-            extends ProcessManager<ProjectId, Project, ProjectValidatingBuilder>
+            extends ProcessManager<ProjectId, Project, ProjectVBuilder>
             implements TestEntityWithStringColumn {
 
         /** The event message we store for inspecting in delivery tests. */

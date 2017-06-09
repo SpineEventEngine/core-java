@@ -609,14 +609,4 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
             repository.completeCatchUp();
         }
     }
-
-    /*
-     * Beam support
-     *************************/
-
-    @Override
-    public ProjectionRepositoryIO<I, P, S> getIO() {
-        return new ProjectionRepositoryIO<>(projectionStorage().getIO(getIdClass()),
-                                            entityConverter());
-    }
 }

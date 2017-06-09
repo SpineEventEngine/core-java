@@ -86,7 +86,7 @@ class TenantCatchup<I> {
         this.repository = repository;
         this.options = options;
 
-        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = repository.getIO();
+        final ProjectionRepositoryIO<I, ?, ?> repositoryIO = ProjectionRepositoryIO.of(repository);
 
         final Coder<I> idCoder = repositoryIO.getIdCoder();
         final Coder<Event> eventCoder = EventStoreIO.getEventCoder();
