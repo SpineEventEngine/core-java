@@ -27,6 +27,10 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * A wrapper of the Failure subscriber method of the short form.
+ *
+ * <p>Such method receives only the Failure message as the parameter.
+ *
  * @author Dmytro Dashenkov
  */
 final class ShortFailureSubscriberMethod extends FailureSubscriberMethod {

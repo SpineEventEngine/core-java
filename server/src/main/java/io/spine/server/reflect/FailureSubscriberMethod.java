@@ -89,14 +89,6 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         }
     }
 
-    @Override
-    public <R> R invoke(Object target, Message message, CommandContext context)
-                                                            throws InvocationTargetException {
-        throw new IllegalStateException("Failure handling method requires " +
-                                        "at least one Message argument. " +
-                                        "See io.spine.base.Subscribe for more details");
-    }
-
     /**
      * Invokes the underlying {@link Method} with the specified set of params.
      *

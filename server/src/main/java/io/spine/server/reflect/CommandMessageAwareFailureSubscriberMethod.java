@@ -27,6 +27,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
+ * A wrapper of the Failure subscriber method aware of the Command message.
+ *
+ * <p>The parameter set of such a method is as follows:
+ * {@code (FailureMessage, CommandMessage)}.
+ *
  * @author Dmytro Dashenkov
  */
 final class CommandMessageAwareFailureSubscriberMethod extends FailureSubscriberMethod {
