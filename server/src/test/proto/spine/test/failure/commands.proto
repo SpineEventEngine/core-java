@@ -43,10 +43,3 @@ message RemoveOwner {
 
     string owner_user_id = 2;
 }
-
-message AddUser {
-
-    ProjectId id = 1;
-
-    string user_id = 2;
-}

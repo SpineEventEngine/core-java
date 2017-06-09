@@ -35,23 +35,7 @@ message InvalidProjectName {
     ProjectId project_id = 1;
 }
 
-message InvalidPersistenceFolder {
-
-    ProjectId project_id = 1;
-    string path_to_folder = 2;
-}
-
-message AmbiguousOwner {
-
-    ProjectId project_id = 1;
-}
-
 message MissingOwner {
-
-    ProjectId project_id = 1;
-}
-
-message QuotaOverusage {
 
     ProjectId project_id = 1;
 }
