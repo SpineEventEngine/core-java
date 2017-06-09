@@ -27,7 +27,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A wrapper of the Failure subscriber method aware of both the {@link CommandContext}.
+ * A wrapper of the Failure subscriber method aware of the {@link CommandContext}.
  *
  * <p>The parameter list of such a method is as follows:
  * {@code (FailureMessage, CommandContext)}.
