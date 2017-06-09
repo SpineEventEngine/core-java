@@ -22,16 +22,15 @@ package io.spine.server.failure;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.Commands;
 import io.spine.base.Failure;
 import io.spine.base.Failures;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
 import io.spine.envelope.FailureEnvelope;
-import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.Given;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.failure.ProjectId;
-import io.spine.test.failure.command.AddUser;
 import io.spine.test.failure.command.RemoveOwner;
 import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.testdata.Sample;
@@ -46,16 +45,15 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.base.Failures.getMessage;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.test.failure.ProjectFailures.AmbiguousOwner;
-import static io.spine.test.failure.ProjectFailures.InvalidPersistenceFolder;
 import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
 import static io.spine.test.failure.ProjectFailures.MissingOwner;
-import static io.spine.test.failure.ProjectFailures.QuotaOverusage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -65,6 +63,8 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+    // OK as for the test class for one of the primary framework features
 public class FailureBusShould {
 
     private FailureBus failureBus;
@@ -269,7 +269,7 @@ public class FailureBusShould {
 
     @Test
     public void catch_exceptions_caused_by_subscribers() {
-        final FaultySubscriber faultySubscriber = new FaultySubscriber();
+        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         failureBus.register(faultySubscriber);
         failureBus.post(invalidProjectNameFailure());
@@ -294,19 +294,39 @@ public class FailureBusShould {
     @Test
     public void support_short_form_handler_methods() {
         final ShortFormSubscriber subscriber = new ShortFormSubscriber();
+        checkFailure(subscriber);
+    }
 
-        final Failure failure = ambiguousOwnerFailure();
+    @Test
+    public void support_context_aware_handler_methods() {
+        final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
+        checkFailure(subscriber);
+    }
 
-        failureBus.register(subscriber);
-        failureBus.post(failure);
+    @Test
+    public void support_command_msg_aware_handler_methods() {
+        final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
+        checkFailure(subscriber);
+    }
 
-        assertTrue(subscriber.isMethodCalled());
-        assertEquals(AnyPacker.unpack(failure.getMessage()), subscriber.failure);
+    @Test
+    public void support_command_aware_handler_methods() {
+        final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
+        checkFailure(subscriber);
     }
 
     @Test
     public void have_log() {
         assertNotNull(FailureBus.log());
+    }
+
+    private void checkFailure(VerifiableSubscriber subscriber) {
+        final Failure failure = missingOwnerFailure();
+        failureBus.register(subscriber);
+        failureBus.post(failure);
+
+        assertTrue(subscriber.isMethodCalled());
+        subscriber.verifyGot(failure);
     }
 
     private static Failure invalidProjectNameFailure() {
@@ -332,11 +352,11 @@ public class FailureBusShould {
         return Failures.createFailure(invalidProjectName, command);
     }
 
-    private static Failure ambiguousOwnerFailure() {
+    private static Failure missingOwnerFailure() {
         final ProjectId projectId = newProjectId();
-        final AmbiguousOwner msg = AmbiguousOwner.newBuilder()
-                                                 .setProjectId(projectId)
-                                                 .build();
+        final MissingOwner msg = MissingOwner.newBuilder()
+                                             .setProjectId(projectId)
+                                             .build();
         final Command command = Given.Command.withMessage(Sample.messageOfType(RemoveOwner.class));
         return Failures.createFailure(msg, command);
     }
@@ -422,21 +442,23 @@ public class FailureBusShould {
         }
     }
 
-    private static class MemoizeSubscriber extends FailureSubscriber {
+    private abstract static class VerifiableSubscriber extends FailureSubscriber {
 
         private boolean methodCalled = false;
 
-        protected void triggerCall() {
+        void triggerCall() {
             methodCalled = true;
         }
 
-        public boolean isMethodCalled() {
+        private boolean isMethodCalled() {
             return methodCalled;
         }
+
+        abstract void verifyGot(Failure failure);
     }
 
     /** The subscriber which throws exception from the subscriber method. */
-    private static class FaultySubscriber extends MemoizeSubscriber {
+    private static class FaultySubscriber extends VerifiableSubscriber {
 
         @SuppressWarnings("unused") // It's fine for a faulty subscriber.
         @Subscribe
@@ -446,33 +468,49 @@ public class FailureBusShould {
                     "Faulty subscriber should have failed: " +
                             FaultySubscriber.class.getSimpleName());
         }
-    }
 
-    private static class ShortFormSubscriber extends MemoizeSubscriber {
-
-        private AmbiguousOwner failure;
-
-        @Subscribe
-        public void on(AmbiguousOwner failure) {
-            triggerCall();
-            this.failure = failure;
+        @Override
+        void verifyGot(Failure ignored) {
+            fail("FaultySubscriber");
         }
     }
 
-    private static class ContextAwareSubscriber extends MemoizeSubscriber {
+    private static class ShortFormSubscriber extends VerifiableSubscriber {
 
-        private InvalidPersistenceFolder failure;
+        private MissingOwner failure;
+
+        @Subscribe
+        public void on(MissingOwner failure) {
+            triggerCall();
+            this.failure = failure;
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+        }
+    }
+
+    private static class ContextAwareSubscriber extends VerifiableSubscriber {
+
+        private MissingOwner failure;
         private CommandContext context;
 
         @Subscribe
-        public void on(InvalidPersistenceFolder failure, CommandContext context) {
+        public void on(MissingOwner failure, CommandContext context) {
             triggerCall();
             this.failure = failure;
             this.context = context;
         }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+            assertEquals(failure.getContext().getCommand().getContext(), context);
+        }
     }
 
-    private static class CommandMessageAwareSubscriber extends MemoizeSubscriber {
+    private static class CommandMessageAwareSubscriber extends VerifiableSubscriber {
 
         private MissingOwner failure;
         private RemoveOwner command;
@@ -483,39 +521,52 @@ public class FailureBusShould {
             this.failure = failure;
             this.command = command;
         }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+            assertEquals(Commands.getMessage(failure.getContext().getCommand()), command);
+        }
     }
 
-    private static class CommandAwareSubscriber extends MemoizeSubscriber {
+    private static class CommandAwareSubscriber extends VerifiableSubscriber {
 
-        private QuotaOverusage failure;
-        private AddUser command;
+        private MissingOwner failure;
+        private RemoveOwner command;
         private CommandContext context;
 
         @Subscribe
-        public void on(QuotaOverusage failure,
-                       AddUser command,
+        public void on(MissingOwner failure,
+                       RemoveOwner command,
                        CommandContext context) {
             triggerCall();
             this.failure = failure;
             this.command = command;
             this.context = context;
         }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+            assertEquals(Commands.getMessage(failure.getContext().getCommand()), command);
+            assertEquals(failure.getContext().getCommand().getContext(), context);
+        }
     }
 
-    private static class InvalidOrderSubscriber extends MemoizeSubscriber {
+    private static class InvalidOrderSubscriber extends VerifiableSubscriber {
 
-        private QuotaOverusage failure;
-        private AddUser command;
-        private CommandContext context;
-
+        @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
         @Subscribe
-        public void on(QuotaOverusage failure,
+        public void on(MissingOwner failure,
                        CommandContext context,
-                       AddUser command) {
+                       RemoveOwner command) {
             triggerCall();
-            this.failure = failure;
-            this.command = command;
-            this.context = context;
+            fail("InvalidOrderSubscriber invoked the handler method");
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            fail("InvalidOrderSubscriber");
         }
     }
 }
