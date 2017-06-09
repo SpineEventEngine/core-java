@@ -60,8 +60,8 @@ import java.lang.annotation.Target;
  *          as the second or the third parameter.
  * </ul>
  *
- * <p>Therefore, if the subscriber method specifies both the Command message and
- * the Command Context, it must have the parameters exactly is that order:
+ * <p>Therefore, if the subscriber method specifies both the command message and
+ * the command context, it must have the parameters exactly is that order, i.e.
  * {@code (FailureMessage, CommandMessage, CommandContext)}. Otherwise, an exception may be thrown
  * at runtime.
  *

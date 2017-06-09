@@ -193,7 +193,7 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         @Override
         public FailureSubscriberMethod create(Method method) {
             final Class[] paramTypes = method.getParameterTypes();
-            final MethodWrapper wrapper = MethodWrapper.forParamSet(paramTypes);
+            final MethodWrapper wrapper = MethodWrapper.forParams(paramTypes);
             final FailureSubscriberMethod result = wrapper.apply(method);
             return result;
         }
@@ -229,12 +229,13 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
     private enum MethodWrapper implements Function<Method, FailureSubscriberMethod> {
 
         /**
-         * Wraps the given {@link Method} with an instance of {@link ShortFailureSubscriberMethod}.
+         * Wraps the given {@link Method} with an instance of
+         * {@link FailureMessageSubscriberMethod}.
          */
-        SHORT {
+        FAILURE_MESSAGE_AWARE {
             @Override
             FailureSubscriberMethod wrap(Method method) {
-                return new ShortFailureSubscriberMethod(method);
+                return new FailureMessageSubscriberMethod(method);
             }
         },
 
@@ -272,18 +273,19 @@ public abstract class FailureSubscriberMethod extends HandlerMethod<CommandConte
         };
 
         /**
-         * Retrieves the wrapper implementation for the given set of parameters of a handler method.
+         * Retrieves the wrapper implementation for the given set of parameters of a failure
+         * subscriber method
          *
-         * @param paramTypes the types of the parameters of the handler method
+         * @param paramTypes the parameter types of the failure subscriber method
          * @return the corresponding instance of {@code MethodWrapper}
          */
-        private static MethodWrapper forParamSet(Class[] paramTypes) {
+        private static MethodWrapper forParams(Class[] paramTypes) {
             checkNotNull(paramTypes);
             final int paramCount = paramTypes.length;
             final MethodWrapper methodWrapper;
             switch (paramCount) {
                 case 1:
-                    methodWrapper = SHORT;
+                    methodWrapper = FAILURE_MESSAGE_AWARE;
                     break;
                 case 2:
                     final Class<?> secondParamType = paramTypes[1];

@@ -29,8 +29,13 @@ import java.lang.reflect.Method;
 /**
  * A wrapper of the Failure subscriber method aware of the Command message.
  *
- * <p>The parameter list of such a method is as follows:
- * {@code (FailureMessage, CommandMessage)}.
+ *  * <p>The signature of such a method is following:
+ * <pre>
+ *     {@code
+ *     {@link io.spine.annotation.Subscribe {@literal @}Subscribe}
+ *     public void on(FailureMessage failure, CommandMessage command);
+ *     }
+ * </pre>
  *
  * @author Dmytro Dashenkov
  */

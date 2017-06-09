@@ -27,20 +27,27 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * A wrapper of the Failure subscriber method of the short form.
+ * A wrapper of the Failure subscriber method which receives a failure message as a single
+ * parameter.
  *
- * <p>Such method receives only the Failure message as the parameter.
+ * <p>The signature of such a method is following:
+ * <pre>
+ *     {@code
+ *     {@link io.spine.annotation.Subscribe {@literal @}Subscribe}
+ *     public void on(FailureMessage failure);
+ *     }
+ * </pre>
  *
  * @author Dmytro Dashenkov
  */
-final class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
+final class FailureMessageSubscriberMethod extends FailureSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.
      *
      * @param method subscriber method
      */
-    ShortFailureSubscriberMethod(Method method) {
+    FailureMessageSubscriberMethod(Method method) {
         super(method);
     }
 
