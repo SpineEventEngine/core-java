@@ -27,7 +27,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -73,7 +73,7 @@ public class AggregateCommandTestShould {
      * and prints it into its state.
      */
     private static final class TimePrinter
-                         extends Aggregate<Long, StringValue, StringValueValidatingBuilder> {
+                         extends Aggregate<Long, StringValue, StringValueVBuilder> {
 
         TimePrinter(Long id) {
             super(id);

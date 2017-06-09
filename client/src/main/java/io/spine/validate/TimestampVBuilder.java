@@ -19,27 +19,32 @@
  */
 package io.spine.validate;
 
-import com.google.protobuf.BoolValue;
+import com.google.protobuf.Timestamp;
 
 /**
- * Validating builder for {@linkplain BoolValue} messages.
+ * Validating builder for {@linkplain Timestamp} messages.
  *
  * @author Alex Tymchenko
  */
-public final class BoolValueValidatingBuilder
-        extends AbstractValidatingBuilder<BoolValue, BoolValue.Builder> {
+public final class TimestampVBuilder
+        extends AbstractValidatingBuilder<Timestamp, Timestamp.Builder> {
 
     // Prevent instantiation from the outside.
-    private BoolValueValidatingBuilder() {
+    private TimestampVBuilder() {
         super();
     }
 
-    public static BoolValueValidatingBuilder newBuilder() {
-        return new BoolValueValidatingBuilder();
+    public static TimestampVBuilder newBuilder() {
+        return new TimestampVBuilder();
     }
 
-    public BoolValueValidatingBuilder setValue(boolean value) {
-        getMessageBuilder().setValue(value);
+    public TimestampVBuilder setSeconds(long value) {
+        getMessageBuilder().setSeconds(value);
+        return this;
+    }
+
+    public TimestampVBuilder setNanos(int value) {
+        getMessageBuilder().setNanos(value);
         return this;
     }
 }

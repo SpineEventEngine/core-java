@@ -31,9 +31,9 @@ import io.spine.server.aggregate.AggregateRoot;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.procman.ProcessManager;
 import io.spine.server.projection.Projection;
-import io.spine.validate.StringValueValidatingBuilder;
-import io.spine.validate.TimestampValidatingBuilder;
-import io.spine.validate.UInt32ValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
+import io.spine.validate.TimestampVBuilder;
+import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -65,7 +65,7 @@ public class GivenShould {
     }
 
     private static class AnAggregate
-            extends Aggregate<Integer, StringValue, StringValueValidatingBuilder> {
+            extends Aggregate<Integer, StringValue, StringValueVBuilder> {
         protected AnAggregate(Integer id) {
             super(id);
         }
@@ -79,7 +79,7 @@ public class GivenShould {
 
     private static class AnAggregatePart extends AggregatePart<Long,
                                                                Timestamp,
-                                                               TimestampValidatingBuilder,
+            TimestampVBuilder,
                                                                AnAggregateRoot> {
         protected AnAggregatePart(AnAggregateRoot root) {
             super(root);
@@ -94,7 +94,7 @@ public class GivenShould {
 
     private static class AProjection extends Projection<String,
                                                         UInt32Value,
-                                                        UInt32ValueValidatingBuilder> {
+                                                        UInt32ValueVBuilder> {
         protected AProjection(String id) {
             super(id);
         }
@@ -114,7 +114,7 @@ public class GivenShould {
 
     private static class AProcessManager extends ProcessManager<Timestamp,
                                                                 StringValue,
-                                                                StringValueValidatingBuilder> {
+                                                                StringValueVBuilder> {
         protected AProcessManager(Timestamp id) {
             super(id);
         }

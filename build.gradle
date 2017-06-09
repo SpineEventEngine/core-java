@@ -35,11 +35,11 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
 
-        spineVersion = '0.9.18-SNAPSHOT'
+        spineVersion = '0.9.19-SNAPSHOT'
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
-        spineToolsVersion = '0.9.8-SNAPSHOT'
+        spineToolsVersion = '0.9.10-SNAPSHOT'
 
         // Defines option for the `spine-model-compiler` plugin.
         // Indicates whether the generation of the validating builders is enabled.

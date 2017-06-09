@@ -32,8 +32,8 @@ import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
-import io.spine.test.projection.ProjectTaskNamesValidatingBuilder;
-import io.spine.test.projection.ProjectValidatingBuilder;
+import io.spine.test.projection.ProjectTaskNamesVBuilder;
+import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.event.ProjectCreated;
 import io.spine.test.projection.event.ProjectStarted;
 import io.spine.test.projection.event.TaskAdded;
@@ -53,7 +53,7 @@ public class ProjectionRepositoryTestEnv {
     @SuppressWarnings("unused")
     public static class NoOpTaskNamesProjection extends Projection<ProjectId,
             ProjectTaskNames,
-            ProjectTaskNamesValidatingBuilder> {
+            ProjectTaskNamesVBuilder> {
 
         public NoOpTaskNamesProjection(ProjectId id) {
             super(id);
@@ -112,7 +112,7 @@ public class ProjectionRepositoryTestEnv {
 
     /** The projection stub used in tests. */
     public static class TestProjection
-            extends Projection<ProjectId, Project, ProjectValidatingBuilder>
+            extends Projection<ProjectId, Project, ProjectVBuilder>
             implements TestEntityWithStringColumn {
 
         /** The event message history we store for inspecting in delivery tests. */

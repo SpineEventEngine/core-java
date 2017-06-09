@@ -34,7 +34,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
-import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidationException;
 
 import javax.annotation.Nullable;
 
@@ -68,7 +68,7 @@ public class EventFactory {
      * Creates an event for the passed event message.
      *
      * <p>The message passed is validated according to the constraints set in its Protobuf
-     * definition. In case the message isn't valid, an {@linkplain ConstraintViolationThrowable
+     * definition. In case the message isn't valid, an {@linkplain ValidationException
      * exception} is thrown.
      *
      * <p>In the message is an instance of {@code Any}, it is unpacked for validation.
@@ -78,11 +78,11 @@ public class EventFactory {
      *
      * @param messageOrAny the message of the event or the message packed into {@code Any}
      * @param version      the version of the entity which produces the event
-     * @throws ConstraintViolationThrowable if the passed message does not satisfy the constraints
-     *                                      set for it in its Protobuf definition
+     * @throws ValidationException if the passed message does not satisfy the constraints
+     *                             set for it in its Protobuf definition
      */
     public Event createEvent(Message messageOrAny,
-                             @Nullable Version version) throws ConstraintViolationThrowable {
+                             @Nullable Version version) throws ValidationException {
         checkNotNull(messageOrAny);
         validate(messageOrAny);     // we must validate it now before emitting the next ID.
 
@@ -98,7 +98,7 @@ public class EventFactory {
      * <p>If the given {@code messageOrAny} is an instance of {@code Any}, it is unpacked
      * for the validation.
      */
-    private static void validate(Message messageOrAny) throws ConstraintViolationThrowable {
+    private static void validate(Message messageOrAny) throws ValidationException {
         final Message toValidate;
         toValidate = messageOrAny instanceof Any
                 ? AnyPacker.unpack((Any) messageOrAny)

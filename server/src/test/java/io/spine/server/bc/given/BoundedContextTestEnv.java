@@ -38,16 +38,16 @@ import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.bc.Project;
 import io.spine.test.bc.ProjectId;
-import io.spine.test.bc.ProjectValidatingBuilder;
+import io.spine.test.bc.ProjectVBuilder;
 import io.spine.test.bc.SecretProject;
-import io.spine.test.bc.SecretProjectValidatingBuilder;
+import io.spine.test.bc.SecretProjectVBuilder;
 import io.spine.test.bc.command.AddTask;
 import io.spine.test.bc.command.CreateProject;
 import io.spine.test.bc.command.StartProject;
 import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.bc.event.ProjectStarted;
 import io.spine.test.bc.event.TaskAdded;
-import io.spine.validate.EmptyValidatingBuilder;
+import io.spine.validate.EmptyVBuilder;
 
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class BoundedContextTestEnv {
     private BoundedContextTestEnv() {}
 
     public static class ProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private ProjectAggregate(ProjectId id) {
             super(id);
@@ -128,7 +128,7 @@ public class BoundedContextTestEnv {
     }
 
     public static class SecretProjectAggregate
-            extends Aggregate<String, SecretProject, SecretProjectValidatingBuilder> {
+            extends Aggregate<String, SecretProject, SecretProjectVBuilder> {
         private SecretProjectAggregate(String id) {
             super(id);
         }
@@ -144,7 +144,7 @@ public class BoundedContextTestEnv {
     }
 
     public static class ProjectProcessManager
-            extends ProcessManager<ProjectId, Empty, EmptyValidatingBuilder> {
+            extends ProcessManager<ProjectId, Empty, EmptyVBuilder> {
 
         // a ProcessManager constructor must be public because it is used via reflection
         @SuppressWarnings("PublicConstructorInNonPublicClass")
@@ -170,7 +170,7 @@ public class BoundedContextTestEnv {
     }
 
     public static class ProjectReport
-            extends Projection<ProjectId, Empty, EmptyValidatingBuilder> {
+            extends Projection<ProjectId, Empty, EmptyVBuilder> {
 
         @SuppressWarnings("PublicConstructorInNonPublicClass")
         // Public constructor is a part of projection public API. It's called by a repository.
@@ -191,7 +191,7 @@ public class BoundedContextTestEnv {
     }
 
     public static class AnotherProjectAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
         protected AnotherProjectAggregate(ProjectId id) {
             super(id);
         }

@@ -27,8 +27,8 @@ import io.spine.base.EventContext;
 import io.spine.base.Version;
 import io.spine.server.entity.TransactionListener.SilentWitness;
 import io.spine.validate.AbstractValidatingBuilder;
-import io.spine.validate.ConstraintViolationThrowable;
 import io.spine.validate.ValidatingBuilder;
+import io.spine.validate.ValidationException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -264,7 +264,7 @@ public abstract class Transaction<I,
 
                 entity.updateState(newState, getVersion());
                 commitAttributeChanges();
-            } catch (ConstraintViolationThrowable exception) {  /* Could only happen if the state
+            } catch (ValidationException exception) {  /* Could only happen if the state
                                                                    has been injected not using
                                                                    the builder setters. */
                 final InvalidEntityStateException invalidStateException = of(exception);
@@ -280,7 +280,7 @@ public abstract class Transaction<I,
         } else {
             // The state isn't modified, but other attributes may have been modified.
             listener.onBeforeCommit(getEntity(), getEntity().getState(),
-                                         getVersion(), getLifecycleFlags());
+                                    getVersion(), getLifecycleFlags());
             commitAttributeChanges();
             releaseTx();
         }
@@ -334,7 +334,7 @@ public abstract class Transaction<I,
         return this;
     }
 
-    private InvalidEntityStateException of(ConstraintViolationThrowable exception) {
+    private InvalidEntityStateException of(ValidationException exception) {
         final Message invalidState = currentBuilderState();
         return onConstraintViolations(invalidState, exception.getConstraintViolations());
     }

@@ -26,19 +26,19 @@ import com.google.protobuf.DoubleValue;
  *
  * @author Alex Tymchenko
  */
-public final class DoubleValueValidatingBuilder
+public final class DoubleValueVBuilder
         extends AbstractValidatingBuilder<DoubleValue, DoubleValue.Builder> {
 
     // Prevent instantiation from the outside.
-    private DoubleValueValidatingBuilder() {
+    private DoubleValueVBuilder() {
         super();
     }
 
-    public static DoubleValueValidatingBuilder newBuilder() {
-        return new DoubleValueValidatingBuilder();
+    public static DoubleValueVBuilder newBuilder() {
+        return new DoubleValueVBuilder();
     }
 
-    public DoubleValueValidatingBuilder setValue(double value) {
+    public DoubleValueVBuilder setValue(double value) {
         getMessageBuilder().setValue(value);
         return this;
     }

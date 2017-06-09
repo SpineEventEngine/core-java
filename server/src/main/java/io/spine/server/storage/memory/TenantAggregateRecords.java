@@ -26,6 +26,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.TreeMultimap;
+import io.spine.base.Event;
 import io.spine.server.aggregate.AggregateEventRecord;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.LifecycleFlags;
@@ -40,6 +41,7 @@ import java.util.Map;
 
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.util.Exceptions.unsupported;
+import static io.spine.validate.Validate.isDefault;
 
 /**
  * The events for for a tenant.
@@ -180,8 +182,78 @@ class TenantAggregateRecords<I> implements TenantStorage<I, AggregateEventRecord
 
         @Override
         public int compare(AggregateEventRecord first, AggregateEventRecord second) {
-            final int result = Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
+            int result = compareTimestamps(first, second);
+
+            // In case the wall-clock isn't accurate enough, the timestamps may be the same.
+            // In this case, compare the version in a similar fashion.
+            if (result == 0) {
+                result = compareVersions(first, second);
+                if(result == 0) {
+                    result = compareSimilarRecords(first, second);
+                }
+            }
             return result;
+        }
+
+        /**
+         * Compares the {@linkplain AggregateEventRecord records} with the same version number
+         * and timestamp.
+         *
+         * <p>If the timestamp and versions are the same, we should check if one of the records
+         * is a snapshot. From a snapshot and an event with the same version and timestamp,
+         * a snapshot is considered "newer".
+         *
+         * @param first  the first record
+         * @param second the second record
+         * @return {@code -1}, {@code 1} or {@code 0} according to
+         * {@linkplain Comparator#compare(Object, Object) compare(..) specification}
+         */
+        private static int compareSimilarRecords(AggregateEventRecord first,
+                                                 AggregateEventRecord second) {
+            final boolean firstIsSnapshot = isSnapshot(first);
+            final boolean secondIsSnapshot = isSnapshot(second);
+            if (firstIsSnapshot && !secondIsSnapshot) {
+                return -1;
+            } else if (secondIsSnapshot && !firstIsSnapshot) {
+                return 1;
+            } else {
+                // Both are of the same kind and have the same versions and timestamps.
+                return 0;
+            }
+        }
+
+        private static boolean isSnapshot(AggregateEventRecord record) {
+            return !isDefault(record.getSnapshot());
+        }
+
+        private static int compareVersions(AggregateEventRecord first,
+                                           AggregateEventRecord second) {
+            int result;
+            final int secondEventVersion = versionNumberOf(second);
+            final int firstEventVersion = versionNumberOf(first);
+            result = Integer.compare(secondEventVersion, firstEventVersion);
+            return result;
+        }
+
+        private static int compareTimestamps(AggregateEventRecord first,
+                                             AggregateEventRecord second) {
+            return Timestamps2.compare(second.getTimestamp(), first.getTimestamp());
+        }
+
+        private static int versionNumberOf(AggregateEventRecord record) {
+            final int versionNumber;
+
+            final Event event = record.getEvent();
+            if (isDefault(event)) {
+                versionNumber = record.getSnapshot()
+                                      .getVersion()
+                                      .getNumber();
+            } else {
+                versionNumber = event.getContext()
+                                     .getVersion()
+                                     .getNumber();
+            }
+            return versionNumber;
         }
     }
 }

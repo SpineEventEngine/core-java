@@ -35,14 +35,14 @@ import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.idfunc.IdCommandFunction;
 import io.spine.test.TestActorRequestFactory;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -118,7 +118,7 @@ public class AggregateRepositoryViewsShould {
      */
     @SuppressWarnings("RedundantMethodOverride") // We expose methods to the tests.
     private static class SHAggregate
-            extends Aggregate<Long, StringValue, StringValueValidatingBuilder> {
+            extends Aggregate<Long, StringValue, StringValueVBuilder> {
         private SHAggregate(Long id) {
             super(id);
         }
