@@ -382,17 +382,22 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * Updates projections from the event stream obtained from {@code EventStore}.
      */
     public void catchUp() {
-        setStatus(Status.CATCHING_UP);
-
-        /*
-            Uncomment the below line and comment the one after to switch between regular and
-            Beam-based catch-up procedures.
-        */
-//               allTenantOpCatchup();
-        BeamCatchUp.forAllTenants(this);
-
+        startCatchUp();
+        allTenantOpCatchup();
         completeCatchUp();
-        logCatchUpComplete();
+    }
+
+    void startCatchUp() {
+        setStatus(Status.CATCHING_UP);
+    }
+
+    void completeCatchUp() {
+        setOnline();
+
+        if (log().isInfoEnabled()) {
+            final Class<? extends ProjectionRepository> repositoryClass = getClass();
+            log().info("{} catch-up complete", repositoryClass.getName());
+        }
     }
 
     @Internal
@@ -443,17 +448,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                                .setAfter(timestamp)
                                .addAllFilter(eventFilters)
                                .build();
-    }
-
-    private void completeCatchUp() {
-        setOnline();
-    }
-
-    private void logCatchUpComplete() {
-        if (log().isInfoEnabled()) {
-            final Class<? extends ProjectionRepository> repositoryClass = getClass();
-            log().info("{} catch-up complete", repositoryClass.getName());
-        }
     }
 
     /**

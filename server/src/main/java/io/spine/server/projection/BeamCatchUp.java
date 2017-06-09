@@ -34,7 +34,7 @@ import java.util.Set;
  */
 @SuppressWarnings("unused")
     // Keep this class even if it is temporarily not used by the Projection class.
-class BeamCatchUp {
+public class BeamCatchUp {
 
     private BeamCatchUp() {
         // Prevent instantiation of this utility class.
@@ -44,23 +44,19 @@ class BeamCatchUp {
      * Iteratively performs catch-up for the passed projections.
      */
     static <I> void forAllTenants(ProjectionRepository<I, ?, ?> repository) {
+        repository.startCatchUp();
+
         final Set<TenantId> allTenants = repository.boundedContext()
                                                    .getTenantIndex()
                                                    .getAll();
         final PipelineOptions options = PipelineOptionsFactory.create();
-
-        //TODO:2017-05-21:alexander.yevsyukov: re-write using PCollection<TenantId> as the input.
-        // This would allow performing this in parallel. It should not be difficult, but would
-        // require changing the way `CatchupOp` is started. Now `EventStreamQuery` is obtained
-        // from the repository, but we'll need to do it via a DoFn, which works with
-        // ProjectionStorageIO for obtaining EventStreamQuery, which includes a timestamp of last
-        // handled event. OR, we would implement storing timestamps differently (per projection)
-        // and composing EventStreamQuery would be two calls for corresponding RecordStorageIOs.
 
         for (TenantId tenantId : allTenants) {
             final TenantCatchup<I> catchupOp = new TenantCatchup<>(tenantId, repository, options);
             final PipelineResult result = catchupOp.run();
             result.waitUntilFinish();
         }
+
+        repository.completeCatchUp();
     }
 }
