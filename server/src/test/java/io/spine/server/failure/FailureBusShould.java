@@ -292,25 +292,25 @@ public class FailureBusShould {
     }
 
     @Test
-    public void support_short_form_handler_methods() {
+    public void support_short_form_subscriber_methods() {
         final ShortFormSubscriber subscriber = new ShortFormSubscriber();
         checkFailure(subscriber);
     }
 
     @Test
-    public void support_context_aware_handler_methods() {
+    public void support_context_aware_subscriber_methods() {
         final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
         checkFailure(subscriber);
     }
 
     @Test
-    public void support_command_msg_aware_handler_methods() {
+    public void support_command_msg_aware_subscriber_methods() {
         final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
         checkFailure(subscriber);
     }
 
     @Test
-    public void support_command_aware_handler_methods() {
+    public void support_command_aware_subscriber_methods() {
         final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
         checkFailure(subscriber);
     }
@@ -319,7 +319,7 @@ public class FailureBusShould {
             expected = IllegalArgumentException.class
                 // In Bus ->  No message types are forwarded by this dispatcher.
     )
-    public void not_support_handler_methods_with_wrond_parameter_sequance() {
+    public void not_support_subscriber_methods_with_wrong_parameter_sequence() {
         final FailureDispatcher subscriber = new InvalidOrderSubscriber();
 
         failureBus.register(subscriber);
