@@ -293,7 +293,7 @@ public class FailureBusShould {
 
     @Test
     public void support_short_form_subscriber_methods() {
-        final ShortFormSubscriber subscriber = new ShortFormSubscriber();
+        final FailureMessageSubscriber subscriber = new FailureMessageSubscriber();
         checkFailure(subscriber);
     }
 
@@ -486,7 +486,7 @@ public class FailureBusShould {
         }
     }
 
-    private static class ShortFormSubscriber extends VerifiableSubscriber {
+    private static class FailureMessageSubscriber extends VerifiableSubscriber {
 
         private MissingOwner failure;
 
