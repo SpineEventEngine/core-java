@@ -171,7 +171,6 @@ class Given {
                     = AggregateEventRecord.newBuilder()
                                           .setTimestamp(timestamp)
                                           .setEvent(event);
-                                             // To guarantee KindCase presence
             return builder.build();
         }
 
