@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
+final class ShortFailureSubscriberMethod extends FailureSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

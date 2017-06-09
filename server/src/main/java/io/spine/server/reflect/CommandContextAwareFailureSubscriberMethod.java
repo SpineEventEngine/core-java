@@ -29,7 +29,7 @@ import java.lang.reflect.Method;
 /**
  * @author Dmytro Dashenkov
  */
-public class CommandContextAwareFailureSubscriberMethod extends FailureSubscriberMethod {
+final class CommandContextAwareFailureSubscriberMethod extends FailureSubscriberMethod {
 
     /**
      * Creates a new instance to wrap {@code method} on {@code target}.

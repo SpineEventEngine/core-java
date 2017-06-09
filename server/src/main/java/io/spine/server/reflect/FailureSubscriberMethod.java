@@ -23,6 +23,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.annotation.Subscribe;
 import io.spine.base.CommandContext;
 import io.spine.type.FailureClass;
@@ -43,6 +44,7 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  * @author Dmytro Dashenkov
  */
+@Internal
 public abstract class FailureSubscriberMethod extends HandlerMethod<CommandContext> {
 
     /** The instance of the predicate to filter failure subscriber methods of a class. */

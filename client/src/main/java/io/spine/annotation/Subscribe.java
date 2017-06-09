@@ -57,12 +57,12 @@ import java.lang.annotation.Target;
  *     <li>(optional) accepts a command derived from {@link com.google.protobuf.Message Message}
  *          as the second parameter;
  *     <li>(optional) accepts an {@link io.spine.base.CommandContext CommandContext}
- *          as the second or third parameter.
+ *          as the second or the third parameter.
  * </ul>
  *
  * <p>Therefore, if the subscriber method specifies both the Command message and
  * the Command Context, it must have the parameters exactly is that order:
- * {@code (FailureMessage, CommandMessage, CommandContext)}. Otherwise, an Exception may be thrown
+ * {@code (FailureMessage, CommandMessage, CommandContext)}. Otherwise, an exception may be thrown
  * at runtime.
  *
  * <p>The type of the command argument, if specified, acts as a filter, i.e.
@@ -71,7 +71,8 @@ import java.lang.annotation.Target;
  *     <li>the failure type matches the first argument type;
  *     <li>the command, which processing caused the failure, has the same type as
  *          the command message argument if it is present;
- *     <li>if the command message argument is absent, any failure of a matching type will do.
+ *     <li>if the command message argument is absent, any failure of a matching type is received by
+ *          the subscriber.
  * </ul>
  *
  * <p>If the annotation is applied to a method which doesn't satisfy any of these requirements,
