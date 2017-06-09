@@ -44,6 +44,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
+import static io.spine.test.TestEventFactory.newInstance;
 import static io.spine.test.Values.newUserId;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
@@ -158,13 +159,18 @@ class Given {
 
     static class StorageRecord {
 
+        private static final TestEventFactory eventFactory = newInstance(Given.class);
+
         private StorageRecord() {
         }
 
         static AggregateEventRecord create(Timestamp timestamp) {
+            final Message eventMessage = Sample.messageOfType(ProjectCreated.class);
+            final Event event = eventFactory.createEvent(eventMessage);
             final AggregateEventRecord.Builder builder
                     = AggregateEventRecord.newBuilder()
-                                          .setTimestamp(timestamp);
+                                          .setTimestamp(timestamp)
+                                          .setEvent(event);
             return builder.build();
         }
 
@@ -199,7 +205,7 @@ class Given {
             final Timestamp timestamp2 = add(timestamp1, delta);
             final Timestamp timestamp3 = add(timestamp2, delta);
 
-            final TestEventFactory eventFactory = TestEventFactory.newInstance(Given.class);
+            final TestEventFactory eventFactory = newInstance(Given.class);
 
             final Event e1 = eventFactory.createEvent(projectCreated(id, projectName(id)),
                                                       null,

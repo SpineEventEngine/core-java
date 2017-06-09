@@ -34,3 +34,8 @@ message InvalidProjectName {
 
     ProjectId project_id = 1;
 }
+
+message MissingOwner {
+
+    ProjectId project_id = 1;
+}

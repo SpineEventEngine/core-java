@@ -65,7 +65,7 @@ public class Given {
          * serId and timestamp using default {@link Command} instance.
          */
         private static io.spine.base.Command create(Message command, UserId userId,
-                                                      Timestamp when) {
+                                                    Timestamp when) {
             final TenantId generatedTenantId = TenantId.newBuilder()
                                                        .setValue(newUuid())
                                                        .build();
@@ -73,6 +73,10 @@ public class Given {
                     TestActorRequestFactory.newInstance(userId, generatedTenantId);
             final io.spine.base.Command result = factory.createCommand(command, when);
             return result;
+        }
+
+        public static io.spine.base.Command withMessage(Message message) {
+            return create(message, USER_ID, getCurrentTime());
         }
 
         public static io.spine.base.Command addTask() {

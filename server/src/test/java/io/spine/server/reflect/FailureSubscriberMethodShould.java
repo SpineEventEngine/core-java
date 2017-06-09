@@ -51,7 +51,7 @@ public class FailureSubscriberMethodShould {
     public void invoke_subscriber_method() throws InvocationTargetException {
         final ValidSubscriberThreeParams subscriberObject = spy(new ValidSubscriberThreeParams());
         final FailureSubscriberMethod subscriber =
-                FailureSubscriberMethod.from(subscriberObject.getMethod());
+                new CommandAwareFailureSubscriberMethod(subscriberObject.getMethod());
         final ReflectFailures.InvalidProjectName msg = Given.FailureMessage.invalidProjectName();
 
         subscriber.invoke(subscriberObject, msg,

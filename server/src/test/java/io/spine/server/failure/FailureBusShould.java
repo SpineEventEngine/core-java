@@ -22,15 +22,18 @@ package io.spine.server.failure;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.Commands;
 import io.spine.base.Failure;
 import io.spine.base.Failures;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
 import io.spine.envelope.FailureEnvelope;
+import io.spine.server.commandbus.Given;
 import io.spine.test.TestActorRequestFactory;
-import io.spine.test.failure.ProjectFailures;
 import io.spine.test.failure.ProjectId;
+import io.spine.test.failure.command.RemoveOwner;
 import io.spine.test.failure.command.UpdateProjectName;
+import io.spine.testdata.Sample;
 import io.spine.type.FailureClass;
 import io.spine.users.TenantId;
 import org.junit.Before;
@@ -42,11 +45,15 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.base.Failures.getMessage;
 import static io.spine.base.Identifier.newUuid;
+import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
+import static io.spine.test.failure.ProjectFailures.MissingOwner;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -56,6 +63,8 @@ import static org.mockito.Mockito.verify;
 /**
  * @author Alex Tymchenko
  */
+@SuppressWarnings({"ClassWithTooManyMethods", "OverlyCoupledClass"})
+    // OK as for the test class for one of the primary framework features
 public class FailureBusShould {
 
     private FailureBus failureBus;
@@ -128,7 +137,7 @@ public class FailureBusShould {
         failureBus.register(subscriberOne);
         failureBus.register(subscriberTwo);
 
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         assertTrue(failureBus.hasDispatchers(failureClass));
 
         final Collection<FailureDispatcher> dispatchers = failureBus.getDispatchers(failureClass);
@@ -143,7 +152,7 @@ public class FailureBusShould {
         failureBus.register(subscriberOne);
         failureBus.register(subscriberTwo);
         final FailureClass failureClass = FailureClass.of(
-                ProjectFailures.InvalidProjectName.class);
+                InvalidProjectName.class);
 
         failureBus.unregister(subscriberOne);
 
@@ -191,7 +200,7 @@ public class FailureBusShould {
 
         failureBus.register(dispatcher);
 
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         assertTrue(failureBus.getDispatchers(failureClass)
                              .contains(dispatcher));
     }
@@ -231,7 +240,7 @@ public class FailureBusShould {
         failureBusWithPostponedExecution.post(failure);
         final Set<FailureEnvelope> postponedFailures = postponedDelivery.getPostponedFailures();
         final FailureEnvelope postponedFailure = postponedFailures.iterator()
-                                                                .next();
+                                                                  .next();
         verify(delegateDispatcherExecutor, never()).execute(any(Runnable.class));
         postponedDelivery.deliverNow(postponedFailure, dispatcher.getClass());
         assertTrue(dispatcher.isDispatchCalled());
@@ -242,7 +251,7 @@ public class FailureBusShould {
     public void unregister_dispatchers() {
         final FailureDispatcher dispatcherOne = new BareDispatcher();
         final FailureDispatcher dispatcherTwo = new BareDispatcher();
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
         failureBus.register(dispatcherOne);
         failureBus.register(dispatcherTwo);
 
@@ -260,7 +269,7 @@ public class FailureBusShould {
 
     @Test
     public void catch_exceptions_caused_by_subscribers() {
-        final FaultySubscriber faultySubscriber = new FaultySubscriber();
+        final VerifiableSubscriber faultySubscriber = new FaultySubscriber();
 
         failureBus.register(faultySubscriber);
         failureBus.post(invalidProjectNameFailure());
@@ -274,7 +283,7 @@ public class FailureBusShould {
                                                 .build();
         failureBus.register(new BareDispatcher());
         failureBus.register(new InvalidProjectNameSubscriber());
-        final FailureClass failureClass = FailureClass.of(ProjectFailures.InvalidProjectName.class);
+        final FailureClass failureClass = FailureClass.of(InvalidProjectName.class);
 
         failureBus.close();
 
@@ -283,18 +292,60 @@ public class FailureBusShould {
     }
 
     @Test
+    public void support_short_form_subscriber_methods() {
+        final FailureMessageSubscriber subscriber = new FailureMessageSubscriber();
+        checkFailure(subscriber);
+    }
+
+    @Test
+    public void support_context_aware_subscriber_methods() {
+        final ContextAwareSubscriber subscriber = new ContextAwareSubscriber();
+        checkFailure(subscriber);
+    }
+
+    @Test
+    public void support_command_msg_aware_subscriber_methods() {
+        final CommandMessageAwareSubscriber subscriber = new CommandMessageAwareSubscriber();
+        checkFailure(subscriber);
+    }
+
+    @Test
+    public void support_command_aware_subscriber_methods() {
+        final CommandAwareSubscriber subscriber = new CommandAwareSubscriber();
+        checkFailure(subscriber);
+    }
+
+    @Test(
+            expected = IllegalArgumentException.class
+                // In Bus ->  No message types are forwarded by this dispatcher.
+    )
+    public void not_support_subscriber_methods_with_wrong_parameter_sequence() {
+        final FailureDispatcher subscriber = new InvalidOrderSubscriber();
+
+        failureBus.register(subscriber);
+        failureBus.post(missingOwnerFailure());
+    }
+
+    @Test
     public void have_log() {
         assertNotNull(FailureBus.log());
     }
 
+    private void checkFailure(VerifiableSubscriber subscriber) {
+        final Failure failure = missingOwnerFailure();
+        failureBus.register(subscriber);
+        failureBus.post(failure);
+
+        assertTrue(subscriber.isMethodCalled());
+        subscriber.verifyGot(failure);
+    }
+
     private static Failure invalidProjectNameFailure() {
-        final ProjectId projectId = ProjectId.newBuilder()
-                                             .setId(newUuid())
-                                             .build();
-        final ProjectFailures.InvalidProjectName invalidProjectName =
-                ProjectFailures.InvalidProjectName.newBuilder()
-                                                  .setProjectId(projectId)
-                                                  .build();
+        final ProjectId projectId = newProjectId();
+        final InvalidProjectName invalidProjectName =
+                InvalidProjectName.newBuilder()
+                                  .setProjectId(projectId)
+                                  .build();
         final StringChange nameChange = StringChange.newBuilder()
                                                     .setNewValue("Too short")
                                                     .build();
@@ -312,6 +363,22 @@ public class FailureBusShould {
         return Failures.createFailure(invalidProjectName, command);
     }
 
+    private static Failure missingOwnerFailure() {
+        final ProjectId projectId = newProjectId();
+        final MissingOwner msg = MissingOwner.newBuilder()
+                                             .setProjectId(projectId)
+                                             .build();
+        final Command command = Given.Command.withMessage(Sample.messageOfType(RemoveOwner.class));
+        return Failures.createFailure(msg, command);
+    }
+
+    private static ProjectId newProjectId() {
+        final ProjectId projectId = ProjectId.newBuilder()
+                                             .setId(newUuid())
+                                             .build();
+        return projectId;
+    }
+
     /**
      * A simple dispatcher class, which only dispatch and does not have own failure
      * subscribing methods.
@@ -322,7 +389,7 @@ public class FailureBusShould {
 
         @Override
         public Set<FailureClass> getMessageClasses() {
-            return FailureClass.setOf(ProjectFailures.InvalidProjectName.class);
+            return FailureClass.setOf(InvalidProjectName.class);
         }
 
         @Override
@@ -340,7 +407,7 @@ public class FailureBusShould {
         private Failure failureHandled;
 
         @Subscribe
-        public void on(ProjectFailures.InvalidProjectName failure,
+        public void on(InvalidProjectName failure,
                        UpdateProjectName commandMessage,
                        CommandContext context) {
             final CommandFactory commandFactory =
@@ -376,7 +443,7 @@ public class FailureBusShould {
                     envelope);
             final boolean failurePostponed = actualClass != null;
             final boolean dispatcherMatches = failurePostponed && dispatcher.getClass()
-                                                                          .equals(actualClass);
+                                                                            .equals(actualClass);
             return dispatcherMatches;
         }
 
@@ -386,22 +453,131 @@ public class FailureBusShould {
         }
     }
 
-    /** The subscriber which throws exception from the subscriber method. */
-    private static class FaultySubscriber extends FailureSubscriber {
+    private abstract static class VerifiableSubscriber extends FailureSubscriber {
 
         private boolean methodCalled = false;
 
-        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
-        @Subscribe
-        public void on(ProjectFailures.InvalidProjectName failure, UpdateProjectName command) {
+        void triggerCall() {
             methodCalled = true;
-            throw new UnsupportedOperationException(
-                    "Faulty subscriber should have failed: " +
-                    FaultySubscriber.class.getSimpleName());
         }
 
         private boolean isMethodCalled() {
-            return this.methodCalled;
+            return methodCalled;
+        }
+
+        abstract void verifyGot(Failure failure);
+    }
+
+    /** The subscriber which throws exception from the subscriber method. */
+    private static class FaultySubscriber extends VerifiableSubscriber {
+
+        @SuppressWarnings("unused") // It's fine for a faulty subscriber.
+        @Subscribe
+        public void on(InvalidProjectName failure, CommandContext context) {
+            triggerCall();
+            throw new UnsupportedOperationException(
+                    "Faulty subscriber should have failed: " +
+                            FaultySubscriber.class.getSimpleName());
+        }
+
+        @Override
+        void verifyGot(Failure ignored) {
+            fail("FaultySubscriber");
+        }
+    }
+
+    private static class FailureMessageSubscriber extends VerifiableSubscriber {
+
+        private MissingOwner failure;
+
+        @Subscribe
+        public void on(MissingOwner failure) {
+            triggerCall();
+            this.failure = failure;
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+        }
+    }
+
+    private static class ContextAwareSubscriber extends VerifiableSubscriber {
+
+        private MissingOwner failure;
+        private CommandContext context;
+
+        @Subscribe
+        public void on(MissingOwner failure, CommandContext context) {
+            triggerCall();
+            this.failure = failure;
+            this.context = context;
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+            assertEquals(failure.getContext().getCommand().getContext(), context);
+        }
+    }
+
+    private static class CommandMessageAwareSubscriber extends VerifiableSubscriber {
+
+        private MissingOwner failure;
+        private RemoveOwner command;
+
+        @Subscribe
+        public void on(MissingOwner failure, RemoveOwner command) {
+            triggerCall();
+            this.failure = failure;
+            this.command = command;
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+            assertEquals(Commands.getMessage(failure.getContext().getCommand()), command);
+        }
+    }
+
+    private static class CommandAwareSubscriber extends VerifiableSubscriber {
+
+        private MissingOwner failure;
+        private RemoveOwner command;
+        private CommandContext context;
+
+        @Subscribe
+        public void on(MissingOwner failure,
+                       RemoveOwner command,
+                       CommandContext context) {
+            triggerCall();
+            this.failure = failure;
+            this.command = command;
+            this.context = context;
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            assertEquals(getMessage(failure), this.failure);
+            assertEquals(Commands.getMessage(failure.getContext().getCommand()), command);
+            assertEquals(failure.getContext().getCommand().getContext(), context);
+        }
+    }
+
+    private static class InvalidOrderSubscriber extends VerifiableSubscriber {
+
+        @SuppressWarnings("unused") // The method should never be invoked, so the params are unused.
+        @Subscribe
+        public void on(MissingOwner failure,
+                       CommandContext context,
+                       RemoveOwner command) {
+            triggerCall();
+            fail("InvalidOrderSubscriber invoked the handler method");
+        }
+
+        @Override
+        void verifyGot(Failure failure) {
+            fail("InvalidOrderSubscriber");
         }
     }
 }
