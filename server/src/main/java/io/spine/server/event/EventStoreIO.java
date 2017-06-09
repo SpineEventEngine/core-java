@@ -134,21 +134,23 @@ public class EventStoreIO {
                     entityRecords.apply("ExtractEvents", ParDo.of(extractEvents));
             final PCollectionView<EventStreamQuery> queryView =
                     input.apply("GetEventStreamQuery", View.<EventStreamQuery>asSingleton());
-            final PCollection<Event> matchingQuery =
-                    events.apply("FilterByEventStreamQuery", ParDo.of(new DoFn<Event, Event>() {
-                        private static final long serialVersionUID = 0L;
 
-                        @ProcessElement
-                        public void processElement(ProcessContext c) {
-                            final Event event = c.element();
-                            final EventStreamQuery query = c.sideInput(queryView);
-                            final Predicate<Event> filter = new MatchesStreamQuery(query);
-                            if (filter.apply(event)) {
-                                c.outputWithTimestamp(event, toInstant(event.getContext()
-                                                                            .getTimestamp()));
-                            }
-                        }
-                    })
+            final DoFn<Event, Event> filterEvents = new DoFn<Event, Event>() {
+                private static final long serialVersionUID = 0L;
+
+                @ProcessElement
+                public void processElement(ProcessContext c) {
+                    final Event event = c.element();
+                    final EventStreamQuery query = c.sideInput(queryView);
+                    final Predicate<Event> filter = new MatchesStreamQuery(query);
+                    if (filter.apply(event)) {
+                        c.outputWithTimestamp(event, toInstant(event.getContext()
+                                                                    .getTimestamp()));
+                    }
+                }
+            };
+            final PCollection<Event> matchingQuery =
+                    events.apply("FilterByEventStreamQuery", ParDo.of(filterEvents)
                                                                   .withSideInputs(queryView));
             return matchingQuery;
         }
