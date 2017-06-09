@@ -27,6 +27,7 @@ import io.spine.client.EntityFilters;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.RecordBasedRepository;
+import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.type.TypeUrl;
 
 import java.util.Map;
@@ -55,7 +56,8 @@ class RecordStorageService extends RecordStorageServiceGrpc.RecordStorageService
     }
 
     @Override
-    public void find(RecordStorageRequest request, StreamObserver<EntityRecord> responseObserver) {
+    public void find(RecordStorageRequest request,
+                     final StreamObserver<EntityRecord> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
         final RecordBasedRepository repository = delegate.findRepository(typeUrl, responseObserver);
         if (repository == null) {
@@ -63,13 +65,18 @@ class RecordStorageService extends RecordStorageServiceGrpc.RecordStorageService
             return;
         }
         final EntityFilters filters = request.getQuery();
-        @SuppressWarnings("unchecked")
-            // The value type in the map is ensured by the return of `findRecords()`
-        final Map<?, EntityRecord> records =
-                repository.findRecords(filters, FieldMask.getDefaultInstance());
-        for (EntityRecord record : records.values()) {
-            responseObserver.onNext(record);
-        }
-        responseObserver.onCompleted();
+        new TenantAwareOperation(request.getTenantId()) {
+            @Override
+            public void run() {
+                @SuppressWarnings("unchecked")
+                // The value type in the map is ensured by the return of `findRecords()`
+                final Map<?, EntityRecord> records =
+                        repository.findRecords(filters, FieldMask.getDefaultInstance());
+                for (EntityRecord record : records.values()) {
+                    responseObserver.onNext(record);
+                }
+                responseObserver.onCompleted();
+            }
+        }.execute();
     }
 }
