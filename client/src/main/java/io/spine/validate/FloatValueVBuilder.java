@@ -19,26 +19,26 @@
  */
 package io.spine.validate;
 
-import com.google.protobuf.UInt32Value;
+import com.google.protobuf.FloatValue;
 
 /**
- * Validating builder for {@linkplain UInt32Value} messages.
+ * Validating builder for {@linkplain FloatValue} messages.
  *
  * @author Alex Tymchenko
  */
-public final class UInt32ValueValidatingBuilder
-        extends AbstractValidatingBuilder<UInt32Value, UInt32Value.Builder> {
+public final class FloatValueVBuilder
+        extends AbstractValidatingBuilder<FloatValue, FloatValue.Builder> {
 
     // Prevent instantiation from the outside.
-    private UInt32ValueValidatingBuilder() {
+    private FloatValueVBuilder() {
         super();
     }
 
-    public static UInt32ValueValidatingBuilder newBuilder() {
-        return new UInt32ValueValidatingBuilder();
+    public static FloatValueVBuilder newBuilder() {
+        return new FloatValueVBuilder();
     }
 
-    public UInt32ValueValidatingBuilder setValue(int value) {
+    public FloatValueVBuilder setValue(float value) {
         getMessageBuilder().setValue(value);
         return this;
     }

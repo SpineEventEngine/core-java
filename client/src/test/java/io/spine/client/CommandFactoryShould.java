@@ -32,7 +32,7 @@ import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.users.TenantId;
 import io.spine.users.UserId;
-import io.spine.validate.ConstraintViolationThrowable;
+import io.spine.validate.ValidationException;
 import org.junit.Test;
 
 import static io.spine.test.Values.newTenantUuid;
@@ -105,15 +105,17 @@ public class CommandFactoryShould extends ActorRequestFactoryShould {
                                       .getTenantId());
     }
 
-    @Test(expected = ConstraintViolationThrowable.class)
-    public void throw_ConstraintViolation_exception_once_passed_invalid_Message() {
+    @Test(expected = ValidationException.class)
+    public void throw_ValidationException_once_passed_invalid_Message() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        factory().command().create(invalidCommand);
+        factory().command()
+                 .create(invalidCommand);
     }
 
-    @Test(expected = ConstraintViolationThrowable.class)
-    public void throw_ConstraintViolation_exception_once_passed_invalid_Message_with_version() {
+    @Test(expected = ValidationException.class)
+    public void throw_ValidationException_once_passed_invalid_Message_with_version() {
         final RequiredFieldCommand invalidCommand = RequiredFieldCommand.getDefaultInstance();
-        factory().command().create(invalidCommand, 42);
+        factory().command()
+                 .create(invalidCommand, 42);
     }
 }

@@ -34,7 +34,7 @@ import io.spine.test.Spy;
 import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.commandservice.ProjectId;
 import io.spine.test.projection.Project;
-import io.spine.test.projection.ProjectValidatingBuilder;
+import io.spine.test.projection.ProjectVBuilder;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -191,7 +191,7 @@ public class QueryServiceShould {
     }
 
     private static class ProjectDetails
-            extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Projection<ProjectId, Project, ProjectVBuilder> {
 
         public ProjectDetails(ProjectId id) {
             super(id);

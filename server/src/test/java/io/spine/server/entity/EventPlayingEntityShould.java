@@ -24,8 +24,9 @@ import com.google.protobuf.StringValue;
 import io.spine.base.Event;
 import io.spine.base.Version;
 import io.spine.test.TestEventFactory;
+import io.spine.test.Tests;
 import io.spine.test.Values;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.ValidatingBuilder;
 import org.junit.Test;
 
@@ -249,7 +250,7 @@ public class EventPlayingEntityShould {
     }
 
     private static class EpeEntity
-            extends EventPlayingEntity<Long, StringValue, StringValueValidatingBuilder> {
+            extends EventPlayingEntity<Long, StringValue, StringValueVBuilder> {
 
         /**
          * Creates a new instance.

@@ -28,11 +28,11 @@ import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.test.options.FullAccessAggregate;
-import io.spine.test.options.FullAccessAggregateValidatingBuilder;
+import io.spine.test.options.FullAccessAggregateVBuilder;
 import io.spine.test.options.HiddenAggregate;
-import io.spine.test.options.HiddenAggregateValidatingBuilder;
+import io.spine.test.options.HiddenAggregateVBuilder;
 import io.spine.test.options.SubscribableAggregate;
-import io.spine.test.options.SubscribableAggregateValidatingBuilder;
+import io.spine.test.options.SubscribableAggregateVBuilder;
 import io.spine.type.TypeName;
 import org.junit.After;
 import org.junit.Before;
@@ -64,9 +64,9 @@ public class VisibilityGuardShould {
         repositories = Lists.newArrayList();
 
         guard = VisibilityGuard.newInstance();
-        register(new ExposedRepository(boundedContext));
-        register(new SubscribableRepository(boundedContext));
-        register(new HiddenRepository(boundedContext));
+        register(new ExposedRepository());
+        register(new SubscribableRepository());
+        register(new HiddenRepository());
     }
 
     private void register(Repository repository) {
@@ -119,7 +119,7 @@ public class VisibilityGuardShould {
 
     @Test(expected = IllegalStateException.class)
     public void do_not_allow_double_registration() {
-        register(new ExposedRepository(boundedContext));
+        register(new ExposedRepository());
     }
     
     @Test(expected = IllegalArgumentException.class)
@@ -130,47 +130,47 @@ public class VisibilityGuardShould {
     @Test
     public void do_not_allow_null_inputs() {
         new NullPointerTester()
-                .setDefault(Repository.class, new ExposedRepository(boundedContext))
+                .setDefault(Repository.class, new ExposedRepository())
                 .setDefault(Class.class, FullAccessAggregate.class)
                 .setDefault(Visibility.class, Visibility.NONE)
                 .testAllPublicInstanceMethods(guard);
     }
 
     private static class Exposed
-            extends Aggregate<Long, FullAccessAggregate, FullAccessAggregateValidatingBuilder> {
+            extends Aggregate<Long, FullAccessAggregate, FullAccessAggregateVBuilder> {
         private Exposed(Long id) {
             super(id);
         }
     }
 
     private static class ExposedRepository extends AggregateRepository<Long, Exposed> {
-        private ExposedRepository(BoundedContext boundedContext) {
+        private ExposedRepository() {
             super();
         }
     }
 
     private static class Subscribable
-            extends Aggregate<Long, SubscribableAggregate, SubscribableAggregateValidatingBuilder> {
+            extends Aggregate<Long, SubscribableAggregate, SubscribableAggregateVBuilder> {
         protected Subscribable(Long id) {
             super(id);
         }
     }
 
     private static class SubscribableRepository extends AggregateRepository<Long, Subscribable> {
-        private SubscribableRepository(BoundedContext boundedContext) {
+        private SubscribableRepository() {
             super();
         }
     }
 
     private static class Hidden
-                   extends Aggregate<String, HiddenAggregate, HiddenAggregateValidatingBuilder> {
+                   extends Aggregate<String, HiddenAggregate, HiddenAggregateVBuilder> {
         private Hidden(String id) {
             super(id);
         }
     }
 
     private static class HiddenRepository extends AggregateRepository<String, Hidden> {
-        private HiddenRepository(BoundedContext boundedContext) {
+        private HiddenRepository() {
             super();
         }
     }

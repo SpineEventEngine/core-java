@@ -37,7 +37,7 @@ import io.spine.test.TestEventFactory;
 import io.spine.test.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
-import io.spine.test.aggregate.ProjectValidatingBuilder;
+import io.spine.test.aggregate.ProjectVBuilder;
 import io.spine.test.aggregate.Status;
 import io.spine.test.aggregate.command.AddTask;
 import io.spine.test.aggregate.command.CreateProject;
@@ -47,7 +47,7 @@ import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.test.aggregate.user.User;
-import io.spine.test.aggregate.user.UserValidatingBuilder;
+import io.spine.test.aggregate.user.UserVBuilder;
 import io.spine.time.Time;
 import io.spine.type.CommandClass;
 import io.spine.validate.ConstraintViolation;
@@ -401,7 +401,7 @@ public class AggregateShould {
 
     @SuppressWarnings("unused")
     private static class TestAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private boolean isCreateProjectCommandHandled = false;
         private boolean isAddTaskCommandHandled = false;
@@ -487,7 +487,7 @@ public class AggregateShould {
 
     /** Class only for test cases: exception if missing command handler or missing event applier. */
     private static class TestAggregateForCaseMissingHandlerOrApplier
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private boolean isCreateProjectCommandHandled = false;
 
@@ -504,7 +504,7 @@ public class AggregateShould {
     }
 
     private static class TestAggregateWithIdInteger
-            extends Aggregate<Integer, Project, ProjectValidatingBuilder> {
+            extends Aggregate<Integer, Project, ProjectVBuilder> {
         private TestAggregateWithIdInteger(Integer id) {
             super(id);
         }
@@ -546,7 +546,7 @@ public class AggregateShould {
     /** The class to check raising and catching exceptions. */
     @SuppressWarnings("unused")
     private static class FaultyAggregate
-            extends Aggregate<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Aggregate<ProjectId, Project, ProjectVBuilder> {
 
         private static final String BROKEN_HANDLER = "broken_handler";
         private static final String BROKEN_APPLIER = "broken_applier";
@@ -675,7 +675,7 @@ public class AggregateShould {
                                              .build();
     }
 
-    private static class UserAggregate extends Aggregate<String, User, UserValidatingBuilder> {
+    private static class UserAggregate extends Aggregate<String, User, UserVBuilder> {
         private UserAggregate(String id) {
             super(id);
         }

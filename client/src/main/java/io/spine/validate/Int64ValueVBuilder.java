@@ -19,26 +19,26 @@
  */
 package io.spine.validate;
 
-import com.google.protobuf.FloatValue;
+import com.google.protobuf.Int64Value;
 
 /**
- * Validating builder for {@linkplain FloatValue} messages.
+ * Validating builder for {@linkplain Int64Value} messages.
  *
  * @author Alex Tymchenko
  */
-public final class FloatValueValidatingBuilder
-        extends AbstractValidatingBuilder<FloatValue, FloatValue.Builder> {
+public final class Int64ValueVBuilder
+        extends AbstractValidatingBuilder<Int64Value, Int64Value.Builder> {
 
     // Prevent instantiation from the outside.
-    private FloatValueValidatingBuilder() {
+    private Int64ValueVBuilder() {
         super();
     }
 
-    public static FloatValueValidatingBuilder newBuilder() {
-        return new FloatValueValidatingBuilder();
+    public static Int64ValueVBuilder newBuilder() {
+        return new Int64ValueVBuilder();
     }
 
-    public FloatValueValidatingBuilder setValue(float value) {
+    public Int64ValueVBuilder setValue(long value) {
         getMessageBuilder().setValue(value);
         return this;
     }

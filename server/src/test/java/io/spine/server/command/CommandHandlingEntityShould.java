@@ -21,9 +21,7 @@
 package io.spine.server.command;
 
 import com.google.protobuf.StringValue;
-import io.spine.client.ActorRequestFactory;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -34,9 +32,6 @@ import static org.junit.Assert.assertEquals;
  * @author Alexander Yevsyukov
  */
 public class CommandHandlingEntityShould {
-
-    private final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(getClass());
 
     /** The object we test. */
     private HandlingEntity entity;
@@ -77,7 +72,7 @@ public class CommandHandlingEntityShould {
 
     private static class HandlingEntity extends CommandHandlingEntity<Long,
                                                                       StringValue,
-                                                                      StringValueValidatingBuilder> {
+                                                                      StringValueVBuilder> {
         private HandlingEntity(Long id) {
             super(id);
         }

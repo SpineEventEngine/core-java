@@ -23,10 +23,13 @@ package io.spine.server.procman;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
 import io.spine.server.commandbus.CommandBus;
+import io.spine.time.Time;
 import org.junit.Test;
 
 import java.util.List;
@@ -75,8 +78,29 @@ public class IteratingCommandRouterShould
 
     @Test
     public void produce_a_command_on_routeNext() throws Exception {
-        final CommandRouted firstRouted = router().routeFirst();
 
+        /*
+        This is a hack, aimed to resolve the wall-clock inaccuracy issue, that is randomly
+        causing the test failure due to a fast execution.
+
+        <p>The idea is to add some randomization to {@code nanoseconds} value of the
+        current Timestamp obtained from the wall-clock provider.
+        */
+        Time.setProvider(new Time.Provider() {
+            @Override
+            public Timestamp getCurrentTime() {
+                final Timestamp millis = Timestamps.fromMillis(System.currentTimeMillis());
+                final Timestamp nanos = Timestamps.fromNanos(System.nanoTime());
+
+                final Timestamp result = millis.toBuilder()
+                                               .setNanos(nanos.toBuilder()
+                                                              .getNanos())
+                                               .build();
+                return result;
+            }
+        });
+
+        final CommandRouted firstRouted = router().routeFirst();
         assertTrue(router().hasNext());
         
         final Command command = router().routeNext();
@@ -86,7 +110,14 @@ public class IteratingCommandRouterShould
 
         // Verify that the context for the next routed command has been created, not just copied.
         final Command firstCommand = firstRouted.getSource();
-        assertNotEquals(firstCommand.getContext().getActorContext().getTimestamp(),
-                        command.getContext().getActorContext().getTimestamp());
+        assertNotEquals(firstCommand.getContext()
+                                    .getActorContext()
+                                    .getTimestamp(),
+                        command.getContext()
+                               .getActorContext()
+                               .getTimestamp());
+
+        // Revert the hack.
+        Time.resetProvider();
     }
 }

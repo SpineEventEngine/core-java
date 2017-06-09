@@ -44,10 +44,10 @@ import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
-import io.spine.test.projection.ProjectValidatingBuilder;
+import io.spine.test.projection.ProjectVBuilder;
 import io.spine.test.projection.command.CreateProject;
 import io.spine.test.projection.event.ProjectCreated;
-import io.spine.validate.StringValueValidatingBuilder;
+import io.spine.validate.StringValueVBuilder;
 
 import java.util.Collections;
 import java.util.List;
@@ -146,7 +146,7 @@ class Given {
     }
 
     static class StandTestAggregate
-            extends Aggregate<ProjectId, StringValue, StringValueValidatingBuilder> {
+            extends Aggregate<ProjectId, StringValue, StringValueVBuilder> {
 
         /**
          * Creates a new aggregate instance.
@@ -172,7 +172,7 @@ class Given {
     }
 
     static class StandTestProjection
-            extends Projection<ProjectId, Project, ProjectValidatingBuilder> {
+            extends Projection<ProjectId, Project, ProjectVBuilder> {
 
         public StandTestProjection(ProjectId id) {
             super(id);
