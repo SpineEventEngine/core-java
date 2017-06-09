@@ -164,7 +164,9 @@ class Given {
         static AggregateEventRecord create(Timestamp timestamp) {
             final AggregateEventRecord.Builder builder
                     = AggregateEventRecord.newBuilder()
-                                          .setTimestamp(timestamp);
+                                          .setTimestamp(timestamp)
+                                          .setEvent(Event.getDefaultInstance());
+                                             // To guarantee KindCase presence
             return builder.build();
         }
 
