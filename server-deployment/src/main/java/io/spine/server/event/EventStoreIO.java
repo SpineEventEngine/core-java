@@ -43,7 +43,7 @@ import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PCollectionView;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.storage.RecordStorageIO.toInstant;
+import static io.spine.server.storage.BeamUtil.toInstant;
 
 /**
  * Beam support for I/O operations of {@link EventStore}.

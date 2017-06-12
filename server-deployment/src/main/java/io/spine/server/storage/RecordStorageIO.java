@@ -20,20 +20,14 @@
 
 package io.spine.server.storage;
 
-import com.google.protobuf.Message;
-import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.memory.InMemoryRecordStorage;
 import io.spine.server.storage.memory.InMemoryRecordStorageIO;
 import io.spine.users.TenantId;
 import io.spine.util.Exceptions;
-import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
-import org.apache.beam.sdk.coders.BigEndianLongCoder;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.KvCoder;
-import org.apache.beam.sdk.coders.StringUtf8Coder;
 import org.apache.beam.sdk.extensions.protobuf.ProtoCoder;
 import org.apache.beam.sdk.transforms.DoFn;
 import org.apache.beam.sdk.transforms.PTransform;
@@ -41,14 +35,9 @@ import org.apache.beam.sdk.transforms.ParDo;
 import org.apache.beam.sdk.values.KV;
 import org.apache.beam.sdk.values.PCollection;
 import org.apache.beam.sdk.values.PDone;
-import org.joda.time.Instant;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
-
-import static com.google.protobuf.util.Timestamps.toMillis;
-import static io.spine.util.Exceptions.illegalStateWithCauseOf;
-import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
  * Abstract base for I/O operations based on Apache Beam.
@@ -73,55 +62,27 @@ public abstract class RecordStorageIO<I> {
         this.idClass = idClass;
     }
 
+    public static <I> RecordStorageIO<I> of(RecordStorage<I> storage) {
+        if (storage instanceof InMemoryRecordStorage) {
+            InMemoryRecordStorage<I> memStg = (InMemoryRecordStorage<I>) storage;
+            return InMemoryRecordStorageIO.create(memStg);
+        }
+
+        throw Exceptions.unsupported("Unsupported storage class: " + storage.getClass());
+    }
+
     public Class<I> getIdClass() {
         return idClass;
     }
 
     /**
-     * Converts Protobuf {@link Timestamp} instance to Joda Time {@link Instant}.
-     *
-     * <p>Nanoseconds are lost during the conversion as {@code Instant} keeps time with the
-     * millis precision.
-     */
-    public static Instant toInstant(Timestamp timestamp) {
-        final long millis = toMillis(timestamp);
-        return new Instant(millis);
-    }
-
-    /**
      * Creates a deterministic coder for identifiers used by the storage.
      */
-    @SuppressWarnings("unchecked") // the cast is preserved by ID type checking
     public Coder<I> getIdCoder() {
         if (idCoder != null) {
             return idCoder;
         }
-
-        final Identifier.Type idType = Identifier.getType(idClass);
-        switch (idType) {
-            case INTEGER:
-                idCoder = (Coder<I>) BigEndianIntegerCoder.of();
-                break;
-            case LONG:
-                idCoder = (Coder<I>) BigEndianLongCoder.of();
-                break;
-            case STRING:
-                idCoder = (Coder<I>) StringUtf8Coder.of();
-                break;
-            case MESSAGE:
-                idCoder = (Coder<I>) ProtoCoder.of((Class<? extends Message>)idClass);
-                break;
-            default:
-                throw newIllegalStateException("Unsupported ID type: %s", idType.name());
-        }
-
-        // Check that the key coder is deterministic.
-        try {
-            idCoder.verifyDeterministic();
-        } catch (Coder.NonDeterministicException e) {
-            throw illegalStateWithCauseOf(e);
-        }
-
+        idCoder = BeamUtil.crateIdCoder(idClass);
         return idCoder;
     }
 
@@ -129,7 +90,6 @@ public abstract class RecordStorageIO<I> {
         if (kvCoder != null) {
             return kvCoder;
         }
-
         kvCoder = KvCoder.of(getIdCoder(), ENTITY_RECORD_CODER);
         return kvCoder;
     }
@@ -210,7 +170,7 @@ public abstract class RecordStorageIO<I> {
     }
 
     /**
-     * A {@link DoFn} that reads {@code EntityRecord}s that match  
+     * A {@link DoFn} that reads {@code EntityRecord}s that match
      */
     public abstract static class FindFn extends DoFn<EntityFilters, EntityRecord> {
 
@@ -231,14 +191,5 @@ public abstract class RecordStorageIO<I> {
         }
 
         protected abstract Iterator<EntityRecord> doFind(TenantId tenantId, EntityFilters filters);
-    }
-
-    public static <I> RecordStorageIO<I> of(RecordStorage<I> storage) {
-        if (storage instanceof InMemoryRecordStorage) {
-            InMemoryRecordStorage<I> memStg = (InMemoryRecordStorage<I>) storage;
-            return InMemoryRecordStorageIO.create(memStg);
-        }
-
-        throw Exceptions.unsupported("Unsupported storage class: " + storage.getClass());
     }
 }
