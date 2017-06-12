@@ -31,6 +31,8 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
 
+import java.util.Collection;
+
 /**
  * Processes the queries targeting {@link io.spine.server.entity.Entity Entity} objects.
  *
@@ -51,7 +53,7 @@ class EntityQueryProcessor implements QueryProcessor {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        final ImmutableCollection<? extends Entity> entities;
+        final Collection<? extends Entity> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
             entities = repository.loadAll();

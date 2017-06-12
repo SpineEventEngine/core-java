@@ -24,10 +24,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
+import com.google.common.base.Predicates;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -43,14 +41,18 @@ import io.spine.type.TypeUrl;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.FluentIterable.from;
+import static com.google.common.collect.Iterators.transform;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.util.MoreIterables.onTopOf;
+import static io.spine.util.MoreIterators.collect;
+import static io.spine.util.MoreIterators.toOneOffIterable;
+import static java.util.Collections.unmodifiableCollection;
 
 /**
  * The base class for repositories that store entities as records.
@@ -136,9 +138,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         final Iterable<E> allEntities = loadAll();
-        final Iterator<E> result = FluentIterable.from(allEntities)
-                                                 .filter(filter)
-                                                 .iterator();
+        final Iterator<E> result = from(allEntities).filter(filter)
+                                                    .iterator();
         return result;
     }
 
@@ -182,7 +183,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
-    public ImmutableCollection<E> loadAll(Iterable<I> ids) {
+    public Collection<E> loadAll(Iterable<I> ids) {
         return loadAll(ids, FieldMask.getDefaultInstance());
     }
 
@@ -203,28 +204,18 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     @CheckReturnValue
-    public ImmutableCollection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
+    public Collection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         final Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids);
 
-        final List<E> entities = Lists.newLinkedList();
         final EntityStorageConverter<I, E, S> converter =
                 entityConverter().withFieldMask(fieldMask);
 
-        while (entityStorageRecords.hasNext()) {
-            final EntityRecord record = entityStorageRecords.next();
-
-            if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
-                                   *    returns an `Iterable` that may contain nulls.             */
-                continue;
-            }
-
-            final E entity = converter.reverse()
-                                      .convert(record);
-            entities.add(entity);
-        }
-
-        return ImmutableList.copyOf(entities);
+        final FluentIterable<E> entities = from(toOneOffIterable(entityStorageRecords))
+                .filter(Predicates.notNull())
+                .transform(converter.reverse());
+        final Collection<E> collectedEntities = collect(entities.iterator());
+        return unmodifiableCollection(collectedEntities);
     }
 
     /**
@@ -236,13 +227,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     @CheckReturnValue
-    public ImmutableCollection<E> loadAll() {
+    public Collection<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
         final Iterator<EntityRecord> records = storage.readAll();
-        final ImmutableCollection<E> result = FluentIterable.from(onTopOf(records))
-                                                            .transform(storageRecordToEntity())
-                                                            .toList();
-        return result;
+        final Iterator<E> entities = transform(records, storageRecordToEntity());
+        final Collection<E> collectedEntities = collect(entities);
+        return unmodifiableCollection(collectedEntities);
     }
 
     /**
@@ -264,17 +254,16 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see EntityQuery
      */
     @CheckReturnValue
-    public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
+    public Collection<E> find(EntityFilters filters, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        final ImmutableCollection<E> result = FluentIterable.from(onTopOf(records))
-                                                            .transform(storageRecordToEntity())
-                                                            .toList();
-        return result;
+        final Iterator<E> entities = transform(records, storageRecordToEntity());
+        final Collection<E> collectedEntities = collect(entities);
+        return unmodifiableCollection(collectedEntities);
     }
 
     /**

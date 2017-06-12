@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -135,7 +134,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         return repository.findOrCreate(id);
     }
 
-    private ImmutableCollection<E> find(EntityFilters filters,
+    private Collection<E> find(EntityFilters filters,
                                         FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }

@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -515,7 +514,7 @@ public class ProjectionRepositoryShould
         final Event event = createEvent(PRODUCER_ID, projectCreated());
         repo.dispatch(EventEnvelope.of(event));
 
-        final ImmutableCollection<ProjectionRepositoryTestEnv.NoOpTaskNamesProjection> items = repo.loadAll();
+        final Collection<ProjectionRepositoryTestEnv.NoOpTaskNamesProjection> items = repo.loadAll();
         assertTrue(items.isEmpty());
     }
 
