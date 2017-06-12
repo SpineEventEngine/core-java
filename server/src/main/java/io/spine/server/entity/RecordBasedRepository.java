@@ -47,10 +47,10 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.MoreIterables.onTopOf;
 
 /**
  * The base class for repositories that store entities as records.
@@ -239,7 +239,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public ImmutableCollection<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
         final Iterator<EntityRecord> records = storage.readAll();
-        final ImmutableCollection<E> result = FluentIterable.from(newArrayList(records))
+        final ImmutableCollection<E> result = FluentIterable.from(onTopOf(records))
                                                             .transform(storageRecordToEntity())
                                                             .toList();
         return result;
@@ -271,8 +271,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        // TODO:2017-06-12:dmytro.dashenkov: Check perf here and in similar methods in this class.
-        final ImmutableCollection<E> result = FluentIterable.from(newArrayList(records))
+        final ImmutableCollection<E> result = FluentIterable.from(onTopOf(records))
                                                             .transform(storageRecordToEntity())
                                                             .toList();
         return result;
