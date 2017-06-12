@@ -34,13 +34,15 @@ import static java.lang.String.format;
 /**
  * @author Dmytro Dashenkov
  */
-public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId,
-                                                                     RecordStorage<ProjectId>> {
+public class InMemoryRecordStorageShould
+        extends RecordStorageShould<ProjectId, RecordStorage<ProjectId>> {
 
     @Override
     protected RecordStorage<ProjectId> getStorage() {
-        final TypeUrl typeUrl = TypeUrl.of(Project.class);
-        return InMemoryRecordStorage.newInstance(, getClass().getSimpleName(), false);
+        final StorageSpec<ProjectId> spec = StorageSpec.of(getClass().getSimpleName(),
+                                                           TypeUrl.of(Project.class),
+                                                           ProjectId.class);
+        return InMemoryRecordStorage.newInstance(spec, false);
     }
 
     @Override
