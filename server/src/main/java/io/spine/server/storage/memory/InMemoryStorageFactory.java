@@ -32,6 +32,9 @@ import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
+import static io.spine.server.entity.Entity.TypeInfo.getIdClass;
+import static io.spine.server.entity.Entity.TypeInfo.getStateClass;
+
 /**
  * A factory for in-memory storages.
  *
@@ -93,28 +96,25 @@ public class InMemoryStorageFactory implements StorageFactory {
     @Override
     public <I> RecordStorage<I>
     createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
-        final Class<? extends Message> stateClass = Entity.TypeInfo.getStateClass(entityClass);
+        final Class<? extends Message> stateClass = getStateClass(entityClass);
         final TypeUrl typeUrl = TypeUrl.of(stateClass);
-        return InMemoryRecordStorage.newInstance(boundedContextName, typeUrl, isMultitenant());
+        final Class<I> idClass = getIdClass(entityClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
+        return InMemoryRecordStorage.newInstance(spec, isMultitenant());
     }
 
     @Override
     public <I> ProjectionStorage<I> createProjectionStorage(
             Class<? extends Projection<I, ?, ?>> projectionClass) {
         final Class<Message> stateClass = getStateClass(projectionClass);
+        final Class<I> idClass = getIdClass(projectionClass);
+        final TypeUrl stateUrl = TypeUrl.of(stateClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
+
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
-                InMemoryRecordStorage.newInstance(boundedContextName,
-                                                  TypeUrl.of(stateClass),
-                                                  multitenant);
-        final TypeUrl stateUrl = TypeUrl.of(stateClass);
-        return InMemoryProjectionStorage.newInstance(boundedContextName, stateUrl, entityStorage);
-    }
-
-    @SuppressWarnings("unchecked") // The type is protected by the Projection class declaration.
-    private static <I> Class<Message> getStateClass(
-            Class<? extends Projection<I, ?, ?>> projectionClass) {
-        return (Class<Message>) Entity.GenericParameter.STATE.getArgumentIn(projectionClass);
+                InMemoryRecordStorage.newInstance(spec, multitenant);
+        return InMemoryProjectionStorage.newInstance(entityStorage);
     }
 
     @Override

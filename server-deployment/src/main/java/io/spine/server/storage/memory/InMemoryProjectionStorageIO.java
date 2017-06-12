@@ -27,7 +27,6 @@ import io.spine.server.storage.RecordStorageIO;
 import io.spine.server.storage.memory.grpc.LastHandledEventRequest;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
-import io.spine.type.TypeUrl;
 import io.spine.users.TenantId;
 import io.spine.util.Exceptions;
 
@@ -40,31 +39,25 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
 
-    private final String boundedContextName;
-    private final TypeUrl stateTypeUrl;
+    private final StorageSpec<I> spec;
     private final RecordStorageIO<I> storageIO;
 
-    public static <I> InMemoryProjectionStorageIO<I> of(Class<I> idClass,
-                                                        InMemoryProjectionStorage<I> storage) {
-        final RecordStorageIO<I> recordStorageIO = RecordStorageIO.of(idClass,
-                                                         storage.recordStorage());
-        return new InMemoryProjectionStorageIO<>(storage.getBoundedContextName(),
-                                                 storage.getStateTypeUrl(),
-                                                 recordStorageIO);
+    private InMemoryProjectionStorageIO(StorageSpec<I> spec, RecordStorageIO<I> storageIO) {
+        super(storageIO.getIdClass());
+        this.spec = spec;
+        this.storageIO = storageIO;
     }
 
-    InMemoryProjectionStorageIO(
-            String boundedContextName, TypeUrl stateTypeUrl,
-            RecordStorageIO<I> storageIO) {
-        super(storageIO.getIdClass());
-        this.boundedContextName = boundedContextName;
-        this.stateTypeUrl = stateTypeUrl;
-        this.storageIO = storageIO;
+    public static <I> InMemoryProjectionStorageIO<I> of(InMemoryProjectionStorage<I> storage) {
+        final StorageSpec<I> spec = storage.getSpec();
+        final RecordStorageIO<I> recordStorageIO = RecordStorageIO.of(
+                storage.recordStorage());
+        return new InMemoryProjectionStorageIO<>(spec, recordStorageIO);
     }
 
     @Override
     public WriteTimestampFn writeTimestampFn(TenantId tenantId) {
-        return new WriteTimestampOverGrpc(boundedContextName, tenantId, stateTypeUrl);
+        return new WriteTimestampOverGrpc(tenantId, spec);
     }
 
     @Override
@@ -73,13 +66,13 @@ public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     }
 
     @Override
-    public WriteFn<I> writeFn(TenantId tenantId) {
-        return storageIO.writeFn(tenantId);
+    public FindFn findFn(TenantId tenantId) {
+        throw Exceptions.unsupported("Finding in ProjectionStorage is not supported");
     }
 
     @Override
-    public FindFn findFn(TenantId tenantId) {
-        throw Exceptions.unsupported("Finding in ProjectionStorage is not supported");
+    public WriteFn<I> writeFn(TenantId tenantId) {
+        return storageIO.writeFn(tenantId);
     }
 
     private static class ProjectionStorageServiceChannel
@@ -98,21 +91,17 @@ public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     private static class WriteTimestampOverGrpc extends WriteTimestampFn {
 
         private static final long serialVersionUID = 0L;
-        private final String boundedContextName;
-        private final TypeUrl stateTypeUrl;
-
+        private final StorageSpec<?> spec;
         private transient ProjectionStorageServiceChannel channel;
 
-        private WriteTimestampOverGrpc(String boundedContextName, TenantId tenantId,
-                                       TypeUrl typeUrl) {
+        private WriteTimestampOverGrpc(TenantId tenantId, StorageSpec<?> spec) {
             super(tenantId);
-            this.boundedContextName = boundedContextName;
-            this.stateTypeUrl = typeUrl;
+            this.spec = spec;
         }
 
         @StartBundle
         public void startBundle() {
-            channel = new ProjectionStorageServiceChannel(boundedContextName);
+            channel = new ProjectionStorageServiceChannel(spec.getBoundedContextName());
             channel.open();
         }
 
@@ -128,7 +117,8 @@ public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
             final LastHandledEventRequest req =
                     LastHandledEventRequest.newBuilder()
                                            .setTenantId(tenantId)
-                                           .setProjectionStateTypeUrl(stateTypeUrl.value())
+                                           .setProjectionStateTypeUrl(spec.getEntityStateUrl()
+                                                                          .value())
                                            .setTimestamp(timestamp)
                                            .build();
             channel.getStub()

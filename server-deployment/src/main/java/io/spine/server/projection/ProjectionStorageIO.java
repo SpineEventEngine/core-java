@@ -60,10 +60,10 @@ public abstract class ProjectionStorageIO<I> extends RecordStorageIO<I> {
         protected abstract void doWrite(TenantId tenantId, Timestamp timestamp);
     }
 
-    public static <I> ProjectionStorageIO<I> of(Class<I> idClass, ProjectionStorage<I> storage) {
+    public static <I> ProjectionStorageIO<I> of(ProjectionStorage<I> storage) {
         if (storage instanceof InMemoryProjectionStorage) {
             InMemoryProjectionStorage<I> memStg = (InMemoryProjectionStorage<I>) storage;
-            return InMemoryProjectionStorageIO.of(idClass, memStg);
+            return InMemoryProjectionStorageIO.of(memStg);
         }
         throw Exceptions.unsupported("Unsupported projection storage class: " + storage.getClass());
     }

@@ -26,7 +26,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantFunction;
-import io.spine.type.TypeUrl;
 import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
@@ -44,37 +43,25 @@ import static com.google.common.collect.Maps.newConcurrentMap;
  */
 public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
 
-    private final TypeUrl stateTypeUrl;
+    /** The storage for projection entities. */
     private final InMemoryRecordStorage<I> recordStorage;
 
     /** The time of the last handled event per tenant. */
     private final Map<TenantId, Timestamp> timestampOfLastEvent = newConcurrentMap();
-    private final String boundedContextName;
 
     public static <I>
-    InMemoryProjectionStorage<I> newInstance(String boundedContextName,
-                                             TypeUrl stateTypeUrl,
-                                             InMemoryRecordStorage<I> entityStorage) {
-        return new InMemoryProjectionStorage<>(boundedContextName, entityStorage, stateTypeUrl);
+    InMemoryProjectionStorage<I> newInstance(InMemoryRecordStorage<I> entityStorage) {
+        return new InMemoryProjectionStorage<>(entityStorage);
     }
 
-    private InMemoryProjectionStorage(String boundedContextName,
-                                      InMemoryRecordStorage<I> recordStorage,
-                                      TypeUrl stateTypeUrl) {
+    private InMemoryProjectionStorage(InMemoryRecordStorage<I> recordStorage) {
         super(recordStorage.isMultitenant());
-        this.boundedContextName = boundedContextName;
-        this.stateTypeUrl = stateTypeUrl;
         this.recordStorage = recordStorage;
     }
 
-    public TypeUrl getStateTypeUrl() {
-        return stateTypeUrl;
+    StorageSpec<I> getSpec() {
+        return recordStorage.getSpec();
     }
-
-    public String getBoundedContextName() {
-        return boundedContextName;
-    }
-
 
     @Override
     public Iterator<I> index() {

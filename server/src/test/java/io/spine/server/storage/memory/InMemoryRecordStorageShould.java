@@ -40,7 +40,7 @@ public class InMemoryRecordStorageShould extends RecordStorageShould<ProjectId,
     @Override
     protected RecordStorage<ProjectId> getStorage() {
         final TypeUrl typeUrl = TypeUrl.of(Project.class);
-        return InMemoryRecordStorage.newInstance(getClass().getSimpleName(), typeUrl, false);
+        return InMemoryRecordStorage.newInstance(, getClass().getSimpleName(), false);
     }
 
     @Override

@@ -36,9 +36,9 @@ public class InMemoryProjectionStorageShould extends ProjectionStorageShould<Str
         final TypeUrl typeUrl = TypeUrl.of(io.spine.test.projection.Project.class);
         final String boundedContextName = getClass().getSimpleName();
         final InMemoryRecordStorage<String> recordStorage =
-                InMemoryRecordStorage.newInstance(boundedContextName, typeUrl, false);
+                InMemoryRecordStorage.newInstance(, boundedContextName, false);
         final InMemoryProjectionStorage<String> storage =
-                InMemoryProjectionStorage.newInstance(boundedContextName, typeUrl, recordStorage);
+                InMemoryProjectionStorage.newInstance(recordStorage);
         return storage;
     }
 

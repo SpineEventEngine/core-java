@@ -101,7 +101,7 @@ public class EventStoreIO {
         final ERepository repository = eventStore.getStorage();
         final RecordStorage<EventId> storage = repository.recordStorage();
         final RecordStorageIO.FindFn findFn =
-                RecordStorageIO.of(EventId.class, storage)
+                RecordStorageIO.of(storage)
                                .findFn(tenantId);
         return new Query(findFn);
     }

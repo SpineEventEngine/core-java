@@ -59,9 +59,11 @@ class InMemoryStandStorage extends StandStorage {
             We do not use the StandStorage in a way that requires the `entityStateUrl` parameter
             passed. Therefore simply pass the `TypeUrl` of `EntityRecord`
         */
-        recordStorage = new InMemoryRecordStorage<>(checkNotNull(builder.boundedContextName),
-                                                    TypeUrl.of(EntityRecord.class),
-                                                    builder.isMultitenant());
+        recordStorage = new InMemoryRecordStorage<>(
+                StorageSpec.of(checkNotNull(builder.boundedContextName),
+                               TypeUrl.of(EntityRecord.class),
+                               AggregateStateId.class),
+                builder.isMultitenant());
     }
 
     public static Builder newBuilder() {

@@ -26,7 +26,6 @@ import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
-import io.spine.type.TypeUrl;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -43,15 +42,12 @@ import java.util.Map;
  */
 public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
-    private final String boundedContextName;
-    private final TypeUrl entityStateUrl;
+    private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    InMemoryRecordStorage(String boundedContextName, TypeUrl entityStateUrl,
-                          boolean multitenant) {
+    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant) {
         super(multitenant);
-        this.boundedContextName = boundedContextName;
-        this.entityStateUrl = entityStateUrl;
+        this.spec = spec;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
             TenantRecords<I> createSlice() {
@@ -60,18 +56,13 @@ public class InMemoryRecordStorage<I> extends RecordStorage<I> {
         };
     }
 
-    protected static <I> InMemoryRecordStorage<I> newInstance(String boundedContextName,
-                                                              TypeUrl entityStateUrl,
+    protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
                                                               boolean multitenant) {
-        return new InMemoryRecordStorage<>(boundedContextName, entityStateUrl, multitenant);
+        return new InMemoryRecordStorage<>(spec, multitenant);
     }
 
-    String getBoundedContextName() {
-        return boundedContextName;
-    }
-
-    TypeUrl getEntityStateUrl() {
-        return entityStateUrl;
+    StorageSpec<I> getSpec() {
+        return spec;
     }
 
     @Override

@@ -29,7 +29,6 @@ import io.spine.server.storage.RecordStorageIO;
 import io.spine.server.storage.memory.grpc.RecordStorageRequest;
 import io.spine.server.storage.memory.grpc.RecordStorageServiceGrpc;
 import io.spine.server.storage.memory.grpc.RecordStorageServiceGrpc.RecordStorageServiceBlockingStub;
-import io.spine.type.TypeUrl;
 import io.spine.users.TenantId;
 
 import java.util.Iterator;
@@ -41,35 +40,31 @@ import java.util.Iterator;
  */
 public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
 
-    private final String boundedContextName;
-    private final TypeUrl entityStateUrl;
+    private final StorageSpec<I> spec;
 
-    InMemoryRecordStorageIO(String boundedContextName, Class<I> idClass, TypeUrl entityStateUrl) {
-        super(idClass);
-        this.boundedContextName = boundedContextName;
-        this.entityStateUrl = entityStateUrl;
+    private InMemoryRecordStorageIO(StorageSpec<I> spec) {
+        super(spec.getIdClass());
+        this.spec = spec;
     }
 
-    public static <I> InMemoryRecordStorageIO<I> create(Class<I> idClass,
-                                                        InMemoryRecordStorage<I> storage) {
-        return new InMemoryRecordStorageIO<>(storage.getBoundedContextName(),
-                                             idClass,
-                                             storage.getEntityStateUrl());
+    public static <I> InMemoryRecordStorageIO<I> create(InMemoryRecordStorage<I> storage) {
+        final StorageSpec<I> spec = storage.getSpec();
+        return new InMemoryRecordStorageIO<>(spec);
     }
 
     @Override
     public ReadFn<I> readFn(TenantId tenantId) {
-        return new InMemReadFn<>(boundedContextName, tenantId, entityStateUrl);
+        return new InMemReadFn<>(tenantId, spec);
     }
 
     @Override
     public FindFn findFn(TenantId tenantId) {
-        return new InMemFindFn(boundedContextName, tenantId, entityStateUrl);
+        return new InMemFindFn(tenantId, spec);
     }
 
     @Override
     public WriteFn<I> writeFn(TenantId tenantId) {
-        return new InMemWriteFn<>(boundedContextName, tenantId, entityStateUrl);
+        return new InMemWriteFn<>(tenantId, spec);
     }
 
     /**
@@ -91,20 +86,18 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemReadFn<I> extends ReadFn<I> {
 
         private static final long serialVersionUID = 0L;
-        private final String boundedContextName;
-        private final TypeUrl entityStateUrl;
+        private final StorageSpec<I> spec;
         private transient RecordStorageServiceChannel channel;
 
-        private InMemReadFn(String boundedContextName, TenantId tenantId, TypeUrl entityState) {
+        private InMemReadFn(TenantId tenantId, StorageSpec<I> spec) {
             super(tenantId);
-            this.boundedContextName = boundedContextName;
-            this.entityStateUrl = entityState;
+            this.spec = spec;
         }
 
         @SuppressWarnings("unused") // called by Beam
         @StartBundle
         public void startBundle() {
-            channel = new RecordStorageServiceChannel(boundedContextName);
+            channel = new RecordStorageServiceChannel(spec.getBoundedContextName());
             channel.open();
         }
 
@@ -119,7 +112,8 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
             final RecordStorageRequest req =
                     RecordStorageRequest.newBuilder()
                                         .setTenantId(tenantId)
-                                        .setEntityStateTypeUrl(entityStateUrl.value())
+                                        .setEntityStateTypeUrl(spec.getEntityStateUrl()
+                                                                   .value())
                                         .setRead(EntityId.newBuilder()
                                                          .setId(Identifier.pack(id)))
                                         .build();
@@ -135,19 +129,17 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemWriteFn<I> extends WriteFn<I> {
 
         private static final long serialVersionUID = 0L;
-        private final String boundedContextName;
-        private final TypeUrl entityStateUrl;
+        private final StorageSpec<I> spec;
         private transient RecordStorageServiceChannel channel;
 
-        private InMemWriteFn(String boundedContextName, TenantId tenantId, TypeUrl entityStateUrl) {
+        private InMemWriteFn(TenantId tenantId, StorageSpec<I> spec) {
             super(tenantId);
-            this.boundedContextName = boundedContextName;
-            this.entityStateUrl = entityStateUrl;
+            this.spec = spec;
         }
 
         @StartBundle
         public void startBundle() {
-            channel = new RecordStorageServiceChannel(boundedContextName);
+            channel = new RecordStorageServiceChannel(spec.getBoundedContextName());
             channel.open();
         }
 
@@ -161,7 +153,8 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
             final RecordStorageRequest req =
                     RecordStorageRequest.newBuilder()
                                         .setTenantId(tenantId)
-                                        .setEntityStateTypeUrl(entityStateUrl.value())
+                                        .setEntityStateTypeUrl(spec.getEntityStateUrl()
+                                                                   .value())
                                         .setWrite(record)
                                         .build();
             channel.getStub()
@@ -175,19 +168,17 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemFindFn extends FindFn {
 
         private static final long serialVersionUID = 0L;
-        private final String boundedContextName;
-        private final TypeUrl entityStateUrl;
+        private final StorageSpec<?> spec;
         private transient RecordStorageServiceChannel channel;
 
-        private InMemFindFn(String boundedContextName, TenantId tenantId, TypeUrl entityStateUrl) {
+        private InMemFindFn(TenantId tenantId, StorageSpec<?> spec) {
             super(tenantId);
-            this.boundedContextName = boundedContextName;
-            this.entityStateUrl = entityStateUrl;
+            this.spec = spec;
         }
 
         @StartBundle
         public void startBundle() {
-            channel = new RecordStorageServiceChannel(boundedContextName);
+            channel = new RecordStorageServiceChannel(spec.getBoundedContextName());
             channel.open();
         }
 
@@ -201,7 +192,8 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
             final RecordStorageRequest req =
                     RecordStorageRequest.newBuilder()
                                         .setTenantId(tenantId)
-                                        .setEntityStateTypeUrl(entityStateUrl.value())
+                                        .setEntityStateTypeUrl(spec.getEntityStateUrl()
+                                                                   .value())
                                         .setQuery(filters)
                                         .build();
             final Iterator<EntityRecord> iterator = channel.getStub()

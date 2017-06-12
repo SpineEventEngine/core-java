@@ -233,10 +233,10 @@ public abstract class RecordStorageIO<I> {
         protected abstract Iterator<EntityRecord> doFind(TenantId tenantId, EntityFilters filters);
     }
 
-    public static <I> RecordStorageIO<I> of(Class<I> idClass, RecordStorage<I> storage) {
+    public static <I> RecordStorageIO<I> of(RecordStorage<I> storage) {
         if (storage instanceof InMemoryRecordStorage) {
             InMemoryRecordStorage<I> memStg = (InMemoryRecordStorage<I>) storage;
-            return InMemoryRecordStorageIO.create(idClass, memStg);
+            return InMemoryRecordStorageIO.create(memStg);
         }
 
         throw Exceptions.unsupported("Unsupported storage class: " + storage.getClass());

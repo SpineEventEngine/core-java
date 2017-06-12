@@ -22,6 +22,8 @@ package io.spine.server.storage.memory;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.SerializableTester;
+import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
@@ -67,5 +69,13 @@ public class StorageSpecShould {
                         StorageSpec.of(bcName, TypeUrl.of(Timestamp.class), Integer.class),
                         StorageSpec.of(bcName, TypeUrl.of(Timestamp.class), Integer.class))
                 .testEquals();
+    }
+
+    @Test
+    public void serialize() {
+        SerializableTester.reserializeAndAssert(
+                StorageSpec.of(getClass().getSimpleName(),
+                               TypeUrl.of(DoubleValue.class),
+                               String.class));
     }
 }
