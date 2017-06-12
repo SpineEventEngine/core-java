@@ -45,9 +45,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -205,15 +205,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public ImmutableCollection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
-        final Iterable<EntityRecord> entityStorageRecords = storage.readMultiple(ids);
+        final Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids);
 
-        final Iterator<EntityRecord> recordIterator = entityStorageRecords.iterator();
         final List<E> entities = Lists.newLinkedList();
         final EntityStorageConverter<I, E, S> converter =
                 entityConverter().withFieldMask(fieldMask);
 
-        while (recordIterator.hasNext()) {
-            final EntityRecord record = recordIterator.next();
+        while (entityStorageRecords.hasNext()) {
+            final EntityRecord record = entityStorageRecords.next();
 
             if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
                                    *    returns an `Iterable` that may contain nulls.             */
@@ -239,13 +238,11 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     @CheckReturnValue
     public ImmutableCollection<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityRecord> recordMap = storage.readAll();
-
-        final ImmutableCollection<E> entities =
-                FluentIterable.from(recordMap.entrySet())
-                              .transform(storageRecordToEntity())
-                              .toList();
-        return entities;
+        final Iterator<EntityRecord> records = storage.readAll();
+        final ImmutableCollection<E> result = FluentIterable.from(newArrayList(records))
+                                                            .transform(storageRecordToEntity())
+                                                            .toList();
+        return result;
     }
 
     /**
@@ -273,8 +270,9 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
-        final Map<I, EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
+        final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
+        // TODO:2017-06-12:dmytro.dashenkov: Check perf here and in similar methods in this class.
+        final ImmutableCollection<E> result = FluentIterable.from(newArrayList(records))
                                                             .transform(storageRecordToEntity())
                                                             .toList();
         return result;
@@ -347,13 +345,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      *
      * @return new instance of the transforming function
      */
-    protected final Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
-        return new Function<Map.Entry<I, EntityRecord>, E>() {
+    protected final Function<EntityRecord, E> storageRecordToEntity() {
+        return new Function<EntityRecord, E>() {
             @Nullable
             @Override
-            public E apply(@Nullable Map.Entry<I, EntityRecord> input) {
+            public E apply(@Nullable EntityRecord input) {
                 checkNotNull(input);
-                final E result = toEntity(input.getValue());
+                final E result = toEntity(input);
                 return result;
             }
         };

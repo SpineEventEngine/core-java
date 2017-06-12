@@ -30,6 +30,7 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -68,7 +69,7 @@ public abstract class ProjectionStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
         return storage.readAll(query, fieldMask);
     }

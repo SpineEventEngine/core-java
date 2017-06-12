@@ -20,12 +20,14 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 
 /**
@@ -447,6 +449,12 @@ public final class Verify extends Assert {
         }
     }
 
+    public static void assertEmpty(Iterator<?> iterator) {
+        if (iterator.hasNext()) {
+            throw new AssertionError("Iterator is not empty.");
+        }
+    }
+
     /** Assert that the given {@link Iterable} is <em>not</em> empty. */
     public static void assertNotEmpty(Iterable<?> actualIterable) {
         try {
@@ -546,6 +554,12 @@ public final class Verify extends Assert {
         }
     }
 
+    public static void assertNotEmpty(Iterator<?> iterator) {
+        if (!iterator.hasNext()) {
+            throw new AssertionError("Iterator is empty.");
+        }
+    }
+
     /** Assert the size of the given array. */
     public static void assertSize(int expectedSize, Object[] actualArray) {
         try {
@@ -629,6 +643,18 @@ public final class Verify extends Assert {
 
             final int actualSize = actualMultimap.size();
             failOnSizeMismatch(multimapName, expectedSize, actualSize);
+        } catch (AssertionError e) {
+            throw mangledException(e);
+        }
+    }
+
+    public static void assertSize(int expectedSize,
+                                  Iterator<?> iterator) {
+        try {
+            assertObjectNotNull("Iterator", iterator);
+
+            final int actualSize = newArrayList(iterator).size();
+            failOnSizeMismatch("the Iterator", expectedSize, actualSize);
         } catch (AssertionError e) {
             throw mangledException(e);
         }
@@ -1599,6 +1625,16 @@ public final class Verify extends Assert {
             failDidNotThrow(exceptionClass);
         } catch (AssertionError e) {
             throw mangledException(e);
+        }
+    }
+
+    public static <E> void assertIteratorsEqual(Iterator<? extends E> first,
+                                                Iterator<? extends E> second) {
+        final Collection<? extends E> firstCollection = newArrayList(first);
+        final Collection<? extends E> secondCollection = newArrayList(second);
+        assertEquals("Sizes are not equal: ", firstCollection.size(), secondCollection.size());
+        for (E el : firstCollection) {
+            assertContains(el, secondCollection);
         }
     }
 

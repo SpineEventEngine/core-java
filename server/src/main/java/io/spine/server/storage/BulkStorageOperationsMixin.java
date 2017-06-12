@@ -22,6 +22,7 @@ package io.spine.server.storage;
 import com.google.protobuf.Message;
 
 import javax.annotation.CheckReturnValue;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -54,7 +55,7 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * @throws IllegalStateException if the storage was closed before
      */
     @CheckReturnValue
-    Iterable<R> readMultiple(Iterable<I> ids);
+    Iterator<R> readMultiple(Iterable<I> ids);
 
     /**
      * Reads all the records from the storage.
@@ -66,5 +67,5 @@ interface BulkStorageOperationsMixin<I, R extends Message> {
      * @throws IllegalStateException if the storage was closed before
      */
     @CheckReturnValue
-    Map<I, R> readAll();
+    Iterator<R> readAll();
 }

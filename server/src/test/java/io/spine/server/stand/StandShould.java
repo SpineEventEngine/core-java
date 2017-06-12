@@ -25,7 +25,6 @@ import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors;
@@ -102,6 +101,7 @@ import static io.spine.io.StreamObservers.memoizingObserver;
 import static io.spine.io.StreamObservers.noOpObserver;
 import static io.spine.server.stand.Given.StandTestProjection;
 import static io.spine.test.Tests.newUserId;
+import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -329,13 +329,15 @@ public class StandShould extends TenantAwareTest {
                 ImmutableList.<EntityRecord>builder().add(someRecord)
                                                      .build();
         when(standStorageMock.readAllByType(any(TypeUrl.class)))
-                .thenReturn(nonEmptyList);
+                .thenReturn(nonEmptyList.iterator());
         when(standStorageMock.read(any(AggregateStateId.class)))
                 .thenReturn(Optional.of(someRecord));
         when(standStorageMock.readAll())
-                .thenReturn(Maps.<AggregateStateId, EntityRecord>newHashMap());
+                .thenReturn(Collections.<EntityRecord>emptyIterator());
         when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
-                .thenReturn(nonEmptyList);
+                .thenReturn(nonEmptyList.iterator());
+        when(standStorageMock.readMultiple(ArgumentMatchers.<AggregateStateId>anyIterable()))
+                .thenReturn(nonEmptyList.iterator());
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
@@ -1067,11 +1069,12 @@ public class StandShould extends TenantAwareTest {
         verifyObserver(observer);
     }
 
+    @SuppressWarnings("unchecked") // Mock instance of no type params
     private void checkEmptyResultForTargetOnEmptyStorage(Query readCustomersQuery) {
         final StandStorage standStorageMock = mock(StandStorage.class);
-        // Return an empty collection on {@link StandStorage#readAllByType(TypeUrl)} call.
-        final ImmutableList<EntityRecord> emptyResultList = ImmutableList.<EntityRecord>builder().build();
-        when(standStorageMock.readAllByType(any(TypeUrl.class))).thenReturn(emptyResultList);
+        when(standStorageMock.readAllByType(any(TypeUrl.class)))
+                .thenReturn(Collections.<EntityRecord>emptyIterator());
+        when(standStorageMock.readMultiple(any(Iterable.class))).thenReturn(emptyIterator());
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
