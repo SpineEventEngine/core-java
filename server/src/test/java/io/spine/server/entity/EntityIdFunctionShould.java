@@ -26,6 +26,9 @@ import io.spine.client.EntityId;
 import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+
 /**
  * @author Alexander Yevsyukov
  */
@@ -40,5 +43,19 @@ public class EntityIdFunctionShould {
                                            .setId(Wrapper.forLong().pack(100L))
                                            .build();
         func.apply(wrongType);
+    }
+
+    @Test
+    public void accept_proper_id_type() {
+        final Function<EntityId, StringValue> func =
+                new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
+
+        final String value = "abcd";
+        final EntityId type = EntityId.newBuilder()
+                                      .setId(Wrapper.forString().pack(value))
+                                      .build();
+        final StringValue result = func.apply(type);
+        assertNotNull(result);
+        assertEquals(value, result.getValue());
     }
 }
