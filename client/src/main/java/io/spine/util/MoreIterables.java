@@ -47,14 +47,14 @@ public final class MoreIterables {
      * @return new instance of {@link Iterable}.
      */
     public static <E> Iterable<E> onTopOf(Iterator<E> iterator) {
-        return new DelegateIterable<>(checkNotNull(iterator));
+        return new DelegatingIterable<>(checkNotNull(iterator));
     }
 
-    private static class DelegateIterable<E> implements Iterable<E> {
+    private static class DelegatingIterable<E> implements Iterable<E> {
 
         private final Iterator<E> iterator;
 
-        private DelegateIterable(Iterator<E> iterator) {
+        private DelegatingIterable(Iterator<E> iterator) {
             this.iterator = iterator;
         }
 
