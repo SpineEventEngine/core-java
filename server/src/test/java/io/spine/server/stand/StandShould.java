@@ -101,7 +101,6 @@ import static io.spine.io.StreamObservers.memoizingObserver;
 import static io.spine.io.StreamObservers.noOpObserver;
 import static io.spine.server.stand.Given.StandTestProjection;
 import static io.spine.test.Tests.newUserId;
-import static java.util.Collections.emptyIterator;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
@@ -1074,7 +1073,8 @@ public class StandShould extends TenantAwareTest {
         final StandStorage standStorageMock = mock(StandStorage.class);
         when(standStorageMock.readAllByType(any(TypeUrl.class)))
                 .thenReturn(Collections.<EntityRecord>emptyIterator());
-        when(standStorageMock.readMultiple(any(Iterable.class))).thenReturn(emptyIterator());
+        when(standStorageMock.readMultiple(any(Iterable.class)))
+                .thenReturn(Collections.<EntityRecord>emptyIterator());
 
         final Stand stand = prepareStandWithAggregateRepo(standStorageMock);
 
