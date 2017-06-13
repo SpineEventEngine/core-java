@@ -120,6 +120,11 @@ public final class BigIterators {
      * a {@link java.util.ConcurrentModificationException ConcurrentModificationException} unless
      * the {@code first} iterator is used after the {@code second} iterator is created.
      *
+     * <p>Please also note that the {@linkplain Collection#size() size} of the {@code Collection} is
+     * calculated using an instance of {@code Iterator}, i.e. calling
+     * {@link Collection#size() Collection.size()} while iterating the {@code Collection} may also
+     * cause {@link java.util.ConcurrentModificationException ConcurrentModificationException}.
+     *
      * <p>The order of the elements in the resulting {@code Collection} when iterating over is
      * the same as in the passed {@link Iterator}. The new elements added into
      * the {@code Collection} via {@link Collection#add(Object) Collection.add)} and
