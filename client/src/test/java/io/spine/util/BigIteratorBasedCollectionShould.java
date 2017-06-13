@@ -64,6 +64,18 @@ public class BigIteratorBasedCollectionShould {
         assertSize(source.size(), col);
     }
 
+    @Test
+    public void return_true_if_empty() {
+        final Collection<?> col = empty();
+        assertTrue(col.isEmpty());
+    }
+
+    @Test
+    public void return_false_if_not_empty() {
+        final Collection<?> col = collect(newArrayList(2.71, 3.14).iterator());
+        assertFalse(col.isEmpty());
+    }
+
     @Test(expected = ConcurrentModificationException.class)
     public void not_support_multiple_simultaneous_iterators() {
         final Collection<String> col = collect(newArrayList("1", "2", "3").iterator());

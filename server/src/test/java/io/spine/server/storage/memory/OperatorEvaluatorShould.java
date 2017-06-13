@@ -20,12 +20,15 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
+import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.client.ColumnFilter.Operator;
+import static io.spine.client.ColumnFilter.Operator.CFO_UNDEFINED;
 import static io.spine.client.ColumnFilter.Operator.EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_OR_EQUAL;
 import static io.spine.client.ColumnFilter.Operator.GREATER_THAN;
@@ -41,8 +44,16 @@ import static org.junit.Assert.assertTrue;
 /**
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("Duplicates")     // Comparison tests are similar but cannot be simplified to one
-public class QueryOperatorShould {
+@SuppressWarnings({"Duplicates", "ClassWithTooManyMethods"})
+    // 1 - Comparison tests are similar but cannot be simplified to one.
+    // 2 - Many test cases required.
+public class OperatorEvaluatorShould {
+
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .testStaticMethods(OperatorEvaluator.class, PACKAGE);
+    }
 
     @SuppressWarnings("RedundantStringConstructorCall") // We need an equal but not the same object
     @Test
@@ -213,6 +224,16 @@ public class QueryOperatorShould {
     @Test(expected = IllegalArgumentException.class)
     public void fail_to_compare_unsupported_types_by_LE() {
         eval(FaultyComparisonType.INSTANCE, LESS_OR_EQUAL, FaultyComparisonType.INSTANCE);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_compare_different_types() {
+        eval("7", GREATER_THAN, 6);
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_compare_by_an_invalid_operator() {
+        eval("a", CFO_UNDEFINED, "b");
     }
 
     private static void assertGreater(Object left, Object right) {

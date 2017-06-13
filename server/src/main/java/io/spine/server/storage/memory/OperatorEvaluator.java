@@ -56,10 +56,9 @@ enum OperatorEvaluator {
             }
             if (left.getClass() != right.getClass()) {
                 throw new IllegalArgumentException(
-                        format(
-                                "Cannot compare an instance of %s to an instance of %s.",
-                                left.getClass(),
-                                right.getClass())
+                        format("Cannot compare an instance of %s to an instance of %s.",
+                               left.getClass(),
+                               right.getClass())
                 );
             }
             if (left instanceof Timestamp) {
