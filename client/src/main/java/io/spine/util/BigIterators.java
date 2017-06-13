@@ -190,7 +190,7 @@ public final class BigIterators {
         @Override
         public int size() {
             while (iterator.hasNext()) {
-                popped.add(iterator.next());
+                popped.offer(iterator.next());
             }
             return popped.size();
         }
