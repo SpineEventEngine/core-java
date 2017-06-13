@@ -28,9 +28,6 @@ import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 
-import java.util.Collection;
-import java.util.LinkedList;
-
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.isNotDefault;
@@ -91,24 +88,6 @@ public abstract class Bus<T extends Message,
         responseObserver.onCompleted();
     }
 
-    public void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
-        checkNotNull(messages);
-        checkNotNull(responseObserver);
-
-        final Collection<T> messagesToStore = new LinkedList<>();
-        for (T message : messages) {
-            checkArgument(isNotDefault(message));
-            final boolean posted = prepareAndPost(message, responseObserver);
-            if (posted) {
-                messagesToStore.add(message);
-            }
-        }
-        if (!messagesToStore.isEmpty()) {
-            store(messagesToStore);
-        }
-        responseObserver.onCompleted();
-    }
-
     /**
      * Handles the message, for which there is no dispatchers registered in the registry.
      *
@@ -136,10 +115,4 @@ public abstract class Bus<T extends Message,
     protected abstract boolean prepareAndPost(T message, StreamObserver<Response> responseObserver);
 
     protected abstract void store(T message);
-
-    protected void store(Iterable<T> messages) {
-        for (T message : messages) {
-            store(message);
-        }
-    }
 }

@@ -43,13 +43,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -191,7 +195,18 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     public void post(Iterable<Event> events) {
-        post(events, StreamObservers.<Response>noOpObserver());
+        checkNotNull(events);
+
+        final StreamObserver<Response> observer = StreamObservers.noOpObserver();
+        final Collection<Event> postedEvents = new LinkedList<>();
+        for (Event event : events) {
+            checkArgument(isNotDefault(event));
+            final boolean posted = prepareAndPost(event, observer);
+            if (posted) {
+                postedEvents.add(event);
+            }
+        }
+        store(postedEvents);
     }
 
     @Override
@@ -208,8 +223,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         eventStore.append(event);
     }
 
-    @Override
-    protected void store(Iterable<Event> events) {
+    private void store(Iterable<Event> events) {
         eventStore.appendAll(events);
     }
 
