@@ -32,11 +32,18 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.lt;
@@ -88,6 +95,25 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     void store(Event event) {
         final EEntity entity = new EEntity(event);
         store(entity);
+    }
+
+    void store(Iterable<Event> events) {
+        final Iterable<EEntity> entities = transform(events, EventToEEntity.instance());
+        store(newLinkedList(entities));
+    }
+
+    private void store(Collection<EEntity> entities) {
+        final Map<EventId, EntityRecordWithColumns> records = new HashMap<>(entities.size());
+        for (EEntity entity : entities) {
+            final EntityRecord record = entityConverter().convert(entity);
+            checkNotNull(record);
+            final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.create(
+                    record,
+                    entity
+            );
+            records.put(entity.getId(), recordWithColumns);
+        }
+        recordStorage().write(records);
     }
 
     static Function<EEntity, Event> getEventFunc() {
@@ -160,9 +186,24 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
             if (input == null) {
                 return false;
             }
-            final Event event = input.getState();
+            final io.spine.base.Event event = input.getState();
             final boolean result = filter.apply(event);
             return result;
+        }
+    }
+
+    private enum EventToEEntity implements Function<Event, EEntity> {
+
+        INSTANCE;
+
+        private static Function<Event, EEntity> instance() {
+            return INSTANCE;
+        }
+
+        @Override
+        public EEntity apply(@Nullable Event event) {
+            checkNotNull(event);
+            return new EEntity(event);
         }
     }
 }

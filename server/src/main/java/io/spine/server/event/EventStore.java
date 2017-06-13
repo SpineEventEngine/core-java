@@ -20,6 +20,8 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicates;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
@@ -35,10 +37,13 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.tryFind;
 
 /**
  * A store of all events in a bounded context.
@@ -98,10 +103,21 @@ public abstract class EventStore implements AutoCloseable {
         logStored(event);
     }
 
-    public void appendAll(Iterable<Event> events) {
-        for (Event event : events) {
-            append(event);
+    public void appendAll(final Iterable<Event> events) {
+        final Optional<Event> tenantDiningEvent = tryFind(events, Predicates.<Event>notNull());
+        if (!tenantDiningEvent.isPresent()) {
+            return;
         }
+        final Event event = tenantDiningEvent.get();
+        final TenantAwareOperation op = new EventOperation(event) {
+            @Override
+            public void run() {
+                store(events);
+            }
+        };
+        op.execute();
+
+        logStored(events);
     }
 
     /**
@@ -110,6 +126,9 @@ public abstract class EventStore implements AutoCloseable {
      * @param event the event record to store.
      */
     protected abstract void store(Event event);
+
+    protected abstract void store(Iterable<Event> events);
+
 
     /**
      * Creates iterator for traversing through the history of events matching the passed query.
@@ -267,6 +286,11 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
+        protected void store(Iterable<Event> events) {
+            storage.store(events);
+        }
+
+        @Override
         protected Iterator<Event> iterator(EventStreamQuery query) {
             return storage.iterator(query);
         }
@@ -351,6 +375,31 @@ public abstract class EventStore implements AutoCloseable {
         }
 
         @Override
+        public StreamObserver<Event> appendAll(final StreamObserver<Response> responseObserver) {
+            final Collection<Event> events = new LinkedList<>();
+            final StreamObserver<Event> handler = new StreamObserver<Event>() {
+                @Override
+                public void onNext(Event value) {
+                    events.add(value);
+                    responseObserver.onNext(Responses.ok());
+                }
+
+                @Override
+                public void onError(Throwable t) {
+                    responseObserver.onError(t);
+                    throw new RuntimeException(t);
+                }
+
+                @Override
+                public void onCompleted() {
+                    eventStore.appendAll(events);
+                    responseObserver.onCompleted();
+                }
+            };
+            return handler;
+        }
+
+        @Override
         public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
             eventStore.read(request, responseObserver);
         }
@@ -366,6 +415,12 @@ public abstract class EventStore implements AutoCloseable {
         }
         if (logger.isTraceEnabled()) {
             logger.trace("Stored: {}", TextFormat.shortDebugString(request));
+        }
+    }
+
+    private void logStored(Iterable<Event> requests) {
+        for (Event event : requests) {
+            logStored(event);
         }
     }
 

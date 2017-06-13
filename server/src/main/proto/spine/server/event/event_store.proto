@@ -37,8 +37,11 @@ import "spine/server/event/event_stream_query.proto";
 service EventStore {
     option (SPI_service) = true;
 
-    // Request to append events to the storage.
+    // Request to append an event to the storage.
     rpc Append(base.Event) returns (base.Response);
+
+    // Request to append events to the storage.
+    rpc AppendAll(stream base.Event) returns (stream base.Response);
 
     // Provides events matching the query as a stream.
     rpc Read(EventStreamQuery) returns (stream base.Event);
