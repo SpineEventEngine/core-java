@@ -31,7 +31,8 @@ import java.util.NoSuchElementException;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A utility class for working with the {@linkplain Iterator Iterators}.
+ * A utility class for working with the {@linkplain Iterator Iterators} which have a large
+ * (infinite or unpredictable) count of elements.
  *
  * <p>This utility kit contains the methods for creating lazily constructed instances of
  * {@link Iterable} and {@link Collection} based on a passed {@link Iterator}.
