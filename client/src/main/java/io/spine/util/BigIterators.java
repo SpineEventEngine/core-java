@@ -77,10 +77,10 @@ public final class BigIterators {
      *
      * <p>It other cases, the count of the elements which are evaluated is equal to the number of
      * times the {@link Iterator#next() Iterator.next()} is called on the {@link Iterator} of this
-     * {@link Collection}.
+     * {@code Collection}.
      *
      * <p>Unlike the {@linkplain #toOneOffIterable(Iterator) one-off Iterable}, the resulting
-     * {@link Collection} is designed to be reused multiple times. Though, the cost of that reuse is
+     * {@code Collection} is designed to be reused multiple times. Though, the cost of that reuse is
      * in keeping in memory all the elements which have already been evaluated.
      *
      * <p>Note that it's illegal to use multiple {@linkplain Iterator Iterators} on a single
@@ -124,6 +124,10 @@ public final class BigIterators {
      * calculated using an instance of {@code Iterator}, i.e. calling
      * {@link Collection#size() Collection.size()} while iterating the {@code Collection} may also
      * cause {@link java.util.ConcurrentModificationException ConcurrentModificationException}.
+     *
+     * <p>The reason for that is the fact that the given iterator is lazily evaluated to a usual
+     * in-memory {@code Collection}. This means that a read operation may turn out to ba
+     * a modification operation for that {@code Collection}.
      *
      * <p>The order of the elements in the resulting {@code Collection} when iterating over is
      * the same as in the passed {@link Iterator}. The new elements added into
