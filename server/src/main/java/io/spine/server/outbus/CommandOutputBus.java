@@ -56,10 +56,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @Internal
-public abstract class CommandOutputBus< M extends Message,
-                                        E extends MessageEnvelope<M>,
-                                        C extends MessageClass,
-                                        D extends MessageDispatcher<C,E>> extends Bus<M, E, C, D> {
+public abstract class CommandOutputBus<M extends Message,
+                                       E extends MessageEnvelope<M>,
+                                       C extends MessageClass,
+                                       D extends MessageDispatcher<C,E>> extends Bus<M, E, C, D> {
 
     /**
      * The strategy to deliver the messages to the dispatchers.
@@ -115,14 +115,6 @@ public abstract class CommandOutputBus< M extends Message,
         return true;
     }
 
-    protected abstract void store(M message);
-
-    protected void store(Iterable<M> messages) {
-        for (M message : messages) {
-            store(message);
-        }
-    }
-
     /**
      * Validates the message and notifies the observer of those (if any).
      *
@@ -161,12 +153,11 @@ public abstract class CommandOutputBus< M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected void prepareAndPost(M message, StreamObserver<Response> responseObserver) {
+    protected boolean prepareAndPost(M message, StreamObserver<Response> responseObserver) {
         final boolean validationPassed = validateMessage(message, responseObserver);
 
         if (validationPassed) {
             responseObserver.onNext(Responses.ok());
-            store(message);
             final M enriched = enrich(message);
             final int dispatchersCalled = callDispatchers(createEnvelope(enriched));
 
@@ -174,6 +165,7 @@ public abstract class CommandOutputBus< M extends Message,
                 handleDeadMessage(createEnvelope(message), responseObserver);
             }
         }
+        return validationPassed;
     }
 
     /**

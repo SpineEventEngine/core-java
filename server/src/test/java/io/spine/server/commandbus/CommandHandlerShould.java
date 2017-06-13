@@ -46,13 +46,13 @@ import org.mockito.ArgumentCaptor;
 
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 /**
@@ -146,11 +146,13 @@ public class CommandHandlerShould {
     }
 
     private List<Event> verifyPostedEvents(int expectedEventCount) {
-        final ArgumentCaptor<Event> eventCaptor = ArgumentCaptor.forClass(Event.class);
-        verify(eventBus, times(expectedEventCount)).post(eventCaptor.capture());
-        final List<Event> events = eventCaptor.getAllValues();
-        assertEquals(expectedEventCount, events.size());
-        return events;
+        @SuppressWarnings("unchecked") // Can't create a Captor for a generic type
+        final ArgumentCaptor<Iterable<Event>> eventCaptor = ArgumentCaptor.forClass(Iterable.class);
+        verify(eventBus).post(eventCaptor.capture());
+        final Iterable<Event> events = eventCaptor.getValue();
+        final List<Event> eventsList = newArrayList(events);
+        assertEquals(expectedEventCount, eventsList.size());
+        return eventsList;
     }
 
     private void assertHandles(Command cmd) {

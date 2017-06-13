@@ -205,15 +205,21 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     @Override
-    protected void prepareAndPost(Command command, StreamObserver<Response> responseObserver) {
+    protected boolean prepareAndPost(Command command, StreamObserver<Response> responseObserver) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         if (!filterChain.accept(commandEnvelope, responseObserver)) {
-            return;
+            return false;
         }
         commandStore().store(command);
         responseObserver.onNext(Responses.ok());
 
         doPost(commandEnvelope);
+        return true;
+    }
+
+    @Override
+    protected void store(Command command) {
+        // NoOp
     }
 
     /**
