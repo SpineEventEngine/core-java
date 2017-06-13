@@ -191,7 +191,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     public void post(Iterable<Event> events) {
-        post(events, StreamObservers.<Response>noOpObserver());;
+        post(events, StreamObservers.<Response>noOpObserver());
     }
 
     @Override
@@ -206,6 +206,11 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     @Override
     protected void store(Event event) {
         eventStore.append(event);
+    }
+
+    @Override
+    protected void store(Iterable<Event> events) {
+        eventStore.appendAll(events);
     }
 
     @Override

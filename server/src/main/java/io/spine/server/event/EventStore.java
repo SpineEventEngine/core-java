@@ -98,6 +98,12 @@ public abstract class EventStore implements AutoCloseable {
         logStored(event);
     }
 
+    public void appendAll(Iterable<Event> events) {
+        for (Event event : events) {
+            append(event);
+        }
+    }
+
     /**
      * Implement this method for storing the passed event.
      *

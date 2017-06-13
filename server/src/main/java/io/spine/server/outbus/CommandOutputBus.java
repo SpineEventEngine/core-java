@@ -117,6 +117,12 @@ public abstract class CommandOutputBus< M extends Message,
 
     protected abstract void store(M message);
 
+    protected void store(Iterable<M> messages) {
+        for (M message : messages) {
+            store(message);
+        }
+    }
+
     /**
      * Validates the message and notifies the observer of those (if any).
      *
