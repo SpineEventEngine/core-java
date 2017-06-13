@@ -55,7 +55,7 @@ public final class BigIterators {
      * calls to {@link Iterable#iterator() Iterable.iterator()} throw {@link IllegalStateException}.
      *
      * @param iterator the backing iterator
-     * @param <E> the type of the elements
+     * @param <E>      the type of the elements
      * @return new instance of a one-off {@link Iterable}
      * @see #collect(Iterator) for more long-living wrapper implementation
      */
@@ -127,7 +127,7 @@ public final class BigIterators {
      * the sequence.
      *
      * @param iterator the data source iterator
-     * @param <E> the type of the elements
+     * @param <E>      the type of the elements
      * @return new instance of a lazily constructed {@link Collection}
      */
     public static <E> Collection<E> collect(Iterator<E> iterator) {

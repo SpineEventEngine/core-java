@@ -32,6 +32,7 @@ import java.util.NoSuchElementException;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertNotEmpty;
+import static io.spine.test.Verify.assertSize;
 import static io.spine.util.BigIterators.collect;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -54,6 +55,13 @@ public class BigIteratorBasedCollectionShould {
         assertNotEmpty(iter);
         assertEquals(newValue, iter.next());
         assertEmpty(iter);
+    }
+
+    @Test
+    public void calculate_own_size() {
+        final List<String> source = newArrayList("1", "2", "3");
+        final Collection<String> col = collect(source.iterator());
+        assertSize(source.size(), col);
     }
 
     @Test(expected = ConcurrentModificationException.class)
