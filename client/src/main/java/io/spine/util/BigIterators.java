@@ -52,8 +52,9 @@ public final class BigIterators {
      * {@link Iterator} in response to the first {@link Iterable#iterator() Iterable.iterator()}
      * call.
      *
-     * <p>The resulting {@link Iterable} is designed for one-time usage. The second and subsequent
-     * calls to {@link Iterable#iterator() Iterable.iterator()} throw {@link IllegalStateException}.
+     * <p>The resulting {@link Iterable} is designed for one-time usage. The second and
+     * the subsequent calls to {@link Iterable#iterator() Iterable.iterator()} throw
+     * {@link IllegalStateException}.
      *
      * @param iterator the backing iterator
      * @param <E>      the type of the elements
@@ -70,22 +71,22 @@ public final class BigIterators {
      * <p>The {@link Iterator} is evaluated lazily, i.e. the iterator elements will not be retrieved
      * until they are needed.
      *
-     * <p>The elements are evaluated all at one when calling:
+     * <p>The elements are evaluated all at once when calling:
      * <ul>
      *     <li>{@link Collection#size() Collection.size()};
-     *     <li>one of {@link Collection#toArray() Collection.toArray} overloads.
+     *     <li>Any of {@link Collection#toArray() Collection.toArray} overloads.
      * </ul>
      *
-     * <p>It other cases, the count of the elements which are evaluated is equal to the number of
-     * times the {@link Iterator#next() Iterator.next()} is called on the {@link Iterator} of this
-     * {@code Collection}.
+     * <p>In other cases, the count of the elements which are evaluated is equal to the maximum
+     * number of calls to {@link Iterator#next() Iterator.next()} on a single instance of
+     * the {@link Iterator} of this {@code Collection}.
      *
      * <p>Unlike the {@linkplain #toOneOffIterable(Iterator) one-off Iterable}, the resulting
      * {@code Collection} is designed to be reused multiple times. Though, the cost of that reuse is
      * in keeping in memory all the elements which have already been evaluated.
      *
-     * <p>Note that it's illegal to use multiple {@linkplain Iterator Iterators} on a single
-     * {@code Collection} produced by this method. Example:
+     * <p>Note that it's illegal to use simultaneously multiple {@linkplain Iterator Iterators} on
+     * a single {@code Collection} produced by this method. Example:
      * <pre>
      * {@code
      * final Collection&lt;Order&gt; lazyView = BigIterators.collect(myDatabaseCursorIterator);
@@ -126,8 +127,8 @@ public final class BigIterators {
      * {@link Collection#size() Collection.size()} while iterating the {@code Collection} may also
      * cause {@link java.util.ConcurrentModificationException ConcurrentModificationException}.
      *
-     * <p>The reason for that is the fact that the given iterator is lazily evaluated to a usual
-     * in-memory {@code Collection}. This means that a read operation may turn out to ba
+     * <p>The reason for that is the fact that the given iterator is lazily evaluated into a usual
+     * in-memory {@code Collection}. This means that a read operation may turn out to be
      * a modification operation for that {@code Collection}.
      *
      * <p>The order of the elements in the resulting {@code Collection} when iterating over is
@@ -182,8 +183,15 @@ public final class BigIterators {
      */
     private static final class DelegatingCollection<E> extends AbstractCollection<E> {
 
+        /**
+         * The dynamic {@code Iterator} of the elements which have not yet been evaluated.
+         */
         private final Iterator<E> iterator;
 
+        /**
+         * The {@link Deque} of the elements which have already been evaluated (popped from
+         * the source).
+         */
         private final Deque<E> popped;
 
         private DelegatingCollection(Iterator<E> iterator) {
@@ -216,12 +224,23 @@ public final class BigIterators {
             return popped.isEmpty() && !iterator.hasNext();
         }
 
-        private class Iter implements Iterator<E> {
+        private final class Iter implements Iterator<E> {
 
+            /**
+             * The dynamic {@code Iterator} of the elements which have not yet been evaluated.
+             */
             private final Iterator<E> sourceIterator;
 
+            /**
+             * The {@code Iterator} of the elements which have already been evaluated (popped
+             * from the source).
+             */
             private final Iterator<E> poppedIterator;
 
+            /**
+             * A flag showing whether the next element should be read from
+             * the {@code sourceIterator} and not from the {@code poppedIterator}.
+             */
             private boolean readFromSource;
 
             private Iter() {
@@ -232,7 +251,8 @@ public final class BigIterators {
 
             @Override
             public boolean hasNext() {
-                return (!readFromSource && poppedIterator.hasNext()) || sourceIterator.hasNext();
+                return (!readFromSource && poppedIterator.hasNext())
+                        || sourceIterator.hasNext();
             }
 
             @Override
