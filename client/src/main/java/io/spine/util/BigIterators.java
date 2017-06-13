@@ -38,9 +38,9 @@ import static com.google.common.collect.Iterators.concat;
  *
  * @author Dmytro Dashenkov
  */
-public final class MoreIterators {
+public final class BigIterators {
 
-    private MoreIterators() {
+    private BigIterators() {
         // Prevent utility class instantiation.
     }
 

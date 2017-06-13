@@ -50,8 +50,8 @@ import static com.google.common.collect.Iterators.transform;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
-import static io.spine.util.MoreIterators.collect;
-import static io.spine.util.MoreIterators.toOneOffIterable;
+import static io.spine.util.BigIterators.collect;
+import static io.spine.util.BigIterators.toOneOffIterable;
 import static java.util.Collections.unmodifiableCollection;
 
 /**
