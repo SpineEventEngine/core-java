@@ -42,11 +42,9 @@ import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.validate.Validate.isNotDefault;
 import static java.lang.String.format;
 
 /**
@@ -177,36 +175,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     /**
-     * Directs the command to be dispatched.
-     *
-     * <p>If the command has scheduling attributes, it will be posted for execution by
-     * the configured scheduler according to values of those scheduling attributes.
-     *
-     * <p>If a command does not have a dispatcher, the error is
-     * {@linkplain StreamObserver#onError(Throwable) returned} with
-     * {@link UnsupportedCommandException} as the cause.
-     *
-     * @param command the command to be processed
-     * @param responseObserver the observer to return the result of the call
-     */
-    @Override
-    public void post(Command command, StreamObserver<Response> responseObserver) {
-        checkNotNull(command);
-        checkNotNull(responseObserver);
-        checkArgument(isNotDefault(command));
-
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        if (!filterChain.accept(commandEnvelope, responseObserver)) {
-            return;
-        }
-        commandStore().store(command);
-        responseObserver.onNext(Responses.ok());
-
-        doPost(commandEnvelope);
-        responseObserver.onCompleted();
-    }
-
-    /**
      * Does nothing because commands for which are no registered dispatchers
      * are rejected by a built-in {@link CommandBusFilter} invoked when such a command is
      * {@linkplain #post(Command, StreamObserver) posted} to the bus.
@@ -234,6 +202,18 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
                                                  .getClassName(),
                                   idStr);
         throw new IllegalStateException(msg);
+    }
+
+    @Override
+    protected void prepareAndPost(Command command, StreamObserver<Response> responseObserver) {
+        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
+        if (!filterChain.accept(commandEnvelope, responseObserver)) {
+            return;
+        }
+        commandStore().store(command);
+        responseObserver.onNext(Responses.ok());
+
+        doPost(commandEnvelope);
     }
 
     /**

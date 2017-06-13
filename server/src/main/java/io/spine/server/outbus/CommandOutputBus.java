@@ -154,25 +154,8 @@ public abstract class CommandOutputBus< M extends Message,
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
-    /**
-     * Validates and posts the message for handling.
-     *
-     * <p>If the message is invalid, the {@code responseObserver} is notified of an error.
-     *
-     * <p>If the message is valid, it {@linkplain #store(Message) may be stored} in the associated
-     * store before passing it to dispatchers.
-     *
-     * <p>The {@code responseObserver} is then notified of a successful acknowledgement of the
-     * passed message.
-     *
-     * @param message          the message to be handled
-     * @param responseObserver the observer to be notified
-     * @see #validateMessage(Message, StreamObserver)
-     */
     @Override
-    public void post(M message, StreamObserver<Response> responseObserver) {
-        checkNotNull(responseObserver);
-
+    protected void prepareAndPost(M message, StreamObserver<Response> responseObserver) {
         final boolean validationPassed = validateMessage(message, responseObserver);
 
         if (validationPassed) {
@@ -184,7 +167,6 @@ public abstract class CommandOutputBus< M extends Message,
             if (dispatchersCalled == 0) {
                 handleDeadMessage(createEnvelope(message), responseObserver);
             }
-            responseObserver.onCompleted();
         }
     }
 

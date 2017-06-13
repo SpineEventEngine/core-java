@@ -28,7 +28,9 @@ import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Abstract base for buses.
@@ -74,7 +76,25 @@ public abstract class Bus<T extends Message,
      * @param message the message to post
      * @param responseObserver the observer to receive outcome of the operation
      */
-    public abstract void post(T message, StreamObserver<Response> responseObserver);
+    public void post(T message, StreamObserver<Response> responseObserver) {
+        checkNotNull(message);
+        checkNotNull(responseObserver);
+        checkArgument(isNotDefault(message));
+
+        prepareAndPost(message, responseObserver);
+        responseObserver.onCompleted();
+    }
+
+    public void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
+        checkNotNull(messages);
+        checkNotNull(responseObserver);
+
+        for (T message : messages) {
+            checkArgument(isNotDefault(message));
+            prepareAndPost(message, responseObserver);
+        }
+        responseObserver.onCompleted();
+    }
 
     /**
      * Handles the message, for which there is no dispatchers registered in the registry.
@@ -99,4 +119,6 @@ public abstract class Bus<T extends Message,
      * dispatchers of the bus.
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
+
+    protected abstract void prepareAndPost(T message, StreamObserver<Response> responseObserver);
 }

@@ -190,6 +190,10 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         post(event, StreamObservers.<Response>noOpObserver());
     }
 
+    public void post(Iterable<Event> events) {
+        post(events, StreamObservers.<Response>noOpObserver());;
+    }
+
     @Override
     protected Event enrich(Event event) {
         if (enricher == null || !enricher.canBeEnriched(event)) {
