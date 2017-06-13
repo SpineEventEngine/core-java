@@ -22,7 +22,6 @@ package io.spine.server.storage.memory;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Timestamp;
-import io.spine.client.ColumnFilter;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -101,7 +100,7 @@ enum OperatorEvaluator {
         }
     };
 
-    private static final ImmutableMap<ColumnFilter.Operator, OperatorEvaluator> EVALUATORS =
+    private static final ImmutableMap<Operator, OperatorEvaluator> EVALUATORS =
             ImmutableMap.<Operator, OperatorEvaluator>builder()
                     .put(Operator.EQUAL, EQUAL)
                     .put(Operator.GREATER_THAN, GREATER_THAN)
