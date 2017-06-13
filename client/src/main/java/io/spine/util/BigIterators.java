@@ -83,9 +83,42 @@ public final class BigIterators {
      * {@link Collection} is designed to be reused multiple times. Though, the cost of that reuse is
      * in keeping in memory all the elements which have already been evaluated.
      *
-     * <p>Note that, unlike {@linkplain #toOneOffIterable(Iterator) the one-off Iterable},
-     * the resulting {@link Collection} is not specified to return the passed {@link Iterator} on
-     * {@link Collection#iterator() Collection.iterator()}.
+     * <p>Note that it's illegal to use multiple {@linkplain Iterator Iterators} on a single
+     * {@code Collection} produced by this method. Example:
+     * <pre>
+     * {@code
+     * final Collection&lt;Order&gt; lazyView = BigIterators.collect(myDatabaseCursorIterator);
+     * final Iterator&lt;Order&gt; first = lazyView.iterator();
+     * final Iterator&lt;Order&gt; second = lazyView.iterator();
+     *
+     * // ...
+     *
+     * first.next();
+     * second.next(); // <-- throws a ConcurrentModificationException
+     * }
+     * </pre>
+     *
+     * <p>The right way to use multiple iterators is to initialize and use them sequentially.
+     * <pre>
+     * {@code
+     * final Collection&lt;Order&gt; lazyView = BigIterators.collect(myDatabaseCursorIterator);
+     * final Iterator&lt;Order&gt; first = lazyView.iterator();
+     *
+     * // ...
+     *
+     * first.next();
+     *
+     * final Iterator&lt;Order&gt; second = lazyView.iterator();
+     *
+     * // ...
+     *
+     * second.next(); // OK
+     * }
+     * </pre>
+     *
+     * <p>The code from the example above won't throw
+     * a {@link java.util.ConcurrentModificationException ConcurrentModificationException} unless
+     * the {@code first} iterator is used after the {@code second} iterator is created.
      *
      * <p>The order of the elements in the resulting {@code Collection} when iterating over is
      * the same as in the passed {@link Iterator}. The new elements added into
