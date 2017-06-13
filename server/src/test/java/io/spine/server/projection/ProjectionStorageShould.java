@@ -43,6 +43,7 @@ import java.util.List;
 import static com.google.protobuf.util.Durations.fromSeconds;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testdata.TestEntityStorageRecordFactory.newEntityStorageRecord;
@@ -94,19 +95,20 @@ public abstract class ProjectionStorageShould<I>
         assertNull(time);
     }
 
-    // TODO:2017-06-12:dmytro.dashenkov: Re-enable.
-//    @SuppressWarnings("MethodWithMultipleLoops")
-//    @Test
-//    public void read_all_messages() {
-//        final List<I> ids = fillStorage(5);
-//
-//        final Iterator<EntityRecord> read = storage.readAll();
-//        assertSize(ids.size(), read);
-//        while (read.hasNext()) {
-//            final EntityRecord record = read.next();
-//            assertContains(record.getKey(), ids);
-//        }
-//    }
+    @SuppressWarnings("MethodWithMultipleLoops")
+    @Test
+    public void read_all_messages() {
+        final List<I> ids = fillStorage(5);
+
+        final Iterator<EntityRecord> read = storage.readAll();
+        assertSize(ids.size(), read);
+        while (read.hasNext()) {
+            final EntityRecord record = read.next();
+            final Project state = AnyPacker.unpack(record.getState());
+            final ProjectId id = state.getId();
+            assertContains(id, ids);
+        }
+    }
 
     @SuppressWarnings("MethodWithMultipleLoops")
     @Test
@@ -146,21 +148,21 @@ public abstract class ProjectionStorageShould<I>
         assertEquals(noMaskEntiries, maskedEntries);
     }
 
-    // TODO:2017-06-12:dmytro.dashenkov: Re-enable.
-//    @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
-//    @Test
-//    public void perform_read_bulk_operations() {
-//        // Get a subset of IDs
-//        final List<I> ids = fillStorage(10).subList(0, 5);
-//
-//        final Iterable<EntityRecord> read = storage.readMultiple(ids);
-//        assertSize(ids.size(), read);
-//
-//        // Check data consistency
-//        for (EntityRecord record : read) {
-//            checkProjectIdIsInList(record, ids);
-//        }
-//    }
+    @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
+    @Test
+    public void perform_read_bulk_operations() {
+        // Get a subset of IDs
+        final List<I> ids = fillStorage(10).subList(0, 5);
+
+        final Iterator<EntityRecord> read = storage.readMultiple(ids);
+        assertSize(ids.size(), read);
+
+        // Check data consistency
+        while (read.hasNext()) {
+            final EntityRecord record = read.next();
+            checkProjectIdIsInList(record, ids);
+        }
+    }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
     @Test
