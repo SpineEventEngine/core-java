@@ -199,7 +199,7 @@ public final class BigIterators {
                     element = poppedIterator.next();
                 } else if (sourceIterator.hasNext()) {
                     element = sourceIterator.next();
-                    popped.push(element);
+                    popped.offer(element);
                     readFromSource = true;
                 } else {
                     throw new NoSuchElementException("The backing iterator is empty.");
