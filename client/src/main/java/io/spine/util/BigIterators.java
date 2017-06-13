@@ -26,9 +26,9 @@ import java.util.Collection;
 import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterators.concat;
 
 /**
  * A utility class for working with the {@linkplain Iterator Iterators}.
@@ -145,13 +145,13 @@ public final class BigIterators {
 
         private DelegatingCollection(Iterator<E> iterator) {
             super();
-            this.iterator = new Iter(iterator);
+            this.iterator = iterator;
             this.popped = new LinkedList<>();
         }
 
         @Override
         public Iterator<E> iterator() {
-            return concat(iterator, popped.iterator());
+            return new Iter();
         }
 
         @Override
@@ -175,28 +175,41 @@ public final class BigIterators {
 
         private class Iter implements Iterator<E> {
 
-            private final Iterator<E> backingIterator;
+            private final Iterator<E> sourceIterator;
 
-            private Iter(Iterator<E> backingIterator) {
-                this.backingIterator = backingIterator;
+            private final Iterator<E> poppedIterator;
+
+            private boolean readFromSource;
+
+            private Iter() {
+                this.sourceIterator = DelegatingCollection.this.iterator;
+                this.poppedIterator = popped.iterator();
+                this.readFromSource = false;
             }
 
             @Override
             public boolean hasNext() {
-                return backingIterator.hasNext();
+                return (!readFromSource && poppedIterator.hasNext()) || sourceIterator.hasNext();
             }
 
             @Override
             public E next() {
-                final E el = backingIterator.next();
-                popped.offer(el);
-                return el;
+                final E element;
+                if (!readFromSource && poppedIterator.hasNext()) {
+                    element = poppedIterator.next();
+                } else if (sourceIterator.hasNext()) {
+                    element = sourceIterator.next();
+                    popped.push(element);
+                    readFromSource = true;
+                } else {
+                    throw new NoSuchElementException("The backing iterator is empty.");
+                }
+                return element;
             }
 
             @Override
             public void remove() {
-                backingIterator.remove();
-                popped.pollLast();
+                throw new UnsupportedOperationException("Iterator.remove");
             }
         }
     }
