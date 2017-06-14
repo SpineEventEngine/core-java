@@ -29,13 +29,13 @@ import io.spine.users.TenantId;
  *
  * @author Alexander Yevsyukov
  */
-public class RecordBasedRepositoryIO<I, E extends Entity<I, S>, S extends Message> {
+public class RepositoryIO<I, E extends Entity<I, S>, S extends Message> {
 
     private final RecordStorageIO<I> storageIO;
     private final EntityStorageConverter<I, E, S> converter;
 
-    protected RecordBasedRepositoryIO(RecordStorageIO<I> storageIO,
-                                      EntityStorageConverter<I, E, S> converter) {
+    protected RepositoryIO(RecordStorageIO<I> storageIO,
+                           EntityStorageConverter<I, E, S> converter) {
         this.storageIO = storageIO;
         this.converter = converter;
     }

@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityStorageConverter;
-import io.spine.server.entity.RecordBasedRepositoryIO;
+import io.spine.server.entity.RepositoryIO;
 import io.spine.users.TenantId;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.KvCoder;
@@ -39,7 +39,7 @@ import org.apache.beam.sdk.values.PDone;
  * @author Alexander Yevsyukov
  */
 public class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends Message>
-        extends RecordBasedRepositoryIO<I, P, S> {
+        extends RepositoryIO<I, P, S> {
 
     public static <I, P extends Projection<I, S, ?>, S extends Message>
     ProjectionRepositoryIO<I, P, S> of(ProjectionRepository<I, P, S> repository) {
