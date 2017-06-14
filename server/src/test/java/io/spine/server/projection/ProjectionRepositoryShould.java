@@ -37,7 +37,6 @@ import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.idfunc.IdSetEventFunction;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.ProjectionRepository.Status;
-import io.spine.server.projection.given.ProjectionRepositoryTestEnv;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
@@ -63,6 +62,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -508,14 +508,13 @@ public class ProjectionRepositoryShould
         final NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
-        assertTrue(repo.loadAll()
-                       .isEmpty());
+        assertFalse(repo.loadAll().hasNext());
 
         final Event event = createEvent(PRODUCER_ID, projectCreated());
         repo.dispatch(EventEnvelope.of(event));
 
-        final Collection<ProjectionRepositoryTestEnv.NoOpTaskNamesProjection> items = repo.loadAll();
-        assertTrue(items.isEmpty());
+        final Iterator<?> items = repo.loadAll();
+        assertFalse(items.hasNext());
     }
 
     private static ManualCatchupProjectionRepository repoWithManualCatchup() {

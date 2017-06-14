@@ -31,7 +31,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.RecordBasedRepository;
 
-import java.util.Collection;
+import java.util.Iterator;
 
 /**
  * Processes the queries targeting {@link io.spine.server.entity.Entity Entity} objects.
@@ -53,7 +53,7 @@ class EntityQueryProcessor implements QueryProcessor {
         final Target target = query.getTarget();
         final FieldMask fieldMask = query.getFieldMask();
 
-        final Collection<? extends Entity> entities;
+        final Iterator<? extends Entity> entities;
         if (target.getIncludeAll() && fieldMask.getPathsList()
                                                .isEmpty()) {
             entities = repository.loadAll();
@@ -61,13 +61,12 @@ class EntityQueryProcessor implements QueryProcessor {
             final EntityFilters filters = target.getFilters();
             entities = repository.find(filters, fieldMask);
         }
-
-        for (Entity entity : entities) {
+        while (entities.hasNext()) {
+            final Entity entity = entities.next();
             final Message state = entity.getState();
             final Any packedState = AnyPacker.pack(state);
             resultBuilder.add(packedState);
         }
-
         final ImmutableList<Any> result = resultBuilder.build();
         return result;
     }

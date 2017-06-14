@@ -1230,13 +1230,13 @@ public class StandShould extends TenantAwareTest {
         final Iterable<ProjectId> matchingIds = argThat(projectionIdsIterableMatcher(projectIds));
 
         when(projectionRepository.loadAll(matchingIds, any(FieldMask.class)))
-                .thenReturn(allResults);
+                .thenReturn(allResults.iterator());
         when(projectionRepository.loadAll())
-                .thenReturn(allResults);
+                .thenReturn(allResults.iterator());
 
         final EntityFilters matchingFilter = argThat(entityFilterMatcher(projectIds));
         when(projectionRepository.find(matchingFilter, any(FieldMask.class)))
-                .thenReturn(allResults);
+                .thenReturn(allResults.iterator());
     }
 
     @SuppressWarnings("OverlyComplexAnonymousInnerClass")
