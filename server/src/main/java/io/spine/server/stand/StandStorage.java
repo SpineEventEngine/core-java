@@ -19,7 +19,6 @@
  */
 package io.spine.server.stand;
 
-import com.google.common.collect.ImmutableCollection;
 import com.google.protobuf.FieldMask;
 import io.spine.annotation.SPI;
 import io.spine.server.entity.EntityRecord;
@@ -27,7 +26,7 @@ import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.storage.RecordStorage;
 import io.spine.type.TypeUrl;
 
-import java.util.Map;
+import java.util.Iterator;
 
 /**
  * Serves as a storage for the latest
@@ -54,7 +53,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
      * equals the argument value
      */
-    public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type);
+    public abstract Iterator<EntityRecord> readAllByType(TypeUrl type);
 
     /**
      * Reads all the state records by the given type.
@@ -63,7 +62,7 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @return the state records which {@link com.google.protobuf.Any#getTypeUrl() Any.getTypeUrl()}
      * equals the argument value
      */
-    public abstract ImmutableCollection<EntityRecord> readAllByType(TypeUrl type,
+    public abstract Iterator<EntityRecord> readAllByType(TypeUrl type,
                                                                     FieldMask fieldMask);
 
     /**
@@ -81,13 +80,13 @@ public abstract class StandStorage extends RecordStorage<AggregateStateId> {
      * @see #readAll(FieldMask)
      */
     @Override
-    public Map<AggregateStateId, EntityRecord> readAll(EntityQuery<AggregateStateId> query,
-                                                       FieldMask fieldMask) {
+    public Iterator<EntityRecord> readAll(EntityQuery<AggregateStateId> query,
+                                          FieldMask fieldMask) {
         return readAll(fieldMask);
     }
 
     @Override
-    protected Map<AggregateStateId, EntityRecord> readAllRecords(
+    protected Iterator<EntityRecord> readAllRecords(
             EntityQuery<AggregateStateId> query,
             FieldMask fieldMask) {
         throw new IllegalStateException("Call #readAll(EntityQuery, FieldMask) instead.");

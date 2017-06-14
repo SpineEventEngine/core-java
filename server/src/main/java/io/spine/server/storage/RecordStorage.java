@@ -34,6 +34,7 @@ import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.stand.AggregateStateId;
 import io.spine.type.TypeUrl;
 
+import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -178,7 +179,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * {@inheritDoc}
      */
     @Override
-    public Iterable<EntityRecord> readMultiple(Iterable<I> ids) {
+    public Iterator<EntityRecord> readMultiple(Iterable<I> ids) {
         checkNotClosed();
         checkNotNull(ids);
 
@@ -192,7 +193,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param fieldMask the mask to apply
      * @return the items with the given IDs and with the given {@code FieldMask} applied
      */
-    public Iterable<EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
+    public Iterator<EntityRecord> readMultiple(Iterable<I> ids, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(ids);
 
@@ -203,7 +204,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * {@inheritDoc}
      */
     @Override
-    public Map<I, EntityRecord> readAll() {
+    public Iterator<EntityRecord> readAll() {
         checkNotClosed();
 
         return readAllRecords();
@@ -215,7 +216,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param fieldMask the {@code FieldMask} to apply
      * @return all items from this repository with the given {@code FieldMask} applied
      */
-    public Map<I, EntityRecord> readAll(FieldMask fieldMask) {
+    public Iterator<EntityRecord> readAll(FieldMask fieldMask) {
         checkNotClosed();
 
         return readAllRecords(fieldMask);
@@ -233,7 +234,7 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
      * @param fieldMask the fields to retrieve
      * @return the matching records mapped upon their IDs
      */
-    public Map<I, EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
+    public Iterator<EntityRecord> readAll(EntityQuery<I> query, FieldMask fieldMask) {
         checkNotClosed();
         checkNotNull(query);
         checkNotNull(fieldMask);
@@ -254,23 +255,23 @@ public abstract class RecordStorage<I> extends AbstractStorage<I, EntityRecord>
     protected abstract Optional<EntityRecord> readRecord(I id);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids);
+    protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids);
 
     /** @see BulkStorageOperationsMixin#readMultiple(java.lang.Iterable) */
-    protected abstract Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids,
+    protected abstract Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids,
                                                                   FieldMask fieldMask);
 
     /** @see BulkStorageOperationsMixin#readAll() */
-    protected abstract Map<I, EntityRecord> readAllRecords();
+    protected abstract Iterator<EntityRecord> readAllRecords();
 
     /** @see BulkStorageOperationsMixin#readAll() */
-    protected abstract Map<I, EntityRecord> readAllRecords(FieldMask fieldMask);
+    protected abstract Iterator<EntityRecord> readAllRecords(FieldMask fieldMask);
 
     /**
      * @see #readAll(EntityQuery, FieldMask)
      */
-    protected abstract Map<I, EntityRecord> readAllRecords(EntityQuery<I> query,
-                                                           FieldMask fieldMask);
+    protected abstract Iterator<EntityRecord> readAllRecords(EntityQuery<I> query,
+                                                             FieldMask fieldMask);
 
     /**
      * Writes a record and the associated

@@ -56,11 +56,12 @@ import org.mockito.ArgumentMatcher;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.pack;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -70,8 +71,7 @@ import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.archived;
 import static io.spine.test.Tests.assertMatchesMask;
-import static io.spine.test.Verify.assertEmpty;
-import static io.spine.test.Verify.assertMapsEqual;
+import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
@@ -151,10 +151,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
                                                      .addPaths("invalid-path")
                                                      .build();
         final RecordStorage storage = getStorage();
-        final Map empty = storage.readAll(nonEmptyFieldMask);
+        final Iterator empty = storage.readAll(nonEmptyFieldMask);
 
         assertNotNull(empty);
-        assertEmpty(empty);
+        assertFalse("Iterator is not empty!", empty.hasNext());
     }
 
     @SuppressWarnings("ConstantConditions") // Converter nullability issues
@@ -199,12 +199,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
 
         final int bulkCount = count / 2;
         final FieldMask fieldMask = FieldMasks.maskOf(typeDescriptor, 2);
-        final Iterable<EntityRecord> readRecords = storage.readMultiple(
+        final Iterator<EntityRecord> readRecords = storage.readMultiple(
                 ids.subList(0, bulkCount),
                 fieldMask);
-        final List<EntityRecord> readList = newLinkedList(readRecords);
+        final List<EntityRecord> readList = newArrayList(readRecords);
         assertSize(bulkCount, readList);
-        for (EntityRecord record : readRecords) {
+        for (EntityRecord record : readList) {
             final Message state = unpack(record.getState());
             assertMatchesMask(state, fieldMask);
         }
@@ -255,7 +255,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
         storage.write(initial);
 
-        final Collection<EntityRecord> actual = newLinkedList(
+        final Collection<EntityRecord> actual = newArrayList(
                 storage.readMultiple(initial.keySet())
         );
         final Collection<EntityRecord> expected = Collections2.transform(initial.values(),
@@ -299,12 +299,14 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         }
 
         storage.write(Maps.transformValues(v1Records, recordPacker));
-        final Map<I, EntityRecord> firstRevision = storage.readAll();
-        assertMapsEqual(v1Records, firstRevision, "First revision EntityRecord-s");
+        final Iterator<EntityRecord> firstRevision = storage.readAll();
+        assertIteratorsEqual(v1Records.values()
+                                      .iterator(), firstRevision);
 
         storage.write(Maps.transformValues(v2Records, recordPacker));
-        final Map<I, EntityRecord> secondRevision = storage.readAll();
-        assertMapsEqual(v2Records, secondRevision, "Second revision EntityRecord-s");
+        final Iterator<EntityRecord> secondRevision = storage.readAll();
+        assertIteratorsEqual(v2Records.values()
+                                      .iterator(), secondRevision);
     }
 
     @Test(expected = IllegalStateException.class)
@@ -396,10 +398,10 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final ColumnFilter status = eq("projectStatusValue", wrappedValue);
         final ColumnFilter version = eq("counterVersion", versionValue);
         final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
-                                                                                 .setOperator(ALL)
-                                                                                 .addFilter(status)
-                                                                                 .addFilter(version)
-                                                                                 .build();
+                                                                             .setOperator(ALL)
+                                                                             .addFilter(status)
+                                                                             .addFilter(version)
+                                                                             .build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
@@ -436,17 +438,11 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         storage.write(idWrong1, recordWrong1);
         storage.write(idWrong2, recordWrong2);
 
-        final Map<I, EntityRecord> readRecords = storage.readAll(query,
-                                                                 FieldMask.getDefaultInstance());
-        assertSize(1, readRecords);
-        final I singleId = readRecords.keySet()
-                                      .iterator()
-                                      .next();
-        assertEquals(idMatching, singleId);
-
-        final EntityRecord singleRecord = readRecords.values()
-                                                     .iterator()
-                                                     .next();
+        final Iterator<EntityRecord> readRecords = storage.readAll(query,
+                                                                   FieldMask.getDefaultInstance());
+        assertTrue(readRecords.hasNext());
+        final EntityRecord singleRecord = readRecords.next();
+        assertFalse(readRecords.hasNext());
         assertEquals(fineRecord, singleRecord);
     }
 
@@ -490,11 +486,12 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityQuery<I> query = EntityQueries.from(filters, TestCounterEntity.class);
 
         // Perform the query
-        final Map<I, EntityRecord> readRecords = storage.readAll(query,
-                                                                 FieldMask.getDefaultInstance());
+        final Iterator<EntityRecord> readRecords = storage.readAll(query,
+                                                                    FieldMask.getDefaultInstance());
         // Check results
-        assertSize(1, readRecords);
-        final EntityRecord actualRecord = readRecords.get(idMatching);
+        assertTrue(readRecords.hasNext());
+        final EntityRecord actualRecord = readRecords.next();
+        assertFalse(readRecords.hasNext());
         assertEquals(fineRecord, actualRecord);
     }
 

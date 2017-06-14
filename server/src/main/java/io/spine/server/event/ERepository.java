@@ -40,10 +40,13 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newLinkedList;
+import static com.google.common.collect.Iterators.filter;
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.lt;
@@ -52,6 +55,7 @@ import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.event.EEntity.CREATED_TIME_COLUMN;
 import static io.spine.server.event.EEntity.TYPE_COLUMN;
 import static io.spine.server.event.EEntity.comparator;
+import static java.util.Collections.sort;
 
 /**
  * A storage used by {@link EventStore} for keeping event data.
@@ -81,14 +85,13 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         checkNotNull(query);
 
         final EntityFilters filters = toEntityFilters(query);
-        final Iterable<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
+        final Iterator<EEntity> entities = find(filters, FieldMask.getDefaultInstance());
         // A predicate on the Event message and EventContext fields.
         final Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
-        final Iterator<EEntity> entityIterator = FluentIterable.from(entities)
-                                                                   .filter(detailedLookupFilter)
-                                                                   .toSortedList(comparator())
-                                                                   .iterator();
-        final Iterator<Event> result = transform(entityIterator, getEvent());
+        final Iterator<EEntity> filtered = filter(entities, detailedLookupFilter);
+        final List<EEntity> entityList = newArrayList(filtered);
+        sort(entityList, comparator());
+        final Iterator<Event> result = transform(entityList.iterator(), getEvent());
         return result;
     }
 
@@ -116,7 +119,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         recordStorage().write(records);
     }
 
-    static Function<EEntity, Event> getEvent() {
+    private static Function<EEntity, Event> getEvent() {
         return GET_EVENT;
     }
 
@@ -193,7 +196,6 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     private enum EventToEEntity implements Function<Event, EEntity> {
-
         INSTANCE;
 
         private static Function<Event, EEntity> instance() {
