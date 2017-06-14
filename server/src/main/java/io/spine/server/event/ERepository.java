@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Iterators;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
@@ -38,6 +37,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
+import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
@@ -83,7 +83,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         final Iterator<EEntity> filtered = filter(entities, detailedLookupFilter);
         final List<EEntity> mutableList = newArrayList(filtered);
         sort(mutableList, comparator());
-        final Iterator<Event> result = Iterators.transform(mutableList.iterator(), getEventFunc());
+        final Iterator<Event> result = transform(mutableList.iterator(), getEventFunc());
         return result;
     }
 
