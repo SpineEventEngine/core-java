@@ -23,12 +23,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.protobuf.TextFormat;
-import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Event;
-import io.spine.base.Response;
-import io.spine.base.Responses;
-import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -37,9 +33,7 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.io.IOException;
-import java.util.Collection;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -64,14 +58,6 @@ public abstract class EventStore implements AutoCloseable {
      */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    /**
-     * Creates new {@link ServiceBuilder} for building {@code EventStore} instance
-     * that will be exposed as a gRPC service.
-     */
-    public static ServiceBuilder newServiceBuilder() {
-        return new ServiceBuilder();
     }
 
     /**
@@ -302,104 +288,6 @@ public abstract class EventStore implements AutoCloseable {
         @Override
         public void close() throws Exception {
             storage.close();
-        }
-    }
-
-    /**
-     * The builder of {@code EventStore} instance exposed as gRPC service.
-     *
-     * @see EventStoreGrpc.EventStoreImplBase
-     */
-    public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
-
-        @Override
-        public ServerServiceDefinition build() {
-            checkState();
-            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(),
-                                                       getStorageFactory(),
-                                                       getLogger());
-            final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
-            final ServerServiceDefinition result = grpcService.bindService();
-            return result;
-        }
-
-        @Override
-        public ServiceBuilder setStreamExecutor(Executor executor) {
-            super.setStreamExecutor(executor);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder setStorageFactory(StorageFactory storageFactory) {
-            super.setStorageFactory(storageFactory);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder setLogger(@Nullable Logger logger) {
-            super.setLogger(logger);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder withDefaultLogger() {
-            super.withDefaultLogger();
-            return this;
-        }
-    }
-
-    /**
-     * gRPC service over the locally running implementation.
-     */
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-        /* as we override default implementation with `unimplemented` status. */
-    private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
-
-        private final LocalImpl eventStore;
-
-        private GrpcService(LocalImpl eventStore) {
-            super();
-            this.eventStore = eventStore;
-        }
-
-        @Override
-        public void append(Event request, StreamObserver<Response> responseObserver) {
-            try {
-                eventStore.append(request);
-                responseObserver.onNext(Responses.ok());
-                responseObserver.onCompleted();
-            } catch (RuntimeException e) {
-                responseObserver.onError(e);
-            }
-        }
-
-        @Override
-        public StreamObserver<Event> appendAll(final StreamObserver<Response> responseObserver) {
-            final Collection<Event> events = new LinkedList<>();
-            final StreamObserver<Event> handler = new StreamObserver<Event>() {
-                @Override
-                public void onNext(Event value) {
-                    events.add(value);
-                    responseObserver.onNext(Responses.ok());
-                }
-
-                @Override
-                public void onError(Throwable t) {
-                    throw new IllegalStateException(t);
-                }
-
-                @Override
-                public void onCompleted() {
-                    eventStore.appendAll(events);
-                    responseObserver.onCompleted();
-                }
-            };
-            return handler;
-        }
-
-        @Override
-        public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-            eventStore.read(request, responseObserver);
         }
     }
 
