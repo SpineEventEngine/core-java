@@ -203,7 +203,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
         final Iterator<EntityRecord> presentRecords = filter(entityStorageRecords,
                                                              Predicates.<EntityRecord>notNull());
-        final Iterator<E> result = transform(presentRecords, storageRecordToEntity());
+        final Function<EntityRecord, E> transformer = entityConverter().reverse();
+        final Iterator<E> result = transform(presentRecords, transformer);
         return result;
     }
 
@@ -219,7 +220,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public Iterator<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
         final Iterator<EntityRecord> records = storage.readAll();
-        final Iterator<E> result = transform(records, storageRecordToEntity());
+        final Function<EntityRecord, E> transformer = entityConverter().reverse();
+        final Iterator<E> result = transform(records, transformer);
         return result;
     }
 
@@ -249,7 +251,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        final Iterator<E> result = transform(records, storageRecordToEntity());
+        final Function<EntityRecord, E> transformer = entityConverter().reverse();
+        final Iterator<E> result = transform(records, transformer);
         return result;
     }
 
@@ -312,24 +315,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final E result = entityConverter().reverse()
                                           .convert(record);
         return result;
-    }
-
-    /**
-     * Creates a function that transforms a {@code EntityStorageRecord} stored in a map
-     * into an entity of type {@code <E>}.
-     *
-     * @return new instance of the transforming function
-     */
-    protected final Function<EntityRecord, E> storageRecordToEntity() {
-        return new Function<EntityRecord, E>() {
-            @Nullable
-            @Override
-            public E apply(@Nullable EntityRecord input) {
-                checkNotNull(input);
-                final E result = toEntity(input);
-                return result;
-            }
-        };
     }
 
     /**
