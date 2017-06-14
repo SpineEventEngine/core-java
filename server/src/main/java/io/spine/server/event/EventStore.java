@@ -89,6 +89,11 @@ public abstract class EventStore implements AutoCloseable {
         logStored(event);
     }
 
+    /**
+     * Appends the passed events to the history of events.
+     *
+     * @param events the events to append
+     */
     public void appendAll(final Iterable<Event> events) {
         final Optional<Event> tenantDiningEvent = tryFind(events, Predicates.<Event>notNull());
         if (!tenantDiningEvent.isPresent()) {

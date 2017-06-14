@@ -155,7 +155,10 @@ public abstract class CommandOutputBus<M extends Message,
     /**
      * {@inheritDoc}
      *
-     * <p>Validates the given message, if validation is passed, posts it into the bus.
+     * <p>Validates and posts the message for handling. If the message is invalid,
+     * the {@code responseObserver} is notified of an error. Otherwise, the message is passed to
+     * the dispatchers. In this case the {@code responseObserver} is notified of a successful
+     * acknowledgement of the passed message.
      */
     @Override
     protected boolean prepareAndPost(M message, StreamObserver<Response> responseObserver) {
