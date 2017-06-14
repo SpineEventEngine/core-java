@@ -34,7 +34,7 @@ import org.junit.Test;
 
 import static io.spine.test.Tests.newUserUuid;
 import static io.spine.test.Tests.newUuidValue;
-import static io.spine.validate.Validate.checkNotDefault;
+import static io.spine.validate.Validate.checkNotDefaultState;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -55,9 +55,9 @@ public class CommandTestShould {
         final StringValue commandMessage = newUuidValue();
         final Command command = commandTest.createCommand(commandMessage);
 
-        checkNotDefault(command);
+        checkNotDefaultState(command);
         assertEquals(commandMessage, Commands.getMessage(command));
-        checkNotDefault(command.getContext());
+        checkNotDefaultState(command.getContext());
     }
 
     @Before
