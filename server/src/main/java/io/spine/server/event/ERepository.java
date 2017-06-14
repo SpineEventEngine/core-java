@@ -23,7 +23,7 @@ package io.spine.server.event;
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.Iterators;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
@@ -42,7 +42,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
@@ -88,7 +88,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
                                                                    .filter(detailedLookupFilter)
                                                                    .toSortedList(comparator())
                                                                    .iterator();
-        final Iterator<Event> result = Iterators.transform(entityIterator, getEventFunc());
+        final Iterator<Event> result = transform(entityIterator, getEvent());
         return result;
     }
 
@@ -98,7 +98,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     }
 
     void store(Iterable<Event> events) {
-        final Iterable<EEntity> entities = transform(events, EventToEEntity.instance());
+        final Iterable<EEntity> entities = Iterables.transform(events, EventToEEntity.instance());
         store(newLinkedList(entities));
     }
 
@@ -116,7 +116,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         recordStorage().write(records);
     }
 
-    static Function<EEntity, Event> getEventFunc() {
+    static Function<EEntity, Event> getEvent() {
         return GET_EVENT;
     }
 
