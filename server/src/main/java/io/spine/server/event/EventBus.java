@@ -231,7 +231,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     /**
      * Stores the given Events into the associated {@link EventStore}.
      *
-     * @param events the Event to store
+     * @param events the Events to store
      */
     private void store(Iterable<Event> events) {
         eventStore.appendAll(events);
