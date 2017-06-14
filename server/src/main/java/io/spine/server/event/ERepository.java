@@ -186,7 +186,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
             if (input == null) {
                 return false;
             }
-            final io.spine.base.Event event = input.getState();
+            final Event event = input.getState();
             final boolean result = filter.apply(event);
             return result;
         }
