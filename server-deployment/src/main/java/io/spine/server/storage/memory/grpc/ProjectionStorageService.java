@@ -47,6 +47,7 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
     private final Helper delegate;
 
     ProjectionStorageService(BoundedContext boundedContext) {
+        super();
         this.delegate = new Helper(boundedContext);
     }
 
