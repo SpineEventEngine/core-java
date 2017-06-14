@@ -130,7 +130,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return Optional.of(entity);
     }
 
-    // TODO:2017-06-14:dmytro.dashenkov: Deprecated?
     @Override
     public Iterator<E> iterator(Predicate<E> filter) {
         final Iterator<E> allEntities = loadAll();
