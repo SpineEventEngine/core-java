@@ -324,6 +324,16 @@ public class ProjectionRepositoryShould
     }
 
     /**
+     * Ensures that {@link ProjectionRepository#getIdSetFunction(Class)} which is used by Beam-based
+     * catch-up is exposed.
+     */
+    @Test
+    public void expose_event_targets_function() {
+        final EventTargetsFunction<ProjectId, Message> fn = repository().getIdSetFunction();
+        assertNotNull(fn);
+    }
+
+    /**
      * The projection stub with the event subscribing methods that do nothing.
      *
      * <p>Such a projection allows to reproduce a use case, when the event-handling method
