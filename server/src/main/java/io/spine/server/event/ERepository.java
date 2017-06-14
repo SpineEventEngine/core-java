@@ -83,7 +83,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         final Iterator<EEntity> filtered = filter(entities, detailedLookupFilter);
         final List<EEntity> mutableList = newArrayList(filtered);
         sort(mutableList, comparator());
-        final Iterator<Event> result = transform(mutableList.iterator(), getEventFunc());
+        final Iterator<Event> result = transform(mutableList.iterator(), getEvent());
         return result;
     }
 
@@ -92,7 +92,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         store(entity);
     }
 
-    static Function<EEntity, Event> getEventFunc() {
+    private static Function<EEntity, Event> getEvent() {
         return GET_EVENT;
     }
 
