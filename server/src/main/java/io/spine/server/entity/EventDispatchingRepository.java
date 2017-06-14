@@ -58,8 +58,8 @@ public abstract class EventDispatchingRepository<I,
     }
 
     /**
-     * Obtains the {@link EventTargetsFunction} used by the repository for calculating identifiers of
-     * event targets.
+     * Obtains the {@link EventTargetsFunction} used by the repository for calculating identifiers
+     * of event targets.
      */
     protected EventTargetsFunction<I, Message> getIdSetFunction() {
         return idSetFunctions;
