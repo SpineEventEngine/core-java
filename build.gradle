@@ -26,7 +26,7 @@ buildscript {
         maven { url = 'https://maven-central.storage.googleapis.com' }
         
         mavenCentral()
-        // mavenLocal()
+        mavenLocal()
 
         // Spine releases repository.
         maven { url = 'http://maven.teamdev.com/repository/spine' }
