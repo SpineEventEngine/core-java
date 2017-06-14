@@ -73,6 +73,7 @@ public class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends 
         private final ProjectionStorageIO.WriteTimestampFn fn;
 
         private WriteTimestamp(ProjectionStorageIO.WriteTimestampFn fn) {
+            super();
             this.fn = fn;
         }
 

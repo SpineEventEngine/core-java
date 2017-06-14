@@ -116,6 +116,7 @@ public class EventStoreIO {
         private final DoFn<EntityFilters, EntityRecord> findFn;
 
         private Query(DoFn<EntityFilters, EntityRecord> findFn) {
+            super();
             this.findFn = findFn;
         }
 

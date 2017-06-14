@@ -55,6 +55,7 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
                 TupleTag<EntityRecord> entityRecordsTag,
                 EntityStorageConverter<I, ?, ?> converter,
                 TupleTag<Timestamp> timestampTag) {
+        super();
         this.eventsTag = eventsTag;
         this.entityRecordsTag = entityRecordsTag;
         this.converter = converter;
