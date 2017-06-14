@@ -22,7 +22,6 @@ package io.spine.server.event;
 
 import com.google.common.base.Function;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
@@ -39,14 +38,14 @@ import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Iterators.transform;
-import static com.google.common.collect.Lists.newLinkedList;
 import static com.google.common.collect.Iterators.filter;
+import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.lt;
