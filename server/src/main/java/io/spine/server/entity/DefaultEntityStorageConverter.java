@@ -24,14 +24,15 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.type.TypeUrl;
 
-import static io.spine.util.Exceptions.newIllegalStateException;
-
 /**
  * Default implementation of {@code EntityStorageConverter} for {@code AbstractEntity}.
  *
+ * @param <I> the type of entity IDs
+ * @param <E> the type of entities
+ * @param <S> the type of entity states
  * @author Alexander Yevsyukov
  */
-class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
+class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
@@ -76,9 +77,7 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
     /**
      * Injects the state into an entity.
      *
-     * <p>The method attempts to cast the passed entity instance into one of the standard abstract
-     * implementations provided by the framework. If successful, it invokes corresponding state
-     * mutation method(s).
+     * <p>if the passed entity is versionable its lifecycle flags will be set from the record.
      *
      * <p>If not, {@code IllegalStateException} is thrown suggesting to provide a custom
      * {@link EntityStorageConverter} in the repository which manages entities of this class.
@@ -87,8 +86,6 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
      * @param state        the state message to inject
      * @param entityRecord the {@link EntityRecord} which contains additional attributes that may be
      *                     injected
-     * @throws IllegalStateException if the passed entity instance is implemented outside of the
-     *                               framework
      */
     @SuppressWarnings({
             "ChainOfInstanceofChecks" /* `DefaultEntityStorageConverter` supports conversion of
@@ -102,15 +99,8 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
             final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             versionable.updateState(state, entityRecord.getVersion());
             versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
-        } else if (entity instanceof AbstractEntity) {
-            ((AbstractEntity) entity).setState(state);
         } else {
-            throw newIllegalStateException(
-                    "Cannot inject state into an Entity of the class %s. " +
-                            "Please set custom EntityStorageConverter into the repository " +
-                            "managing entities of this class.",
-                    entity.getClass()
-                          .getName());
+            entity.setState(state);
         }
     }
 }
