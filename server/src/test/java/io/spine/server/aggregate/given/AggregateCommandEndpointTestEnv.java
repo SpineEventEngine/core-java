@@ -107,7 +107,5 @@ public class AggregateCommandEndpointTestEnv {
 
     public static class ProjectAggregateRepository
             extends AggregateRepository<ProjectId, ProjectAggregate> {
-
-
     }
 }
