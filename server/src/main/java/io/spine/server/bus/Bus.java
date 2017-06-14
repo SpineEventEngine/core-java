@@ -112,7 +112,29 @@ public abstract class Bus<T extends Message,
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
+    /**
+     * Posts the given message to the bus.
+     *
+     * <p>This method performs all the bus-specific preparations and validation and posts
+     * the message.
+     *
+     * <p>The {@link StreamObserver#onNext StreamObserver.onNext)} is called on the response
+     * observer when and if the message is posted. Though the {@link StreamObserver#onCompleted
+     * StreamObserver#onCompleted} is never called by this method.
+     *
+     * <p>This method may or may not {@linkplain #store(Message) store} the message.
+     *
+     * @return {@code true} if the message was posted successfully, {@code false} otherwise
+     * @see #post(Message, StreamObserver) for the public API
+     */
     protected abstract boolean prepareAndPost(T message, StreamObserver<Response> responseObserver);
 
+    /**
+     * Persists the message.
+     *
+     * <p>The method may perform no action if it's specified by the implementor.
+     *
+     * @param message the message to store
+     */
     protected abstract void store(T message);
 }

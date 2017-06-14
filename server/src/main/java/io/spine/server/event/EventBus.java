@@ -218,11 +218,21 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         return enriched;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Stores the given Event into the associated {@link EventStore}.
+     */
     @Override
     protected void store(Event event) {
         eventStore.append(event);
     }
 
+    /**
+     * Stores the given Events into the associated {@link EventStore}.
+     *
+     * @param events the Event to store
+     */
     private void store(Iterable<Event> events) {
         eventStore.appendAll(events);
     }

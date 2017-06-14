@@ -204,6 +204,12 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         throw new IllegalStateException(msg);
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Performs the checks defined by the {@code filterChain}. If the message passes the filters,
+     * it is been posted into the bus and stored into the associated {@link CommandStore}.
+     */
     @Override
     protected boolean prepareAndPost(Command command, StreamObserver<Response> responseObserver) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
@@ -217,6 +223,11 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return true;
     }
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Performs no action.
+     */
     @Override
     protected void store(Command command) {
         // NoOp
@@ -227,6 +238,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      */
     @SuppressWarnings("ConstantConditions")
         // OK to get without checking because the command was validated before this call.
+    @VisibleForTesting
     void doPost(CommandEnvelope commandEnvelope) {
         final CommandDispatcher dispatcher = getDispatcher(commandEnvelope);
         try {

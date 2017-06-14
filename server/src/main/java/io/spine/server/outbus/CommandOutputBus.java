@@ -152,10 +152,14 @@ public abstract class CommandOutputBus<M extends Message,
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Validates the given message, if validation is passed, posts it into the bus.
+     */
     @Override
     protected boolean prepareAndPost(M message, StreamObserver<Response> responseObserver) {
         final boolean validationPassed = validateMessage(message, responseObserver);
-
         if (validationPassed) {
             responseObserver.onNext(Responses.ok());
             final M enriched = enrich(message);

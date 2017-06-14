@@ -65,7 +65,11 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
         return new Builder();
     }
 
-
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Performs no action.
+     */
     @Override
     protected void store(Failure message) {
         // do nothing for now.
