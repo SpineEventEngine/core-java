@@ -34,6 +34,7 @@ import org.apache.beam.sdk.values.TupleTag;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -112,5 +113,25 @@ class ApplyEvents<I> extends DoFn<KV<I, CoGbkResult>, KV<I, EntityRecord>> {
      */
     static class TimestampTupleTag extends TupleTag<Timestamp> {
         private static final long serialVersionUID = 0L;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(eventsTag, entityRecordsTag, converter, timestampTag);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final ApplyEvents other = (ApplyEvents) obj;
+        return Objects.equals(this.eventsTag, other.eventsTag)
+                && Objects.equals(this.entityRecordsTag, other.entityRecordsTag)
+                && Objects.equals(this.converter, other.converter)
+                && Objects.equals(this.timestampTag, other.timestampTag);
     }
 }

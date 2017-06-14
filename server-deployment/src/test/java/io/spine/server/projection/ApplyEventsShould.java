@@ -58,7 +58,7 @@ public class ApplyEventsShould {
 
     @Test
     public void serialize() {
-        SerializableTester.reserialize(applyEvents);
+        SerializableTester.reserializeAndAssert(applyEvents);
     }
 
     private static class Sum extends Projection<Long, DoubleValue, DoubleValueVBuilder> {
