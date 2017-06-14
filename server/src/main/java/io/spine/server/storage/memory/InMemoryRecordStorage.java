@@ -64,7 +64,7 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
+    protected Iterator<EntityRecord> readMultipleRecords(final Iterable<I> givenIds,
                                                          FieldMask fieldMask) {
         final TenantRecords<I> storage = getStorage();
 
@@ -76,27 +76,33 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
             final EntityRecord matchingResult = storage.findAndApplyFieldMask(givenId, fieldMask);
             result.add(matchingResult);
         }
-        return result;
+        return result.iterator();
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
         return readMultipleRecords(ids, FieldMask.getDefaultInstance());
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords() {
-        return getStorage().readAllRecords();
+    protected Iterator<EntityRecord> readAllRecords() {
+        return getStorage().readAllRecords()
+                           .values()
+                           .iterator();
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
-        return getStorage().readAllRecords(fieldMask);
+    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+        return getStorage().readAllRecords(fieldMask)
+                           .values()
+                           .iterator();
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
-        return getStorage().readAllRecords(query, fieldMask);
+    protected Iterator<EntityRecord> readAllRecords(EntityQuery<I> query, FieldMask fieldMask) {
+        return getStorage().readAllRecords(query, fieldMask)
+                           .values()
+                           .iterator();
     }
 
     protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
