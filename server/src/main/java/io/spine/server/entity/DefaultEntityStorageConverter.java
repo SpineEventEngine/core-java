@@ -20,17 +20,10 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 
-import javax.annotation.Nullable;
-import java.util.Objects;
-
-import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
@@ -42,17 +35,11 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
         extends EntityStorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
-    private final EntityFactory<I, E> entityFactory;
-    private final TypeUrl entityStateType;
-    private final FieldMask fieldMask;
 
     private DefaultEntityStorageConverter(TypeUrl entityStateType,
                                           EntityFactory<I, E> factory,
                                           FieldMask fieldMask) {
-        super(fieldMask);
-        this.entityStateType = entityStateType;
-        this.entityFactory = factory;
-        this.fieldMask = fieldMask;
+        super(entityStateType, factory, fieldMask);
     }
 
     static <I, E extends AbstractEntity<I, S>, S extends Message>
@@ -65,38 +52,25 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
 
     @Override
     public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        return new DefaultEntityStorageConverter<>(entityStateType, entityFactory, fieldMask);
+        return new DefaultEntityStorageConverter<>(getEntityStateType(),
+                                                   getEntityFactory(),
+                                                   fieldMask);
     }
 
+    /**
+     * Sets lifecycle flags in the builder from the entity, if the entity is
+     * {@linkplain AbstractVersionableEntity versionable}.
+     *
+     * @param builder the entity builder to update
+     * @param entity  the entity which data is passed to the {@link EntityRecord} we are building
+     */
     @Override
-    protected EntityRecord doForward(E entity) {
-        final Any entityId = Identifier.pack(entity.getId());
-        final Any stateAny = pack(entity.getState());
-        final EntityRecord.Builder builder = EntityRecord.newBuilder()
-                                                         .setEntityId(entityId)
-                                                         .setState(stateAny);
+    protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         if (entity instanceof AbstractVersionableEntity) {
             final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             builder.setVersion(versionable.getVersion())
                    .setLifecycleFlags(versionable.getLifecycleFlags());
         }
-
-        return builder.build();
-    }
-
-    @Override
-    @SuppressWarnings("unchecked")
-    protected E doBackward(EntityRecord entityRecord) {
-        final Message unpacked = unpack(entityRecord.getState());
-        final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
-
-        final I id = (I) Identifier.unpack(entityRecord.getEntityId());
-        final E entity = entityFactory.create(id);
-
-        if (entity != null) {
-            injectState(entity, state, entityRecord);
-        }
-        return entity;
     }
 
     /**
@@ -122,7 +96,8 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
                 custom state injection. We do not want to expose state injection in the `Entity`
                 interface.*/,
             "unchecked" /* The state type is the same as the parameter of this class. */})
-    private void injectState(E entity, S state, EntityRecord entityRecord) {
+    @Override
+    protected void injectState(E entity, S state, EntityRecord entityRecord) {
         if (entity instanceof AbstractVersionableEntity) {
             final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             versionable.updateState(state, entityRecord.getVersion());
@@ -137,24 +112,5 @@ class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message
                     entity.getClass()
                           .getName());
         }
-    }
-
-    @Override
-    public boolean equals(@Nullable Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final DefaultEntityStorageConverter other = (DefaultEntityStorageConverter) obj;
-        return Objects.equals(this.entityFactory, other.entityFactory)
-                && Objects.equals(this.entityStateType, other.entityStateType)
-                && Objects.equals(this.fieldMask, other.fieldMask);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(entityFactory, entityStateType, fieldMask);
     }
 }
