@@ -76,17 +76,18 @@ public class AggregateRoot<I> {
      * @return new instance
      */
     static <I, R extends AggregateRoot<I>> R create(BoundedContext boundedContext,
-                                                    Class<R> rootClass, I aggregateId) {
+                                                    Class<R> rootClass,
+                                                    I aggregateId) {
         checkNotNull(aggregateId);
         checkNotNull(boundedContext);
         checkNotNull(rootClass);
 
         try {
-            final Constructor<R> rootConstructor =
+            final Constructor<R> ctor =
                     rootClass.getDeclaredConstructor(boundedContext.getClass(),
                                                      aggregateId.getClass());
-            rootConstructor.setAccessible(true);
-            final R root = rootConstructor.newInstance(boundedContext, aggregateId);
+            ctor.setAccessible(true);
+            final R root = ctor.newInstance(boundedContext, aggregateId);
             return root;
         } catch (NoSuchMethodException | InvocationTargetException |
                 InstantiationException | IllegalAccessException e) {
