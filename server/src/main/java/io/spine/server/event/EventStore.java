@@ -109,10 +109,15 @@ public abstract class EventStore implements AutoCloseable {
     /**
      * Implement this method for storing the passed event.
      *
-     * @param event the event record to store.
+     * @param event the event to store.
      */
     protected abstract void store(Event event);
 
+    /**
+     * Implement this method for storing the passed events.
+     *
+     * @param events the events to store.
+     */
     protected abstract void store(Iterable<Event> events);
 
     /**
