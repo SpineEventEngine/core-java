@@ -129,7 +129,6 @@ public abstract class EventStore implements AutoCloseable {
 
     protected abstract void store(Iterable<Event> events);
 
-
     /**
      * Creates iterator for traversing through the history of events matching the passed query.
      *
@@ -386,7 +385,6 @@ public abstract class EventStore implements AutoCloseable {
 
                 @Override
                 public void onError(Throwable t) {
-                    responseObserver.onError(t);
                     throw new IllegalStateException(t);
                 }
 
