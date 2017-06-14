@@ -33,6 +33,7 @@ import io.spine.type.TypeUrl;
 import java.util.Iterator;
 
 /**
+ * In-process gRPC service for read/write/find operations in in-memory storages.
  *
  * @author Alexander Yevsyukov
  */
@@ -41,6 +42,7 @@ class RecordStorageService extends RecordStorageServiceGrpc.RecordStorageService
     private final Helper delegate;
 
     RecordStorageService(BoundedContext boundedContext) {
+        super();
         this.delegate = new Helper(boundedContext);
     }
 

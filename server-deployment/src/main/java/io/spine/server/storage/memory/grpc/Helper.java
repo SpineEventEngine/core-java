@@ -42,8 +42,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Provides access to {@link io.spine.server.entity.RecordBasedRepository}ies of a
- * {@code BoundedContext}.
+ * Provides access to {@link io.spine.server.entity.RecordBasedRepository RecordBasedRepository}ies
+ * of a {@code BoundedContext}.
  *
  * @author Alexander Yevsyukov
  */
