@@ -286,6 +286,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
+    /**
+     * Obtains iterator over {@link EntityRecord} for entities matching the passed filters.
+     *
+     * @param filters   the filters for filtering entities
+     * @param fieldMask the mask to apply for returned records
+     * @return an iterator over the matching records
+     */
+    @Internal
     public Iterator<EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(fieldMask);
