@@ -50,8 +50,7 @@ public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
 
     public static <I> InMemoryProjectionStorageIO<I> of(InMemoryProjectionStorage<I> storage) {
         final StorageSpec<I> spec = storage.getSpec();
-        final RecordStorageIO<I> recordStorageIO = RecordStorageIO.of(
-                storage.recordStorage());
+        final RecordStorageIO<I> recordStorageIO = RecordStorageIO.of(storage.recordStorage());
         return new InMemoryProjectionStorageIO<>(spec, recordStorageIO);
     }
 
