@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.EventContext;
-import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.EventDispatchingRepository;
@@ -186,15 +185,16 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
      * <p>If there is no stored projection with the ID from the event, a new projection is created
      * and stored after it handles the passed event.
      *
-     * @param eventEnvelope the event to dispatch packed into an envelope
+     * <p>If the projection was changed as the result of dispatching the event, the following
+     * operations are performed:
+     * <ol>
+     *     <li>The projection is stored.
+     *     <li>The timestamp of the event is stored.
+     *     <li>The state of the projection is posted to the {@link Stand}.
+     * </ol>
+     *
      * @see Projection#handle(Message, EventContext)
      */
-    @SuppressWarnings("MethodDoesntCallSuperMethod") // We call indirectly via `internalDispatch()`.
-    @Override
-    public void dispatch(EventEnvelope eventEnvelope) {
-        internalDispatch(eventEnvelope);
-    }
-
     @Override
     protected void dispatchToEntity(I id, Message eventMessage, EventContext context) {
         final P projection = findOrCreate(id);
@@ -205,21 +205,10 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
         if (projection.isChanged()) {
             final Timestamp eventTime = context.getTimestamp();
-            storeNow(projection, eventTime);
+            store(projection);
+            projectionStorage().writeLastHandledEventTime(eventTime);
             getStand().post(projection, context.getCommandContext());
         }
-    }
-
-    /**
-     * Dispatches the passed event to projections without checking the status.
-     */
-    private void internalDispatch(EventEnvelope envelope) {
-        super.dispatch(envelope);
-    }
-
-    private void storeNow(P projection, Timestamp eventTime) {
-        store(projection);
-        projectionStorage().writeLastHandledEventTime(eventTime);
     }
 
     @Internal
