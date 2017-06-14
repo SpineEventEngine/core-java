@@ -31,27 +31,20 @@ import java.util.Objects;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Default implementation of {@code EntityStorageConverter} for {@code AbstractVersionableEntity}.
+ * Default implementation of {@code EntityStorageConverter} for {@code AbstractEntity}.
  *
  * @author Alexander Yevsyukov
  */
-class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
+class DefaultEntityStorageConverter<I, E extends Entity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
     private static final long serialVersionUID = 0L;
     private final EntityFactory<I, E> entityFactory;
     private final TypeUrl entityStateType;
     private final FieldMask fieldMask;
-
-    static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(TypeUrl entityStateType,
-                                                 EntityFactory<I, E> factory) {
-        return new DefaultEntityStorageConverter<>(entityStateType,
-                                                   factory,
-                                                   FieldMask.getDefaultInstance());
-    }
 
     private DefaultEntityStorageConverter(TypeUrl entityStateType,
                                           EntityFactory<I, E> factory,
@@ -60,6 +53,14 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         this.entityStateType = entityStateType;
         this.entityFactory = factory;
         this.fieldMask = fieldMask;
+    }
+
+    static <I, E extends AbstractEntity<I, S>, S extends Message>
+    EntityStorageConverter<I, E, S> forAllFields(TypeUrl entityStateType,
+                                                 EntityFactory<I, E> factory) {
+        return new DefaultEntityStorageConverter<>(entityStateType,
+                                                   factory,
+                                                   FieldMask.getDefaultInstance());
     }
 
     @Override
@@ -71,11 +72,9 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
     protected EntityRecord doForward(E entity) {
         final Any entityId = Identifier.pack(entity.getId());
         final Any stateAny = pack(entity.getState());
-        final EntityRecord.Builder builder =
-                EntityRecord.newBuilder()
-                            .setEntityId(entityId)
-                            .setState(stateAny);
-
+        final EntityRecord.Builder builder = EntityRecord.newBuilder()
+                                                         .setEntityId(entityId)
+                                                         .setState(stateAny);
         if (entity instanceof AbstractVersionableEntity) {
             final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             builder.setVersion(versionable.getVersion())
@@ -95,26 +94,49 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         final E entity = entityFactory.create(id);
 
         if (entity != null) {
-
-            if (entity instanceof AbstractVersionableEntity) {
-                final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-                if (versionable instanceof EventPlayingEntity) {
-                    final EventPlayingEntity playingEntity = (EventPlayingEntity) versionable;
-                    playingEntity.injectState(state, entityRecord.getVersion());
-                } else {
-                    versionable.updateState(state, entityRecord.getVersion());
-                }
-                versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
-            } else {
-                entity.injectState(state);
-            }
+            injectState(entity, state, entityRecord);
         }
         return entity;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(entityFactory, entityStateType, fieldMask);
+    /**
+     * Injects the state into an entity.
+     *
+     * <p>The method attempts to cast the passed entity instance into one of the standard abstract
+     * implementations provided by the framework. If successful, it invokes corresponding state
+     * mutation method(s).
+     *
+     * <p>If not, {@code IllegalStateException} is thrown suggesting to provide a custom
+     * {@link EntityStorageConverter} in the repository which manages entities of this class.
+     *
+     * @param entity       the entity to inject the state
+     * @param state        the state message to inject
+     * @param entityRecord the {@link EntityRecord} which contains additional attributes that may be
+     *                     injected
+     * @throws IllegalStateException if the passed entity instance is implemented outside of the
+     *                               framework
+     */
+    @SuppressWarnings({
+            "ChainOfInstanceofChecks" /* `DefaultEntityStorageConverter` supports conversion of
+                entities derived from standard abstract classes. A custom `Entity` class needs a
+                custom state injection. We do not want to expose state injection in the `Entity`
+                interface.*/,
+            "unchecked" /* The state type is the same as the parameter of this class. */})
+    private void injectState(E entity, S state, EntityRecord entityRecord) {
+        if (entity instanceof AbstractVersionableEntity) {
+            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            versionable.updateState(state, entityRecord.getVersion());
+            versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
+        } else if (entity instanceof AbstractEntity) {
+            ((AbstractEntity) entity).setState(state);
+        } else {
+            throw newIllegalStateException(
+                    "Cannot inject state into an Entity of the class %s. " +
+                            "Please set custom EntityStorageConverter into the repository " +
+                            "managing entities of this class.",
+                    entity.getClass()
+                          .getName());
+        }
     }
 
     @Override
@@ -129,5 +151,10 @@ class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends
         return Objects.equals(this.entityFactory, other.entityFactory)
                 && Objects.equals(this.entityStateType, other.entityStateType)
                 && Objects.equals(this.fieldMask, other.fieldMask);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityFactory, entityStateType, fieldMask);
     }
 }

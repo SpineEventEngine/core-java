@@ -67,7 +67,7 @@ public class DefaultEntityStorageConverterShould {
 
     private static TestEntity createEntity(Long id, StringValue state) {
         final TestEntity result = new TestEntity(id);
-        result.injectState(state);
+        result.setState(state);
         return result;
     }
 
