@@ -27,9 +27,11 @@ import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectId;
 import io.spine.test.storage.Task;
 import io.spine.type.TypeUrl;
+import org.junit.Test;
 
 import static io.spine.base.Identifier.newUuid;
 import static java.lang.String.format;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmytro Dashenkov
@@ -62,5 +64,11 @@ public class InMemoryRecordStorageShould
                                        .addTask(Task.getDefaultInstance())
                                        .build();
         return project;
+    }
+
+    @Test
+    public void return_storage_spec() {
+        final StorageSpec spec = ((InMemoryRecordStorage) getStorage()).getSpec();
+        assertEquals(ProjectId.class, spec.getIdClass());
     }
 }
