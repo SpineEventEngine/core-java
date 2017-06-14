@@ -54,16 +54,18 @@ import static io.spine.util.Exceptions.newIllegalStateException;
  */
 public final class StorageFactorySwitch implements Supplier<StorageFactory> {
 
+    /** The name of the BoundedContext where this switch works. */
     private final String boundedContextName;
-
-    @Nullable
-    private StorageFactory storageFactory;
 
     @Nullable
     private Supplier<StorageFactory> productionSupplier;
 
     @Nullable
     private Supplier<StorageFactory> testsSupplier;
+
+    /** Cached instance of the StorageFactory supplied by one of the suppliers. */
+    @Nullable
+    private StorageFactory storageFactory;
 
     private final boolean multitenant;
 
