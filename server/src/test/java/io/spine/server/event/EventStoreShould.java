@@ -46,6 +46,7 @@ import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.type.TypeName.of;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -159,6 +160,19 @@ public abstract class EventStoreShould {
         assertSize(2, resultEvents);
         assertContainsAll(resultEvents, taskAdded1, teasAdded2);
     }
+
+    /**
+     * Checks that the event storage is exposed to Beam-based catch-up code which is in the same
+     * package but in a different module.
+     */
+    @Test
+    public void expose_event_repository_to_the_package() {
+        assertNotNull(eventStore.getStorage());
+    }
+
+    /*
+     * Test environment
+     *********************/
 
     private static Event projectCreated(Timestamp when) {
         final ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
