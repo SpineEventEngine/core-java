@@ -81,9 +81,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         // A predicate on the Event message and EventContext fields.
         final Predicate<EEntity> detailedLookupFilter = createEntityFilter(query);
         final Iterator<EEntity> filtered = filter(entities, detailedLookupFilter);
-        final List<EEntity> mutableList = newArrayList(filtered);
-        sort(mutableList, comparator());
-        final Iterator<Event> result = transform(mutableList.iterator(), getEvent());
+        final List<EEntity> entityList = newArrayList(filtered);
+        sort(entityList, comparator());
+        final Iterator<Event> result = transform(entityList.iterator(), getEvent());
         return result;
     }
 
