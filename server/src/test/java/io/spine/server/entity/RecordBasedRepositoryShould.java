@@ -21,7 +21,6 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
@@ -40,8 +39,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
@@ -64,13 +65,12 @@ import static org.junit.Assert.assertTrue;
  *
  * @param <E> the type of the {@link Entity} of this repository; the type is checked to implement
  *            {@link TestEntityWithStringColumn} at runtime
- *
  * @author Dmytro Dashenkov
  */
 @SuppressWarnings("ConstantConditions")
 public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableEntity<I, S>,
-                                                  I,
-                                                  S extends Message>
+        I,
+        S extends Message>
         extends TenantAwareTest {
 
     @SuppressWarnings("ProtectedField") // we use the reference in the derived test cases.
@@ -115,11 +115,11 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         return repository.find(id);
     }
 
-    private Collection<E> loadMany(final List<I> ids) {
+    private Iterator<E> loadMany(final List<I> ids) {
         return repository.loadAll(ids);
     }
 
-    private Collection<E> loadAll() {
+    private Iterator<E> loadAll() {
         return repository.loadAll();
     }
 
@@ -127,8 +127,8 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         return repository.findOrCreate(id);
     }
 
-    private ImmutableCollection<E> find(EntityFilters filters,
-                                        FieldMask firstFieldOnly) {
+    private Iterator<E> find(EntityFilters filters,
+                             FieldMask firstFieldOnly) {
         return repository.find(filters, firstFieldOnly);
     }
 
@@ -169,7 +169,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                             .getId());
         }
 
-        final Collection<E> found = loadMany(ids);
+        final Collection<E> found = newArrayList(loadMany(ids));
 
         assertSize(ids.size(), found);
 
@@ -182,7 +182,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     @Test
     public void find_all_entities() {
         final List<E> entities = createAndStoreEntities(repository, 150);
-        final Collection<E> found = loadAll();
+        final Collection<E> found = newArrayList(loadAll());
         assertSize(entities.size(), found);
 
         for (E entity : found) {
@@ -210,13 +210,14 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                                                   .build();
         final ColumnFilter filter = eq(fieldPath, fieldValue);
         final CompositeColumnFilter aggregatingFilter = CompositeColumnFilter.newBuilder()
-                                                                                 .addFilter(filter)
-                                                                                 .setOperator(ALL)
-                                                                                 .build();
+                                                                             .addFilter(filter)
+                                                                             .setOperator(ALL)
+                                                                             .build();
         final EntityFilters filters = EntityFilters.newBuilder()
                                                    .addFilter(aggregatingFilter)
                                                    .build();
-        final Collection<E> found = repository.find(filters, FieldMask.getDefaultInstance());
+        final Collection<E> found = newArrayList(repository.find(filters,
+                                                                 FieldMask.getDefaultInstance()));
         assertSize(1, found);
         assertContains(entity1, found);
         assertNotContains(entity2, found);
@@ -224,7 +225,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     @Test
     public void find_no_entities_if_empty() {
-        final Collection<E> found = loadAll();
+        final Collection<E> found = newArrayList(loadAll());
         assertSize(0, found);
     }
 
@@ -253,7 +254,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         final Entity<I, S> sideEntity = createEntity();
         ids.add(sideEntity.getId());
 
-        final Collection<E> found = loadMany(ids);
+        final Collection<E> found = newArrayList(loadMany(ids));
         assertSize(ids.size() - 1, found); // Check we've found all existing items
 
         for (E entity : found) {
@@ -288,11 +289,12 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                                                                 .getState()
                                                                 .getDescriptorForType();
         final FieldMask firstFieldOnly = FieldMasks.maskOf(entityDescriptor, 1);
-        final Iterable<E> readEntities = find(filters, firstFieldOnly);
+        final Iterator<E> readEntities = find(filters, firstFieldOnly);
+        final Collection<E> foundList = newArrayList(readEntities);
 
-        assertSize(ids.size(), readEntities);
+        assertSize(ids.size(), foundList);
 
-        for (E entity : readEntities) {
+        for (E entity : foundList) {
             assertMatches(entity, firstFieldOnly);
         }
     }
@@ -354,11 +356,12 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
         repository.store(archivedEntity);
         repository.store(deletedEntity);
 
-        final Collection<E> found = repository.find(EntityFilters.getDefaultInstance(),
-                                                                 FieldMask.getDefaultInstance());
+        final Iterator<E> found = repository.find(EntityFilters.getDefaultInstance(),
+                                                  FieldMask.getDefaultInstance());
+        final List<E> foundList = newArrayList(found);
         // Check results
-        assertSize(1, found);
-        final E actualEntity = found.iterator().next();
+        assertSize(1, foundList);
+        final E actualEntity = foundList.get(0);
         assertEquals(activeEntity, actualEntity);
     }
 
@@ -384,10 +387,10 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
                                                    .addFilter(columnFilter)
                                                    .build();
 
-        final Collection<E> found = repository.find(filters,
-                                                          FieldMask.getDefaultInstance());
-        // Check results
-        assertSize(2, found);
-        assertContainsAll(found, activeEntity, deletedEntity);
+        final Iterator<E> found = repository.find(filters, FieldMask.getDefaultInstance());
+        final Collection<E> foundList = newArrayList(found);
+        // Check result
+        assertSize(2, foundList);
+        assertContainsAll(foundList, activeEntity, deletedEntity);
     }
 }

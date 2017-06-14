@@ -21,7 +21,6 @@
 package io.spine.server.projection;
 
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableCollection;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
@@ -41,7 +40,6 @@ import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.event.EventStore;
 import io.spine.server.projection.ProjectionRepository.Status;
-import io.spine.server.projection.given.ProjectionRepositoryTestEnv;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.ManualCatchupProjectionRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskNamesRepository;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
@@ -69,6 +67,7 @@ import org.junit.Test;
 import org.mockito.ArgumentMatcher;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -537,8 +536,7 @@ public class ProjectionRepositoryShould
         final NoOpTaskNamesRepository repo = new NoOpTaskNamesRepository();
         boundedContext.register(repo);
 
-        assertTrue(repo.loadAll()
-                       .isEmpty());
+        assertFalse(repo.loadAll().hasNext());
 
         final Event event = createEvent(tenantId(),
                                         projectCreated(),
@@ -546,8 +544,8 @@ public class ProjectionRepositoryShould
                                         getCurrentTime());
         repo.dispatch(EventEnvelope.of(event));
 
-        final ImmutableCollection<ProjectionRepositoryTestEnv.NoOpTaskNamesProjection> items = repo.loadAll();
-        assertTrue(items.isEmpty());
+        final Iterator<?> items = repo.loadAll();
+        assertFalse(items.hasNext());
     }
 
     /**

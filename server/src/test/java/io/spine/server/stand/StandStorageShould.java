@@ -23,7 +23,6 @@ package io.spine.server.stand;
 import com.google.common.base.Function;
 import com.google.common.base.Supplier;
 import com.google.common.collect.Collections2;
-import com.google.common.collect.ImmutableCollection;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
@@ -45,9 +44,9 @@ import org.junit.Test;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static io.spine.test.Tests.assertMatchesMask;
@@ -92,8 +91,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         final StandStorage storage = getStorage();
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
-        final Map<AggregateStateId, EntityRecord> allRecords = storage.readAll();
-        checkIds(ids, allRecords.values());
+        final Iterator<EntityRecord> allRecords = storage.readAll();
+        checkIds(ids, allRecords);
     }
 
     @Test
@@ -102,7 +101,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
-        final Collection<EntityRecord> records = (Collection<EntityRecord>) storage.readMultiple(ids);
+        final Iterator<EntityRecord> records = storage.readMultiple(ids);
         checkIds(ids, records);
     }
 
@@ -141,7 +140,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             storage.write(id, record);
         }
 
-        final ImmutableCollection<EntityRecord> readRecords
+        final Iterator<EntityRecord> readRecords
                 = withFieldMask
                   ? storage.readAllByType(TypeUrl.from(Project.getDescriptor()), fieldMask)
                   : storage.readAllByType(TypeUrl.from(Project.getDescriptor()));
@@ -204,7 +203,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
         return record;
     }
 
-    protected void checkIds(List<AggregateStateId> ids, Collection<EntityRecord> records) {
+    protected void checkIds(List<AggregateStateId> ids, Iterator<EntityRecord> records) {
         assertSize(ids.size(), records);
 
         final Collection<ProjectId> projectIds = Collections2.transform(ids, new Function<AggregateStateId, ProjectId>() {
@@ -218,7 +217,8 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             }
         });
 
-        for (EntityRecord record : records) {
+        while (records.hasNext()) {
+            final EntityRecord record = records.next();
             final Any packedState = record.getState();
             final Project state = AnyPacker.unpack(packedState);
             final ProjectId id = state.getId();
@@ -226,5 +226,4 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
             assertContains(id, projectIds);
         }
     }
-
 }

@@ -114,25 +114,25 @@ public class InMemoryProjectionStorage<I> extends ProjectionStorage<I> {
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids) {
-        final Iterable<EntityRecord> result = recordStorage.readMultiple(ids);
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids) {
+        final Iterator<EntityRecord> result = recordStorage.readMultiple(ids);
         return result;
     }
 
     @Override
-    protected Iterable<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
+    protected Iterator<EntityRecord> readMultipleRecords(Iterable<I> ids, FieldMask fieldMask) {
         return recordStorage.readMultiple(ids, fieldMask);
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords() {
-        final Map<I, EntityRecord> result = recordStorage.readAll();
+    protected Iterator<EntityRecord> readAllRecords() {
+        final Iterator<EntityRecord> result = recordStorage.readAll();
         return result;
     }
 
     @Override
-    protected Map<I, EntityRecord> readAllRecords(FieldMask fieldMask) {
-        final Map<I, EntityRecord> result = recordStorage.readAll(fieldMask);
+    protected Iterator<EntityRecord> readAllRecords(FieldMask fieldMask) {
+        final Iterator<EntityRecord> result = recordStorage.readAll(fieldMask);
         return result;
     }
 }

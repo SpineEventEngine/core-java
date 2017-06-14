@@ -24,10 +24,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
-import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableCollection;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.base.Predicates;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
@@ -44,10 +41,10 @@ import io.spine.type.TypeUrl;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterators.filter;
+import static com.google.common.collect.Iterators.transform;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.EntityWithLifecycle.Predicates.isEntityVisible;
 import static io.spine.util.Exceptions.newIllegalStateException;
@@ -155,17 +152,13 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return Optional.of(record);
     }
 
-    /**
-     * Obtains a record for an entity with the passed ID.
-     *
-     * <p>If there is no such entity yet, it is created and {@link EntityRecord} for this entity is
-     * returned. The new entity is not stored as the result of this call.
-     *
-     * <p>This method is used internally and should not be called by the application code directly.
-     *
-     * @param id the ID of the entity
-     * @return loaded or created {@link EntityRecord}
-     */
+    @Override
+    public Iterator<E> iterator(Predicate<E> filter) {
+        final Iterator<E> allEntities = loadAll();
+        final Iterator<E> result = filter(allEntities, filter);
+        return result;
+    }
+
     @Internal
     @CheckReturnValue
     public EntityRecord findOrCreateRecord(I id) {
@@ -187,15 +180,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         }
 
         final E result = loaded.get();
-        return result;
-    }
-
-    @Override
-    public Iterator<E> iterator(Predicate<E> filter) {
-        final Iterable<E> allEntities = loadAll();
-        final Iterator<E> result = FluentIterable.from(allEntities)
-                                                 .filter(filter)
-                                                 .iterator();
         return result;
     }
 
@@ -223,7 +207,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return all the entities in this repository with the IDs matching the given {@code Iterable}
      */
     @CheckReturnValue
-    public ImmutableCollection<E> loadAll(Iterable<I> ids) {
+    public Iterator<E> loadAll(Iterable<I> ids) {
         return loadAll(ids, FieldMask.getDefaultInstance());
     }
 
@@ -244,29 +228,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     @CheckReturnValue
-    public ImmutableCollection<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
+    public Iterator<E> loadAll(Iterable<I> ids, FieldMask fieldMask) {
         final RecordStorage<I> storage = recordStorage();
-        final Iterable<EntityRecord> entityStorageRecords = storage.readMultiple(ids);
-
-        final Iterator<EntityRecord> recordIterator = entityStorageRecords.iterator();
-        final List<E> entities = Lists.newLinkedList();
-        final EntityStorageConverter<I, E, S> converter =
-                entityConverter().withFieldMask(fieldMask);
-
-        while (recordIterator.hasNext()) {
-            final EntityRecord record = recordIterator.next();
-
-            if (record == null) { /*    Record is nullable here since `RecordStorage.findBulk()`  *
-                                   *    returns an `Iterable` that may contain nulls.             */
-                continue;
-            }
-
-            final E entity = converter.reverse()
-                                      .convert(record);
-            entities.add(entity);
-        }
-
-        return ImmutableList.copyOf(entities);
+        final Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
+        final Iterator<EntityRecord> presentRecords = filter(entityStorageRecords,
+                                                             Predicates.<EntityRecord>notNull());
+        final Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        final Iterator<E> result = transform(presentRecords, toEntity);
+        return result;
     }
 
     /**
@@ -278,15 +247,12 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see #loadAll(Iterable)
      */
     @CheckReturnValue
-    public ImmutableCollection<E> loadAll() {
+    public Iterator<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityRecord> recordMap = storage.readAll();
-
-        final ImmutableCollection<E> entities =
-                FluentIterable.from(recordMap.entrySet())
-                              .transform(storageRecordToEntity())
-                              .toList();
-        return entities;
+        final Iterator<EntityRecord> records = storage.readAll();
+        final Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        final Iterator<E> result = transform(records, toEntity);
+        return result;
     }
 
     /**
@@ -308,11 +274,15 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @see EntityQuery
      */
     @CheckReturnValue
-    public ImmutableCollection<E> find(EntityFilters filters, FieldMask fieldMask) {
-        final Map<I, EntityRecord> records = findRecords(filters, fieldMask);
-        final ImmutableCollection<E> result = FluentIterable.from(records.entrySet())
-                                                            .transform(storageRecordToEntity())
-                                                            .toList();
+    public Iterator<E> find(EntityFilters filters, FieldMask fieldMask) {
+        checkNotNull(filters);
+        checkNotNull(fieldMask);
+
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
+        final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
+        final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
+        final Function<EntityRecord, E> toEntity = entityConverter().reverse();
+        final Iterator<E> result = transform(records, toEntity);
         return result;
     }
 
@@ -387,24 +357,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     }
 
     /**
-     * Creates a function that transforms a {@code EntityStorageRecord} stored in a map
-     * into an entity of type {@code <E>}.
-     *
-     * @return new instance of the transforming function
-     */
-    protected final Function<Map.Entry<I, EntityRecord>, E> storageRecordToEntity() {
-        return new Function<Map.Entry<I, EntityRecord>, E>() {
-            @Nullable
-            @Override
-            public E apply(@Nullable Map.Entry<I, EntityRecord> input) {
-                checkNotNull(input);
-                final E result = toEntity(input.getValue());
-                return result;
-            }
-        };
-    }
-
-    /**
      * Transforms an instance of {@link EntityId} into an identifier
      * of the required type.
      *
@@ -431,8 +383,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
 
             final Message idAsMessage = unpack(idAsAny);
 
-            // As the message class is the same as expected, the conversion is safe.
             @SuppressWarnings("unchecked")
+                // As the message class is the same as expected, the conversion is safe.
             final I id = (I) idAsMessage;
             return id;
         }
