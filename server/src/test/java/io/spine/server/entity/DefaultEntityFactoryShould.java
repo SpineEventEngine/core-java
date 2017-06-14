@@ -20,9 +20,10 @@
 
 package io.spine.server.entity;
 
+import com.google.common.testing.EqualsTester;
 import com.google.common.testing.SerializableTester;
+import com.google.protobuf.DoubleValue;
 import com.google.protobuf.StringValue;
-import io.spine.server.BoundedContext;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -31,36 +32,52 @@ import org.junit.Test;
  */
 public class DefaultEntityFactoryShould {
 
-    private EntityFactory<Long, TestEntity> entityFactory;
+    private EntityFactory<Long, TestEntity1> entityFactory1;
+    private EntityFactory<Long, TestEntity2> entityFactory2;
 
     @Before
     public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .build();
-        RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
-        bc.register(repository);
+        RecordBasedRepository<Long, TestEntity1, StringValue> r1 = new TestRepository1();
+        RecordBasedRepository<Long, TestEntity2, DoubleValue> r2 = new TestRepository2();
 
-        entityFactory = repository.entityFactory();
+        entityFactory1 = r1.entityFactory();
+        entityFactory2 = r2.entityFactory();
     }
 
     @Test
     public void serialize() {
-        SerializableTester.reserializeAndAssert(entityFactory);
+        SerializableTester.reserializeAndAssert(entityFactory1);
     }
 
-    /**
-     * A test entity class which is not versionable.
-     */
-    private static class TestEntity extends AbstractEntity<Long, StringValue> {
-        private TestEntity(Long id) {
+    @Test
+    public void have_custom_equals() {
+        new EqualsTester()
+                .addEqualityGroup(entityFactory1)
+                .addEqualityGroup(entityFactory2)
+                .testEquals();
+    }
+
+    /** A test entity class which is not versionable. */
+    private static class TestEntity1 extends AbstractEntity<Long, StringValue> {
+        private TestEntity1(Long id) {
             super(id);
         }
     }
 
-    /**
-     * A test repository.
-     */
-    private static class TestRepository
-            extends DefaultRecordBasedRepository<Long, TestEntity, StringValue> {
+    /** A test repository */
+    private static class TestRepository1
+            extends DefaultRecordBasedRepository<Long, TestEntity1, StringValue> {
+    }
+
+    /** Another entity with the same ID and different state. */
+    private static class TestEntity2 extends AbstractEntity<Long, DoubleValue> {
+        protected TestEntity2(Long id) {
+            super(id);
+        }
+    }
+
+    /** A repository for {@link TestEntity2}. */
+    private static class TestRepository2
+        extends DefaultRecordBasedRepository<Long, TestEntity2, DoubleValue> {
     }
 }
