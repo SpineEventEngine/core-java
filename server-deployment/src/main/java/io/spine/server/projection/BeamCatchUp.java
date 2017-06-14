@@ -44,8 +44,6 @@ public class BeamCatchUp {
      * Iteratively performs catch-up for the passed projections.
      */
     static <I> void forAllTenants(ProjectionRepository<I, ?, ?> repository) {
-        repository.startCatchUp();
-
         final Set<TenantId> allTenants = repository.boundedContext()
                                                    .getTenantIndex()
                                                    .getAll();
@@ -56,7 +54,5 @@ public class BeamCatchUp {
             final PipelineResult result = catchupOp.run();
             result.waitUntilFinish();
         }
-
-        repository.completeCatchUp();
     }
 }

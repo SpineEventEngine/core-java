@@ -49,8 +49,8 @@ public class ProjectionRepositoryIO<I, P extends Projection<I, S, ?>, S extends 
         return new ProjectionRepositoryIO<>(storageIO, converter);
     }
 
-    ProjectionRepositoryIO(ProjectionStorageIO<I> storageIO,
-                           EntityStorageConverter<I, P, S> converter) {
+    private ProjectionRepositoryIO(ProjectionStorageIO<I> storageIO,
+                                   EntityStorageConverter<I, P, S> converter) {
         super(storageIO, converter);
     }
 

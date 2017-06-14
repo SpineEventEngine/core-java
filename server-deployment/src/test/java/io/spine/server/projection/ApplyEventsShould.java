@@ -88,8 +88,7 @@ public class ApplyEventsShould {
     private static class SumRepo extends ProjectionRepository<Long, Sum, DoubleValue> {
 
         private SumRepo() {
-            super(false /* Do not catch-up automatically so that we can test serialization of
-                           `ApplyEvents` only. */);
+            super();
         }
     }
 }
