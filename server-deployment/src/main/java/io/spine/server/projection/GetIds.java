@@ -43,6 +43,7 @@ class GetIds<I> extends SimpleFunction<Event, Iterable<KV<I, Event>>> {
     private final EventTargetsFunction<I, Message> fn;
 
     GetIds(EventTargetsFunction<I, Message> fn) {
+        super();
         this.fn = fn;
     }
 
