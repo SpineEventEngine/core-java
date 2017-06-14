@@ -387,7 +387,7 @@ public abstract class EventStore implements AutoCloseable {
                 @Override
                 public void onError(Throwable t) {
                     responseObserver.onError(t);
-                    throw new RuntimeException(t);
+                    throw new IllegalStateException(t);
                 }
 
                 @Override
