@@ -59,6 +59,7 @@ public abstract class RecordStorageIO<I> {
     private KvCoder<I, EntityRecord> kvCoder;
 
     protected RecordStorageIO(Class<I> idClass) {
+        super();
         this.idClass = idClass;
     }
 
@@ -116,6 +117,7 @@ public abstract class RecordStorageIO<I> {
         private final TenantId tenantId;
 
         protected ReadFn(TenantId tenantId) {
+            super();
             this.tenantId = tenantId;
         }
 
@@ -138,6 +140,7 @@ public abstract class RecordStorageIO<I> {
         private final WriteFn<I> fn;
 
         private Write(WriteFn<I> fn) {
+            super();
             this.fn = fn;
         }
 
@@ -157,6 +160,7 @@ public abstract class RecordStorageIO<I> {
         private final TenantId tenantId;
 
         protected WriteFn(TenantId tenantId) {
+            super();
             this.tenantId = tenantId;
         }
 
@@ -178,6 +182,7 @@ public abstract class RecordStorageIO<I> {
         private final TenantId tenantId;
 
         protected FindFn(TenantId tenantId) {
+            super();
             this.tenantId = tenantId;
         }
 
