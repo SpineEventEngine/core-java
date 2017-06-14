@@ -30,7 +30,7 @@ import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.type.TypeUrl;
 
-import java.util.Map;
+import java.util.Iterator;
 
 /**
  *
@@ -70,9 +70,10 @@ class RecordStorageService extends RecordStorageServiceGrpc.RecordStorageService
             public void run() {
                 @SuppressWarnings("unchecked")
                 // The value type in the map is ensured by the return of `findRecords()`
-                final Map<?, EntityRecord> records =
+                final Iterator<EntityRecord> records =
                         repository.findRecords(filters, FieldMask.getDefaultInstance());
-                for (EntityRecord record : records.values()) {
+                while(records.hasNext()) {
+                    final EntityRecord record = records.next();
                     responseObserver.onNext(record);
                 }
                 responseObserver.onCompleted();

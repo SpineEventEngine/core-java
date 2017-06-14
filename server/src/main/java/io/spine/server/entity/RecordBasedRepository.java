@@ -286,7 +286,7 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         return result;
     }
 
-    public Map<I, EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
+    public Iterator<EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
         checkNotNull(filters);
         checkNotNull(fieldMask);
 
