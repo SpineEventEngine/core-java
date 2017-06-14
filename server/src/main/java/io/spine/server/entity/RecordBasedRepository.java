@@ -203,8 +203,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final Iterator<EntityRecord> entityStorageRecords = storage.readMultiple(ids, fieldMask);
         final Iterator<EntityRecord> presentRecords = filter(entityStorageRecords,
                                                              Predicates.<EntityRecord>notNull());
-        final Function<EntityRecord, E> transformer = entityConverter().reverse();
-        final Iterator<E> result = transform(presentRecords, transformer);
+        final Function<EntityRecord, E> recordToEntity = entityConverter().reverse();
+        final Iterator<E> result = transform(presentRecords, recordToEntity);
         return result;
     }
 
@@ -220,8 +220,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     public Iterator<E> loadAll() {
         final RecordStorage<I> storage = recordStorage();
         final Iterator<EntityRecord> records = storage.readAll();
-        final Function<EntityRecord, E> transformer = entityConverter().reverse();
-        final Iterator<E> result = transform(records, transformer);
+        final Function<EntityRecord, E> recordToEntity = entityConverter().reverse();
+        final Iterator<E> result = transform(records, recordToEntity);
         return result;
     }
 
@@ -251,8 +251,8 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
         final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
         final Iterator<EntityRecord> records = recordStorage().readAll(completeQuery, fieldMask);
-        final Function<EntityRecord, E> transformer = entityConverter().reverse();
-        final Iterator<E> result = transform(records, transformer);
+        final Function<EntityRecord, E> recordToEntity = entityConverter().reverse();
+        final Iterator<E> result = transform(records, recordToEntity);
         return result;
     }
 
