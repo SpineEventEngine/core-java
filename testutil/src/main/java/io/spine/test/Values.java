@@ -46,6 +46,7 @@ public class Values {
      * The prefix for generated tenant identifiers.
      */
     private static final String TENANT_PREFIX = "tenant-";
+    
     /**
      * The prefix for generated user identifiers.
      */
