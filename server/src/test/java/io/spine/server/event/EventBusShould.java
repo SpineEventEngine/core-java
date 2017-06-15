@@ -26,14 +26,15 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
+import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.envelope.EventEnvelope;
+import io.spine.io.StreamObservers;
+import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.EventTests;
-import io.spine.test.Observers;
-import io.spine.test.Observers.MemoizingObserver;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import io.spine.type.EventClass;
@@ -69,7 +70,7 @@ public class EventBusShould {
 
     private EventBus eventBus;
     private EventBus eventBusWithPosponedExecution;
-    private MemoizingObserver responseObserver;
+    private MemoizingObserver<Response> responseObserver;
     private PostponedDispatcherEventDelivery postponedDispatcherDelivery;
     private Executor delegateDispatcherExecutor;
     private StorageFactory storageFactory;
@@ -93,7 +94,7 @@ public class EventBusShould {
                 new PostponedDispatcherEventDelivery(delegateDispatcherExecutor);
         buildEventBus(enricher);
         buildEventBusWithPostponedExecution(enricher);
-        this.responseObserver = Observers.memoizingObserver();
+        this.responseObserver = StreamObservers.memoizingObserver();
     }
 
     @SuppressWarnings("MethodMayBeStatic")   /* it cannot, as its result is used in {@code org.mockito.Mockito.spy() */
@@ -445,18 +446,20 @@ public class EventBusShould {
     }
 
     private static void assertResponseIsOk(MemoizingObserver responseObserver) {
-        assertEquals(Responses.ok(), responseObserver.getResponse());
+        assertEquals(Responses.ok(), responseObserver.firstResponse());
         assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getThrowable());
+        assertNull(responseObserver.getError());
     }
 
     private static void assertReturnedExceptionAndNoResponse(
             Class<? extends Exception> exceptionClass,
             MemoizingObserver responseObserver) {
-        final Throwable cause = responseObserver.getThrowable()
-                                                .getCause();
+        final Throwable error = responseObserver.getError();
+
+        assertNotNull(error);
+        final Throwable cause = error.getCause();
         assertEquals(exceptionClass, cause.getClass());
-        assertNull(responseObserver.getResponse());
+        assertTrue(responseObserver.responses().isEmpty());
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {

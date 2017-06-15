@@ -171,8 +171,7 @@ public class QueryServiceShould {
     }
 
     private static void checkFailureResponse(MemoizingObserver<QueryResponse> responseObserver) {
-        final QueryResponse responseHandled = responseObserver.firstResponse();
-        assertNull(responseHandled);
+        assertTrue(responseObserver.responses().isEmpty());
         assertFalse(responseObserver.isCompleted());
         assertNotNull(responseObserver.getError());
     }

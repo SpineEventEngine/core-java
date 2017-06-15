@@ -142,15 +142,6 @@ public class CommandDispatcherRegistryTestEnv {
 
     public static class NoCommandsDispatcherRepo
             extends ProcessManagerRepository<ProjectId, NoCommandsProcessManager, Project> {
-
-        /**
-         * Always returns an empty set of command classes forwarded by this repository.
-         */
-//        @SuppressWarnings("MethodDoesntCallSuperMethod")
-//        @Override
-//        public Set<CommandClass> getCommandClasses() {
-//            return newHashSet();
-//        }
     }
 
     public static class AllCommandDispatcher implements CommandDispatcher {
