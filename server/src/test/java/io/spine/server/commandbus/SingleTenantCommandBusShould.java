@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
@@ -30,6 +31,7 @@ import io.spine.io.StreamObservers;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
+import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
@@ -115,6 +117,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
         verify(failureBus).post(eq(expectedFailure),
                                 ArgumentMatchers.<StreamObserver<Response>>any());
+    }
+
+    @Override
+    protected Command newCommand() {
+        final Message commandMessage = Given.CommandMessage.createProjectMessage();
+        return TestActorRequestFactory.newInstance(SingleTenantCommandBusShould.class)
+                                      .createCommand(commandMessage);
     }
 
     /**

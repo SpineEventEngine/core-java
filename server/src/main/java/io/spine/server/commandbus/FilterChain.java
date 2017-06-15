@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
 
@@ -33,7 +32,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * The chain of {@code CommandBusFilter}s that {@link CommandBus} applies before
- * {@linkplain CommandBus#post(Command, StreamObserver) posting} a command.
+ * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posting} a command.
  *
  * @author Alexander Yevsyukov
  */

@@ -27,7 +27,10 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
+import io.spine.base.Response;
 import io.spine.client.ActorRequestFactory;
+import io.spine.envelope.CommandEnvelope;
+import io.spine.io.StreamObservers;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
@@ -42,14 +45,25 @@ import io.spine.test.command.event.ProjectCreated;
 import io.spine.users.TenantId;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
 
+import java.util.List;
+
+import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
+import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Verify.assertContainsAll;
+import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 /**
  * Abstract base for test suites of {@code CommandBus}.
@@ -176,11 +190,42 @@ public abstract class AbstractCommandBusTestSuite {
         eventBus.close();
     }
 
+    @Test
+    public void post_commands_in_bulk() {
+        final Command first = newCommand();
+        final Command second = newCommand();
+        final List<Command> commands = newArrayList(first, second);
+
+        commandBus.unregister(createProjectHandler);
+        commandBus.register(createProjectHandler);
+        final CommandBus spy = spy(commandBus);
+        spy.post(commands, StreamObservers.<Response>noOpObserver());
+
+        final ArgumentCaptor<Command> storingCaptor = forClass(Command.class);
+        verify(spy, times(2)).store(storingCaptor.capture());
+        final List<Command> storingArgs = storingCaptor.getAllValues();
+        assertSize(commands.size(), storingArgs);
+        assertContainsAll(storingArgs, first, second);
+
+        final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
+        verify(spy, times(2)).doPost(postingCaptor.capture());
+        final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
+        assertSize(commands.size(), postingArgs);
+        assertEquals(commands.get(0), postingArgs.get(0).getCommand());
+        assertEquals(commands.get(1), postingArgs.get(1).getCommand());
+
+        commandBus.unregister(createProjectHandler);
+    }
+
+    protected Command newCommand() {
+        return Given.Command.createProject();
+    }
+
     void storeAsScheduled(Iterable<Command> commands,
                           Duration delay,
                           Timestamp schedulingTime) {
         for (Command cmd : commands) {
-            final Command cmdWithSchedule = CommandScheduler.setSchedule(cmd, delay, schedulingTime);
+            final Command cmdWithSchedule = setSchedule(cmd, delay, schedulingTime);
             commandStore.store(cmdWithSchedule, SCHEDULED);
         }
     }
