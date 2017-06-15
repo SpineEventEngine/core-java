@@ -223,7 +223,6 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         eventStore.append(event);
     }
 
-
     @Override
     protected void store(Iterable<Event> events) {
         eventStore.appendAll(events);

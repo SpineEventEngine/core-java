@@ -231,11 +231,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         throw new IllegalStateException(msg);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Performs no action.
-     */
     @Override
     protected void store(Command command) {
         commandStore().store(command);

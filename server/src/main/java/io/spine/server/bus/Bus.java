@@ -150,8 +150,8 @@ public abstract class Bus<T extends Message,
     /**
      * Filters the given message.
      *
-     * <p>The implementations may apply some validation to the passed message. If the validation is
-     * passed, the {@link Optional#of Optional.of(message)} is returned; otherwise,
+     * <p>The implementations may apply some validation to the passed message. If the message passes
+     * the validation, the {@link Optional#of Optional.of(message)} is returned; otherwise,
      * {@link Optional#absent() Optional.absent()} is returned and
      * {@link StreamObserver#onError StreamObserver.onError} may be called with the failure reasons.
      *
@@ -184,7 +184,7 @@ public abstract class Bus<T extends Message,
     protected abstract void doPost(E envelope);
 
     /**
-     * Posts each of the given envelopes into the bus and acknowledges the message posing with
+     * Posts each of the given envelopes into the bus and acknowledges the message posting with
      * the {@code responseObserver}.
      *
      * @param envelopes        the envelopes to post
@@ -199,8 +199,6 @@ public abstract class Bus<T extends Message,
 
     /**
      * Persists the message.
-     *
-     * <p>The method may perform no action if it's specified by the implementer.
      *
      * @param message the message to store
      */
@@ -223,10 +221,16 @@ public abstract class Bus<T extends Message,
         return filtered;
     }
 
+    /**
+     * @see MatchesFilter
+     */
     private Predicate<T> matchesFilter(StreamObserver<Response> responseObserver) {
         return new MatchesFilter(responseObserver);
     }
 
+    /**
+     * @see MessageParceler
+     */
     private Function<T, E> parcel() {
         return new MessageParceler();
     }
