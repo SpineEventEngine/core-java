@@ -20,12 +20,13 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.io.StreamObservers;
+import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
@@ -63,7 +64,8 @@ public class QueryServiceShould {
 
     private BoundedContext customersContext;
 
-    private final TestQueryResponseObserver responseObserver = new TestQueryResponseObserver();
+    private final MemoizingObserver<QueryResponse> responseObserver =
+            StreamObservers.memoizingObserver();
     private ProjectDetailsRepository projectDetailsRepository;
 
     @Before
@@ -160,19 +162,19 @@ public class QueryServiceShould {
         checkFailureResponse(responseObserver);
     }
 
-    private static void checkOkResponse(TestQueryResponseObserver responseObserver) {
-        final QueryResponse responseHandled = responseObserver.getResponseHandled();
+    private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {
+        final QueryResponse responseHandled = responseObserver.firstResponse();
         assertNotNull(responseHandled);
         assertEquals(Responses.ok(), responseHandled.getResponse());
         assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getThrowable());
+        assertNull(responseObserver.getError());
     }
 
-    private static void checkFailureResponse(TestQueryResponseObserver responseObserver) {
-        final QueryResponse responseHandled = responseObserver.getResponseHandled();
+    private static void checkFailureResponse(MemoizingObserver<QueryResponse> responseObserver) {
+        final QueryResponse responseHandled = responseObserver.firstResponse();
         assertNull(responseHandled);
         assertFalse(responseObserver.isCompleted());
-        assertNotNull(responseObserver.getThrowable());
+        assertNotNull(responseObserver.getError());
     }
 
     /*
@@ -194,43 +196,6 @@ public class QueryServiceShould {
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             // Do nothing.
-        }
-    }
-
-    /**
-     * The stub observer remembering response, throwable, and completion of query execution.
-     */
-    private static class TestQueryResponseObserver implements StreamObserver<QueryResponse> {
-
-        private QueryResponse responseHandled;
-        private Throwable throwable;
-        private boolean isCompleted = false;
-
-        @Override
-        public void onNext(QueryResponse response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.isCompleted = true;
-        }
-
-        QueryResponse getResponseHandled() {
-            return responseHandled;
-        }
-
-        Throwable getThrowable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return isCompleted;
         }
     }
 }

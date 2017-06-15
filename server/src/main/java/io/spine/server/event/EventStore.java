@@ -191,7 +191,7 @@ public class EventStore implements AutoCloseable {
 
     /*
      * Logging methods
-     */
+     *******************/
 
     private void logReadingComplete(StreamObserver<Event> observer) {
         if (logger == null) {

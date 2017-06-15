@@ -71,6 +71,7 @@ public class Producers {
      * @param <I> the type of entity IDs
      */
     private static class ProducerFromContext<I> implements EventTargetsFunction<I, Message> {
+
         private static final long serialVersionUID = 0L;
 
         @Override
@@ -94,6 +95,7 @@ public class Producers {
             implements EventTargetsFunction<I, Message> {
 
         private static final long serialVersionUID = 0L;
+
         private final GetProducerIdFromEvent<I, Message> func = fromFieldIndex(0);
 
         @Override

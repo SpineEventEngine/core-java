@@ -126,6 +126,7 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
 
     /**
      * {@inheritDoc}
+     *
      * <p>Overrides to open the method to the package.
      */
     @Override
