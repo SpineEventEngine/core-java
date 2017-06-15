@@ -22,13 +22,12 @@ package io.spine.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.base.Command;
 import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
 
 /**
  * A {@code CommandBus} can have several filters that can prevent a command to be
- * {@linkplain CommandBus#post(Command, StreamObserver) posted}.
+ * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posted}.
  *
  * @author Alexander Yevsyukov
  */
