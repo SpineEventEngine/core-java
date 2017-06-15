@@ -22,7 +22,6 @@ package io.spine.server.projection;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Maps;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -31,7 +30,6 @@ import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.entity.EventDispatchingRepository;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 import io.spine.server.event.EventFilter;
 import io.spine.server.event.EventStore;
 import io.spine.server.event.EventStreamQuery;
@@ -46,8 +44,6 @@ import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -300,24 +296,6 @@ public abstract class ProjectionRepository<I, P extends Projection<I, S, ?>, S e
                    "Unable to store postponed projection: ongoingOperation is null.");
         ongoingOperation.storeProjection(projection);
         ongoingOperation.storeLastHandledEventTime(eventTime);
-    }
-
-    /**
-     * Store a number of projections at a time.
-     *
-     * @param projections {@link Projection} bulk to store
-     */
-    @VisibleForTesting
-    void store(Collection<P> projections) {
-        final RecordStorage<I> storage = recordStorage();
-        final Map<I, EntityRecordWithColumns> records =
-                Maps.newHashMapWithExpectedSize(projections.size());
-        for (P projection : projections) {
-            final I id = projection.getId();
-            final EntityRecordWithColumns record = toRecord(projection);
-            records.put(id, record);
-        }
-        storage.write(records);
     }
 
     /**

@@ -31,15 +31,10 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.DefaultRecordBasedRepository;
-import io.spine.server.entity.EntityRecord;
-import io.spine.server.entity.storage.EntityRecordWithColumns;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
@@ -102,20 +97,6 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
     void store(Iterable<Event> events) {
         final Iterable<EEntity> entities = Iterables.transform(events, EventToEEntity.instance());
         store(newLinkedList(entities));
-    }
-
-    private void store(Collection<EEntity> entities) {
-        final Map<EventId, EntityRecordWithColumns> records = new HashMap<>(entities.size());
-        for (EEntity entity : entities) {
-            final EntityRecord record = entityConverter().convert(entity);
-            checkNotNull(record);
-            final EntityRecordWithColumns recordWithColumns = EntityRecordWithColumns.create(
-                    record,
-                    entity
-            );
-            records.put(entity.getId(), recordWithColumns);
-        }
-        recordStorage().write(records);
     }
 
     private static Function<EEntity, Event> getEvent() {

@@ -40,7 +40,10 @@ import io.spine.type.TypeUrl;
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
@@ -111,6 +114,22 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final RecordStorage<I> storage = recordStorage();
         final EntityRecordWithColumns record = toRecord(entity);
         storage.write(entity.getId(), record);
+    }
+
+    /**
+     * Stores a number of {@linkplain Entity Entities}.
+     *
+     * <p>NOTE: The storage must be assigned before calling this method.
+     *
+     * @param entities the {@linkplain Entity Entities} to store
+     */
+    public void store(Collection<E> entities) {
+        final Map<I, EntityRecordWithColumns> records = new HashMap<>(entities.size());
+        for (E entity : entities) {
+            final EntityRecordWithColumns recordWithColumns = toRecord(entity);
+            records.put(entity.getId(), recordWithColumns);
+        }
+        recordStorage().write(records);
     }
 
     /** {@inheritDoc} */
