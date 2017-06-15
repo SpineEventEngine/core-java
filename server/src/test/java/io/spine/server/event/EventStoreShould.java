@@ -35,6 +35,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.google.common.collect.Sets.newConcurrentHashSet;
@@ -164,6 +165,11 @@ public abstract class EventStoreShould {
 
         assertSize(2, resultEvents);
         assertContainsAll(resultEvents, taskAdded1, teasAdded2);
+    }
+
+    @Test
+    public void do_nothing_when_appending_empty_iterable() {
+        eventStore.appendAll(Collections.<Event>emptySet());
     }
 
     private static Event projectCreated(Timestamp when) {
