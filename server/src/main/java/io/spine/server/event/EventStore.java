@@ -78,6 +78,7 @@ public abstract class EventStore implements AutoCloseable {
      * @param event the record to append
      */
     public void append(final Event event) {
+        checkNotNull(event);
         final TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
@@ -92,9 +93,15 @@ public abstract class EventStore implements AutoCloseable {
     /**
      * Appends the passed events to the history of events.
      *
+     * <p>As storing events is {@linkplain TenantAwareOperation tenant-dependant}, the first Event
+     * from the {@link Iterable} is taken as tenant defining.
+     *
+     * <p>If the passed {@link Iterable} is empty, no action is performed.
+     *
      * @param events the events to append
      */
     public void appendAll(final Iterable<Event> events) {
+        checkNotNull(events);
         final Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.<Event>notNull());
         if (!tenantDefiningEvent.isPresent()) {
             return;
@@ -140,6 +147,9 @@ public abstract class EventStore implements AutoCloseable {
      * @param responseObserver observer for the resulting stream
      */
     public void read(final EventStreamQuery request, final StreamObserver<Event> responseObserver) {
+        checkNotNull(request);
+        checkNotNull(responseObserver);
+
         logReadingStart(request, responseObserver);
 
         streamExecutor.execute(new Runnable() {
