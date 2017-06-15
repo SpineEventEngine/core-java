@@ -20,12 +20,14 @@
 
 package io.spine.server.storage.memory.grpc;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.EntityRecord;
+import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceImplBase;
 import io.spine.server.tenant.TenantAwareFunction0;
@@ -44,11 +46,11 @@ import io.spine.type.TypeUrl;
  */
 class ProjectionStorageService extends ProjectionStorageServiceImplBase {
 
-    private final Helper delegate;
+    private final RepositoryFacade delegate;
 
     ProjectionStorageService(BoundedContext boundedContext) {
         super();
-        this.delegate = new Helper(boundedContext);
+        this.delegate = new RepositoryFacade(boundedContext);
     }
 
     @Override
@@ -66,12 +68,13 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
     public void readLastHandledEventTimestamp(LastHandledEventRequest request,
                                               StreamObserver<Timestamp> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getProjectionStateTypeUrl());
-        final ProjectionRepository repository =
-                (ProjectionRepository) delegate.findRepository(typeUrl, responseObserver);
-        if (repository == null) {
+        final Optional<RecordBasedRepository> optional =
+                delegate.findRepository(typeUrl, responseObserver);
+        if (!optional.isPresent()) {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
+        final ProjectionRepository repository = (ProjectionRepository)optional.get();
         final TenantAwareFunction0<Timestamp> func =
                 new TenantAwareFunction0<Timestamp>(request.getTenantId()) {
             @Override
@@ -88,12 +91,13 @@ class ProjectionStorageService extends ProjectionStorageServiceImplBase {
     public void writeLastHandledEventTimestamp(final LastHandledEventRequest request,
                                                final StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getProjectionStateTypeUrl());
-        final ProjectionRepository repository =
-                (ProjectionRepository) delegate.findRepository(typeUrl, responseObserver);
-        if (repository == null) {
+        final Optional<RecordBasedRepository> optional =
+                delegate.findRepository(typeUrl, responseObserver);
+        if (!optional.isPresent()) {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
+        final ProjectionRepository repository = (ProjectionRepository)optional.get();
         new TenantAwareOperation(request.getTenantId()) {
             @Override
             public void run() {

@@ -86,6 +86,7 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemReadFn<I> extends ReadFn<I> {
 
         private static final long serialVersionUID = 0L;
+
         private final StorageSpec<I> spec;
         private transient RecordStorageServiceChannel channel;
 
@@ -129,6 +130,7 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemWriteFn<I> extends WriteFn<I> {
 
         private static final long serialVersionUID = 0L;
+
         private final StorageSpec<I> spec;
         private transient RecordStorageServiceChannel channel;
 
@@ -168,6 +170,7 @@ public class InMemoryRecordStorageIO<I> extends RecordStorageIO<I> {
     private static class InMemFindFn extends FindFn {
 
         private static final long serialVersionUID = 0L;
+
         private final StorageSpec<?> spec;
         private transient RecordStorageServiceChannel channel;
 

@@ -42,44 +42,45 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalStateException;
 
 /**
- * Provides access to {@link io.spine.server.entity.RecordBasedRepository RecordBasedRepository}ies
- * of a {@code BoundedContext}.
+ * Provides access to {@link io.spine.server.entity.RecordBasedRepository RecordBasedRepository}
+ * instances of a {@code BoundedContext}.
  *
  * @author Alexander Yevsyukov
  */
-class Helper {
+class RepositoryFacade {
 
     private final BoundedContext boundedContext;
 
-    Helper(BoundedContext boundedContext) {
+    RepositoryFacade(BoundedContext boundedContext) {
         this.boundedContext = boundedContext;
     }
 
-    @Nullable
-    RecordBasedRepository findRepository(TypeUrl typeUrl, StreamObserver<?> responseObserver) {
+    Optional<RecordBasedRepository> findRepository(TypeUrl typeUrl,
+                                                   StreamObserver<?> responseObserver) {
         final Class<Message> stateClass = typeUrl.getJavaClass();
 
         // Since the storage of events is not registered in BoundedContext, get it directly.
         if (stateClass.equals(Event.class)) {
-            return (RecordBasedRepository) EventStoreIO.eventStorageOf(boundedContext);
+            return Optional.of((RecordBasedRepository) EventStoreIO.eventStorageOf(boundedContext));
         }
 
         final Optional<Repository> optional = boundedContext.findRepository(stateClass);
         if (!optional.isPresent()) {
             responseObserver.onError(newIllegalStateException(
                     "Unable to find Repository for the the state: %s", typeUrl));
-            return null;
+            return Optional.absent();
         }
-        return (RecordBasedRepository) optional.get();
+        return Optional.of((RecordBasedRepository) optional.get());
     }
 
     void read(RecordStorageRequest request, StreamObserver<EntityRecord> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
-        final RecordBasedRepository repository = findRepository(typeUrl, responseObserver);
-        if (repository == null) {
+        final Optional<RecordBasedRepository> optional = findRepository(typeUrl, responseObserver);
+        if (!optional.isPresent()) {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
+        final RecordBasedRepository repository = optional.get();
         final Object id = AnyPacker.unpack(request.getRead()
                                                   .getId());
         final TenantAwareFunction<Object, EntityRecord> func =
@@ -101,11 +102,12 @@ class Helper {
     void write(final RecordStorageRequest request,
                final StreamObserver<Response> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
-        final RecordBasedRepository repository = findRepository(typeUrl, responseObserver);
-        if (repository == null) {
+        final Optional<RecordBasedRepository> optional = findRepository(typeUrl, responseObserver);
+        if (!optional.isPresent()) {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
+        final RecordBasedRepository repository = optional.get();
         new TenantAwareOperation(request.getTenantId()) {
             @Override
             public void run() {

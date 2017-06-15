@@ -90,6 +90,7 @@ public class InMemoryProjectionStorageIO<I> extends ProjectionStorageIO<I> {
     private static class WriteTimestampOverGrpc extends WriteTimestampFn {
 
         private static final long serialVersionUID = 0L;
+
         private final StorageSpec<?> spec;
         private transient ProjectionStorageServiceChannel channel;
 

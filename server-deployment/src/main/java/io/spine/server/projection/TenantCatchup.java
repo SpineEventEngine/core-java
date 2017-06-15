@@ -57,7 +57,7 @@ import org.apache.beam.sdk.values.TupleTagList;
 import org.apache.beam.sdk.values.TypeDescriptor;
 
 /**
- * Performs of a catch-up for the repository for one tenant.
+ * Performs catch-up operation for a {@link ProjectionRepository} for a single tenant.
  *
  * @param <I> the type of projection identifiers
  * @author Alexander Yevsyukov

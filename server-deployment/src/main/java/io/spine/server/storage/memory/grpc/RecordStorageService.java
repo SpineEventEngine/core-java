@@ -20,6 +20,7 @@
 
 package io.spine.server.storage.memory.grpc;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.FieldMask;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
@@ -39,11 +40,11 @@ import java.util.Iterator;
  */
 class RecordStorageService extends RecordStorageServiceGrpc.RecordStorageServiceImplBase {
 
-    private final Helper delegate;
+    private final RepositoryFacade delegate;
 
     RecordStorageService(BoundedContext boundedContext) {
         super();
-        this.delegate = new Helper(boundedContext);
+        this.delegate = new RepositoryFacade(boundedContext);
     }
 
 
@@ -61,11 +62,13 @@ class RecordStorageService extends RecordStorageServiceGrpc.RecordStorageService
     public void find(RecordStorageRequest request,
                      final StreamObserver<EntityRecord> responseObserver) {
         final TypeUrl typeUrl = TypeUrl.parse(request.getEntityStateTypeUrl());
-        final RecordBasedRepository repository = delegate.findRepository(typeUrl, responseObserver);
-        if (repository == null) {
+        final Optional<RecordBasedRepository> optional = delegate.findRepository(typeUrl,
+                                                                                 responseObserver);
+        if (!optional.isPresent()) {
             // Just quit. The error was reported by `findRepository()`.
             return;
         }
+        final RecordBasedRepository repository = optional.get();
         final EntityFilters filters = request.getQuery();
         new TenantAwareOperation(request.getTenantId()) {
             @Override
