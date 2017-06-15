@@ -93,19 +93,18 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
     }
 
     @Override
-    protected FailureEnvelope createEnvelope(Failure message) {
-        final FailureEnvelope result = FailureEnvelope.of(message);
-        return result;
-    }
-
-    @Override
     protected OutputDispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
         return new FailureDispatcherRegistry();
     }
 
     @Override
-    public void handleDeadMessage(FailureEnvelope message,
-                                  StreamObserver<Response> responseObserver) {
+    protected FailureEnvelope parcel(Failure message) {
+        final FailureEnvelope result = FailureEnvelope.of(message);
+        return result;
+    }
+
+    @Override
+    public void handleDeadMessage(FailureEnvelope message) {
         log().warn("No dispatcher defined for the failure class {}", message.getMessageClass());
     }
 

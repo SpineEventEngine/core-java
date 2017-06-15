@@ -159,6 +159,26 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
         return new CommandDispatcherRegistry();
     }
 
+    @Override
+    protected Optional<Command> filter(Command command, StreamObserver<Response> responseObserver) {
+        final CommandEnvelope wrapped = parcel(command);
+        final boolean passedFilters = filterChain.accept(wrapped, responseObserver);
+        final Optional<Command> validCommand = passedFilters
+                                             ? Optional.of(command)
+                                             : Optional.<Command>absent();
+        return validCommand;
+    }
+
+    @Override
+    protected CommandEnvelope parcel(Command message) {
+        return CommandEnvelope.of(message);
+    }
+
+    @Override
+    protected void proceed(CommandEnvelope envelope) {
+        doPost(envelope);
+    }
+
     /**
      * Obtains the view {@code Set} of commands that are known to this {@code CommandBus}.
      *
@@ -180,8 +200,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
      * {@linkplain #post(Command, StreamObserver) posted} to the bus.
      */
     @Override
-    public void handleDeadMessage(CommandEnvelope message,
-                                  StreamObserver<Response> responseObserver) {
+    public void handleDeadMessage(CommandEnvelope message) {
         // Do nothing because this is the responsibility of `DeadCommandFilter`.
         //TODO:2017-03-30:alexander.yevsyukov: Handle dead messages in other buses using filters
         // and remove this method from the interface.
@@ -207,30 +226,11 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     /**
      * {@inheritDoc}
      *
-     * <p>Performs the checks defined by the {@code filterChain}. If the message passes the filters,
-     * it is been posted into the bus and stored into the associated {@link CommandStore}.
-     */
-    @Override
-    protected boolean prepareAndPost(Command command, StreamObserver<Response> responseObserver) {
-        final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        if (!filterChain.accept(commandEnvelope, responseObserver)) {
-            return false;
-        }
-        commandStore().store(command);
-        responseObserver.onNext(Responses.ok());
-
-        doPost(commandEnvelope);
-        return true;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * <p>Performs no action.
      */
     @Override
     protected void store(Command command) {
-        // NoOp
+        commandStore().store(command);
     }
 
     /**

@@ -20,6 +20,7 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -142,8 +143,6 @@ public abstract class CommandOutputBus<M extends Message,
         return this.delivery;
     }
 
-    protected abstract E createEnvelope(M message);
-
     /**
      * {@inheritDoc}
      *
@@ -151,6 +150,15 @@ public abstract class CommandOutputBus<M extends Message,
      */
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
+
+    @Override
+    protected Optional<M> filter(M message, StreamObserver<Response> responseObserver) {
+        final boolean valid = validateMessage(message, responseObserver);
+        final Optional<M> result = valid
+                                 ? Optional.of(message)
+                                 : Optional.<M>absent();
+        return result;
+    }
 
     /**
      * {@inheritDoc}
@@ -161,18 +169,14 @@ public abstract class CommandOutputBus<M extends Message,
      * acknowledgement of the passed message.
      */
     @Override
-    protected boolean prepareAndPost(M message, StreamObserver<Response> responseObserver) {
-        final boolean validationPassed = validateMessage(message, responseObserver);
-        if (validationPassed) {
-            responseObserver.onNext(Responses.ok());
-            final M enriched = enrich(message);
-            final int dispatchersCalled = callDispatchers(createEnvelope(enriched));
+    protected void proceed(E envelope) {
+        final M enriched = enrich(envelope.getOuterObject());
+        final E enrichedParceledMessage = parcel(enriched);
+        final int dispatchersCalled = callDispatchers(enrichedParceledMessage);
 
-            if (dispatchersCalled == 0) {
-                handleDeadMessage(createEnvelope(message), responseObserver);
-            }
+        if (dispatchersCalled == 0) {
+            handleDeadMessage(enrichedParceledMessage);
         }
-        return validationPassed;
     }
 
     /**

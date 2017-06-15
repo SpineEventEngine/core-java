@@ -20,9 +20,14 @@
 
 package io.spine.server.bus;
 
+import com.google.common.base.Function;
+import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
+import io.spine.base.Responses;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -30,6 +35,8 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Iterables.isEmpty;
+import static com.google.common.collect.Iterables.transform;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -55,7 +62,7 @@ public abstract class Bus<T extends Message,
      *
      * @param dispatcher the dispatcher to register
      * @throws IllegalArgumentException if the set of message classes
-     *  {@linkplain MessageDispatcher#getMessageClasses() exposed} by the dispatcher is empty
+     *                                  {@linkplain MessageDispatcher#getMessageClasses() exposed} by the dispatcher is empty
      */
     public void register(D dispatcher) {
         registry().register(checkNotNull(dispatcher));
@@ -73,7 +80,7 @@ public abstract class Bus<T extends Message,
     /**
      * Posts the message to the bus.
      *
-     * @param message the message to post
+     * @param message          the message to post
      * @param responseObserver the observer to receive outcome of the operation
      */
     public void post(T message, StreamObserver<Response> responseObserver) {
@@ -81,20 +88,42 @@ public abstract class Bus<T extends Message,
         checkNotNull(responseObserver);
         checkArgument(isNotDefault(message));
 
-        final boolean posted = prepareAndPost(message, responseObserver);
-        if (posted) {
+        final Optional<T> filtered = filter(message, responseObserver);
+        if (filtered.isPresent()) {
+            final T validMessage = filtered.get();
+            final E envelope = parcel(validMessage);
             store(message);
+            responseObserver.onNext(Responses.ok());
+            proceed(envelope);
         }
         responseObserver.onCompleted();
+    }
+
+    public void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
+        checkNotNull(messages);
+        checkNotNull(responseObserver);
+
+        final Iterable<T> filteredMessages = filter(messages, responseObserver);
+        if (!isEmpty(filteredMessages)) {
+            store(messages);
+            final Iterable<E> envelopes = transform(filteredMessages, new Function<T, E>() {
+                @Override
+                public E apply(@Nullable T message) {
+                    checkNotNull(message);
+                    return parcel(message);
+                }
+            });
+            proceed(envelopes, responseObserver);
+            responseObserver.onCompleted();
+        }
     }
 
     /**
      * Handles the message, for which there is no dispatchers registered in the registry.
      *
      * @param message          the message that has no target dispatchers, packed into an envelope
-     * @param responseObserver the observer to be potentially notified about the dead message
      */
-    public abstract void handleDeadMessage(E message, StreamObserver<Response> responseObserver);
+    public abstract void handleDeadMessage(E message);
 
     /**
      * Obtains the dispatcher registry.
@@ -112,6 +141,11 @@ public abstract class Bus<T extends Message,
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
+    protected abstract Optional<T> filter(T message,
+                                          StreamObserver<Response> responseObserver);
+
+    protected abstract E parcel(T message);
+
     /**
      * Posts the given message to the bus.
      *
@@ -124,17 +158,55 @@ public abstract class Bus<T extends Message,
      *
      * <p>This method may or may not {@linkplain #store(Message) store} the message.
      *
-     * @return {@code true} if the message was posted successfully, {@code false} otherwise
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract boolean prepareAndPost(T message, StreamObserver<Response> responseObserver);
+    protected abstract void proceed(E envelope);
+
+    private void proceed(Iterable<E> envelopes, StreamObserver<Response> responseObserver) {
+        for (E message : envelopes) {
+            responseObserver.onNext(Responses.ok());
+            proceed(message);
+        }
+    }
 
     /**
      * Persists the message.
      *
-     * <p>The method may perform no action if it's specified by the implementor.
+     * <p>The method may perform no action if it's specified by the implementer.
      *
      * @param message the message to store
      */
     protected abstract void store(T message);
+
+    protected void store(Iterable<T> messages) {
+        for (T message : messages) {
+            store(message);
+        }
+    }
+
+    private Iterable<T> filter(Iterable<T> messages,
+                               final StreamObserver<Response> responseObserver) {
+        final Iterable<T> filtered = Iterables.filter(messages, matchesFilter(responseObserver));
+        return filtered;
+    }
+
+    private Predicate<T> matchesFilter(StreamObserver<Response> responseObserver) {
+        return new MatchesFilter(responseObserver);
+    }
+
+    private class MatchesFilter implements Predicate<T> {
+
+        private final StreamObserver<Response> responseObserver;
+
+        private MatchesFilter(StreamObserver<Response> responseObserver) {
+            this.responseObserver = responseObserver;
+        }
+
+        @Override
+        public boolean apply(@Nullable T message) {
+            checkNotNull(message);
+            final Optional<T> optional = filter(message, responseObserver);
+            return optional.isPresent();
+        }
+    }
 }

@@ -43,17 +43,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.Collection;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
-import static io.spine.validate.Validate.isNotDefault;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -154,8 +150,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @Override
-    public void handleDeadMessage(EventEnvelope message,
-                                  StreamObserver<Response> responseObserver) {
+    public void handleDeadMessage(EventEnvelope message) {
         final Event event = message.getOuterObject();
         log().warn("No subscriber or dispatcher defined for the event class: {}",
                    event.getClass()
@@ -163,14 +158,13 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @Override
-    protected EventEnvelope createEnvelope(Event message) {
-        final EventEnvelope result = EventEnvelope.of(message);
-        return result;
+    protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
+        return new EventDispatcherRegistry();
     }
 
     @Override
-    protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
-        return new EventDispatcherRegistry();
+    protected EventEnvelope parcel(Event message) {
+        return EventEnvelope.of(message);
     }
 
     /** Returns {@link EventStore} associated with the bus. */
@@ -195,18 +189,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     public void post(Iterable<Event> events) {
-        checkNotNull(events);
-
-        final StreamObserver<Response> observer = StreamObservers.noOpObserver();
-        final Collection<Event> postedEvents = new LinkedList<>();
-        for (Event event : events) {
-            checkArgument(isNotDefault(event));
-            final boolean posted = prepareAndPost(event, observer);
-            if (posted) {
-                postedEvents.add(event);
-            }
-        }
-        store(postedEvents);
+        post(events, StreamObservers.<Response>noOpObserver());
     }
 
     @Override
@@ -233,7 +216,8 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      *
      * @param events the Events to store
      */
-    private void store(Iterable<Event> events) {
+    @Override
+    protected void store(Iterable<Event> events) {
         eventStore.appendAll(events);
     }
 

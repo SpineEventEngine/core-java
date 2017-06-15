@@ -100,8 +100,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void do_nothing_in_handleDeadMessage() {
-        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef(),
-                                     Tests.<StreamObserver<Response>>nullRef());
+        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef());
     }
 
     @Test
