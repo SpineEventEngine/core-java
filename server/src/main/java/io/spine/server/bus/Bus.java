@@ -142,9 +142,28 @@ public abstract class Bus<T extends Message,
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
+    /**
+     * Filters the given message.
+     *
+     * <p>The implementations may apply some validation to the passed message. If the validation is
+     * passed, the {@link Optional#of Optional.of(message)} is returned; otherwise,
+     * {@link Optional#absent() Optional.absent()} is returned and
+     * {@link StreamObserver#onError StreamObserver.onError} may be called with the failure reasons.
+     *
+     * @param message the message to filter
+     * @param responseObserver the observer to receive the negative outcome of the operation
+     * @return the message itself if it passes the filtering or
+     *         {@link Optional#absent() Optional.absent()} otherwise
+     */
     protected abstract Optional<T> filter(T message,
                                           StreamObserver<Response> responseObserver);
 
+    /**
+     * Packs the given message of type {@code T} into an envelope of type {@code E}.
+     *
+     * @param message the message to pack
+     * @return new envelope with the given message inside
+     */
     protected abstract E parcel(T message);
 
     /**
@@ -179,6 +198,11 @@ public abstract class Bus<T extends Message,
      */
     protected abstract void store(T message);
 
+    /**
+     * Stores the given messages into the underlying storage.
+     *
+     * @param messages the messages to store
+     */
     protected void store(Iterable<T> messages) {
         for (T message : messages) {
             store(message);
@@ -196,9 +220,13 @@ public abstract class Bus<T extends Message,
     }
 
     private Function<T, E> parcel() {
-        return new EnvelopeFaactory();
+        return new EnvelopeFactory();
     }
 
+    /**
+     * A predicate on the message checking if the given message matches the bus
+     * {@linkplain #filter(Message, StreamObserver) filter} or not.
+     */
     private class MatchesFilter implements Predicate<T> {
 
         private final StreamObserver<Response> responseObserver;
@@ -215,7 +243,10 @@ public abstract class Bus<T extends Message,
         }
     }
 
-    private class EnvelopeFaactory implements Function<T, E> {
+    /**
+     * A function creating the instances of {@link MessageEnvelope} from the given message.
+     */
+    private class EnvelopeFactory implements Function<T, E> {
 
         @Override
         public E apply(@Nullable T message) {
