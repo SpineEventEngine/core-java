@@ -160,16 +160,8 @@ public abstract class CommandOutputBus<M extends Message,
         return result;
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Validates and posts the message for handling. If the message is invalid,
-     * the {@code responseObserver} is notified of an error. Otherwise, the message is passed to
-     * the dispatchers. In this case the {@code responseObserver} is notified of a successful
-     * acknowledgement of the passed message.
-     */
     @Override
-    protected void proceed(E envelope) {
+    protected void doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedParceledMessage = parcel(enriched);
         final int dispatchersCalled = callDispatchers(enrichedParceledMessage);

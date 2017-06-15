@@ -95,7 +95,7 @@ public abstract class Bus<T extends Message,
             final E envelope = parcel(validMessage);
             store(message);
             responseObserver.onNext(Responses.ok());
-            proceed(envelope);
+            doPost(envelope);
         }
         responseObserver.onCompleted();
     }
@@ -114,7 +114,7 @@ public abstract class Bus<T extends Message,
         if (!isEmpty(filteredMessages)) {
             store(messages);
             final Iterable<E> envelopes = transform(filteredMessages, parcel());
-            proceed(envelopes, responseObserver);
+            doPost(envelopes, responseObserver);
             responseObserver.onCompleted();
         }
     }
@@ -122,7 +122,7 @@ public abstract class Bus<T extends Message,
     /**
      * Handles the message, for which there is no dispatchers registered in the registry.
      *
-     * @param message          the message that has no target dispatchers, packed into an envelope
+     * @param message the message that has no target dispatchers, packed into an envelope
      */
     public abstract void handleDeadMessage(E message);
 
@@ -150,7 +150,7 @@ public abstract class Bus<T extends Message,
      * {@link Optional#absent() Optional.absent()} is returned and
      * {@link StreamObserver#onError StreamObserver.onError} may be called with the failure reasons.
      *
-     * @param message the message to filter
+     * @param message          the message to filter
      * @param responseObserver the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
      *         {@link Optional#absent() Optional.absent()} otherwise
@@ -167,25 +167,28 @@ public abstract class Bus<T extends Message,
     protected abstract E parcel(T message);
 
     /**
-     * Posts the given message to the bus.
+     * Posts the given envelope to the bus.
      *
-     * <p>This method performs all the bus-specific preparations and validation and posts
-     * the message.
+     * <p>Finds and invokes the {@linkplain MessageDispatcher MessageDispatcher(s)} for the given
+     * message.
      *
-     * <p>The {@link StreamObserver#onNext StreamObserver.onNext)} is called on the response
-     * observer when and if the message is posted. Though the {@link StreamObserver#onCompleted
-     * StreamObserver#onCompleted} is never called by this method.
-     *
-     * <p>This method may or may not {@linkplain #store(Message) store} the message.
+     * <p>This method assumes that the given massage has passed the filtering.
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract void proceed(E envelope);
+    protected abstract void doPost(E envelope);
 
-    private void proceed(Iterable<E> envelopes, StreamObserver<Response> responseObserver) {
+    /**
+     * Posts each of the given envelopes into the bus and acknowledges the message posing with
+     * the {@code responseObserver}.
+     *
+     * @param envelopes        the envelopes to post
+     * @param responseObserver the observer of the message posting
+     */
+    private void doPost(Iterable<E> envelopes, StreamObserver<Response> responseObserver) {
         for (E message : envelopes) {
             responseObserver.onNext(Responses.ok());
-            proceed(message);
+            doPost(message);
         }
     }
 
@@ -220,7 +223,7 @@ public abstract class Bus<T extends Message,
     }
 
     private Function<T, E> parcel() {
-        return new EnvelopeFactory();
+        return new MessageParceler();
     }
 
     /**
@@ -246,7 +249,7 @@ public abstract class Bus<T extends Message,
     /**
      * A function creating the instances of {@link MessageEnvelope} from the given message.
      */
-    private class EnvelopeFactory implements Function<T, E> {
+    private class MessageParceler implements Function<T, E> {
 
         @Override
         public E apply(@Nullable T message) {

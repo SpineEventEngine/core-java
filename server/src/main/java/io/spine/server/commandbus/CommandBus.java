@@ -29,7 +29,6 @@ import io.spine.base.Command;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
 import io.spine.base.Response;
-import io.spine.base.Responses;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.Environment;
@@ -175,8 +174,17 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     }
 
     @Override
-    protected void proceed(CommandEnvelope envelope) {
-        doPost(envelope);
+    protected void doPost(CommandEnvelope envelope) {
+        final CommandDispatcher dispatcher = getDispatcher(envelope);
+        try {
+            dispatcher.dispatch(envelope);
+            commandStore.setCommandStatusOk(envelope);
+        } catch (RuntimeException e) {
+            final Throwable cause = getRootCause(e);
+            commandStore.updateCommandStatus(envelope, cause, log);
+
+            emitFailure(envelope, cause);
+        }
     }
 
     /**
@@ -197,7 +205,7 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     /**
      * Does nothing because commands for which are no registered dispatchers
      * are rejected by a built-in {@link CommandBusFilter} invoked when such a command is
-     * {@linkplain #post(Command, StreamObserver) posted} to the bus.
+     * {@linkplain #post(com.google.protobuf.Message, StreamObserver) posted} to the bus.
      */
     @Override
     public void handleDeadMessage(CommandEnvelope message) {
@@ -231,25 +239,6 @@ public class CommandBus extends Bus<Command, CommandEnvelope, CommandClass, Comm
     @Override
     protected void store(Command command) {
         commandStore().store(command);
-    }
-
-    /**
-     * Directs a command to be dispatched.
-     */
-    @SuppressWarnings("ConstantConditions")
-        // OK to get without checking because the command was validated before this call.
-    @VisibleForTesting
-    void doPost(CommandEnvelope commandEnvelope) {
-        final CommandDispatcher dispatcher = getDispatcher(commandEnvelope);
-        try {
-            dispatcher.dispatch(commandEnvelope);
-            commandStore.setCommandStatusOk(commandEnvelope);
-        } catch (RuntimeException e) {
-            final Throwable cause = getRootCause(e);
-            commandStore.updateCommandStatus(commandEnvelope, cause, log);
-
-            emitFailure(commandEnvelope, cause);
-        }
     }
 
     /**
