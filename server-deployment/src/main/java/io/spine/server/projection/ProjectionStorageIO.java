@@ -50,10 +50,13 @@ public abstract class ProjectionStorageIO<I> extends RecordStorageIO<I> {
     public abstract WriteTimestampFn writeTimestampFn(TenantId tenantId);
 
     public abstract static class WriteTimestampFn extends DoFn<Timestamp, Void> {
+
         private static final long serialVersionUID = 0L;
+        
         private final TenantId tenantId;
 
         protected WriteTimestampFn(TenantId tenantId) {
+            super();
             this.tenantId = tenantId;
         }
 
