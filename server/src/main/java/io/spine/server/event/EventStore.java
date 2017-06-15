@@ -95,11 +95,11 @@ public abstract class EventStore implements AutoCloseable {
      * @param events the events to append
      */
     public void appendAll(final Iterable<Event> events) {
-        final Optional<Event> tenantDiningEvent = tryFind(events, Predicates.<Event>notNull());
-        if (!tenantDiningEvent.isPresent()) {
+        final Optional<Event> tenantDefiningEvent = tryFind(events, Predicates.<Event>notNull());
+        if (!tenantDefiningEvent.isPresent()) {
             return;
         }
-        final Event event = tenantDiningEvent.get();
+        final Event event = tenantDefiningEvent.get();
         final TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {

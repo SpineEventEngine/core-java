@@ -62,7 +62,8 @@ public abstract class Bus<T extends Message,
      *
      * @param dispatcher the dispatcher to register
      * @throws IllegalArgumentException if the set of message classes
-     *                                  {@linkplain MessageDispatcher#getMessageClasses() exposed} by the dispatcher is empty
+     *                                  {@linkplain MessageDispatcher#getMessageClasses() exposed}
+     *                                  by the dispatcher is empty
      */
     public void register(D dispatcher) {
         registry().register(checkNotNull(dispatcher));
@@ -83,7 +84,7 @@ public abstract class Bus<T extends Message,
      * @param message          the message to post
      * @param responseObserver the observer to receive outcome of the operation
      */
-    public void post(T message, StreamObserver<Response> responseObserver) {
+    public final void post(T message, StreamObserver<Response> responseObserver) {
         checkNotNull(message);
         checkNotNull(responseObserver);
         checkArgument(isNotDefault(message));
@@ -99,20 +100,14 @@ public abstract class Bus<T extends Message,
         responseObserver.onCompleted();
     }
 
-    public void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
+    public final void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
         checkNotNull(messages);
         checkNotNull(responseObserver);
 
         final Iterable<T> filteredMessages = filter(messages, responseObserver);
         if (!isEmpty(filteredMessages)) {
             store(messages);
-            final Iterable<E> envelopes = transform(filteredMessages, new Function<T, E>() {
-                @Override
-                public E apply(@Nullable T message) {
-                    checkNotNull(message);
-                    return parcel(message);
-                }
-            });
+            final Iterable<E> envelopes = transform(filteredMessages, parcel());
             proceed(envelopes, responseObserver);
             responseObserver.onCompleted();
         }
@@ -194,6 +189,10 @@ public abstract class Bus<T extends Message,
         return new MatchesFilter(responseObserver);
     }
 
+    private Function<T, E> parcel() {
+        return new EnvelopeFaactory();
+    }
+
     private class MatchesFilter implements Predicate<T> {
 
         private final StreamObserver<Response> responseObserver;
@@ -207,6 +206,16 @@ public abstract class Bus<T extends Message,
             checkNotNull(message);
             final Optional<T> optional = filter(message, responseObserver);
             return optional.isPresent();
+        }
+    }
+
+    private class EnvelopeFaactory implements Function<T, E> {
+
+        @Override
+        public E apply(@Nullable T message) {
+            checkNotNull(message);
+            final E result = parcel(message);
+            return result;
         }
     }
 }
