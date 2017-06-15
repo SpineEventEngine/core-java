@@ -175,7 +175,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     /**
      * Validates and posts the event for handling.
      *
-     * <p>Does performs the same as the
+     * <p>Performs the same action as the
      * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
      * require any response observer.
      *
@@ -188,6 +188,18 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
         post(event, StreamObservers.<Response>noOpObserver());
     }
 
+    /**
+     * Validates and posts the event for handling.
+     *
+     * <p>Performs the same action as the
+     * {@linkplain CommandOutputBus#post(Iterable, StreamObserver)} parent method}, but does not
+     * require any response observer.
+     *
+     * <p>This method should be used if the callee does not care about the events acknowledgement.
+     *
+     * @param events the events to be handled
+     * @see CommandOutputBus#post(Message, StreamObserver)
+     */
     public void post(Iterable<Event> events) {
         post(events, StreamObservers.<Response>noOpObserver());
     }
