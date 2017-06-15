@@ -84,7 +84,7 @@ public abstract class Bus<T extends Message,
      * @param message          the message to post
      * @param responseObserver the observer to receive outcome of the operation
      */
-    public final void post(T message, StreamObserver<Response> responseObserver) {
+    public void post(T message, StreamObserver<Response> responseObserver) {
         checkNotNull(message);
         checkNotNull(responseObserver);
         checkArgument(isNotDefault(message));
@@ -100,7 +100,13 @@ public abstract class Bus<T extends Message,
         responseObserver.onCompleted();
     }
 
-    public final void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
+    /**
+     * Posts the given messages to the bus.
+     *
+     * @param messages         the message to post
+     * @param responseObserver the observer to receive outcome of the operation
+     */
+    public void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
         checkNotNull(messages);
         checkNotNull(responseObserver);
 
