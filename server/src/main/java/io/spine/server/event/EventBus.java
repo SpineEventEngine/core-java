@@ -181,10 +181,12 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      *
      * <p>This method should be used if the callee does not care about the event acknowledgement.
      *
+     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
+     *
      * @param event the event to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
-    public void post(Event event) {
+    public final void post(Event event) {
         post(event, StreamObservers.<Response>noOpObserver());
     }
 
@@ -197,9 +199,12 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
      *
+     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
+     *
      * @param events the events to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
+    // Left non-final for testing purposes.
     public void post(Iterable<Event> events) {
         post(events, StreamObservers.<Response>noOpObserver());
     }

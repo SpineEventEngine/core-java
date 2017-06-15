@@ -81,9 +81,12 @@ public abstract class Bus<T extends Message,
     /**
      * Posts the message to the bus.
      *
+     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
+     *
      * @param message          the message to post
      * @param responseObserver the observer to receive outcome of the operation
      */
+    // Left non-final for testing purposes.
     public void post(T message, StreamObserver<Response> responseObserver) {
         checkNotNull(message);
         checkNotNull(responseObserver);
@@ -103,10 +106,12 @@ public abstract class Bus<T extends Message,
     /**
      * Posts the given messages to the bus.
      *
+     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
+     *
      * @param messages         the message to post
      * @param responseObserver the observer to receive outcome of the operation
      */
-    public void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
+    public final void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
         checkNotNull(messages);
         checkNotNull(responseObserver);
 
