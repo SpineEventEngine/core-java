@@ -159,15 +159,15 @@ class Columns {
     /**
      * Retrieves a {@link Collection} of {@link Column Columns} from the given Entity class.
      *
-     * <p> This method is used in Jdbc table creation process.
-     *
      * @param entityClass the class containing the {@link Column} definition
      * @return a {@link Collection} of {@link Column} corresponded to entity class
      */
     static Collection<Column> getColumns(Class<? extends Entity> entityClass) {
         checkNotNull(entityClass);
         ensureRegistered(entityClass);
-        return knownEntityProperties.get(entityClass);
+
+        final Collection<Column> result = knownEntityProperties.get(entityClass);
+        return result;
     }
 
     /**
