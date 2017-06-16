@@ -23,8 +23,12 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
 import com.google.protobuf.TextFormat;
+import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Event;
+import io.spine.base.Response;
+import io.spine.base.Responses;
+import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -58,6 +62,14 @@ public abstract class EventStore implements AutoCloseable {
      */
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    /**
+     * Creates new {@link ServiceBuilder} for building {@code EventStore} instance
+     * that will be exposed as a gRPC service.
+     */
+    public static ServiceBuilder newServiceBuilder() {
+        return new ServiceBuilder();
     }
 
     /**
@@ -308,6 +320,80 @@ public abstract class EventStore implements AutoCloseable {
         @Override
         public void close() throws Exception {
             storage.close();
+        }
+    }
+
+    /**
+     * The builder of {@code EventStore} instance exposed as gRPC service.
+     *
+     * @see EventStoreGrpc.EventStoreImplBase
+     */
+    public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
+
+        @Override
+        public ServerServiceDefinition build() {
+            checkState();
+            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(),
+                                                       getStorageFactory(),
+                                                       getLogger());
+            final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
+            final ServerServiceDefinition result = grpcService.bindService();
+            return result;
+        }
+
+        @Override
+        public ServiceBuilder setStreamExecutor(Executor executor) {
+            super.setStreamExecutor(executor);
+            return this;
+        }
+
+        @Override
+        public ServiceBuilder setStorageFactory(StorageFactory storageFactory) {
+            super.setStorageFactory(storageFactory);
+            return this;
+        }
+
+        @Override
+        public ServiceBuilder setLogger(@Nullable Logger logger) {
+            super.setLogger(logger);
+            return this;
+        }
+
+        @Override
+        public ServiceBuilder withDefaultLogger() {
+            super.withDefaultLogger();
+            return this;
+        }
+    }
+
+    /**
+     * gRPC service over the locally running implementation.
+     */
+    @SuppressWarnings("MethodDoesntCallSuperMethod")
+   /* as we override default implementation with `unimplemented` status. */
+    private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
+
+        private final LocalImpl eventStore;
+
+        private GrpcService(LocalImpl eventStore) {
+            super();
+            this.eventStore = eventStore;
+        }
+
+        @Override
+        public void append(Event request, StreamObserver<Response> responseObserver) {
+            try {
+                eventStore.append(request);
+                responseObserver.onNext(Responses.ok());
+                responseObserver.onCompleted();
+            } catch (RuntimeException e) {
+                responseObserver.onError(e);
+            }
+        }
+
+        @Override
+        public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
+            eventStore.read(request, responseObserver);
         }
     }
 
