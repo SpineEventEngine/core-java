@@ -20,10 +20,9 @@
 
 package io.spine.server.bus;
 
+import com.google.common.base.Converter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
@@ -38,6 +37,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Iterables.transform;
 import static io.spine.validate.Validate.isNotDefault;
+import static java.util.Collections.singleton;
 
 /**
  * Abstract base for buses.
@@ -54,6 +54,8 @@ public abstract class Bus<T extends Message,
                           E extends MessageEnvelope<I, T>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E>> implements AutoCloseable {
+
+    private final Converter<T, E> messageConverter = new MessageToEnvelope();
 
     @Nullable
     private DispatcherRegistry<C, D> registry;
@@ -93,15 +95,7 @@ public abstract class Bus<T extends Message,
         checkNotNull(responseObserver);
         checkArgument(isNotDefault(message));
 
-        final Optional<T> filtered = filter(message, responseObserver);
-        if (filtered.isPresent()) {
-            final T validMessage = filtered.get();
-            final E envelope = parcel(validMessage);
-            store(message);
-            responseObserver.onNext(Responses.ok());
-            doPost(envelope);
-        }
-        responseObserver.onCompleted();
+        post(singleton(message), responseObserver);
     }
 
     /**
@@ -119,7 +113,7 @@ public abstract class Bus<T extends Message,
         final Iterable<T> filteredMessages = filter(messages, responseObserver);
         if (!isEmpty(filteredMessages)) {
             store(messages);
-            final Iterable<E> envelopes = transform(filteredMessages, parcel());
+            final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
             doPost(envelopes, responseObserver);
             responseObserver.onCompleted();
         }
@@ -149,20 +143,19 @@ public abstract class Bus<T extends Message,
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
     /**
-     * Filters the given message.
+     * Filters the given messages.
      *
-     * <p>The implementations may apply some validation to the passed message. If the message passes
-     * the validation, the {@link Optional#of Optional.of(message)} is returned; otherwise,
-     * {@link Optional#absent() Optional.absent()} is returned and
-     * {@link StreamObserver#onError StreamObserver.onError} may be called with the failure reasons.
+     * <p>The implementations may apply some specific validation to the given messages.
      *
-     * @param message          the message to filter
+     * <p>If the message does not pass the filter,
+     * {@link StreamObserver#onError(Throwable) StreamObserver#onError} may be called.
+     *
+     * @param messages         the message to filter
      * @param responseObserver the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
      *         {@link Optional#absent() Optional.absent()} otherwise
      */
-    protected abstract Optional<T> filter(T message,
-                                          StreamObserver<Response> responseObserver);
+    protected abstract Iterable<T> filter(Iterable<T> messages, StreamObserver<Response> responseObserver);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.
@@ -170,7 +163,7 @@ public abstract class Bus<T extends Message,
      * @param message the message to pack
      * @return new envelope with the given message inside
      */
-    protected abstract E parcel(T message);
+    protected abstract E toEnvelope(T message);
 
     /**
      * Posts the given envelope to the bus.
@@ -199,72 +192,42 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Persists the message.
-     *
-     * @param message the message to store
-     */
-    protected abstract void store(T message);
-
-    /**
      * Stores the given messages into the underlying storage.
      *
      * @param messages the messages to store
      */
-    protected void store(Iterable<T> messages) {
-        for (T message : messages) {
-            store(message);
-        }
-    }
+    protected abstract void store(Iterable<T> messages);
 
-    private Iterable<T> filter(Iterable<T> messages,
-                               final StreamObserver<Response> responseObserver) {
-        final Iterable<T> filtered = Iterables.filter(messages, matchesFilter(responseObserver));
-        return filtered;
+    /**
+     * @return a {@link Function} converting the messages into the envelopes of the specified
+     *         type
+     */
+    protected final Function<T, E> toEnvelope() {
+        return messageConverter;
     }
 
     /**
-     * @see MatchesFilter
+     * @return a {@link Function} converting the envelopes into the messages of the specified
+     *         type
      */
-    private Predicate<T> matchesFilter(StreamObserver<Response> responseObserver) {
-        return new MatchesFilter(responseObserver);
-    }
-
-    /**
-     * @see MessageParceler
-     */
-    private Function<T, E> parcel() {
-        return new MessageParceler();
-    }
-
-    /**
-     * A predicate on the message checking if the given message matches the bus
-     * {@linkplain #filter(Message, StreamObserver) filter} or not.
-     */
-    private class MatchesFilter implements Predicate<T> {
-
-        private final StreamObserver<Response> responseObserver;
-
-        private MatchesFilter(StreamObserver<Response> responseObserver) {
-            this.responseObserver = responseObserver;
-        }
-
-        @Override
-        public boolean apply(@Nullable T message) {
-            checkNotNull(message);
-            final Optional<T> optional = filter(message, responseObserver);
-            return optional.isPresent();
-        }
+    protected final Function<E, T> toMessage() {
+        return messageConverter.reverse();
     }
 
     /**
      * A function creating the instances of {@link MessageEnvelope} from the given message.
      */
-    private class MessageParceler implements Function<T, E> {
+    private class MessageToEnvelope extends Converter<T, E> {
 
         @Override
-        public E apply(@Nullable T message) {
-            checkNotNull(message);
-            final E result = parcel(message);
+        public E doForward(T message) {
+            final E result = toEnvelope(message);
+            return result;
+        }
+
+        @Override
+        protected T doBackward(E envelope) {
+            final T result = envelope.getOuterObject();
             return result;
         }
     }

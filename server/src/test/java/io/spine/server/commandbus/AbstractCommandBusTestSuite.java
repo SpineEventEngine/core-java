@@ -201,9 +201,10 @@ public abstract class AbstractCommandBusTestSuite {
         final CommandBus spy = spy(commandBus);
         spy.post(commands, StreamObservers.<Response>noOpObserver());
 
-        final ArgumentCaptor<Command> storingCaptor = forClass(Command.class);
-        verify(spy, times(2)).store(storingCaptor.capture());
-        final List<Command> storingArgs = storingCaptor.getAllValues();
+        @SuppressWarnings("unchecked")
+        final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
+        verify(spy).store(storingCaptor.capture());
+        final Iterable<Command> storingArgs = storingCaptor.getValue();
         assertSize(commands.size(), storingArgs);
         assertContainsAll(storingArgs, first, second);
 

@@ -21,6 +21,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
+import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
@@ -164,17 +165,17 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Optional<Command> filter(Command command, StreamObserver<Response> responseObserver) {
-        final CommandEnvelope wrapped = parcel(command);
-        final boolean passedFilters = filterChain.accept(wrapped, responseObserver);
-        final Optional<Command> validCommand = passedFilters
-                                             ? Optional.of(command)
-                                             : Optional.<Command>absent();
-        return validCommand;
+    protected Iterable<Command> filter(Iterable<Command> commands,
+                                       StreamObserver<Response> responseObserver) {
+        final Iterable<Command> result = FluentIterable.from(commands)
+                .transform(toEnvelope())
+                .filter(new MatchesCommandBusFilter(filterChain, responseObserver))
+                .transform(toMessage());
+        return result;
     }
 
     @Override
-    protected CommandEnvelope parcel(Command message) {
+    protected CommandEnvelope toEnvelope(Command message) {
         return CommandEnvelope.of(message);
     }
 
@@ -237,8 +238,10 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected void store(Command command) {
-        commandStore().store(command);
+    protected void store(Iterable<Command> commands) {
+        for (Command command : commands) {
+            commandStore().store(command);
+        }
     }
 
     /**

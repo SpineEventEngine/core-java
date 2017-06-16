@@ -20,7 +20,8 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
@@ -154,18 +155,21 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Optional<M> filter(M message, StreamObserver<Response> responseObserver) {
-        final boolean valid = validateMessage(message, responseObserver);
-        final Optional<M> result = valid
-                                 ? Optional.of(message)
-                                 : Optional.<M>absent();
+    protected Iterable<M> filter(Iterable<M> messages, final StreamObserver<Response> responseObserver) {
+        final Iterable<M> result = Iterables.filter(messages, new Predicate<M>() {
+            @Override
+            public boolean apply(@Nullable M message) {
+                checkNotNull(message);
+                return validateMessage(message, responseObserver);
+            }
+        });
         return result;
     }
 
     @Override
     protected void doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());
-        final E enrichedParceledMessage = parcel(enriched);
+        final E enrichedParceledMessage = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedParceledMessage);
 
         if (dispatchersCalled == 0) {

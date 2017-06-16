@@ -75,7 +75,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * <p>Performs no action.
      */
     @Override
-    protected void store(Failure message) {
+    protected void store(Iterable<Failure> message) {
         // do nothing for now.
     }
 
@@ -102,7 +102,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected FailureEnvelope parcel(Failure message) {
+    protected FailureEnvelope toEnvelope(Failure message) {
         final FailureEnvelope result = FailureEnvelope.of(message);
         return result;
     }

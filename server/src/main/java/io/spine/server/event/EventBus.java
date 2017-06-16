@@ -168,7 +168,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected EventEnvelope parcel(Event message) {
+    protected EventEnvelope toEnvelope(Event message) {
         return EventEnvelope.of(message);
     }
 
@@ -221,11 +221,6 @@ public class EventBus extends CommandOutputBus<Event,
         }
         final Event enriched = enricher.enrich(event);
         return enriched;
-    }
-
-    @Override
-    protected void store(Event event) {
-        eventStore.append(event);
     }
 
     @Override
