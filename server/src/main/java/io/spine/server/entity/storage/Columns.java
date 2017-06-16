@@ -142,7 +142,7 @@ class Columns {
         checkNotNull(columnName);
         ensureRegistered(entityClass);
 
-        final Collection<Column> cachedColumns = knownEntityProperties.get(entityClass);
+        final Collection<Column> cachedColumns = getColumns(entityClass);
         for (Column column : cachedColumns) {
             if (column.getName()
                       .equals(columnName)) {
