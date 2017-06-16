@@ -48,18 +48,6 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
     CommandRouter createRouter(CommandBus commandBus,
                                Message sourceMessage,
                                CommandContext commandContext) {
-//        final CommandBus mockBus = mock(CommandBus.class);
-
-//        doAnswer(new Answer() {
-//            @SuppressWarnings("ReturnOfNull") // is OK for Answer
-//            @Override
-//            public Object answer(InvocationOnMock invocation) throws Throwable {
-//                final StreamObserver<Response> observer = invocation.getArgument(1);
-//                observer.onError(new RuntimeException("simulate error"));
-//                return null;
-//            }
-//        }).when(mockBus).post(any(Command.class), ArgumentMatchers.<StreamObserver<Command>>any());
-
         return new CommandRouter(commandBus, sourceMessage, commandContext);
     }
 
