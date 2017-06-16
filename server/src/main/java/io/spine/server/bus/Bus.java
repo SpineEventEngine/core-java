@@ -25,8 +25,6 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
-import io.spine.base.Responses;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -86,15 +84,15 @@ public abstract class Bus<T extends Message,
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
      * @param message          the message to post
-     * @param responseObserver the observer to receive outcome of the operation
+     * @param acknowledgement the observer to receive outcome of the operation
      */
     // Left non-final for testing purposes.
-    public void post(T message, StreamObserver<Response> responseObserver) {
+    public void post(T message, StreamObserver<T> acknowledgement) {
         checkNotNull(message);
-        checkNotNull(responseObserver);
+        checkNotNull(acknowledgement);
         checkArgument(isNotDefault(message));
 
-        post(singleton(message), responseObserver);
+        post(singleton(message), acknowledgement);
     }
 
     /**
@@ -103,18 +101,18 @@ public abstract class Bus<T extends Message,
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
      * @param messages         the message to post
-     * @param responseObserver the observer to receive outcome of the operation
+     * @param acknowledgement the observer to receive outcome of the operation
      */
-    public final void post(Iterable<T> messages, StreamObserver<Response> responseObserver) {
+    public final void post(Iterable<T> messages, StreamObserver<T> acknowledgement) {
         checkNotNull(messages);
-        checkNotNull(responseObserver);
+        checkNotNull(acknowledgement);
 
-        final Iterable<T> filteredMessages = filter(messages, responseObserver);
+        final Iterable<T> filteredMessages = filter(messages, acknowledgement);
         if (!isEmpty(filteredMessages)) {
             store(messages);
             final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
-            doPost(envelopes, responseObserver);
-            responseObserver.onCompleted();
+            doPost(envelopes, acknowledgement);
+            acknowledgement.onCompleted();
         }
     }
 
@@ -150,11 +148,11 @@ public abstract class Bus<T extends Message,
      * {@link StreamObserver#onError(Throwable) StreamObserver#onError} may be called.
      *
      * @param messages         the message to filter
-     * @param responseObserver the observer to receive the negative outcome of the operation
+     * @param acknowledgement the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
      *         {@link Optional#absent() Optional.absent()} otherwise
      */
-    protected abstract Iterable<T> filter(Iterable<T> messages, StreamObserver<Response> responseObserver);
+    protected abstract Iterable<T> filter(Iterable<T> messages, StreamObserver<T> acknowledgement);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.
@@ -178,14 +176,14 @@ public abstract class Bus<T extends Message,
 
     /**
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
-     * the {@code responseObserver}.
+     * the {@code acknowledgement} observer.
      *
      * @param envelopes        the envelopes to post
-     * @param responseObserver the observer of the message posting
+     * @param acknowledgement the observer of the message posting
      */
-    private void doPost(Iterable<E> envelopes, StreamObserver<Response> responseObserver) {
+    private void doPost(Iterable<E> envelopes, StreamObserver<T> acknowledgement) {
         for (E message : envelopes) {
-            responseObserver.onNext(Responses.ok());
+            acknowledgement.onNext(message.getOuterObject());
             doPost(message);
         }
     }

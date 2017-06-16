@@ -25,7 +25,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Failure;
-import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.command.Assign;
@@ -68,7 +67,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     @Test
     public void post_command_and_do_not_set_current_tenant() {
-        commandBus.post(newCommandWithoutTenantId(), responseObserver);
+        commandBus.post(newCommandWithoutTenantId(), observer);
 
         assertFalse(isTenantSet());
     }
@@ -77,13 +76,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void reject_invalid_command() {
         final Command cmd = newCommandWithoutContext();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
-        checkCommandError(responseObserver.getThrowable(),
+        checkCommandError(observer.getError(),
                           INVALID_COMMAND,
                           InvalidCommandException.class,
                           cmd);
-        assertTrue(responseObserver.getResponses().isEmpty());
+        assertTrue(observer.responses().isEmpty());
     }
 
     @Test
@@ -91,13 +90,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         // Create a multi-tenant command.
         final Command cmd = createProject();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
-        checkCommandError(responseObserver.getThrowable(),
+        checkCommandError(observer.getError(),
                           TENANT_INAPPLICABLE,
                           InvalidCommandException.class,
                           cmd);
-        assertTrue(responseObserver.getResponses().isEmpty());
+        assertTrue(observer.responses().isEmpty());
     }
 
     @Test
@@ -111,12 +110,12 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(faultyHandler);
 
         final Command addTaskCommand = clearTenantId(addTask());
-        commandBus.post(addTaskCommand, StreamObservers.<Response>noOpObserver());
+        commandBus.post(addTaskCommand, StreamObservers.<Command>noOpObserver());
 
         final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
         final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
         verify(failureBus).post(eq(expectedFailure),
-                                ArgumentMatchers.<StreamObserver<Response>>any());
+                                ArgumentMatchers.<StreamObserver<Failure>>any());
     }
 
     @Override

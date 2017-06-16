@@ -22,7 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.common.base.Predicate;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
+import io.spine.base.Command;
 import io.spine.envelope.CommandEnvelope;
 
 import javax.annotation.Nullable;
@@ -35,12 +35,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class MatchesCommandBusFilter implements Predicate<CommandEnvelope> {
 
     private final CommandBusFilter filter;
-    private final StreamObserver<Response> responseObserver;
+    private final StreamObserver<Command> responseObserver;
 
     MatchesCommandBusFilter(CommandBusFilter filter,
-                            StreamObserver<Response> responseObserver) {
+                            StreamObserver<Command> errorObserver) {
         this.filter = filter;
-        this.responseObserver = responseObserver;
+        this.responseObserver = errorObserver;
     }
 
     @Override

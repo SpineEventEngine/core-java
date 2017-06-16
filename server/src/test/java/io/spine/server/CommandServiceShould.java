@@ -22,15 +22,13 @@ package io.spine.server;
 
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
-import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.io.StreamObservers;
+import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.transport.GrpcContainer;
 import io.spine.test.TestActorRequestFactory;
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,7 +50,7 @@ public class CommandServiceShould {
     private BoundedContext projectsContext;
 
     private BoundedContext customersContext;
-    private final TestResponseObserver responseObserver = new TestResponseObserver();
+    private final MemoizingObserver<Command> responseObserver = StreamObservers.memoizingObserver();
 
     @Before
     public void setUp() {
@@ -110,11 +108,12 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        service.post(cmd, responseObserver);
+        final MemoizingObserver<Command> observer = StreamObservers.memoizingObserver();
+        service.post(cmd, observer);
 
-        Assert.assertEquals(Responses.ok(), responseObserver.getResponseHandled());
-        assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getThrowable());
+        assertNull(observer.getError());
+        assertTrue(observer.isCompleted());
+        assertEquals(cmd, observer.firstResponse());
     }
 
     @Test
@@ -125,9 +124,10 @@ public class CommandServiceShould {
 
         service.post(unsupportedCmd, responseObserver);
 
-        final Throwable exception = responseObserver.getThrowable()
-                                                    .getCause();
-        assertEquals(UnsupportedCommandException.class, exception.getClass());
+        final Throwable error = responseObserver.getError();
+        assertNotNull(error);
+        final Throwable cause = error.getCause();
+        assertEquals(UnsupportedCommandException.class, cause.getClass());
     }
 
     @Test
@@ -147,44 +147,6 @@ public class CommandServiceShould {
             if (!grpcContainer.isShutdown()) {
                 grpcContainer.shutdown();
             }
-        }
-    }
-
-    /*
-     * Stub repositories and aggregates
-     ***************************************************/
-
-    private static class TestResponseObserver implements StreamObserver<Response> {
-
-        private Response responseHandled;
-        private Throwable throwable;
-        private boolean isCompleted = false;
-
-        @Override
-        public void onNext(Response response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.isCompleted = true;
-        }
-
-        Response getResponseHandled() {
-            return responseHandled;
-        }
-
-        Throwable getThrowable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return isCompleted;
         }
     }
 }

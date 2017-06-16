@@ -28,7 +28,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Response;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -65,12 +64,12 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     /**
      * The future for waiting until the {@link CommandBus#post posting of the command} completes.
      */
-    private final SettableFuture<Void> finishFuture = SettableFuture.create();
+    private final SettableFuture<Command> finishFuture = SettableFuture.create();
 
     /**
      * The observer for posting commands.
      */
-    private final StreamObserver<Response> responseObserver = newResponseObserver(finishFuture);
+    private final StreamObserver<Command> responseObserver = newAckingObserver(finishFuture);
 
     AbstractCommandRouter(CommandBus commandBus,
                           Message commandMessage,
@@ -145,7 +144,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         commandBus.post(command, responseObserver);
         // Wait till the call is completed.
         try {
-            finishFuture.get();
+            final Command retrievedCommand = finishFuture.get();
+            checkNotNull(retrievedCommand);
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
@@ -171,22 +171,22 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<Response> newResponseObserver(
-            final SettableFuture<Void> finishFuture) {
-        return new StreamObserver<Response>() {
+    private static StreamObserver<Command> newAckingObserver(
+            final SettableFuture<Command> finishFuture) {
+        return new StreamObserver<Command>() {
             @Override
-            public void onNext(Response response) {
-                // Do nothing. It's just a confirmation of successful post to Command Bus.
+            public void onNext(Command value) {
+                finishFuture.set(value);
             }
 
             @Override
-            public void onError(Throwable throwable) {
-                finishFuture.setException(throwable);
+            public void onError(Throwable t) {
+                finishFuture.setException(t);
             }
 
             @Override
             public void onCompleted() {
-                finishFuture.set(null);
+                // Do nothing. It's just a confirmation of successful post to Command Bus.
             }
         };
     }

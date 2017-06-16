@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
-import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 
@@ -50,7 +49,7 @@ class DeadCommandFilter implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+    public boolean accept(CommandEnvelope envelope, StreamObserver<Command> responseObserver) {
         if (!hasDispatcher(envelope.getMessageClass())) {
             final Command command = envelope.getCommand();
             final CommandException unsupported = new UnsupportedCommandException(command);

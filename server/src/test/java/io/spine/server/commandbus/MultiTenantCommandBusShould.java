@@ -20,14 +20,14 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.testing.NullPointerTester;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.Error;
-import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
+import io.spine.io.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.failure.FailureBus;
-import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.type.CommandClass;
@@ -109,26 +109,26 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutTenantId();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
-        checkCommandError(responseObserver.getThrowable(),
+        checkCommandError(observer.getError(),
                           TENANT_UNKNOWN,
                           InvalidCommandException.class,
                           cmd);
 
-        assertTrue(responseObserver.getResponses().isEmpty());
+        assertTrue(observer.responses().isEmpty());
     }
 
     @Test
     public void return_UnsupportedCommandException_when_there_is_neither_handler_nor_dispatcher() {
         final Command command = addTask();
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
-        checkCommandError(responseObserver.getThrowable(),
+        checkCommandError(observer.getError(),
                           UNSUPPORTED_COMMAND,
                           UnsupportedCommandException.class, command);
-        assertTrue(responseObserver.getResponses()
-                                   .isEmpty());
+        assertTrue(observer.responses()
+                           .isEmpty());
     }
 
     /*
@@ -138,9 +138,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void register_command_dispatcher() {
         commandBus.register(new AddTaskDispatcher());
 
-        commandBus.post(addTask(), responseObserver);
+        commandBus.post(addTask(), observer);
 
-        assertTrue(responseObserver.isCompleted());
+        assertTrue(observer.isCompleted());
     }
 
     @Test
@@ -149,18 +149,18 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(dispatcher);
         commandBus.unregister(dispatcher);
 
-        commandBus.post(addTask(), responseObserver);
+        commandBus.post(addTask(), observer);
 
-        assertTrue(responseObserver.isError());
+        assertNotNull(observer.getError());
     }
 
     @Test
     public void register_command_handler() {
         commandBus.register(new CreateProjectHandler());
 
-        commandBus.post(createProject(), responseObserver);
+        commandBus.post(createProject(), observer);
 
-        assertTrue(responseObserver.isCompleted());
+        assertTrue(observer.isCompleted());
     }
 
     @Test
@@ -170,9 +170,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(handler);
         commandBus.unregister(handler);
 
-        commandBus.post(createProject(), responseObserver);
+        commandBus.post(createProject(), observer);
 
-        assertTrue(responseObserver.isError());
+        assertNotNull(observer.getError());
     }
 
     CreateProjectHandler newCommandHandler() {
@@ -183,19 +183,19 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
      * Test of illegal arguments for post()
      ***************************************/
 
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_command() {
-        commandBus.post(Tests.<Command>nullRef(), responseObserver);
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_observer() {
-        commandBus.post(createProject(), Tests.<StreamObserver<Response>>nullRef());
+    @Test
+    public void not_accept_nulls() throws NoSuchMethodException {
+        new NullPointerTester()
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .setDefault(StreamObserver.class, StreamObservers.noOpObserver())
+                .ignore(CommandBus.class.getDeclaredMethod("handleDeadMessage",
+                                                           CommandEnvelope.class)) // NoOp method
+                .testAllPublicInstanceMethods(commandBus);
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void do_not_accept_default_command() {
-        commandBus.post(Command.getDefaultInstance(), responseObserver);
+    public void not_accept_default_command() {
+        commandBus.post(Command.getDefaultInstance(), observer);
     }
 
     /*
@@ -206,9 +206,10 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void post_command_and_return_OK_response() {
         commandBus.register(createProjectHandler);
 
-        commandBus.post(createProject(), responseObserver);
+        final Command command = createProject();
+        commandBus.post(command, observer);
 
-        responseObserver.assertResponseOkAndCompleted();
+        checkResult(command);
     }
 
     @Test
@@ -216,7 +217,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
         verify(commandStore).store(cmd);
     }
@@ -226,7 +227,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = newCommandWithoutContext();
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
         verify(commandStore).store(eq(cmd), isA(Error.class));
     }
@@ -235,7 +236,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
     public void invoke_handler_when_command_posted() {
         commandBus.register(createProjectHandler);
 
-        commandBus.post(createProject(), responseObserver);
+        commandBus.post(createProject(), observer);
 
         assertTrue(createProjectHandler.wasHandlerInvoked());
     }
@@ -245,7 +246,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
         commandBus.register(dispatcher);
 
-        commandBus.post(addTask(), responseObserver);
+        commandBus.post(addTask(), observer);
 
         assertTrue(dispatcher.wasDispatcherInvoked());
     }

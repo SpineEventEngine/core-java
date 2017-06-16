@@ -69,10 +69,10 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
         verify(commandStore).store(cmd, SCHEDULED);
-        responseObserver.assertResponseOkAndCompleted();
+        checkResult(cmd);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
         final Command cmd = createProject(/*delay=*/minutes(1));
 
-        commandBus.post(cmd, responseObserver);
+        commandBus.post(cmd, observer);
 
         verify(scheduler).schedule(cmd);
     }
@@ -89,10 +89,11 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     public void not_schedule_command_if_no_scheduling_options_are_set() {
         commandBus.register(new CreateProjectHandler());
 
-        commandBus.post(createProject(), responseObserver);
+        final Command command = createProject();
+        commandBus.post(command, observer);
 
         verify(scheduler, never()).schedule(createProject());
-        responseObserver.assertResponseOkAndCompleted();
+        checkResult(command);
     }
 
     @Test

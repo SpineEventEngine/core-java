@@ -72,7 +72,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
 
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         final TenantId tenantId = command.getContext()
                                          .getActorContext()
@@ -90,7 +90,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final Command command = requestFactory.command()
                                               .create(createProjectMessage());
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         final CommandEnvelope envelope = CommandEnvelope.of(command);
@@ -110,7 +110,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final CommandId commandId = command.getId();
         final Message commandMessage = getMessage(command);
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         verify(log).failureHandling(eq(failure), eq(commandMessage), eq(commandId));
@@ -146,7 +146,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final Command command = givenThrowingHandler(exception);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         verify(log).errorHandling(eq(exception),
@@ -193,7 +193,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final Command command = givenThrowingHandler(throwable);
         final CommandEnvelope envelope = CommandEnvelope.of(command);
 
-        commandBus.post(command, responseObserver);
+        commandBus.post(command, observer);
 
         // Check that the logging was called.
         verify(log).errorHandlingUnknown(eq(throwable),

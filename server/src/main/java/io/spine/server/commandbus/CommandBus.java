@@ -27,9 +27,9 @@ import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
+import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
-import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.Environment;
@@ -164,7 +164,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected Iterable<Command> filter(Iterable<Command> commands,
-                                       StreamObserver<Response> responseObserver) {
+                                       StreamObserver<Command> responseObserver) {
         final Iterable<Command> result = FluentIterable.from(commands)
                 .transform(toEnvelope())
                 .filter(new MatchesCommandBusFilter(filterChain, responseObserver))
@@ -250,7 +250,7 @@ public class CommandBus extends Bus<Command,
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
             failureBus.post(failure.toFailure(commandEnvelope.getCommand()),
-                            StreamObservers.<Response>noOpObserver());
+                            StreamObservers.<Failure>noOpObserver());
         }
     }
 

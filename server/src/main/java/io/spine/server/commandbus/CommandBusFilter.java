@@ -22,7 +22,7 @@ package io.spine.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.base.Response;
+import io.spine.base.Command;
 import io.spine.envelope.CommandEnvelope;
 
 /**
@@ -47,14 +47,13 @@ public interface CommandBusFilter {
      *         is acknowledged to the observer.
      * </ul>
      *
-     * @param envelope         the envelope with the command to filter
-     * @param responseObserver the observer to be {@linkplain StreamObserver#onError(Throwable)
-     *                         notified} about the error which caused not accepting the passed
-     *                         command
-     *
+     * @param envelope      the envelope with the command to filter
+     * @param errorObserver the observer to be {@linkplain StreamObserver#onError(Throwable)
+     *                      notified} about the error which caused not accepting the passed
+     *                      command
      * @return {@code true} if the command passes the filter, {@code false} otherwise
      */
-    boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver);
+    boolean accept(CommandEnvelope envelope, StreamObserver<Command> errorObserver);
 
     void onClose(CommandBus commandBus);
 }

@@ -40,6 +40,7 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.io.StreamObservers.forwardErrorsOnly;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -110,7 +111,8 @@ public abstract class CommandOutputBus<M extends Message,
      * {@code false} otherwise
      */
     public boolean validate(Message message, StreamObserver<Response> responseObserver) {
-        if (!validateMessage(message, responseObserver)) {
+        final StreamObserver<M> ackObserver = forwardErrorsOnly(responseObserver);
+        if (!validateMessage(message, ackObserver)) {
             return false;
         }
         responseObserver.onNext(Responses.ok());
@@ -123,10 +125,10 @@ public abstract class CommandOutputBus<M extends Message,
      *
      * <p>Does not call {@link StreamObserver#onNext(Object) StreamObserver.onNext(..)} or
      * {@link StreamObserver#onCompleted() StreamObserver.onCompleted(..)}
-     * for the given {@code responseObserver}.
+     * for the given {@code acknowledgement} observer.
      */
     protected abstract boolean validateMessage(Message message,
-                                               StreamObserver<Response> responseObserver);
+                                               StreamObserver<M> acknowledgement);
 
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
@@ -154,12 +156,12 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Iterable<M> filter(Iterable<M> messages, final StreamObserver<Response> responseObserver) {
+    protected Iterable<M> filter(Iterable<M> messages, final StreamObserver<M> acknowledgement) {
         final Iterable<M> result = Iterables.filter(messages, new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M message) {
                 checkNotNull(message);
-                return validateMessage(message, responseObserver);
+                return validateMessage(message, acknowledgement);
             }
         });
         return result;

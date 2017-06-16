@@ -29,7 +29,6 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
-import io.spine.base.Response;
 import io.spine.envelope.EventEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;
@@ -190,7 +189,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
-        post(event, StreamObservers.<Response>noOpObserver());
+        post(event, StreamObservers.<Event>noOpObserver());
     }
 
     /**
@@ -209,7 +208,7 @@ public class EventBus extends CommandOutputBus<Event,
      */
     // Left non-final for testing purposes.
     public void post(Iterable<Event> events) {
-        post(events, StreamObservers.<Response>noOpObserver());
+        post(events, StreamObservers.<Event>noOpObserver());
     }
 
     @Override
@@ -227,11 +226,11 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected boolean validateMessage(Message event, StreamObserver<Response> responseObserver) {
+    protected boolean validateMessage(Message event, StreamObserver<Event> acknowledgement) {
         final EventClass eventClass = EventClass.of(event);
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            responseObserver.onError(
+            acknowledgement.onError(
                     invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError()));
             return false;
         }
@@ -239,8 +238,8 @@ public class EventBus extends CommandOutputBus<Event,
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent =
                     InvalidEventException.onConstraintViolations(event, violations);
-            responseObserver.onError(invalidArgumentWithCause(invalidEvent,
-                                                              invalidEvent.getError()));
+            acknowledgement.onError(invalidArgumentWithCause(invalidEvent,
+                                                             invalidEvent.getError()));
             return false;
         }
         return true;

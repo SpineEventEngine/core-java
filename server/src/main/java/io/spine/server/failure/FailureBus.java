@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Failure;
-import io.spine.base.Response;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.outbus.CommandOutputBus;
@@ -78,7 +77,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected boolean validateMessage(Message message, StreamObserver<Response> responseObserver) {
+    protected boolean validateMessage(Message message, StreamObserver<Failure> acknowledgement) {
         return true;
     }
 
@@ -150,7 +149,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * @see #post(Message, StreamObserver)
      */
     public void post(Failure failure) {
-        post(failure, StreamObservers.<Response>noOpObserver());
+        post(failure, StreamObservers.<Failure>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

@@ -43,10 +43,12 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
     /**
      * Creates a router with mocked {@code CommandBus} which always calls
      * {@link StreamObserver#onError(Throwable) StreamObserver.onError()} when
-     * {@link CommandBus#post(Command, StreamObserver) CommandBus.post()} is invoked.
+     * {@link CommandBus#post(Message, StreamObserver) CommandBus.post()} is invoked.
      */
     @Override
-    CommandRouter createRouter(CommandBus ignored, Message sourceMessage, CommandContext commandContext) {
+    CommandRouter createRouter(CommandBus ignored,
+                               Message sourceMessage,
+                               CommandContext commandContext) {
         final CommandBus mockBus = mock(CommandBus.class);
 
         doAnswer(new Answer() {
@@ -57,7 +59,7 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
                 observer.onError(new RuntimeException("simulate error"));
                 return null;
             }
-        }).when(mockBus).post(any(Command.class), ArgumentMatchers.<StreamObserver<Response>>any());
+        }).when(mockBus).post(any(Command.class), ArgumentMatchers.<StreamObserver<Command>>any());
 
         return new CommandRouter(mockBus, sourceMessage, commandContext);
     }

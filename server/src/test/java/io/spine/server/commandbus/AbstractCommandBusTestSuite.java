@@ -27,10 +27,10 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
-import io.spine.base.Response;
 import io.spine.client.ActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
+import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.commandstore.CommandStore;
@@ -48,6 +48,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
+import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -60,6 +61,9 @@ import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -84,7 +88,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
-    protected TestResponseObserver responseObserver;
+    protected MemoizingObserver<Command> observer;
 
     /**
      * A public constructor for derived test cases.
@@ -104,10 +108,11 @@ public abstract class AbstractCommandBusTestSuite {
     }
 
     static <E extends CommandException>
-    void checkCommandError(Throwable throwable,
+    void checkCommandError(@Nullable Throwable throwable,
                            CommandValidationError validationError,
                            Class<E> exceptionClass,
                            Command cmd) {
+        assertNotNull(throwable);
         final Throwable cause = throwable.getCause();
         assertEquals(exceptionClass, cause.getClass());
         @SuppressWarnings("unchecked")
@@ -179,7 +184,7 @@ public abstract class AbstractCommandBusTestSuite {
                             ? TestActorRequestFactory.newInstance(getClass(), newTenantUuid())
                             : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
-        responseObserver = new TestResponseObserver();
+        observer = StreamObservers.memoizingObserver();
     }
 
     @After
@@ -199,7 +204,7 @@ public abstract class AbstractCommandBusTestSuite {
         commandBus.unregister(createProjectHandler);
         commandBus.register(createProjectHandler);
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.<Response>noOpObserver());
+        spy.post(commands, StreamObservers.<Command>memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
@@ -220,6 +225,12 @@ public abstract class AbstractCommandBusTestSuite {
 
     protected Command newCommand() {
         return Given.Command.createProject();
+    }
+
+    protected void checkResult(Command cmd) {
+        assertNull(observer.getError());
+        assertTrue(observer.isCompleted());
+        assertEquals(cmd, observer.firstResponse());
     }
 
     void storeAsScheduled(Iterable<Command> commands,
