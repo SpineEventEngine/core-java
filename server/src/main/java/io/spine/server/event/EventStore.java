@@ -140,6 +140,9 @@ public class EventStore implements AutoCloseable {
      *
      * <p>If the passed {@link Iterable} is empty, no action is performed.
      *
+     * <p>If the passed {@linkplain Event Events} belong to the different
+     * {@linkplain TenantId tenants}, an {@link IllegalArgumentException} is thrown.
+     *
      * @param events the events to append
      */
     public void appendAll(final Iterable<Event> events) {
