@@ -38,6 +38,7 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Abstract base for command routers.
@@ -60,16 +61,6 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      * Command messages for commands that we post during routing.
      */
     private final Queue<Message> queue;
-
-    /**
-     * The future for waiting until the {@link CommandBus#post posting of the command} completes.
-     */
-    private final SettableFuture<Command> finishFuture = SettableFuture.create();
-
-    /**
-     * The observer for posting commands.
-     */
-    private final StreamObserver<Command> responseObserver = newAckingObserver(finishFuture);
 
     AbstractCommandRouter(CommandBus commandBus,
                           Message commandMessage,
@@ -141,14 +132,22 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     protected Command route(Message message) {
         final Command command = produceCommand(message);
-        commandBus.post(command, responseObserver);
+        final SettableFuture<Command> finishFuture = SettableFuture.create();
+        final StreamObserver<Command> observer = newAckingObserver(finishFuture);
+        commandBus.post(command, observer);
         // Wait till the call is completed.
+        final Command retrievedCommand;
         try {
-            final Command retrievedCommand = finishFuture.get();
-            checkNotNull(retrievedCommand);
+            retrievedCommand = finishFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
+        checkState(retrievedCommand.equals(command),
+                   "Wrong command acknowledged. Was expecting %s (%s), but was %s (%s).",
+                   command.getMessage().getTypeUrl(),
+                   command.getId(),
+                   retrievedCommand.getMessage().getTypeUrl(),
+                   retrievedCommand.getId());
         return command;
     }
 
