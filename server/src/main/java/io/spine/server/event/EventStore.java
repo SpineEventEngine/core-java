@@ -220,6 +220,12 @@ public class EventStore implements AutoCloseable {
         }
     }
 
+    private void logStored(Iterable<Event> events) {
+        for (Event event : events) {
+            logStored(event);
+        }
+    }
+
     private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
         if (logger == null) {
             return;
