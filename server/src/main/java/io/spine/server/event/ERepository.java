@@ -41,7 +41,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterators.filter;
 import static com.google.common.collect.Iterators.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.gt;
 import static io.spine.client.ColumnFilters.lt;
@@ -107,7 +106,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
 
     void store(Iterable<Event> events) {
         final Iterable<EEntity> entities = Iterables.transform(events, EventToEEntity.instance());
-        store(newLinkedList(entities));
+        store(newArrayList(entities));
     }
 
     private static Function<EEntity, Event> getEvent() {
