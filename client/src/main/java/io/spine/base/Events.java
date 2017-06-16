@@ -22,8 +22,10 @@ package io.spine.base;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.annotation.Internal;
 import io.spine.string.Stringifier;
 import io.spine.time.Timestamps2;
+import io.spine.users.TenantId;
 import io.spine.users.UserId;
 
 import java.util.Collections;
@@ -146,6 +148,18 @@ public final class Events {
         checkNotNull(id);
         checkNotEmptyOrBlank(id.getValue(), "event ID");
         return id;
+    }
+
+    /**
+     * Obtains the {@link TenantId} from the given {@link Event}.
+     */
+    @Internal
+    public static TenantId getTenantId(Event event) {
+        final TenantId result = event.getContext()
+                                     .getCommandContext()
+                                     .getActorContext()
+                                     .getTenantId();
+        return result;
     }
 
     /**

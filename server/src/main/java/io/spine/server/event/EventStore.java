@@ -42,6 +42,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
+import static io.spine.base.Events.getTenantId;
 
 /**
  * A store of all events in a bounded context.
@@ -49,6 +50,9 @@ import static com.google.common.collect.Iterables.tryFind;
  * @author Alexander Yevsyukov
  */
 public class EventStore implements AutoCloseable {
+
+    private static final String DIFFERENT_TENANT_ERROR_TEMPLATE =
+            "Events belonging to different tenants (%s) and (%s) cannot be stored in a single operation.";
 
     private final ERepository storage;
     private final Executor streamExecutor;
@@ -77,19 +81,12 @@ public class EventStore implements AutoCloseable {
         checkNotNull(first);
         checkNotNull(others);
 
-        final TenantId firstTenant = first.getContext()
-                                          .getCommandContext()
-                                          .getActorContext()
-                                          .getTenantId();
-
+        final TenantId firstTenant = getTenantId(first);
         while (others.hasNext()) {
             final Event event = others.next();
-            final TenantId currentTenant = event.getContext()
-                                               .getCommandContext()
-                                               .getActorContext()
-                                               .getTenantId();
+            final TenantId currentTenant = getTenantId(event);
             checkArgument(currentTenant.equals(firstTenant),
-                          "Different tenants (%s) and (%s) cannot be stored in a single operation.",
+                          DIFFERENT_TENANT_ERROR_TEMPLATE,
                           first, currentTenant);
         }
     }
