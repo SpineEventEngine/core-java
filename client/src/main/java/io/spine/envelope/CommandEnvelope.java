@@ -71,19 +71,15 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Co
     }
 
     /**
-     * Obtains the ID of the command.
-     */
-    public CommandId getCommandId() {
-        return getId();
-    }
-
-    /**
      * Obtains the tenant ID of the command.
      */
     public TenantId getTenantId() {
         return Commands.getTenantId(getCommand());
     }
 
+    /**
+     * Obtains the command ID.
+     */
     @Override
     public CommandId getId() {
         return commandId;

@@ -227,7 +227,7 @@ public class CommandBus extends Bus<Command,
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
-        final String idStr = Identifier.toString(commandEnvelope.getCommandId());
+        final String idStr = Identifier.toString(commandEnvelope.getId());
         final String msg = format("No dispatcher found for the command (class: %s id: %s).",
                                   commandEnvelope.getMessageClass()
                                                  .getClassName(),

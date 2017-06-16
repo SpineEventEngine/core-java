@@ -96,7 +96,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final CommandEnvelope envelope = CommandEnvelope.of(command);
         verify(log).errorHandling(dispatcher.exception,
                                   envelope.getMessage(),
-                                  envelope.getCommandId());
+                                  envelope.getId());
 
         // Check that the command status has the correct code,
         // and the error matches the thrown exception.
@@ -151,7 +151,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         // Check that the logging was called.
         verify(log).errorHandling(eq(exception),
                                   eq(envelope.getMessage()),
-                                  eq(envelope.getCommandId()));
+                                  eq(envelope.getId()));
 
         final String errorMessage = exception.getMessage();
         assertHasErrorStatusWithMessage(envelope, errorMessage);
@@ -182,7 +182,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
                         return commandStore.getStatus(checkNotNull(input));
                     }
                 };
-        final ProcessingStatus result = func.execute(commandEnvelope.getCommandId());
+        final ProcessingStatus result = func.execute(commandEnvelope.getId());
         return result;
     }
 
@@ -198,7 +198,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         // Check that the logging was called.
         verify(log).errorHandlingUnknown(eq(throwable),
                                          eq(envelope.getMessage()),
-                                         eq(envelope.getCommandId()));
+                                         eq(envelope.getId()));
 
         // Check that the status and message.
         assertHasErrorStatusWithMessage(envelope, throwable.getMessage());
@@ -218,7 +218,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         for (Command cmd : commands) {
             final CommandEnvelope envelope = CommandEnvelope.of(cmd);
             final Message msg = envelope.getMessage();
-            final CommandId id = envelope.getCommandId();
+            final CommandId id = envelope.getId();
 
             // Check the expired status error was set.
             final ProcessingStatus status = getProcessingStatus(envelope);

@@ -92,7 +92,7 @@ public class StandPostShould {
                 new ArgumentMatcher<EntityStateEnvelope<?, ?>>() {
                     @Override
                     public boolean matches(EntityStateEnvelope<?, ?> argument) {
-                        final boolean entityIdMatches = argument.getEntityId()
+                        final boolean entityIdMatches = argument.getId()
                                                                 .equals(entityId);
                         final boolean versionMatches = version.equals(argument.getEntityVersion()
                                                                               .orNull());

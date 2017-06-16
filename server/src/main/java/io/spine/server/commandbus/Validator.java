@@ -65,7 +65,7 @@ class Validator {
         final ImmutableList.Builder<ConstraintViolation> result = ImmutableList.builder();
         final Message message = envelope.getMessage();
         final CommandContext context = envelope.getCommandContext();
-        final CommandId id = envelope.getCommandId();
+        final CommandId id = envelope.getId();
         validateCommandId(id, result);
         validateMessage(message, result);
         validateContext(context, result);

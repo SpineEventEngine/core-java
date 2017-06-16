@@ -85,7 +85,7 @@ public class CommandEnvelopeShould {
 
     @Test
     public void obtain_command_id() {
-        assertEquals(command.getId(), envelope.getCommandId());
+        assertEquals(command.getId(), envelope.getId());
     }
 
     @Test

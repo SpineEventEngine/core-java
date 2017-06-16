@@ -151,7 +151,7 @@ class Rescheduler {
     private void onScheduledCommandExpired(Command command) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
         final Message msg = commandEnvelope.getMessage();
-        final CommandId id = commandEnvelope.getCommandId();
+        final CommandId id = commandEnvelope.getId();
 
         final Error error = CommandExpiredException.commandExpiredError(msg);
         commandStore().setToError(commandEnvelope, error);

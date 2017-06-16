@@ -260,7 +260,7 @@ public class CommandStore implements AutoCloseable {
     @SuppressWarnings("ChainOfInstanceofChecks") // OK for this consolidated error handling.
     public void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
         final Message commandMessage = commandEnvelope.getMessage();
-        final CommandId commandId = commandEnvelope.getCommandId();
+        final CommandId commandId = commandEnvelope.getId();
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
             log.failureHandling(failure, commandMessage, commandId);

@@ -260,7 +260,7 @@ public abstract class Aggregate<I,
 
     private EventFactory createEventFactory(CommandEnvelope envelope, int eventCount) {
         final EventFactory result = EventFactory.newBuilder()
-                                                .setCommandId(envelope.getCommandId())
+                                                .setCommandId(envelope.getId())
                                                 .setProducerId(getProducerId())
                                                 .setMaxEventCount(eventCount)
                                                 .setCommandContext(envelope.getCommandContext())
