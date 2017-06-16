@@ -58,7 +58,7 @@ public class CommandRouterOnErrorShould extends AbstractCommandRouterShould<Comm
         final CommandBus commandBus = boundedContext.getCommandBus();
 
         // Register dispatcher for `StringValue` message type.
-        // Otherwise we won't be able to post.
+        // Fails each time of dispatch().
         commandBus.register(new CommandDispatcher() {
             @Override
             public Set<CommandClass> getMessageClasses() {

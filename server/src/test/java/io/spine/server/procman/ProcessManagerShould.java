@@ -24,9 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Subscribe;
-import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
@@ -73,12 +71,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
 
 @SuppressWarnings("OverlyCoupledClass")
 public class ProcessManagerShould {
@@ -203,19 +197,10 @@ public class ProcessManagerShould {
 
         // The source of the command is StartProject.
         assertThat(getMessage(commandRouted.getSource()), instanceOf(StartProject.class));
-//        verifyPostedCmd(commandRouted.getProduced(0));
         final List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
         assertSize(1, dispatchedCommands);
         final CommandEnvelope dispatchedCommand = dispatcher.getCommands().get(0);
         assertEquals(commandRouted.getProduced(0), dispatchedCommand.getCommand());
-    }
-
-    @SuppressWarnings("unchecked")
-    private void verifyPostedCmd(Command cmd) {
-        // The produced command was posted to CommandBus once, and the same
-        // command is in the generated event.
-        // We are not interested in observer instance here.
-        verify(commandBus, times(1)).post(eq(cmd), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)
