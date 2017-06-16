@@ -27,6 +27,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
+import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
@@ -39,7 +40,6 @@ import io.spine.server.tenant.TenantIndex;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.event.ProjectCreated;
-import io.spine.users.TenantId;
 import org.junit.After;
 import org.junit.Before;
 

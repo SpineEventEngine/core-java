@@ -28,7 +28,7 @@ option java_outer_classname = "GroupProto";
 option java_package = "io.spine.users";
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
+import "spine/base/user_id.proto";
 
 message GroupId {
     string value = 1;
@@ -46,7 +46,7 @@ message Group {
     // Reserved for attributes describing the group.
     reserved 4 to 19;
 
-    repeated UserId users = 20;
+    repeated base.UserId users = 20;
 
     repeated GroupId groups = 21;
 }

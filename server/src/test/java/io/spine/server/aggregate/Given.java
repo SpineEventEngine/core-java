@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.base.Event;
+import io.spine.base.UserId;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
@@ -35,7 +36,6 @@ import io.spine.test.aggregate.event.ProjectCreated;
 import io.spine.test.aggregate.event.ProjectStarted;
 import io.spine.test.aggregate.event.TaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.users.UserId;
 
 import java.util.List;
 

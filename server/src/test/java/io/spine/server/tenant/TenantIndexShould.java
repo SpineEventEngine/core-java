@@ -22,9 +22,9 @@ package io.spine.server.tenant;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
+import io.spine.base.TenantId;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.users.TenantId;
 import org.junit.Test;
 
 import java.util.List;

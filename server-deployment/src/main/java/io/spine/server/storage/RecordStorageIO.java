@@ -20,11 +20,11 @@
 
 package io.spine.server.storage;
 
+import io.spine.base.TenantId;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.memory.InMemoryRecordStorage;
 import io.spine.server.storage.memory.InMemoryRecordStorageIO;
-import io.spine.users.TenantId;
 import io.spine.util.Exceptions;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.KvCoder;

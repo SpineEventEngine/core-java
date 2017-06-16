@@ -31,13 +31,13 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/timestamp.proto";
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
+import "spine/base/user_id.proto";
 
 // Details about online status of a user.
 message OnlineStatus {
 
     // The id of the user.
-    UserId user_id = 1;
+    base.UserId user_id = 1;
 
     // This field is `true` is the user is logged in the system at the moment of creation of
     // this message.

@@ -23,10 +23,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.errorprone.annotations.CanIgnoreReturnValue;
 import io.spine.base.ActorContext;
 import io.spine.base.CommandContext;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import javax.annotation.Nullable;
 

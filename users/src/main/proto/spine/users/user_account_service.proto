@@ -24,7 +24,7 @@ package spine.users;
 option (type_url_prefix) = "type.spine.io";
 // We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
 // to hide implementation details from the public API of the framework.
-option java_package = "io.spine.users.grpc";
+option java_package = "io.spine.base.grpc";
 
 option java_multiple_files = true;
 option java_outer_classname = "UserInfoServiceProto";
@@ -33,14 +33,14 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/field_mask.proto";
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
+import "spine/base/user_id.proto";
 import "spine/users/user_account.proto";
 
 // The request for obtaining multiple user accounts at once.
 message UserAccountRequest {
 
     // Identifiers of users for whom we need account details.
-    repeated UserId user_id = 1;
+    repeated base.UserId user_id = 1;
 
     // Specification of fields to be included into the returned results.
     // If not set, all fields will be returned.

@@ -32,8 +32,8 @@ import "google/protobuf/field_mask.proto";
 
 import "spine/options.proto";
 import "spine/ui/language.proto";
-import "spine/users/user_id.proto";
-import "spine/users/tenant_id.proto";
+import "spine/base/user_id.proto";
+import "spine/base/tenant_id.proto";
 import "spine/base/actor_context.proto";
 import "spine/base/response.proto";
 import "spine/client/entities.proto";

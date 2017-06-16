@@ -25,10 +25,10 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.base.Commands;
+import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.time.Time;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
 import org.junit.Before;
 import org.junit.Test;
 

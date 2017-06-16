@@ -24,14 +24,14 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.CommandContext;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.client.CommandFactory;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.StartProject;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;

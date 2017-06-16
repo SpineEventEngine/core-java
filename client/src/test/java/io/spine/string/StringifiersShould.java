@@ -24,8 +24,8 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.base.CommandId;
 import io.spine.base.EventId;
 import io.spine.base.Identifier;
+import io.spine.base.UserId;
 import io.spine.test.identifiers.IdWithPrimitiveFields;
-import io.spine.users.UserId;
 import org.junit.Test;
 
 import java.util.Random;

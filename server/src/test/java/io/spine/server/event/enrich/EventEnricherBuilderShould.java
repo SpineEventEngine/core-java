@@ -24,12 +24,12 @@ import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.UserId;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.event.Given;
 import io.spine.server.event.enrich.EventEnricher.SameTransition;
 import io.spine.test.Tests;
 import io.spine.test.event.ProjectId;
-import io.spine.users.UserId;
 import org.junit.Before;
 import org.junit.Test;
 

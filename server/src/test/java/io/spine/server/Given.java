@@ -25,6 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Identifier;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.Query;
 import io.spine.people.PersonName;
@@ -50,8 +52,6 @@ import io.spine.test.commandservice.customer.command.CreateCustomer;
 import io.spine.test.commandservice.customer.event.CustomerCreated;
 import io.spine.time.LocalDate;
 import io.spine.time.LocalDates;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;

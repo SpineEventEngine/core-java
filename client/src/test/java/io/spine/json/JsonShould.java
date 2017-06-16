@@ -25,11 +25,11 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
+import io.spine.base.UserId;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
-import io.spine.users.UserId;
 import org.junit.Test;
 
 import java.util.List;

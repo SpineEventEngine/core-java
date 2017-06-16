@@ -21,10 +21,10 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Timestamp;
+import io.spine.base.TenantId;
 import io.spine.server.storage.RecordStorageIO;
 import io.spine.server.storage.memory.InMemoryProjectionStorage;
 import io.spine.server.storage.memory.InMemoryProjectionStorageIO;
-import io.spine.users.TenantId;
 import io.spine.util.Exceptions;
 import org.apache.beam.sdk.transforms.DoFn;
 

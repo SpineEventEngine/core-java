@@ -27,6 +27,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventId;
+import io.spine.base.UserId;
 import io.spine.people.PersonName;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.test.TestEventFactory;
@@ -40,7 +41,6 @@ import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
 import io.spine.time.ZoneOffset;
-import io.spine.users.UserId;
 
 import javax.annotation.Nullable;
 

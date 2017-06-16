@@ -190,7 +190,7 @@ extend google.protobuf.FieldOptions {
     // An example:
     //
     // message MyEvent {
-    //    spine.users.UserId user_id = 1;
+    //    spine.base.UserId user_id = 1;
     //    ...
     //    message Enrichment {
     //       spine.people.PersonName name = 1 [(by) = "user_id"];

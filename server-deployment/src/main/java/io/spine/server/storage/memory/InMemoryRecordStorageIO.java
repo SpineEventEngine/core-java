@@ -22,6 +22,7 @@ package io.spine.server.storage.memory;
 
 import io.grpc.ManagedChannel;
 import io.spine.base.Identifier;
+import io.spine.base.TenantId;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.server.entity.EntityRecord;
@@ -29,7 +30,6 @@ import io.spine.server.storage.RecordStorageIO;
 import io.spine.server.storage.memory.grpc.RecordStorageRequest;
 import io.spine.server.storage.memory.grpc.RecordStorageServiceGrpc;
 import io.spine.server.storage.memory.grpc.RecordStorageServiceGrpc.RecordStorageServiceBlockingStub;
-import io.spine.users.TenantId;
 
 import java.util.Iterator;
 

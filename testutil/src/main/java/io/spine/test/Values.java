@@ -21,13 +21,13 @@
 package io.spine.test;
 
 import com.google.protobuf.StringValue;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.base.Version;
 import io.spine.base.Versions;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.time.Time;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import java.util.concurrent.ThreadLocalRandom;
 

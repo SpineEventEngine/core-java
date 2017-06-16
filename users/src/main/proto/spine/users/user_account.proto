@@ -31,10 +31,10 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/timestamp.proto";
 
 import "spine/options.proto";
+import "spine/base/user_id.proto";
 import "spine/net/url.proto";
 import "spine/net/internet_domain.proto";
 import "spine/people/person_name.proto";
-import "spine/users/user_id.proto";
 import "spine/users/user_profile.proto";
 
 // Information exposed by an identity provider such as Google Sign-In or Facebook Login.
@@ -67,7 +67,7 @@ message UserInfo {
 message UserAccount {
 
     // The identifier of the user account in the application.
-    UserId user_id = 1;
+    base.UserId user_id = 1;
 
     // The name of the human user.
     people.PersonName name = 2;
@@ -136,7 +136,7 @@ message UserAccount {
     // The linked identities of the user obtained from different authentication providers.
     //
     // For getting Google Account Id from Java,
-    // please use `io.spine.users.UserAccounts.getGoogleUid()`
+    // please use `io.spine.base.UserAccounts.getGoogleUid()`
     //
     repeated UserInfo linked_identity = 20;
 
