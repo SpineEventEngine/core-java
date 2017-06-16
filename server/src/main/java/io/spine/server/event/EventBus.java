@@ -203,10 +203,11 @@ public class EventBus extends CommandOutputBus<Event,
      *
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
+     * <p>This method defines the general posting flow and should not be overridden.
+     *
      * @param events the events to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
-    // Left non-final for testing purposes.
     public void post(Iterable<Event> events) {
         post(events, StreamObservers.<Event>noOpObserver());
     }

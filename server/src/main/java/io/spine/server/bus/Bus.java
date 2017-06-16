@@ -83,10 +83,11 @@ public abstract class Bus<T extends Message,
      *
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
+     * <p>This method defines the general posting flow and should not be overridden.
+     *
      * @param message          the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
-    // Left non-final for testing purposes.
     public void post(T message, StreamObserver<T> acknowledgement) {
         checkNotNull(message);
         checkNotNull(acknowledgement);
