@@ -192,13 +192,16 @@ public final class Identifier<I> {
      * @param any the ID value wrapped into {@code Any}
      * @return unwrapped ID
      */
-    public static Object unpack(Any any) {
+    public static <I> I unpack(Any any) {
         checkNotNull(any);
         final Message unpacked = AnyPacker.unpack(any);
 
         for (Type type : Type.values()) {
             if (type.matchMessage(unpacked)) {
-                final Object result = type.fromMessage(unpacked);
+                // Expect the client to know the desired type.
+                // If the client fails to predict it in compile time, fail fast.
+                @SuppressWarnings("unchecked")
+                final I result = (I) type.fromMessage(unpacked);
                 return result;
             }
         }

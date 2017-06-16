@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+abstract class AbstractMessageEnvelope<I, T> implements MessageEnvelope<I, T> {
 
     private final T object;
 

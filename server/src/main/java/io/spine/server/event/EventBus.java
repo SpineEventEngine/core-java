@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
+import io.spine.base.EventId;
 import io.spine.base.Response;
 import io.spine.envelope.EventEnvelope;
 import io.spine.io.StreamObservers;
@@ -94,7 +95,11 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * @see io.spine.server.projection.Projection Projection
  * @see Subscribe @Subscribe
  */
-public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher> {
+public class EventBus extends CommandOutputBus<Event,
+                                               EventId,
+                                               EventEnvelope,
+                                               EventClass,
+                                               EventDispatcher> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and

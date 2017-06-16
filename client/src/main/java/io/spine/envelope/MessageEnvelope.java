@@ -30,12 +30,17 @@ import io.spine.type.MessageClass;
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public interface MessageEnvelope<T> {
+public interface MessageEnvelope<I, T> {
 
     /**
      * Obtains the object which contains the message of interest.
      */
     T getOuterObject();
+
+    /**
+     * Obtains the identifier of the object.
+     */
+    I getId();
 
     /**
      * Obtains the message.

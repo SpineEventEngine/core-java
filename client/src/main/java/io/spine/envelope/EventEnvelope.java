@@ -23,6 +23,7 @@ package io.spine.envelope;
 import com.google.protobuf.Message;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
+import io.spine.base.EventId;
 import io.spine.base.Events;
 import io.spine.type.EventClass;
 
@@ -34,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
+public final class EventEnvelope extends AbstractMessageEnvelope<EventId, Event> {
 
     private final Message eventMessage;
     private final EventClass eventClass;
@@ -53,6 +54,12 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
     public static EventEnvelope of(Event event) {
         checkNotNull(event);
         return new EventEnvelope(event);
+    }
+
+    @Override
+    public EventId getId() {
+        final EventId result = getOuterObject().getId();
+        return result;
     }
 
     /**

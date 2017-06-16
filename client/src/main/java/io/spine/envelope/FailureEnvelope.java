@@ -24,6 +24,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
 import io.spine.base.Failure;
+import io.spine.base.FailureId;
 import io.spine.base.Failures;
 import io.spine.type.FailureClass;
 
@@ -35,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
+public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure> {
 
     /**
      * The failure message.
@@ -74,6 +75,11 @@ public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
     public static FailureEnvelope of(Failure failure) {
         checkNotNull(failure);
         return new FailureEnvelope(failure);
+    }
+
+    @Override
+    public FailureId getId() {
+        return getOuterObject().getId();
     }
 
     @Override

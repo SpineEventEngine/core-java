@@ -50,7 +50,8 @@ import static io.spine.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 public abstract class Bus<T extends Message,
-                          E extends MessageEnvelope<T>,
+                          I,
+                          E extends MessageEnvelope<I, T>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E>> implements AutoCloseable {
 

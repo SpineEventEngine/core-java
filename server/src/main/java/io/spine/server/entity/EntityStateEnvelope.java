@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
  * @author Alex Tymchenko
  */
 public final class EntityStateEnvelope<I, S extends Message>
-                                    implements MessageEnvelope<Entity<I, S>> {
+                                    implements MessageEnvelope<I, Entity<I, S>> {
 
     /**
      * The state of the entity.
@@ -111,6 +111,12 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Nullable
     public Entity<I, S> getOuterObject() {
         return null;
+    }
+
+    @Override
+    public I getId() {
+        final I result = Identifier.unpack(entityId);
+        return result;
     }
 
     @Override
