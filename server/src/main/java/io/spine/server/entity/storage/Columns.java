@@ -142,7 +142,7 @@ class Columns {
         checkNotNull(columnName);
         ensureRegistered(entityClass);
 
-        final Collection<Column> cachedColumns = knownEntityProperties.get(entityClass);
+        final Collection<Column> cachedColumns = getColumns(entityClass);
         for (Column column : cachedColumns) {
             if (column.getName()
                       .equals(columnName)) {
@@ -154,6 +154,20 @@ class Columns {
                 format("Could not find a Column description for %s.%s.",
                        entityClass.getCanonicalName(),
                        columnName));
+    }
+
+    /**
+     * Retrieves a {@link Collection} of {@link Column Columns} from the given Entity class.
+     *
+     * @param entityClass the class containing the {@link Column} definition
+     * @return a {@link Collection} of {@link Column} corresponded to entity class
+     */
+    static Collection<Column> getColumns(Class<? extends Entity> entityClass) {
+        checkNotNull(entityClass);
+        ensureRegistered(entityClass);
+
+        final Collection<Column> result = knownEntityProperties.get(entityClass);
+        return result;
     }
 
     /**
