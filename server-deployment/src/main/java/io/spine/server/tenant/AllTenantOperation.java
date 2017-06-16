@@ -21,7 +21,7 @@
 package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
-import io.spine.users.TenantId;
+import io.spine.base.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

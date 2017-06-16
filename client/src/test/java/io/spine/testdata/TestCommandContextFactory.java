@@ -25,8 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.ActorContext;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandContext.Schedule;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;

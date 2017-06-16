@@ -71,12 +71,6 @@ dependencies {
     
     // Add this only for server-side code. 
     compile group: 'io.spine', name: 'spine-server-core', version: spineVersion
-    
-    // Add this if your code deals with users. 
-    compile group: 'io.spine', name: 'spine-users', version: spineVersion
-    
-    // Dependency on value objects from the Values sub-project.
-    compile group: 'io.spine', name: 'spine-values', version: spineVersion
 }
 ```
 There is no Maven support at the moment. 

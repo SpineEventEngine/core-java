@@ -29,6 +29,7 @@ import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.FailureThrowable;
+import io.spine.base.TenantId;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.Assign;
@@ -40,7 +41,6 @@ import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
 import io.spine.test.command.event.ProjectCreated;
 import io.spine.type.CommandClass;
-import io.spine.users.TenantId;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;

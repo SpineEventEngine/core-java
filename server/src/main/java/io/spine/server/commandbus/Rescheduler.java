@@ -29,13 +29,13 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Error;
+import io.spine.base.TenantId;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;
-import io.spine.users.TenantId;
 
 import java.util.Iterator;
 import java.util.Set;

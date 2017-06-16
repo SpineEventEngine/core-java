@@ -20,26 +20,16 @@ import groovy.time.TimeCategory
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 buildscript {
-    repositories {
-        jcenter()
-        // Google's mirror of Maven Central
-        maven { url = 'https://maven-central.storage.googleapis.com' }
-        
-        mavenCentral()
-        mavenLocal()
-
-        // Spine releases repository.
-        maven { url = 'http://maven.teamdev.com/repository/spine' }
-
-        // Spine snapshots repository.
-        maven { url = 'http://maven.teamdev.com/repository/spine-snapshots' }
-    }
 
     ext {
+        googleMavenCentralMirror = 'https://maven-central.storage.googleapis.com'
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
 
-        spineVersion = '0.9.24-SNAPSHOT'
+        spineRepository = 'http://maven.teamdev.com/repository/spine'
+        spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
+        spineVersion = '0.9.25-SNAPSHOT'
+
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
@@ -49,6 +39,21 @@ buildscript {
         // Indicates whether the generation of the validating builders is enabled.
         generateValidatingBuildersValue = true
     }
+
+    repositories {
+        jcenter()
+        maven { url = googleMavenCentralMirror }
+
+        mavenCentral()
+        mavenLocal()
+
+        // Spine releases repository.
+        maven { url = spineRepository }
+
+        // Spine snapshots repository.
+        maven { url = spineSnapshotsRepository }
+    }
+
 
     dependencies {
         classpath group: 'com.google.guava', name: 'guava', version: guavaVersion
@@ -97,7 +102,7 @@ ext {
     publishPlugin = "$rootDir/scripts/publish.gradle"
 
     credentialsPropertyFile = 'credentials.properties'
-    projectsToPublish = ["client", "server", "values", "testutil", "users"]
+    projectsToPublish = ["client", "server", "values", "testutil"]
 }
 
 subprojects {
@@ -169,8 +174,10 @@ subprojects {
     // org.gradle.java.home=/Library/Java/JavaVirtualMachines/jdk1.7.0_80.jdk/Contents/Home/
 
     repositories {
-        mavenLocal()
+        jcenter()
+        maven { url = googleMavenCentralMirror }
         mavenCentral()
+        mavenLocal()
     }
 
     dependencies {

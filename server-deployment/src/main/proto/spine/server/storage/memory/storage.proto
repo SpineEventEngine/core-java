@@ -34,7 +34,7 @@ import "spine/options.proto";
 import "spine/client/entities.proto";
 import "spine/base/event.proto";
 import "spine/base/response.proto";
-import "spine/users/tenant_id.proto";
+import "spine/base/tenant_id.proto";
 import "spine/server/entity/entity.proto";
 import "spine/server/event/event_stream_query.proto";
 
@@ -42,7 +42,7 @@ import "spine/server/event/event_stream_query.proto";
 message RecordStorageRequest {
 
     // The ID of a tenant.
-    spine.users.TenantId tenant_id = 1;
+    spine.base.TenantId tenant_id = 1;
 
     // The type URL of the entity state.
     string entity_state_type_url = 2;
@@ -75,7 +75,7 @@ service RecordStorageService {
 
 // The request to write last handled event timestamp for a projection repository.
 message LastHandledEventRequest {
-    spine.users.TenantId tenant_id = 1;
+    spine.base.TenantId tenant_id = 1;
     string projection_state_type_url = 2;
     google.protobuf.Timestamp timestamp = 3;
 }

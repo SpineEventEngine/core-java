@@ -28,11 +28,11 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Identifier;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import static io.spine.test.Values.newUserId;
 

@@ -21,8 +21,8 @@
 package io.spine.server.tenant;
 
 import com.google.common.base.Optional;
+import io.spine.base.TenantId;
 import io.spine.test.Tests;
-import io.spine.users.TenantId;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

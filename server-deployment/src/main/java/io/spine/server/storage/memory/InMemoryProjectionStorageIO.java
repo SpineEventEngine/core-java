@@ -22,12 +22,12 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.Timestamp;
 import io.grpc.ManagedChannel;
+import io.spine.base.TenantId;
 import io.spine.server.projection.ProjectionStorageIO;
 import io.spine.server.storage.RecordStorageIO;
 import io.spine.server.storage.memory.grpc.LastHandledEventRequest;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc;
 import io.spine.server.storage.memory.grpc.ProjectionStorageServiceGrpc.ProjectionStorageServiceBlockingStub;
-import io.spine.users.TenantId;
 import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;

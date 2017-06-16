@@ -27,7 +27,7 @@ option java_outer_classname = "EventEventsProto";
 option java_multiple_files = true;
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
+import "spine/base/user_id.proto";
 import "spine/test/event/project.proto";
 
 message ProjectCreated {
@@ -36,7 +36,7 @@ message ProjectCreated {
     message Enrichment {
         string project_name = 1 [(by) = "project_id"];
 
-        spine.users.UserId owner_id = 2 [(by) = "project_id"];
+        spine.base.UserId owner_id = 2 [(by) = "project_id"];
     }
 }
 

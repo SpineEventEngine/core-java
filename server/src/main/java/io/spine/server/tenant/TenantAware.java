@@ -23,7 +23,7 @@ package io.spine.server.tenant;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import io.spine.annotation.Internal;
-import io.spine.users.TenantId;
+import io.spine.base.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.validate.Validate.isDefault;

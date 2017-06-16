@@ -25,13 +25,13 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.test.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.time.Timestamps2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 import io.spine.validate.ValidationException;
 import org.junit.Test;
 

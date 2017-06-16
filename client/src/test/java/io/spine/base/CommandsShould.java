@@ -38,7 +38,6 @@ import io.spine.test.commands.TestCommand;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.UserId;
 import org.junit.Test;
 
 import java.util.List;

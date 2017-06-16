@@ -26,7 +26,7 @@ option java_package="io.spine.test.event";
 option java_multiple_files = true;
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
+import "spine/base/user_id.proto";
 
 message ProjectId {
     string id = 1;
@@ -49,7 +49,7 @@ message Project {
 
     Status status = 4;
 
-    spine.users.UserId owner_id = 5;
+    spine.base.UserId owner_id = 5;
 }
 
 message TaskId {

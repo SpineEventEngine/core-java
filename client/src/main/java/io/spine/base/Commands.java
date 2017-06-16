@@ -29,7 +29,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.time.Timestamps2;
-import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Collections;

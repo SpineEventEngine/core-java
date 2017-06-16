@@ -28,10 +28,10 @@ import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.time.ZoneOffset;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 import io.spine.validate.ValidationException;
 
 import javax.annotation.Nullable;
