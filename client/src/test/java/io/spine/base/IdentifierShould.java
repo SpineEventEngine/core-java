@@ -24,6 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
+import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
@@ -254,5 +255,13 @@ public class IdentifierShould {
     @Test(expected = IllegalArgumentException.class)
     public void not_unpack_empty_Any() {
         Identifier.unpack(Any.getDefaultInstance());
+    }
+
+    @Test(expected = ClassCastException.class)
+    public void fail_to_unpack_ID_of_wrong_type() {
+        final String id = "abcdef";
+        final Any packed = Identifier.pack(id);
+
+        final Message wrong = Identifier.unpack(packed);
     }
 }
