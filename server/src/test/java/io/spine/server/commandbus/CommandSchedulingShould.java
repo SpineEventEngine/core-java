@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
+import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
@@ -48,6 +49,7 @@ import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -186,7 +188,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
 
         spy.postPreviouslyScheduled(command);
 
-        verify(spy).doPost(eq(CommandEnvelope.of(command)));
+        verify(spy).doPost(eq(CommandEnvelope.of(command)), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)

@@ -58,6 +58,7 @@ import io.spine.validate.AnyVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -66,8 +67,11 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.procman.ProcManTransaction.start;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Verify.assertSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
@@ -176,7 +180,8 @@ public class ProcessManagerShould {
     @Test
     public void route_commands() {
         // Add dispatcher for the routed command. Otherwise the command would reject the command.
-        commandBus.register(new AddTaskDispatcher());
+        final AddTaskDispatcher dispatcher = new AddTaskDispatcher();
+        commandBus.register(dispatcher);
         processManager.setCommandBus(commandBus);
 
         final List<Event> events = testDispatchCommand(startProject());
@@ -192,13 +197,17 @@ public class ProcessManagerShould {
         final Message message = AnyPacker.unpack(event.getMessage());
 
         // The event type is CommandRouted.
-        assertTrue(message instanceof CommandRouted);
+        assertThat(message, instanceOf(CommandRouted.class));
 
         final CommandRouted commandRouted = (CommandRouted) message;
 
         // The source of the command is StartProject.
-        assertTrue(getMessage(commandRouted.getSource()) instanceof StartProject);
-        verifyPostedCmd(commandRouted.getProduced(0));
+        assertThat(getMessage(commandRouted.getSource()), instanceOf(StartProject.class));
+//        verifyPostedCmd(commandRouted.getProduced(0));
+        final List<CommandEnvelope> dispatchedCommands = dispatcher.getCommands();
+        assertSize(1, dispatchedCommands);
+        final CommandEnvelope dispatchedCommand = dispatcher.getCommands().get(0);
+        assertEquals(commandRouted.getProduced(0), dispatchedCommand.getCommand());
     }
 
     @SuppressWarnings("unchecked")
@@ -206,8 +215,7 @@ public class ProcessManagerShould {
         // The produced command was posted to CommandBus once, and the same
         // command is in the generated event.
         // We are not interested in observer instance here.
-        verify(commandBus, times(1))
-                .post(eq(cmd), any(StreamObserver.class));
+        verify(commandBus, times(1)).post(eq(cmd), any(StreamObserver.class));
     }
 
     @Test(expected = IllegalStateException.class)
@@ -353,6 +361,8 @@ public class ProcessManagerShould {
 
     private static class AddTaskDispatcher implements CommandDispatcher {
 
+        private final List<CommandEnvelope> commands = new LinkedList<>();
+
         @Override
         public Set<CommandClass> getMessageClasses() {
             return CommandClass.setOf(AddTask.class);
@@ -360,7 +370,12 @@ public class ProcessManagerShould {
 
         @Override
         public void dispatch(CommandEnvelope envelope) {
-            // Do nothing in this dummy dispatcher.
+            commands.add(envelope);
+        }
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
+        public List<CommandEnvelope> getCommands() {
+            return commands;
         }
     }
 }

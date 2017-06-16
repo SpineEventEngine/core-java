@@ -161,20 +161,22 @@ public abstract class CommandOutputBus<M extends Message,
             @Override
             public boolean apply(@Nullable M message) {
                 checkNotNull(message);
-                return validateMessage(message, acknowledgement);
+                final boolean passes = validateMessage(message, acknowledgement);
+                return passes;
             }
         });
         return result;
     }
 
     @Override
-    protected void doPost(E envelope) {
+    protected void doPost(E envelope, StreamObserver<?> failureObserver) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedParceledMessage = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedParceledMessage);
 
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedParceledMessage);
+            // TODO:2017-06-16:dmytro.dashenkov: failureObserver.onError ?
         }
     }
 

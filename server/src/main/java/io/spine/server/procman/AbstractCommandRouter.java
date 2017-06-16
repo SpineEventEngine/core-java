@@ -154,8 +154,7 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     private Command produceCommand(Message commandMessage) {
         final CommandContext sourceContext = source.getContext();
         final CommandFactory commandFactory = commandFactory(sourceContext);
-        final Command result = commandFactory
-                .createBasedOnContext(commandMessage, sourceContext);
+        final Command result = commandFactory.createBasedOnContext(commandMessage, sourceContext);
         return result;
     }
 

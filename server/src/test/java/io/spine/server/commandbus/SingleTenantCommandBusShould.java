@@ -21,7 +21,6 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Failure;
@@ -37,7 +36,6 @@ import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
 import io.spine.test.failure.ProjectId;
 import org.junit.Test;
-import org.mockito.ArgumentMatchers;
 
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
@@ -114,8 +112,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
         final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
-        verify(failureBus).post(eq(expectedFailure),
-                                ArgumentMatchers.<StreamObserver<Failure>>any());
+        verify(failureBus).post(eq(expectedFailure));
     }
 
     @Override

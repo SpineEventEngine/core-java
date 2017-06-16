@@ -88,7 +88,7 @@ public abstract class Bus<T extends Message,
      * @param message          the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
-    public void post(T message, StreamObserver<T> acknowledgement) {
+    public final void post(T message, StreamObserver<T> acknowledgement) {
         checkNotNull(message);
         checkNotNull(acknowledgement);
         checkArgument(isNotDefault(message));
@@ -113,7 +113,6 @@ public abstract class Bus<T extends Message,
             store(messages);
             final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
             doPost(envelopes, acknowledgement);
-            acknowledgement.onCompleted();
         }
     }
 
@@ -173,7 +172,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract void doPost(E envelope);
+    protected abstract void doPost(E envelope, StreamObserver<?> failureObserver);
 
     /**
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
@@ -183,9 +182,19 @@ public abstract class Bus<T extends Message,
      * @param acknowledgement the observer of the message posting
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<T> acknowledgement) {
+        final CountingStreamSupervisor<T> ackingSupervisor =
+                new CountingStreamSupervisor<>(acknowledgement);
+        int currentErrorCount = ackingSupervisor.getErrorCount();
         for (E message : envelopes) {
-            acknowledgement.onNext(message.getOuterObject());
-            doPost(message);
+            doPost(message, ackingSupervisor);
+            if (currentErrorCount == ackingSupervisor.getErrorCount()) {
+                ackingSupervisor.onNext(message.getOuterObject());
+            } else {
+                currentErrorCount = ackingSupervisor.getErrorCount();
+            }
+        }
+        if (ackingSupervisor.getErrorCount() == 0) {
+            ackingSupervisor.onCompleted();
         }
     }
 
@@ -227,6 +236,52 @@ public abstract class Bus<T extends Message,
         protected T doBackward(E envelope) {
             final T result = envelope.getOuterObject();
             return result;
+        }
+    }
+
+    private abstract static class StreamSupervisor<T> implements StreamObserver<T> {
+
+        private final StreamObserver<T> delegate;
+
+        StreamSupervisor(StreamObserver<T> delegate) {
+            this.delegate = delegate;
+        }
+
+        protected abstract void onErrorSpotted(Throwable error);
+
+        @Override
+        public void onNext(T value) {
+            delegate.onNext(value);
+        }
+
+        @Override
+        public void onCompleted() {
+            delegate.onCompleted();
+        }
+
+        @Override
+        public void onError(Throwable error) {
+            onErrorSpotted(error);
+            delegate.onError(error);
+        }
+    }
+
+    private static class CountingStreamSupervisor<T> extends StreamSupervisor<T> {
+
+        private int errorCount;
+
+        CountingStreamSupervisor(StreamObserver<T> delegate) {
+            super(delegate);
+            this.errorCount = 0;
+        }
+
+        @Override
+        protected void onErrorSpotted(Throwable error) {
+            errorCount++;
+        }
+
+        public int getErrorCount() {
+            return errorCount;
         }
     }
 }

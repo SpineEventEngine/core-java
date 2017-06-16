@@ -27,11 +27,9 @@ import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
-import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
@@ -45,6 +43,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.io.StreamObservers.noOpObserver;
 import static java.lang.String.format;
 
 /**
@@ -178,7 +177,7 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected void doPost(CommandEnvelope envelope) {
+    protected void doPost(CommandEnvelope envelope, StreamObserver<?> failureObserver) {
         final CommandDispatcher dispatcher = getDispatcher(envelope);
         try {
             dispatcher.dispatch(envelope);
@@ -186,6 +185,7 @@ public class CommandBus extends Bus<Command,
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
+            failureObserver.onError(cause);
 
             emitFailure(envelope, cause);
         }
@@ -223,7 +223,7 @@ public class CommandBus extends Bus<Command,
      */
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        doPost(commandEnvelope);
+        doPost(commandEnvelope, noOpObserver());
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
@@ -249,8 +249,7 @@ public class CommandBus extends Bus<Command,
     private void emitFailure(CommandEnvelope commandEnvelope, Throwable cause) {
         if (cause instanceof FailureThrowable) {
             final FailureThrowable failure = (FailureThrowable) cause;
-            failureBus.post(failure.toFailure(commandEnvelope.getCommand()),
-                            StreamObservers.<Failure>noOpObserver());
+            failureBus.post(failure.toFailure(commandEnvelope.getCommand()));
         }
     }
 
