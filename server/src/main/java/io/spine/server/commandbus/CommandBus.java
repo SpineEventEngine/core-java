@@ -27,7 +27,6 @@ import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
-import io.spine.base.CommandId;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
 import io.spine.base.Response;
@@ -57,7 +56,6 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  */
 public class CommandBus extends Bus<Command,
-                                    CommandId,
                                     CommandEnvelope,
                                     CommandClass,
                                     CommandDispatcher> {

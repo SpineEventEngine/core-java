@@ -50,8 +50,7 @@ import static java.util.Collections.singleton;
  * @author Alexander Yevsyukov
  */
 public abstract class Bus<T extends Message,
-                          I,
-                          E extends MessageEnvelope<I, T>,
+                          E extends MessageEnvelope<?, T>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E>> implements AutoCloseable {
 

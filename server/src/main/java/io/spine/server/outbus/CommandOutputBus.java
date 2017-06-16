@@ -59,11 +59,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       I,
-                                       E extends MessageEnvelope<I, M>,
+                                       E extends MessageEnvelope<?, M>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C,E>>
-                extends Bus<M, I, E, C, D> {
+                extends Bus<M, E, C, D> {
 
     /**
      * The strategy to deliver the messages to the dispatchers.

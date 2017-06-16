@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Failure;
-import io.spine.base.FailureId;
 import io.spine.base.Response;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.io.StreamObservers;
@@ -50,7 +49,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @see Subscribe @Subscribe
  */
 public class FailureBus extends CommandOutputBus<Failure,
-                                                 FailureId,
                                                  FailureEnvelope,
                                                  FailureClass,
                                                  FailureDispatcher> {
