@@ -201,8 +201,11 @@ public abstract class AbstractCommandBusTestSuite {
         final Command second = newCommand();
         final List<Command> commands = newArrayList(first, second);
 
+        // Some derived test suite classes may register the handler in setUp().
+        // This prevents the repeating registration (which is an illegal operation).
         commandBus.unregister(createProjectHandler);
         commandBus.register(createProjectHandler);
+
         final CommandBus spy = spy(commandBus);
         spy.post(commands, StreamObservers.<Command>memoizingObserver());
 
