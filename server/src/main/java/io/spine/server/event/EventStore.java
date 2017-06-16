@@ -30,6 +30,7 @@ import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
+import io.spine.users.TenantId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,6 +39,7 @@ import java.io.IOException;
 import java.util.Iterator;
 import java.util.concurrent.Executor;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
 
@@ -53,22 +55,6 @@ public class EventStore implements AutoCloseable {
 
     @Nullable
     private final Logger logger;
-
-    /**
-     * Constructs an instance with the passed executor for returning streams.
-     *
-     * @param streamExecutor the executor for updating new subscribers
-     * @param storageFactory the storage factory for creating underlying storage
-     * @param logger         debug logger instance
-     */
-    EventStore(Executor streamExecutor, StorageFactory storageFactory, @Nullable Logger logger) {
-        super();
-        final ERepository eventRepository = new ERepository();
-        eventRepository.initStorage(storageFactory);
-        this.storage = eventRepository;
-        this.streamExecutor = streamExecutor;
-        this.logger = logger;
-    }
 
     /**
      * Creates a builder for locally running {@code EventStore}.
@@ -87,9 +73,41 @@ public class EventStore implements AutoCloseable {
         return new ServiceBuilder();
     }
 
-    /** Returns default logger for the class. */
-    public static Logger log() {
-        return LogSingleton.INSTANCE.value;
+    private static void checkOfTenant(Event first, Iterator<Event> others) {
+        checkNotNull(first);
+        checkNotNull(others);
+
+        final TenantId firstTenant = first.getContext()
+                                          .getCommandContext()
+                                          .getActorContext()
+                                          .getTenantId();
+
+        while (others.hasNext()) {
+            final Event event = others.next();
+            final TenantId currentTenant = event.getContext()
+                                               .getCommandContext()
+                                               .getActorContext()
+                                               .getTenantId();
+            checkArgument(currentTenant.equals(firstTenant),
+                          "Different tenants (%s) and (%s) cannot be stored in a single operation.",
+                          first, currentTenant);
+        }
+    }
+
+    /**
+     * Constructs an instance with the passed executor for returning streams.
+     *
+     * @param streamExecutor the executor for updating new subscribers
+     * @param storageFactory the storage factory for creating underlying storage
+     * @param logger         debug logger instance
+     */
+    EventStore(Executor streamExecutor, StorageFactory storageFactory, @Nullable Logger logger) {
+        super();
+        final ERepository eventRepository = new ERepository();
+        eventRepository.initStorage(storageFactory);
+        this.storage = eventRepository;
+        this.streamExecutor = streamExecutor;
+        this.logger = logger;
     }
 
     ERepository getStorage() {
@@ -134,6 +152,9 @@ public class EventStore implements AutoCloseable {
         final TenantAwareOperation op = new EventOperation(event) {
             @Override
             public void run() {
+                if (isTenantSet()) { // If multitenant context
+                    checkOfTenant(getEvent(), events.iterator());
+                }
                 store(events);
             }
         };
@@ -209,47 +230,6 @@ public class EventStore implements AutoCloseable {
     @Override
     public void close() throws Exception {
         storage.close();
-    }
-
-    private void logStored(Event request) {
-        if (logger == null) {
-            return;
-        }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
-        }
-    }
-
-    private void logStored(Iterable<Event> events) {
-        for (Event event : events) {
-            logStored(event);
-        }
-    }
-
-    private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-        if (logger == null) {
-            return;
-        }
-
-        if (logger.isInfoEnabled()) {
-            final String requestData = TextFormat.shortDebugString(request);
-            logger.info("Creating stream on request: {} for observer: {}",
-                        requestData,
-                        responseObserver);
-        }
-    }
-
-    /*
-     * Logging methods
-     *******************/
-
-    private void logReadingComplete(StreamObserver<Event> observer) {
-        if (logger == null) {
-            return;
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Observer {} got all queried events.", observer);
-        }
     }
 
     private enum LogSingleton {
@@ -358,6 +338,52 @@ public class EventStore implements AutoCloseable {
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
             return result;
+        }
+    }
+
+    /*
+     * Logging methods
+     *******************/
+
+    private void logStored(Event request) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isTraceEnabled()) {
+            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
+        }
+    }
+
+    private void logStored(Iterable<Event> events) {
+        for (Event event : events) {
+            logStored(event);
+        }
+    }
+
+    private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
+        if (logger == null) {
+            return;
+        }
+
+        if (logger.isInfoEnabled()) {
+            final String requestData = TextFormat.shortDebugString(request);
+            logger.info("Creating stream on request: {} for observer: {}",
+                        requestData,
+                        responseObserver);
+        }
+    }
+
+    /** Returns default logger for the class. */
+    public static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    private void logReadingComplete(StreamObserver<Event> observer) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Observer {} got all queried events.", observer);
         }
     }
 }
