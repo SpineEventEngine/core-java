@@ -140,11 +140,11 @@ public abstract class EventPlayingEntity <I,
      * @param events the events to play
      */
     protected void play(Iterable<Event> events) {
+        final Transaction<I, ? extends EventPlayingEntity<I, S, B>, S, B> tx = tx();
         for (Event event : events) {
             final Message message = getMessage(event);
             final EventContext context = event.getContext();
-
-            tx().apply(message, context);
+            tx.apply(message, context);
         }
     }
 
@@ -183,21 +183,7 @@ public abstract class EventPlayingEntity <I,
     B builderFromState() {
         final B builder = newBuilderInstance();
         builder.setOriginalState(getState());
-        @SuppressWarnings("unchecked")      // the cast is safe by `mergeFrom` design.
-        final B result = (B) builder;
-        return result;
-    }
-
-    /**
-     * Injects the passed entity state and version.
-     *
-     * <p>The method does not require an {@linkplain #isTransactionInProgress() active transaction},
-     * and serves exclusively for {@linkplain EntityStorageConverter entity conversion} mechanism.
-     *
-     * <p>The {@linkplain #isChanged()} return value is not affected by this method.
-     */
-    void injectState(S stateToInject, Version version) {
-        updateState(stateToInject, version);
+        return builder;
     }
 
     /**

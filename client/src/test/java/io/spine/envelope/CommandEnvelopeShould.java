@@ -30,7 +30,7 @@ import io.spine.type.CommandClass;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.Values.newUuidValue;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;

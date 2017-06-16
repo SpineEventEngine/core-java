@@ -18,21 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.entity.idfunc;
-
-import com.google.protobuf.Message;
-import io.spine.base.EventContext;
-
 /**
- * Obtains a set of entity IDs from an event message and its context.
- *
- * <p>Use such functions for transforming an event into a set of
- * identifiers of entities that are interested in receiving the event.
- *
- * @param <I> the type of entity IDs
- * @param <M> the type of messages to get IDs from
- * @author Alexander Yevsyukov
+ * Test environment classes for testing {@code io.spine.server.aggregate} package.
  */
-public interface IdSetEventFunction<I, M extends Message>
-        extends IdSetFunction<I, M, EventContext> {
-}
+
+@ParametersAreNonnullByDefault
+package io.spine.server.aggregate.given;
+
+import javax.annotation.ParametersAreNonnullByDefault;

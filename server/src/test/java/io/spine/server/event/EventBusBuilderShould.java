@@ -21,9 +21,9 @@
 package io.spine.server.event;
 
 import io.spine.envelope.EventEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.Before;
@@ -46,7 +46,10 @@ public class EventBusBuilderShould {
 
     @Before
     public void setUp() {
-        this.storageFactory = StorageFactorySwitch.get(true);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(true)
+                                                .build();
+        this.storageFactory = bc.getStorageFactory();
     }
 
     @Test(expected = NullPointerException.class)

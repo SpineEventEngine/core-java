@@ -27,15 +27,17 @@ import static org.junit.Assert.assertTrue;
 
 public class InMemoryStorageFactoryShould {
 
+    private final String boundedContextName = getClass().getSimpleName();
+
     @Test
     public void have_single_tenant_instance() {
-        assertFalse(InMemoryStorageFactory.getInstance(false)
+        assertFalse(InMemoryStorageFactory.newInstance(boundedContextName, false)
                                           .isMultitenant());
     }
 
     @Test
     public void have_multitenant_instance() {
-        assertTrue(InMemoryStorageFactory.getInstance(true)
+        assertTrue(InMemoryStorageFactory.newInstance(boundedContextName, true)
                                          .isMultitenant());
     }
 }

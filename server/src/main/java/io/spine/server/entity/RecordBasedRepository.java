@@ -28,6 +28,7 @@ import com.google.common.base.Predicates;
 import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.server.entity.storage.EntityQueries;
@@ -38,7 +39,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.CheckReturnValue;
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
@@ -91,7 +91,6 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
      * @return storage instance
      * @throws IllegalStateException if the storage is null
      */
-    @Nonnull
     protected RecordStorage<I> recordStorage() {
         @SuppressWarnings("unchecked") // OK as we control the creation in createStorage().
         final RecordStorage<I> storage = (RecordStorage<I>) getStorage();
@@ -108,26 +107,49 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
     /** {@inheritDoc} */
     @Override
     public void store(E entity) {
-        final RecordStorage<I> storage = recordStorage();
         final EntityRecordWithColumns record = toRecord(entity);
+        final RecordStorage<I> storage = recordStorage();
         storage.write(entity.getId(), record);
+    }
+
+    /**
+     * Stores the passed entity record.
+     */
+    @Internal
+    public void storeRecord(EntityRecord record) {
+        final E entity = toEntity(record);
+        store(entity);
     }
 
     /** {@inheritDoc} */
     @Override
     @CheckReturnValue
     public Optional<E> find(I id) {
+        Optional<EntityRecord> optional = findRecord(id);
+        if (!optional.isPresent()) {
+            return Optional.absent();
+        }
+        final EntityRecord record = optional.get();
+        final boolean recordVisible = !isEntityVisible().apply(record.getLifecycleFlags());
+        if (recordVisible) {
+            return Optional.absent();
+        }
+        final E entity = toEntity(record);
+        return Optional.of(entity);
+    }
+
+    /**
+     * Finds a record and returns it if its {@link LifecycleFlags} don't make it
+     * {@linkplain EntityWithLifecycle.Predicates#isEntityVisible()}.
+     */
+    private Optional<EntityRecord> findRecord(I id) {
         final RecordStorage<I> storage = recordStorage();
         final Optional<EntityRecord> found = storage.read(id);
         if (!found.isPresent()) {
             return Optional.absent();
         }
         final EntityRecord record = found.get();
-        if (!isEntityVisible().apply(record.getLifecycleFlags())) {
-            return Optional.absent();
-        }
-        final E entity = toEntity(record);
-        return Optional.of(entity);
+        return Optional.of(record);
     }
 
     @Override
@@ -135,6 +157,14 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final Iterator<E> allEntities = loadAll();
         final Iterator<E> result = filter(allEntities, filter);
         return result;
+    }
+
+    @Internal
+    @CheckReturnValue
+    public EntityRecord findOrCreateRecord(I id) {
+        final E entity = findOrCreate(id);
+        final EntityRecordWithColumns recordWithColumns = toRecord(entity);
+        return recordWithColumns.getRecord();
     }
 
     /**
@@ -254,6 +284,23 @@ public abstract class RecordBasedRepository<I, E extends Entity<I, S>, S extends
         final Function<EntityRecord, E> toEntity = entityConverter().reverse();
         final Iterator<E> result = transform(records, toEntity);
         return result;
+    }
+
+    /**
+     * Obtains iterator over {@link EntityRecord} for entities matching the passed filters.
+     *
+     * @param filters   the filters for filtering entities
+     * @param fieldMask the mask to apply for returned records
+     * @return an iterator over the matching records
+     */
+    @Internal
+    public Iterator<EntityRecord> findRecords(EntityFilters filters, FieldMask fieldMask) {
+        checkNotNull(filters);
+        checkNotNull(fieldMask);
+
+        final EntityQuery<I> entityQuery = EntityQueries.from(filters, getEntityClass());
+        final EntityQuery<I> completeQuery = toCompleteQuery(entityQuery);
+        return recordStorage().readAll(completeQuery, fieldMask);
     }
 
     /**

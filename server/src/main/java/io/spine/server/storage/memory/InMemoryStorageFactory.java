@@ -20,14 +20,20 @@
 
 package io.spine.server.storage.memory;
 
+import com.google.protobuf.Message;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.StandStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
+import io.spine.type.TypeUrl;
+
+import static io.spine.server.entity.Entity.TypeInfo.getIdClass;
+import static io.spine.server.entity.Entity.TypeInfo.getStateClass;
 
 /**
  * A factory for in-memory storages.
@@ -36,9 +42,16 @@ import io.spine.server.storage.StorageFactory;
  */
 public class InMemoryStorageFactory implements StorageFactory {
 
+    private final String boundedContextName;
     private final boolean multitenant;
 
-    private InMemoryStorageFactory(boolean multitenant) {
+    public static InMemoryStorageFactory newInstance(String boundedContextName,
+                                                     boolean multitenant) {
+        return new InMemoryStorageFactory(boundedContextName, multitenant);
+    }
+
+    private InMemoryStorageFactory(String boundedContextName, boolean multitenant) {
+        this.boundedContextName = boundedContextName;
         this.multitenant = multitenant;
     }
 
@@ -62,9 +75,11 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     @Override
     public StandStorage createStandStorage() {
-        final InMemoryStandStorage result = InMemoryStandStorage.newBuilder()
-                                                                .setMultitenant(isMultitenant())
-                                                                .build();
+        final InMemoryStandStorage result =
+                InMemoryStandStorage.newBuilder()
+                                    .setBoundedContextName(boundedContextName)
+                                    .setMultitenant(isMultitenant())
+                                    .build();
         return result;
     }
 
@@ -77,19 +92,28 @@ public class InMemoryStorageFactory implements StorageFactory {
 
     /**
      * {@inheritDoc}
-     *
-     * @param unused the parameter is not used in this implementation
      */
     @Override
-    public <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> unused) {
-        return InMemoryRecordStorage.newInstance(isMultitenant());
+    public <I> RecordStorage<I>
+    createRecordStorage(Class<? extends Entity<I, ?>> entityClass) {
+        final Class<? extends Message> stateClass = getStateClass(entityClass);
+        final TypeUrl typeUrl = TypeUrl.of(stateClass);
+        final Class<I> idClass = getIdClass(entityClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, typeUrl, idClass);
+        return InMemoryRecordStorage.newInstance(spec, isMultitenant());
     }
 
     @Override
-    public <I> ProjectionStorage<I> createProjectionStorage(Class<? extends Entity<I, ?>> unused) {
+    public <I> ProjectionStorage<I> createProjectionStorage(
+            Class<? extends Projection<I, ?, ?>> projectionClass) {
+        final Class<Message> stateClass = getStateClass(projectionClass);
+        final Class<I> idClass = getIdClass(projectionClass);
+        final TypeUrl stateUrl = TypeUrl.of(stateClass);
+        final StorageSpec<I> spec = StorageSpec.of(boundedContextName, stateUrl, idClass);
+
         final boolean multitenant = isMultitenant();
         final InMemoryRecordStorage<I> entityStorage =
-                InMemoryRecordStorage.newInstance(multitenant);
+                InMemoryRecordStorage.newInstance(spec, multitenant);
         return InMemoryProjectionStorage.newInstance(entityStorage);
     }
 
@@ -103,22 +127,6 @@ public class InMemoryStorageFactory implements StorageFactory {
         if (!isMultitenant()) {
             return this;
         }
-        return getInstance(false);
-    }
-
-    public static InMemoryStorageFactory getInstance(boolean multitenant) {
-        return multitenant
-                ? Singleton.INSTANCE.multiTenantInstance
-                : Singleton.INSTANCE.singleTenantInstance;
-    }
-
-    @SuppressWarnings("NonSerializableFieldInSerializableClass")
-    private enum Singleton {
-        INSTANCE;
-        private final InMemoryStorageFactory singleTenantInstance =
-                new InMemoryStorageFactory(false);
-
-        private final InMemoryStorageFactory multiTenantInstance =
-                new InMemoryStorageFactory(true);
+        return newInstance(this.boundedContextName, false);
     }
 }

@@ -37,7 +37,7 @@ import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;
 import io.spine.server.command.Assign;
 import io.spine.server.command.EventFactory;
-import io.spine.server.entity.idfunc.IdSetEventFunction;
+import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.test.TestActorRequestFactory;
@@ -71,7 +71,8 @@ class Given {
     static Command validCommand() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(Given.class);
-        return requestFactory.command().create(CreateProject.getDefaultInstance());
+        return requestFactory.command()
+                             .create(CreateProject.getDefaultInstance());
     }
 
     static Event validEvent() {
@@ -89,10 +90,10 @@ class Given {
         final Event event = eventFactory.createEvent(eventMessage, Tests.<Version>nullRef());
         final Event result = event.toBuilder()
                                   .setContext(event.getContext()
-                                               .toBuilder()
-                                               .setEnrichment(Enrichment.newBuilder()
-                                                                        .setDoNotEnrich(true))
-                                               .build())
+                                                   .toBuilder()
+                                                   .setEnrichment(Enrichment.newBuilder()
+                                                                            .setDoNotEnrich(true))
+                                                   .build())
                                   .build();
         return result;
     }
@@ -112,24 +113,14 @@ class Given {
         return aggregateRepo(boundedContext);
     }
 
-    static BoundedContext boundedContext(Stand.Builder stand, StandUpdateDelivery delivery) {
-        return boundedContextBuilder(stand)
-                .setStand(Stand.newBuilder()
-                               .setDelivery(delivery))
-                .build();
-    }
-
-    private static BoundedContext.Builder boundedContextBuilder(Stand.Builder stand) {
-        return BoundedContext.newBuilder()
-                             .setStand(stand);
-    }
-
     static class StandTestProjectionRepository
             extends ProjectionRepository<ProjectId, StandTestProjection, Project> {
         StandTestProjectionRepository(BoundedContext boundedContext) {
             super();
             addIdSetFunction(ProjectCreated.class,
-                             new IdSetEventFunction<ProjectId, ProjectCreated>() {
+                             new EventTargetsFunction<ProjectId, ProjectCreated>() {
+                                 private static final long serialVersionUID = 0L;
+
                                  @Override
                                  public Set<ProjectId> apply(ProjectCreated message,
                                                              EventContext context) {

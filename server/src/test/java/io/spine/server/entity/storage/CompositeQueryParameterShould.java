@@ -24,15 +24,14 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import com.google.common.testing.NullPointerTester;
 import com.google.common.testing.SerializableTester;
-import org.junit.Test;
 import io.spine.client.ColumnFilter;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
+import org.junit.Test;
 
 import static com.google.common.collect.ImmutableMultimap.of;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.testing.NullPointerTester.Visibility.PACKAGE;
-import static org.junit.Assert.assertEquals;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.ColumnFilters.ge;
 import static io.spine.client.ColumnFilters.lt;
@@ -43,6 +42,7 @@ import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
 import static io.spine.test.Verify.assertContainsAll;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Dmytro Dashenkov

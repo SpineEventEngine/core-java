@@ -25,8 +25,6 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.event.EventBus;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.stand.Stand;
-import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 
 /**
  * Creates stubs with instances of {@link BoundedContext} for testing purposes.
@@ -37,19 +35,6 @@ public class TestBoundedContextFactory {
 
     private TestBoundedContextFactory() {
         // Prevent instantiation of this utility class.
-    }
-
-    public static class SingleTenant {
-
-        private SingleTenant() {
-            // Prevent instantiation of this utility class.
-        }
-
-        public static BoundedContext newBoundedContext(Stand.Builder stand) {
-            return BoundedContext.newBuilder()
-                                 .setStand(stand)
-                                 .build();
-        }
     }
 
     public static class MultiTenant {
@@ -93,11 +78,11 @@ public class TestBoundedContextFactory {
         }
 
         public static BoundedContext newBoundedContext(EventEnricher enricher) {
-            final StorageFactory factory = StorageFactorySwitch.get(true);
-            final EventBus.Builder eventBus = EventBus.newBuilder()
-                                                      .setEnricher(enricher)
-                                                      .setStorageFactory(factory);
-            return newBoundedContext(eventBus);
+            return BoundedContext.newBuilder()
+                                 .setMultitenant(true)
+                                 .setEventBus(EventBus.newBuilder()
+                                                      .setEnricher(enricher))
+                                 .build();
         }
 
         public static BoundedContext newBoundedContext(CommandBus.Builder commandBus,

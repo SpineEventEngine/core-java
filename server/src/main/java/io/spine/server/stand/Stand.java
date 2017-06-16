@@ -38,6 +38,7 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Subscription;
 import io.spine.client.Topic;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -45,7 +46,6 @@ import io.spine.server.entity.EntityStateEnvelope;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.Repository;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.server.tenant.EntityUpdateOperation;
 import io.spine.server.tenant.QueryOperation;
@@ -93,8 +93,13 @@ public class Stand implements AutoCloseable {
      *
      * <p>Any {@code Aggregate} state delivered to this instance of {@code Stand} is
      * persisted to this storage.
+     *
+     * <p>The storage is {@code null} if it was not passed to the builder and this instance is not
+     * yet added to a {@code BoundedContext}.
+
      */
-    private final StandStorage storage;
+    @Nullable
+    private StandStorage storage;
 
     /**
      * Manages the subscriptions for this instance of {@code Stand}.
@@ -139,6 +144,12 @@ public class Stand implements AutoCloseable {
 
     private void init() {
         delivery.setStand(this);
+    }
+
+    public void onCreated(BoundedContext parent) {
+        if (storage == null) {
+            storage = parent.getStorageFactory().createStandStorage();
+        }
     }
 
     /**
@@ -211,7 +222,7 @@ public class Stand implements AutoCloseable {
                                                             .setState(packedState)
                                                             .setVersion(versionValue)
                                                             .build();
-                    storage.write(aggregateStateId, record);
+                    getStorage().write(aggregateStateId, record);
                 }
                 notifyMatchingSubscriptions(id, packedState, entityTypeUrl);
             }
@@ -381,6 +392,7 @@ public class Stand implements AutoCloseable {
                     callbackExecutor.execute(new Runnable() {
                         @Override
                         public void run() {
+                            //TODO:2017-06-06:alexander.yevsyukov: Handle null result of getCallback().
                             subscriptionRecord.getCallback()
                                               .onStateChanged(entityState);
                         }
@@ -414,7 +426,10 @@ public class Stand implements AutoCloseable {
     @Override
     public void close() throws Exception {
         typeRegistry.close();
-        storage.close();
+
+        if (storage != null) {
+            storage.close();
+        }
     }
 
     /**
@@ -458,7 +473,7 @@ public class Stand implements AutoCloseable {
         } else if (getExposedAggregateTypes().contains(type)) {
 
             // The query target is an {@code Aggregate} state.
-            result = new AggregateQueryProcessor(storage, type);
+            result = new AggregateQueryProcessor(getStorage(), type);
         } else {
 
             // This type points to an object, that are not exposed via the current
@@ -466,6 +481,11 @@ public class Stand implements AutoCloseable {
             result = NOOP_PROCESSOR;
         }
         return result;
+    }
+
+    private StandStorage getStorage() {
+        checkState(storage != null, "Stand %s does not have a storage assigned", this);
+        return storage;
     }
 
     public static class Builder {
@@ -490,7 +510,6 @@ public class Stand implements AutoCloseable {
          * value will be set by the builder.
          */
         private StandUpdateDelivery delivery;
-
         private StandStorage storage;
         private Executor callbackExecutor;
         private SubscriptionRegistry subscriptionRegistry;
@@ -607,10 +626,6 @@ public class Stand implements AutoCloseable {
                     ? false
                     : this.multitenant;
 
-            if (storage == null) {
-                storage = StorageFactorySwitch.get(multitenant)
-                                              .createStandStorage();
-            }
             if (callbackExecutor == null) {
                 callbackExecutor = MoreExecutors.directExecutor();
             }

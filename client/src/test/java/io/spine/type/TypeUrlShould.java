@@ -21,6 +21,7 @@
 package io.spine.type;
 
 import com.google.common.testing.EqualsTester;
+import com.google.common.testing.SerializableTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Descriptors;
@@ -218,5 +219,10 @@ public class TypeUrlShould {
     public void have_prefix_enumeration() {
         assertTrue(TypeUrl.Prefix.SPINE.toString()
                                        .contains("spine"));
+    }
+
+    @Test
+    public void serialize() {
+        SerializableTester.reserializeAndAssert(TypeUrl.of(Timestamp.class));
     }
 }

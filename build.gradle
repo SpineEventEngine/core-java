@@ -21,6 +21,10 @@ import groovy.time.TimeCategory
 //
 buildscript {
     repositories {
+        jcenter()
+        // Google's mirror of Maven Central
+        maven { url = 'https://maven-central.storage.googleapis.com' }
+        
         mavenCentral()
         mavenLocal()
 
@@ -35,7 +39,7 @@ buildscript {
         guavaVersion = '20.0'
         protobufGradlePluginVerison = '0.8.0'
 
-        spineVersion = '0.9.22-SNAPSHOT'
+        spineVersion = '0.9.23-SNAPSHOT'
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
         // `spineVersion` defined above.
@@ -86,7 +90,7 @@ ext {
     gRpcVersion = '1.1.2'
     slf4JVersion = '1.7.21'
     jUnitVersion = '4.12'
-    mockitoVersion = '2.+'
+    mockitoVersion = '2.7.22'
 
     spineProtobufPluginId = 'io.spine.tools.spine-model-compiler'
     spineCodestyleCheckerId = 'io.spine.tools.spine-codestyle-checker'

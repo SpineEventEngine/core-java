@@ -103,5 +103,4 @@ class InMemoryAggregateStorage<I> extends AggregateStorage<I> {
         final List<AggregateEventRecord> records = getStorage().getHistoryBackward(id);
         return records.iterator();
     }
-
 }

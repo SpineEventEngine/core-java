@@ -23,6 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.server.BoundedContext;
+import io.spine.server.entity.Repository;
 
 import static java.lang.String.format;
 
@@ -66,8 +67,13 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
      *                               IDs are not of the expected type
      */
     <A extends AggregatePart<I, S, ?, ?>> AggregatePartRepository<I, A, ?> find() {
-        final AggregateRepository<?, ?> repo =
-                checkFound(boundedContext.getAggregateRepository(stateClass));
+        final Optional<Repository> optional = boundedContext.findRepository(stateClass);
+        if (!optional.isPresent()) {
+            final String errMsg = format("Unable to find repository for the state class: %s",
+                                         stateClass);
+            throw new IllegalStateException(errMsg);
+        }
+        final Repository repo = optional.get();
 
         checkIsAggregatePartRepository(repo);
 
@@ -76,25 +82,13 @@ class AggregatePartRepositoryLookup<I, S extends Message> {
         return result;
     }
 
-    @SuppressWarnings("OptionalUsedAsFieldOrParameterType") // as this is the purpose of the method
-    private AggregateRepository<?, ?>
-    checkFound(Optional<? extends AggregateRepository<?, ?>> rawRepo) {
-        if (!rawRepo.isPresent()) {
-            final String errMsg = format("Unable to find repository for the state class: %s",
-                                         stateClass);
-            throw new IllegalStateException(errMsg);
-        } else {
-            return rawRepo.get();
-        }
-    }
-
     /**
      * Ensures that the passed repository is instance of {@code AggregatePartRepository}.
      *
      * <p>We check this to make sure that expectations of this {@code AggregateRoot} are supported
      * by correct configuration of the {@code BoundedContext}.
      */
-    private static void checkIsAggregatePartRepository(AggregateRepository<?, ?> repo) {
+    private static void checkIsAggregatePartRepository(Repository repo) {
         if (!(repo instanceof AggregatePartRepository)) {
             final String errMsg = format("The repository `%s` is not an instance of `%s`",
                                          repo,

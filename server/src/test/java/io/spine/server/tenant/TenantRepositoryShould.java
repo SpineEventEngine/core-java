@@ -22,12 +22,12 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.BoundedContext;
 import io.spine.users.TenantId;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -43,8 +43,9 @@ public class TenantRepositoryShould {
 
     @Before
     public void setUp() {
+        final BoundedContext bc = BoundedContext.newBuilder().build();
         TenantRepository<?, ?> impl = new TenantRepositoryImpl();
-        impl.initStorage(StorageFactorySwitch.get(false));
+        impl.initStorage(bc.getStorageFactory());
         repository = spy(impl);
     }
 

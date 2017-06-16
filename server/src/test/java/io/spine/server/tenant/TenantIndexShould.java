@@ -23,7 +23,7 @@ package io.spine.server.tenant;
 import com.google.common.collect.ImmutableList;
 import com.google.common.testing.NullPointerTester;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
+import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.users.TenantId;
 import org.junit.Test;
 
@@ -45,7 +45,8 @@ public class TenantIndexShould {
     @Test
     public void pass_null_tolerance_test() {
         new NullPointerTester()
-                .setDefault(StorageFactory.class, StorageFactorySwitch.get(false))
+                .setDefault(StorageFactory.class,
+                            InMemoryStorageFactory.newInstance(getClass().getSimpleName(), false))
                 .testAllPublicStaticMethods(TenantIndex.Factory.class);
     }
 

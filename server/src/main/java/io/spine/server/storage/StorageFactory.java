@@ -25,6 +25,7 @@ import io.spine.server.aggregate.AggregateStorage;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.storage.ColumnTypeRegistry;
+import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.stand.StandStorage;
 
@@ -74,17 +75,16 @@ public interface StorageFactory extends AutoCloseable {
      * @param <I>         the type of entity IDs
      * @param entityClass the class of entities to store
      */
-    <I> RecordStorage<I> createRecordStorage(
-            Class<? extends Entity<I, ?>> entityClass);
+    <I> RecordStorage<I> createRecordStorage(Class<? extends Entity<I, ?>> entityClass);
 
     /**
      * Creates a new {@link ProjectionStorage} instance.
      *
      * @param <I>             the type of stream projection IDs
-     * @param projectionClass the class of projections to store
+     * @param projectionClass the class of projections to be stored
      */
     <I> ProjectionStorage<I> createProjectionStorage(
-            Class<? extends Entity<I, ?>> projectionClass);
+            Class<? extends Projection<I, ?, ?>> projectionClass);
 
     /**
      * Creates a single-tenant version of the factory.

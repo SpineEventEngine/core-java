@@ -39,15 +39,13 @@ public abstract class DefaultRecordBasedRepository<I,
     private final EntityFactory<I, E> entityFactory;
     private final EntityStorageConverter<I, E, S> storageConverter;
 
-    /**
-     * {@inheritDoc}
-     *
-     */
-    @SuppressWarnings("ThisEscapedInObjectConstruction") // OK as we only pass the reference.
+    /** {@inheritDoc} */
+    @SuppressWarnings("OverriddenMethodCallDuringObjectConstruction") // for getting generic params
     protected DefaultRecordBasedRepository() {
         super();
-        this.entityFactory = new DefaultEntityFactory<>(this);
-        this.storageConverter = DefaultEntityStorageConverter.forAllFields(this);
+        this.entityFactory = new DefaultEntityFactory<>(getEntityClass(), getIdClass());
+        this.storageConverter = DefaultEntityStorageConverter.forAllFields(getEntityStateType(),
+                                                                           this.entityFactory);
     }
 
     @Override

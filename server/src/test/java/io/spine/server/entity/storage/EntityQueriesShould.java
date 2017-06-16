@@ -24,7 +24,6 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
-import org.junit.Test;
 import io.spine.base.Version;
 import io.spine.client.ColumnFilter;
 import io.spine.client.ColumnFilters;
@@ -38,22 +37,23 @@ import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.Entity;
 import io.spine.test.storage.ProjectId;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import java.util.Collection;
 import java.util.List;
 
 import static com.google.common.collect.Iterators.size;
 import static com.google.common.collect.Lists.newArrayList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.EITHER;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertSize;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Dmytro Dashenkov

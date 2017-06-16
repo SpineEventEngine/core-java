@@ -22,30 +22,30 @@ package io.spine.server.entity.storage;
 
 import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.test.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
+import org.junit.Test;
 
 import java.util.Collections;
 import java.util.Map;
 
 import static com.google.common.testing.SerializableTester.reserializeAndAssert;
-import static java.util.Collections.singletonMap;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 import static io.spine.server.entity.storage.Column.MemoizedValue;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.of;
 import static io.spine.server.storage.EntityField.version;
 import static io.spine.test.Verify.assertContainsKeyValue;
 import static io.spine.test.Verify.assertEmpty;
 import static io.spine.test.Verify.assertMapsEqual;
+import static java.util.Collections.singletonMap;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * @author Dmytro Dashenkov

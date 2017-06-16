@@ -38,19 +38,31 @@ import java.util.Map;
  * @param <I> the type of entity IDs
  * @author Alexander Litus
  * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
-class InMemoryRecordStorage<I> extends RecordStorage<I> {
+public class InMemoryRecordStorage<I> extends RecordStorage<I> {
 
+    private final StorageSpec<I> spec;
     private final MultitenantStorage<TenantRecords<I>> multitenantStorage;
 
-    protected InMemoryRecordStorage(boolean multitenant) {
+    InMemoryRecordStorage(StorageSpec<I> spec, boolean multitenant) {
         super(multitenant);
+        this.spec = spec;
         this.multitenantStorage = new MultitenantStorage<TenantRecords<I>>(multitenant) {
             @Override
             TenantRecords<I> createSlice() {
                 return new TenantRecords<>();
             }
         };
+    }
+
+    protected static <I> InMemoryRecordStorage<I> newInstance(StorageSpec<I> spec,
+                                                              boolean multitenant) {
+        return new InMemoryRecordStorage<>(spec, multitenant);
+    }
+
+    StorageSpec<I> getSpec() {
+        return spec;
     }
 
     @Override
@@ -103,10 +115,6 @@ class InMemoryRecordStorage<I> extends RecordStorage<I> {
         return getStorage().readAllRecords(query, fieldMask)
                            .values()
                            .iterator();
-    }
-
-    protected static <I> InMemoryRecordStorage<I> newInstance(boolean multitenant) {
-        return new InMemoryRecordStorage<>(multitenant);
     }
 
     private TenantRecords<I> getStorage() {

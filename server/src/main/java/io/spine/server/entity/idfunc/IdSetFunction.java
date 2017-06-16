@@ -23,6 +23,7 @@ package io.spine.server.entity.idfunc;
 import com.google.protobuf.Message;
 import io.spine.base.EventContext;
 
+import java.io.Serializable;
 import java.util.Set;
 
 /**
@@ -34,7 +35,7 @@ import java.util.Set;
  *              {@link io.spine.base.CommandContext CommandContext} type
  * @author Alexander Yevsyukov
  */
-public interface IdSetFunction<I, M extends Message, C extends Message> {
+public interface IdSetFunction<I, M extends Message, C extends Message> extends Serializable {
 
     /**
      * Obtains a set of entity IDs based on the passed event or command message and its context.

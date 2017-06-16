@@ -25,10 +25,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
+import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.reflect.command.CreateProject;
 import io.spine.test.reflect.event.ProjectCreated;
@@ -45,7 +45,7 @@ import static io.spine.server.reflect.CommandHandlerMethod.predicate;
 import static io.spine.server.reflect.Given.CommandMessage.createProject;
 import static io.spine.server.reflect.Given.CommandMessage.startProject;
 import static io.spine.server.reflect.Given.EventMessage.projectCreated;
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -65,8 +65,11 @@ public class CommandHandlerMethodShould {
 
     @Before
     public void setUp() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(true)
+                                                .build();
         eventBus = EventBus.newBuilder()
-                           .setStorageFactory(StorageFactorySwitch.get(true))
+                           .setStorageFactory(bc.getStorageFactory())
                            .build();
     }
 

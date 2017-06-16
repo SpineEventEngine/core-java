@@ -50,7 +50,7 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
 import static io.spine.server.storage.LifecycleFlagField.archived;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Verify.assertContains;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertNotContains;
@@ -84,18 +84,10 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
 
     protected abstract I createId(int value);
 
-    protected void initRepository() {
-        this.repository = createRepository();
-    }
-
-    protected void setCurrentTenant() {
-        setCurrentTenant(newTenantUuid());
-    }
-
     @Before
     public void setUp() {
-        initRepository();
-        setCurrentTenant();
+        this.repository = createRepository();
+        setCurrentTenant(newTenantUuid());
     }
 
     @After

@@ -29,7 +29,6 @@ import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.Response;
 import io.spine.option.EntityOption.Visibility;
-import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
@@ -104,6 +103,10 @@ public final class BoundedContext
         this.eventBus = builder.eventBus.build();
         this.stand = builder.stand.build();
         this.tenantIndex = builder.tenantIndex;
+    }
+
+    private void init() {
+        stand.onCreated(this);
     }
 
     /**
@@ -274,27 +277,17 @@ public final class BoundedContext
     }
 
     /**
-     * Obtains an {@code AggregateRepository} which manages aggregates with the passed state.
-     *
-     * @param aggregateStateClass the class of the aggregate state
-     * @return repository instance or empty {@code Optional} if not found
+     * Finds a repository by the state class of entities.
      */
-    public Optional<? extends AggregateRepository<?, ?>> getAggregateRepository(
-            Class<? extends Message> aggregateStateClass) {
+    @Internal
+    public Optional<Repository> findRepository(Class<? extends Message> entityStateClass) {
         // See if there is a repository for this state at all.
-        if (!guard.hasRepository(aggregateStateClass)) {
-            throw newIllegalStateException("No repository found for the aggregate state class %s",
-                                           aggregateStateClass.getName());
+        if (!guard.hasRepository(entityStateClass)) {
+            throw newIllegalStateException("No repository found for the the entity state class %s",
+                                           entityStateClass.getName());
         }
-
-        // See if the aggregate state is visible.
-        final Optional<Repository> repository = guard.getRepository(aggregateStateClass);
-        if (!repository.isPresent()) {
-            return Optional.absent();
-        }
-
-        final AggregateRepository<?, ?> result = (AggregateRepository<?, ?>) repository.get();
-        return Optional.of(result);
+        final Optional<Repository> repository = guard.getRepository(entityStateClass);
+        return repository;
     }
 
     /**
@@ -397,8 +390,7 @@ public final class BoundedContext
         public Builder setTenantIndex(TenantIndex tenantIndex) {
             if (this.multitenant) {
                 checkNotNull(tenantIndex,
-                             "TenantRepository cannot be null " +
-                                     "in multi-tenant BoundedContext.");
+                             "TenantRepository cannot be null in multi-tenant BoundedContext.");
             }
             this.tenantIndex = tenantIndex;
             return this;
@@ -413,14 +405,14 @@ public final class BoundedContext
             initStand(storageFactory);
 
             final BoundedContext result = new BoundedContext(this);
-
+            result.init();
             log().info(result.nameForLogging() + " created.");
             return result;
         }
 
         private StorageFactory getStorageFactory() {
             if (storageFactorySupplier == null) {
-                storageFactorySupplier = StorageFactorySwitch.getInstance(multitenant);
+                storageFactorySupplier = StorageFactorySwitch.newInstance(name, multitenant);
             }
 
             final StorageFactory storageFactory = storageFactorySupplier.get();

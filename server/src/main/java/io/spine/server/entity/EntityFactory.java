@@ -20,12 +20,14 @@
 
 package io.spine.server.entity;
 
+import java.io.Serializable;
+
 /**
  * Base interface for objects that can create entities.
  *
  * @author Alexander Yevsyukov
  */
-public interface EntityFactory<I, E extends Entity<I, ?>> {
+public interface EntityFactory<I, E extends Entity<I, ?>> extends Serializable {
 
     /**
      * Creates a new entity with the passed ID.

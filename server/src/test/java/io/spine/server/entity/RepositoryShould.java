@@ -27,7 +27,6 @@ import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupport
 import io.spine.server.entity.given.RepositoryTestEnv.TestRepo;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.entity.ProjectId;
@@ -40,7 +39,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -65,7 +64,7 @@ public class RepositoryShould {
                                        .setMultitenant(true)
                                        .build();
         repository = new TestRepo();
-        storageFactory = StorageFactorySwitch.get(boundedContext.isMultitenant());
+        storageFactory = boundedContext.getStorageFactory();
         tenantId = newTenantUuid();
     }
 

@@ -43,7 +43,7 @@ public class Spy<T> {
         return new Spy<>(spyClass);
     }
 
-    public Spy(Class<T> classOfSpy) {
+    private Spy(Class<T> classOfSpy) {
         this.classOfSpy = classOfSpy;
     }
 
