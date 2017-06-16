@@ -168,7 +168,7 @@ public abstract class Bus<T extends Message,
      * <p>Finds and invokes the {@linkplain MessageDispatcher MessageDispatcher(s)} for the given
      * message.
      *
-     * <p>This method assumes that the given massage has passed the filtering.
+     * <p>This method assumes that the given message has passed the filtering.
      *
      * @see #post(Message, StreamObserver) for the public API
      */
