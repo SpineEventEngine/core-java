@@ -83,9 +83,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
-     * <p>This method defines the general posting flow and should not be overridden.
-     *
-     * @param message          the message to post
+     * @param message         the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
     public final void post(T message, StreamObserver<T> acknowledgement) {
@@ -101,7 +99,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
-     * @param messages         the message to post
+     * @param messages        the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
     public final void post(Iterable<T> messages, StreamObserver<T> acknowledgement) {
@@ -147,10 +145,10 @@ public abstract class Bus<T extends Message,
      * <p>If the message does not pass the filter,
      * {@link StreamObserver#onError(Throwable) StreamObserver#onError} may be called.
      *
-     * @param messages         the message to filter
+     * @param messages        the message to filter
      * @param acknowledgement the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
-     *         {@link Optional#absent() Optional.absent()} otherwise
+     * {@link Optional#absent() Optional.absent()} otherwise
      */
     protected abstract Iterable<T> filter(Iterable<T> messages, StreamObserver<T> acknowledgement);
 
@@ -178,7 +176,7 @@ public abstract class Bus<T extends Message,
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
      * the {@code acknowledgement} observer.
      *
-     * @param envelopes        the envelopes to post
+     * @param envelopes       the envelopes to post
      * @param acknowledgement the observer of the message posting
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<T> acknowledgement) {
@@ -207,7 +205,7 @@ public abstract class Bus<T extends Message,
 
     /**
      * @return a {@link Function} converting the messages into the envelopes of the specified
-     *         type
+     * type
      */
     protected final Function<T, E> toEnvelope() {
         return messageConverter;
@@ -215,7 +213,7 @@ public abstract class Bus<T extends Message,
 
     /**
      * @return a {@link Function} converting the envelopes into the messages of the specified
-     *         type
+     * type
      */
     protected final Function<E, T> toMessage() {
         return messageConverter.reverse();
@@ -239,14 +237,28 @@ public abstract class Bus<T extends Message,
         }
     }
 
+    /**
+     * Supervises the underlying {@link StreamObserver} and performs a defined action on a call to
+     * {@link StreamObserver#onError StreamObserver.onError}.
+     *
+     * @param <T> the type parameter of the {@link StreamObserver}
+     */
     private abstract static class StreamSupervisor<T> implements StreamObserver<T> {
 
         private final StreamObserver<T> delegate;
 
-        StreamSupervisor(StreamObserver<T> delegate) {
+        private StreamSupervisor(StreamObserver<T> delegate) {
             this.delegate = delegate;
         }
 
+        /**
+         * Performs a custom action on {@link StreamObserver#onError StreamObserver.onError}.
+         *
+         * <p>This method is called before the actual underlying
+         * {@link StreamObserver#onError StreamObserver.onError} invocation.
+         *
+         * @param error the parameter of {@code StreamObserver.onError}
+         */
         protected abstract void onErrorSpotted(Throwable error);
 
         @Override
@@ -266,21 +278,29 @@ public abstract class Bus<T extends Message,
         }
     }
 
+    /**
+     * Counts the {@link StreamObserver#onError StreamObserver.onError} invocations.
+     *
+     * @param <T> the type parameter of the {@link StreamObserver}
+     */
     private static class CountingStreamSupervisor<T> extends StreamSupervisor<T> {
 
         private int errorCount;
 
-        CountingStreamSupervisor(StreamObserver<T> delegate) {
+        private CountingStreamSupervisor(StreamObserver<T> delegate) {
             super(delegate);
             this.errorCount = 0;
         }
 
         @Override
-        protected void onErrorSpotted(Throwable error) {
+        protected void onErrorSpotted(Throwable unused) {
             errorCount++;
         }
 
-        public int getErrorCount() {
+        /**
+         * @return the count of {@code StreamObserver.onError} invocations
+         */
+        private int getErrorCount() {
             return errorCount;
         }
     }
