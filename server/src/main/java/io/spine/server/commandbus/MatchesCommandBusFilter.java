@@ -30,6 +30,11 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * A predicate on {@link CommandEnvelope} matching it to a {@link CommandBusFilter}.
+ *
+ * <p>The filter receives the given {@link StreamObserver} for either acknowledging the Command
+ * posting or emitting an error.
+ *
  * @author Dmytro Dashenkov
  */
 final class MatchesCommandBusFilter implements Predicate<CommandEnvelope> {
