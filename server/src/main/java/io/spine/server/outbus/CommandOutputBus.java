@@ -176,7 +176,6 @@ public abstract class CommandOutputBus<M extends Message,
 
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedParceledMessage);
-            // TODO:2017-06-16:dmytro.dashenkov: failureObserver.onError ?
         }
     }
 
