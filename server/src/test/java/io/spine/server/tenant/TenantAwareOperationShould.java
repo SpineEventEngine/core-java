@@ -24,7 +24,7 @@ import io.spine.test.Tests;
 import io.spine.users.TenantId;
 import org.junit.Test;
 
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 

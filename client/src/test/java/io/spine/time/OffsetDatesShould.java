@@ -28,7 +28,7 @@ import java.text.ParseException;
 import java.util.Calendar;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Tests.random;
+import static io.spine.test.Values.random;
 import static io.spine.time.Calendars.at;
 import static io.spine.time.Calendars.getDay;
 import static io.spine.time.Calendars.getMonth;

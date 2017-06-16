@@ -47,6 +47,7 @@ import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.type.TypeName.of;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
 
 /**
@@ -93,9 +94,7 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
+        assertDone(done);
 
         assertSize(1, resultEvents);
         final Event event = resultEvents.iterator()
@@ -128,9 +127,7 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
+        assertDone(done);
 
         assertSize(1, resultEvents);
         final Event event = resultEvents.iterator()
@@ -159,9 +156,7 @@ public abstract class EventStoreShould {
         final AtomicBoolean done = new AtomicBoolean(false);
         final Collection<Event> resultEvents = newConcurrentHashSet();
         eventStore.read(query, new ResponseObserver(resultEvents, done));
-        if (!done.get()) {
-            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
-        }
+        assertDone(done);
 
         assertSize(2, resultEvents);
         assertContainsAll(resultEvents, taskAdded1, teasAdded2);
@@ -172,6 +167,19 @@ public abstract class EventStoreShould {
         eventStore.appendAll(Collections.<Event>emptySet());
     }
 
+    /**
+     * Checks that the event storage is exposed to Beam-based catch-up code which is in the same
+     * package but in a different module.
+     */
+    @Test
+    public void expose_event_repository_to_the_package() {
+        assertNotNull(eventStore.getStorage());
+    }
+
+    /*
+     * Test environment
+     *********************/
+
     private static Event projectCreated(Timestamp when) {
         final ProjectCreated msg = Sample.messageOfType(ProjectCreated.class);
         return eventFactory.createEvent(msg, null, when);
@@ -180,6 +188,12 @@ public abstract class EventStoreShould {
     private static Event taskAdded(Timestamp when) {
         final TaskAdded msg = Sample.messageOfType(TaskAdded.class);
         return eventFactory.createEvent(msg, null, when);
+    }
+
+    private static void assertDone(AtomicBoolean done) {
+        if (!done.get()) {
+            fail("Please use the MoreExecutors.directExecutor in EventStore for tests.");
+        }
     }
 
     private static class ResponseObserver implements StreamObserver<Event> {

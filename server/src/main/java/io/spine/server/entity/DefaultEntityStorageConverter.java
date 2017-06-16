@@ -20,85 +20,87 @@
 
 package io.spine.server.entity;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
 import io.spine.type.TypeUrl;
 
-import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.AnyPacker.unpack;
-
 /**
- * Default implementation of {@code EntityStorageConverter} for {@code AbstractVersionableEntity}.
+ * Default implementation of {@code EntityStorageConverter} for {@code AbstractEntity}.
  *
+ * @param <I> the type of entity IDs
+ * @param <E> the type of entities
+ * @param <S> the type of entity states
  * @author Alexander Yevsyukov
  */
 class DefaultEntityStorageConverter<I, E extends AbstractEntity<I, S>, S extends Message>
         extends EntityStorageConverter<I, E, S> {
 
-    private final Repository<I, E> repository;
-    private final FieldMask fieldMask;
+    private static final long serialVersionUID = 0L;
 
-    static <I, E extends AbstractEntity<I, S>, S extends Message>
-    EntityStorageConverter<I, E, S> forAllFields(Repository<I, E> repository) {
-        return new DefaultEntityStorageConverter<>(repository, FieldMask.getDefaultInstance());
+    private DefaultEntityStorageConverter(TypeUrl entityStateType,
+                                          EntityFactory<I, E> factory,
+                                          FieldMask fieldMask) {
+        super(entityStateType, factory, fieldMask);
     }
 
-    private DefaultEntityStorageConverter(Repository<I, E> repository, FieldMask fieldMask) {
-        super(fieldMask);
-        this.repository = repository;
-        this.fieldMask = fieldMask;
+    static <I, E extends AbstractEntity<I, S>, S extends Message>
+    EntityStorageConverter<I, E, S> forAllFields(TypeUrl entityStateType,
+                                                 EntityFactory<I, E> factory) {
+        return new DefaultEntityStorageConverter<>(entityStateType,
+                                                   factory,
+                                                   FieldMask.getDefaultInstance());
     }
 
     @Override
     public EntityStorageConverter<I, E, S> withFieldMask(FieldMask fieldMask) {
-        return new DefaultEntityStorageConverter<>(this.repository, fieldMask);
+        return new DefaultEntityStorageConverter<>(getEntityStateType(),
+                                                   getEntityFactory(),
+                                                   fieldMask);
     }
 
+    /**
+     * Sets lifecycle flags in the builder from the entity, if the entity is
+     * {@linkplain AbstractVersionableEntity versionable}.
+     *
+     * @param builder the entity builder to update
+     * @param entity  the entity which data is passed to the {@link EntityRecord} we are building
+     */
     @Override
-    protected EntityRecord doForward(E entity) {
-        final Any entityId = Identifier.pack(entity.getId());
-        final Any stateAny = pack(entity.getState());
-        final EntityRecord.Builder builder =
-                EntityRecord.newBuilder()
-                            .setEntityId(entityId)
-                            .setState(stateAny);
-
+    protected void updateBuilder(EntityRecord.Builder builder, E entity) {
         if (entity instanceof AbstractVersionableEntity) {
             final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
             builder.setVersion(versionable.getVersion())
                    .setLifecycleFlags(versionable.getLifecycleFlags());
         }
-
-        return builder.build();
     }
 
+    /**
+     * Injects the state into an entity.
+     *
+     * <p>if the passed entity is versionable its lifecycle flags will be set from the record.
+     *
+     * <p>If not, {@code IllegalStateException} is thrown suggesting to provide a custom
+     * {@link EntityStorageConverter} in the repository which manages entities of this class.
+     *
+     * @param entity       the entity to inject the state
+     * @param state        the state message to inject
+     * @param entityRecord the {@link EntityRecord} which contains additional attributes that may be
+     *                     injected
+     */
+    @SuppressWarnings({
+            "ChainOfInstanceofChecks" /* `DefaultEntityStorageConverter` supports conversion of
+                entities derived from standard abstract classes. A custom `Entity` class needs a
+                custom state injection. We do not want to expose state injection in the `Entity`
+                interface.*/,
+            "unchecked" /* The state type is the same as the parameter of this class. */})
     @Override
-    @SuppressWarnings("unchecked")
-    protected E doBackward(EntityRecord entityRecord) {
-        final Message unpacked = unpack(entityRecord.getState());
-        final TypeUrl entityStateType = repository.getEntityStateType();
-        final S state = (S) FieldMasks.applyMask(fieldMask, unpacked, entityStateType);
-
-        final I id = (I) Identifier.unpack(entityRecord.getEntityId());
-        final E entity = repository.create(id);
-
-        if (entity != null) {
-
-            if (entity instanceof AbstractVersionableEntity) {
-                final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
-                if (versionable instanceof EventPlayingEntity) {
-                    final EventPlayingEntity playingEntity = (EventPlayingEntity) versionable;
-                    playingEntity.injectState(state, entityRecord.getVersion());
-                } else {
-                    versionable.updateState(state, entityRecord.getVersion());
-                }
-                versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
-            } else {
-                entity.injectState(state);
-            }
+    protected void injectState(E entity, S state, EntityRecord entityRecord) {
+        if (entity instanceof AbstractVersionableEntity) {
+            final AbstractVersionableEntity versionable = (AbstractVersionableEntity) entity;
+            versionable.updateState(state, entityRecord.getVersion());
+            versionable.setLifecycleFlags(entityRecord.getLifecycleFlags());
+        } else {
+            entity.setState(state);
         }
-        return entity;
     }
 }

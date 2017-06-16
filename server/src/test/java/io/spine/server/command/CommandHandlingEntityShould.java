@@ -25,7 +25,7 @@ import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 
 /**

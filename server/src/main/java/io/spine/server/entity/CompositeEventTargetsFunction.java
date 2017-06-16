@@ -24,43 +24,46 @@ import com.google.common.base.Optional;
 import com.google.common.collect.Maps;
 import com.google.protobuf.Message;
 import io.spine.base.EventContext;
-import io.spine.server.entity.idfunc.IdSetEventFunction;
+import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.type.EventClass;
 
-import java.util.Map;
+import java.util.HashMap;
 import java.util.Set;
 
 /**
- * Helper class for managing {@link IdSetEventFunction}s associated with
+ * Helper class for managing {@link EventTargetsFunction}s associated with
  * a repository that dispatches events to its entities.
  *
  * @param <I> the type of the entity IDs of this repository
  * @author Alexander Yevsyukov
  */
-class IdSetFunctions<I> {
+class CompositeEventTargetsFunction<I> implements EventTargetsFunction<I, Message> {
+
+    private static final long serialVersionUID = 0L;
 
     /**
      * The map from event class to a function that generates a set of project IDs
      * for the corresponding event.
      */
-    private final Map<EventClass, IdSetEventFunction<I, Message>> map = Maps.newHashMap();
+    @SuppressWarnings("CollectionDeclaredAsConcreteClass") // need a serializable field.
+    private final HashMap<EventClass, EventTargetsFunction<I, Message>> map = Maps.newHashMap();
 
     /** The function used when there's no matching entry in the map. */
-    private final IdSetEventFunction<I, Message> defaultFunction;
+    private final EventTargetsFunction<I, Message> defaultFunction;
 
     /**
      * Creates new instance with the passed default function.
      *
      * @param defaultFunction the function which used when there is no matching entry in the map
      */
-    public IdSetFunctions(IdSetEventFunction<I, Message> defaultFunction) {
+    CompositeEventTargetsFunction(EventTargetsFunction<I, Message> defaultFunction) {
         this.defaultFunction = defaultFunction;
     }
 
     /**
      * Removes a function for the passed event class.
      */
-    public <E extends Message> void remove(Class<E> eventClass) {
+    <E extends Message> void remove(Class<E> eventClass) {
         final EventClass clazz = EventClass.of(eventClass);
         map.remove(clazz);
     }
@@ -74,9 +77,10 @@ class IdSetFunctions<I> {
      * @param context the event context
      * @return the set of entity IDs
      */
-    public Set<I> findAndApply(Message event, EventContext context) {
+    @Override
+    public Set<I> apply(Message event, EventContext context) {
         final EventClass eventClass = EventClass.of(event);
-        final IdSetEventFunction<I, Message> func = map.get(eventClass);
+        final EventTargetsFunction<I, Message> func = map.get(eventClass);
         if (func != null) {
             final Set<I> result = func.apply(event, context);
             return result;
@@ -93,12 +97,12 @@ class IdSetFunctions<I> {
      * @param func       the function instance
      * @param <E>        the type of the event message
      */
-    public <E extends Message> void put(Class<E> eventClass, IdSetEventFunction<I, E> func) {
+    <E extends Message> void put(Class<E> eventClass, EventTargetsFunction<I, E> func) {
         final EventClass clazz = EventClass.of(eventClass);
 
         @SuppressWarnings("unchecked")
         // since we want to store {@code IdSetFunction}s for various event types.
-        final IdSetEventFunction<I, Message> casted = (IdSetEventFunction<I, Message>) func;
+        final EventTargetsFunction<I, Message> casted = (EventTargetsFunction<I, Message>) func;
         map.put(clazz, casted);
     }
 
@@ -110,12 +114,12 @@ class IdSetFunctions<I> {
      * @return the function wrapped into {@code Optional} or empty {@code Optional}
      * if there is no matching function
      */
-    public <E extends Message> Optional<IdSetEventFunction<I, E>> get(Class<E> eventClass) {
+    <E extends Message> Optional<EventTargetsFunction<I, E>> get(Class<E> eventClass) {
         final EventClass clazz = EventClass.of(eventClass);
-        final IdSetEventFunction<I, Message> func = map.get(clazz);
+        final EventTargetsFunction<I, Message> func = map.get(clazz);
 
         @SuppressWarnings("unchecked")  // we ensure the type when we put into the map.
-        final IdSetEventFunction<I, E> result = (IdSetEventFunction<I, E>) func;
+        final EventTargetsFunction<I, E> result = (EventTargetsFunction<I, E>) func;
         return Optional.fromNullable(result);
     }
 }

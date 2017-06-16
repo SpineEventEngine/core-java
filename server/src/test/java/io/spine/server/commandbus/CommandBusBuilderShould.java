@@ -47,7 +47,7 @@ public class CommandBusBuilderShould {
     public void setUp() {
         final boolean multitenant = true;
         final InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.getInstance(multitenant);
+                InMemoryStorageFactory.newInstance(getClass().getSimpleName(), multitenant);
         final TenantIndex tenantIndex =
                 TenantAwareTest.createTenantIndex(multitenant, storageFactory);
         commandStore = new CommandStore(storageFactory, tenantIndex);

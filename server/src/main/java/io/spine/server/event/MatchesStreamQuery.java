@@ -40,17 +40,16 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 final class MatchesStreamQuery implements Predicate<Event> {
 
-    private final EventStreamQuery query;
+    private final List<EventFilter> filterList;
 
     MatchesStreamQuery(EventStreamQuery query) {
-        this.query = checkNotNull(query);
+        checkNotNull(query);
+        this.filterList = query.getFilterList();
     }
 
     @Override
     public boolean apply(@Nullable Event input) {
         checkNotNull(input);
-
-        final List<EventFilter> filterList = query.getFilterList();
         if (filterList.isEmpty()) {
             return true; // No filters specified.
         }

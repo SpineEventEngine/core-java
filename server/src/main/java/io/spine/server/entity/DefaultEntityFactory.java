@@ -20,7 +20,9 @@
 
 package io.spine.server.entity;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
+import java.util.Objects;
 
 import static io.spine.server.entity.AbstractEntity.createEntity;
 import static io.spine.server.entity.AbstractEntity.getConstructor;
@@ -33,29 +35,58 @@ import static io.spine.server.entity.AbstractEntity.getConstructor;
  * @param <E> the type of entities to create
  * @author Alexander Yevsyukov
  */
-class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>>
-        implements EntityFactory<I, E> {
+class DefaultEntityFactory<I, E extends AbstractEntity<I, ?>> implements EntityFactory<I, E> {
 
-    private final Repository<I, E> repository;
+    private static final long serialVersionUID = 0L;
 
-    /** The constructor for creating entity instances. */
-    private final Constructor<E> entityConstructor;
+    /** The class of entities to create. */
+    private final Class<E> entityClass;
 
-    DefaultEntityFactory(Repository<I, E> repository) {
-        this.repository = repository;
-        this.entityConstructor = getEntityConstructor();
-        this.entityConstructor.setAccessible(true);
+    /** The class of entity IDs. */
+    private final Class<I> idClass;
+
+    /**
+     * The constructor for creating entity instances.
+     *
+     * <p>Is {@code null} upon deserialization.
+     */
+    @Nullable
+    private transient Constructor<E> entityConstructor;
+
+    DefaultEntityFactory(Class<E> entityClass, Class<I> idClass) {
+        this.entityClass = entityClass;
+        this.idClass = idClass;
     }
 
     private Constructor<E> getEntityConstructor() {
-        final Class<E> entityClass = repository.getEntityClass();
-        final Class<I> idClass = repository.getIdClass();
         final Constructor<E> result = getConstructor(entityClass, idClass);
+        result.setAccessible(true);
         return result;
     }
 
     @Override
     public E create(I id) {
+        if (entityConstructor == null) {
+            entityConstructor = getEntityConstructor();
+        }
         return createEntity(this.entityConstructor, id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(entityClass, idClass);
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null || getClass() != obj.getClass()) {
+            return false;
+        }
+        final DefaultEntityFactory other = (DefaultEntityFactory) obj;
+        return Objects.equals(this.entityClass, other.entityClass)
+                && Objects.equals(this.idClass, other.idClass);
     }
 }

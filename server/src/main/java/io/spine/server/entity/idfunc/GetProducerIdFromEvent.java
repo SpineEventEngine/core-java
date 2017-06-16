@@ -36,6 +36,8 @@ import io.spine.base.EventContext;
  */
 class GetProducerIdFromEvent<I, M extends Message> extends GetIdByFieldIndex<I, M, EventContext> {
 
+    private static final long serialVersionUID = 0L;
+
     private GetProducerIdFromEvent(int idIndex) {
         super(idIndex);
     }

@@ -26,10 +26,8 @@ import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.event.EventBus;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantIndex;
 import io.spine.test.Tests;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -42,20 +40,13 @@ import static org.mockito.Mockito.mock;
 @SuppressWarnings({"OptionalGetWithoutIsPresent", "ConstantConditions"})
 public class BoundedContextBuilderShould {
 
-    private StorageFactory storageFactory;
     private BoundedContext.Builder builder;
 
     @Before
     public void setUp() {
         final boolean multitenant = true;
-        storageFactory = StorageFactorySwitch.get(multitenant);
         builder = BoundedContext.newBuilder()
                                 .setMultitenant(multitenant);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        storageFactory.close();
     }
 
     @Test

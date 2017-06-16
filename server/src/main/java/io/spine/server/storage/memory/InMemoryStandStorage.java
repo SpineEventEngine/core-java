@@ -54,7 +54,15 @@ class InMemoryStandStorage extends StandStorage {
 
     private InMemoryStandStorage(Builder builder) {
         super(builder.isMultitenant());
-        recordStorage = new InMemoryRecordStorage<>(builder.isMultitenant());
+        /*
+            We do not use the StandStorage in a way that requires the `entityStateUrl` parameter
+            passed. Therefore simply pass the `TypeUrl` of `EntityRecord`
+        */
+        recordStorage = new InMemoryRecordStorage<>(
+                StorageSpec.of(checkNotNull(builder.boundedContextName),
+                               TypeUrl.of(EntityRecord.class),
+                               AggregateStateId.class),
+                builder.isMultitenant());
     }
 
     public static Builder newBuilder() {
@@ -155,10 +163,16 @@ class InMemoryStandStorage extends StandStorage {
 
     public static class Builder {
 
+        private String boundedContextName;
         private boolean multitenant;
 
         public boolean isMultitenant() {
             return multitenant;
+        }
+
+        public Builder setBoundedContextName(String boundedContextName) {
+            this.boundedContextName = boundedContextName;
+            return this;
         }
 
         public Builder setMultitenant(boolean multitenant) {

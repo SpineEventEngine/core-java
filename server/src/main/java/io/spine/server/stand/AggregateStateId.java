@@ -41,6 +41,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public final class AggregateStateId<I> {
 
+    static {
+        StringifierRegistry.getInstance()
+                           .register(new AggregateStateIdStringifier(), AggregateStateId.class);
+    }
+
     private final I aggregateId;
     private final TypeUrl stateType;
 

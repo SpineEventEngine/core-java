@@ -22,7 +22,6 @@ package io.spine.server.projection.given;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
@@ -41,6 +40,7 @@ import io.spine.test.projection.event.TaskAdded;
 public class ProjectionRepositoryTestEnv {
 
     private ProjectionRepositoryTestEnv() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -73,29 +73,7 @@ public class ProjectionRepositoryTestEnv {
     /** Stub projection repository. */
     public static class TestProjectionRepository
             extends ProjectionRepository<ProjectId, TestProjection, Project> {
-        public TestProjectionRepository() {
-            super();
-        }
 
-        @SuppressWarnings("unused")
-        @Subscribe
-        public void apply(ProjectCreated event, EventContext eventContext) {
-            // NOP
-        }
-    }
-
-    /** Stub projection repository with the disabled automatic catch-up */
-    public static class ManualCatchupProjectionRepository
-            extends ProjectionRepository<ProjectId, TestProjection, Project> {
-        public ManualCatchupProjectionRepository() {
-            super(false);
-        }
-
-        public ManualCatchupProjectionRepository(Duration catchUpMaxDuration) {
-            super(false, catchUpMaxDuration);
-        }
-
-        @SuppressWarnings("unused")
         @Subscribe
         public void apply(ProjectCreated event, EventContext eventContext) {
             // NOP

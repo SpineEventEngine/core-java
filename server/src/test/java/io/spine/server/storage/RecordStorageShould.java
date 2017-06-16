@@ -45,7 +45,7 @@ import io.spine.server.entity.TestTransaction;
 import io.spine.server.entity.storage.EntityQueries;
 import io.spine.server.entity.storage.EntityQuery;
 import io.spine.server.entity.storage.EntityRecordWithColumns;
-import io.spine.test.Tests;
+import io.spine.test.Values;
 import io.spine.test.storage.Project;
 import io.spine.test.storage.ProjectVBuilder;
 import io.spine.testdata.Sample;
@@ -69,8 +69,8 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.injectState;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
-import static io.spine.test.Tests.archived;
 import static io.spine.test.Tests.assertMatchesMask;
+import static io.spine.test.Values.archived;
 import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.validate.Validate.isDefault;
@@ -114,7 +114,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(wrappedState)
-                                                .setVersion(Tests.newVersionWithNumber(0))
+                                                .setVersion(Values.newVersionWithNumber(0))
                                                 .build();
         return record;
     }
@@ -124,7 +124,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setEntityId(pack(id))
                                                 .setState(wrappedState)
-                                                .setVersion(Tests.newVersionWithNumber(0))
+                                                .setVersion(Values.newVersionWithNumber(0))
                                                 .build();
         return record;
     }

@@ -30,7 +30,7 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
-import io.spine.test.Tests;
+import io.spine.test.Values;
 import io.spine.test.commandservice.customer.Customer;
 import io.spine.test.commandservice.customer.CustomerId;
 import io.spine.users.TenantId;
@@ -40,7 +40,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -83,8 +83,10 @@ public class MultiTenantStandShould extends StandShould {
 
     @Test
     public void not_trigger_updates_of_aggregate_records_for_another_tenant_subscriptions() {
-        final StandStorage standStorage = InMemoryStorageFactory.getInstance(isMultitenant())
-                                                                .createStandStorage();
+        final StandStorage standStorage =
+                InMemoryStorageFactory.newInstance(getClass().getSimpleName(),
+                                                   isMultitenant())
+                                      .createStandStorage();
         final Stand stand = prepareStandWithAggregateRepo(standStorage);
 
         // --- Default Tenant
@@ -106,7 +108,7 @@ public class MultiTenantStandShould extends StandShould {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = Tests.newVersionWithNumber(1);
+        final Version stateVersion = Values.newVersionWithNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         final Any packedState = AnyPacker.pack(customer);

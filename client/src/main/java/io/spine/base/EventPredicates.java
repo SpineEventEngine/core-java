@@ -28,6 +28,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.protobuf.util.Timestamps.checkValid;
 
 /**
  * Predicates for working with {@code Event}s.
@@ -44,7 +45,7 @@ public final class EventPredicates {
      * Creates a predicate for filtering events after the passed timestamp.
      */
     public static Predicate<Event> isAfter(Timestamp timestamp) {
-        checkNotNull(timestamp);
+        checkValid(timestamp);
         final Predicate<Event> result = new IsAfter(timestamp);
         return result;
     }
@@ -53,7 +54,7 @@ public final class EventPredicates {
      * Creates a predicate for filtering events after the passed timestamp.
      */
     public static Predicate<Event> isBefore(Timestamp timestamp) {
-        checkNotNull(timestamp);
+        checkValid(timestamp);
         final Predicate<Event> result = new IsBefore(timestamp);
         return result;
     }
@@ -62,8 +63,7 @@ public final class EventPredicates {
      * Creates a predicate to filter event records within a given time range.
      */
     public static Predicate<Event> isBetween(Timestamp start, Timestamp finish) {
-        checkNotNull(start);
-        checkNotNull(finish);
+        IsBetween.checkArguments(start, finish);
         final Predicate<Event> result = new IsBetween(start, finish);
         return result;
     }
@@ -73,7 +73,7 @@ public final class EventPredicates {
 
         private final Timestamp timestamp;
 
-        public IsAfter(Timestamp timestamp) {
+        private IsAfter(Timestamp timestamp) {
             this.timestamp = timestamp;
         }
 
@@ -93,7 +93,7 @@ public final class EventPredicates {
 
         private final Timestamp timestamp;
 
-        public IsBefore(Timestamp timestamp) {
+        private IsBefore(Timestamp timestamp) {
             this.timestamp = timestamp;
         }
 
@@ -115,13 +115,19 @@ public final class EventPredicates {
         private final Timestamp start;
         private final Timestamp finish;
 
-        public IsBetween(Timestamp start, Timestamp finish) {
-            checkNotNull(start);
-            checkNotNull(finish);
-            checkArgument(Timestamps2.compare(start, finish) < 0,
-                          "`start` must be before `finish`");
+        private IsBetween(Timestamp start, Timestamp finish) {
+            checkArguments(start, finish);
             this.start = start;
             this.finish = finish;
+        }
+
+        public static void checkArguments(Timestamp start, Timestamp finish) {
+            checkNotNull(start);
+            checkNotNull(finish);
+            checkValid(start);
+            checkValid(finish);
+            checkArgument(Timestamps2.compare(start, finish) < 0,
+                          "`start` must be before `finish`");
         }
 
         @Override

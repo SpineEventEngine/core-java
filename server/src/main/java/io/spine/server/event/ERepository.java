@@ -31,6 +31,7 @@ import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.server.entity.DefaultRecordBasedRepository;
+import io.spine.server.storage.RecordStorage;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
@@ -75,6 +76,16 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
                 }
             };
 
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Overrides to open the method to the package.
+     */
+    @Override
+    protected RecordStorage<EventId> recordStorage() {
+        return super.recordStorage();
+    }
+
     Iterator<Event> iterator(EventStreamQuery query) {
         checkNotNull(query);
 
@@ -117,7 +128,7 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
      * @param query the source {@link EventStreamQuery} to get the info from
      * @return new instance of {@link EntityFilters} filtering the events
      */
-    private static EntityFilters toEntityFilters(EventStreamQuery query) {
+    static EntityFilters toEntityFilters(EventStreamQuery query) {
         final CompositeColumnFilter timeFilter = timeFilter(query);
         final CompositeColumnFilter typeFilter = typeFilter(query);
         final EntityFilters entityFilters = EntityFilters.newBuilder()

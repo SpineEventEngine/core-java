@@ -61,7 +61,7 @@ import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessa
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
 import static io.spine.server.commandstore.Records.toCommandIterator;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -86,7 +86,9 @@ public class StorageShould extends TenantAwareTest {
     public void setUpCommandStorageTest() {
         setCurrentTenant(newTenantUuid());
         repository = new CRepository();
-        repository.initStorage(StorageFactorySwitch.get(true));
+        final StorageFactorySwitch storageSwitch =
+                StorageFactorySwitch.newInstance(getClass().getSimpleName(), true);
+        repository.initStorage(storageSwitch.get());
     }
 
     @After

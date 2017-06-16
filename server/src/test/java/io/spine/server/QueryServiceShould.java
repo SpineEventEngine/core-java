@@ -20,12 +20,13 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.io.StreamObservers;
+import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;
@@ -60,8 +61,11 @@ public class QueryServiceShould {
     private final Set<BoundedContext> boundedContexts = Sets.newHashSet();
 
     private BoundedContext projectsContext;
+
     private BoundedContext customersContext;
-    private final TestQueryResponseObserver responseObserver = new TestQueryResponseObserver();
+
+    private final MemoizingObserver<QueryResponse> responseObserver =
+            StreamObservers.memoizingObserver();
     private ProjectDetailsRepository projectDetailsRepository;
 
     @Before
@@ -70,6 +74,7 @@ public class QueryServiceShould {
         projectsContext = BoundedContext.newBuilder()
                                         .setName("Projects")
                                         .build();
+
         // Inject spy, which will be obtained later via getStand().
         Spy.ofClass(Stand.class)
            .on(projectsContext);
@@ -77,7 +82,7 @@ public class QueryServiceShould {
         final Given.ProjectAggregateRepository projectRepo =
                 new Given.ProjectAggregateRepository(projectsContext);
         projectsContext.register(projectRepo);
-        projectDetailsRepository = spy(new ProjectDetailsRepository(projectsContext));
+        projectDetailsRepository = spy(new ProjectDetailsRepository());
         projectsContext.register(projectDetailsRepository);
 
         boundedContexts.add(projectsContext);
@@ -86,6 +91,7 @@ public class QueryServiceShould {
         customersContext = BoundedContext.newBuilder()
                                          .setName("Customers")
                                          .build();
+
         // Inject spy, which will be obtained later via getStand().
         Spy.ofClass(Stand.class)
            .on(customersContext);
@@ -156,19 +162,18 @@ public class QueryServiceShould {
         checkFailureResponse(responseObserver);
     }
 
-    private static void checkOkResponse(TestQueryResponseObserver responseObserver) {
-        final QueryResponse responseHandled = responseObserver.getResponseHandled();
+    private static void checkOkResponse(MemoizingObserver<QueryResponse> responseObserver) {
+        final QueryResponse responseHandled = responseObserver.firstResponse();
         assertNotNull(responseHandled);
         assertEquals(Responses.ok(), responseHandled.getResponse());
         assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getThrowable());
+        assertNull(responseObserver.getError());
     }
 
-    private static void checkFailureResponse(TestQueryResponseObserver responseObserver) {
-        final QueryResponse responseHandled = responseObserver.getResponseHandled();
-        assertNull(responseHandled);
+    private static void checkFailureResponse(MemoizingObserver<QueryResponse> responseObserver) {
+        assertTrue(responseObserver.responses().isEmpty());
         assertFalse(responseObserver.isCompleted());
-        assertNotNull(responseObserver.getThrowable());
+        assertNotNull(responseObserver.getError());
     }
 
     /*
@@ -177,21 +182,11 @@ public class QueryServiceShould {
 
     private static class ProjectDetailsRepository
             extends ProjectionRepository<ProjectId, ProjectDetails, Project> {
-
-        private ProjectDetailsRepository(BoundedContext boundedContext) {
-            super();
-        }
     }
 
     private static class ProjectDetails
             extends Projection<ProjectId, Project, ProjectVBuilder> {
 
-        /**
-         * Creates a new instance.
-         *
-         * @param id the ID for the new instance
-         * @throws IllegalArgumentException if the ID is not of one of the supported types
-         */
         public ProjectDetails(ProjectId id) {
             super(id);
         }
@@ -200,40 +195,6 @@ public class QueryServiceShould {
         @Subscribe
         public void on(ProjectCreated event, EventContext context) {
             // Do nothing.
-        }
-    }
-
-    private static class TestQueryResponseObserver implements StreamObserver<QueryResponse> {
-
-        private QueryResponse responseHandled;
-        private Throwable throwable;
-        private boolean isCompleted = false;
-
-        @Override
-        public void onNext(QueryResponse response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-            this.throwable = throwable;
-        }
-
-        @Override
-        public void onCompleted() {
-            this.isCompleted = true;
-        }
-
-        QueryResponse getResponseHandled() {
-            return responseHandled;
-        }
-
-        Throwable getThrowable() {
-            return throwable;
-        }
-
-        boolean isCompleted() {
-            return isCompleted;
         }
     }
 }

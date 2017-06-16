@@ -23,6 +23,7 @@ package io.spine.server.projection;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.EventSubscriberMethod;
@@ -71,8 +72,14 @@ public abstract class Projection<I,
         return super.getBuilder();
     }
 
-    void apply(Message eventMessage,
-                         EventContext eventContext)  {
+    /**
+     * Exposes playing events on a projection for the package.
+     */
+    static void play(Projection projection, Iterable<Event> events) {
+        projection.play(events);
+    }
+
+    void apply(Message eventMessage, EventContext eventContext)  {
         final EventSubscriberMethod method = forMessage(getClass(), eventMessage);
         try {
             method.invoke(this, eventMessage, eventContext);

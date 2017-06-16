@@ -38,7 +38,7 @@ import io.spine.test.Tests;
 import io.spine.time.Time;
 import org.junit.Test;
 
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

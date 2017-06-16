@@ -56,7 +56,7 @@ import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.Command.createProject;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
@@ -160,7 +160,7 @@ public abstract class AbstractCommandBusTestSuite {
     @Before
     public void setUp() {
         final InMemoryStorageFactory storageFactory =
-                InMemoryStorageFactory.getInstance(this.multitenant);
+                InMemoryStorageFactory.newInstance(getClass().getSimpleName(), this.multitenant);
         final TenantIndex tenantIndex = TenantAwareTest.createTenantIndex(this.multitenant,
                                                                           storageFactory);
         commandStore = spy(new CommandStore(storageFactory, tenantIndex));

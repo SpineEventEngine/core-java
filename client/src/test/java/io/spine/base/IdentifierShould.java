@@ -43,7 +43,7 @@ import static io.spine.protobuf.Wrapper.forLong;
 import static io.spine.protobuf.Wrapper.forString;
 import static io.spine.protobuf.Wrapper.forUnsignedInteger;
 import static io.spine.protobuf.Wrapper.forUnsignedLong;
-import static io.spine.test.Tests.newUuidValue;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;

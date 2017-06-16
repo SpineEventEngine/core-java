@@ -28,6 +28,7 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
+import io.spine.test.Values;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.Task;
@@ -134,18 +135,18 @@ public abstract class ProjectionStorageShould<I>
     @Override
     @Test
     public void retrieve_empty_map_if_storage_is_empty() {
-        final Iterator<EntityRecord> noMaskEntiries = storage.readAll();
+        final Iterator<EntityRecord> noMaskEntries = storage.readAll();
 
         final FieldMask nonEmptyMask = FieldMask.newBuilder()
                                                 .addPaths("invalid_path")
                                                 .build();
         final Iterator<EntityRecord> maskedEntries = storage.readAll(nonEmptyMask);
 
-        assertEmpty(noMaskEntiries);
+        assertEmpty(noMaskEntries);
         assertEmpty(maskedEntries);
 
         // Same type
-        assertEquals(noMaskEntiries, maskedEntries);
+        assertEquals(noMaskEntries, maskedEntries);
     }
 
     @SuppressWarnings({"MethodWithMultipleLoops", "BreakStatement"})
@@ -214,7 +215,7 @@ public abstract class ProjectionStorageShould<I>
 
             final EntityRecord record = EntityRecord.newBuilder()
                                                     .setState(packedState)
-                                                    .setVersion(Tests.newVersionWithNumber(1))
+                                                    .setVersion(Values.newVersionWithNumber(1))
                                                     .build();
             storage.write(id, record);
             ids.add(id);

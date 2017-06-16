@@ -21,8 +21,8 @@
 package io.spine.server.event;
 
 import com.google.common.util.concurrent.MoreExecutors;
+import io.spine.server.BoundedContext;
 import io.spine.server.storage.StorageFactory;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,11 +34,15 @@ import static org.junit.Assert.assertNotNull;
 
 public class EventStoreServiceBuilderShould {
 
-    private final StorageFactory storageFactory = StorageFactorySwitch.get(true);
+    private StorageFactory storageFactory;
     private EventStore.ServiceBuilder builder;
 
     @Before
     public void setUp() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(true)
+                                                .build();
+        storageFactory = bc.getStorageFactory();
         builder = EventStore.newServiceBuilder();
     }
 

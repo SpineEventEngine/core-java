@@ -28,8 +28,10 @@ import io.spine.base.Events;
 
 import java.util.Set;
 
+import static io.spine.server.entity.idfunc.GetProducerIdFromEvent.fromFieldIndex;
+
 /**
- * Internal utility class that provides default {@link IdSetEventFunction}s
+ * Internal utility class that provides default {@link EventTargetsFunction}s
  * for obtaining a producer from an event.
  *
  * @author Alexander Yevsyukov
@@ -48,7 +50,7 @@ public class Producers {
      * @param <I> the type of the IDs managed by the repository
      * @return new function instance
      */
-    public static <I> IdSetEventFunction<I, Message> producerFromContext() {
+    public static <I> EventTargetsFunction<I, Message> fromContext() {
         return new ProducerFromContext<>();
     }
 
@@ -59,7 +61,7 @@ public class Producers {
      * @param <I> the type of the IDs managed by the repository
      * @return new function instance
      */
-    public static <I> IdSetEventFunction<I, Message> producerFromFirstMessageField() {
+    public static <I> EventTargetsFunction<I, Message> fromFirstMessageField() {
         return new ProducerFromFirstEventMessageField<>();
     }
 
@@ -68,11 +70,19 @@ public class Producers {
      *
      * @param <I> the type of entity IDs
      */
-    private static class ProducerFromContext<I> implements IdSetEventFunction<I, Message> {
+    private static class ProducerFromContext<I> implements EventTargetsFunction<I, Message> {
+
+        private static final long serialVersionUID = 0L;
+
         @Override
         public Set<I> apply(Message message, EventContext context) {
             final I id = Events.getProducer(context);
             return ImmutableSet.of(id);
+        }
+
+        @Override
+        public String toString() {
+            return "Producers.fromContext()";
         }
     }
 
@@ -82,15 +92,21 @@ public class Producers {
      * @param <I> the type of entity IDs
      */
     private static class ProducerFromFirstEventMessageField<I>
-            implements IdSetEventFunction<I, Message> {
+            implements EventTargetsFunction<I, Message> {
 
-        private final GetProducerIdFromEvent<I, Message> func =
-                GetProducerIdFromEvent.fromFieldIndex(0);
+        private static final long serialVersionUID = 0L;
+
+        private final GetProducerIdFromEvent<I, Message> func = fromFieldIndex(0);
 
         @Override
         public Set<I> apply(Message message, EventContext context) {
             final I id = func.apply(message, context);
             return ImmutableSet.of(id);
+        }
+
+        @Override
+        public String toString() {
+            return "Producers.fromFirstMessageField()";
         }
     }
 }

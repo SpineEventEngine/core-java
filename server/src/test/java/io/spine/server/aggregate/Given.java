@@ -45,7 +45,7 @@ import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
 import static io.spine.test.TestEventFactory.newInstance;
-import static io.spine.test.Tests.newUserId;
+import static io.spine.test.Values.newUserId;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 

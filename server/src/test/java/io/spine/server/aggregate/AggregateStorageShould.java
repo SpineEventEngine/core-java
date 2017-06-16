@@ -88,8 +88,8 @@ public abstract class AggregateStorageShould
      */
     protected abstract <I> AggregateStorage<I> getStorage(
             Class<? extends Aggregate<I,
-                                                  ? extends Message,
-                                                  ? extends ValidatingBuilder<?, ?>>> aggregateClass);
+                                      ? extends Message,
+                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass);
 
     @Override
     protected AggregateStateRecord newStorageRecord() {

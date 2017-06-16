@@ -23,9 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
-import io.spine.base.Identifier;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.tenant.TenantAwareOperation;
 
@@ -103,40 +101,8 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
 
         /**
          * Loads an aggregate and dispatches the command to it.
-         *
-         * <p>During the command dispatching and event applying, the original list of events may
-         * have been changed by other actors in the system.
-         *
-         * <p>To ensure the resulting {@code Aggregate} state is consistent with the numerous
-         * concurrent actor changes, the event count from the last snapshot should remain the same
-         * during the {@linkplain AggregateRepository#find(Object) loading} and
-         * {@linkplain CommandHandlingEntity#dispatchCommand(CommandEnvelope) command dispatching}.
-         *
-         * <p>In case the new events are detected, the loading and command
-         * dispatching is repeated from scratch.
          */
         private A loadAndDispatch() {
-            final AggregateStorage<I> storage = storage();
-            A aggregate;
-            Integer eventCountBeforeSave = null;
-            int eventCountBeforeDispatch = 0;
-            do {
-                if (eventCountBeforeSave != null) {
-                    final int newEventCount = eventCountBeforeSave - eventCountBeforeDispatch;
-                    logConcurrentModification(aggregateId, envelope.getMessage(), newEventCount);
-                }
-
-                eventCountBeforeDispatch = storage.readEventCountAfterLastSnapshot(aggregateId);
-
-                aggregate = doDispatch();
-
-                eventCountBeforeSave = storage.readEventCountAfterLastSnapshot(aggregateId);
-            } while (eventCountBeforeDispatch != eventCountBeforeSave);
-
-            return aggregate;
-        }
-
-        private A doDispatch() {
             final A aggregate = repository.loadOrCreate(aggregateId);
 
             final LifecycleFlags statusBefore = aggregate.getLifecycleFlags();
@@ -161,19 +127,6 @@ class AggregateCommandEndpoint<I, A extends Aggregate<I, ?, ?>>
          */
         private AggregateStorage<I> storage() {
             return repository.aggregateStorage();
-        }
-
-        private void logConcurrentModification(I aggregateId,
-                                               Message commandMessage,
-                                               int newEventCount) {
-            final String idStr = Identifier.toString(aggregateId);
-            final Class<?> aggregateClass = repository.getAggregateClass();
-            AggregateRepository.log()
-               .warn("Detected the concurrent modification of {} ID: {}. " +
-                             "New events detected while dispatching the command {} " +
-                             "The number of new events is {}. " +
-                             "Restarting the command dispatching.",
-                     aggregateClass, idStr, commandMessage, newEventCount);
         }
     }
 

@@ -26,8 +26,6 @@ import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Event;
-import io.spine.base.Response;
-import io.spine.base.Responses;
 import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -48,12 +46,29 @@ import static com.google.common.collect.Iterables.tryFind;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class EventStore implements AutoCloseable {
+public class EventStore implements AutoCloseable {
 
+    private final ERepository storage;
     private final Executor streamExecutor;
 
     @Nullable
     private final Logger logger;
+
+    /**
+     * Constructs an instance with the passed executor for returning streams.
+     *
+     * @param streamExecutor the executor for updating new subscribers
+     * @param storageFactory the storage factory for creating underlying storage
+     * @param logger         debug logger instance
+     */
+    EventStore(Executor streamExecutor, StorageFactory storageFactory, @Nullable Logger logger) {
+        super();
+        final ERepository eventRepository = new ERepository();
+        eventRepository.initStorage(storageFactory);
+        this.storage = eventRepository;
+        this.streamExecutor = streamExecutor;
+        this.logger = logger;
+    }
 
     /**
      * Creates a builder for locally running {@code EventStore}.
@@ -72,16 +87,13 @@ public abstract class EventStore implements AutoCloseable {
         return new ServiceBuilder();
     }
 
-    /**
-     * Constructs an instance with the passed executor for returning streams.
-     *
-     * @param streamExecutor the executor for updating new subscribers
-     * @param logger         debug logger instance
-     */
-    protected EventStore(Executor streamExecutor, @Nullable Logger logger) {
-        super();
-        this.streamExecutor = streamExecutor;
-        this.logger = logger;
+    /** Returns default logger for the class. */
+    public static Logger log() {
+        return LogSingleton.INSTANCE.value;
+    }
+
+    ERepository getStorage() {
+        return storage;
     }
 
     /**
@@ -135,14 +147,18 @@ public abstract class EventStore implements AutoCloseable {
      *
      * @param event the event to store.
      */
-    protected abstract void store(Event event);
+    protected void store(Event event) {
+        storage.store(event);
+    }
 
     /**
      * Implement this method for storing the passed events.
      *
      * @param events the events to store.
      */
-    protected abstract void store(Iterable<Event> events);
+    protected void store(Iterable<Event> events) {
+        storage.store(events);
+    }
 
     /**
      * Creates iterator for traversing through the history of events matching the passed query.
@@ -150,12 +166,14 @@ public abstract class EventStore implements AutoCloseable {
      * @param query the query filtering the history
      * @return iterator instance
      */
-    protected abstract Iterator<Event> iterator(EventStreamQuery query);
+    protected Iterator<Event> iterator(EventStreamQuery query) {
+        return storage.iterator(query);
+    }
 
     /**
      * Creates the steam with events matching the passed query.
      *
-     * @param request the query with filtering parameters for the event history
+     * @param request          the query with filtering parameters for the event history
      * @param responseObserver observer for the resulting stream
      */
     public void read(final EventStreamQuery request, final StreamObserver<Event> responseObserver) {
@@ -173,17 +191,75 @@ public abstract class EventStore implements AutoCloseable {
                     responseObserver.onNext(event);
                 }
                 responseObserver.onCompleted();
-                logCatchUpComplete(responseObserver);
+                logReadingComplete(responseObserver);
             }
         });
+    }
+
+    @VisibleForTesting
+    Executor getStreamExecutor() {
+        return streamExecutor;
+    }
+
+    /**
+     * Closes the underlying storage.
+     *
+     * @throws IOException if the attempt to close the storage throws an exception
+     */
+    @Override
+    public void close() throws Exception {
+        storage.close();
+    }
+
+    private void logStored(Event request) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isTraceEnabled()) {
+            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
+        }
+    }
+
+    private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
+        if (logger == null) {
+            return;
+        }
+
+        if (logger.isInfoEnabled()) {
+            final String requestData = TextFormat.shortDebugString(request);
+            logger.info("Creating stream on request: {} for observer: {}",
+                        requestData,
+                        responseObserver);
+        }
+    }
+
+    /*
+     * Logging methods
+     *******************/
+
+    private void logReadingComplete(StreamObserver<Event> observer) {
+        if (logger == null) {
+            return;
+        }
+        if (logger.isInfoEnabled()) {
+            logger.info("Observer {} got all queried events.", observer);
+        }
+    }
+
+    private enum LogSingleton {
+        INSTANCE;
+
+        @SuppressWarnings("NonSerializableFieldInSerializableClass")
+        private final Logger value = LoggerFactory.getLogger(EventStore.class);
     }
 
     /**
      * Abstract builder base for building.
      *
      * @param <T> the type of the builder product
+     * @param <B> the type of the builder for covariance in derived classes
      */
-    private abstract static class AbstractBuilder<T> {
+    private abstract static class AbstractBuilder<T, B extends AbstractBuilder<T, B>> {
 
         private Executor streamExecutor;
         private StorageFactory storageFactory;
@@ -201,27 +277,22 @@ public abstract class EventStore implements AutoCloseable {
             checkNotNull(getStorageFactory(), "eventStorage must be set");
         }
 
-        protected AbstractBuilder setStreamExecutor(Executor executor) {
-            this.streamExecutor = checkNotNull(executor);
-            return this;
-        }
-
         public Executor getStreamExecutor() {
             return streamExecutor;
         }
 
-        protected AbstractBuilder setStorageFactory(StorageFactory storageFactory) {
-            this.storageFactory = checkNotNull(storageFactory);
-            return this;
+        public B setStreamExecutor(Executor executor) {
+            this.streamExecutor = checkNotNull(executor);
+            return castThis();
         }
 
         public StorageFactory getStorageFactory() {
             return storageFactory;
         }
 
-        protected AbstractBuilder setLogger(@Nullable Logger logger) {
-            this.logger = logger;
-            return this;
+        public B setStorageFactory(StorageFactory storageFactory) {
+            this.storageFactory = checkNotNull(storageFactory);
+            return castThis();
         }
 
         @Nullable
@@ -229,97 +300,39 @@ public abstract class EventStore implements AutoCloseable {
             return logger;
         }
 
+        public B setLogger(@Nullable Logger logger) {
+            this.logger = logger;
+            return castThis();
+        }
+
         /**
          * Sets default logger.
          *
          * @see EventStore#log()
          */
-        public AbstractBuilder withDefaultLogger() {
+        public B withDefaultLogger() {
             setLogger(log());
-            return this;
+            return castThis();
+        }
+
+        /** Casts this to generic type to provide type covariance in the derived classes. */
+        @SuppressWarnings("unchecked") // See Javadoc
+        private B castThis() {
+            return (B) this;
         }
     }
 
-    /** Builder for creating new local {@code EventStore} instance. */
-    public static class Builder extends AbstractBuilder<EventStore> {
+    /**
+     * Builder for creating new local {@code EventStore} instance.
+     */
+    public static class Builder extends AbstractBuilder<EventStore, Builder> {
 
         @Override
         public EventStore build() {
             checkState();
-            final LocalImpl result = new LocalImpl(getStreamExecutor(),
-                                                   getStorageFactory(),
-                                                   getLogger());
+            final EventStore result =
+                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
             return result;
-        }
-
-        @Override
-        public Builder setStreamExecutor(Executor executor) {
-            super.setStreamExecutor(executor);
-            return this;
-        }
-
-        @Override
-        public Builder setStorageFactory(StorageFactory storageFactory) {
-            super.setStorageFactory(storageFactory);
-            return this;
-        }
-
-        @Override
-        public Builder setLogger(@Nullable Logger logger) {
-            super.setLogger(logger);
-            return this;
-        }
-
-        @Override
-        public Builder withDefaultLogger() {
-            super.withDefaultLogger();
-            return this;
-        }
-    }
-
-    @VisibleForTesting
-    Executor getStreamExecutor() {
-        return streamExecutor;
-    }
-
-    /** A locally running {@code EventStore} implementation. */
-    private static class LocalImpl extends EventStore {
-
-        private final ERepository storage;
-
-        private LocalImpl(Executor catchUpExecutor,
-                          StorageFactory storageFactory,
-                          @Nullable Logger logger) {
-            super(catchUpExecutor, logger);
-
-            final ERepository eventRepository = new ERepository();
-            eventRepository.initStorage(storageFactory);
-            this.storage = eventRepository;
-        }
-
-        @Override
-        protected void store(Event event) {
-            storage.store(event);
-        }
-
-        @Override
-        protected void store(Iterable<Event> events) {
-            storage.store(events);
-        }
-
-        @Override
-        protected Iterator<Event> iterator(EventStreamQuery query) {
-            return storage.iterator(query);
-        }
-
-        /**
-         * Notifies all the subscribers and closes the underlying storage.
-         *
-         * @throws IOException if the attempt to close the storage throws an exception
-         */
-        @Override
-        public void close() throws Exception {
-            storage.close();
         }
     }
 
@@ -328,126 +341,17 @@ public abstract class EventStore implements AutoCloseable {
      *
      * @see EventStoreGrpc.EventStoreImplBase
      */
-    public static class ServiceBuilder extends AbstractBuilder<ServerServiceDefinition> {
+    public static class ServiceBuilder
+            extends AbstractBuilder<ServerServiceDefinition, ServiceBuilder> {
 
         @Override
         public ServerServiceDefinition build() {
             checkState();
-            final LocalImpl eventStore = new LocalImpl(getStreamExecutor(),
-                                                       getStorageFactory(),
-                                                       getLogger());
+            final EventStore eventStore =
+                    new EventStore(getStreamExecutor(), getStorageFactory(), getLogger());
             final EventStoreGrpc.EventStoreImplBase grpcService = new GrpcService(eventStore);
             final ServerServiceDefinition result = grpcService.bindService();
             return result;
         }
-
-        @Override
-        public ServiceBuilder setStreamExecutor(Executor executor) {
-            super.setStreamExecutor(executor);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder setStorageFactory(StorageFactory storageFactory) {
-            super.setStorageFactory(storageFactory);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder setLogger(@Nullable Logger logger) {
-            super.setLogger(logger);
-            return this;
-        }
-
-        @Override
-        public ServiceBuilder withDefaultLogger() {
-            super.withDefaultLogger();
-            return this;
-        }
     }
-
-    /**
-     * gRPC service over the locally running implementation.
-     */
-    @SuppressWarnings("MethodDoesntCallSuperMethod")
-   /* as we override default implementation with `unimplemented` status. */
-    private static class GrpcService extends EventStoreGrpc.EventStoreImplBase {
-
-        private final LocalImpl eventStore;
-
-        private GrpcService(LocalImpl eventStore) {
-            super();
-            this.eventStore = eventStore;
-        }
-
-        @Override
-        public void append(Event request, StreamObserver<Response> responseObserver) {
-            try {
-                eventStore.append(request);
-                responseObserver.onNext(Responses.ok());
-                responseObserver.onCompleted();
-            } catch (RuntimeException e) {
-                responseObserver.onError(e);
-            }
-        }
-
-        @Override
-        public void read(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-            eventStore.read(request, responseObserver);
-        }
-    }
-
-    //
-    // Logging methods
-    //------------------------------------------
-
-    private void logStored(Event request) {
-        if (logger == null) {
-            return;
-        }
-        if (logger.isTraceEnabled()) {
-            logger.trace("Stored: {}", TextFormat.shortDebugString(request));
-        }
-    }
-
-    private void logStored(Iterable<Event> requests) {
-        for (Event event : requests) {
-            logStored(event);
-        }
-    }
-
-    private void logReadingStart(EventStreamQuery request, StreamObserver<Event> responseObserver) {
-        if (logger == null) {
-            return;
-        }
-
-        if (logger.isInfoEnabled()) {
-            final String requestData = TextFormat.shortDebugString(request);
-            logger.info("Creating stream on request: {} for observer: {}",
-                        requestData,
-                        responseObserver);
-        }
-    }
-
-    private void logCatchUpComplete(StreamObserver<Event> observer) {
-        if (logger == null) {
-            return;
-        }
-        if (logger.isInfoEnabled()) {
-            logger.info("Observer {} got all catch-up events.", observer);
-        }
-    }
-
-    private enum LogSingleton {
-        INSTANCE;
-
-        @SuppressWarnings("NonSerializableFieldInSerializableClass")
-        private final Logger value = LoggerFactory.getLogger(EventStore.class);
-    }
-
-    /** Returns default logger of {EventStore} class. */
-    public static Logger log() {
-        return LogSingleton.INSTANCE.value;
-    }
-
 }

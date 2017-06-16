@@ -28,7 +28,6 @@ import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
-import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.Given;
 import io.spine.test.TestActorRequestFactory;
@@ -53,7 +52,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
-import static io.spine.test.Tests.newTenantUuid;
+import static io.spine.test.Values.newTenantUuid;
 import static io.spine.validate.Validate.isDefault;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
@@ -85,7 +84,8 @@ public class AggregateRepositoryShould {
     public void setUp() {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .build();
-        repository = new ProjectAggregateRepository(boundedContext);
+        repository = new ProjectAggregateRepository();
+        boundedContext.register(repository);
         repositorySpy = spy(repository);
     }
 
@@ -409,12 +409,6 @@ public class AggregateRepositoryShould {
         private static final ProjectId troublesome = ProjectId.newBuilder()
                                                               .setId("CANNOT_BE_LOADED")
                                                               .build();
-
-        protected ProjectAggregateRepository(BoundedContext boundedContext) {
-            super();
-            initStorage(StorageFactorySwitch.get(boundedContext.isMultitenant()));
-        }
-
         @Override
         public Optional<ProjectAggregate> find(ProjectId id) {
             if (id.equals(troublesome)) {

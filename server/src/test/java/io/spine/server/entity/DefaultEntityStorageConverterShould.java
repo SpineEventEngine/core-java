@@ -20,6 +20,7 @@
 
 package io.spine.server.entity;
 
+import com.google.common.testing.SerializableTester;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.StringValue;
 import io.spine.protobuf.Wrapper;
@@ -35,21 +36,20 @@ import static org.junit.Assert.assertEquals;
  */
 public class DefaultEntityStorageConverterShould {
 
-    private Repository<Long, TestEntity> repository;
+    private EntityStorageConverter<Long, TestEntity, StringValue> converter;
 
     @Before
     public void setUp() {
-        final BoundedContext bc = BoundedContext.newBuilder().build();
-        repository = new TestRepository(bc);
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .build();
+        RecordBasedRepository<Long, TestEntity, StringValue> repository = new TestRepository();
         bc.register(repository);
 
+        converter = forAllFields(repository.getEntityStateType(), repository.entityFactory());
     }
 
     @Test
     public void create_instance_for_for_all_fields() throws Exception {
-        final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
-                repository);
-
         assertEquals(FieldMask.getDefaultInstance(), converter.getFieldMask());
     }
 
@@ -59,15 +59,15 @@ public class DefaultEntityStorageConverterShould {
                                              .addPaths("foo.bar")
                                              .build();
 
-        final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
-                repository).withFieldMask(fieldMask);
+        final EntityStorageConverter<Long, TestEntity, StringValue> withMasks =
+                converter.withFieldMask(fieldMask);
 
-        assertEquals(fieldMask, converter.getFieldMask());
+        assertEquals(fieldMask, withMasks.getFieldMask());
     }
 
     private static TestEntity createEntity(Long id, StringValue state) {
         final TestEntity result = new TestEntity(id);
-        result.injectState(state);
+        result.setState(state);
         return result;
     }
 
@@ -75,13 +75,15 @@ public class DefaultEntityStorageConverterShould {
     public void convert_forward_and_backward() throws Exception {
         final TestEntity entity = createEntity(100L, Wrapper.forString("back and forth"));
 
-        final EntityStorageConverter<Long, TestEntity, StringValue> converter = forAllFields(
-                repository);
-
         final EntityRecord out = converter.convert(entity);
         final TestEntity back = converter.reverse()
                                          .convert(out);
         assertEquals(entity, back);
+    }
+
+    @Test
+    public void serialize() {
+        SerializableTester.reserializeAndAssert(converter);
     }
 
     /**
@@ -98,8 +100,5 @@ public class DefaultEntityStorageConverterShould {
      */
     private static class TestRepository
             extends DefaultRecordBasedRepository<Long, TestEntity, StringValue> {
-        private TestRepository(BoundedContext boundedContext) {
-            super();
-        }
     }
 }
