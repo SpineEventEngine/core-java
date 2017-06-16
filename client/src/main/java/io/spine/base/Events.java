@@ -124,10 +124,7 @@ public final class Events {
      */
     public static <I> I getProducer(EventContext context) {
         checkNotNull(context);
-        final Object aggregateId = Identifier.unpack(context.getProducerId());
-        @SuppressWarnings("unchecked")
-        // It is the caller's responsibility to know the type of the wrapped ID.
-        final I id = (I) aggregateId;
+        final I id = Identifier.unpack(context.getProducerId());
         return id;
 
     }

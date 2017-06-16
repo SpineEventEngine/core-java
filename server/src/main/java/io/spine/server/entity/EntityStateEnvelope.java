@@ -130,10 +130,7 @@ public final class EntityStateEnvelope<I, S extends Message>
     }
 
     public I getEntityId() {
-        final Object rawId = Identifier.unpack(entityId);
-        @SuppressWarnings("unchecked")  // as `Any` was created out of `I`-typed object previously.
-        final I result = (I) rawId;
-        return result;
+        return getId();
     }
 
     public Optional<Version> getEntityVersion() {
