@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.annotation;
+package io.spine.base;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

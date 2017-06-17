@@ -20,9 +20,9 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
+import io.spine.base.Subscribe;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
 import io.spine.io.StreamObservers;
