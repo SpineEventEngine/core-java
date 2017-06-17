@@ -22,6 +22,7 @@ package io.spine.time.change;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
+import io.spine.change.TimeChanges;
 import io.spine.test.TimeTests;
 import io.spine.time.Interval;
 import io.spine.time.Intervals;

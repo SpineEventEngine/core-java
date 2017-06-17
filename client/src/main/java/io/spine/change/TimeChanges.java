@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.time.change;
+package io.spine.change;
 
 import io.spine.time.Interval;
 import io.spine.time.LocalDate;
@@ -25,12 +25,18 @@ import io.spine.time.LocalTime;
 import io.spine.time.OffsetDate;
 import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetTime;
+import io.spine.time.change.IntervalChange;
+import io.spine.time.change.LocalDateChange;
+import io.spine.time.change.LocalTimeChange;
+import io.spine.time.change.OffsetDateChange;
+import io.spine.time.change.OffsetDateTimeChange;
+import io.spine.time.change.OffsetTimeChange;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.change.Preconditions.checkNotEqual;
 
 /**
- * Utility class for working with field changes.
+ * Utility class for working with time field changes.
  *
  * @author Alexander Aleksandrov
  */
