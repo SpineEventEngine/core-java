@@ -21,9 +21,9 @@ package io.spine.server.event;
 
 import io.spine.annotation.SPI;
 import io.spine.base.Event;
+import io.spine.base.EventClass;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.outbus.CommandOutputDelivery;
-import io.spine.type.EventClass;
 
 import java.util.concurrent.Executor;
 

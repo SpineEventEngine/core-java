@@ -23,9 +23,9 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;

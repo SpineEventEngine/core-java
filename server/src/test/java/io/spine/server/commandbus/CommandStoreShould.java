@@ -24,6 +24,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
@@ -40,7 +41,6 @@ import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
 import io.spine.test.command.event.ProjectCreated;
-import io.spine.type.CommandClass;
 import org.junit.Test;
 
 import javax.annotation.Nonnull;

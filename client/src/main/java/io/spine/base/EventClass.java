@@ -17,71 +17,71 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.type;
+
+package io.spine.base;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.Failure;
-import io.spine.base.Failures;
+import io.spine.type.MessageClass;
 
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A value object holding a class of a business failure.
+ * A value object holding a class of events.
  *
- * @author Alex Tymchenko
+ * @author Alexander Yevsyukov
  */
-public class FailureClass extends MessageClass {
+public final class EventClass extends MessageClass {
 
-    protected FailureClass(Class<? extends Message> value) {
+    private EventClass(Class<? extends Message> value) {
         super(value);
     }
 
     /**
-     * Creates a new instance of the failure class.
+     * Creates a new instance of the event class.
      *
      * @param value a value to hold
      * @return new instance
      */
-    public static FailureClass of(Class<? extends Message> value) {
-        return new FailureClass(checkNotNull(value));
+    public static EventClass of(Class<? extends Message> value) {
+        return new EventClass(checkNotNull(value));
     }
 
     /**
-     * Creates a new instance of the failure class by passed failure instance.
+     * Creates a new instance of the event class by passed event instance.
      *
-     * <p>If an instance of {@link Failure} (which implements {@code Message}) is passed to this
-     * method, enclosing failure message will be un-wrapped to determine the class of the failure.
+     * <p>If an instance of {@link Event} (which implements {@code Message}) is passed to
+     * this method, enclosing event message will be un-wrapped to determine the class of the event.
      *
-     * @param failure a failure instance
+     * @param event an event instance
      * @return new instance
      */
-    public static FailureClass of(Message failure) {
-        final Message message = checkNotNull(failure);
-        if (message instanceof Failure) {
-            final Failure failureRecord = (Failure) failure;
-            final Message enclosed = Failures.getMessage(failureRecord);
+    public static EventClass of(Message event) {
+        final Message message = checkNotNull(event);
+        if (message instanceof Event) {
+            final Event eventRecord = (Event) event;
+            final Message enclosed = Events.getMessage(eventRecord);
             return of(enclosed.getClass());
         }
-        final FailureClass result = of(message.getClass());
+        final EventClass result = of(message.getClass());
         return result;
     }
 
-    /** Creates an immutable set of {@code FailureClass} from the passed classes. */
-    public static ImmutableSet<FailureClass> setOf(Set<Class<? extends Message>> classes) {
-        final ImmutableSet.Builder<FailureClass> builder = ImmutableSet.builder();
+    /** Creates immutable set of {@code EventClass} from the passed set. */
+    public static ImmutableSet<EventClass> setOf(Set<Class<? extends Message>> classes) {
+        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }
         return builder.build();
     }
 
-    /** Creates an immutable set of {@code FailureClass} from the passed classes. */
+    /** Creates immutable set of {@code EventClass} from the passed classes. */
     @SafeVarargs
-    public static ImmutableSet<FailureClass> setOf(Class<? extends Message> ...classes) {
-        final ImmutableSet.Builder<FailureClass> builder = ImmutableSet.builder();
+    public static ImmutableSet<EventClass> setOf(Class<? extends Message>... classes) {
+        final ImmutableSet.Builder<EventClass> builder = ImmutableSet.builder();
         for (Class<? extends Message> cls : classes) {
             builder.add(of(cls));
         }

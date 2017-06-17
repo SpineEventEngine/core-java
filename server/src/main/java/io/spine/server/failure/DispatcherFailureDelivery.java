@@ -21,9 +21,9 @@ package io.spine.server.failure;
 
 import io.spine.annotation.SPI;
 import io.spine.base.Failure;
+import io.spine.base.FailureClass;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.server.outbus.CommandOutputDelivery;
-import io.spine.type.FailureClass;
 
 import java.util.concurrent.Executor;
 

@@ -22,11 +22,11 @@ package io.spine.envelope;
 
 import com.google.protobuf.Message;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Commands;
 import io.spine.base.TenantId;
-import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

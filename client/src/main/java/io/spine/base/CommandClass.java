@@ -18,12 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.type;
+package io.spine.base;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.Commands;
+import io.spine.type.MessageClass;
 
 import java.util.Arrays;
 

@@ -24,6 +24,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
 import io.spine.base.Failure;
+import io.spine.base.FailureClass;
 import io.spine.base.Failures;
 import io.spine.base.TenantId;
 import io.spine.change.StringChange;
@@ -35,7 +36,6 @@ import io.spine.test.failure.ProjectId;
 import io.spine.test.failure.command.RemoveOwner;
 import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.testdata.Sample;
-import io.spine.type.FailureClass;
 import org.junit.Before;
 import org.junit.Test;
 

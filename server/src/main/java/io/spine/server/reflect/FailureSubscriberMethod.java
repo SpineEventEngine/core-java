@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.annotation.Subscribe;
 import io.spine.base.CommandContext;
-import io.spine.type.FailureClass;
+import io.spine.base.FailureClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

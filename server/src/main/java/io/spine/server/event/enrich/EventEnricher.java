@@ -36,10 +36,10 @@ import com.google.protobuf.Message;
 import io.spine.base.Enrichment;
 import io.spine.base.Enrichment.Container;
 import io.spine.base.Event;
+import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.envelope.EventEnvelope;
 import io.spine.protobuf.AnyPacker;
-import io.spine.type.EventClass;
 import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;

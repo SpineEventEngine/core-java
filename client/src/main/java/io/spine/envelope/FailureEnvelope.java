@@ -24,8 +24,8 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
 import io.spine.base.Failure;
+import io.spine.base.FailureClass;
 import io.spine.base.Failures;
-import io.spine.type.FailureClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

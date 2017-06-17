@@ -24,9 +24,9 @@ import com.google.common.testing.EqualsTester;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.time.Time;
-import io.spine.type.CommandClass;
 import org.junit.Before;
 import org.junit.Test;
 

@@ -24,8 +24,8 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Subscribe;
+import io.spine.base.EventClass;
 import io.spine.base.EventContext;
-import io.spine.type.EventClass;
 
 import javax.annotation.CheckReturnValue;
 import java.lang.reflect.InvocationTargetException;

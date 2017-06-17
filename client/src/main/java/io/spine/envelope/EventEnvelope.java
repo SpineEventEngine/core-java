@@ -22,9 +22,9 @@ package io.spine.envelope;
 
 import com.google.protobuf.Message;
 import io.spine.base.Event;
+import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.Events;
-import io.spine.type.EventClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

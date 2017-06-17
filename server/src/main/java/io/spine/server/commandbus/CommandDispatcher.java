@@ -20,9 +20,9 @@
 
 package io.spine.server.commandbus;
 
+import io.spine.base.CommandClass;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.type.CommandClass;
 
 /**
  * Delivers commands to their handlers.

@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.annotation.Subscribe;
+import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.command.Assign;
@@ -44,7 +45,6 @@ import io.spine.test.command.Task;
 import io.spine.test.command.event.ProjectCreated;
 import io.spine.test.command.event.ProjectStarted;
 import io.spine.test.command.event.TaskAdded;
-import io.spine.type.CommandClass;
 
 import java.util.Collections;
 import java.util.Set;

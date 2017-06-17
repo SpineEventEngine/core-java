@@ -24,10 +24,10 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.Failure;
+import io.spine.base.FailureClass;
 import io.spine.base.Failures;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.failures.Failures.CannotPerformBusinessOperation;
-import io.spine.type.FailureClass;
 import org.junit.Before;
 import org.junit.Test;
 

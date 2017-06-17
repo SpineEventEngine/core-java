@@ -20,9 +20,8 @@
 
 package io.spine.server.event;
 
-
+import io.spine.base.EventClass;
 import io.spine.server.outbus.OutputDispatcherRegistry;
-import io.spine.type.EventClass;
 
 import java.util.Set;
 
