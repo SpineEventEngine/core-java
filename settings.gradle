@@ -1,5 +1,6 @@
 rootProject.name = 'spine'
 
+include 'options'
 include 'testutil'
 include 'client'
 include 'server'

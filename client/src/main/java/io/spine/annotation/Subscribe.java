@@ -20,8 +20,6 @@
 
 package io.spine.annotation;
 
-import io.spine.base.EventContext;
-
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -41,7 +39,7 @@ import java.lang.annotation.Target;
  *     <li>returns {@code void};
  *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
  *          as the first parameter;
- *     <li>(optional) accepts an {@link EventContext EventContext}
+ *     <li>(optional) accepts an {@link io.spine.base.EventContext EventContext}
  *          as the second parameter.
  * </ul>
  *
