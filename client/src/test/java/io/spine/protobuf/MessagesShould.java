@@ -46,13 +46,13 @@ public class MessagesShould {
     @Test
     public void return_the_same_any_from_toAny() {
         final Any any = pack(getClass().getSimpleName());
-        assertSame(any, Messages.toAny(any));
+        assertSame(any, AnyPacker.pack(any));
     }
 
     @Test
     public void pack_to_Any() {
         final Timestamp timestamp = Time.getCurrentTime();
-        assertEquals(timestamp, unpack(Messages.toAny(timestamp)));
+        assertEquals(timestamp, unpack(AnyPacker.pack(timestamp)));
     }
 
     @Test

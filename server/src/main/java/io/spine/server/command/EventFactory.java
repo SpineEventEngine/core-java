@@ -41,7 +41,6 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.Messages.toAny;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 import static io.spine.validate.Validate.isNotDefault;
@@ -117,7 +116,7 @@ public class EventFactory {
     private static Event createEvent(EventId id, Message messageOrAny, EventContext context) {
         checkNotNull(messageOrAny);
         checkNotNull(context);
-        final Any packed = toAny(messageOrAny);
+        final Any packed = pack(messageOrAny);
         final Event result = Event.newBuilder()
                                   .setId(id)
                                   .setMessage(packed)
@@ -187,7 +186,7 @@ public class EventFactory {
          * Sets the ID of an entity which is producing the events wrapped into {@code Any}.
          */
         public Builder setProducerId(Message messageOrAny) {
-            this.producerId = toAny(checkNotNull(messageOrAny));
+            this.producerId = pack(checkNotNull(messageOrAny));
             return this;
         }
 

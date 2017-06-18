@@ -19,7 +19,6 @@
  */
 package io.spine.protobuf;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 
@@ -29,7 +28,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.protobuf.AnyPacker.pack;
 import static java.lang.String.format;
 
 /**
@@ -41,23 +39,11 @@ import static java.lang.String.format;
  */
 public final class Messages {
 
+    /** The name of a message builder factory method. */
+    public static final String METHOD_NEW_BUILDER = "newBuilder";
+
     private Messages() {
         // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Safely packs the given {@link Message} object as {@link Any}.
-     *
-     * <p>If the passed message object is already packed as {@code Any}, just
-     * casts it to {@code Any} and returns the result.
-     *
-     * @param messageOrAny the message object
-     * @return {@code Any}
-     */
-    public static Any toAny(Message messageOrAny) {
-        return (messageOrAny instanceof Any)
-                ? (Any) messageOrAny
-                : pack(messageOrAny);
     }
 
     /**
@@ -93,7 +79,7 @@ public final class Messages {
     public static <B extends Message.Builder> B builderFor(Class<? extends Message> clazz) {
         checkNotNull(clazz);
         try {
-            final Method factoryMethod = clazz.getDeclaredMethod("newBuilder");
+            final Method factoryMethod = clazz.getDeclaredMethod(METHOD_NEW_BUILDER);
             @SuppressWarnings("unchecked")
             final B result = (B) factoryMethod.invoke(null);
             return result;

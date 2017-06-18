@@ -23,6 +23,7 @@ package io.spine.validate;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.protobuf.Messages;
 import io.spine.reflect.GenericTypeIndex;
 
 import java.lang.reflect.Method;
@@ -162,10 +163,9 @@ public interface ValidatingBuilder<T extends Message, B extends Message.Builder>
         }
 
         // as the method names are the same, but methods are different.
-        @SuppressWarnings("DuplicateStringLiteralInspection")
         public static Method getNewBuilderMethod(Class<? extends ValidatingBuilder<?, ?>> cls) {
             try {
-                return cls.getMethod("newBuilder");
+                return cls.getMethod(Messages.METHOD_NEW_BUILDER);
             } catch (NoSuchMethodException e) {
                 throw illegalArgumentWithCauseOf(e);
             }
