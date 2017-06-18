@@ -18,6 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
+/**
+ * This package provides base data classes for commands, events, errors, failures, and utilities
+ * for working with them.
+ */
 @ParametersAreNonnullByDefault
 package io.spine.base;
 
