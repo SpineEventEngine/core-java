@@ -23,6 +23,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.string.time;
+package io.spine.time.string;
 
 import javax.annotation.ParametersAreNonnullByDefault;

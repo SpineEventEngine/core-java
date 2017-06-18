@@ -20,9 +20,9 @@
 
 package io.spine.string;
 
-import io.spine.string.time.TimeStringifiers;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import io.spine.time.string.TimeStringifiers;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

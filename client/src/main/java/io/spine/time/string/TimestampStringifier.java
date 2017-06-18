@@ -18,54 +18,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
+import com.google.protobuf.Timestamp;
+import com.google.protobuf.util.Timestamps;
 import io.spine.string.Stringifier;
-import io.spine.time.LocalTime;
-import io.spine.time.LocalTimes;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
+import static io.spine.util.Exceptions.newIllegalArgumentException;
 
 /**
- * The default stringifier for {@link LocalTime} values.
+ * The stringifier of timestamps into RFC 3339 date string format.
  *
  * @author Alexander Yevsyukov
  */
-final class LocalTimeStringifier extends Stringifier<LocalTime> implements Serializable {
+final class TimestampStringifier extends Stringifier<Timestamp> implements Serializable {
 
     private static final long serialVersionUID = 0L;
-    private static final LocalTimeStringifier INSTANCE = new LocalTimeStringifier();
+    private static final TimestampStringifier INSTANCE = new TimestampStringifier();
 
-    static LocalTimeStringifier getInstance() {
+    static TimestampStringifier getInstance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(LocalTime time) {
-        checkNotNull(time);
-        final String result = LocalTimes.toString(time);
-        return result;
+    protected String toString(Timestamp obj) {
+        return Timestamps.toString(obj);
     }
 
     @Override
-    protected LocalTime fromString(String str) {
-        checkNotNull(str);
-        final LocalTime time;
+    @SuppressWarnings("ThrowInsideCatchBlockWhichIgnoresCaughtException")
+    // It is OK because all necessary information from caught exception is passed.
+    protected Timestamp fromString(String str) {
         try {
-          time = LocalTimes.parse(str);
+            return Timestamps.parse(str);
         } catch (ParseException e) {
-            throw illegalArgumentWithCauseOf(e);
+            throw newIllegalArgumentException(e.getMessage(), e);
         }
-        return time;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forLocalTime()";
+        return "TimeStringifiers.forTimestamp()";
     }
 
     private Object readResolve() {

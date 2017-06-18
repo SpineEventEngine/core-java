@@ -18,51 +18,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
 import io.spine.string.Stringifier;
-import io.spine.time.LocalDate;
-import io.spine.time.LocalDates;
+import io.spine.time.OffsetDateTime;
+import io.spine.time.OffsetDateTimes;
+import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
-import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
-
 /**
- * The default stringifier for {@link LocalDate} instances.
+ * Default stringifier for {@link OffsetDateTime}.
  *
  * @author Alexander Yevsyukov
  */
-final class LocalDateStringifier extends Stringifier<LocalDate> implements Serializable {
+final class OffsetDateTimeStringifier extends Stringifier<OffsetDateTime> implements Serializable {
 
     private static final long serialVersionUID = 0L;
-    private static final LocalDateStringifier INSTANCE = new LocalDateStringifier();
+    private static final OffsetDateTimeStringifier INSTANCE = new OffsetDateTimeStringifier();
 
-    static LocalDateStringifier getInstance() {
+    static OffsetDateTimeStringifier getInstance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(LocalDate date) {
-        final String result = LocalDates.toString(date);
+    protected String toString(OffsetDateTime dateTime) {
+        final String result = OffsetDateTimes.toString(dateTime);
         return result;
     }
 
     @Override
-    protected LocalDate fromString(String str) {
-        final LocalDate date;
+    protected OffsetDateTime fromString(String str) {
+        final OffsetDateTime result;
         try {
-            date = LocalDates.parse(str);
+            result = OffsetDateTimes.parse(str);
         } catch (ParseException e) {
-            throw illegalArgumentWithCauseOf(e);
+            throw Exceptions.illegalArgumentWithCauseOf(e);
         }
-        return date;
+        return result;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forLocalDate()";
+        return "TimeStringifiers.forOffsetDateTime()";
     }
 
     private Object readResolve() {

@@ -22,22 +22,22 @@ package io.spine.string;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.string.time.TimeStringifiers;
 import io.spine.test.Tests;
 import io.spine.time.LocalDate;
 import io.spine.time.LocalTime;
 import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetTime;
 import io.spine.time.ZoneOffset;
+import io.spine.time.string.TimeStringifiers;
 import org.junit.Test;
 
-import static io.spine.string.time.TimeStringifiers.forDuration;
-import static io.spine.string.time.TimeStringifiers.forLocalDate;
-import static io.spine.string.time.TimeStringifiers.forLocalTime;
-import static io.spine.string.time.TimeStringifiers.forOffsetDateTime;
-import static io.spine.string.time.TimeStringifiers.forOffsetTime;
-import static io.spine.string.time.TimeStringifiers.forTimestamp;
-import static io.spine.string.time.TimeStringifiers.forZoneOffset;
+import static io.spine.time.string.TimeStringifiers.forDuration;
+import static io.spine.time.string.TimeStringifiers.forLocalDate;
+import static io.spine.time.string.TimeStringifiers.forLocalTime;
+import static io.spine.time.string.TimeStringifiers.forOffsetDateTime;
+import static io.spine.time.string.TimeStringifiers.forOffsetTime;
+import static io.spine.time.string.TimeStringifiers.forTimestamp;
+import static io.spine.time.string.TimeStringifiers.forZoneOffset;
 import static org.junit.Assert.assertEquals;
 
 /**

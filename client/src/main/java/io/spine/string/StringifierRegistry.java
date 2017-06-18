@@ -23,7 +23,6 @@ package io.spine.string;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import io.spine.string.time.TimeStringifiers;
 
 import java.lang.reflect.Type;
 import java.util.Map;
@@ -49,7 +48,6 @@ public final class StringifierRegistry {
                             .put(Integer.class, Stringifiers.forInteger())
                             .put(Long.class, Stringifiers.forLong())
                             .put(String.class, Stringifiers.forString())
-                            .putAll(TimeStringifiers.getAll())
                             .build()
             )
     );
@@ -83,6 +81,21 @@ public final class StringifierRegistry {
     }
 
     /**
+     * Casts the passed instance.
+     *
+     * <p>The cast is safe as we check the first type when
+     * {@linkplain #register(Stringifier, Type) adding}.
+     */
+    @SuppressWarnings("unchecked")
+    private static <T> Stringifier<T> cast(Stringifier<?> func) {
+        return (Stringifier<T>) func;
+    }
+
+    public static StringifierRegistry getInstance() {
+        return Singleton.INSTANCE.value;
+    }
+
+    /**
      * Registers the passed stringifier in the registry.
      *
      * @param stringifier the stringifier to register
@@ -112,17 +125,6 @@ public final class StringifierRegistry {
     }
 
     /**
-     * Casts the passed instance.
-     *
-     * <p>The cast is safe as we check the first type when
-     * {@linkplain #register(Stringifier, Type) adding}.
-     */
-    @SuppressWarnings("unchecked")
-    private static <T> Stringifier<T> cast(Stringifier<?> func) {
-        return (Stringifier<T>) func;
-    }
-
-    /**
      * Tells whether there is a Stringifier registered for the passed type.
      *
      * @param type the type for which to find a stringifier
@@ -137,9 +139,5 @@ public final class StringifierRegistry {
         INSTANCE;
         @SuppressWarnings("NonSerializableFieldInSerializableClass")
         private final StringifierRegistry value = new StringifierRegistry();
-    }
-
-    public static StringifierRegistry getInstance() {
-        return Singleton.INSTANCE.value;
     }
 }

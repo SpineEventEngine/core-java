@@ -23,8 +23,8 @@ package io.spine.string;
 import com.google.protobuf.Timestamp;
 import org.junit.Test;
 
-import static io.spine.string.time.TimeStringifiers.forTimestampWebSafe;
 import static io.spine.time.Time.getCurrentTime;
+import static io.spine.time.string.TimeStringifiers.forTimestampWebSafe;
 import static org.junit.Assert.assertEquals;
 
 /**

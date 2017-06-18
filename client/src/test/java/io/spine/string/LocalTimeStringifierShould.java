@@ -20,9 +20,9 @@
 
 package io.spine.string;
 
-import io.spine.string.time.TimeStringifiers;
 import io.spine.time.LocalTime;
 import io.spine.time.LocalTimes;
+import io.spine.time.string.TimeStringifiers;
 
 /**
  * @author Alexander Yevsyukov

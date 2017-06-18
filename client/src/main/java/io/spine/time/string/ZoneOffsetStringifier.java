@@ -18,50 +18,54 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
 import io.spine.string.Stringifier;
-import io.spine.time.OffsetTime;
-import io.spine.time.OffsetTimes;
-import io.spine.util.Exceptions;
+import io.spine.time.ZoneOffset;
+import io.spine.time.ZoneOffsets;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
+
 /**
- * Default stringifier for {@link OffsetTime}.
+ * The default stringifier for {@code ZoneOffset} values.
  *
  * @author Alexander Yevsyukov
  */
-final class OffsetTimeStringifier extends Stringifier<OffsetTime> implements Serializable {
+final class ZoneOffsetStringifier extends Stringifier<ZoneOffset> implements Serializable {
 
     private static final long serialVersionUID = 0L;
-    private static final OffsetTimeStringifier INSTANCE = new OffsetTimeStringifier();
+    private static final ZoneOffsetStringifier INSTANCE = new ZoneOffsetStringifier();
 
-    static OffsetTimeStringifier getInstance() {
+    static ZoneOffsetStringifier getInstance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(OffsetTime time) {
-        final String result = OffsetTimes.toString(time);
+    protected String toString(ZoneOffset offset) {
+        checkNotNull(offset);
+        final String result = ZoneOffsets.toString(offset);
         return result;
     }
 
     @Override
-    protected OffsetTime fromString(String str) {
-        final OffsetTime result;
+    protected ZoneOffset fromString(String str) {
+        checkNotNull(str);
+        final ZoneOffset result;
         try {
-            result = OffsetTimes.parse(str);
+            result = ZoneOffsets.parse(str);
         } catch (ParseException e) {
-            throw Exceptions.illegalArgumentWithCauseOf(e);
+            throw illegalArgumentWithCauseOf(e);
         }
         return result;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forOffsetTime()";
+        return "TimeStringifiers.forZoneOffset()";
     }
 
     private Object readResolve() {

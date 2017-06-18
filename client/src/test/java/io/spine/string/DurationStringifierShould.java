@@ -21,8 +21,8 @@
 package io.spine.string;
 
 import com.google.protobuf.Duration;
-import io.spine.string.time.TimeStringifiers;
 import io.spine.time.Durations2;
+import io.spine.time.string.TimeStringifiers;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

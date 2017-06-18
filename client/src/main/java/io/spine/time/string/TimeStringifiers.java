@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Durations;
 import com.google.protobuf.util.Timestamps;
-import io.spine.annotation.Internal;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.LocalDate;
@@ -34,9 +32,6 @@ import io.spine.time.LocalTime;
 import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetTime;
 import io.spine.time.ZoneOffset;
-
-import java.lang.reflect.Type;
-import java.util.Map;
 
 /**
  * A collection of stringifiers for date/time value objects.
@@ -47,23 +42,28 @@ import java.util.Map;
  */
 public final class TimeStringifiers {
 
+    static {
+        registerAll();
+    }
+
     private TimeStringifiers() {
         // Prevent instantiation of this utility class.
     }
 
-    @Internal
-    public static Map<Type, Stringifier<?>> getAll() {
-        final ImmutableMap.Builder<Type, Stringifier<?>> builder =
-                ImmutableMap.<Type, Stringifier<?>>builder()
-                        .put(ZoneOffset.class, forZoneOffset())
-                        .put(Duration.class, forDuration())
-                        .put(Timestamp.class, forTimestamp())
-                        .put(LocalDate.class, forLocalDate())
-                        .put(LocalTime.class, forLocalTime())
-                        .put(OffsetDateTime.class, forOffsetDateTime())
-                        .put(OffsetTime.class, forOffsetTime());
+    private static void registerAll() {
+        final StringifierRegistry registry = StringifierRegistry.getInstance();
+        if (registry.get(Duration.class).isPresent()) {
+            // Already registered.
+            return;
+        }
 
-        return builder.build();
+        registry.register(forDuration(), Duration.class);
+        registry.register(forZoneOffset(), ZoneOffset.class);
+        registry.register(forTimestamp(), Timestamp.class);
+        registry.register(forLocalDate(), LocalDate.class);
+        registry.register(forLocalTime(), LocalTime.class);
+        registry.register(forOffsetDateTime(), OffsetDateTime.class);
+        registry.register(forOffsetTime(), OffsetTime.class);
     }
 
     /**

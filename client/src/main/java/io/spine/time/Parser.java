@@ -20,6 +20,8 @@
 
 package io.spine.time;
 
+import io.spine.time.string.TimeStringifiers;
+
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Calendar;
@@ -48,6 +50,11 @@ import static java.lang.String.format;
  * @author Alexander Yevsyukov
  */
 final class Parser {
+
+    static {
+        // Load the TimeStringifiers which registers stringifiers automatically.
+        TimeStringifiers.class.getName();
+    }
 
     private final String value;
 
@@ -88,9 +95,9 @@ final class Parser {
         return result;
     }
 
-    //
-    // Implementation
-    //-------------------
+    /*
+     * Implementation
+     *******************/
 
     @SuppressWarnings("CharUsedInArithmeticContext") // OK for this parsing method.
     private static int parseNanos(String value) throws ParseException {
@@ -167,7 +174,6 @@ final class Parser {
         final long millis = seconds * MILLIS_PER_SECOND + nanos / NANOS_PER_MILLISECOND;
         final Date date = new Date(millis);
         calendar.setTime(date);
-//        calendar.setTimeInMillis(millis);
         return calendar;
     }
 

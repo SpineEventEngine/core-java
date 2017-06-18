@@ -18,50 +18,51 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
+import com.google.protobuf.Duration;
+import com.google.protobuf.util.Durations;
 import io.spine.string.Stringifier;
-import io.spine.time.OffsetDateTime;
-import io.spine.time.OffsetDateTimes;
-import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
+import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
+
 /**
- * Default stringifier for {@link OffsetDateTime}.
+ * The default stringifier for {@code Duration}s.
  *
  * @author Alexander Yevsyukov
  */
-final class OffsetDateTimeStringifier extends Stringifier<OffsetDateTime> implements Serializable {
+final class DurationStringifier extends Stringifier<Duration> implements Serializable {
 
     private static final long serialVersionUID = 0L;
-    private static final OffsetDateTimeStringifier INSTANCE = new OffsetDateTimeStringifier();
+    private static final DurationStringifier INSTANCE = new DurationStringifier();
 
-    static OffsetDateTimeStringifier getInstance() {
+    static DurationStringifier getInstance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(OffsetDateTime dateTime) {
-        final String result = OffsetDateTimes.toString(dateTime);
+    protected String toString(Duration duration) {
+        final String result = Durations.toString(duration);
         return result;
     }
 
     @Override
-    protected OffsetDateTime fromString(String str) {
-        final OffsetDateTime result;
+    protected Duration fromString(String str) {
+        final Duration result;
         try {
-            result = OffsetDateTimes.parse(str);
+            result = Durations.parse(str);
         } catch (ParseException e) {
-            throw Exceptions.illegalArgumentWithCauseOf(e);
+            throw illegalArgumentWithCauseOf(e);
         }
         return result;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forOffsetDateTime()";
+        return "TimeStringifiers.forDuration()";
     }
 
     private Object readResolve() {

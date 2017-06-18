@@ -22,8 +22,8 @@ package io.spine.protobuf;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Duration;
 import io.spine.string.Stringifier;
-import io.spine.string.time.TimeStringifiers;
 import io.spine.time.Durations2;
+import io.spine.time.string.TimeStringifiers;
 import org.junit.Test;
 
 import static com.google.protobuf.util.Durations.subtract;

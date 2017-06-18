@@ -21,7 +21,7 @@
 package io.spine.string;
 
 import com.google.protobuf.Timestamp;
-import io.spine.string.time.TimeStringifiers;
+import io.spine.time.string.TimeStringifiers;
 import org.junit.Test;
 
 import static io.spine.time.Time.getCurrentTime;

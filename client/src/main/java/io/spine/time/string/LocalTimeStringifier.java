@@ -18,11 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
 import io.spine.string.Stringifier;
-import io.spine.time.ZoneOffset;
-import io.spine.time.ZoneOffsets;
+import io.spine.time.LocalTime;
+import io.spine.time.LocalTimes;
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -31,41 +31,41 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
 
 /**
- * The default stringifier for {@code ZoneOffset} values.
+ * The default stringifier for {@link LocalTime} values.
  *
  * @author Alexander Yevsyukov
  */
-final class ZoneOffsetStringifier extends Stringifier<ZoneOffset> implements Serializable {
+final class LocalTimeStringifier extends Stringifier<LocalTime> implements Serializable {
 
     private static final long serialVersionUID = 0L;
-    private static final ZoneOffsetStringifier INSTANCE = new ZoneOffsetStringifier();
+    private static final LocalTimeStringifier INSTANCE = new LocalTimeStringifier();
 
-    static ZoneOffsetStringifier getInstance() {
+    static LocalTimeStringifier getInstance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(ZoneOffset offset) {
-        checkNotNull(offset);
-        final String result = ZoneOffsets.toString(offset);
+    protected String toString(LocalTime time) {
+        checkNotNull(time);
+        final String result = LocalTimes.toString(time);
         return result;
     }
 
     @Override
-    protected ZoneOffset fromString(String str) {
+    protected LocalTime fromString(String str) {
         checkNotNull(str);
-        final ZoneOffset result;
+        final LocalTime time;
         try {
-            result = ZoneOffsets.parse(str);
+          time = LocalTimes.parse(str);
         } catch (ParseException e) {
             throw illegalArgumentWithCauseOf(e);
         }
-        return result;
+        return time;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forZoneOffset()";
+        return "TimeStringifiers.forLocalTime()";
     }
 
     private Object readResolve() {

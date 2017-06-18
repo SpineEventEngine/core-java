@@ -18,51 +18,50 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.string.time;
+package io.spine.time.string;
 
-import com.google.protobuf.Duration;
-import com.google.protobuf.util.Durations;
 import io.spine.string.Stringifier;
+import io.spine.time.OffsetTime;
+import io.spine.time.OffsetTimes;
+import io.spine.util.Exceptions;
 
 import java.io.Serializable;
 import java.text.ParseException;
 
-import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
-
 /**
- * The default stringifier for {@code Duration}s.
+ * Default stringifier for {@link OffsetTime}.
  *
  * @author Alexander Yevsyukov
  */
-final class DurationStringifier extends Stringifier<Duration> implements Serializable {
+final class OffsetTimeStringifier extends Stringifier<OffsetTime> implements Serializable {
 
     private static final long serialVersionUID = 0L;
-    private static final DurationStringifier INSTANCE = new DurationStringifier();
+    private static final OffsetTimeStringifier INSTANCE = new OffsetTimeStringifier();
 
-    static DurationStringifier getInstance() {
+    static OffsetTimeStringifier getInstance() {
         return INSTANCE;
     }
 
     @Override
-    protected String toString(Duration duration) {
-        final String result = Durations.toString(duration);
+    protected String toString(OffsetTime time) {
+        final String result = OffsetTimes.toString(time);
         return result;
     }
 
     @Override
-    protected Duration fromString(String str) {
-        final Duration result;
+    protected OffsetTime fromString(String str) {
+        final OffsetTime result;
         try {
-            result = Durations.parse(str);
+            result = OffsetTimes.parse(str);
         } catch (ParseException e) {
-            throw illegalArgumentWithCauseOf(e);
+            throw Exceptions.illegalArgumentWithCauseOf(e);
         }
         return result;
     }
 
     @Override
     public String toString() {
-        return "TimeStringifiers.forDuration()";
+        return "TimeStringifiers.forOffsetTime()";
     }
 
     private Object readResolve() {
