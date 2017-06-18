@@ -46,7 +46,8 @@ public final class EmailAddresses {
 
     private static void checkArgumentIsEmailAddress(CharSequence value) {
         checkNotNull(value);
-        checkArgument(pattern().matcher(value).matches());
+        checkArgument(pattern().matcher(value)
+                               .matches());
     }
 
     /**
