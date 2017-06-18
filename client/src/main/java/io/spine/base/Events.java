@@ -23,6 +23,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.string.Stringifier;
+import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
 
 import java.util.Collections;
@@ -53,6 +54,11 @@ public final class Events {
 
     /** The stringifier for event IDs. */
     private static final Stringifier<EventId> idStringifier = new EventIdStringifier();
+
+    static {
+        StringifierRegistry.getInstance()
+                           .register(idStringifier(), EventId.class);
+    }
 
     private Events() {
         // Prevent instantiation of this utility class.

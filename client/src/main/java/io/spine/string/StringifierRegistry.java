@@ -23,10 +23,6 @@ package io.spine.string;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableMap;
 import com.google.protobuf.Message;
-import io.spine.base.CommandId;
-import io.spine.base.Commands;
-import io.spine.base.EventId;
-import io.spine.base.Events;
 import io.spine.string.time.TimeStringifiers;
 
 import java.lang.reflect.Type;
@@ -53,8 +49,6 @@ public final class StringifierRegistry {
                             .put(Integer.class, Stringifiers.forInteger())
                             .put(Long.class, Stringifiers.forLong())
                             .put(String.class, Stringifiers.forString())
-                            .put(EventId.class, Events.idStringifier())
-                            .put(CommandId.class, Commands.idStringifier())
                             .putAll(TimeStringifiers.getAll())
                             .build()
             )

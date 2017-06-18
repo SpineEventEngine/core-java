@@ -28,6 +28,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
+import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
 
 import javax.annotation.Nullable;
@@ -56,6 +57,11 @@ public final class Commands {
     private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
+
+    static {
+        StringifierRegistry.getInstance()
+                           .register(idStringifier(), CommandId.class);
+    }
 
     private Commands() {
         // Prevent instantiation of this utility class.
