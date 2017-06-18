@@ -29,6 +29,11 @@ option java_package = "io.spine.time";
 
 import "spine/options.proto";
 
+// An ID of a time-zone, such as `Europe/Amsterdam`.
+message ZoneId {
+    string value = 1;
+}
+
 // A time-zone offset from UTC, such as +02:00.
 message ZoneOffset {
     int32 amountSeconds = 1;
