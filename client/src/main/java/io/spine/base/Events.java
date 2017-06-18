@@ -25,6 +25,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
+import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -154,6 +156,14 @@ public final class Events {
         checkNotNull(id);
         checkNotEmptyOrBlank(id.getValue(), "event ID");
         return id;
+    }
+
+    /**
+     * Obtains type name from the message of the passed event.
+     */
+    public static TypeName typeNameOf(Event event) {
+        checkNotNull(event);
+        return TypeName.from(TypeUrl.ofEvent(event));
     }
 
     /**

@@ -23,22 +23,11 @@ package io.spine.type;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.StringValue;
-import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt64Value;
 import io.spine.base.Command;
-import io.spine.base.Commands;
-import io.spine.base.Event;
-import io.spine.base.Version;
-import io.spine.client.ActorRequestFactory;
 import io.spine.option.IfMissingOption;
-import io.spine.protobuf.Wrapper;
-import io.spine.server.command.EventFactory;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.Tests;
-import io.spine.time.Time;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -49,9 +38,6 @@ import static org.junit.Assert.assertNotNull;
  * its own set of tests.
  */
 public class TypeNameShould {
-
-    private static final ActorRequestFactory requestFactory =
-            TestActorRequestFactory.newInstance(TypeNameShould.class);
 
     @Test
     public void pass_the_null_tolerance_check() {
@@ -98,22 +84,6 @@ public class TypeNameShould {
         final TypeName typeName = TypeName.of(StringValue.class);
         assertNotNull(typeName);
         assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
-    }
-
-    @Test
-    public void obtain_type_name_of_event() {
-        final Command command = requestFactory.command().create(newUuidValue());
-        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
-        final EventFactory ef = EventFactory.newBuilder()
-                                            .setCommandId(Commands.generateId())
-                                            .setProducerId(producerId)
-                                            .setCommandContext(command.getContext())
-                                            .build();
-        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
-
-        final TypeName typeName = TypeName.ofEvent(event);
-        assertNotNull(typeName);
-        assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
     }
 
     @Test

@@ -30,6 +30,8 @@ import io.spine.type.TypeName;
 
 import java.util.Comparator;
 
+import static io.spine.base.Events.typeNameOf;
+
 /**
  * Stores an event.
  *
@@ -81,6 +83,13 @@ public class EEntity extends AbstractEntity<EventId, Event> {
     }
 
     /**
+     * Returns comparator which sorts event entities chronologically.
+     */
+    static Comparator<EEntity> comparator() {
+        return comparator;
+    }
+
+    /**
      * Retrieves the time of the event occurrence.
      *
      * <p>This method represents an Entity Column {@code created}.
@@ -102,14 +111,7 @@ public class EEntity extends AbstractEntity<EventId, Event> {
      * @see #TYPE_COLUMN
      */
     public String getType() {
-        return TypeName.ofEvent(getState())
-                       .value();
-    }
-
-    /**
-     * Returns comparator which sorts event entities chronologically.
-     */
-    static Comparator<EEntity> comparator() {
-        return comparator;
+        final TypeName typeName = typeNameOf(getState());
+        return typeName.value();
     }
 }

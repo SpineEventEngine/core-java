@@ -24,6 +24,8 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
+import com.google.protobuf.Timestamp;
+import io.spine.client.ActorRequestFactory;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.EventFactory;
 import io.spine.string.Stringifiers;
@@ -32,6 +34,8 @@ import io.spine.test.TestActorRequestFactory;
 import io.spine.test.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.time.Time;
+import io.spine.type.TypeName;
+import io.spine.type.TypeNameShould;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -52,6 +56,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -59,6 +64,9 @@ import static org.junit.Assert.assertTrue;
  * @author Alexander Yevsyukov
  */
 public class EventsShould {
+
+    private static final ActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(TypeNameShould.class);
 
     private static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(Wrapper.forString()
@@ -198,5 +206,21 @@ public class EventsShould {
     public void accept_generated_event_id() {
         final EventId eventId = event.getId();
         assertEquals(eventId, checkValid(eventId));
+    }
+
+    @Test
+    public void obtain_type_name_of_event() {
+        final Command command = requestFactory.command().create(newUuidValue());
+        final StringValue producerId = Wrapper.forString(getClass().getSimpleName());
+        final EventFactory ef = EventFactory.newBuilder()
+                                            .setCommandId(Commands.generateId())
+                                            .setProducerId(producerId)
+                                            .setCommandContext(command.getContext())
+                                            .build();
+        final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
+
+        final TypeName typeName = Events.typeNameOf(event);
+        assertNotNull(typeName);
+        assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
     }
 }
