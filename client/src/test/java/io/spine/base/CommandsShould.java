@@ -38,6 +38,7 @@ import io.spine.test.commands.TestCommand;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import io.spine.type.TypeName;
 import org.junit.Test;
 
 import java.util.List;
@@ -50,11 +51,13 @@ import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Values.newUserUuid;
+import static io.spine.test.Values.newUuidValue;
 import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class CommandsShould {
@@ -225,5 +228,14 @@ public class CommandsShould {
     public void return_value_id_when_checked() {
         final CommandId id = Commands.generateId();
         assertEquals(id, Commands.checkValid(id));
+    }
+
+    @Test
+    public void obtain_type_of_command() {
+        final Command command = requestFactory.command().create(newUuidValue());
+
+        final TypeName typeName = Commands.typeNameOf(command);
+        assertNotNull(typeName);
+        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
     }
 }

@@ -41,7 +41,6 @@ import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
-import io.spine.type.TypeName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -56,6 +55,7 @@ import static io.spine.base.CommandStatus.OK;
 import static io.spine.base.CommandStatus.RECEIVED;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.Commands.generateId;
+import static io.spine.base.Commands.typeNameOf;
 import static io.spine.protobuf.Wrappers.pack;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
@@ -99,8 +99,7 @@ public class StorageShould extends TenantAwareTest {
 
     private static CommandRecord newStorageRecord() {
         final Command command = Given.Command.createProject();
-        final String commandType = TypeName.ofCommand(command)
-                                           .value();
+        final String commandType = typeNameOf(command).value();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

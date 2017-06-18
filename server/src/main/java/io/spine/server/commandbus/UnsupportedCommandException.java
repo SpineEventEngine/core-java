@@ -25,8 +25,8 @@ import io.spine.base.CommandClass;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Commands;
 import io.spine.base.Error;
-import io.spine.type.TypeName;
 
+import static io.spine.base.Commands.typeNameOf;
 import static java.lang.String.format;
 
 /**
@@ -48,11 +48,10 @@ public class UnsupportedCommandException extends CommandException {
 
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final String typeName = TypeName.ofCommand(command)
-                                        .value();
+        final String typeName = typeNameOf(command).value();
         final String result = format(
                 "There is no registered handler or dispatcher for the command of class: `%s`. " +
-                "Protobuf type: `%s`",
+                        "Protobuf type: `%s`",
                 commandClass,
                 typeName
         );
@@ -61,13 +60,16 @@ public class UnsupportedCommandException extends CommandException {
 
     /** Creates an instance of unsupported command error. */
     private static Error unsupportedCommandError(Message commandMessage) {
-        final String commandType = commandMessage.getDescriptorForType().getFullName();
+        final String commandType = commandMessage.getDescriptorForType()
+                                                 .getFullName();
         final String errMsg = format("Commands of the type `%s` are not supported.", commandType);
         final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
-                .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
-                .putAllAttributes(commandTypeAttribute(commandMessage))
-                .setMessage(errMsg);
+                                         .setType(CommandValidationError.getDescriptor()
+                                                                        .getFullName())
+                                         .setCode(
+                                                 CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
+                                         .putAllAttributes(commandTypeAttribute(commandMessage))
+                                         .setMessage(errMsg);
         return error.build();
     }
 }

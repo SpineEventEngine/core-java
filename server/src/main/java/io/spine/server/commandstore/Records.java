@@ -28,12 +28,12 @@ import io.spine.base.CommandStatus;
 import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
-import io.spine.type.TypeName;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static io.spine.base.Commands.generateId;
+import static io.spine.base.Commands.typeNameOf;
 import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.time.Time.getCurrentTime;
 
@@ -66,25 +66,21 @@ class Records {
      * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
      * the command is not for an entity.
      *
-     * @param command
-     *            a command to convert to a record. This includes instances of faulty commands.
-     *            An example of such a fault is missing command ID.
-     * @param status
-     *            a command status to set in the record
-     * @param generatedCommandId
-     *            a command ID to be used because the passed command does not have own ID.
-     *            If the command has own ID, this parameter is {@code null}.
+     * @param command            a command to convert to a record. This includes instances of faulty commands.
+     *                           An example of such a fault is missing command ID.
+     * @param status             a command status to set in the record
+     * @param generatedCommandId a command ID to be used because the passed command does not have own ID.
+     *                           If the command has own ID, this parameter is {@code null}.
      * @return a storage record
      */
     static CommandRecord.Builder newRecordBuilder(Command command,
                                                   CommandStatus status,
                                                   @Nullable CommandId generatedCommandId) {
         final CommandId commandId = generatedCommandId != null
-                                    ? generatedCommandId
-                                    : command.getId();
+                ? generatedCommandId
+                : command.getId();
 
-        final String commandType = TypeName.ofCommand(command)
-                                           .getSimpleName();
+        final String commandType = typeNameOf(command).getSimpleName();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()
@@ -112,7 +108,8 @@ class Records {
      */
     static CommandId getOrGenerateCommandId(Command command) {
         CommandId id = command.getId();
-        if (Identifier.toString(id).equals(EMPTY_ID)) {
+        if (Identifier.toString(id)
+                      .equals(EMPTY_ID)) {
             id = generateId();
         }
         return id;

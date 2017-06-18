@@ -101,15 +101,6 @@ public class TypeNameShould {
     }
 
     @Test
-    public void obtain_type_of_command() {
-        final Command command = requestFactory.command().create(newUuidValue());
-
-        final TypeName typeName = TypeName.ofCommand(command);
-        assertNotNull(typeName);
-        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
-    }
-
-    @Test
     public void obtain_type_name_of_event() {
         final Command command = requestFactory.command().create(newUuidValue());
         final StringValue producerId = Wrapper.forString(getClass().getSimpleName());

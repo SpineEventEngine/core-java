@@ -25,8 +25,8 @@ import io.spine.base.CommandClass;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Commands;
 import io.spine.base.Error;
-import io.spine.type.TypeName;
 
+import static io.spine.base.Commands.typeNameOf;
 import static java.lang.String.format;
 
 /**
@@ -47,8 +47,7 @@ public class CommandExpiredException extends CommandException {
 
     private static String messageFormat(Command command) {
         final CommandClass commandClass = CommandClass.of(command);
-        final String typeName = TypeName.ofCommand(command)
-                                        .value();
+        final String typeName = typeNameOf(command).value();
         final String result = format(
                 "A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.",
                 commandClass,
@@ -62,9 +61,10 @@ public class CommandExpiredException extends CommandException {
         final String errMsg = format("Scheduled command of type `%s` expired.",
                                      CommandClass.of(commandMessage));
         final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
-                .setMessage(errMsg)
-                .putAllAttributes(commandTypeAttribute(commandMessage));
+                                         .setType(CommandValidationError.getDescriptor()
+                                                                        .getFullName())
+                                         .setMessage(errMsg)
+                                         .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
     }
 }

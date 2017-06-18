@@ -23,7 +23,6 @@ package io.spine.type;
 import com.google.common.base.Splitter;
 import com.google.protobuf.Descriptors.Descriptor;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
 import io.spine.base.Event;
 
 import java.util.List;
@@ -80,14 +79,6 @@ public class TypeName extends StringTypeValue {
     public static TypeName of(Class<? extends Message> cls) {
         checkNotNull(cls);
         return from(TypeUrl.of(cls));
-    }
-
-    /**
-     * Obtains type name from the message of the passed command.
-     */
-    public static TypeName ofCommand(Command command) {
-        checkNotNull(command);
-        return from(TypeUrl.ofCommand(command));
     }
 
     /**
