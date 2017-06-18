@@ -76,7 +76,7 @@ projectsToPublish.each {
         // However, the artifact IDs for "users" and "values" domains do not have "-core" suffix,
         // as they do not require any additional identification.
         //
-        final def noSuffixProjects = ['values', 'options']
+        final def noSuffixProjects = ['core', 'values']
         final boolean shouldAddSuffix = !(currentProject.name in noSuffixProjects)
         final String artifactIdSuffix = shouldAddSuffix ? "-core" : ""
         final String artifactIdForPublishing = "spine-${currentProject.name}" + artifactIdSuffix
