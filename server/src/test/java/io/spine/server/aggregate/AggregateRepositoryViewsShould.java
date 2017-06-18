@@ -28,7 +28,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Response;
 import io.spine.client.ActorRequestFactory;
-import io.spine.io.StreamObservers;
+import io.spine.grpc.StreamObservers;
 import io.spine.protobuf.Wrapper;
 import io.spine.protobuf.Wrappers;
 import io.spine.server.BoundedContext;

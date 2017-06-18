@@ -92,8 +92,8 @@ import static com.google.protobuf.DescriptorProtos.ServiceDescriptorProto;
 import static com.google.protobuf.DescriptorProtos.ServiceOptions;
 import static com.google.protobuf.DescriptorProtos.SourceCodeInfo;
 import static com.google.protobuf.DescriptorProtos.UninterpretedOption;
-import static io.spine.io.IoUtil.loadAllProperties;
 import static io.spine.util.Exceptions.newIllegalStateException;
+import static io.spine.util.PropertyFiles.loadAllProperties;
 
 /**
  * A map which contains all Protobuf types known to the application.

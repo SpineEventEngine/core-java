@@ -18,26 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.io;
-
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
-
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-
 /**
- * @author Alexander Litus
+ * This package contains classes and interfaces related to gRPC.
  */
-public class IoUtilShould {
+@ParametersAreNonnullByDefault
+package io.spine.grpc;
 
-    @Test
-    public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(IoUtil.class);
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(IoUtil.class);
-    }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

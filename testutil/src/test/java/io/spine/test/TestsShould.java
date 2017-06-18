@@ -24,7 +24,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
 import org.junit.Test;
 
-import static io.spine.io.StreamObservers.noOpObserver;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.hasPrivateParameterlessCtor;
 import static io.spine.test.Values.newUserId;

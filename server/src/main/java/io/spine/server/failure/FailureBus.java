@@ -28,7 +28,7 @@ import io.spine.base.FailureClass;
 import io.spine.base.Response;
 import io.spine.base.Subscribe;
 import io.spine.envelope.FailureEnvelope;
-import io.spine.io.StreamObservers;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import org.slf4j.Logger;

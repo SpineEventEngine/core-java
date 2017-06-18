@@ -18,20 +18,15 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.io;
+package io.spine.util;
 
 import com.google.common.collect.FluentIterable;
-import com.google.common.collect.ImmutableSet;
 import io.spine.annotation.Internal;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.Enumeration;
-import java.util.Properties;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -45,62 +40,6 @@ public class IoUtil {
 
     private IoUtil() {
         // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Loads all data from {@code .properties} file(s) into memory.
-     *
-     * <p>Logs {@link IOException} if it occurs.
-     *
-     * @param propsFilePath the path of the {@code .properties} file to load
-     */
-    public static ImmutableSet<Properties> loadAllProperties(String propsFilePath) {
-        checkNotNull(propsFilePath);
-
-        final ImmutableSet.Builder<Properties> result = ImmutableSet.builder();
-        final Enumeration<URL> resources = getResources(propsFilePath);
-        if (resources == null) {
-            return result.build();
-        }
-        while (resources.hasMoreElements()) {
-            final URL resourceUrl = resources.nextElement();
-            final Properties properties = loadPropertiesFile(resourceUrl);
-            result.add(properties);
-        }
-        return result.build();
-    }
-
-    private static Enumeration<URL> getResources(String propsFilePath) {
-        final ClassLoader classLoader = getContextClassLoader();
-        Enumeration<URL> resources = null;
-        try {
-            resources = classLoader.getResources(propsFilePath);
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Failed to load resources: " + propsFilePath, e);
-            }
-        }
-        return resources;
-    }
-
-    private static Properties loadPropertiesFile(URL resourceUrl) {
-        final Properties properties = new Properties();
-        InputStream inputStream = null;
-        try {
-            inputStream = resourceUrl.openStream();
-            properties.load(inputStream);
-        } catch (IOException e) {
-            if (log().isWarnEnabled()) {
-                log().warn("Failed to load properties file from: " + resourceUrl, e);
-            }
-        } finally {
-            close(inputStream);
-        }
-        return properties;
-    }
-
-    private static ClassLoader getContextClassLoader() {
-        return Thread.currentThread().getContextClassLoader();
     }
 
     /**

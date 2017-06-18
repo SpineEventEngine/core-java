@@ -32,7 +32,7 @@ import io.spine.base.EventContext;
 import io.spine.base.Response;
 import io.spine.base.Subscribe;
 import io.spine.envelope.EventEnvelope;
-import io.spine.io.StreamObservers;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;

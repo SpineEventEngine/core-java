@@ -32,7 +32,7 @@ import io.spine.base.Identifier;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
