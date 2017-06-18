@@ -31,7 +31,7 @@ import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
 import "spine/options.proto";
-import "spine/time/zone_offset.proto";
+import "spine/time/zone.proto";
 
 // Enum representing the 12 months of the year.
 enum MonthOfYear {
