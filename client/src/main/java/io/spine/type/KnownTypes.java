@@ -60,8 +60,6 @@ import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import com.google.protobuf.Value;
 import io.spine.annotation.Internal;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
 import java.lang.reflect.InvocationTargetException;
@@ -426,16 +424,6 @@ public class KnownTypes {
                 return;
             }
             resultMap.put(typeUrl, className);
-        }
-
-        private static Logger log() {
-            return LogSingleton.INSTANCE.value;
-        }
-
-        private enum LogSingleton {
-            INSTANCE;
-            @SuppressWarnings("NonSerializableFieldInSerializableClass")
-            private final Logger value = LoggerFactory.getLogger(KnownTypes.class);
         }
     }
 }
