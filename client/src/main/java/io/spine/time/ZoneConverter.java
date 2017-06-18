@@ -87,7 +87,8 @@ final class ZoneConverter extends Converter<TimeZone, ZoneOffset> implements Ser
     }
 
     private static Optional<String> getId(ZoneOffset offset) {
-        final String id = offset.getId();
+        final String id = offset.getId()
+                                .getValue();
         if (id.length() > 0) {
             return Optional.of(id);
         }

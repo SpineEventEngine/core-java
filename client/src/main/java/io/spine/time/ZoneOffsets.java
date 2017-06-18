@@ -53,7 +53,8 @@ public final class ZoneOffsets {
     public static final int MAX_MINUTES_OFFSET = 60;
 
     public static final ZoneOffset UTC = ZoneOffset.newBuilder()
-                                                   .setId("UTC")
+                                                   .setId(ZoneId.newBuilder()
+                                                                .setValue("UTC"))
                                                    .setAmountSeconds(0)
                                                    .build();
 
@@ -192,7 +193,7 @@ public final class ZoneOffsets {
         final String id = nullToEmpty(zoneId);
         return ZoneOffset.newBuilder()
                          .setAmountSeconds(offsetInSeconds)
-                         .setId(id)
+                         .setId(ZoneId.newBuilder().setValue(id))
                          .build();
     }
 
@@ -204,6 +205,7 @@ public final class ZoneOffsets {
      */
     static ZoneOffset adjustZero(ZoneOffset offset) {
         if (offset.getAmountSeconds() == 0 && offset.getId()
+                                                    .getValue()
                                                     .isEmpty()) {
             return UTC;
         }

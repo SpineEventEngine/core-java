@@ -68,7 +68,8 @@ public abstract class AbstractZonedTimeTest {
         // Get current zone offset and strip ID value because it's not stored into date/time.
         final ZoneOffset zoneOffset = ZoneOffsets.getDefault()
                                                  .toBuilder()
-                                                 .clearId()
+                                                 .setId(ZoneId.newBuilder()
+                                                              .setValue(""))
                                                  .build();
         assertConversionAt(zoneOffset);
     }

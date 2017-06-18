@@ -40,6 +40,7 @@ import io.spine.test.event.ProjectStarted;
 import io.spine.test.event.user.permission.PermissionGrantedEvent;
 import io.spine.test.event.user.permission.PermissionRevokedEvent;
 import io.spine.test.event.user.sharing.SharingRequestApproved;
+import io.spine.time.ZoneId;
 import io.spine.time.ZoneOffset;
 
 import javax.annotation.Nullable;
@@ -287,8 +288,11 @@ public class Given {
                     @Override
                     public ZoneOffset apply(@Nullable String input) {
                         return input == null
-                               ? ZoneOffset.getDefaultInstance()
-                               : ZoneOffset.newBuilder().setId(input).build();
+                                ? ZoneOffset.getDefaultInstance()
+                                : ZoneOffset.newBuilder()
+                                            .setId(ZoneId.newBuilder()
+                                                         .setValue(input))
+                                            .build();
                     }
                 };
 

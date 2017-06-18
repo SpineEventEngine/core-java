@@ -54,7 +54,8 @@ public class ZoneOffsetsShould {
         final int offsetSeconds = timeZone.getOffset(date) / MILLIS_PER_SECOND;
 
         final String zoneId = timeZone.getID();
-        assertEquals(zoneId, zoneOffset.getId());
+        assertEquals(zoneId, zoneOffset.getId()
+                                       .getValue());
 
         assertEquals(offsetSeconds, zoneOffset.getAmountSeconds());
     }
