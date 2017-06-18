@@ -20,6 +20,9 @@
 
 package io.spine.envelope;
 
+import com.google.protobuf.Message;
+import io.spine.type.TypeUrl;
+
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,13 +34,23 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+public abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
 
     private final T object;
 
     AbstractMessageEnvelope(T object) {
         checkNotNull(object);
         this.object = object;
+    }
+
+    /**
+     * Obtains type URL of the message in the envelope.
+     */
+    public static TypeUrl ofEnclosedMessage(MessageEnvelope envelope) {
+        checkNotNull(envelope);
+        final Message message = envelope.getMessage();
+        final TypeUrl result = TypeUrl.of(message);
+        return result;
     }
 
     @Override

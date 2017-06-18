@@ -31,12 +31,9 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
-import io.spine.base.Command;
 import io.spine.base.CommandValidationError;
 import io.spine.base.UserId;
-import io.spine.client.ActorRequestFactory;
 import io.spine.protobuf.Wrapper;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import org.junit.Test;
 
@@ -145,17 +142,6 @@ public class TypeUrlShould {
         final TypeUrl typeUrl = TypeUrl.from(enumDescriptor);
 
         assertEquals(expected, typeUrl.value());
-    }
-
-    @Test
-    public void obtain_type_of_command() {
-        final ActorRequestFactory factory = TestActorRequestFactory.newInstance(TypeUrlShould.class);
-        final StringValue message = Wrapper.forString(newUuid());
-        final Command command = factory.command().create(message);
-
-        final TypeUrl typeUrl = TypeUrl.ofCommand(command);
-
-        assertIsStringValueUrl(typeUrl);
     }
 
     @Test

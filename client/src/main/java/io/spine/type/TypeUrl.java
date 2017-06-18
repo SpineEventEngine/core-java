@@ -31,11 +31,6 @@ import com.google.protobuf.Descriptors.GenericDescriptor;
 import com.google.protobuf.InvalidProtocolBufferException;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Command;
-import io.spine.base.Event;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.envelope.EventEnvelope;
-import io.spine.envelope.MessageEnvelope;
 import io.spine.option.OptionsProto;
 
 import java.io.Serializable;
@@ -162,37 +157,6 @@ public final class TypeUrl implements Serializable {
     public static TypeUrl ofEnclosed(AnyOrBuilder any) {
         final TypeUrl typeUrl = doParse(any.getTypeUrl());
         return typeUrl;
-    }
-
-    /**
-     * Obtains the type URL of the command message.
-     *
-     * <p>The passed command must have non-default message.
-     *
-     * @param command the command from which to get the URL
-     * @return the type URL of the command message
-     */
-    public static TypeUrl ofCommand(Command command) {
-        return ofEnclosedMessage(CommandEnvelope.of(command));
-    }
-
-    /**
-     * Obtains the type URL of the event message.
-     *
-     * <p>The event must contain non-default message.
-     *
-     * @param event the event for which get the type URL
-     * @return the type URL of the event message.
-     */
-    public static TypeUrl ofEvent(Event event) {
-        return ofEnclosedMessage(EventEnvelope.of(event));
-    }
-
-    private static TypeUrl ofEnclosedMessage(MessageEnvelope envelope) {
-        checkNotNull(envelope);
-        final Message message = envelope.getMessage();
-        final TypeUrl result = of(message);
-        return result;
     }
 
     /** Obtains the type URL for the passed message class. */

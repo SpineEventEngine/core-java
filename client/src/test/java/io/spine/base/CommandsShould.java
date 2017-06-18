@@ -30,6 +30,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.client.ActorRequestFactory;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.test.TestActorRequestFactory;
@@ -39,6 +40,7 @@ import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.junit.Test;
 
 import java.util.List;
@@ -46,6 +48,8 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.base.Commands.sameActorAndTenant;
+import static io.spine.base.Commands.typeUrlOf;
+import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
@@ -237,5 +241,17 @@ public class CommandsShould {
         final TypeName typeName = Commands.typeNameOf(command);
         assertNotNull(typeName);
         assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void obtain_type_url_of_command() {
+        final ActorRequestFactory factory =
+                TestActorRequestFactory.newInstance(CommandsShould.class);
+        final StringValue message = Wrapper.forString(newUuid());
+        final Command command = factory.command().create(message);
+
+        final TypeUrl typeUrl = typeUrlOf(command);
+
+        assertEquals(TypeUrl.of(StringValue.class), typeUrl);
     }
 }
