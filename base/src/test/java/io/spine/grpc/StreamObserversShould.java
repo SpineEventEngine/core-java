@@ -22,7 +22,11 @@ package io.spine.grpc;
 import com.google.common.collect.ContiguousSet;
 import com.google.common.collect.DiscreteDomain;
 import com.google.common.collect.Range;
+import io.grpc.Metadata;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
@@ -31,6 +35,7 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
+import static io.grpc.Status.INVALID_ARGUMENT;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -129,5 +134,48 @@ public class StreamObserversShould {
         assertFalse(observer.isCompleted());
         observer.onCompleted();
         assertTrue(observer.isCompleted());
+    }
+
+    /*
+     * Error extraction tests
+     **************************/
+
+    @Test
+    public void return_Error_extracted_from_StatusRuntimeException_metadata() {
+        final Error expectedError = Error.getDefaultInstance();
+        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        final StatusRuntimeException statusRuntimeException =
+                INVALID_ARGUMENT.asRuntimeException(metadata);
+
+        assertEquals(expectedError, StreamObservers.fromStreamError(statusRuntimeException)
+                                                   .get());
+    }
+
+    @Test
+    public void return_Error_extracted_form_StatusException_metadata() {
+        final Error expectedError = Error.getDefaultInstance();
+        final Metadata metadata = MetadataConverter.toMetadata(expectedError);
+        final StatusException statusException = INVALID_ARGUMENT.asException(metadata);
+
+        assertEquals(expectedError, StreamObservers.fromStreamError(statusException)
+                                                   .get());
+    }
+
+    @Test
+    public void return_absent_if_passed_Throwable_is_not_status_exception() {
+        final String msg = "Neither a StatusException nor a StatusRuntimeException.";
+        final Exception exception = new Exception(msg);
+
+        assertFalse(StreamObservers.fromStreamError(exception)
+                                   .isPresent());
+    }
+
+    @Test
+    public void return_absent_if_there_is_no_error_in_metadata() {
+        final Metadata emptyMetadata = new Metadata();
+        final Throwable statusRuntimeEx = INVALID_ARGUMENT.asRuntimeException(emptyMetadata);
+
+        assertFalse(StreamObservers.fromStreamError(statusRuntimeEx)
+                                   .isPresent());
     }
 }

@@ -19,14 +19,20 @@
  */
 package io.spine.grpc;
 
+import com.google.common.base.Optional;
+import io.grpc.Metadata;
+import io.grpc.StatusException;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 
 import javax.annotation.Nullable;
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Responses.ok;
@@ -118,6 +124,35 @@ public class StreamObservers {
     @Internal
     public static <T> MemoizingObserver<T> memoizingObserver() {
         return new MemoizingObserver<>();
+    }
+
+    /**
+     * Extracts a {@linkplain Error system error} from the
+     * {@linkplain StreamObserver#onError(Throwable) Throwable},
+     * received on a client-side as a result of a failed gRPC call to server-side routines.
+     *
+     * <p>The {@code Error} is extracted from the trailer metadata of
+     * either {@link StatusRuntimeException} or {@link StatusException} only.
+     *
+     * <p>If any other type of {@code Throwable} is passed, {@code Optional.absent()} is returned.
+     *
+     * @param throwable the {@code Throwable} to extract an {@link Error}
+     * @return the extracted error or {@code Optional.absent()} if the extraction failed
+     */
+    @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
+    public static Optional<Error> fromStreamError(Throwable throwable) {
+        checkNotNull(throwable);
+
+        if (throwable instanceof StatusRuntimeException) {
+            final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
+            return MetadataConverter.toError(metadata);
+        }
+        if (throwable instanceof StatusException) {
+            final Metadata metadata = ((StatusException) throwable).getTrailers();
+            return MetadataConverter.toError(metadata);
+        }
+
+        return Optional.absent();
     }
 
     /**
