@@ -35,7 +35,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alexander Yevsyukov
  */
-public final class CommandEnvelope extends AbstractMessageEnvelope<CommandId, Command> {
+public final class CommandEnvelope extends MessageWithIdEnvelope<CommandId, Command> {
 
     // The below fields are calculated from the command.
 

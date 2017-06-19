@@ -35,8 +35,7 @@ import static org.junit.Assert.assertNotNull;
  * @author Dmytro Dashenkov
  */
 public abstract class MessageEnvelopeShould<O extends Message,
-                                            I,
-                                            E extends MessageEnvelope<I, O>,
+                                            E extends MessageEnvelope<O>,
                                             C extends MessageClass> {
 
     protected abstract O outerObject();
@@ -44,8 +43,6 @@ public abstract class MessageEnvelopeShould<O extends Message,
     protected abstract E toEnvelope(O obj);
 
     protected abstract C getMessageClass(O obj);
-
-    protected abstract I getId(O obj);
 
     @Test
     public void not_accept_nulls_on_construction() {
@@ -79,13 +76,6 @@ public abstract class MessageEnvelopeShould<O extends Message,
         final O obj  = outerObject();
         final E envelope = toEnvelope(obj);
         assertEquals(getMessageClass(obj), envelope.getMessageClass());
-    }
-
-    @Test
-    public void obtain_message_id() {
-        final O obj = outerObject();
-        final E envelope = toEnvelope(obj);
-        assertEquals(getId(obj), envelope.getId());
     }
 
     @Test

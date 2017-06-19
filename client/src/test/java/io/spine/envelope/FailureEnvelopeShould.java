@@ -37,10 +37,10 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alex Tymchenko
  */
-public class FailureEnvelopeShould extends MessageEnvelopeShould<Failure,
-                                                                 FailureId,
-                                                                 FailureEnvelope,
-                                                                 FailureClass> {
+public class FailureEnvelopeShould extends MessageWithIdEnvelopeShould<Failure,
+                                                                       FailureId,
+                                                                       FailureEnvelope,
+                                                                       FailureClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(FailureEnvelopeShould.class);

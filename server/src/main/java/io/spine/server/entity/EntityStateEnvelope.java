@@ -25,7 +25,6 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
-import io.spine.base.MessageAcked;
 import io.spine.base.TenantId;
 import io.spine.base.Version;
 import io.spine.envelope.MessageEnvelope;
@@ -39,7 +38,7 @@ import javax.annotation.Nullable;
  * @author Alex Tymchenko
  */
 public final class EntityStateEnvelope<I, S extends Message>
-                                    implements MessageEnvelope<I, Entity<I, S>> {
+                                    implements MessageEnvelope<Entity<I, S>> {
 
     /**
      * The state of the entity.
@@ -114,7 +113,6 @@ public final class EntityStateEnvelope<I, S extends Message>
         return null;
     }
 
-    @Override
     public I getId() {
         final I result = Identifier.unpack(entityId);
         return result;
@@ -128,14 +126,6 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Override
     public EntityStateClass getMessageClass() {
         return this.entityStateClass;
-    }
-
-    @Override
-    public MessageAcked acknowledge() {
-        final MessageAcked acked = MessageAcked.newBuilder()
-                                               .setMessageId(entityId)
-                                               .build();
-        return acked;
     }
 
     public Optional<Version> getEntityVersion() {

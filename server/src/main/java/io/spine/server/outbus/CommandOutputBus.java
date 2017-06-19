@@ -30,7 +30,7 @@ import io.spine.base.Failure;
 import io.spine.base.MessageAcked;
 import io.spine.base.Response;
 import io.spine.base.Responses;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -61,7 +61,7 @@ import static io.spine.io.StreamObservers.forwardErrorsOnly;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       E extends MessageEnvelope<?, M>,
+                                       E extends MessageWithIdEnvelope<?, M>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C,E>>
                 extends Bus<M, E, C, D> {

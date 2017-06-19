@@ -33,10 +33,10 @@ import static io.spine.base.Identifier.newUuid;
 /**
  * @author Dmytro Dashenkov
  */
-public class EventEnvelopeShould extends MessageEnvelopeShould<Event,
-        EventId,
-        EventEnvelope,
-        EventClass> {
+public class EventEnvelopeShould extends MessageWithIdEnvelopeShould<Event,
+                                                                     EventId,
+                                                                     EventEnvelope,
+                                                                     EventClass> {
 
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(EventEnvelopeShould.class);

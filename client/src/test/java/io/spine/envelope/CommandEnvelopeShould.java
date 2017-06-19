@@ -32,10 +32,10 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
-                                                                 CommandId,
-                                                                 CommandEnvelope,
-                                                                 CommandClass> {
+public class CommandEnvelopeShould extends MessageWithIdEnvelopeShould<Command,
+                                                                       CommandId,
+                                                                       CommandEnvelope,
+                                                                       CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);

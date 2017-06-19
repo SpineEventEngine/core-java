@@ -20,45 +20,32 @@
 
 package io.spine.envelope;
 
-import java.util.Objects;
-
-import static com.google.common.base.Preconditions.checkNotNull;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.base.MessageAcked;
+import io.spine.protobuf.AnyPacker;
 
 /**
- * Abstract base for classes implementing {@link MessageEnvelope}.
- *
- * @param <T> the type of the object that wraps a message
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+public abstract class MessageWithIdEnvelope<I extends Message, T extends Message>
+        extends AbstractMessageEnvelope<T> {
 
-    private final T object;
-
-    AbstractMessageEnvelope(T object) {
-        checkNotNull(object);
-        this.object = object;
+    MessageWithIdEnvelope(T object) {
+        super(object);
     }
 
-    @Override
-    public T getOuterObject() {
-        return object;
-    }
+    /**
+     * Obtains the identifier of the object.
+     */
+    public abstract I getId();
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(object);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
-        return Objects.equals(this.object, other.object);
+    public final MessageAcked acknowledge() {
+        final I id = getId();
+        final Any packedId = AnyPacker.pack(id);
+        final MessageAcked result = MessageAcked.newBuilder()
+                                                .setMessageId(packedId)
+                                                .build();
+        return result;
     }
 }

@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageAcked;
 import io.spine.envelope.MessageEnvelope;
+import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.type.MessageClass;
 
@@ -50,7 +51,7 @@ import static java.util.Collections.singleton;
  * @author Alexander Yevsyukov
  */
 public abstract class Bus<T extends Message,
-                          E extends MessageEnvelope<?, T>,
+                          E extends MessageWithIdEnvelope<?, T>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E>> implements AutoCloseable {
 

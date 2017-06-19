@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelope extends AbstractMessageEnvelope<FailureId, Failure> {
+public class FailureEnvelope extends MessageWithIdEnvelope<FailureId, Failure> {
 
     /**
      * The failure message.

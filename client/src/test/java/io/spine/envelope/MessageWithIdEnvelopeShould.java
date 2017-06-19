@@ -20,45 +20,29 @@
 
 package io.spine.envelope;
 
-import java.util.Objects;
+import com.google.protobuf.Message;
+import io.spine.type.MessageClass;
+import org.junit.Test;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static org.junit.Assert.assertEquals;
 
 /**
- * Abstract base for classes implementing {@link MessageEnvelope}.
- *
- * @param <T> the type of the object that wraps a message
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+public abstract class MessageWithIdEnvelopeShould<O extends Message,
+                                                  I extends Message,
+                                                  E extends MessageWithIdEnvelope<I, O>,
+                                                  C extends MessageClass>
+        extends MessageEnvelopeShould<O, E, C> {
 
-    private final T object;
+    protected abstract I getId(O obj);
 
-    AbstractMessageEnvelope(T object) {
-        checkNotNull(object);
-        this.object = object;
+    @Test
+    public void obtain_message_id() {
+        final O obj = outerObject();
+        final E envelope = toEnvelope(obj);
+        assertEquals(getId(obj), envelope.getId());
     }
 
-    @Override
-    public T getOuterObject() {
-        return object;
-    }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(object);
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
-        return Objects.equals(this.object, other.object);
-    }
 }
