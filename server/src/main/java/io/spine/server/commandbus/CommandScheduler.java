@@ -76,21 +76,21 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Command> responseObserver) {
+    public boolean accept(CommandEnvelope envelope, StreamObserver<Command> observer) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
-            scheduleAndStore(command, responseObserver);
+            scheduleAndStore(command, observer);
             return false;
         }
         return true;
     }
 
-    private void scheduleAndStore(Command command, StreamObserver<Command> ackObserver) {
+    private void scheduleAndStore(Command command, StreamObserver<Command> observer) {
         schedule(command);
         commandBus().commandStore()
                     .store(command, SCHEDULED);
-        ackObserver.onNext(command);
-        ackObserver.onCompleted();
+        observer.onNext(command);
+        observer.onCompleted();
     }
 
     @Override
