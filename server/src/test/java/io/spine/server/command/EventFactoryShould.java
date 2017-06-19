@@ -26,7 +26,7 @@ import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Commands;
 import io.spine.client.ActorRequestFactory;
-import io.spine.test.TestActorRequestFactory;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
 import io.spine.validate.ValidationException;

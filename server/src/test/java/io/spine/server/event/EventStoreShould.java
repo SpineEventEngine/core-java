@@ -25,11 +25,12 @@ import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
-import io.spine.test.TestEventFactory;
+import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
+import io.spine.type.TypeName;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -44,7 +45,6 @@ import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
-import static io.spine.type.TypeName.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -117,7 +117,8 @@ public abstract class EventStoreShould {
         eventStore.append(eventInFuture);
 
         final EventFilter taskAddedType = EventFilter.newBuilder()
-                                                     .setEventType(of(TaskAdded.class).value())
+                                                     .setEventType(TypeName.of(TaskAdded.class)
+                                                                           .value())
                                                      .build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                                                        .setAfter(past)
@@ -147,7 +148,8 @@ public abstract class EventStoreShould {
         eventStore.append(teasAdded2);
 
         final EventFilter taskAddedType = EventFilter.newBuilder()
-                                                     .setEventType(of(TaskAdded.class).value())
+                                                     .setEventType(TypeName.of(TaskAdded.class)
+                                                                           .value())
                                                      .build();
         final EventStreamQuery query = EventStreamQuery.newBuilder()
                                                        .addFilter(taskAddedType)

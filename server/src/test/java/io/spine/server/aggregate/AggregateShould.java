@@ -30,11 +30,12 @@ import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
 import io.spine.base.Event;
+import io.spine.base.Identifier;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.command.Assign;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.TestEventFactory;
 import io.spine.test.TimeTests;
 import io.spine.test.aggregate.Project;
 import io.spine.test.aggregate.ProjectId;
@@ -62,7 +63,6 @@ import java.util.Set;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Collections2.transform;
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
@@ -92,7 +92,7 @@ public class AggregateShould {
                                                  .build();
 
     private static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(pack(ID), requestFactory);
+            TestEventFactory.newInstance(Identifier.pack(ID), requestFactory);
 
     private static final CreateProject createProject = Given.CommandMessage.createProject(ID);
     private static final AddTask addTask = Given.CommandMessage.addTask(ID);

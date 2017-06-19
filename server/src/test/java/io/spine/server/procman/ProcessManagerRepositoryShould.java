@@ -31,6 +31,7 @@ import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.Subscribe;
 import io.spine.base.TenantId;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
@@ -43,7 +44,6 @@ import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcess
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
 import io.spine.test.procman.command.AddTask;

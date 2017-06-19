@@ -22,6 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
@@ -32,7 +33,6 @@ import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskPart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.TaskRepository;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.WrongAggregatePart;
 import io.spine.server.entity.InvalidEntityStateException;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.Task;
 import io.spine.test.aggregate.command.AddTask;

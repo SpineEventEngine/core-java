@@ -30,13 +30,13 @@ import io.spine.base.Command;
 import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.Commands;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.test.TestActorRequestFactory;
 import org.junit.Before;
 
 import javax.annotation.Nullable;

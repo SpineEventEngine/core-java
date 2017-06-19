@@ -18,7 +18,6 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
 ext {
     beamVersion = '2.0.0'
 }
@@ -26,7 +25,6 @@ ext {
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
 
-    compile project(path: ':client')
     compile project(path: ':server')
     compile project(path: ':values')
 
@@ -34,7 +32,7 @@ dependencies {
     compile group: 'org.apache.beam', name: 'beam-sdks-java-extensions-protobuf', version: beamVersion
     compile group: 'org.apache.beam', name: 'beam-runners-direct-java', version: beamVersion
 
-    testCompile project(path: ":client", configuration: 'testArtifacts')
+    testCompile project(path: ":base", configuration: 'testArtifacts')
     testCompile project(path: ":server", configuration: 'testArtifacts')
     testCompile project(path: ":testutil")
 }

@@ -29,8 +29,8 @@ import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.base.UserId;
 import io.spine.people.PersonName;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.enrich.EventEnricher;
-import io.spine.test.TestEventFactory;
 import io.spine.test.Values;
 import io.spine.test.event.ProjectCompleted;
 import io.spine.test.event.ProjectCreated;
@@ -47,7 +47,6 @@ import javax.annotation.Nullable;
 
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.test.TestEventFactory.newInstance;
 
 /**
  * Is for usage only in tests under the `event` package.
@@ -142,7 +141,8 @@ public class Given {
         private AnEvent() {}
 
         private static TestEventFactory eventFactory() {
-            final TestEventFactory result = newInstance(pack(PROJECT_ID), AnEvent.class);
+            final TestEventFactory result = TestEventFactory.newInstance(pack(PROJECT_ID),
+                                                                         AnEvent.class);
             return result;
         }
 

@@ -25,13 +25,13 @@ import com.google.protobuf.Message;
 import io.spine.base.Event;
 import io.spine.base.FieldFilter;
 import io.spine.protobuf.AnyPacker;
-import io.spine.test.TestEventFactory;
+import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
 import org.junit.Test;
 
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.test.TestEventFactory.newInstance;
+import static io.spine.server.command.TestEventFactory.newInstance;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 

@@ -29,12 +29,15 @@ import io.spine.base.Event;
 import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.Events;
+import io.spine.base.Identifier;
 import io.spine.base.Subscribe;
 import io.spine.base.TenantId;
 import io.spine.base.Version;
 import io.spine.base.Versions;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
@@ -44,8 +47,6 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjecti
 import io.spine.server.storage.RecordStorage;
 import io.spine.test.EventTests;
 import io.spine.test.Given;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.test.TestEventFactory;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
 import io.spine.test.projection.ProjectTaskNames;
@@ -64,7 +65,6 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.base.Identifier.newUuid;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.time.Time.getCurrentTime;
 import static java.lang.String.format;
@@ -91,7 +91,7 @@ public class ProjectionRepositoryShould
     private static final ProjectId ID = ProjectId.newBuilder()
                                                  .setId("p-123")
                                                  .build();
-    private static final Any PRODUCER_ID = pack(ID);
+    private static final Any PRODUCER_ID = Identifier.pack(ID);
 
     private BoundedContext boundedContext;
 
