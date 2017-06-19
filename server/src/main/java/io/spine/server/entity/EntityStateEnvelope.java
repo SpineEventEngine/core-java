@@ -26,10 +26,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
 import io.spine.base.MessageAcked;
+import io.spine.base.TenantId;
 import io.spine.base.Version;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.string.Stringifiers;
-import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 

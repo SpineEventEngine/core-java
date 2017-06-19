@@ -28,11 +28,11 @@ import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Event;
+import io.spine.base.TenantId;
 import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
 import io.spine.server.tenant.TenantAwareOperation;
-import io.spine.users.TenantId;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

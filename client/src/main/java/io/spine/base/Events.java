@@ -25,8 +25,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.string.Stringifier;
 import io.spine.time.Timestamps2;
-import io.spine.users.TenantId;
-import io.spine.users.UserId;
 
 import java.util.Collections;
 import java.util.Comparator;
