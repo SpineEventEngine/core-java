@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.MessageAcked;
 import io.spine.envelope.MessageEnvelope;
+import io.spine.io.StreamObservers;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -182,7 +183,7 @@ public abstract class Bus<T extends Message,
      * @param acknowledgement the observer of the message posting
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<MessageAcked> acknowledgement) {
-        final CountingStreamSupervisor ackingSupervisor = new CountingStreamSupervisor(acknowledgement);
+        final ErrorCountingSpyObserver ackingSupervisor = new ErrorCountingSpyObserver(acknowledgement);
         int currentErrorCount = ackingSupervisor.getErrorCount();
         for (E message : envelopes) {
             doPost(message, ackingSupervisor);
@@ -239,52 +240,13 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Supervises the underlying {@link StreamObserver} and performs a defined action on a call to
-     * {@link StreamObserver#onError StreamObserver.onError}.
-     */
-    private abstract static class StreamSupervisor implements StreamObserver<MessageAcked> {
-
-        private final StreamObserver<MessageAcked> delegate;
-
-        private StreamSupervisor(StreamObserver<MessageAcked> delegate) {
-            this.delegate = delegate;
-        }
-
-        /**
-         * Performs a custom action on {@link StreamObserver#onError StreamObserver.onError}.
-         *
-         * <p>This method is called before the actual underlying
-         * {@link StreamObserver#onError StreamObserver.onError} invocation.
-         *
-         * @param error the parameter of {@code StreamObserver.onError}
-         */
-        protected abstract void onErrorSpotted(Throwable error);
-
-        @Override
-        public void onNext(MessageAcked value) {
-            delegate.onNext(value);
-        }
-
-        @Override
-        public void onCompleted() {
-            delegate.onCompleted();
-        }
-
-        @Override
-        public void onError(Throwable error) {
-            onErrorSpotted(error);
-            delegate.onError(error);
-        }
-    }
-
-    /**
      * Counts the {@link StreamObserver#onError StreamObserver.onError} invocations.
      */
-    private static class CountingStreamSupervisor extends StreamSupervisor {
+    private static class ErrorCountingSpyObserver extends StreamObservers.SpyObserver<MessageAcked> {
 
         private int errorCount;
 
-        private CountingStreamSupervisor(StreamObserver<MessageAcked> delegate) {
+        private ErrorCountingSpyObserver(StreamObserver<MessageAcked> delegate) {
             super(delegate);
             this.errorCount = 0;
         }
