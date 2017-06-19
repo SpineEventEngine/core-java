@@ -24,8 +24,8 @@ import com.google.protobuf.Message;
 import io.spine.base.Event;
 import io.spine.base.EventId;
 import io.spine.test.TestEventFactory;
-import io.spine.test.event.ProjectCreated;
-import io.spine.test.event.ProjectId;
+import io.spine.test.envelope.ProjectCreated;
+import io.spine.test.envelope.ProjectId;
 import io.spine.type.EventClass;
 
 import static io.spine.base.Identifier.newUuid;
@@ -46,6 +46,7 @@ public class EventEnvelopeShould extends MessageEnvelopeShould<Event,
         final ProjectId projectId = ProjectId.newBuilder()
                                              .setId(newUuid())
                                              .build();
+
         final Message eventMessage = ProjectCreated.newBuilder()
                                                    .setProjectId(projectId)
                                                    .build();

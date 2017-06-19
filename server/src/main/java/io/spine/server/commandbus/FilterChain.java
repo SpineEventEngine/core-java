@@ -23,7 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 
 import java.util.List;
@@ -49,7 +49,7 @@ final class FilterChain implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Command> responseObserver) {
+    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> responseObserver) {
         for (CommandBusFilter filter : filters) {
             if (!filter.accept(envelope, responseObserver)) {
                 return false;

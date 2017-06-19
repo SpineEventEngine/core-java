@@ -25,6 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -86,7 +87,7 @@ public abstract class Bus<T extends Message,
      * @param message         the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
-    public final void post(T message, StreamObserver<T> acknowledgement) {
+    public final void post(T message, StreamObserver<MessageAcked> acknowledgement) {
         checkNotNull(message);
         checkNotNull(acknowledgement);
         checkArgument(isNotDefault(message));
@@ -102,7 +103,7 @@ public abstract class Bus<T extends Message,
      * @param messages        the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
-    public final void post(Iterable<T> messages, StreamObserver<T> acknowledgement) {
+    public final void post(Iterable<T> messages, StreamObserver<MessageAcked> acknowledgement) {
         checkNotNull(messages);
         checkNotNull(acknowledgement);
 
@@ -150,7 +151,8 @@ public abstract class Bus<T extends Message,
      * @return the message itself if it passes the filtering or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    protected abstract Iterable<T> filter(Iterable<T> messages, StreamObserver<T> acknowledgement);
+    protected abstract Iterable<T> filter(Iterable<T> messages,
+                                          StreamObserver<MessageAcked> acknowledgement);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.
@@ -179,14 +181,13 @@ public abstract class Bus<T extends Message,
      * @param envelopes       the envelopes to post
      * @param acknowledgement the observer of the message posting
      */
-    private void doPost(Iterable<E> envelopes, StreamObserver<T> acknowledgement) {
-        final CountingStreamSupervisor<T> ackingSupervisor =
-                new CountingStreamSupervisor<>(acknowledgement);
+    private void doPost(Iterable<E> envelopes, StreamObserver<MessageAcked> acknowledgement) {
+        final CountingStreamSupervisor ackingSupervisor = new CountingStreamSupervisor(acknowledgement);
         int currentErrorCount = ackingSupervisor.getErrorCount();
         for (E message : envelopes) {
             doPost(message, ackingSupervisor);
             if (currentErrorCount == ackingSupervisor.getErrorCount()) {
-                ackingSupervisor.onNext(message.getOuterObject());
+                ackingSupervisor.onNext(message.acknowledge());
             } else {
                 currentErrorCount = ackingSupervisor.getErrorCount();
             }
@@ -240,14 +241,12 @@ public abstract class Bus<T extends Message,
     /**
      * Supervises the underlying {@link StreamObserver} and performs a defined action on a call to
      * {@link StreamObserver#onError StreamObserver.onError}.
-     *
-     * @param <T> the type parameter of the {@link StreamObserver}
      */
-    private abstract static class StreamSupervisor<T> implements StreamObserver<T> {
+    private abstract static class StreamSupervisor implements StreamObserver<MessageAcked> {
 
-        private final StreamObserver<T> delegate;
+        private final StreamObserver<MessageAcked> delegate;
 
-        private StreamSupervisor(StreamObserver<T> delegate) {
+        private StreamSupervisor(StreamObserver<MessageAcked> delegate) {
             this.delegate = delegate;
         }
 
@@ -262,7 +261,7 @@ public abstract class Bus<T extends Message,
         protected abstract void onErrorSpotted(Throwable error);
 
         @Override
-        public void onNext(T value) {
+        public void onNext(MessageAcked value) {
             delegate.onNext(value);
         }
 
@@ -280,14 +279,12 @@ public abstract class Bus<T extends Message,
 
     /**
      * Counts the {@link StreamObserver#onError StreamObserver.onError} invocations.
-     *
-     * @param <T> the type parameter of the {@link StreamObserver}
      */
-    private static class CountingStreamSupervisor<T> extends StreamSupervisor<T> {
+    private static class CountingStreamSupervisor extends StreamSupervisor {
 
         private int errorCount;
 
-        private CountingStreamSupervisor(StreamObserver<T> delegate) {
+        private CountingStreamSupervisor(StreamObserver<MessageAcked> delegate) {
             super(delegate);
             this.errorCount = 0;
         }

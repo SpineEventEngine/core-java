@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.base.Predicate;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 
 import javax.annotation.Nullable;
@@ -40,10 +41,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 final class CommandBusFilterPredicate implements Predicate<CommandEnvelope> {
 
     private final CommandBusFilter filter;
-    private final StreamObserver<Command> responseObserver;
+    private final StreamObserver<MessageAcked> responseObserver;
 
     CommandBusFilterPredicate(CommandBusFilter filter,
-                              StreamObserver<Command> errorObserver) {
+                              StreamObserver<MessageAcked> errorObserver) {
         this.filter = filter;
         this.responseObserver = errorObserver;
     }

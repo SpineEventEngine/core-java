@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Failure;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.command.Assign;
@@ -108,7 +109,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(faultyHandler);
 
         final Command addTaskCommand = clearTenantId(addTask());
-        commandBus.post(addTaskCommand, StreamObservers.<Command>noOpObserver());
+        commandBus.post(addTaskCommand, StreamObservers.<MessageAcked>noOpObserver());
 
         final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
         final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);

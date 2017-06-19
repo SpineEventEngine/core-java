@@ -21,6 +21,7 @@
 package io.spine.envelope;
 
 import com.google.protobuf.Message;
+import io.spine.base.MessageAcked;
 import io.spine.type.MessageClass;
 
 /**
@@ -51,4 +52,6 @@ public interface MessageEnvelope<I, T> {
      * Obtains the message class.
      */
     MessageClass getMessageClass();
+
+    MessageAcked acknowledge();
 }

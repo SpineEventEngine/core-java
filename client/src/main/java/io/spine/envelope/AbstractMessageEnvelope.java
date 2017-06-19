@@ -20,6 +20,11 @@
 
 package io.spine.envelope;
 
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.base.MessageAcked;
+import io.spine.protobuf.AnyPacker;
+
 import java.util.Objects;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -31,7 +36,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  * @author Alex Tymchenko
  */
-abstract class AbstractMessageEnvelope<I, T> implements MessageEnvelope<I, T> {
+abstract class AbstractMessageEnvelope<I extends Message, T extends Message>
+        implements MessageEnvelope<I, T> {
 
     private final T object;
 
@@ -43,6 +49,16 @@ abstract class AbstractMessageEnvelope<I, T> implements MessageEnvelope<I, T> {
     @Override
     public T getOuterObject() {
         return object;
+    }
+
+    @Override
+    public MessageAcked acknowledge() {
+        final I id = getId();
+        final Any packedId = AnyPacker.pack(id);
+        final MessageAcked result = MessageAcked.newBuilder()
+                                                .setMessageId(packedId)
+                                                .build();
+        return result;
     }
 
     @Override

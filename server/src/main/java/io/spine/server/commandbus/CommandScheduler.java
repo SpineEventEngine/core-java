@@ -26,6 +26,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 
 import javax.annotation.CheckReturnValue;
@@ -76,20 +77,22 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Command> observer) {
+    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> observer) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
-            scheduleAndStore(command, observer);
+            scheduleAndStore(envelope, observer);
             return false;
         }
         return true;
     }
 
-    private void scheduleAndStore(Command command, StreamObserver<Command> observer) {
+    private void scheduleAndStore(CommandEnvelope commandEnvelope,
+                                  StreamObserver<MessageAcked> observer) {
+        final Command command = commandEnvelope.getCommand();
         schedule(command);
         commandBus().commandStore()
                     .store(command, SCHEDULED);
-        observer.onNext(command);
+        observer.onNext(commandEnvelope.acknowledge());
         observer.onCompleted();
     }
 

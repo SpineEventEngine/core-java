@@ -25,6 +25,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Identifier;
+import io.spine.base.MessageAcked;
 import io.spine.base.Version;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.string.Stringifiers;
@@ -127,6 +128,14 @@ public final class EntityStateEnvelope<I, S extends Message>
     @Override
     public EntityStateClass getMessageClass() {
         return this.entityStateClass;
+    }
+
+    @Override
+    public MessageAcked acknowledge() {
+        final MessageAcked acked = MessageAcked.newBuilder()
+                                               .setMessageId(entityId)
+                                               .build();
+        return acked;
     }
 
     public Optional<Version> getEntityVersion() {

@@ -27,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.Failure;
+import io.spine.base.MessageAcked;
 import io.spine.base.Response;
 import io.spine.base.Responses;
 import io.spine.envelope.MessageEnvelope;
@@ -111,7 +112,7 @@ public abstract class CommandOutputBus<M extends Message,
      * {@code false} otherwise
      */
     public boolean validate(Message message, StreamObserver<Response> responseObserver) {
-        final StreamObserver<M> ackObserver = forwardErrorsOnly(responseObserver);
+        final StreamObserver<MessageAcked> ackObserver = forwardErrorsOnly(responseObserver);
         if (!validateMessage(message, ackObserver)) {
             return false;
         }
@@ -128,7 +129,7 @@ public abstract class CommandOutputBus<M extends Message,
      * for the given {@code acknowledgement} observer.
      */
     protected abstract boolean validateMessage(Message message,
-                                               StreamObserver<M> acknowledgement);
+                                               StreamObserver<MessageAcked> acknowledgement);
 
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
@@ -156,7 +157,8 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Iterable<M> filter(Iterable<M> messages, final StreamObserver<M> acknowledgement) {
+    protected Iterable<M> filter(Iterable<M> messages,
+                                 final StreamObserver<MessageAcked> acknowledgement) {
         final Iterable<M> result = Iterables.filter(messages, new Predicate<M>() {
             @Override
             public boolean apply(@Nullable M message) {

@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.users.TenantId;
 import io.spine.validate.ConstraintViolation;
@@ -49,7 +50,7 @@ class ValidationFilter implements CommandBusFilter {
      * Returns {@code true} if a command is valid, {@code false} otherwise.
      */
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Command> responseObserver) {
+    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> responseObserver) {
         if (!isTenantIdValid(envelope, responseObserver)) {
             return false;
         }

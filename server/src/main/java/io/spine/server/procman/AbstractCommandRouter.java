@@ -28,6 +28,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.MessageAcked;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -38,7 +39,6 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 /**
  * Abstract base for command routers.
@@ -132,22 +132,15 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     protected Command route(Message message) {
         final Command command = produceCommand(message);
-        final SettableFuture<Command> finishFuture = SettableFuture.create();
-        final StreamObserver<Command> observer = newAckingObserver(finishFuture);
+        final SettableFuture<MessageAcked> finishFuture = SettableFuture.create();
+        final StreamObserver<MessageAcked> observer = newAckingObserver(finishFuture);
         commandBus.post(command, observer);
         // Wait till the call is completed.
-        final Command retrievedCommand;
         try {
-            retrievedCommand = finishFuture.get();
+            finishFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
-        checkState(retrievedCommand.equals(command),
-                   "Wrong command acknowledged. Was expecting %s (%s), but was %s (%s).",
-                   command.getMessage().getTypeUrl(),
-                   command.getId(),
-                   retrievedCommand.getMessage().getTypeUrl(),
-                   retrievedCommand.getId());
         return command;
     }
 
@@ -169,11 +162,11 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<Command> newAckingObserver(
-            final SettableFuture<Command> finishFuture) {
-        return new StreamObserver<Command>() {
+    private static StreamObserver<MessageAcked> newAckingObserver(
+            final SettableFuture<MessageAcked> finishFuture) {
+        return new StreamObserver<MessageAcked>() {
             @Override
-            public void onNext(Command value) {
+            public void onNext(MessageAcked value) {
                 finishFuture.set(value);
             }
 

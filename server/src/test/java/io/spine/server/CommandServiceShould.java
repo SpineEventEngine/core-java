@@ -23,8 +23,11 @@ package io.spine.server;
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
 import io.spine.base.Command;
+import io.spine.base.CommandId;
+import io.spine.base.MessageAcked;
 import io.spine.io.StreamObservers;
 import io.spine.io.StreamObservers.MemoizingObserver;
+import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.transport.GrpcContainer;
 import io.spine.test.TestActorRequestFactory;
@@ -50,7 +53,7 @@ public class CommandServiceShould {
     private BoundedContext projectsContext;
 
     private BoundedContext customersContext;
-    private final MemoizingObserver<Command> responseObserver = StreamObservers.memoizingObserver();
+    private final MemoizingObserver<MessageAcked> responseObserver = StreamObservers.memoizingObserver();
 
     @Before
     public void setUp() {
@@ -108,12 +111,14 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        final MemoizingObserver<Command> observer = StreamObservers.memoizingObserver();
+        final MemoizingObserver<MessageAcked> observer = StreamObservers.memoizingObserver();
         service.post(cmd, observer);
 
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        assertEquals(cmd, observer.firstResponse());
+        final MessageAcked acked = observer.firstResponse();
+        final CommandId id = AnyPacker.unpack(acked.getMessageId());
+        assertEquals(cmd.getId(), id);
     }
 
     @Test

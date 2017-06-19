@@ -26,8 +26,10 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.CommandId;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
+import io.spine.base.MessageAcked;
 import io.spine.client.ActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.io.StreamObservers;
@@ -55,6 +57,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.test.Values.newTenantUuid;
@@ -90,7 +93,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
-    protected MemoizingObserver<Command> observer;
+    protected MemoizingObserver<MessageAcked> observer;
 
     /**
      * A public constructor for derived test cases.
@@ -209,7 +212,7 @@ public abstract class AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.<Command>memoizingObserver());
+        spy.post(commands, StreamObservers.<MessageAcked>memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);
@@ -235,7 +238,8 @@ public abstract class AbstractCommandBusTestSuite {
     protected void checkResult(Command cmd) {
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        assertEquals(cmd, observer.firstResponse());
+        final CommandId commandId = unpack(observer.firstResponse().getMessageId());
+        assertEquals(cmd.getId(), commandId);
     }
 
     void storeAsScheduled(Iterable<Command> commands,

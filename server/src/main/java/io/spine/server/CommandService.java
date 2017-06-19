@@ -24,6 +24,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.MessageAcked;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandException;
@@ -66,7 +67,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     // as we override default implementation with `unimplemented` status.
     @Override
-    public void post(Command request, StreamObserver<Command> responseObserver) {
+    public void post(Command request, StreamObserver<MessageAcked> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
         final BoundedContext boundedContext = boundedContextMap.get(commandClass);
         if (boundedContext == null) {

@@ -29,6 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Command;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
+import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
@@ -163,7 +164,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected Iterable<Command> filter(Iterable<Command> commands,
-                                       StreamObserver<Command> responseObserver) {
+                                       StreamObserver<MessageAcked> responseObserver) {
         final Iterable<Command> result = FluentIterable.from(commands)
                 .transform(toEnvelope())
                 .filter(new CommandBusFilterPredicate(filterChain, responseObserver))
