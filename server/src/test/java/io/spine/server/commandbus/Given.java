@@ -33,7 +33,7 @@ import io.spine.test.command.CreateProject;
 import io.spine.test.command.ProjectId;
 import io.spine.test.command.StartProject;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;
 import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;

@@ -36,8 +36,8 @@ import java.util.List;
 import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
+import static io.spine.Identifier.newUuid;
 import static io.spine.base.CommandStatus.SCHEDULED;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.Command.addTask;
 import static io.spine.server.commandbus.Given.Command.createProject;

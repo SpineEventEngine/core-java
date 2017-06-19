@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
@@ -28,16 +28,17 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
-import io.spine.base.Identifier.Type;
+import io.spine.Identifier.Type;
+import io.spine.base.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.identifiers.NestedMessageId;
 import io.spine.test.identifiers.SeveralFieldsId;
 import org.junit.Test;
 
-import static io.spine.base.Identifier.EMPTY_ID;
-import static io.spine.base.Identifier.NULL_ID;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.EMPTY_ID;
+import static io.spine.Identifier.NULL_ID;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.protobuf.Wrapper.forLong;
 import static io.spine.protobuf.Wrapper.forString;

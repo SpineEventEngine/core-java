@@ -33,7 +33,7 @@ import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.server.projection.ProjectionEventDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

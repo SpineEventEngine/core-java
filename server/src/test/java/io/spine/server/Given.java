@@ -22,9 +22,9 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.Identifier;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Identifier;
 import io.spine.base.TenantId;
 import io.spine.base.UserId;
 import io.spine.client.ActorRequestFactory;
@@ -57,7 +57,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 

@@ -22,7 +22,7 @@ package io.spine.string;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
 import io.spine.json.Json;
 import io.spine.test.Values;
 import io.spine.test.identifiers.IdWithPrimitiveFields;
@@ -30,7 +30,7 @@ import org.junit.Test;
 
 import java.util.Random;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.string.Stringifiers.forBoolean;
 import static io.spine.string.Stringifiers.forInteger;
 import static io.spine.string.Stringifiers.forLong;

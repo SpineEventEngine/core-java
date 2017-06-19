@@ -22,6 +22,7 @@ package io.spine.base;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.Identifier;
 import io.spine.envelope.EventEnvelope;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;

@@ -21,8 +21,8 @@
 package io.spine.server.aggregate;
 
 import com.google.common.base.Optional;
+import io.spine.Identifier;
 import io.spine.base.Command;
-import io.spine.base.Identifier;
 import io.spine.base.Subscribe;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.BoundedContext;

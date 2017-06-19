@@ -37,7 +37,7 @@ import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import org.junit.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.type.TypeUrl.composeTypeUrl;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

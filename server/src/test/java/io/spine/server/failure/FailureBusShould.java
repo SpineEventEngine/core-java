@@ -45,8 +45,8 @@ import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.Identifier.newUuid;
 import static io.spine.base.Failures.getMessage;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
 import static io.spine.test.failure.ProjectFailures.MissingOwner;
 import static org.junit.Assert.assertEquals;

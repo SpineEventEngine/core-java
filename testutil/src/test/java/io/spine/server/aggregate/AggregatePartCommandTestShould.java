@@ -33,7 +33,7 @@ import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Values.newUserUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

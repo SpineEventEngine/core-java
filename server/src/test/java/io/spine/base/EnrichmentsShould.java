@@ -33,8 +33,8 @@ import io.spine.type.TypeName;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.Identifier.newUuid;
 import static io.spine.base.Enrichments.isEnrichmentEnabled;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.base.given.Given.newEventContext;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.Wrapper.forBoolean;

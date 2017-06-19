@@ -46,8 +46,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.Identifier.newUuid;
 import static io.spine.base.Enrichments.getEnrichment;
-import static io.spine.base.Identifier.newUuid;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.server.event.Given.AnEvent.projectStarted;
 import static io.spine.server.event.Given.Enrichment.GetProjectMaxMemberCount;

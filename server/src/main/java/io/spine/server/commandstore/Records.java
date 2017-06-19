@@ -22,19 +22,19 @@ package io.spine.server.commandstore;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Iterators;
+import io.spine.Identifier;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
-import io.spine.base.Identifier;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 
+import static io.spine.Identifier.EMPTY_ID;
 import static io.spine.base.Commands.generateId;
 import static io.spine.base.Commands.typeNameOf;
-import static io.spine.base.Identifier.EMPTY_ID;
 import static io.spine.time.Time.getCurrentTime;
 
 /**

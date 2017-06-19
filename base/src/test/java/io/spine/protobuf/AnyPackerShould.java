@@ -31,7 +31,7 @@ import org.junit.Test;
 
 import java.util.Iterator;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Values.newUserId;
 import static io.spine.test.Values.newUuidValue;
