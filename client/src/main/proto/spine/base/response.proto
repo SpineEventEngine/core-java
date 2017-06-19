@@ -52,3 +52,14 @@ message Response {
         Failure failure = 3;
     }
 }
+
+
+// The result to a call to a service with a message as a parameter.
+//
+// The respone message brings the ID of the message which has been acknowlaged.
+//
+message MessageAcked {
+
+    // An identifier of the message, acknowledged and successfully received by the bus.
+    Any message_id = 1 [(required) = true];
+}
