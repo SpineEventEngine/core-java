@@ -171,11 +171,11 @@ public abstract class CommandOutputBus<M extends Message,
     @Override
     protected void doPost(E envelope, StreamObserver<?> failureObserver) {
         final M enriched = enrich(envelope.getOuterObject());
-        final E enrichedParceledMessage = toEnvelope(enriched);
-        final int dispatchersCalled = callDispatchers(enrichedParceledMessage);
+        final E enrichedEnvelope = toEnvelope(enriched);
+        final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
         if (dispatchersCalled == 0) {
-            handleDeadMessage(enrichedParceledMessage);
+            handleDeadMessage(enrichedEnvelope);
         }
     }
 

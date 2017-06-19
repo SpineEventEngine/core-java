@@ -166,7 +166,7 @@ public class CommandBus extends Bus<Command,
                                        StreamObserver<Command> responseObserver) {
         final Iterable<Command> result = FluentIterable.from(commands)
                 .transform(toEnvelope())
-                .filter(new MatchesCommandBusFilter(filterChain, responseObserver))
+                .filter(new CommandBusFilterPredicate(filterChain, responseObserver))
                 .transform(toMessage());
         return result;
     }

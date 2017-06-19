@@ -77,7 +77,7 @@ public class EventStore implements AutoCloseable {
         return new ServiceBuilder();
     }
 
-    private static void checkOfTenant(Event first, Iterator<Event> others) {
+    private static void ensureSameTenant(Event first, Iterator<Event> others) {
         checkNotNull(first);
         checkNotNull(others);
 
@@ -98,7 +98,7 @@ public class EventStore implements AutoCloseable {
      * @param storageFactory the storage factory for creating underlying storage
      * @param logger         debug logger instance
      */
-    EventStore(Executor streamExecutor, StorageFactory storageFactory, @Nullable Logger logger) {
+    private EventStore(Executor streamExecutor, StorageFactory storageFactory, @Nullable Logger logger) {
         super();
         final ERepository eventRepository = new ERepository();
         eventRepository.initStorage(storageFactory);
@@ -153,7 +153,7 @@ public class EventStore implements AutoCloseable {
             @Override
             public void run() {
                 if (isTenantSet()) { // If multitenant context
-                    checkOfTenant(getEvent(), events.iterator());
+                    ensureSameTenant(getEvent(), events.iterator());
                 }
                 store(events);
             }

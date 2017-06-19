@@ -193,7 +193,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     /**
-     * Validates and posts the event for handling.
+     * Validates and posts the events for handling.
      *
      * <p>Performs the same action as the
      * {@linkplain CommandOutputBus#post(Iterable, StreamObserver)} parent method}, but does not

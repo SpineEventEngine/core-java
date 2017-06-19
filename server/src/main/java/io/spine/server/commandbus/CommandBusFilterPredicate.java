@@ -37,13 +37,13 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Dmytro Dashenkov
  */
-final class MatchesCommandBusFilter implements Predicate<CommandEnvelope> {
+final class CommandBusFilterPredicate implements Predicate<CommandEnvelope> {
 
     private final CommandBusFilter filter;
     private final StreamObserver<Command> responseObserver;
 
-    MatchesCommandBusFilter(CommandBusFilter filter,
-                            StreamObserver<Command> errorObserver) {
+    CommandBusFilterPredicate(CommandBusFilter filter,
+                              StreamObserver<Command> errorObserver) {
         this.filter = filter;
         this.responseObserver = errorObserver;
     }
