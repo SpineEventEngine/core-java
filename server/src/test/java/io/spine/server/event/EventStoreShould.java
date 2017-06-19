@@ -20,16 +20,22 @@
 
 package io.spine.server.event;
 
+import com.google.common.collect.ImmutableSet;
+import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.ActorContext;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
+import io.spine.base.EventContext;
+import io.spine.server.BoundedContext;
 import io.spine.test.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
+import io.spine.users.TenantId;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,13 +59,22 @@ import static org.junit.Assert.fail;
 /**
  * @author Dmytro Dashenkov
  */
-public abstract class EventStoreShould {
+public class EventStoreShould {
 
     private static TestEventFactory eventFactory = null;
 
     private EventStore eventStore;
 
-    protected abstract EventStore creteStore();
+    protected EventStore creteStore() {
+        final BoundedContext bc = BoundedContext.newBuilder()
+                                                .setMultitenant(false)
+                                                .build();
+        return EventStore.newBuilder()
+                         .setStorageFactory(bc.getStorageFactory())
+                         .setStreamExecutor(MoreExecutors.directExecutor())
+                         .withDefaultLogger()
+                         .build();
+    }
 
     @BeforeClass
     public static void prepare() {
@@ -174,6 +189,42 @@ public abstract class EventStoreShould {
     @Test
     public void expose_event_repository_to_the_package() {
         assertNotNull(eventStore.getStorage());
+    }
+
+    @Test(expected = IllegalArgumentException.class)
+    public void fail_to_store_events_of_different_tenants_in_a_single_operation() {
+        final TenantId firstTenantId = TenantId.newBuilder()
+                                               .setValue("abc")
+                                               .build();
+        final TenantId secondTenantId = TenantId.newBuilder()
+                                                .setValue("xyz")
+                                                .build();
+        final ActorContext firstTenantActor = ActorContext.newBuilder()
+                                                          .setTenantId(firstTenantId)
+                                                          .build();
+        final ActorContext secondTenantActor = ActorContext.newBuilder()
+                                                           .setTenantId(secondTenantId)
+                                                           .build();
+        final CommandContext firstTenantCommand = CommandContext.newBuilder()
+                                                                .setActorContext(firstTenantActor)
+                                                                .build();
+        final CommandContext secondTenantCommand = CommandContext.newBuilder()
+                                                                 .setActorContext(secondTenantActor)
+                                                                 .build();
+        final EventContext firstTenantContext = EventContext.newBuilder()
+                                                           .setCommandContext(firstTenantCommand)
+                                                           .build();
+        final EventContext secondTenantContext = EventContext.newBuilder()
+                                                           .setCommandContext(secondTenantCommand)
+                                                           .build();
+        final Event firstTenantEvent = Event.newBuilder()
+                                            .setContext(firstTenantContext)
+                                            .build();
+        final Event secondTenantEvent = Event.newBuilder()
+                                            .setContext(secondTenantContext)
+                                            .build();
+        final Collection<Event> event = ImmutableSet.of(firstTenantEvent, secondTenantEvent);
+        eventStore.appendAll(event);
     }
 
     /*

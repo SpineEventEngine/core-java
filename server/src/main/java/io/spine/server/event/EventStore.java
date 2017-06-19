@@ -20,8 +20,10 @@
 package io.spine.server.event;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicates;
+import com.google.common.collect.FluentIterable;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
@@ -37,6 +39,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -52,7 +55,9 @@ import static io.spine.base.Events.getTenantId;
 public class EventStore implements AutoCloseable {
 
     private static final String DIFFERENT_TENANT_ERROR_TEMPLATE =
-            "Events belonging to different tenants (%s) and (%s) cannot be stored in a single operation.";
+            "Events, that target different tenants, cannot be stored in a single operation. " +
+                    System.lineSeparator() +
+                    "Observed tenants are: %s";
 
     private final ERepository storage;
     private final Executor streamExecutor;
@@ -77,18 +82,22 @@ public class EventStore implements AutoCloseable {
         return new ServiceBuilder();
     }
 
-    private static void ensureSameTenant(Event first, Iterator<Event> others) {
-        checkNotNull(first);
-        checkNotNull(others);
+    private static void ensureSameTenant(Iterable<Event> events) {
+        checkNotNull(events);
 
-        final TenantId firstTenant = getTenantId(first);
-        while (others.hasNext()) {
-            final Event event = others.next();
-            final TenantId currentTenant = getTenantId(event);
-            checkArgument(currentTenant.equals(firstTenant),
-                          DIFFERENT_TENANT_ERROR_TEMPLATE,
-                          first, currentTenant);
-        }
+        final Set<TenantId> tenants = FluentIterable.from(events)
+                                                    .transform(new Function<Event, TenantId>() {
+                                                        @Override
+                                                        public TenantId apply(
+                                                                @Nullable Event event) {
+                                                            checkNotNull(event);
+                                                            return getTenantId(event);
+                                                        }
+                                                    })
+                                                    .toSet();
+        checkArgument(tenants.size() == 1,
+                      DIFFERENT_TENANT_ERROR_TEMPLATE,
+                      tenants);
     }
 
     /**
@@ -98,7 +107,9 @@ public class EventStore implements AutoCloseable {
      * @param storageFactory the storage factory for creating underlying storage
      * @param logger         debug logger instance
      */
-    private EventStore(Executor streamExecutor, StorageFactory storageFactory, @Nullable Logger logger) {
+    private EventStore(Executor streamExecutor,
+                       StorageFactory storageFactory,
+                       @Nullable Logger logger) {
         super();
         final ERepository eventRepository = new ERepository();
         eventRepository.initStorage(storageFactory);
@@ -153,7 +164,7 @@ public class EventStore implements AutoCloseable {
             @Override
             public void run() {
                 if (isTenantSet()) { // If multitenant context
-                    ensureSameTenant(getEvent(), events.iterator());
+                    ensureSameTenant(events);
                 }
                 store(events);
             }
