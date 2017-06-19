@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.base.Predicate;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
 import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
 
