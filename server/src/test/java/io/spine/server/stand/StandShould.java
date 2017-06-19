@@ -179,7 +179,7 @@ public class StandShould extends TenantAwareTest {
     }
 
     @Test
-    public void initialize_with_direct_DispatcherDelivery_if_none_customized() {
+    public void initialize_with_direct_UpdateDelivery_if_none_customized() {
         final Stand.Builder builder = Stand.newBuilder()
                                            .setMultitenant(isMultitenant());
         final Stand stand = builder.build();
