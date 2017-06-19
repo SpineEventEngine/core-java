@@ -78,28 +78,15 @@ public abstract class DispatcherEventDelivery extends CommandOutputDelivery<Even
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *
-     * @return the pre-configured default executor.
+     * @return the pre-configured direct delivery
      */
     public static DispatcherEventDelivery directDelivery() {
-        return PredefinedDeliveryStrategies.DIRECT_DELIVERY;
-    }
-
-    /** Utility wrapper class for predefined delivery strategies designed to be constants. */
-    private static final class PredefinedDeliveryStrategies {
-
-        /**
-         * A pre-defined instance of the {@code DispatcherEventDelivery},
-         * which does not postpone any event dispatching and uses
-         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
-         * for operation.
-         */
-        private static final DispatcherEventDelivery DIRECT_DELIVERY =
-                new DispatcherEventDelivery() {
-                    @Override
-                    public boolean shouldPostponeDelivery(EventEnvelope envelope,
-                                                          EventDispatcher dispatcher) {
-                        return false;
-                    }
-                };
+        return new DispatcherEventDelivery() {
+            @Override
+            public boolean shouldPostponeDelivery(EventEnvelope envelope,
+                                                  EventDispatcher dispatcher) {
+                return false;
+            }
+        };
     }
 }

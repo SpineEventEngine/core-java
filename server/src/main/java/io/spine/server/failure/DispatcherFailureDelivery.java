@@ -78,28 +78,15 @@ public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<Fa
      * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
      * for operation.
      *
-     * @return the pre-configured default executor.
+     * @return the pre-configured direct delivery
      */
     public static DispatcherFailureDelivery directDelivery() {
-        return PredefinedDeliveryStrategies.DIRECT_DELIVERY;
-    }
-
-    /** Utility wrapper class for predefined delivery strategies designed to be constants. */
-    private static final class PredefinedDeliveryStrategies {
-
-        /**
-         * A pre-defined instance of the {@code DispatcherFailureDelivery},
-         * which does not postpone any failure dispatching and uses
-         * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
-         * for operation.
-         */
-        private static final DispatcherFailureDelivery DIRECT_DELIVERY =
-                new DispatcherFailureDelivery() {
-                    @Override
-                    public boolean shouldPostponeDelivery(FailureEnvelope envelope,
-                                                          FailureDispatcher dispatcher) {
-                        return false;
-                    }
-                };
+        return new DispatcherFailureDelivery() {
+            @Override
+            public boolean shouldPostponeDelivery(FailureEnvelope envelope,
+                                                  FailureDispatcher dispatcher) {
+                return false;
+            }
+        };
     }
 }
