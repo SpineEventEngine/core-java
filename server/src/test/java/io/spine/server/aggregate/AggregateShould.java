@@ -68,7 +68,7 @@ import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.projectStarted;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
-import static io.spine.test.Given.aggregateOfClass;
+import static io.spine.server.entity.given.Given.aggregateOfClass;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Values.newVersionWithNumber;
 import static io.spine.test.Verify.assertSize;

@@ -23,6 +23,7 @@ package io.spine.server.command;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.client.ActorRequestFactory;
@@ -31,7 +32,6 @@ import io.spine.client.TestActorRequestFactory;
 import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.test.TimeTests.adjustTimestamp;
 
 /**
  * An abstract base for testing entities handling commands.
@@ -68,6 +68,23 @@ public abstract class CommandTest<C extends Message> {
      */
     protected CommandTest() {
         this.requestFactory = TestActorRequestFactory.newInstance(getClass());
+    }
+
+    /**
+     * Adjusts a timestamp in the context of the passed command.
+     *
+     * @return new command instance with the modified timestamp
+     */
+    public static Command adjustTimestamp(Command command, Timestamp timestamp) {
+        final CommandContext context = command.getContext();
+        final ActorContext.Builder withTime = context.getActorContext()
+                                                     .toBuilder()
+                                                     .setTimestamp(timestamp);
+        final Command.Builder commandBuilder =
+                command.toBuilder()
+                       .setContext(context.toBuilder()
+                                          .setActorContext(withTime));
+        return commandBuilder.build();
     }
 
     /**

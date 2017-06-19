@@ -27,7 +27,6 @@ import org.junit.Test;
 import static io.spine.test.Values.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -59,15 +58,5 @@ public class ValuesShould {
     @Test
     public void create_new_UUID_based_UserId() {
         assertFalse(Values.newUserUuid().getValue().isEmpty());
-    }
-
-    @Test
-    public void create_archived_visibility() {
-        assertTrue(Values.archived().getArchived());
-    }
-
-    @Test
-    public void create_deleted_visibility() {
-        assertTrue(Values.deleted().getDeleted());
     }
 }

@@ -27,7 +27,7 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandTest;
-import io.spine.test.Given;
+import io.spine.server.entity.given.Given;
 import io.spine.time.ZoneOffsets;
 import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Before;

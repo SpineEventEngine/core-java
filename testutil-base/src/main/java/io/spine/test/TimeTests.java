@@ -23,9 +23,6 @@ package io.spine.test;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.time.Durations2;
 import io.spine.time.Time;
 
@@ -58,23 +55,6 @@ public class TimeTests {
     public static long currentTimeSeconds() {
         final long secs = getCurrentTime().getSeconds();
         return secs;
-    }
-
-    /**
-     * Adjusts a timestamp in the context of the passed command.
-     *
-     * @return new command instance with the modified timestamp
-     */
-    public static Command adjustTimestamp(Command command, Timestamp timestamp) {
-        final CommandContext context = command.getContext();
-        final ActorContext.Builder withTime = context.getActorContext()
-                                                     .toBuilder()
-                                                     .setTimestamp(timestamp);
-        final Command.Builder commandBuilder =
-                command.toBuilder()
-                       .setContext(context.toBuilder()
-                                          .setActorContext(withTime));
-        return commandBuilder.build();
     }
 
     /**

@@ -49,7 +49,7 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.server.aggregate.AggregateCommandDispatcher.dispatch;
 import static io.spine.server.aggregate.AggregatePart.create;
 import static io.spine.server.aggregate.AggregatePart.getConstructor;
-import static io.spine.test.Given.aggregatePartOfClass;
+import static io.spine.server.entity.given.Given.aggregatePartOfClass;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;

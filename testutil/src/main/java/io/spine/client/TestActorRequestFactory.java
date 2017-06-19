@@ -30,7 +30,7 @@ import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.TenantId;
 import io.spine.base.UserId;
-import io.spine.test.TimeTests;
+import io.spine.server.command.CommandTest;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
@@ -85,7 +85,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     /** Creates new command with the passed timestamp. */
     public Command createCommand(Message message, Timestamp timestamp) {
         final Command command = command().create(message);
-        return TimeTests.adjustTimestamp(command, timestamp);
+        return CommandTest.adjustTimestamp(command, timestamp);
     }
 
     public Command createCommand(Message message) {

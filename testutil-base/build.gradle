@@ -18,22 +18,14 @@
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
 dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
+    // Depend on JUnit in the production part of the code, as this module exposes testing utilities
+    // that are based on JUnit.
+    compile group: 'junit', name: 'junit', version: jUnitVersion
 
-    testCompile project(path: ":testutil")
-    testCompile project(path: ":testutil-base")
-}
+    // Depend on Mockito in the production code because this module exposes testing utilities
+    // based on this library.
+    compile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
-apply from: gRpcScript
-
-apply from: generateDescriptorSetScript
-
-apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = generateValidatingBuildersValue
+    // Depend on the client module that contains `Timestamps` and other utility classes.
+    compile project(path: ':base')
 }

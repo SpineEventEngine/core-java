@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import io.spine.test.Given;
+import io.spine.server.entity.given.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 

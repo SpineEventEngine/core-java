@@ -31,7 +31,6 @@ import io.spine.base.EventContext;
 import io.spine.base.Version;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.Wrapper;
-import io.spine.test.Tests;
 
 import javax.annotation.Nullable;
 
@@ -97,7 +96,7 @@ public class TestEventFactory extends EventFactory {
      * Creates an event without version information.
      */
     public Event createEvent(Message messageOrAny) {
-        return createEvent(messageOrAny, Tests.<Version>nullRef());
+        return createEvent(messageOrAny, null);
     }
 
     /**

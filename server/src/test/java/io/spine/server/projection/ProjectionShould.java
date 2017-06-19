@@ -28,7 +28,7 @@ import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.Subscribe;
 import io.spine.protobuf.Wrapper;
-import io.spine.test.Given;
+import io.spine.server.entity.given.Given;
 import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;

@@ -26,7 +26,6 @@ import io.spine.base.UserId;
 import io.spine.base.Version;
 import io.spine.base.Versions;
 import io.spine.protobuf.Wrapper;
-import io.spine.server.entity.LifecycleFlags;
 import io.spine.time.Time;
 
 import java.util.concurrent.ThreadLocalRandom;
@@ -136,21 +135,4 @@ public class Values {
         return randomNum;
     }
 
-    /**
-     * Creates {@code Visibility} with archived flag set to {@code true}.
-     */
-    public static LifecycleFlags archived() {
-        return LifecycleFlags.newBuilder()
-                             .setArchived(true)
-                             .build();
-    }
-
-    /**
-     * Creates {@code Visibility} with deleted flag set to {@code true}.
-     */
-    public static LifecycleFlags deleted() {
-        return LifecycleFlags.newBuilder()
-                             .setDeleted(true)
-                             .build();
-    }
 }

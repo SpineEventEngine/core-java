@@ -24,14 +24,13 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.time.Time;
+import org.junit.Assert;
 import org.junit.Test;
 
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.time.Durations2.fromMinutes;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 
 /**
  * @author Alexander Yevsyukov
@@ -40,9 +39,9 @@ public class TimeTestsShould {
 
     @Test
     public void have_private_utility_ctor() {
-        assertHasPrivateParameterlessCtor(TimeTests.class);
-        assertHasPrivateParameterlessCtor(TimeTests.Future.class);
-        assertHasPrivateParameterlessCtor(TimeTests.Past.class);
+        Tests.assertHasPrivateParameterlessCtor(TimeTests.class);
+        Tests.assertHasPrivateParameterlessCtor(TimeTests.Future.class);
+        Tests.assertHasPrivateParameterlessCtor(TimeTests.Past.class);
     }
 
     @Test
@@ -66,6 +65,6 @@ public class TimeTestsShould {
 
     @Test
     public void return_current_time_in_seconds() {
-        assertNotEquals(0, TimeTests.currentTimeSeconds());
+        Assert.assertNotEquals(0, TimeTests.currentTimeSeconds());
     }
 }
