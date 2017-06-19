@@ -41,6 +41,26 @@ import "spine/base/failure.proto";
 // only upon receiving the `ok` status.
 //
 message Response {
+
+    // The responce status.
+    Status status = 1 [(required) = true];
+}
+
+// The result to a call to a service with a message as a parameter.
+//
+// The respone message brings the ID of the message which has been acknowlaged.
+//
+message MessageAcked {
+
+    // An identifier of the message, acknowledged and successfully received by the bus.
+    google.protobuf.Any message_id = 1 [(required) = true];
+
+    // The responce status.
+    Status status = 2 [(required) = true];
+}
+
+// The responce status.
+message Status {
     oneof status {
         // The request was accepted to execution.
         google.protobuf.Empty ok = 1;
@@ -52,15 +72,4 @@ message Response {
         // It is not possible to satisfy the request because of the business failure.
         Failure failure = 3;
     }
-}
-
-
-// The result to a call to a service with a message as a parameter.
-//
-// The respone message brings the ID of the message which has been acknowlaged.
-//
-message MessageAcked {
-
-    // An identifier of the message, acknowledged and successfully received by the bus.
-    google.protobuf.Any message_id = 1 [(required) = true];
 }
