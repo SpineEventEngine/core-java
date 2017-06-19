@@ -1,10 +1,8 @@
 rootProject.name = 'spine'
 
-include 'base'
 include 'testutil'
 include 'client'
 include 'server'
 include 'server-deployment'
 include 'values'
-include 'time'
 
