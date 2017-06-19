@@ -150,7 +150,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * @param failure the business failure to deliver to the dispatchers.
      * @see #post(Message, StreamObserver)
      */
-    public void post(Failure failure) {
+    public final void post(Failure failure) {
         post(failure, StreamObservers.<MessageAcked>noOpObserver());
     }
 

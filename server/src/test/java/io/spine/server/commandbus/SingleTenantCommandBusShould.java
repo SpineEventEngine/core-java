@@ -21,32 +21,41 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Failure;
+import io.spine.base.FailureThrowable;
 import io.spine.base.MessageAcked;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
+import io.spine.server.failure.FailureSubscriber;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
+import io.spine.test.failure.ProjectFailures;
 import io.spine.test.failure.ProjectId;
 import org.junit.Test;
 
+import java.util.LinkedList;
+import java.util.List;
+
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.io.StreamObservers.MemoizingObserver;
+import static io.spine.io.StreamObservers.memoizingObserver;
+import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.Command.addTask;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Yevsyukov
@@ -109,11 +118,14 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(faultyHandler);
 
         final Command addTaskCommand = clearTenantId(addTask());
-        commandBus.post(addTaskCommand, StreamObservers.<MessageAcked>noOpObserver());
+        final MemoizingObserver<MessageAcked> observer = memoizingObserver();
+        commandBus.post(addTaskCommand, observer);
 
         final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
         final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
-        verify(failureBus).post(eq(expectedFailure));
+        final FailureThrowable actualFailure = (FailureThrowable) observer.getError();
+        assertNotNull(actualFailure);
+        assertEquals(unpack(expectedFailure.getMessage()), actualFailure.getFailureMessage());
     }
 
     @Override
@@ -143,6 +155,21 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         private InvalidProjectName getThrowable() {
             return failure;
+        }
+    }
+
+    private static class FailureCatcher extends FailureSubscriber {
+
+        private final List<Message> dispatched = new LinkedList<>();
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
+        public List<Message> getDispatched() {
+            return dispatched;
+        }
+
+        @Subscribe
+        public void handle(ProjectFailures.InvalidProjectName failure) {
+            dispatched.add(failure);
         }
     }
 }
