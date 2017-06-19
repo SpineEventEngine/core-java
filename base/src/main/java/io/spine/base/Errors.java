@@ -26,6 +26,7 @@ import com.google.common.base.Throwables;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
+import io.spine.grpc.MetadataConverter;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -82,6 +83,8 @@ public final class Errors {
     @SuppressWarnings("ChainOfInstanceofChecks") // Only way to check an exact throwable type.
     public static Optional<Error> fromStreamError(Throwable throwable) {
         checkNotNull(throwable);
+
+        //TODO:2017-06-19:alexander.yevsyukov: Avoid dependency on gRPC here.
         if (throwable instanceof StatusRuntimeException) {
             final Metadata metadata = ((StatusRuntimeException) throwable).getTrailers();
             return MetadataConverter.toError(metadata);

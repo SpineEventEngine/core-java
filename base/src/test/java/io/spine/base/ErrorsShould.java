@@ -24,10 +24,11 @@ import com.google.common.testing.NullPointerTester;
 import io.grpc.Metadata;
 import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
+import io.spine.grpc.MetadataConverter;
+import io.spine.test.Tests;
 import org.junit.Test;
 
 import static io.grpc.Status.INVALID_ARGUMENT;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
@@ -35,7 +36,7 @@ public class ErrorsShould {
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Errors.class);
+        Tests.assertHasPrivateParameterlessCtor(Errors.class);
     }
 
     @Test

@@ -32,6 +32,7 @@ import org.junit.Test;
 
 import java.util.Set;
 
+import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;
 import static io.spine.time.Timestamps2.isLaterThan;

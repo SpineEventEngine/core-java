@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.grpc;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
@@ -26,6 +26,7 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import io.grpc.Metadata;
 import io.grpc.Metadata.Key;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.util.Exceptions;
 
 import static com.google.common.base.Preconditions.checkNotNull;
