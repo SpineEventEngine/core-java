@@ -26,9 +26,11 @@ import io.spine.base.MessageAcked;
 import io.spine.protobuf.AnyPacker;
 
 /**
+ * An abstract {@code MessageEnvelope} or the messages which declare an ID.
+ *
  * @author Dmytro Dashenkov
  */
-public abstract class MessageWithIdEnvelope<I extends Message, T extends Message>
+public abstract class MessageWithIdEnvelope<I extends Message, T>
         extends AbstractMessageEnvelope<T> {
 
     MessageWithIdEnvelope(T object) {

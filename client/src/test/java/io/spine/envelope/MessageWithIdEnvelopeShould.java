@@ -27,6 +27,8 @@ import org.junit.Test;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * An abstract test suite for all the tests of {@link MessageWithIdEnvelope} derived types.
+ *
  * @author Dmytro Dashenkov
  */
 public abstract class MessageWithIdEnvelopeShould<O extends Message,

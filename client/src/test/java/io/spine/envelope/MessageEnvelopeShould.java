@@ -32,6 +32,8 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 /**
+ * An abstract test suite for all the tests of {@link MessageEnvelope} implementations.
+ *
  * @author Dmytro Dashenkov
  */
 public abstract class MessageEnvelopeShould<O extends Message,
