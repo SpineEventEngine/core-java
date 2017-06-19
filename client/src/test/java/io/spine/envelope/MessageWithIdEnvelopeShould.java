@@ -45,6 +45,4 @@ public abstract class MessageWithIdEnvelopeShould<O extends Message,
         final E envelope = toEnvelope(obj);
         assertEquals(getId(obj), envelope.getId());
     }
-
-
 }
