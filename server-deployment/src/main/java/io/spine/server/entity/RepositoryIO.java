@@ -21,8 +21,8 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.base.TenantId;
 import io.spine.server.storage.RecordStorageIO;
-import io.spine.users.TenantId;
 
 /**
  * Beam I/O operations for a {@link RecordBasedRepository}.

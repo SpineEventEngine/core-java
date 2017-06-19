@@ -31,6 +31,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.CommandContext;
 import io.spine.base.Response;
 import io.spine.base.Responses;
+import io.spine.base.TenantId;
 import io.spine.base.Version;
 import io.spine.client.Queries;
 import io.spine.client.Query;
@@ -52,7 +53,6 @@ import io.spine.server.tenant.QueryOperation;
 import io.spine.server.tenant.SubscriptionOperation;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.type.TypeUrl;
-import io.spine.users.TenantId;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

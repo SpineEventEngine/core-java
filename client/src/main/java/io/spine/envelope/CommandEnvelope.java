@@ -25,8 +25,8 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Commands;
+import io.spine.base.TenantId;
 import io.spine.type.CommandClass;
-import io.spine.users.TenantId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

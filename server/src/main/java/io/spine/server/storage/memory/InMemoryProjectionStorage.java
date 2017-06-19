@@ -22,11 +22,11 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
+import io.spine.base.TenantId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;
 import io.spine.server.tenant.TenantFunction;
-import io.spine.users.TenantId;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;

@@ -53,7 +53,7 @@ class CodebaseFilter {
     private final def javaSrcDirs
     private final def outputDirs
 
-    public CodebaseFilter(final Project project, final javaSrcDirs, final outputDirs) {
+    CodebaseFilter(final Project project, final javaSrcDirs, final outputDirs) {
         this.project = project
         this.javaSrcDirs = javaSrcDirs
         this.outputDirs = outputDirs
@@ -71,7 +71,8 @@ class CodebaseFilter {
         }
     }
 
-    private static String parseClassName(final File file, final String sourceFolderMarker, final String extension) {
+    private static String parseClassName(
+            final File file, final String sourceFolderMarker, final String extension) {
 
         final def index = file.absolutePath.lastIndexOf(sourceFolderMarker)
         if (index > 0) {
@@ -89,16 +90,18 @@ class CodebaseFilter {
         }
     }
 
-    @SuppressWarnings("GroovyAssignabilityCheck")  // a workaround for https://youtrack.jetbrains.com/issue/IDEA-141744
+    @SuppressWarnings("GroovyAssignabilityCheck")
+    // a workaround for https://youtrack.jetbrains.com/issue/IDEA-141744
     private LinkedList<String> getGeneratedClassNames() {
-        final def sourceFiles = project.files(javaSrcDirs);
-        final def generatedSourceFiles = generatedOnly(sourceFiles);
+        final def sourceFiles = project.files(javaSrcDirs)
+        final def generatedSourceFiles = generatedOnly(sourceFiles)
 
         final def generatedClassNames = new LinkedList<String>()
         generatedSourceFiles.each { final folder ->
             if (folder.exists() && folder.isDirectory()) {
                 folder.eachFileRecurse(FileType.FILES) { final aFile ->
-                    final def name = parseClassName(aFile, JAVA_SRC_FOLDER_MARKER, JAVA_SOURCE_FILE_EXTENSION)
+                    final
+                    def name = parseClassName(aFile, JAVA_SRC_FOLDER_MARKER, JAVA_SOURCE_FILE_EXTENSION)
                     if (name != null) {
                         generatedClassNames.add(name)
                     } else {
@@ -114,18 +117,19 @@ class CodebaseFilter {
             }
         }
 
-        return generatedClassNames;
+        return generatedClassNames
     }
 
-    @SuppressWarnings("GroovyAssignabilityCheck")  // a workaround for https://youtrack.jetbrains.com/issue/IDEA-141744
-    public List<FileTree> findNonGeneratedCompiledFiles() {
+    @SuppressWarnings("GroovyAssignabilityCheck")
+    // a workaround for https://youtrack.jetbrains.com/issue/IDEA-141744
+    List<FileTree> findNonGeneratedCompiledFiles() {
         println(" - Available source dirs: ")
         final def srcDirs = project.files(javaSrcDirs)
         srcDirs.each {
             println " --- ${it}"
         }
 
-        final def generatedClassNames = getGeneratedClassNames();
+        final def generatedClassNames = getGeneratedClassNames()
         final def nonGeneratedClassTree = outputDirs.collect {
             println("Filtering out the generated classes for ${it.getClassesDir()}")
 

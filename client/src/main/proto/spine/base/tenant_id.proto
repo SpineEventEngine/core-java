@@ -19,32 +19,36 @@
 //
 syntax = "proto3";
 
-package spine.users;
+package spine.base;
 
 option (type_url_prefix) = "type.spine.io";
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
-option java_package = "io.spine.users.grpc";
-
-option java_multiple_files = true;
-option java_outer_classname = "OnlineStatusServiceProto";
 option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "TenantIdProto";
+option java_package = "io.spine.base";
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
-import "spine/users/online_status.proto";
+import "spine/net/internet_domain.proto";
+import "spine/net/email_address.proto";
 
-// The request to obtain online status for one or more users.
-message OnlineStatusRequest {
+// An identifier of a tenant in a multi-tenant application.
+//
+// Commands sent in such application must have non-default value of
+// the `tenant_id` field in `CommandContext`.
+//
+message TenantId {
+    oneof kind {
+        // The tenant has Internet domain name.
+        net.InternetDomain domain = 1;
 
-    // Identifiers of users for whom we need updates on online status.
-    repeated UserId user_id = 1;
+        // The tenant is a person or an organization without a domain name.
+        net.EmailAddress email = 2;
 
-}
+        // reserved 3 to 19;
 
-// The service to obtain online status of a user.
-service OnlineStatusService {
+        // Application-specific value.
+        string value = 20;
+    }
 
-    // The request to obtain online statuses for one or more users.
-    rpc GetMany(OnlineStatusRequest) returns (stream OnlineStatus);
+    reserved 3 to 19;
 }

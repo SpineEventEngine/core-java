@@ -21,6 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Predicates;
+import io.spine.base.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
 import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupportedId;
@@ -30,7 +31,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
 import io.spine.test.entity.ProjectId;
-import io.spine.users.TenantId;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;

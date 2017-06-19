@@ -20,7 +20,7 @@
 
 package io.spine.server.projection;
 
-import io.spine.users.TenantId;
+import io.spine.base.TenantId;
 import org.apache.beam.sdk.PipelineResult;
 import org.apache.beam.sdk.options.PipelineOptions;
 import org.apache.beam.sdk.options.PipelineOptionsFactory;

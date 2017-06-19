@@ -22,10 +22,10 @@ package io.spine.server.projection;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
+import io.spine.base.TenantId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EntityStorageConverter;
 import io.spine.server.entity.RepositoryIO;
-import io.spine.users.TenantId;
 import org.apache.beam.sdk.coders.Coder;
 import org.apache.beam.sdk.coders.KvCoder;
 import org.apache.beam.sdk.transforms.PTransform;

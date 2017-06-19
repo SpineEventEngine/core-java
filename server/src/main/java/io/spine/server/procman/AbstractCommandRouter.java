@@ -183,8 +183,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     /**
-     * Creates a {@code CommandFactory} using the {@linkplain io.spine.users.UserId actor},
-     * {@linkplain io.spine.users.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
+     * Creates a {@code CommandFactory} using the {@linkplain io.spine.base.UserId actor},
+     * {@linkplain io.spine.base.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
      * zone offset} from the given command context.
      */
     private static CommandFactory commandFactory(CommandContext sourceContext) {

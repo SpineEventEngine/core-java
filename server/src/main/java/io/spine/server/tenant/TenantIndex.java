@@ -21,8 +21,8 @@
 package io.spine.server.tenant;
 
 import com.google.common.collect.ImmutableSet;
+import io.spine.base.TenantId;
 import io.spine.server.storage.StorageFactory;
-import io.spine.users.TenantId;
 
 import java.util.Set;
 

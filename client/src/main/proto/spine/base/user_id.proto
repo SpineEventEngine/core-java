@@ -19,41 +19,19 @@
 //
 syntax = "proto3";
 
-package spine.users;
+package spine.base;
 
 option (type_url_prefix) = "type.spine.io";
-
-option java_package = "io.spine.users";
-option java_multiple_files = true;
-option java_outer_classname = "OnlineStatusProto";
 option java_generate_equals_and_hash = true;
-
-import "google/protobuf/timestamp.proto";
+option java_multiple_files = true;
+option java_outer_classname = "UserIdProto";
+option java_package = "io.spine.base";
 
 import "spine/options.proto";
-import "spine/users/user_id.proto";
 
-// Details about online status of a user.
-message OnlineStatus {
-
-    // The id of the user.
-    UserId user_id = 1;
-
-    // This field is `true` is the user is logged in the system at the moment of creation of
-    // this message.
-    bool online = 2;
-
-    // The moment the user logged in into the system last time.
-    //
-    // If the user is currently logged in, this field stores the moment of the user login of
-    // the current session.
-    //
-    google.protobuf.Timestamp when_logged_in = 3;
-
-    // The moment the user logged out from the system last time.
-    //
-    // If the user is currently logged in, this field contains the log-out time of
-    // the previous session.
-    //
-    google.protobuf.Timestamp when_logged_out = 4;
+// A string-based identifier of the user.
+message UserId {
+    // User ID value.
+    string value = 1;
 }
+

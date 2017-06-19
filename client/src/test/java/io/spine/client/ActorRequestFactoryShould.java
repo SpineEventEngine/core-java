@@ -23,11 +23,11 @@ import com.google.common.reflect.TypeToken;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.base.ActorContext;
+import io.spine.base.UserId;
 import io.spine.test.Values;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
-import io.spine.users.UserId;
 import org.junit.Test;
 
 import java.util.Set;
