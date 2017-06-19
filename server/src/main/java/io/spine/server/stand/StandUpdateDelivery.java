@@ -21,6 +21,7 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import io.spine.annotation.SPI;
 import io.spine.server.delivery.Delivery;
@@ -83,13 +84,20 @@ public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope<?
      * @return the pre-configured direct delivery
      */
     public static StandUpdateDelivery directDelivery() {
-        return new StandUpdateDelivery() {
+        return new DirectDelivery();
+    }
 
-            @Override
-            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
-                                                     Stand consumer) {
-                return false;
-            }
-        };
+    /**
+     * A delivery implementation which does not postpone events.
+     *
+     * @see #directDelivery()
+     */
+    @VisibleForTesting
+    static final class DirectDelivery extends StandUpdateDelivery {
+        @Override
+        public boolean shouldPostponeDelivery(EntityStateEnvelope envelope,
+                                              Stand consumer) {
+            return false;
+        }
     }
 }

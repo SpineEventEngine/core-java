@@ -19,6 +19,7 @@
  */
 package io.spine.server.event;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
 import io.spine.base.Event;
 import io.spine.envelope.EventEnvelope;
@@ -81,12 +82,20 @@ public abstract class DispatcherEventDelivery extends CommandOutputDelivery<Even
      * @return the pre-configured direct delivery
      */
     public static DispatcherEventDelivery directDelivery() {
-        return new DispatcherEventDelivery() {
-            @Override
-            public boolean shouldPostponeDelivery(EventEnvelope envelope,
-                                                  EventDispatcher dispatcher) {
-                return false;
-            }
-        };
+        return new DirectDelivery();
+    }
+
+    /**
+     * A delivery implementation which does not postpone events.
+     *
+     * @see #directDelivery()
+     */
+    @VisibleForTesting
+    static final class DirectDelivery extends DispatcherEventDelivery {
+        @Override
+        public boolean shouldPostponeDelivery(EventEnvelope envelope,
+                                              EventDispatcher dispatcher) {
+            return false;
+        }
     }
 }

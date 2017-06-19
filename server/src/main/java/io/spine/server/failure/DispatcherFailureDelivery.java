@@ -19,6 +19,7 @@
  */
 package io.spine.server.failure;
 
+import com.google.common.annotations.VisibleForTesting;
 import io.spine.annotation.SPI;
 import io.spine.base.Failure;
 import io.spine.envelope.FailureEnvelope;
@@ -81,12 +82,20 @@ public abstract class DispatcherFailureDelivery extends CommandOutputDelivery<Fa
      * @return the pre-configured direct delivery
      */
     public static DispatcherFailureDelivery directDelivery() {
-        return new DispatcherFailureDelivery() {
-            @Override
-            public boolean shouldPostponeDelivery(FailureEnvelope envelope,
-                                                  FailureDispatcher dispatcher) {
-                return false;
-            }
-        };
+        return new DirectDelivery();
+    }
+
+    /**
+     * A delivery implementation which does not postpone events.
+     *
+     * @see #directDelivery()
+     */
+    @VisibleForTesting
+    static final class DirectDelivery extends DispatcherFailureDelivery {
+        @Override
+        public boolean shouldPostponeDelivery(FailureEnvelope envelope,
+                                              FailureDispatcher dispatcher) {
+            return false;
+        }
     }
 }
