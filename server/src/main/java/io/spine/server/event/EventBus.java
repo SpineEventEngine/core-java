@@ -182,10 +182,6 @@ public class EventBus extends CommandOutputBus<Event,
      * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
      * require any response observer.
      *
-     * <p>This method should be used if the callee does not care about the event acknowledgement.
-     *
-     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
-     *
      * @param event the event to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
@@ -201,10 +197,6 @@ public class EventBus extends CommandOutputBus<Event,
      * require any response observer.
      *
      * <p>This method should be used if the callee does not care about the events acknowledgement.
-     *
-     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
-     *
-     * <p>This method defines the general posting flow and should not be overridden.
      *
      * @param events the events to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
