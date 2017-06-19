@@ -34,7 +34,7 @@ dependencies {
 
     testCompile project(path: ":base", configuration: 'testArtifacts')
     testCompile project(path: ":server", configuration: 'testArtifacts')
-    testCompile project(path: ":testutil")
+    testCompile project(path: ":testutil-server")
 }
 
 apply from: gRpcScript

@@ -22,8 +22,8 @@ dependencies {
     compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
     compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
 
-    testCompile project(path: ":testutil")
     testCompile project(path: ":testutil-base")
+    testCompile project(path: ":testutil-server")
 }
 
 apply from: gRpcScript
