@@ -209,7 +209,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @param events the events to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
-    public void post(Iterable<Event> events) {
+    public final void post(Iterable<Event> events) {
         post(events, StreamObservers.<MessageAcked>noOpObserver());
     }
 

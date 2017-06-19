@@ -21,39 +21,40 @@
 package io.spine.server.commandbus;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Event;
 import io.spine.base.Events;
 import io.spine.envelope.CommandEnvelope;
+import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.command.CommandHistory;
 import io.spine.server.event.EventBus;
+import io.spine.server.event.EventDispatcher;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.StartProject;
 import io.spine.test.command.event.ProjectCreated;
 import io.spine.test.command.event.ProjectStarted;
 import io.spine.test.command.event.TaskAdded;
+import io.spine.type.EventClass;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.ArgumentCaptor;
 
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
-import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.base.Identifier.newUuid;
 import static io.spine.test.Tests.nullRef;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
 
 /**
  * @author Alexander Litus
@@ -70,7 +71,7 @@ public class CommandHandlerShould {
                                                             .setMultitenant(true)
                                                             .build();
         commandBus = boundedContext.getCommandBus();
-        eventBus = spy(boundedContext.getEventBus());
+        eventBus = boundedContext.getEventBus();
         handler = new TestCommandHandler();
 
         commandBus.register(handler);
@@ -98,13 +99,16 @@ public class CommandHandlerShould {
     public void post_generated_events_to_event_bus() {
         final Command cmd = Given.Command.startProject();
 
+        final EventCatcher eventCatcher = new EventCatcher();
+        eventBus.register(eventCatcher);
+
         handler.handle(cmd);
 
         final ImmutableList<Message> expectedMessages = handler.getEventsOnStartProjectCmd();
-        final List<Event> actualEvents = verifyPostedEvents(expectedMessages.size());
+        final List<EventEnvelope> actualEvents = eventCatcher.getDispatched();
         for (int i = 0; i < expectedMessages.size(); i++) {
             final Message expected = expectedMessages.get(i);
-            final Message actual = Events.getMessage(actualEvents.get(i));
+            final Message actual = Events.getMessage(actualEvents.get(i).getOuterObject());
             assertEquals(expected, actual);
         }
     }
@@ -143,16 +147,6 @@ public class CommandHandlerShould {
     @Test
     public void assure_handler_is_not_equal_to_object_of_another_class() {
         assertFalse(handler.equals(newUuid()));
-    }
-
-    private List<Event> verifyPostedEvents(int expectedEventCount) {
-        @SuppressWarnings("unchecked") // Can't create a Captor for a generic type
-        final ArgumentCaptor<Iterable<Event>> eventCaptor = ArgumentCaptor.forClass(Iterable.class);
-        verify(eventBus).post(eventCaptor.capture());
-        final Iterable<Event> events = eventCaptor.getValue();
-        final List<Event> eventsList = newArrayList(events);
-        assertEquals(expectedEventCount, eventsList.size());
-        return eventsList;
     }
 
     private void assertHandles(Command cmd) {
@@ -207,6 +201,27 @@ public class CommandHandlerShould {
             final ImmutableList.Builder<Message> builder = ImmutableList.builder();
             builder.add(ProjectStarted.getDefaultInstance(), StringValue.getDefaultInstance());
             return builder.build();
+        }
+    }
+
+    private static class EventCatcher implements EventDispatcher {
+
+        private final List<EventEnvelope> dispatched = new LinkedList<>();
+
+        @Override
+        public Set<EventClass> getMessageClasses() {
+            return ImmutableSet.of(EventClass.of(ProjectStarted.class),
+                                   EventClass.of(StringValue.class));
+        }
+
+        @Override
+        public void dispatch(EventEnvelope envelope) {
+            dispatched.add(envelope);
+        }
+
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
+        public List<EventEnvelope> getDispatched() {
+            return dispatched;
         }
     }
 }
