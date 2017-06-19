@@ -20,6 +20,8 @@
 
 package io.spine.base.given;
 
+import com.google.protobuf.Message;
+import io.spine.base.Enrichment;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.EventsShould;
@@ -35,27 +37,43 @@ import static io.spine.test.Values.newUuidValue;
 /**
  * @author Alexander Yevsyukov
  */
-public class Given {
+public class GivenEvent {
 
     public static final TestEventFactory eventFactory =
             TestEventFactory.newInstance(Wrapper.forString()
-                                                .pack(Given.class.getSimpleName()),
+                                                .pack(GivenEvent.class.getSimpleName()),
                                          EventsShould.class);
 
-    private Given() {
+    private GivenEvent() {
         // Prevent instantiation of this utility class.
     }
 
-    public static EventContext newEventContext() {
+    public static EventContext context() {
         final Event event = eventFactory.createEvent(Time.getCurrentTime(),
                                                      Tests.<Version>nullRef());
         return event.getContext();
     }
 
-    public static Event eventOccurredMinutesAgo(int minutesAgo) {
+    public static Event occurredMinutesAgo(int minutesAgo) {
         final Event result = eventFactory.createEvent(newUuidValue(),
                                                       null,
                                                       minutesAgo(minutesAgo));
         return result;
+    }
+
+    public static Event withMessage(Message message) {
+        final Event event = eventFactory.createEvent(message);
+        return event;
+    }
+
+    public static Event withDisabledEnrichmentOf(Message message) {
+        final Event event = withMessage(message);
+        final Event.Builder builder =
+                event.toBuilder()
+                     .setContext(event.getContext()
+                                      .toBuilder()
+                                      .setEnrichment(Enrichment.newBuilder()
+                                                               .setDoNotEnrich(true)));
+        return builder.build();
     }
 }

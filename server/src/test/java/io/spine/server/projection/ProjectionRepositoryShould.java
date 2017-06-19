@@ -34,6 +34,7 @@ import io.spine.base.Subscribe;
 import io.spine.base.TenantId;
 import io.spine.base.Version;
 import io.spine.base.Versions;
+import io.spine.base.given.GivenEvent;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
@@ -45,7 +46,6 @@ import io.spine.server.projection.given.ProjectionRepositoryTestEnv.NoOpTaskName
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjection;
 import io.spine.server.projection.given.ProjectionRepositoryTestEnv.TestProjectionRepository;
 import io.spine.server.storage.RecordStorage;
-import io.spine.test.EventTests;
 import io.spine.test.Given;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -234,7 +234,7 @@ public class ProjectionRepositoryShould
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
 
-        final Event event = EventTests.createContextlessEvent(unknownEventMessage);
+        final Event event = GivenEvent.withMessage(unknownEventMessage);
 
         repository().dispatch(EventEnvelope.of(event));
     }

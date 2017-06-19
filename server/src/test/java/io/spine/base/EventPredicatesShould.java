@@ -23,7 +23,7 @@ package io.spine.base;
 import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import io.spine.base.given.Given;
+import io.spine.base.given.GivenEvent;
 import org.junit.Test;
 
 import static io.spine.base.EventPredicates.isAfter;
@@ -68,8 +68,8 @@ public class EventPredicatesShould {
     @Test
     public void verify_if_an_event_is_after_another() {
         final Predicate<Event> predicate = isAfter(minutesAgo(100));
-        assertTrue(predicate.apply(Given.eventOccurredMinutesAgo(20)));
-        assertFalse(predicate.apply(Given.eventOccurredMinutesAgo(360)));
+        assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
+        assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
     }
 
     @Test
@@ -84,8 +84,8 @@ public class EventPredicatesShould {
     @Test
     public void verify_if_an_event_is_before_another() {
         final Predicate<Event> predicate = isBefore(minutesAgo(100));
-        assertFalse(predicate.apply(Given.eventOccurredMinutesAgo(20)));
-        assertTrue(predicate.apply(Given.eventOccurredMinutesAgo(360)));
+        assertFalse(predicate.apply(GivenEvent.occurredMinutesAgo(20)));
+        assertTrue(predicate.apply(GivenEvent.occurredMinutesAgo(360)));
     }
 
     @Test
@@ -106,7 +106,7 @@ public class EventPredicatesShould {
 
     @Test
     public void verify_if_an_event_is_within_time_range() {
-        final Event event = Given.eventOccurredMinutesAgo(5);
+        final Event event = GivenEvent.occurredMinutesAgo(5);
 
         assertTrue(isBetween(minutesAgo(10), minutesAgo(1))
                            .apply(event));

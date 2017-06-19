@@ -25,13 +25,12 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.given.Given;
+import io.spine.base.given.GivenEvent;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.EventFactory;
 import io.spine.string.Stringifiers;
-import io.spine.test.EventTests;
 import io.spine.test.Tests;
 import io.spine.time.Time;
 import io.spine.type.TypeName;
@@ -80,10 +79,6 @@ public class EventsShould {
     @SuppressWarnings("MagicNumber")
     private final DoubleValue doubleValue = Wrapper.forDouble(10.1);
 
-    private Event createEventWithContext(Message eventMessage) {
-        return EventTests.createEvent(eventMessage, context);
-    }
-
     @Before
     public void setUp() {
         final TestActorRequestFactory requestFactory =
@@ -114,9 +109,9 @@ public class EventsShould {
 
     @Test
     public void sort_events_by_time() {
-        final Event event1 = Given.eventOccurredMinutesAgo(30);
-        final Event event2 = Given.eventOccurredMinutesAgo(20);
-        final Event event3 = Given.eventOccurredMinutesAgo(10);
+        final Event event1 = GivenEvent.occurredMinutesAgo(30);
+        final Event event2 = GivenEvent.occurredMinutesAgo(20);
+        final Event event3 = GivenEvent.occurredMinutesAgo(10);
         final List<Event> sortedEvents = newArrayList(event1, event2, event3);
         final List<Event> eventsToSort = newArrayList(event2, event1, event3);
 
@@ -127,8 +122,8 @@ public class EventsShould {
 
     @Test
     public void have_event_comparator() {
-        final Event event1 = Given.eventOccurredMinutesAgo(120);
-        final Event event2 = Given.eventOccurredMinutesAgo(2);
+        final Event event1 = GivenEvent.occurredMinutesAgo(120);
+        final Event event2 = GivenEvent.occurredMinutesAgo(2);
 
         final Comparator<Event> comparator = Events.eventComparator();
         assertTrue(comparator.compare(event1, event2) < 0);
@@ -144,16 +139,16 @@ public class EventsShould {
     }
 
     private static void createEventAndAssertReturnedMessageFor(Message msg) {
-        final Event event = EventTests.createContextlessEvent(msg);
+        final Event event = GivenEvent.withMessage(msg);
 
         assertEquals(msg, getMessage(event));
     }
 
     @Test
     public void get_timestamp_from_event() {
-        final Event event = createEventWithContext(stringValue);
+        final Event event = GivenEvent.occurredMinutesAgo(1);
 
-        assertEquals(context.getTimestamp(), getTimestamp(event));
+        assertEquals(event.getContext().getTimestamp(), getTimestamp(event));
     }
 
     @Test
@@ -170,7 +165,7 @@ public class EventsShould {
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()
                 .setDefault(StringValue.class, StringValue.getDefaultInstance())
-                .setDefault(EventContext.class, Given.newEventContext())
+                .setDefault(EventContext.class, GivenEvent.context())
                 .testAllPublicStaticMethods(Events.class);
     }
 

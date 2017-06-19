@@ -218,7 +218,7 @@ subprojects {
     test {
         testLogging {
             // Make sure output from standard out or error is shown in Gradle output.
-            showStandardStreams = true
+            showStandardStreams = false
 
             // Or we use events method:
             // events 'standard_out', 'standard_error'

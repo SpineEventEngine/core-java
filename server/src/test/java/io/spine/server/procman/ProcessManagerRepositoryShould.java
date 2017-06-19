@@ -28,21 +28,19 @@ import io.spine.base.Command;
 import io.spine.base.CommandClass;
 import io.spine.base.Event;
 import io.spine.base.EventClass;
-import io.spine.base.EventContext;
 import io.spine.base.Subscribe;
 import io.spine.base.TenantId;
+import io.spine.base.given.GivenEvent;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
-import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.event.EventSubscriber;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManager;
 import io.spine.server.procman.given.ProcessManagerRepositoryTestEnv.TestProcessManagerRepository;
-import io.spine.test.EventTests;
 import io.spine.test.Given;
 import io.spine.test.procman.Project;
 import io.spine.test.procman.ProjectId;
@@ -79,18 +77,6 @@ public class ProcessManagerRepositoryShould
     private static final ProjectId ID = Sample.messageOfType(ProjectId.class);
 
     private BoundedContext boundedContext;
-
-    /**
-     * Creates an instance of {@link Event} for the passed message.
-     *
-     * <p>Under normal circumstances an event is produced via {@link EventFactory}.
-     * Processing of events in a {@link ProcessManagerRepository} is based on event messages
-     * and does not need a properly configured {@link EventContext}. That's why this factory method
-     * is sufficient for the purpose of this test suite.
-     */
-    private static Event createEvent(Message eventMessage) {
-        return EventTests.createContextlessEvent(eventMessage);
-    }
 
     private static CreateProject createProject() {
         return ((CreateProject.Builder) Sample.builderForType(CreateProject.class))
@@ -206,7 +192,7 @@ public class ProcessManagerRepositoryShould
     }
 
     private void testDispatchEvent(Message eventMessage) {
-        final Event event = createEvent(eventMessage);
+        final Event event = GivenEvent.withMessage(eventMessage);
         repository().dispatch(EventEnvelope.of(event));
         assertTrue(TestProcessManager.processed(eventMessage));
     }
@@ -272,7 +258,7 @@ public class ProcessManagerRepositoryShould
     @Test(expected = IllegalArgumentException.class)
     public void throw_exception_if_dispatch_unknown_event() {
         final StringValue unknownEventMessage = StringValue.getDefaultInstance();
-        final Event event = createEvent(unknownEventMessage);
+        final Event event = GivenEvent.withMessage(unknownEventMessage);
         repository().dispatch(EventEnvelope.of(event));
     }
 
