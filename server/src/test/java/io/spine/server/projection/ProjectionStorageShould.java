@@ -25,6 +25,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.storage.RecordStorageShould;
 import io.spine.test.Tests;
@@ -75,7 +76,7 @@ public abstract class ProjectionStorageShould<I>
 
     @Before
     public void setUpProjectionStorageTest() {
-        storage = getStorage();
+        storage = getStorage(Entity.class);
     }
 
     @After
