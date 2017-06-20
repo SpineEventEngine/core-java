@@ -35,6 +35,10 @@ import static io.spine.Identifier.newUuid;
 import static org.junit.Assert.assertEquals;
 
 /**
+ * Test of {@link FailureEnvelope}.
+ *
+ * <p>This test suite is placed under the {@code server} to ease the inter-module dependencies.
+ *
  * @author Alex Tymchenko
  */
 public class FailureEnvelopeShould {

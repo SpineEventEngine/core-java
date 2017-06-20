@@ -20,3 +20,15 @@
 dependencies {
     compile project(path: ':core')
 }
+
+apply from: gRpcScript
+
+apply from: generateDescriptorSetScript
+
+apply from: testArtifactsScript
+
+apply plugin: spineProtobufPluginId
+
+modelCompiler {
+    generateValidatingBuilders = generateValidatingBuildersValue
+}
