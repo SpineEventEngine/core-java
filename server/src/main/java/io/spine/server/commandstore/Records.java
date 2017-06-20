@@ -26,6 +26,7 @@ import io.spine.Identifier;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
+import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 
@@ -34,7 +35,6 @@ import java.util.Iterator;
 
 import static io.spine.Identifier.EMPTY_ID;
 import static io.spine.base.Commands.generateId;
-import static io.spine.base.Commands.typeNameOf;
 import static io.spine.time.Time.getCurrentTime;
 
 /**
@@ -66,11 +66,11 @@ class Records {
      * <p>{@code targetId} and {@code targetIdType} are set to empty strings if
      * the command is not for an entity.
      *
-     * @param command            a command to convert to a record. This includes instances of faulty commands.
-     *                           An example of such a fault is missing command ID.
+     * @param command            a command to convert to a record. This includes instances of faulty
+     *                           commands. An example of such a fault is missing command ID.
      * @param status             a command status to set in the record
-     * @param generatedCommandId a command ID to be used because the passed command does not have own ID.
-     *                           If the command has own ID, this parameter is {@code null}.
+     * @param generatedCommandId a command ID to be used because the passed command does not have
+     *                           own ID. If the command has own ID, this parameter is {@code null}.
      * @return a storage record
      */
     static CommandRecord.Builder newRecordBuilder(Command command,
@@ -80,7 +80,9 @@ class Records {
                 ? generatedCommandId
                 : command.getId();
 
-        final String commandType = typeNameOf(command).getSimpleName();
+        final String commandType = CommandEnvelope.of(command)
+                                                  .getTypeName()
+                                                  .getSimpleName();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

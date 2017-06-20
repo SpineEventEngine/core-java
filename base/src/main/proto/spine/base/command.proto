@@ -143,6 +143,9 @@ enum CommandValidationError {
     // The command context has non-default value of `tenant_id` in the command sent
     // to a single-tenant application.
     TENANT_INAPPLICABLE = 4;
+
+    // The scheduled command was not delivered to the target in time.
+    EXPIRED = 5;
 }
 
 // This enumeration defines possible statuses of command processing.

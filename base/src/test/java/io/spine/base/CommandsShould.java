@@ -33,6 +33,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.test.Values;
@@ -239,7 +240,8 @@ public class CommandsShould {
     public void obtain_type_of_command() {
         final Command command = requestFactory.command().create(newUuidValue());
 
-        final TypeName typeName = Commands.typeNameOf(command);
+        final TypeName typeName = CommandEnvelope.of(command)
+                                                 .getTypeName();
         assertNotNull(typeName);
         assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
     }

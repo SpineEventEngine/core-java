@@ -27,6 +27,7 @@ import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.Commands;
 import io.spine.base.TenantId;
+import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -105,5 +106,12 @@ public final class CommandEnvelope extends AbstractMessageEnvelope<Command> {
      */
     public CommandContext getCommandContext() {
         return getOuterObject().getContext();
+    }
+
+    /**
+     * Obtains {@link TypeName} of the command message.
+     */
+    public TypeName getTypeName() {
+        return TypeName.of(commandMessage);
     }
 }

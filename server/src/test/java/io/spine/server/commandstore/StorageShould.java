@@ -35,6 +35,7 @@ import io.spine.base.FailureContext;
 import io.spine.base.FailureId;
 import io.spine.base.Failures;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.commandbus.ProcessingStatus;
@@ -55,7 +56,6 @@ import static io.spine.base.CommandStatus.OK;
 import static io.spine.base.CommandStatus.RECEIVED;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.Commands.generateId;
-import static io.spine.base.Commands.typeNameOf;
 import static io.spine.protobuf.Wrappers.pack;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
@@ -99,7 +99,9 @@ public class StorageShould extends TenantAwareTest {
 
     private static CommandRecord newStorageRecord() {
         final Command command = Given.Command.createProject();
-        final String commandType = typeNameOf(command).value();
+        final String commandType = CommandEnvelope.of(command)
+                                                  .getTypeName()
+                                                  .value();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

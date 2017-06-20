@@ -226,7 +226,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
             // Check that the logging was called.
             verify(log).errorExpiredCommand(msg, id);
 
-            final Error expected = CommandExpiredException.commandExpiredError(msg);
+            final Error expected = CommandExpiredException.commandExpired(cmd);
             assertEquals(expected, status.getError());
         }
     }

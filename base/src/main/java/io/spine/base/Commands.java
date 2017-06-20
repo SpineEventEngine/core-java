@@ -32,7 +32,6 @@ import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
-import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
@@ -237,14 +236,6 @@ public final class Commands {
         final String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
-    }
-
-    /**
-     * Obtains type name from the message of the passed command.
-     */
-    public static TypeName typeNameOf(Command command) {
-        checkNotNull(command);
-        return TypeName.from(typeUrlOf(command));
     }
 
     /**
