@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
@@ -69,7 +68,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -222,7 +220,7 @@ public abstract class AbstractCommandBusTestSuite {
         assertContainsAll(storingArgs, first, second);
 
         final ArgumentCaptor<CommandEnvelope> postingCaptor = forClass(CommandEnvelope.class);
-        verify(spy, times(2)).doPost(postingCaptor.capture(), any(StreamObserver.class));
+        verify(spy, times(2)).doPost(postingCaptor.capture());
         final List<CommandEnvelope> postingArgs = postingCaptor.getAllValues();
         assertSize(commands.size(), postingArgs);
         assertEquals(commands.get(0), postingArgs.get(0).getCommand());

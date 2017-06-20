@@ -33,7 +33,6 @@ import io.spine.base.Identifier;
 import io.spine.base.MessageAcked;
 import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
@@ -182,22 +181,26 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected void doPost(CommandEnvelope envelope, StreamObserver<MessageAcked> failureObserver) {
+    protected MessageAcked doPost(CommandEnvelope envelope) {
         final CommandDispatcher dispatcher = getDispatcher(envelope);
+        MessageAcked result;
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
+            result = envelope.acknowledge();
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
+
             final Error error = Exceptions.toError(cause);
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            failureObserver.onNext(envelope.acknowledge(status));
+            result = envelope.acknowledge(status);
 
             emitFailure(envelope, cause);
         }
+        return result;
     }
 
     /**
@@ -232,7 +235,7 @@ public class CommandBus extends Bus<Command,
      */
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        doPost(commandEnvelope, StreamObservers.<MessageAcked>noOpObserver());
+        doPost(commandEnvelope);
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {

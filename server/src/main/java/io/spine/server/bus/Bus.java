@@ -174,7 +174,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract void doPost(E envelope, StreamObserver<MessageAcked> failureObserver);
+    protected abstract MessageAcked doPost(E envelope);
 
     /**
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
@@ -187,16 +187,10 @@ public abstract class Bus<T extends Message,
         final ErrorPossessedObserver ackingSupervisor =
                 new ErrorPossessedObserver(acknowledgement);
         for (E message : envelopes) {
-            doPost(message, ackingSupervisor);
-            if (ackingSupervisor.hasError()) {
-                return;
-            }
-            // TODO:2017-06-19:dmytro.dashenkov: Check if has already been acked.
-            ackingSupervisor.onNext(message.acknowledge());
+            final MessageAcked result = doPost(message);
+            ackingSupervisor.onNext(result);
         }
-        if (!ackingSupervisor.hasError()) {
-            ackingSupervisor.onCompleted();
-        }
+        ackingSupervisor.onCompleted();
     }
 
     /**
