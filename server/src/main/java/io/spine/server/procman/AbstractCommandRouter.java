@@ -28,7 +28,9 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.CommandId;
 import io.spine.base.IsSent;
+import io.spine.base.Status;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -39,6 +41,8 @@ import java.util.Queue;
 import java.util.concurrent.ExecutionException;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * Abstract base for command routers.
@@ -137,7 +141,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         commandBus.post(command, observer);
         // Wait till the call is completed.
         try {
-            finishFuture.get();
+            final IsSent isSent = finishFuture.get();
+            checkSent(command, isSent);
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
@@ -201,5 +206,18 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     private static Command asCommand(Message message, CommandContext context) {
         final Command command = commandFactory(context).createWithContext(message, context);
         return command;
+    }
+
+    private static void checkSent(Command command, IsSent isSent) {
+        final Status status = isSent.getStatus();
+        final CommandId routedCommandId = unpack(isSent.getMessageId());
+        final CommandId commandId = command.getId();
+        checkState(commandId.equals(routedCommandId),
+                   "Unexpected command posted. Intending (%s) but was (%s).",
+                   commandId,
+                   routedCommandId);
+        checkState(status.getStatusCase() == Status.StatusCase.OK,
+                   "Command posting failed with status: %s.",
+                   status);
     }
 }

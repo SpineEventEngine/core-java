@@ -21,28 +21,22 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.CommandValidationError;
 import io.spine.base.Failure;
-import io.spine.base.FailureThrowable;
 import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.server.failure.FailureSubscriber;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
-import io.spine.test.failure.ProjectFailures;
 import io.spine.test.failure.ProjectId;
 import org.junit.Test;
-
-import java.util.LinkedList;
-import java.util.List;
 
 import static io.spine.base.CommandValidationError.INVALID_COMMAND;
 import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
@@ -52,9 +46,9 @@ import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.Command.addTask;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -86,11 +80,11 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(cmd, observer);
 
-        checkCommandError(observer.getError(),
+        checkCommandError(observer.firstResponse(),
                           INVALID_COMMAND,
+                          CommandValidationError.getDescriptor().getFullName(),
                           InvalidCommandException.class,
                           cmd);
-        assertTrue(observer.responses().isEmpty());
     }
 
     @Test
@@ -100,11 +94,10 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(cmd, observer);
 
-        checkCommandError(observer.getError(),
+        checkCommandError(observer.firstResponse(),
                           TENANT_INAPPLICABLE,
                           InvalidCommandException.class,
                           cmd);
-        assertTrue(observer.responses().isEmpty());
     }
 
     @Test
@@ -123,9 +116,10 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
         final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
-        final FailureThrowable actualFailure = (FailureThrowable) observer.getError();
-        assertNotNull(actualFailure);
-        assertEquals(unpack(expectedFailure.getMessage()), actualFailure.getFailureMessage());
+        final IsSent isSent = observer.firstResponse();
+        final Failure actualFailure = isSent.getStatus().getFailure();
+        assertTrue(isNotDefault(actualFailure));
+        assertEquals(unpack(expectedFailure.getMessage()), unpack(actualFailure.getMessage()));
     }
 
     @Override
@@ -155,21 +149,6 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         private InvalidProjectName getThrowable() {
             return failure;
-        }
-    }
-
-    private static class FailureCatcher extends FailureSubscriber {
-
-        private final List<Message> dispatched = new LinkedList<>();
-
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for tests.
-        public List<Message> getDispatched() {
-            return dispatched;
-        }
-
-        @Subscribe
-        public void handle(ProjectFailures.InvalidProjectName failure) {
-            dispatched.add(failure);
         }
     }
 }

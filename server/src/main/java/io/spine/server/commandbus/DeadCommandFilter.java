@@ -29,6 +29,7 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.server.bus.Mailing.checkIn;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
@@ -58,8 +59,9 @@ class DeadCommandFilter implements CommandBusFilter {
             final Command command = envelope.getCommand();
             final CommandException unsupported = new UnsupportedCommandException(command);
             commandBus.commandStore().storeWithError(command, unsupported);
-            final Error error = toError(invalidArgumentWithCause(unsupported,
-                                                                 unsupported.getError()));
+            final Throwable throwable = invalidArgumentWithCause(unsupported,
+                                                                 unsupported.getError());
+            final Error error = toError(throwable, UNSUPPORTED_COMMAND.getNumber());
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();

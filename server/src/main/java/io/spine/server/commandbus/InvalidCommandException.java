@@ -95,7 +95,7 @@ public class InvalidCommandException extends CommandException {
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setType(InvalidCommandException.class.getCanonicalName())
                 .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
                 .setMessage(errorText)
                 .putAllAttributes(commandTypeAttribute(commandMessage));
@@ -119,8 +119,7 @@ public class InvalidCommandException extends CommandException {
     private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
         final Error.Builder error =
                 Error.newBuilder()
-                     .setType(CommandValidationError.getDescriptor()
-                                                    .getFullName())
+                     .setType(InvalidCommandException.class.getCanonicalName())
                      .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
                      .setMessage(errMsg)
                      .putAllAttributes(commandTypeAttribute(commandMessage));

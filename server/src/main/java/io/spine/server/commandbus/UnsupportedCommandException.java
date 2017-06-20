@@ -64,7 +64,7 @@ public class UnsupportedCommandException extends CommandException {
         final String commandType = commandMessage.getDescriptorForType().getFullName();
         final String errMsg = format("Commands of the type `%s` are not supported.", commandType);
         final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setType(UnsupportedCommandException.class.getCanonicalName())
                 .setCode(CommandValidationError.UNSUPPORTED_COMMAND.getNumber())
                 .putAllAttributes(commandTypeAttribute(commandMessage))
                 .setMessage(errMsg);

@@ -33,6 +33,8 @@ import io.spine.validate.ConstraintViolation;
 import java.util.List;
 
 import static com.google.common.base.Optional.of;
+import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
 import static io.spine.server.bus.Mailing.checkIn;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
@@ -91,11 +93,8 @@ class ValidationFilter implements CommandBusFilter {
                     InvalidCommandException.onConstraintViolations(command, violations);
             commandBus.commandStore()
                       .storeWithError(command, invalidCommand);
-            final Throwable exception = invalidArgumentWithCause(invalidCommand,
-                                                                 invalidCommand.getError());
-            final Error error = toError(exception);
             final Status status = Status.newBuilder()
-                                        .setError(error)
+                                        .setError(invalidCommand.getError())
                                         .build();
             final Optional<IsSent> result = of(checkIn(envelope, status));
             return result;
@@ -115,7 +114,7 @@ class ValidationFilter implements CommandBusFilter {
         commandBus.commandStore().storeWithError(command, noTenantDefined);
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(noTenantDefined, noTenantDefined.getError());
-        final Error error = toError(exception);
+        final Error error = toError(exception, TENANT_UNKNOWN.getNumber());
         final Status status = Status.newBuilder()
                                     .setError(error)
                                     .build();
@@ -129,7 +128,7 @@ class ValidationFilter implements CommandBusFilter {
                   .storeWithError(command, tenantIdInapplicable);
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(tenantIdInapplicable, tenantIdInapplicable.getError());
-        final Error error = toError(exception);
+        final Error error = toError(exception, TENANT_INAPPLICABLE.getNumber());
         final Status status = Status.newBuilder()
                                     .setError(error)
                                     .build();

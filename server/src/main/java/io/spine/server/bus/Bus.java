@@ -88,14 +88,14 @@ public abstract class Bus<T extends Message,
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
      * @param message         the message to post
-     * @param acknowledgement the observer to receive outcome of the operation
+     * @param observer the observer to receive outcome of the operation
      */
-    public final void post(T message, StreamObserver<IsSent> acknowledgement) {
+    public final void post(T message, StreamObserver<IsSent> observer) {
         checkNotNull(message);
-        checkNotNull(acknowledgement);
+        checkNotNull(observer);
         checkArgument(isNotDefault(message));
 
-        post(singleton(message), acknowledgement);
+        post(singleton(message), observer);
     }
 
     /**
@@ -104,18 +104,19 @@ public abstract class Bus<T extends Message,
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
      * @param messages        the message to post
-     * @param acknowledgement the observer to receive outcome of the operation
+     * @param observer the observer to receive outcome of the operation
      */
-    public final void post(Iterable<T> messages, StreamObserver<IsSent> acknowledgement) {
+    public final void post(Iterable<T> messages, StreamObserver<IsSent> observer) {
         checkNotNull(messages);
-        checkNotNull(acknowledgement);
+        checkNotNull(observer);
 
-        final Iterable<T> filteredMessages = filter(messages, acknowledgement);
+        final Iterable<T> filteredMessages = filter(messages, observer);
         if (!isEmpty(filteredMessages)) {
             store(messages);
             final Iterable<E> envelopes = transform(filteredMessages, toEnvelope());
-            doPost(envelopes, acknowledgement);
+            doPost(envelopes, observer);
         }
+        observer.onCompleted();
     }
 
     /**
@@ -203,7 +204,6 @@ public abstract class Bus<T extends Message,
             final IsSent result = doPost(message);
             observer.onNext(result);
         }
-        observer.onCompleted();
     }
 
     /**

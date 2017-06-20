@@ -27,6 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
 import io.spine.base.Error;
+import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
 import io.spine.base.IsSent;
@@ -187,13 +188,21 @@ public class CommandBus extends Bus<Command,
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
 
-            final Error error = Exceptions.toError(cause);
-            final Status status = Status.newBuilder()
-                                        .setError(error)
-                                        .build();
+            final Status status;
+            if (cause instanceof FailureThrowable) {
+                final FailureThrowable failureThrowable = (FailureThrowable) cause;
+                final Failure failure = failureThrowable.toFailure(envelope.getCommand());
+                status = Status.newBuilder()
+                               .setFailure(failure)
+                               .build();
+                failureBus().post(failure);
+            } else {
+                final Error error = Exceptions.toError(cause);
+                status = Status.newBuilder()
+                               .setError(error)
+                               .build();
+            }
             result = checkIn(envelope, status);
-
-            emitFailure(envelope, cause);
         }
         return result;
     }
@@ -246,17 +255,6 @@ public class CommandBus extends Bus<Command,
     protected void store(Iterable<Command> commands) {
         for (Command command : commands) {
             commandStore().store(command);
-        }
-    }
-
-    /**
-     * Emits the {@code Failure} and posts it to the {@code FailureBus},
-     * if the given {@code cause} is in fact a {@code FailureThrowable} instance.
-     */
-    private void emitFailure(CommandEnvelope commandEnvelope, Throwable cause) {
-        if (cause instanceof FailureThrowable) {
-            final FailureThrowable failure = (FailureThrowable) cause;
-            failureBus.post(failure.toFailure(commandEnvelope.getCommand()));
         }
     }
 

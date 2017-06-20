@@ -20,6 +20,7 @@
 
 package io.spine.util;
 
+import io.spine.annotation.Internal;
 import io.spine.base.Error;
 
 import java.util.Locale;
@@ -192,11 +193,20 @@ public final class Exceptions {
      */
     public static Error toError(Throwable throwable) {
         checkNotNull(throwable);
+        final Throwable cause = getRootCause(throwable);
         final Error error = Error.newBuilder()
-                                 .setType(throwable.getClass().getCanonicalName())
-                                 .setMessage(throwable.getMessage())
-                                 .setStacktrace(getStackTraceAsString(throwable))
+                                 .setType(cause.getClass().getCanonicalName())
+                                 .setMessage(cause.getMessage())
+                                 .setStacktrace(getStackTraceAsString(cause))
                                  .build();
+        return error;
+    }
+
+    @Internal
+    public static Error toError(Throwable throwable, int errorCode) {
+        final Error error = toError(throwable).toBuilder()
+                                              .setCode(errorCode)
+                                              .build();
         return error;
     }
 }

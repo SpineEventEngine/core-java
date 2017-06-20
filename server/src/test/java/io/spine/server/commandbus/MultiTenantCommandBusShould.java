@@ -37,6 +37,7 @@ import java.util.Set;
 
 import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
 import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.base.Status.StatusCase.ERROR;
 import static io.spine.server.commandbus.Given.Command.addTask;
 import static io.spine.server.commandbus.Given.Command.createProject;
 import static org.junit.Assert.assertEquals;
@@ -111,12 +112,10 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(cmd, observer);
 
-        checkCommandError(observer.getError(),
+        checkCommandError(observer.firstResponse(),
                           TENANT_UNKNOWN,
                           InvalidCommandException.class,
                           cmd);
-
-        assertTrue(observer.responses().isEmpty());
     }
 
     @Test
@@ -124,11 +123,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final Command command = addTask();
         commandBus.post(command, observer);
 
-        checkCommandError(observer.getError(),
+        checkCommandError(observer.firstResponse(),
                           UNSUPPORTED_COMMAND,
                           UnsupportedCommandException.class, command);
-        assertTrue(observer.responses()
-                           .isEmpty());
     }
 
     /*
@@ -151,7 +148,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(addTask(), observer);
 
-        assertNotNull(observer.getError());
+        assertEquals(ERROR, observer.firstResponse()
+                                    .getStatus()
+                                    .getStatusCase());
     }
 
     @Test
@@ -172,7 +171,9 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         commandBus.post(createProject(), observer);
 
-        assertNotNull(observer.getError());
+        assertEquals(ERROR, observer.firstResponse()
+                                    .getStatus()
+                                    .getStatusCase());
     }
 
     CreateProjectHandler newCommandHandler() {

@@ -29,6 +29,7 @@ import io.spine.base.CommandId;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
+import io.spine.base.Status;
 import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
@@ -50,7 +51,6 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
@@ -64,7 +64,6 @@ import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentCaptor.forClass;
@@ -110,20 +109,30 @@ public abstract class AbstractCommandBusTestSuite {
         return invalidCmd;
     }
 
-    static <E extends CommandException>
-    void checkCommandError(@Nullable Throwable throwable,
-                           CommandValidationError validationError,
-                           Class<E> exceptionClass,
-                           Command cmd) {
-        assertNotNull(throwable);
-        final Throwable cause = throwable.getCause();
-        assertEquals(exceptionClass, cause.getClass());
-        @SuppressWarnings("unchecked")
-        final E exception = (E) cause;
-        assertEquals(cmd, exception.getCommand());
-        final Error error = exception.getError();
-        assertEquals(CommandValidationError.getDescriptor()
-                                           .getFullName(), error.getType());
+    static void checkCommandError(IsSent sendingResult,
+                                  CommandValidationError validationError,
+                                  Class<? extends CommandException> exceptionClass,
+                                  Command cmd) {
+        checkCommandError(sendingResult,
+                          validationError,
+                          exceptionClass.getCanonicalName(),
+                          exceptionClass,
+                          cmd);
+    }
+
+    static void checkCommandError(IsSent sendingResult,
+                                  CommandValidationError validationError,
+                                  String errorType,
+                                  Class<? extends CommandException> exceptionClass,
+                                  Command cmd) {
+        final Status status = sendingResult.getStatus();
+        assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);
+        final CommandId commandId = cmd.getId();
+        assertEquals(commandId, unpack(sendingResult.getMessageId()));
+
+        final Error error = status.getError();
+        assertEquals(errorType,
+                     error.getType());
         assertEquals(validationError.getNumber(), error.getCode());
         assertFalse(error.getMessage()
                          .isEmpty());

@@ -21,7 +21,6 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.base.Command;
-import io.spine.base.CommandValidationError;
 import io.spine.base.Commands;
 import io.spine.base.Error;
 import io.spine.type.CommandClass;
@@ -62,7 +61,7 @@ public class CommandExpiredException extends CommandException {
         final String errMsg = format("Scheduled command of type `%s` expired.",
                                      CommandClass.of(commandMessage));
         final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setType(CommandExpiredException.class.getCanonicalName())
                 .setMessage(errMsg)
                 .putAllAttributes(commandTypeAttribute(commandMessage));
         return error.build();
