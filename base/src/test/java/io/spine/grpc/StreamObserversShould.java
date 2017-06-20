@@ -27,7 +27,9 @@ import io.grpc.StatusException;
 import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
+import io.spine.base.Response;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.test.Tests;
 import org.junit.Test;
 import org.mockito.ArgumentMatchers;
 
@@ -36,6 +38,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Sets.newHashSet;
 import static io.grpc.Status.INVALID_ARGUMENT;
+import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -60,7 +63,12 @@ public class StreamObserversShould {
 
     @Test
     public void return_non_null_empty_observer() {
-        assertNotNull(StreamObservers.noOpObserver());
+        final StreamObserver<Response> emptyObserver = noOpObserver();
+        assertNotNull(emptyObserver);
+        // Call methods just to add to coverage.
+        emptyObserver.onNext(Tests.<Response>nullRef());
+        emptyObserver.onError(Tests.<Throwable>nullRef());
+        emptyObserver.onCompleted();
     }
 
     @Test

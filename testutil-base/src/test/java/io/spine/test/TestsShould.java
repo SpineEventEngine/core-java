@@ -20,17 +20,13 @@
 
 package io.spine.test;
 
-import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
 import org.junit.Test;
 
-import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.hasPrivateParameterlessCtor;
 import static io.spine.test.Values.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
@@ -69,16 +65,6 @@ public class TestsShould {
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_UseId_value() {
         newUserId(Tests.<String>nullRef());
-    }
-
-    @Test
-    public void return_empty_StreamObserver() {
-        final StreamObserver<Response> emptyObserver = noOpObserver();
-        assertNotNull(emptyObserver);
-        // Call methods just to add to coverage.
-        emptyObserver.onNext(Tests.<Response>nullRef());
-        emptyObserver.onError(Tests.<Throwable>nullRef());
-        emptyObserver.onCompleted();
     }
 
     @Test
