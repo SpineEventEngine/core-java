@@ -26,6 +26,9 @@ dependencies {
     // based on this library.
     compile group: 'org.mockito', name: 'mockito-core', version: mockitoVersion
 
-    // Depend on the client module that contains `Timestamps` and other utility classes.
+    // Depend on the base module that contains `Timestamps` and other utility classes.
     compile project(path: ':base')
+
+    // For `Versions`
+    compile project(path: ':core')
 }
