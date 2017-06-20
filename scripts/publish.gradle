@@ -60,12 +60,13 @@ projectsToPublish.each {
     project(":$it") { final currentProject ->
         apply plugin: 'maven-publish'
 
-        // Artifact IDs are composed as "spine-<project.name>-core". Example:
+        // Artifact IDs are composed as "spine-<project.name>". Example:
         //
         //      "spine-server-core"
         //
-        // That helps to distinguish resulting JARs in the final assembly, such as WAR package.
-        // In addition, "-core" suffix serves as a type marker, helping to identify them among similar modules.
+        // Use the `-core` suffix to distinguish resulting JARs in the final assembly, such as WAR
+        // package. In addition, it this suffix serves as a type marker, helping to identify them
+        // among similar modules.
         //
         // Example:
         //
@@ -73,13 +74,7 @@ projectsToPublish.each {
         //  vs.
         //      "spine-server-gae" (Google AppEngine-based functionality for back-end)
         //
-        // However, the artifact IDs for "users" and "values" domains do not have "-core" suffix,
-        // as they do not require any additional identification.
-        //
-        final def noSuffixProjects = ['core', 'values', 'time']
-        final boolean shouldAddSuffix = !(currentProject.name in noSuffixProjects)
-        final String artifactIdSuffix = shouldAddSuffix ? "-core" : ""
-        final String artifactIdForPublishing = "spine-${currentProject.name}" + artifactIdSuffix
+        final String artifactIdForPublishing = "spine-${currentProject.name}"
 
         publishing {
             publications {

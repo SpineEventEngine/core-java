@@ -25,7 +25,7 @@ ext {
 dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
 
-    compile project(path: ':server')
+    compile project(path: ':server-core')
     compile project(path: ':values')
 
     compile group: 'org.apache.beam', name: 'beam-sdks-java-core', version: beamVersion
@@ -33,7 +33,7 @@ dependencies {
     compile group: 'org.apache.beam', name: 'beam-runners-direct-java', version: beamVersion
 
     testCompile project(path: ":base", configuration: 'testArtifacts')
-    testCompile project(path: ":server", configuration: 'testArtifacts')
+    testCompile project(path: ":server-core", configuration: 'testArtifacts')
     testCompile project(path: ":testutil-server")
 }
 
