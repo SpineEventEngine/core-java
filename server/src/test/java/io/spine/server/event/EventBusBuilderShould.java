@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
 
@@ -132,7 +133,7 @@ public class EventBusBuilderShould {
                                                             .setStorageFactory(storageFactory)
                                                             .build()
                                                             .delivery();
-        assertEquals(DispatcherEventDelivery.directDelivery(), actualValue);
+        assertTrue(actualValue instanceof DispatcherEventDelivery.DirectDelivery);
     }
 
     @Test

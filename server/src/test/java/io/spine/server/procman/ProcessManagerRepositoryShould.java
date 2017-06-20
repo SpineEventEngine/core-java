@@ -33,7 +33,6 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.EventFactory;
-import io.spine.server.commandbus.CommandDispatcher;
 import io.spine.server.entity.RecordBasedRepository;
 import io.spine.server.entity.RecordBasedRepositoryShould;
 import io.spine.server.event.EventSubscriber;
@@ -51,7 +50,6 @@ import io.spine.test.procman.event.ProjectCreated;
 import io.spine.test.procman.event.ProjectStarted;
 import io.spine.test.procman.event.TaskAdded;
 import io.spine.testdata.Sample;
-import io.spine.testdata.TestBoundedContextFactory;
 import io.spine.type.CommandClass;
 import io.spine.type.EventClass;
 import org.junit.After;
@@ -130,9 +128,7 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final TestProcessManagerRepository repo = new TestProcessManagerRepository();
-        boundedContext.register(repo);
         return repo;
     }
 
@@ -177,20 +173,7 @@ public class ProcessManagerRepositoryShould
                                        .setMultitenant(true)
                                        .build();
 
-        boundedContext.getCommandBus()
-                      .register(new CommandDispatcher() {
-                          @Override
-                          public Set<CommandClass> getMessageClasses() {
-                              return CommandClass.setOf(AddTask.class);
-                          }
-
-                          @Override
-                          public void dispatch(CommandEnvelope envelope) {
-                              /* Simply swallow the command. We need this dispatcher for allowing
-                                 Process Manager under test to route the AddTask command. */
-                          }
-                      });
-
+        boundedContext.register(repository);
         TestProcessManager.clearMessageDeliveryHistory();
     }
 

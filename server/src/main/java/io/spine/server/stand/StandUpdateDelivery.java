@@ -21,6 +21,7 @@
  */
 package io.spine.server.stand;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import io.spine.annotation.SPI;
 import io.spine.server.delivery.Delivery;
@@ -75,41 +76,28 @@ public abstract class StandUpdateDelivery extends Delivery<EntityStateEnvelope<?
     }
 
     /**
-     * Returns an instance of {@code StandUpdateDelivery} which does NOT postpone any state
-     * update propagation and uses the specified {@code executor} for the operation.
+     * Obtains a pre-defined instance of the {@code StandUpdateDelivery}, which does NOT
+     * postpone any event dispatching and uses
+     * {@link com.google.common.util.concurrent.MoreExecutors#directExecutor() direct executor}
+     * for operation.
      *
-     * @param executor an instance of {@code Executor} to use for the delivery
-     * @return the instance of {@code StandUpdateDelivery} with the given executor
+     * @return the pre-configured direct delivery
      */
-    public static StandUpdateDelivery immediateDeliveryWithExecutor(Executor executor) {
-        final StandUpdateDelivery immediateDelivery = new StandUpdateDelivery(executor) {
-            @Override
-            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
-                                                     Stand consumer) {
-                return false;
-            }
-        };
-        return immediateDelivery;
-    }
-
     public static StandUpdateDelivery directDelivery() {
-        return PredefinedDeliveryStrategies.DIRECT_DELIVERY;
+        return new DirectDelivery();
     }
 
-    /** Utility wrapper class for predefined delivery strategies designed to be constants. */
-    private static final class PredefinedDeliveryStrategies {
-
-        /**
-         * A pre-defined instance of the {@code StandUpdateDelivery}, which does not postpone any
-         * update delivery and uses a default executor for the operation.
-         */
-        private static final StandUpdateDelivery DIRECT_DELIVERY = new StandUpdateDelivery() {
-
-            @Override
-            protected boolean shouldPostponeDelivery(EntityStateEnvelope deliverable,
-                                                     Stand consumer) {
-                return false;
-            }
-        };
+    /**
+     * A delivery implementation which does not postpone events.
+     *
+     * @see #directDelivery()
+     */
+    @VisibleForTesting
+    static final class DirectDelivery extends StandUpdateDelivery {
+        @Override
+        public boolean shouldPostponeDelivery(EntityStateEnvelope envelope,
+                                              Stand consumer) {
+            return false;
+        }
     }
 }

@@ -23,6 +23,7 @@ package io.spine.server.storage;
 import com.google.common.base.Optional;
 import com.google.common.collect.Sets;
 import com.google.protobuf.Message;
+import io.spine.server.entity.Entity;
 import io.spine.test.Tests;
 import io.spine.test.Verify;
 import org.junit.After;
@@ -56,7 +57,7 @@ public abstract class AbstractStorageShould<I,
 
     @Before
     public void setUpAbstractStorageTest() {
-        storage = getStorage();
+        storage = getStorage(Entity.class);
     }
 
     @After
@@ -72,7 +73,7 @@ public abstract class AbstractStorageShould<I,
      * @return an empty storage instance
      * @see AbstractStorage#close()
      */
-    protected abstract S getStorage();
+    protected abstract S getStorage(Class<? extends Entity> cls);
 
     /** Creates a new storage record. */
     protected abstract R newStorageRecord();
