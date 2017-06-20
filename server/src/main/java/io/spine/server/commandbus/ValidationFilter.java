@@ -53,9 +53,6 @@ class ValidationFilter implements CommandBusFilter {
         this.commandBus = commandBus;
     }
 
-    /**
-     * Returns {@code true} if a command is valid, {@code false} otherwise.
-     */
     @Override
     public Optional<IsSent> accept(CommandEnvelope envelope) {
         final Optional<IsSent> tenantCheckResult = isTenantIdValid(envelope);

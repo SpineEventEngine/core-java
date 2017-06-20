@@ -89,6 +89,7 @@ public abstract class Bus<T extends Message,
      *
      * @param message         the message to post
      * @param observer the observer to receive outcome of the operation
+     * @see #post(Iterable, StreamObserver) for posing multiple messages at once
      */
     public final void post(T message, StreamObserver<IsSent> observer) {
         checkNotNull(message);
@@ -103,7 +104,27 @@ public abstract class Bus<T extends Message,
      *
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
-     * @param messages        the message to post
+     * <p>The {@link StreamObserver} argument is the posting outcome observer;
+     * the {@link StreamObserver#onNext StreamObserver.onNext} will be called for each message
+     * passed to the bus.
+     *
+     * <p>A valid message will result in
+     * an {@link io.spine.base.Status.StatusCase#OK OK} status {@link IsSent} instance.
+     *
+     * <p>An invalid message will result in an {@link io.spine.base.Error Error} status
+     * {@link IsSent} instance.
+     *
+     * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
+     * {@link io.spine.base.Failure} may result ether a {@link io.spine.base.Failure} status or
+     * an {@link io.spine.base.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
+     * the {@link io.spine.base.Failure} status may only pop up if the {@link }
+     * the {@link io.spine.base.Failure} status may only pop up if the {@link MessageDispatcher}
+     * processes the message sequentially and throws
+     * the {@linkplain io.spine.base.FailureThrowable FailureThrowables} (wrapped in a
+     * {@link RuntimeException}) instead of handling them. Otherwise, the {@code OK} status should
+     * be expected.
+     *
+     * @param messages the message to post
      * @param observer the observer to receive outcome of the operation
      */
     public final void post(Iterable<T> messages, StreamObserver<IsSent> observer) {
@@ -147,22 +168,26 @@ public abstract class Bus<T extends Message,
      *
      * <p>The implementations may apply some specific validation to the given messages.
      *
-     * <p>If the message does not pass the filter,
-     * {@link StreamObserver#onError(Throwable) StreamObserver#onError} may be called.
+     * <p>If a message passes the filtering, it is included into the resulting {@link Iterable};
+     * otherwise, {@link StreamObserver#onNext StreamObserver.onNext} is called for that message.
      *
-     * @param messages        the message to filter
-     * @param acknowledgement the observer to receive the negative outcome of the operation
+     * <p>The filtering may cause {@link IsSent} instances with {@code OK} status for those message
+     * that can be handled during the filtering. Such messages are technically valid, but should not
+     * be processed further. An example is a scheduled Command.
+     *
+     * @param messages the message to filter
+     * @param observer the observer to receive the negative outcome of the operation
      * @return the message itself if it passes the filtering or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    private Iterable<T> filter(Iterable<T> messages, StreamObserver<IsSent> acknowledgement) {
+    private Iterable<T> filter(Iterable<T> messages, StreamObserver<IsSent> observer) {
         checkNotNull(messages);
-        checkNotNull(acknowledgement);
+        checkNotNull(observer);
         final Collection<T> result = new LinkedList<>();
         for (T message : messages) {
             final Optional<IsSent> response = preProcess(toEnvelope(message));
             if (response.isPresent()) {
-                acknowledgement.onNext(response.get());
+                observer.onNext(response.get());
             } else {
                 result.add(message);
             }
@@ -170,6 +195,22 @@ public abstract class Bus<T extends Message,
         return result;
     }
 
+    /**
+     * Pre-processes the given message.
+     *
+     * <p>The pre-processing may include e.g. validation.
+     *
+     * <p>If the given message is completely processed and should not be posted via
+     * {@link #doPost doPost} method, the returned {@link Optional} contains a value with either
+     * status.
+     *
+     * <p>If the message should be posted to the Bus via {@link #doPost doPost}, the result of this
+     * method is {@link Optional#absent() Optional.absent()}.
+     *
+     * @param message the {@linkplain MessageWithIdEnvelope message envelope} to pre-process
+     * @return the result of message processing by this bus if any, or
+     * {@link Optional#absent() Optional.absent()} otherwise
+     */
     protected abstract Optional<IsSent> preProcess(E message);
 
     /**
@@ -188,6 +229,17 @@ public abstract class Bus<T extends Message,
      *
      * <p>This method assumes that the given message has passed the filtering.
      *
+     * @return the result of mailing with {@linkplain MessageWithIdEnvelope#getId() the Message ID}
+     *         and:
+     *         <ul>
+     *             <li>{@link io.spine.base.Status.StatusCase#OK OK} status if the message has been
+     *                 passed to the dispatcher;
+     *             <li>{@link io.spine.base.Failure Failure} status, if a {@code Failure} has
+     *                 happened during the message handling (if applicable);
+     *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
+     *                 {@link io.spine.base.FailureThrowable FailureThrowable}, has been thrown
+     *                 during the message posting.
+     *         </ul>
      * @see #post(Message, StreamObserver) for the public API
      */
     protected abstract IsSent doPost(E envelope);
@@ -198,6 +250,7 @@ public abstract class Bus<T extends Message,
      *
      * @param envelopes       the envelopes to post
      * @param observer the observer of the message posting
+     * @see #doPost(MessageWithIdEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {
         for (E message : envelopes) {

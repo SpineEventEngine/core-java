@@ -40,19 +40,16 @@ public interface CommandBusFilter {
      *
      * <p>A filter can:
      * <ul>
-     *     <li>Accept the command (by returning {@code true}).
-     *     <li>Reject the command and {@linkplain StreamObserver#onError(Throwable) notify} the
-     *         response observer with an error. An example of this case would be an invalid command.
-     *     <li>Reject a command but {@linkplain StreamObserver#onCompleted()} acknowledge it to the
-     *         response observer. For example, a scheduled command would not pass a filter, but
-     *         is acknowledged to the observer.
+     *     <li>Accept the command (by returning {@code Optional.absent()};
+     *     <li>Reject the command with {@link io.spine.base.Error} status e.g. if it fails to pass
+     *         the validation;
+     *     <li>Reject the command with {@code OK} status. For example, a scheduled command may not
+     *         pass a filter.
      * </ul>
      *
      * @param envelope      the envelope with the command to filter
-     * @param errorObserver the observer to be {@linkplain StreamObserver#onError(Throwable)
-     *                      notified} about the error which caused not accepting the passed
-     *                      command
-     * @return {@code true} if the command passes the filter, {@code false} otherwise
+     * @return {@code Optional.absent()} if the command passes the filter,
+     *         {@linkplain IsSent posting result} with either status otherwise
      */
     Optional<IsSent> accept(CommandEnvelope envelope);
 
