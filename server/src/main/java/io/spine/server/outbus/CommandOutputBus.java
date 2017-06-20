@@ -171,7 +171,7 @@ public abstract class CommandOutputBus<M extends Message,
     }
 
     @Override
-    protected void doPost(E envelope, StreamObserver<?> failureObserver) {
+    protected void doPost(E envelope, StreamObserver<MessageAcked> failureObserver) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);

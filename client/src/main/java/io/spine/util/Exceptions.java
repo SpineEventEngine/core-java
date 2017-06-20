@@ -20,10 +20,13 @@
 
 package io.spine.util;
 
+import io.spine.base.Error;
+
 import java.util.Locale;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static java.lang.String.format;
 
 /**
@@ -181,4 +184,19 @@ public final class Exceptions {
         throw new IllegalStateException(errMsg, cause);
     }
 
+    /**
+     * Creates a Protobuf error from the given {@link Throwable}.
+     *
+     * @param throwable the {@code Throwable} to convert
+     * @return new instance of {@link Error}
+     */
+    public static Error toError(Throwable throwable) {
+        checkNotNull(throwable);
+        final Error error = Error.newBuilder()
+                                 .setType(throwable.getClass().getCanonicalName())
+                                 .setMessage(throwable.getMessage())
+                                 .setStacktrace(getStackTraceAsString(throwable))
+                                 .build();
+        return error;
+    }
 }

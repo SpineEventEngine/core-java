@@ -27,15 +27,19 @@ import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
+import io.spine.base.Error;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
 import io.spine.base.MessageAcked;
+import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
+import io.spine.io.StreamObservers;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 import io.spine.type.CommandClass;
+import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -44,7 +48,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.io.StreamObservers.noOpObserver;
 import static java.lang.String.format;
 
 /**
@@ -56,9 +59,9 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  */
 public class CommandBus extends Bus<Command,
-                                    CommandEnvelope,
-                                    CommandClass,
-                                    CommandDispatcher> {
+        CommandEnvelope,
+        CommandClass,
+        CommandDispatcher> {
 
     private final CommandStore commandStore;
 
@@ -166,9 +169,10 @@ public class CommandBus extends Bus<Command,
     protected Iterable<Command> filter(Iterable<Command> commands,
                                        StreamObserver<MessageAcked> responseObserver) {
         final Iterable<Command> result = FluentIterable.from(commands)
-                .transform(toEnvelope())
-                .filter(new CommandBusFilterPredicate(filterChain, responseObserver))
-                .transform(toMessage());
+                                                       .transform(toEnvelope())
+                                                       .filter(new CommandBusFilterPredicate(
+                                                               filterChain, responseObserver))
+                                                       .transform(toMessage());
         return result;
     }
 
@@ -178,7 +182,7 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected void doPost(CommandEnvelope envelope, StreamObserver<?> failureObserver) {
+    protected void doPost(CommandEnvelope envelope, StreamObserver<MessageAcked> failureObserver) {
         final CommandDispatcher dispatcher = getDispatcher(envelope);
         try {
             dispatcher.dispatch(envelope);
@@ -186,7 +190,11 @@ public class CommandBus extends Bus<Command,
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
-            failureObserver.onError(cause);
+            final Error error = Exceptions.toError(cause);
+            final Status status = Status.newBuilder()
+                                        .setError(error)
+                                        .build();
+            failureObserver.onNext(envelope.acknowledge(status));
 
             emitFailure(envelope, cause);
         }
@@ -224,7 +232,7 @@ public class CommandBus extends Bus<Command,
      */
     void postPreviouslyScheduled(Command command) {
         final CommandEnvelope commandEnvelope = CommandEnvelope.of(command);
-        doPost(commandEnvelope, noOpObserver());
+        doPost(commandEnvelope, StreamObservers.<MessageAcked>noOpObserver());
     }
 
     private static IllegalStateException noDispatcherFound(CommandEnvelope commandEnvelope) {
@@ -269,9 +277,9 @@ public class CommandBus extends Bus<Command,
      *
      * <p>The following operations are performed:
      * <ol>
-     *     <li>All command dispatchers are un-registered.
-     *     <li>{@code CommandStore} is closed.
-     *     <li>{@code CommandScheduler} is shut down.
+     * <li>All command dispatchers are un-registered.
+     * <li>{@code CommandStore} is closed.
+     * <li>{@code CommandScheduler} is shut down.
      * </ol>
      *
      * @throws Exception if closing the {@code CommandStore} cases an exception
@@ -477,7 +485,7 @@ public class CommandBus extends Bus<Command,
             }
 
             final CommandBus commandBus = createCommandBus();
-            
+
             commandScheduler.setCommandBus(commandBus);
 
             if (autoReschedule) {

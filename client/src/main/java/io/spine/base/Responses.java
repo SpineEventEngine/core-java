@@ -37,7 +37,6 @@ public final class Responses {
     private static final Response RESPONSE_OK = Response.newBuilder()
                                                         .setStatus(STATUS_OK)
                                                         .build();
-
     private Responses() {
         // Prevent instantiation of this utility class.
     }
@@ -45,6 +44,10 @@ public final class Responses {
     /** Returns the instance of OK {@link Response}. */
     public static Response ok() {
         return RESPONSE_OK;
+    }
+
+    public static Status statusOk() {
+        return STATUS_OK;
     }
 
     /**

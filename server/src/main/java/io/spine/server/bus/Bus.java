@@ -174,7 +174,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract void doPost(E envelope, StreamObserver<?> failureObserver);
+    protected abstract void doPost(E envelope, StreamObserver<MessageAcked> failureObserver);
 
     /**
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
@@ -184,17 +184,17 @@ public abstract class Bus<T extends Message,
      * @param acknowledgement the observer of the message posting
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<MessageAcked> acknowledgement) {
-        final ErrorCountingSpyObserver ackingSupervisor = new ErrorCountingSpyObserver(acknowledgement);
-        int currentErrorCount = ackingSupervisor.getErrorCount();
+        final ErrorPossessedObserver ackingSupervisor =
+                new ErrorPossessedObserver(acknowledgement);
         for (E message : envelopes) {
             doPost(message, ackingSupervisor);
-            if (currentErrorCount == ackingSupervisor.getErrorCount()) {
-                ackingSupervisor.onNext(message.acknowledge());
-            } else {
-                currentErrorCount = ackingSupervisor.getErrorCount();
+            if (ackingSupervisor.hasError()) {
+                return;
             }
+            // TODO:2017-06-19:dmytro.dashenkov: Check if has already been acked.
+            ackingSupervisor.onNext(message.acknowledge());
         }
-        if (ackingSupervisor.getErrorCount() == 0) {
+        if (!ackingSupervisor.hasError()) {
             ackingSupervisor.onCompleted();
         }
     }
@@ -243,25 +243,35 @@ public abstract class Bus<T extends Message,
     /**
      * Counts the {@link StreamObserver#onError StreamObserver.onError} invocations.
      */
-    private static class ErrorCountingSpyObserver extends StreamObservers.SpyObserver<MessageAcked> {
+    private static class ErrorPossessedObserver extends StreamObservers.SpyObserver<MessageAcked> {
 
-        private int errorCount;
+        @Nullable
+        private Throwable error;
 
-        private ErrorCountingSpyObserver(StreamObserver<MessageAcked> delegate) {
+        private ErrorPossessedObserver(StreamObserver<MessageAcked> delegate) {
             super(delegate);
-            this.errorCount = 0;
+            this.error = null;
         }
 
         @Override
-        protected void onErrorSpotted(Throwable unused) {
-            errorCount++;
+        protected void onErrorSpotted(Throwable error) {
+            this.error = error;
         }
 
-        /**
-         * @return the count of {@code StreamObserver.onError} invocations
-         */
-        private int getErrorCount() {
-            return errorCount;
+        @Override
+        protected void onNextPassed(MessageAcked next) {
+            if (hasError()) {
+                throw new IllegalStateException("Cannot consume stream after error.", getError());
+            }
+        }
+
+        @Nullable
+        private Throwable getError() {
+            return error;
+        }
+
+        private boolean hasError() {
+            return error != null;
         }
     }
 }
