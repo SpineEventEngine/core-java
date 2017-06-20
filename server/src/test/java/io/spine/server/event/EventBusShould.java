@@ -223,6 +223,12 @@ public class EventBusShould {
     }
 
     @Test
+    public void return_direct_DispatcherDelivery_if_none_customized() {
+        final DispatcherEventDelivery actual = eventBus.delivery();
+        assertTrue(actual instanceof DispatcherEventDelivery.DirectDelivery);
+    }
+
+    @Test
     public void not_call_dispatchers_if_dispatcher_event_execution_postponed() {
         final BareDispatcher dispatcher = new BareDispatcher();
 

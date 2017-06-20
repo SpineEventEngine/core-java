@@ -25,9 +25,12 @@ import io.spine.envelope.MessageEnvelope;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 import java.util.concurrent.Executor;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
  * Base functionality for the routines delivering the
@@ -43,6 +46,13 @@ import java.util.concurrent.Executor;
 public abstract class CommandOutputDelivery<E extends MessageEnvelope,
                                             T extends MessageClass, C> extends Delivery<E, C> {
 
+    /**
+     *  A function, returning a set of consumers by the message class.
+     *
+     *  <p>Defined and set at runtime by the corresponding {@code Bus}.
+     *  Until then it is {@code null}.
+     */
+    @Nullable
     private Function<T, Set<C>> consumerProvider;
 
     /** {@inheritDoc} */
@@ -59,12 +69,16 @@ public abstract class CommandOutputDelivery<E extends MessageEnvelope,
      * Used by the instance of {@linkplain CommandOutputBus bus} to inject the knowledge about
      * up-to-date consumers for the message
      */
-    public void setConsumerProvider(Function<T, Set<C>> consumerProvider) {
+    void setConsumerProvider(Function<T, Set<C>> consumerProvider) {
+        checkNotNull(consumerProvider);
         this.consumerProvider = consumerProvider;
     }
 
     @Override
     protected final Collection<C> consumersFor(E envelope) {
+        checkNotNull(consumerProvider,
+                     "Consumer provider must be set by the corresponding Bus " +
+                             "for this delivery: " + getClass());
         @SuppressWarnings("unchecked")  // It's fine by the definition of <E> and <T>.
         final T eventClass = (T) envelope.getMessageClass();
         return consumerProvider.apply(eventClass);
