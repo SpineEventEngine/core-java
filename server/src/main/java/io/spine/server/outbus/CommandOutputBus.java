@@ -148,7 +148,7 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Optional<MessageAcked> preprocess(final E message) {
+    protected Optional<MessageAcked> preProcess(final E message) {
         final Optional<Throwable> violation = validateMessage(message.getMessage());
         final Optional<MessageAcked> result = violation.transform(
                 new Function<Throwable, MessageAcked>() {

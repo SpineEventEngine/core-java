@@ -160,7 +160,7 @@ public abstract class Bus<T extends Message,
         checkNotNull(acknowledgement);
         final Collection<T> result = new LinkedList<>();
         for (T message : messages) {
-            final Optional<MessageAcked> response = preprocess(toEnvelope(message));
+            final Optional<MessageAcked> response = preProcess(toEnvelope(message));
             if (response.isPresent()) {
                 acknowledgement.onNext(response.get());
             } else {
@@ -170,7 +170,7 @@ public abstract class Bus<T extends Message,
         return result;
     }
 
-    protected abstract Optional<MessageAcked> preprocess(E message);
+    protected abstract Optional<MessageAcked> preProcess(E message);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.

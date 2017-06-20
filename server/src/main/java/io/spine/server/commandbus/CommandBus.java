@@ -164,7 +164,7 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Optional<MessageAcked> preprocess(CommandEnvelope message) {
+    protected Optional<MessageAcked> preProcess(CommandEnvelope message) {
         final Optional<MessageAcked> result = filterChain.accept(message);
         return result;
     }
