@@ -20,9 +20,9 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.base.Optional;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
@@ -33,6 +33,8 @@ import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
 import java.util.Set;
 
+import static com.google.common.base.Optional.absent;
+import static com.google.common.base.Optional.of;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
@@ -77,23 +79,20 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> observer) {
+    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
-            scheduleAndStore(envelope, observer);
-            return false;
+            scheduleAndStore(envelope);
+            return of(envelope.acknowledge());
         }
-        return true;
+        return absent();
     }
 
-    private void scheduleAndStore(CommandEnvelope commandEnvelope,
-                                  StreamObserver<MessageAcked> observer) {
+    private void scheduleAndStore(CommandEnvelope commandEnvelope) {
         final Command command = commandEnvelope.getCommand();
         schedule(command);
         commandBus().commandStore()
                     .store(command, SCHEDULED);
-        observer.onNext(commandEnvelope.acknowledge());
-        observer.onCompleted();
     }
 
     @Override

@@ -32,6 +32,8 @@ import io.spine.io.StreamObservers;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -153,8 +155,22 @@ public abstract class Bus<T extends Message,
      * @return the message itself if it passes the filtering or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    protected abstract Iterable<T> filter(Iterable<T> messages,
-                                          StreamObserver<MessageAcked> acknowledgement);
+    private Iterable<T> filter(Iterable<T> messages, StreamObserver<MessageAcked> acknowledgement) {
+        checkNotNull(messages);
+        checkNotNull(acknowledgement);
+        final Collection<T> result = new LinkedList<>();
+        for (T message : messages) {
+            final Optional<MessageAcked> response = preprocess(toEnvelope(message));
+            if (response.isPresent()) {
+                acknowledgement.onNext(response.get());
+            } else {
+                result.add(message);
+            }
+        }
+        return result;
+    }
+
+    protected abstract Optional<MessageAcked> preprocess(E message);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.

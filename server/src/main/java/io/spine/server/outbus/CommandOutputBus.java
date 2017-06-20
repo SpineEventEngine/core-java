@@ -20,28 +20,27 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Predicate;
-import com.google.common.collect.Iterables;
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
 import io.spine.base.MessageAcked;
-import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.base.Status;
 import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
+import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.io.StreamObservers.forwardErrorsOnly;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -105,31 +104,23 @@ public abstract class CommandOutputBus<M extends Message,
      * <p>The message also must satisfy validation constraints defined in its Protobuf type.
      *
      * @param message          the command output message to check
-     * @param responseObserver the observer to obtain the result of the call;
-     *                         {@link StreamObserver#onError(Throwable)} is called if
-     *                         a message is unsupported or invalid
+     *                         // TODO:2017-06-20:dmytro.dashenkov: Update Javadoc.
      * @return {@code true} if a message is supported and valid and can be posted,
      * {@code false} otherwise
      */
-    public boolean validate(Message message, StreamObserver<Response> responseObserver) {
-        final StreamObserver<MessageAcked> ackObserver = forwardErrorsOnly(responseObserver);
-        if (!validateMessage(message, ackObserver)) {
-            return false;
-        }
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-        return true;
+    public final Optional<Throwable> validate(Message event) {
+        final Optional<Throwable> validationResult = validateMessage(event);
+        return validationResult;
     }
 
     /**
      * Validates the message and notifies the observer of those (if any).
-     *
+     * // TODO:2017-06-20:dmytro.dashenkov: Update Javadoc.
      * <p>Does not call {@link StreamObserver#onNext(Object) StreamObserver.onNext(..)} or
      * {@link StreamObserver#onCompleted() StreamObserver.onCompleted(..)}
      * for the given {@code acknowledgement} observer.
      */
-    protected abstract boolean validateMessage(Message message,
-                                               StreamObserver<MessageAcked> acknowledgement);
+    protected abstract Optional<Throwable> validateMessage(Message event);
 
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
@@ -157,16 +148,21 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Iterable<M> filter(Iterable<M> messages,
-                                 final StreamObserver<MessageAcked> acknowledgement) {
-        final Iterable<M> result = Iterables.filter(messages, new Predicate<M>() {
-            @Override
-            public boolean apply(@Nullable M message) {
-                checkNotNull(message);
-                final boolean passes = validateMessage(message, acknowledgement);
-                return passes;
-            }
-        });
+    protected Optional<MessageAcked> preprocess(final E message) {
+        final Optional<Throwable> violation = validateMessage(message.getMessage());
+        final Optional<MessageAcked> result = violation.transform(
+                new Function<Throwable, MessageAcked>() {
+                    @Override
+                    public MessageAcked apply(@Nullable Throwable input) {
+                        checkNotNull(input);
+                        final Error error = Exceptions.toError(input);
+                        final Status status = Status.newBuilder()
+                                                    .setError(error)
+                                                    .build();
+                        return message.acknowledge(status);
+                    }
+                }
+        );
         return result;
     }
 

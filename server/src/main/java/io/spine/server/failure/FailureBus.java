@@ -37,6 +37,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.Set;
 
+import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -78,9 +79,8 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected boolean validateMessage(Message message,
-                                      StreamObserver<MessageAcked> acknowledgement) {
-        return true;
+    protected Optional<Throwable> validateMessage(Message message) {
+        return absent();
     }
 
     /**

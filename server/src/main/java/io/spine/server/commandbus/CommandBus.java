@@ -21,7 +21,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
@@ -58,9 +57,9 @@ import static java.lang.String.format;
  * @author Alex Tymchenko
  */
 public class CommandBus extends Bus<Command,
-        CommandEnvelope,
-        CommandClass,
-        CommandDispatcher> {
+                                    CommandEnvelope,
+                                    CommandClass,
+                                    CommandDispatcher> {
 
     private final CommandStore commandStore;
 
@@ -165,13 +164,8 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Iterable<Command> filter(Iterable<Command> commands,
-                                       StreamObserver<MessageAcked> responseObserver) {
-        final Iterable<Command> result = FluentIterable.from(commands)
-                                                       .transform(toEnvelope())
-                                                       .filter(new CommandBusFilterPredicate(
-                                                               filterChain, responseObserver))
-                                                       .transform(toMessage());
+    protected Optional<MessageAcked> preprocess(CommandEnvelope message) {
+        final Optional<MessageAcked> result = filterChain.accept(message);
         return result;
     }
 

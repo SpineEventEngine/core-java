@@ -20,6 +20,7 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
@@ -49,13 +50,14 @@ final class FilterChain implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> responseObserver) {
+    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
         for (CommandBusFilter filter : filters) {
-            if (!filter.accept(envelope, responseObserver)) {
-                return false;
+            final Optional<MessageAcked> result = filter.accept(envelope);
+            if (result.isPresent()) {
+                return result;
             }
         }
-        return true;
+        return Optional.absent();
     }
 
     @Override

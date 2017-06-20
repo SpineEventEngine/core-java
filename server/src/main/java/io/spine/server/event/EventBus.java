@@ -220,23 +220,20 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected boolean validateMessage(Message event, StreamObserver<MessageAcked> acknowledgement) {
+    protected Optional<Throwable> validateMessage(Message event) {
         final EventClass eventClass = EventClass.of(event);
+        Throwable result = null;
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            acknowledgement.onError(
-                    invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError()));
-            return false;
+            result = invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError());
         }
         final List<ConstraintViolation> violations = eventValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent =
                     InvalidEventException.onConstraintViolations(event, violations);
-            acknowledgement.onError(invalidArgumentWithCause(invalidEvent,
-                                                             invalidEvent.getError()));
-            return false;
+            result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
         }
-        return true;
+        return Optional.fromNullable(result);
     }
 
     /**

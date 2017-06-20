@@ -21,14 +21,16 @@
 package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.Error;
 import io.spine.base.MessageAcked;
+import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 
 /**
  * Filters out commands that do not have registered dispatchers.
@@ -50,16 +52,20 @@ class DeadCommandFilter implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> responseObserver) {
+    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
         if (!hasDispatcher(envelope.getMessageClass())) {
             final Command command = envelope.getCommand();
             final CommandException unsupported = new UnsupportedCommandException(command);
-            commandBus.commandStore()
-                      .storeWithError(command, unsupported);
-            responseObserver.onError(invalidArgumentWithCause(unsupported, unsupported.getError()));
-            return false;
+            commandBus.commandStore().storeWithError(command, unsupported);
+            final Error error = toError(invalidArgumentWithCause(unsupported,
+                                                                 unsupported.getError()));
+            final Status status = Status.newBuilder()
+                                        .setError(error)
+                                        .build();
+            final MessageAcked result = envelope.acknowledge(status);
+            return Optional.of(result);
         }
-        return true;
+        return Optional.absent();
     }
 
     @Override

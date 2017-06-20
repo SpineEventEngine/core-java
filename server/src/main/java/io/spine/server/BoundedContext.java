@@ -24,10 +24,13 @@ import com.google.common.base.Supplier;
 import com.google.common.base.Suppliers;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.grpc.stub.StreamObservers;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Response;
+import io.spine.base.Responses;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -54,6 +57,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.io.StreamObservers.ack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
@@ -240,11 +244,14 @@ public final class BoundedContext
     @Override
     public void notify(IntegrationEvent integrationEvent,
                        StreamObserver<Response> responseObserver) {
-        final Message eventMsg = unpack(integrationEvent.getMessage());
-        final boolean isValid = eventBus.validate(eventMsg, responseObserver);
+        final Event event = EventFactory.toEvent(integrationEvent);
+        final Optional<Throwable> violation = eventBus.validate(event);
+        final boolean isValid = !violation.isPresent();
         if (isValid) {
-            final Event event = EventFactory.toEvent(integrationEvent);
             eventBus.post(event);
+            ack(responseObserver);
+        } else {
+            responseObserver.onError(violation.get());
         }
     }
 

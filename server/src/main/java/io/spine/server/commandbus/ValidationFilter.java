@@ -20,17 +20,21 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.base.Optional;
 import io.grpc.StatusRuntimeException;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.Error;
 import io.spine.base.MessageAcked;
+import io.spine.base.Status;
 import io.spine.base.TenantId;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
+import static com.google.common.base.Optional.of;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -50,35 +54,34 @@ class ValidationFilter implements CommandBusFilter {
      * Returns {@code true} if a command is valid, {@code false} otherwise.
      */
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<MessageAcked> responseObserver) {
-        if (!isTenantIdValid(envelope, responseObserver)) {
-            return false;
+    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
+        final Optional<MessageAcked> tenantCheckResult = isTenantIdValid(envelope);
+        if (tenantCheckResult.isPresent()) {
+            return tenantCheckResult;
         }
-        final boolean commandValid = isCommandValid(envelope, responseObserver);
+        final Optional<MessageAcked> commandValid = isCommandValid(envelope);
         return commandValid;
     }
 
-    private boolean isTenantIdValid(CommandEnvelope envelope,
-                                    StreamObserver<?> responseObserver) {
+    private Optional<MessageAcked> isTenantIdValid(CommandEnvelope envelope) {
         final TenantId tenantId = envelope.getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                reportMissingTenantId(command, responseObserver);
-                return false;
+                final Status status = reportMissingTenantId(command);
+                return of(envelope.acknowledge(status));
             }
         } else {
             if (tenantSpecified) {
-                reportTenantIdInapplicable(command, responseObserver);
-                return false;
+                final Status status = reportTenantIdInapplicable(command);
+                return of(envelope.acknowledge(status));
             }
         }
-        return true;
+        return Optional.absent();
     }
 
-    private boolean isCommandValid(CommandEnvelope envelope,
-                                   StreamObserver<?> responseObserver) {
+    private Optional<MessageAcked> isCommandValid(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
                                                               .validate(envelope);
@@ -87,11 +90,16 @@ class ValidationFilter implements CommandBusFilter {
                     InvalidCommandException.onConstraintViolations(command, violations);
             commandBus.commandStore()
                       .storeWithError(command, invalidCommand);
-            responseObserver.onError(invalidArgumentWithCause(invalidCommand,
-                                                              invalidCommand.getError()));
-            return false;
+            final Throwable exception = invalidArgumentWithCause(invalidCommand,
+                                                                 invalidCommand.getError());
+            final Error error = toError(exception);
+            final Status status = Status.newBuilder()
+                                        .setError(error)
+                                        .build();
+            final Optional<MessageAcked> result = of(envelope.acknowledge(status));
+            return result;
         }
-        return true;
+        return Optional.absent();
     }
 
     @Override
@@ -99,24 +107,31 @@ class ValidationFilter implements CommandBusFilter {
         // Do nothing.
     }
 
-    private void reportMissingTenantId(Command command,
-                                       StreamObserver<?> responseObserver) {
+    // TODO:2017-06-20:dmytro.dashenkov: Rename these methods.
+    private Status reportMissingTenantId(Command command) {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(noTenantDefined, noTenantDefined.getError());
-        responseObserver.onError(exception);
+        final Error error = toError(exception);
+        final Status status = Status.newBuilder()
+                                    .setError(error)
+                                    .build();
+        return status;
     }
 
-    private void reportTenantIdInapplicable(Command command,
-                                            StreamObserver<?> responseObserver) {
+    private Status reportTenantIdInapplicable(Command command) {
         final CommandException tenantIdInapplicable =
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, tenantIdInapplicable);
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(tenantIdInapplicable, tenantIdInapplicable.getError());
-        responseObserver.onError(exception);
+        final Error error = toError(exception);
+        final Status status = Status.newBuilder()
+                                    .setError(error)
+                                    .build();
+        return status;
     }
 }
