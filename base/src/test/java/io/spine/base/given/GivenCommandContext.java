@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testdata;
+package io.spine.base.given;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
@@ -38,20 +38,20 @@ import static io.spine.time.ZoneOffsets.UTC;
  *
  * @author Mikhail Mikhaylov
  */
-public class TestCommandContextFactory {
+public class GivenCommandContext {
 
-    private TestCommandContextFactory() {
+    private GivenCommandContext() {
     }
 
     /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext createCommandContext() {
+    public static CommandContext withRandomUser() {
         final UserId userId = newUserId(newUuid());
         final Timestamp now = getCurrentTime();
-        return createCommandContext(userId, now);
+        return withUserAndTime(userId, now);
     }
 
     /** Creates a new {@link CommandContext} instance. */
-    public static CommandContext createCommandContext(UserId userId, Timestamp when) {
+    public static CommandContext withUserAndTime(UserId userId, Timestamp when) {
 
         //TODO:2017-03-23:alexander.yevsyukov: Generate commands using TestActorRequestFactory
 
@@ -68,17 +68,17 @@ public class TestCommandContextFactory {
     }
 
     /** Creates a new context with the given delay before the delivery time. */
-    public static CommandContext createCommandContext(Duration delay) {
+    public static CommandContext withScheduledDelayOf(Duration delay) {
         final Schedule schedule = Schedule.newBuilder()
                                           .setDelay(delay)
                                           .build();
-        return createCommandContext(schedule);
+        return withSchedule(schedule);
     }
 
     /** Creates a new context with the given scheduling options. */
-    public static CommandContext createCommandContext(Schedule schedule) {
-        final CommandContext.Builder builder = createCommandContext().toBuilder()
-                                                                     .setSchedule(schedule);
+    private static CommandContext withSchedule(Schedule schedule) {
+        final CommandContext.Builder builder = withRandomUser().toBuilder()
+                                                               .setSchedule(schedule);
         return builder.build();
     }
 }

@@ -26,6 +26,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.CommandContext;
 import io.spine.base.TenantId;
 import io.spine.base.UserId;
+import io.spine.base.given.GivenCommandContext;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.test.command.AddTask;
@@ -35,7 +36,6 @@ import io.spine.test.command.StartProject;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
@@ -100,7 +100,7 @@ public class Given {
         static io.spine.base.Command createProject(Duration delay) {
 
             final CreateProject projectMessage = CommandMessage.createProjectMessage();
-            final CommandContext commandContext = createCommandContext(delay);
+            final CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
             final CommandFactory commandFactory = TestActorRequestFactory.newInstance(Command.class)
                                                                          .command();
             final io.spine.base.Command cmd = commandFactory.createBasedOnContext(projectMessage,

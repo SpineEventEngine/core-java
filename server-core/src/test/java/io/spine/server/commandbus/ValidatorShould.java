@@ -23,6 +23,7 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Any;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.given.GivenCommandContext;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
@@ -35,7 +36,6 @@ import java.util.List;
 
 import static io.spine.base.Commands.generateId;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -60,7 +60,8 @@ public class ValidatorShould {
         final Command commandWithEmptyMessage = Command.newBuilder()
                                                        .setId(generateId())
                                                        .setMessage(invalidMessagePacked)
-                                                       .setContext(createCommandContext())
+                                                       .setContext(
+                                                               GivenCommandContext.withRandomUser())
                                                        .build();
 
         final List<ConstraintViolation> violations =

@@ -24,6 +24,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
+import io.spine.base.given.GivenCommandContext;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
 import org.junit.After;
@@ -34,7 +35,6 @@ import org.mockito.ArgumentCaptor;
 import static io.spine.Identifier.newUuid;
 import static io.spine.server.commandbus.Given.CommandMessage.addTask;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Durations2.milliseconds;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
@@ -65,7 +65,7 @@ public class ExecutorCommandSchedulerShould {
     @Before
     public void setUp() {
         scheduler = spy(ExecutorCommandScheduler.class);
-        context = createCommandContext(DELAY);
+        context = GivenCommandContext.withScheduledDelayOf(DELAY);
     }
 
     @After

@@ -31,6 +31,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.given.GivenCommandContext;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
@@ -57,7 +58,6 @@ import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Values.newUserUuid;
 import static io.spine.test.Values.newUuidValue;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -70,8 +70,8 @@ public class CommandsShould {
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
 
-    private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
-            CommandsShould.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(CommandsShould.class);
 
     @Test
     public void have_private_ctor() {
@@ -193,7 +193,7 @@ public class CommandsShould {
 
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
-        final CommandContext context = createCommandContext(/*delay=*/seconds(10));
+        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
         final Command cmd = requestFactory.command().createBasedOnContext(
                                                              StringValue.getDefaultInstance(),
                                                              context);
@@ -208,7 +208,7 @@ public class CommandsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
-        final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
+        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
         final Command cmd = requestFactory.command()
                                           .createBasedOnContext(StringValue.getDefaultInstance(),
                                                                 context);
