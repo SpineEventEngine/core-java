@@ -29,6 +29,7 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.Mailing.checkIn;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 
@@ -62,7 +63,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            final IsSent result = envelope.acknowledge(status);
+            final IsSent result = checkIn(envelope, status);
             return Optional.of(result);
         }
         return Optional.absent();

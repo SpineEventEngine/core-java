@@ -20,14 +20,7 @@
 
 package io.spine.envelope;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.IsSent;
-import io.spine.base.Status;
-import io.spine.protobuf.AnyPacker;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.Responses.statusOk;
 
 /**
  * An abstract {@code MessageEnvelope} or the messages which declare an ID.
@@ -45,19 +38,4 @@ public abstract class MessageWithIdEnvelope<I extends Message, T>
      * Obtains the identifier of the object.
      */
     public abstract I getId();
-
-    public final IsSent acknowledge() {
-        return acknowledge(statusOk());
-    }
-
-    public final IsSent acknowledge(Status status) {
-        checkNotNull(status);
-        final I id = getId();
-        final Any packedId = AnyPacker.pack(id);
-        final IsSent result = IsSent.newBuilder()
-                                    .setMessageId(packedId)
-                                    .setStatus(status)
-                                    .build();
-        return result;
-    }
 }

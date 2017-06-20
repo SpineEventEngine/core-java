@@ -46,6 +46,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.server.bus.Mailing.checkIn;
 import static java.lang.String.format;
 
 /**
@@ -181,7 +182,7 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = envelope.acknowledge();
+            result = checkIn(envelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
@@ -190,7 +191,7 @@ public class CommandBus extends Bus<Command,
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            result = envelope.acknowledge(status);
+            result = checkIn(envelope, status);
 
             emitFailure(envelope, cause);
         }

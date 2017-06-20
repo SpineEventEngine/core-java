@@ -28,7 +28,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.envelope.MessageWithIdEnvelope;
-import io.spine.io.StreamObservers;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -194,19 +193,17 @@ public abstract class Bus<T extends Message,
 
     /**
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
-     * the {@code acknowledgement} observer.
+     * the {@code observer}.
      *
      * @param envelopes       the envelopes to post
-     * @param acknowledgement the observer of the message posting
+     * @param observer the observer of the message posting
      */
-    private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> acknowledgement) {
-        final ErrorPossessedObserver ackingSupervisor =
-                new ErrorPossessedObserver(acknowledgement);
+    private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {
         for (E message : envelopes) {
             final IsSent result = doPost(message);
-            ackingSupervisor.onNext(result);
+            observer.onNext(result);
         }
-        ackingSupervisor.onCompleted();
+        observer.onCompleted();
     }
 
     /**
@@ -220,16 +217,8 @@ public abstract class Bus<T extends Message,
      * @return a {@link Function} converting the messages into the envelopes of the specified
      * type
      */
-    protected final Function<T, E> toEnvelope() {
+    private Function<T, E> toEnvelope() {
         return messageConverter;
-    }
-
-    /**
-     * @return a {@link Function} converting the envelopes into the messages of the specified
-     * type
-     */
-    protected final Function<E, T> toMessage() {
-        return messageConverter.reverse();
     }
 
     /**
@@ -247,41 +236,6 @@ public abstract class Bus<T extends Message,
         protected T doBackward(E envelope) {
             final T result = envelope.getOuterObject();
             return result;
-        }
-    }
-
-    /**
-     * Counts the {@link StreamObserver#onError StreamObserver.onError} invocations.
-     */
-    private static class ErrorPossessedObserver extends StreamObservers.SpyObserver<IsSent> {
-
-        @Nullable
-        private Throwable error;
-
-        private ErrorPossessedObserver(StreamObserver<IsSent> delegate) {
-            super(delegate);
-            this.error = null;
-        }
-
-        @Override
-        protected void onErrorSpotted(Throwable error) {
-            this.error = error;
-        }
-
-        @Override
-        protected void onNextPassed(IsSent next) {
-            if (hasError()) {
-                throw new IllegalStateException("Cannot consume stream after error.", getError());
-            }
-        }
-
-        @Nullable
-        private Throwable getError() {
-            return error;
-        }
-
-        private boolean hasError() {
-            return error != null;
         }
     }
 }

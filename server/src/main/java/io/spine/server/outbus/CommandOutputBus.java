@@ -31,16 +31,19 @@ import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.server.bus.Bus;
+import io.spine.server.bus.Mailing;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
 import io.spine.util.Exceptions;
+import sun.applet.Main;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.Mailing.checkIn;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -159,7 +162,7 @@ public abstract class CommandOutputBus<M extends Message,
                         final Status status = Status.newBuilder()
                                                     .setError(error)
                                                     .build();
-                        return message.acknowledge(status);
+                        return checkIn(message, status);
                     }
                 }
         );
@@ -175,7 +178,7 @@ public abstract class CommandOutputBus<M extends Message,
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedEnvelope);
         }
-        final IsSent acknowledgement = envelope.acknowledge();
+        final IsSent acknowledgement = checkIn(envelope);
         return acknowledgement;
     }
 
