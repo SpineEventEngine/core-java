@@ -26,7 +26,6 @@ import com.google.protobuf.util.Timestamps;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
-import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -44,16 +43,15 @@ public class FailureThrowableShould {
     public void setUp() {
         final TestActorRequestFactory requestFactory =
                 TestActorRequestFactory.newInstance(FailureThrowable.class);
-        this.command = requestFactory.command().create(newUuidValue());
+        this.command = requestFactory.command()
+                                     .create(newUuidValue());
     }
 
     @Test
     public void create_instance() {
         final StringValue failure = Wrapper.forString(newUuid());
 
-        final FailureThrowable failureThrowable = new TestFailure(command.getMessage(),
-                                                                  command.getContext(),
-                                                                  failure);
+        final FailureThrowable failureThrowable = new TestFailure(failure);
 
         assertEquals(failure, failureThrowable.getFailureMessage());
         assertTrue(Timestamps.isValid(failureThrowable.getTimestamp()));
@@ -63,9 +61,7 @@ public class FailureThrowableShould {
     public void convert_to_failure_message() {
         final StringValue failure = Wrapper.forString(newUuid());
 
-        final Failure failureWrapper = new TestFailure(Tests.<GeneratedMessageV3>nullRef(),
-                                                       Tests.<CommandContext>nullRef(),
-                                                       failure).toFailure(command);
+        final Failure failureWrapper = new TestFailure(failure).toFailure(command);
 
         assertEquals(failure, AnyPacker.unpack(failureWrapper.getMessage()));
         assertFalse(failureWrapper.getContext()
@@ -80,12 +76,10 @@ public class FailureThrowableShould {
 
     private static class TestFailure extends FailureThrowable {
 
-        protected TestFailure(GeneratedMessageV3 commandMessage,
-                              CommandContext context,
-                              GeneratedMessageV3 failure) {
+        private static final long serialVersionUID = 0L;
+
+        private TestFailure(GeneratedMessageV3 failure) {
             super(failure);
         }
-
-        private static final long serialVersionUID = 0L;
     }
 }
