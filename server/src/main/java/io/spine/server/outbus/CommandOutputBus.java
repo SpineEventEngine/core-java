@@ -22,7 +22,6 @@ package io.spine.server.outbus;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Event;
@@ -31,12 +30,10 @@ import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.server.bus.Bus;
-import io.spine.server.bus.Mailing;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
 import io.spine.util.Exceptions;
-import sun.applet.Main;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -107,23 +104,11 @@ public abstract class CommandOutputBus<M extends Message,
      * <p>The message also must satisfy validation constraints defined in its Protobuf type.
      *
      * @param message          the command output message to check
-     *                         // TODO:2017-06-20:dmytro.dashenkov: Update Javadoc.
-     * @return {@code true} if a message is supported and valid and can be posted,
-     * {@code false} otherwise
+     * @return a {@link Throwable} representing the found violation or
+     *         {@link Optional#absent() Optional.absent()} if the given {@link Message} can be
+     *         posted to this bus
      */
-    public final Optional<Throwable> validate(Message event) {
-        final Optional<Throwable> validationResult = validateMessage(event);
-        return validationResult;
-    }
-
-    /**
-     * Validates the message and notifies the observer of those (if any).
-     * // TODO:2017-06-20:dmytro.dashenkov: Update Javadoc.
-     * <p>Does not call {@link StreamObserver#onNext(Object) StreamObserver.onNext(..)} or
-     * {@link StreamObserver#onCompleted() StreamObserver.onCompleted(..)}
-     * for the given {@code acknowledgement} observer.
-     */
-    protected abstract Optional<Throwable> validateMessage(Message event);
+    public abstract Optional<Throwable> validate(Message message);
 
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
@@ -152,7 +137,7 @@ public abstract class CommandOutputBus<M extends Message,
 
     @Override
     protected Optional<IsSent> preProcess(final E message) {
-        final Optional<Throwable> violation = validateMessage(message.getMessage());
+        final Optional<Throwable> violation = this.validate(message.getMessage());
         final Optional<IsSent> result = violation.transform(
                 new Function<Throwable, IsSent>() {
                     @Override

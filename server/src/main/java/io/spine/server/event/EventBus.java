@@ -220,7 +220,9 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected Optional<Throwable> validateMessage(Message event) {
+    public Optional<Throwable> validate(Message event) {
+        checkNotNull(event);
+
         final EventClass eventClass = EventClass.of(event);
         Throwable result = null;
         if (isUnsupportedEvent(eventClass)) {

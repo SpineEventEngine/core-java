@@ -72,12 +72,12 @@ class ValidationFilter implements CommandBusFilter {
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final Status status = reportMissingTenantId(command);
+                final Status status = missingTenantIdStatus(command);
                 return of(checkIn(envelope, status));
             }
         } else {
             if (tenantSpecified) {
-                final Status status = reportTenantIdInapplicable(command);
+                final Status status = tenantIdInapplicableStatus(command);
                 return of(checkIn(envelope, status));
             }
         }
@@ -107,8 +107,7 @@ class ValidationFilter implements CommandBusFilter {
         // Do nothing.
     }
 
-    // TODO:2017-06-20:dmytro.dashenkov: Rename these methods.
-    private Status reportMissingTenantId(Command command) {
+    private Status missingTenantIdStatus(Command command) {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
@@ -121,7 +120,7 @@ class ValidationFilter implements CommandBusFilter {
         return status;
     }
 
-    private Status reportTenantIdInapplicable(Command command) {
+    private Status tenantIdInapplicableStatus(Command command) {
         final CommandException tenantIdInapplicable =
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()

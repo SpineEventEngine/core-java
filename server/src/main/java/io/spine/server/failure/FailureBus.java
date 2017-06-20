@@ -79,7 +79,8 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected Optional<Throwable> validateMessage(Message message) {
+    public Optional<Throwable> validate(Message message) {
+        checkNotNull(message);
         return absent();
     }
 
