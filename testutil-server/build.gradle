@@ -34,4 +34,5 @@ dependencies {
 
     // General purpose test utilities.
     compile project(path: ':testutil-base')
+    compile project(path: ':testutil-client')
 }

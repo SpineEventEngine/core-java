@@ -44,7 +44,8 @@ public class CommandAttributeShould {
     public void setUp() {
         Command command = factory.createCommand(Empty.getDefaultInstance(),
                                                 Time.getCurrentTime());
-        contextBuilder = command.getContext().toBuilder();
+        contextBuilder = command.getContext()
+                                .toBuilder();
     }
 
     private <T> void assertSetGet(CommandAttribute<T> attr, T value) {
@@ -56,14 +57,16 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_bool_attribute() {
-        final CommandAttribute<Boolean> attr = new CommandAttribute<Boolean>("flag") {};
+        final CommandAttribute<Boolean> attr = new CommandAttribute<Boolean>("flag") {
+        };
         assertSetGet(attr, true);
         assertSetGet(attr, false);
     }
 
     @Test
     public void set_and_get_string_attribute() {
-        final CommandAttribute<String> attr = new CommandAttribute<String>("str") {};
+        final CommandAttribute<String> attr = new CommandAttribute<String>("str") {
+        };
         final String value = getClass().getName();
 
         assertSetGet(attr, value);
@@ -71,7 +74,8 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_long_attribute() {
-        final CommandAttribute<Long> attr = new CommandAttribute<Long>("l-o-n-g") {};
+        final CommandAttribute<Long> attr = new CommandAttribute<Long>("l-o-n-g") {
+        };
         final Long value = 10101010L;
 
         assertSetGet(attr, value);
@@ -79,7 +83,8 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_int_attribute() {
-        final CommandAttribute<Integer> attr = new CommandAttribute<Integer>("int") {};
+        final CommandAttribute<Integer> attr = new CommandAttribute<Integer>("int") {
+        };
         final Integer value = 1024;
 
         assertSetGet(attr, value);
@@ -87,7 +92,8 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_message_attribute() {
-        final CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {};
+        final CommandAttribute<StringValue> attr = new CommandAttribute<StringValue>("str-val") {
+        };
         final StringValue value = Wrapper.forString(getClass().getName());
 
         assertSetGet(attr, value);
@@ -95,7 +101,8 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_float_attribute() {
-        final CommandAttribute<Float> attr = new CommandAttribute<Float>("flp") {};
+        final CommandAttribute<Float> attr = new CommandAttribute<Float>("flp") {
+        };
         final Float value = 1024.512f;
 
         assertSetGet(attr, value);
@@ -103,7 +110,8 @@ public class CommandAttributeShould {
 
     @Test
     public void set_and_get_double_attribute() {
-        final CommandAttribute<Double> attr = new CommandAttribute<Double>("dbl") {};
+        final CommandAttribute<Double> attr = new CommandAttribute<Double>("dbl") {
+        };
         final Double value = 100.500;
 
         assertSetGet(attr, value);
@@ -111,10 +119,11 @@ public class CommandAttributeShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void fail_on_unsupported_type() {
-        final CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {};
+        final CommandAttribute<Object> attr = new CommandAttribute<Object>("o") {
+        };
 
-        @SuppressWarnings("EmptyClass")
-        final Object value = new Object() {};
+        @SuppressWarnings("EmptyClass") final Object value = new Object() {
+        };
 
         attr.setValue(contextBuilder, value);
     }

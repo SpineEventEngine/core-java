@@ -25,12 +25,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.TenantId;
 import io.spine.base.UserId;
-import io.spine.server.command.CommandTest;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
@@ -47,14 +47,14 @@ import static io.spine.test.Values.newUserId;
 public class TestActorRequestFactory extends ActorRequestFactory {
 
     protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset) {
-        super(newBuilder().setActor(actor)
-                          .setZoneOffset(zoneOffset));
+        super(ActorRequestFactory.newBuilder().setActor(actor)
+                                 .setZoneOffset(zoneOffset));
     }
 
     protected TestActorRequestFactory(UserId actor, ZoneOffset zoneOffset, TenantId tenantId) {
-        super(newBuilder().setActor(actor)
-                          .setZoneOffset(zoneOffset)
-                          .setTenantId(tenantId));
+        super(ActorRequestFactory.newBuilder().setActor(actor)
+                                 .setZoneOffset(zoneOffset)
+                                 .setTenantId(tenantId));
     }
 
     public static TestActorRequestFactory newInstance(String actor, ZoneOffset zoneOffset) {
@@ -85,7 +85,19 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     /** Creates new command with the passed timestamp. */
     public Command createCommand(Message message, Timestamp timestamp) {
         final Command command = command().create(message);
-        return CommandTest.adjustTimestamp(command, timestamp);
+        return withTimestamp(command, timestamp);
+    }
+
+    private static Command withTimestamp(Command command, Timestamp timestamp) {
+        final CommandContext context = command.getContext();
+        final ActorContext.Builder withTime = context.getActorContext()
+                                                     .toBuilder()
+                                                     .setTimestamp(timestamp);
+        final Command.Builder commandBuilder =
+                command.toBuilder()
+                       .setContext(context.toBuilder()
+                                          .setActorContext(withTime));
+        return commandBuilder.build();
     }
 
     public Command createCommand(Message message) {

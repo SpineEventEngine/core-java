@@ -31,6 +31,7 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.given.ACommand;
 import io.spine.base.given.GivenCommandContext;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
@@ -38,7 +39,6 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.test.Values;
-import io.spine.test.commands.TestCommand;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -132,7 +132,8 @@ public class CommandsShould {
     public void generate_command_ids() {
         final CommandId id = Commands.generateId();
 
-        assertFalse(Identifier.toString(id).isEmpty());
+        assertFalse(Identifier.toString(id)
+                              .isEmpty());
     }
 
     @Test
@@ -177,8 +178,8 @@ public class CommandsShould {
 
     @Test
     public void return_true_if_file_is_for_commands() {
-        final FileDescriptor file = TestCommand.getDescriptor()
-                                               .getFile();
+        final FileDescriptor file = ACommand.getDescriptor()
+                                            .getFile();
 
         assertTrue(Commands.isCommandsFile(file));
     }
@@ -194,9 +195,10 @@ public class CommandsShould {
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
         final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
-        final Command cmd = requestFactory.command().createBasedOnContext(
-                                                             StringValue.getDefaultInstance(),
-                                                             context);
+        final Command cmd = requestFactory.command()
+                                          .createBasedOnContext(
+                                                  StringValue.getDefaultInstance(),
+                                                  context);
         assertTrue(Commands.isScheduled(cmd));
     }
 
@@ -237,7 +239,8 @@ public class CommandsShould {
 
     @Test
     public void obtain_type_of_command() {
-        final Command command = requestFactory.command().create(newUuidValue());
+        final Command command = requestFactory.command()
+                                              .create(newUuidValue());
 
         final TypeName typeName = CommandEnvelope.of(command)
                                                  .getTypeName();
@@ -250,7 +253,8 @@ public class CommandsShould {
         final ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsShould.class);
         final StringValue message = Wrapper.forString(newUuid());
-        final Command command = factory.command().create(message);
+        final Command command = factory.command()
+                                       .create(message);
 
         final TypeUrl typeUrl = CommandEnvelope.of(command)
                                                .getTypeName()

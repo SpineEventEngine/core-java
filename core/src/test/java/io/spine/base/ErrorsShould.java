@@ -55,7 +55,6 @@ public class ErrorsShould {
                               .getName(), error.getType());
     }
 
-
     @Test
     public void pass_the_null_tolerance_check() {
         new NullPointerTester()

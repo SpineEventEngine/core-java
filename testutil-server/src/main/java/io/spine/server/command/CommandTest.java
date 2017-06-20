@@ -75,7 +75,7 @@ public abstract class CommandTest<C extends Message> {
      *
      * @return new command instance with the modified timestamp
      */
-    public static Command adjustTimestamp(Command command, Timestamp timestamp) {
+    private static Command adjustTimestamp(Command command, Timestamp timestamp) {
         final CommandContext context = command.getContext();
         final ActorContext.Builder withTime = context.getActorContext()
                                                      .toBuilder()

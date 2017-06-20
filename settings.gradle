@@ -6,6 +6,7 @@ include 'client'
 include 'server-core'
 include 'server-deployment'
 include 'values'
-include 'testutil-server'
 include 'testutil-base'
+include 'testutil-client'
+include 'testutil-server'
 

@@ -17,28 +17,21 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
+syntax = "proto3";
 
-    compile project(path: ':core')
+package spine.test.commands;
 
-    testCompile project(path: ":testutil-base")
-    //TODO:2017-06-20:alexander.yevsyukov: Remove after moving TestActorRequestFactory
-    testCompile project(path: ":testutil-server")
+//
+// Defines types for `CommandsShould` test suite. Hence the funny file name.
+//
 
-    testCompile project(path: ":core", configuration: 'testArtifacts')
-}
+import "spine/options.proto";
 
-apply from: gRpcScript
+option (type_url_prefix) = "type.spine.io";
+option java_package="io.spine.base.given";
+option java_multiple_files = true;
+option java_outer_classname = "CommandsShouldProto";
 
-apply from: generateDescriptorSetScript
-
-apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = generateValidatingBuildersValue
+message ACommand {
+    string value = 1;
 }

@@ -28,7 +28,6 @@ option java_outer_classname = "CommandsShouldProto";
 
 import "spine/options.proto";
 
-// Only for usage in `CommandsShould` class.
 message TestCommand {
     string value = 1;
 }
