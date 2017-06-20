@@ -27,6 +27,7 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Event;
+import io.spine.server.entity.Entity;
 import io.spine.server.event.Given.EventMessage;
 import io.spine.server.storage.AbstractStorageShould;
 import io.spine.test.TestEventFactory;
@@ -70,7 +71,7 @@ public abstract class AggregateStorageShould
 
     @Before
     public void setUpAggregateStorageTest() {
-        storage = getStorage();
+        storage = getStorage(Entity.class);
     }
 
     @After
@@ -78,18 +79,20 @@ public abstract class AggregateStorageShould
         close(storage);
     }
 
+
+
     /**
      * Used to get a storage in tests with different ID types.
      *
      * <p>NOTE: the storage is closed after each test.
      *
+     * @param idClass class of aggregate ID
+     * @param aggregateClass aggregate class
      * @param <I> the type of aggregate IDs
      * @return an empty storage instance
      */
-    protected abstract <I> AggregateStorage<I> getStorage(
-            Class<? extends Aggregate<I,
-                                      ? extends Message,
-                                      ? extends ValidatingBuilder<?, ?>>> aggregateClass);
+
+    protected abstract <I> AggregateStorage<I> getStorage(Class<? extends I> idClass, Class<? extends Entity> aggregateClass);
 
     @Override
     protected AggregateStateRecord newStorageRecord() {
@@ -153,21 +156,21 @@ public abstract class AggregateStorageShould
 
     @Test
     public void write_and_read_event_by_String_id() {
-        final AggregateStorage<String> storage = getStorage(TestAggregateWithIdString.class);
+        final AggregateStorage<String> storage = getStorage(String.class, TestAggregateWithIdString.class);
         final String id = newUuid();
         writeAndReadEventTest(id, storage);
     }
 
     @Test
     public void write_and_read_event_by_Long_id() {
-        final AggregateStorage<Long> storage = getStorage(TestAggregateWithIdLong.class);
+        final AggregateStorage<Long> storage = getStorage(Long.class, TestAggregateWithIdLong.class);
         final long id = 10L;
         writeAndReadEventTest(id, storage);
     }
 
     @Test
     public void write_and_read_event_by_Integer_id() {
-        final AggregateStorage<Integer> storage = getStorage(TestAggregateWithIdInteger.class);
+        final AggregateStorage<Integer> storage = getStorage(Integer.class, TestAggregateWithIdInteger.class);
         final int id = 10;
         writeAndReadEventTest(id, storage);
     }
