@@ -29,7 +29,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
-import io.spine.test.validate.msg.ProjectId;
+import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeName;
 import org.junit.Test;
 
