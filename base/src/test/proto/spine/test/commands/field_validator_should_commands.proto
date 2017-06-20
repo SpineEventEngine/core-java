@@ -22,7 +22,7 @@ syntax = "proto3";
 package spine.test.commands;
 
 //
-// Defines types for `CommandsShould` test suite. Hence the funny file name.
+// Defines types for `FieldValidatorShould` test suite. Hence the funny file name.
 //
 
 import "spine/options.proto";
@@ -30,8 +30,8 @@ import "spine/options.proto";
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.base.given";
 option java_multiple_files = true;
-option java_outer_classname = "CommandsShouldProto";
+option java_outer_classname = "GivenCommandsProto";
 
-message ACommand {
+message CommandFromCommands {
     string value = 1;
 }

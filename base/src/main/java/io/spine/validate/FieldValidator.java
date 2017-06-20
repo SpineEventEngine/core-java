@@ -34,8 +34,8 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.base.Commands.isCommandsFile;
 
 /**
  * Validates messages according to Spine custom protobuf options and
@@ -99,6 +99,24 @@ abstract class FieldValidator<V> {
         } else {
             return ImmutableList.of((T) fieldValue);
         }
+    }
+
+    /**
+     * Checks if the file is for commands.
+     *
+     * @param file a descriptor of a {@code .proto} file to check
+     * @return {@code true} if the file name ends with {@code "commands"},
+     * {@code false} otherwise
+     */
+    static boolean isCommandsFile(FileDescriptor file) {
+        checkNotNull(file);
+
+        final String fqn = file.getName();
+        final int startIndexOfFileName = fqn.lastIndexOf('/') + 1;
+        final int endIndexOfFileName = fqn.lastIndexOf('.');
+        final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
+        final boolean isCommandsFile = fileName.endsWith("commands");
+        return isCommandsFile;
     }
 
     /**

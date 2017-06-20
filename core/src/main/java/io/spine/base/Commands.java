@@ -22,7 +22,6 @@ package io.spine.base;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
-import com.google.protobuf.Descriptors.FileDescriptor;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
@@ -50,12 +49,6 @@ import static io.spine.validate.Validate.isNotDefault;
  * @author Alexander Yevsyukov
  */
 public final class Commands {
-
-    /** A suffix which the {@code .proto} file containing commands must have in its name. */
-    public static final String FILE_NAME_SUFFIX = "commands";
-
-    private static final char FILE_PATH_SEPARATOR = '/';
-    private static final char FILE_EXTENSION_SEPARATOR = '.';
 
     private static final Stringifier<CommandId> idStringifier = new CommandIdStringifier();
 
@@ -159,24 +152,6 @@ public final class Commands {
                 return Timestamps2.compare(timestamp1, timestamp2);
             }
         });
-    }
-
-    /**
-     * Checks if the file is for commands.
-     *
-     * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name ends with the {@link #FILE_NAME_SUFFIX},
-     * {@code false} otherwise
-     */
-    public static boolean isCommandsFile(FileDescriptor file) {
-        checkNotNull(file);
-
-        final String fqn = file.getName();
-        final int startIndexOfFileName = fqn.lastIndexOf(FILE_PATH_SEPARATOR) + 1;
-        final int endIndexOfFileName = fqn.lastIndexOf(FILE_EXTENSION_SEPARATOR);
-        final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
-        final boolean isCommandsFile = fileName.endsWith(FILE_NAME_SUFFIX);
-        return isCommandsFile;
     }
 
     /**

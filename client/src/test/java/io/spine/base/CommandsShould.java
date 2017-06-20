@@ -31,7 +31,6 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
-import io.spine.base.given.ACommand;
 import io.spine.base.given.GivenCommandContext;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
@@ -176,21 +175,6 @@ public class CommandsShould {
                                       .size());
     }
 
-    @Test
-    public void return_true_if_file_is_for_commands() {
-        final FileDescriptor file = ACommand.getDescriptor()
-                                            .getFile();
-
-        assertTrue(Commands.isCommandsFile(file));
-    }
-
-    @Test
-    public void return_false_if_file_is_not_for_commands() {
-        final FileDescriptor file = StringValue.getDescriptor()
-                                               .getFile();
-
-        assertFalse(Commands.isCommandsFile(file));
-    }
 
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
