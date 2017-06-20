@@ -23,19 +23,15 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
-import io.spine.envelope.EventEnvelope;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
-import io.spine.type.TypeName;
-import io.spine.type.TypeUrl;
 
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.envelope.AbstractMessageEnvelope.ofEnclosedMessage;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
@@ -159,26 +155,6 @@ public final class Events {
         checkNotNull(id);
         checkNotEmptyOrBlank(id.getValue(), "event ID");
         return id;
-    }
-
-    /**
-     * Obtains type name from the message of the passed event.
-     */
-    public static TypeName typeNameOf(Event event) {
-        checkNotNull(event);
-        return TypeName.from(typeUrlOf(event));
-    }
-
-    /**
-     * Obtains the type URL of the event message.
-     *
-     * <p>The event must contain non-default message.
-     *
-     * @param event the event for which get the type URL
-     * @return the type URL of the event message.
-     */
-    public static TypeUrl typeUrlOf(Event event) {
-        return ofEnclosedMessage(EventEnvelope.of(event));
     }
 
     /**

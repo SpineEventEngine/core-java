@@ -25,6 +25,7 @@ import io.spine.base.Event;
 import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.Events;
+import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -76,5 +77,13 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
      */
     public EventContext getEventContext() {
         return this.eventContext;
+    }
+
+    /**
+     * Obtains the type of the event message.
+     */
+    public TypeName getTypeName() {
+        final TypeName result = TypeName.of(eventMessage);
+        return result;
     }
 }

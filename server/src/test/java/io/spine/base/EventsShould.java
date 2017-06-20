@@ -28,6 +28,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.given.GivenEvent;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.envelope.EventEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.EventFactory;
 import io.spine.string.Stringifiers;
@@ -201,7 +202,8 @@ public class EventsShould {
                                             .build();
         final Event event = ef.createEvent(Time.getCurrentTime(), Tests.<Version>nullRef());
 
-        final TypeName typeName = Events.typeNameOf(event);
+        final TypeName typeName = EventEnvelope.of(event)
+                                               .getTypeName();
         assertNotNull(typeName);
         assertEquals(Timestamp.class.getSimpleName(), typeName.getSimpleName());
     }

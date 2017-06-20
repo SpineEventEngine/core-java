@@ -27,12 +27,10 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
-import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;
-import io.spine.type.TypeUrl;
 
 import javax.annotation.Nullable;
 import java.util.Collections;
@@ -44,7 +42,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.EMPTY_ID;
 import static io.spine.base.CommandContext.Schedule;
-import static io.spine.envelope.AbstractMessageEnvelope.ofEnclosedMessage;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
@@ -236,18 +233,6 @@ public final class Commands {
         final String idStr = Identifier.toString(id);
         checkArgument(!idStr.equals(EMPTY_ID), "Command ID must not be an empty string.");
         return id;
-    }
-
-    /**
-     * Obtains the type URL of the command message.
-     *
-     * <p>The passed command must have non-default message.
-     *
-     * @param command the command from which to get the URL
-     * @return the type URL of the command message
-     */
-    public static TypeUrl typeUrlOf(Command command) {
-        return ofEnclosedMessage(CommandEnvelope.of(command));
     }
 
     /**
