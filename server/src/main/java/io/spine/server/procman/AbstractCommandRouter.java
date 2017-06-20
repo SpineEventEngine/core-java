@@ -28,7 +28,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.ActorContext;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -132,8 +132,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
      */
     protected Command route(Message message) {
         final Command command = produceCommand(message);
-        final SettableFuture<MessageAcked> finishFuture = SettableFuture.create();
-        final StreamObserver<MessageAcked> observer = newAckingObserver(finishFuture);
+        final SettableFuture<IsSent> finishFuture = SettableFuture.create();
+        final StreamObserver<IsSent> observer = newAckingObserver(finishFuture);
         commandBus.post(command, observer);
         // Wait till the call is completed.
         try {
@@ -162,11 +162,11 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         return result;
     }
 
-    private static StreamObserver<MessageAcked> newAckingObserver(
-            final SettableFuture<MessageAcked> finishFuture) {
-        return new StreamObserver<MessageAcked>() {
+    private static StreamObserver<IsSent> newAckingObserver(
+            final SettableFuture<IsSent> finishFuture) {
+        return new StreamObserver<IsSent>() {
             @Override
-            public void onNext(MessageAcked value) {
+            public void onNext(IsSent value) {
                 finishFuture.set(value);
             }
 

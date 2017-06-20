@@ -29,7 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.EventEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;
@@ -186,7 +186,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Event event) {
-        post(event, StreamObservers.<MessageAcked>noOpObserver());
+        post(event, StreamObservers.<IsSent>noOpObserver());
     }
 
     /**
@@ -202,7 +202,7 @@ public class EventBus extends CommandOutputBus<Event,
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
     public final void post(Iterable<Event> events) {
-        post(events, StreamObservers.<MessageAcked>noOpObserver());
+        post(events, StreamObservers.<IsSent>noOpObserver());
     }
 
     @Override

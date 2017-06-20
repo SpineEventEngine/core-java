@@ -26,7 +26,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
@@ -118,7 +118,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         commandBus.register(faultyHandler);
 
         final Command addTaskCommand = clearTenantId(addTask());
-        final MemoizingObserver<MessageAcked> observer = memoizingObserver();
+        final MemoizingObserver<IsSent> observer = memoizingObserver();
         commandBus.post(addTaskCommand, observer);
 
         final InvalidProjectName failureThrowable = faultyHandler.getThrowable();

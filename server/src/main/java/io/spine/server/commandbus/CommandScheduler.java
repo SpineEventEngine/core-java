@@ -26,7 +26,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 
 import javax.annotation.CheckReturnValue;
@@ -79,7 +79,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
             scheduleAndStore(envelope);

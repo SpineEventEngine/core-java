@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Command;
 import io.spine.base.Error;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.base.TenantId;
 import io.spine.envelope.CommandEnvelope;
@@ -54,16 +54,16 @@ class ValidationFilter implements CommandBusFilter {
      * Returns {@code true} if a command is valid, {@code false} otherwise.
      */
     @Override
-    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
-        final Optional<MessageAcked> tenantCheckResult = isTenantIdValid(envelope);
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
+        final Optional<IsSent> tenantCheckResult = isTenantIdValid(envelope);
         if (tenantCheckResult.isPresent()) {
             return tenantCheckResult;
         }
-        final Optional<MessageAcked> commandValid = isCommandValid(envelope);
+        final Optional<IsSent> commandValid = isCommandValid(envelope);
         return commandValid;
     }
 
-    private Optional<MessageAcked> isTenantIdValid(CommandEnvelope envelope) {
+    private Optional<IsSent> isTenantIdValid(CommandEnvelope envelope) {
         final TenantId tenantId = envelope.getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
         final Command command = envelope.getCommand();
@@ -81,7 +81,7 @@ class ValidationFilter implements CommandBusFilter {
         return Optional.absent();
     }
 
-    private Optional<MessageAcked> isCommandValid(CommandEnvelope envelope) {
+    private Optional<IsSent> isCommandValid(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
                                                               .validate(envelope);
@@ -96,7 +96,7 @@ class ValidationFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            final Optional<MessageAcked> result = of(envelope.acknowledge(status));
+            final Optional<IsSent> result = of(envelope.acknowledge(status));
             return result;
         }
         return Optional.absent();

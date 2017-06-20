@@ -23,7 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import io.spine.base.Command;
 import io.spine.base.Error;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.type.CommandClass;
@@ -52,7 +52,7 @@ class DeadCommandFilter implements CommandBusFilter {
     }
 
     @Override
-    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
         if (!hasDispatcher(envelope.getMessageClass())) {
             final Command command = envelope.getCommand();
             final CommandException unsupported = new UnsupportedCommandException(command);
@@ -62,7 +62,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            final MessageAcked result = envelope.acknowledge(status);
+            final IsSent result = envelope.acknowledge(status);
             return Optional.of(result);
         }
         return Optional.absent();

@@ -24,7 +24,7 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.io.StreamObservers;
 import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
@@ -53,7 +53,7 @@ public class CommandServiceShould {
     private BoundedContext projectsContext;
 
     private BoundedContext customersContext;
-    private final MemoizingObserver<MessageAcked> responseObserver = StreamObservers.memoizingObserver();
+    private final MemoizingObserver<IsSent> responseObserver = StreamObservers.memoizingObserver();
 
     @Before
     public void setUp() {
@@ -111,12 +111,12 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        final MemoizingObserver<MessageAcked> observer = StreamObservers.memoizingObserver();
+        final MemoizingObserver<IsSent> observer = StreamObservers.memoizingObserver();
         service.post(cmd, observer);
 
         assertNull(observer.getError());
         assertTrue(observer.isCompleted());
-        final MessageAcked acked = observer.firstResponse();
+        final IsSent acked = observer.firstResponse();
         final CommandId id = AnyPacker.unpack(acked.getMessageId());
         assertEquals(cmd.getId(), id);
     }

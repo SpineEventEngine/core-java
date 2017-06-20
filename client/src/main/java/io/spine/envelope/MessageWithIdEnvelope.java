@@ -22,7 +22,7 @@ package io.spine.envelope;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.protobuf.AnyPacker;
 
@@ -46,18 +46,18 @@ public abstract class MessageWithIdEnvelope<I extends Message, T>
      */
     public abstract I getId();
 
-    public final MessageAcked acknowledge() {
+    public final IsSent acknowledge() {
         return acknowledge(statusOk());
     }
 
-    public final MessageAcked acknowledge(Status status) {
+    public final IsSent acknowledge(Status status) {
         checkNotNull(status);
         final I id = getId();
         final Any packedId = AnyPacker.pack(id);
-        final MessageAcked result = MessageAcked.newBuilder()
-                                                .setMessageId(packedId)
-                                                .setStatus(status)
-                                                .build();
+        final IsSent result = IsSent.newBuilder()
+                                    .setMessageId(packedId)
+                                    .setStatus(status)
+                                    .build();
         return result;
     }
 }

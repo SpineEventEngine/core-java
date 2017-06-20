@@ -27,7 +27,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.server.bus.Bus;
@@ -148,12 +148,12 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Optional<MessageAcked> preProcess(final E message) {
+    protected Optional<IsSent> preProcess(final E message) {
         final Optional<Throwable> violation = validateMessage(message.getMessage());
-        final Optional<MessageAcked> result = violation.transform(
-                new Function<Throwable, MessageAcked>() {
+        final Optional<IsSent> result = violation.transform(
+                new Function<Throwable, IsSent>() {
                     @Override
-                    public MessageAcked apply(@Nullable Throwable input) {
+                    public IsSent apply(@Nullable Throwable input) {
                         checkNotNull(input);
                         final Error error = Exceptions.toError(input);
                         final Status status = Status.newBuilder()
@@ -167,7 +167,7 @@ public abstract class CommandOutputBus<M extends Message,
     }
 
     @Override
-    protected MessageAcked doPost(E envelope) {
+    protected IsSent doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
@@ -175,7 +175,7 @@ public abstract class CommandOutputBus<M extends Message,
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedEnvelope);
         }
-        final MessageAcked acknowledgement = envelope.acknowledge();
+        final IsSent acknowledgement = envelope.acknowledge();
         return acknowledgement;
     }
 

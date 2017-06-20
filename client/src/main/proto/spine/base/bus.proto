@@ -19,23 +19,29 @@
 //
 syntax = "proto3";
 
-package spine.client;
+package spine.base;
 
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.client.grpc";
-option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
 option java_generate_equals_and_hash = true;
+option java_multiple_files = true;
+option java_outer_classname = "BusProto";
+option java_package = "io.spine.base";
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 
 import "spine/options.proto";
-import "spine/base/command.proto";
-import "spine/base/bus.proto";
+import "spine/base/response.proto";
 
-// A service for sending commands from clients.
-service CommandService {
+// The result of sending a message to a bus.
+//
+// The respone message brings the ID of the message which has been acknowlaged or rejected.
+//
+message IsSent {
 
-    // Request to handle a command.
-    rpc Post(base.Command) returns (base.IsSent);
+    // The correlation ID of the message, i.e. the ID of the message which has been posted.
+    google.protobuf.Any message_id = 1 [(required) = true];
+
+    // The responce status.
+    base.Status status = 2 [(required) = true];
 }

@@ -28,7 +28,7 @@ import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.envelope.CommandEnvelope;
@@ -91,7 +91,7 @@ public abstract class AbstractCommandBusTestSuite {
     protected FailureBus failureBus;
     protected ExecutorCommandScheduler scheduler;
     protected CreateProjectHandler createProjectHandler;
-    protected MemoizingObserver<MessageAcked> observer;
+    protected MemoizingObserver<IsSent> observer;
 
     /**
      * A public constructor for derived test cases.
@@ -210,7 +210,7 @@ public abstract class AbstractCommandBusTestSuite {
         commandBus.register(createProjectHandler);
 
         final CommandBus spy = spy(commandBus);
-        spy.post(commands, StreamObservers.<MessageAcked>memoizingObserver());
+        spy.post(commands, StreamObservers.<IsSent>memoizingObserver());
 
         @SuppressWarnings("unchecked")
         final ArgumentCaptor<Iterable<Command>> storingCaptor = forClass(Iterable.class);

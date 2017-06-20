@@ -23,7 +23,7 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 
 /**
@@ -54,7 +54,7 @@ public interface CommandBusFilter {
      *                      command
      * @return {@code true} if the command passes the filter, {@code false} otherwise
      */
-    Optional<MessageAcked> accept(CommandEnvelope envelope);
+    Optional<IsSent> accept(CommandEnvelope envelope);
 
     void onClose(CommandBus commandBus);
 }

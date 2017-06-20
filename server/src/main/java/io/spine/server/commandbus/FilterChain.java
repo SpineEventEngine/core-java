@@ -24,7 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 
 import java.util.List;
@@ -50,9 +50,9 @@ final class FilterChain implements CommandBusFilter {
     }
 
     @Override
-    public Optional<MessageAcked> accept(CommandEnvelope envelope) {
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
         for (CommandBusFilter filter : filters) {
-            final Optional<MessageAcked> result = filter.accept(envelope);
+            final Optional<IsSent> result = filter.accept(envelope);
             if (result.isPresent()) {
                 return result;
             }

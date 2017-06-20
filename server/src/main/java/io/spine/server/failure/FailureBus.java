@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Subscribe;
 import io.spine.base.Failure;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.io.StreamObservers;
 import io.spine.server.outbus.CommandOutputBus;
@@ -151,7 +151,7 @@ public class FailureBus extends CommandOutputBus<Failure,
      * @see #post(Message, StreamObserver)
      */
     public final void post(Failure failure) {
-        post(failure, StreamObservers.<MessageAcked>noOpObserver());
+        post(failure, StreamObservers.<IsSent>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

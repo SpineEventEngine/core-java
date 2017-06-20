@@ -29,7 +29,7 @@ import io.spine.base.Command;
 import io.spine.base.Error;
 import io.spine.base.FailureThrowable;
 import io.spine.base.Identifier;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.Environment;
@@ -164,8 +164,8 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Optional<MessageAcked> preProcess(CommandEnvelope message) {
-        final Optional<MessageAcked> result = filterChain.accept(message);
+    protected Optional<IsSent> preProcess(CommandEnvelope message) {
+        final Optional<IsSent> result = filterChain.accept(message);
         return result;
     }
 
@@ -175,9 +175,9 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected MessageAcked doPost(CommandEnvelope envelope) {
+    protected IsSent doPost(CommandEnvelope envelope) {
         final CommandDispatcher dispatcher = getDispatcher(envelope);
-        MessageAcked result;
+        IsSent result;
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);

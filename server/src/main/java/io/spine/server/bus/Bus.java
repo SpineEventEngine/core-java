@@ -25,7 +25,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.MessageAcked;
+import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.io.StreamObservers;
@@ -91,7 +91,7 @@ public abstract class Bus<T extends Message,
      * @param message         the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
-    public final void post(T message, StreamObserver<MessageAcked> acknowledgement) {
+    public final void post(T message, StreamObserver<IsSent> acknowledgement) {
         checkNotNull(message);
         checkNotNull(acknowledgement);
         checkArgument(isNotDefault(message));
@@ -107,7 +107,7 @@ public abstract class Bus<T extends Message,
      * @param messages        the message to post
      * @param acknowledgement the observer to receive outcome of the operation
      */
-    public final void post(Iterable<T> messages, StreamObserver<MessageAcked> acknowledgement) {
+    public final void post(Iterable<T> messages, StreamObserver<IsSent> acknowledgement) {
         checkNotNull(messages);
         checkNotNull(acknowledgement);
 
@@ -155,12 +155,12 @@ public abstract class Bus<T extends Message,
      * @return the message itself if it passes the filtering or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    private Iterable<T> filter(Iterable<T> messages, StreamObserver<MessageAcked> acknowledgement) {
+    private Iterable<T> filter(Iterable<T> messages, StreamObserver<IsSent> acknowledgement) {
         checkNotNull(messages);
         checkNotNull(acknowledgement);
         final Collection<T> result = new LinkedList<>();
         for (T message : messages) {
-            final Optional<MessageAcked> response = preProcess(toEnvelope(message));
+            final Optional<IsSent> response = preProcess(toEnvelope(message));
             if (response.isPresent()) {
                 acknowledgement.onNext(response.get());
             } else {
@@ -170,7 +170,7 @@ public abstract class Bus<T extends Message,
         return result;
     }
 
-    protected abstract Optional<MessageAcked> preProcess(E message);
+    protected abstract Optional<IsSent> preProcess(E message);
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.
@@ -190,7 +190,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #post(Message, StreamObserver) for the public API
      */
-    protected abstract MessageAcked doPost(E envelope);
+    protected abstract IsSent doPost(E envelope);
 
     /**
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
@@ -199,11 +199,11 @@ public abstract class Bus<T extends Message,
      * @param envelopes       the envelopes to post
      * @param acknowledgement the observer of the message posting
      */
-    private void doPost(Iterable<E> envelopes, StreamObserver<MessageAcked> acknowledgement) {
+    private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> acknowledgement) {
         final ErrorPossessedObserver ackingSupervisor =
                 new ErrorPossessedObserver(acknowledgement);
         for (E message : envelopes) {
-            final MessageAcked result = doPost(message);
+            final IsSent result = doPost(message);
             ackingSupervisor.onNext(result);
         }
         ackingSupervisor.onCompleted();
@@ -253,12 +253,12 @@ public abstract class Bus<T extends Message,
     /**
      * Counts the {@link StreamObserver#onError StreamObserver.onError} invocations.
      */
-    private static class ErrorPossessedObserver extends StreamObservers.SpyObserver<MessageAcked> {
+    private static class ErrorPossessedObserver extends StreamObservers.SpyObserver<IsSent> {
 
         @Nullable
         private Throwable error;
 
-        private ErrorPossessedObserver(StreamObserver<MessageAcked> delegate) {
+        private ErrorPossessedObserver(StreamObserver<IsSent> delegate) {
             super(delegate);
             this.error = null;
         }
@@ -269,7 +269,7 @@ public abstract class Bus<T extends Message,
         }
 
         @Override
-        protected void onNextPassed(MessageAcked next) {
+        protected void onNextPassed(IsSent next) {
             if (hasError()) {
                 throw new IllegalStateException("Cannot consume stream after error.", getError());
             }
