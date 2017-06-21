@@ -50,6 +50,7 @@ import static java.util.Collections.singleton;
  * @param <D> the type of dispatches used by this bus
  * @author Alex Tymchenko
  * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
 public abstract class Bus<T extends Message,
                           E extends MessageWithIdEnvelope<?, T>,
