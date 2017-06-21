@@ -22,6 +22,7 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.IsSent;
 import io.spine.base.Responses;
@@ -34,6 +35,9 @@ import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**
+ * A utility for working with the {@linkplain io.spine.envelope.MessageEnvelope envelopes} and
+ * the {@linkplain IsSent result} of {@linkplain Bus#post(Message, StreamObserver) posting} them.
+ *
  * @author Dmytro Dashenkov
  */
 @Internal
@@ -43,10 +47,23 @@ public final class Mailing {
         // Prevent utility class instantiation.
     }
 
+    /**
+     * Checks in the sent envelope with the {@code OK} status.
+     *
+     * @param envelope the envelope to check in
+     * @return the envelope acknowledgement
+     */
     public static IsSent checkIn(MessageWithIdEnvelope<?, ?> envelope) {
         return checkIn(envelope, Responses.statusOk());
     }
 
+    /**
+     * Checks in the sent envelope with the given status.
+     *
+     * @param envelope the envelope to check in
+     * @param status   the status of the envelope
+     * @return the envelope posting result
+     */
     public static IsSent checkIn(MessageWithIdEnvelope<?, ?> envelope, Status status) {
         checkNotNull(envelope);
         checkNotNull(status);

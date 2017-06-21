@@ -46,6 +46,9 @@ public final class Responses {
         return RESPONSE_OK;
     }
 
+    /**
+     * Returns the {@code OK} {@link Status} instance.
+     */
     public static Status statusOk() {
         return STATUS_OK;
     }
