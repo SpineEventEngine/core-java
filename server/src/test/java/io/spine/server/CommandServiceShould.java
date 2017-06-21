@@ -24,7 +24,9 @@ import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
+import io.spine.base.Error;
 import io.spine.base.IsSent;
+import io.spine.base.Status;
 import io.spine.io.StreamObservers;
 import io.spine.io.StreamObservers.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
@@ -38,6 +40,8 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Set;
 
+import static io.spine.base.Status.StatusCase.ERROR;
+import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -122,17 +126,21 @@ public class CommandServiceShould {
     }
 
     @Test
-    public void return_error_if_command_is_unsupported() {
+    public void return_error_status_if_command_is_unsupported() {
         final TestActorRequestFactory factory = TestActorRequestFactory.newInstance(getClass());
 
         final Command unsupportedCmd = factory.createCommand(StringValue.getDefaultInstance());
 
         service.post(unsupportedCmd, responseObserver);
 
-        final Throwable error = responseObserver.getError();
-        assertNotNull(error);
-        final Throwable cause = error.getCause();
-        assertEquals(UnsupportedCommandException.class, cause.getClass());
+        assertTrue(responseObserver.isCompleted());
+        final IsSent result = responseObserver.firstResponse();
+        assertNotNull(result);
+        assertTrue(isNotDefault(result));
+        final Status status = result.getStatus();
+        assertEquals(ERROR, status.getStatusCase());
+        final Error error = status.getError();
+        assertEquals(UnsupportedCommandException.class.getCanonicalName(), error.getType());
     }
 
     @Test
