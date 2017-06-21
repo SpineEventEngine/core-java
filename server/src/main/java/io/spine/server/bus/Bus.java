@@ -87,7 +87,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
      *
-     * @param message         the message to post
+     * @param message  the message to post
      * @param observer the observer to receive outcome of the operation
      * @see #post(Iterable, StreamObserver) for posing multiple messages at once
      */
@@ -117,7 +117,6 @@ public abstract class Bus<T extends Message,
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@link io.spine.base.Failure} may result ether a {@link io.spine.base.Failure} status or
      * an {@link io.spine.base.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
-     * the {@link io.spine.base.Failure} status may only pop up if the {@link }
      * the {@link io.spine.base.Failure} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws
      * the {@linkplain io.spine.base.FailureThrowable FailureThrowables} (wrapped in a
@@ -172,8 +171,8 @@ public abstract class Bus<T extends Message,
      * otherwise, {@link StreamObserver#onNext StreamObserver.onNext} is called for that message.
      *
      * <p>The filtering may cause {@link IsSent} instances with {@code OK} status for those message
-     * that can be handled during the filtering. Such messages are technically valid, but should not
-     * be processed further. An example is a scheduled Command.
+     * that can be handled during the filtering itself. Such messages are technically valid, but
+     * should not be processed further. An example is a scheduled Command.
      *
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
@@ -237,7 +236,7 @@ public abstract class Bus<T extends Message,
      *             <li>{@link io.spine.base.Failure Failure} status, if a {@code Failure} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
-     *                 {@link io.spine.base.FailureThrowable FailureThrowable}, has been thrown
+     *                 a {@link io.spine.base.FailureThrowable FailureThrowable}, has been thrown
      *                 during the message posting.
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API
@@ -248,8 +247,8 @@ public abstract class Bus<T extends Message,
      * Posts each of the given envelopes into the bus and acknowledges the message posting with
      * the {@code observer}.
      *
-     * @param envelopes       the envelopes to post
-     * @param observer the observer of the message posting
+     * @param envelopes the envelopes to post
+     * @param observer  the observer of the message posting
      * @see #doPost(MessageWithIdEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {
