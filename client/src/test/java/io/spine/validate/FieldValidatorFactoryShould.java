@@ -27,10 +27,14 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import io.spine.base.FieldPath;
+import io.spine.test.validate.msg.MapRequiredMsgFieldValue;
+import io.spine.test.validate.msg.RepeatedRequiredMsgFieldValue;
 import io.spine.test.validate.msg.RequiredByteStringFieldValue;
 import io.spine.test.validate.msg.RequiredEnumFieldValue;
 import io.spine.test.validate.msg.RequiredMsgFieldValue;
 import org.junit.Test;
+
+import java.util.Collections;
 
 import static com.google.protobuf.Descriptors.FieldDescriptor;
 import static org.junit.Assert.assertTrue;
@@ -41,6 +45,28 @@ import static org.junit.Assert.assertTrue;
 public class FieldValidatorFactoryShould {
 
     private static final FieldPath FIELD_PATH = FieldPath.getDefaultInstance();
+
+    @Test
+    public void create_map_field_validator() {
+        final FieldDescriptor field = MapRequiredMsgFieldValue.getDescriptor().getFields().get(0);
+
+        final Object fieldValue = Collections.singletonMap(StringValue.getDefaultInstance(), StringValue.getDefaultInstance());
+
+        final FieldValidator validator = FieldValidatorFactory.create(field, fieldValue, FIELD_PATH);
+
+        assertTrue(validator instanceof MessageFieldValidator);
+    }
+
+    @Test
+    public void create_repeated_field_validator() {
+        final FieldDescriptor field = RepeatedRequiredMsgFieldValue.getDescriptor().getFields().get(0);
+
+        final Object fieldValue = Collections.singletonList(StringValue.getDefaultInstance());
+
+        final FieldValidator validator = FieldValidatorFactory.create(field, fieldValue, FIELD_PATH);
+
+        assertTrue(validator instanceof MessageFieldValidator);
+    }
 
     @Test
     public void create_message_field_validator() {

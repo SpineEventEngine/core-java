@@ -33,6 +33,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Map;
 
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.base.Commands.isCommandsFile;
@@ -47,7 +48,7 @@ import static io.spine.base.Commands.isCommandsFile;
 abstract class FieldValidator<V> {
 
     private static final String ENTITY_ID_REPEATED_FIELD_MSG =
-                                "Entity ID must not be a repeated field.";
+            "Entity ID must not be a repeated field.";
 
     private final FieldDescriptor fieldDescriptor;
     private final ImmutableList<V> values;
@@ -92,10 +93,13 @@ abstract class FieldValidator<V> {
         this.ifMissingOption = getFieldOption(OptionsProto.ifMissing);
     }
 
-    @SuppressWarnings({"unchecked", "IfMayBeConditional"})
+    @SuppressWarnings({"unchecked", "IfMayBeConditional", "ChainOfInstanceofChecks"})
     static <T> ImmutableList<T> toValueList(Object fieldValue) {
         if (fieldValue instanceof List) {
             return ImmutableList.copyOf((List<T>) fieldValue);
+        } else if (fieldValue instanceof Map) {
+            //TODO:2017-06-21:yuri.sergiichuk: This branch is used only in Validating Builders and probably should be removed after VBuilder update
+            return ImmutableList.copyOf(((Map) fieldValue).values());
         } else {
             return ImmutableList.of((T) fieldValue);
         }
@@ -227,7 +231,8 @@ abstract class FieldValidator<V> {
      */
     protected String getErrorMsgFormat(Message option, String customMsg) {
         final String defaultMsg = option.getDescriptorForType()
-                                        .getOptions().getExtension(OptionsProto.defaultMessage);
+                                        .getOptions()
+                                        .getExtension(OptionsProto.defaultMessage);
         final String msg = customMsg.isEmpty() ? defaultMsg : customMsg;
         return msg;
     }
@@ -235,11 +240,12 @@ abstract class FieldValidator<V> {
     /**
      * Returns a field validation option.
      *
-     * @param <T> the type of option
+     * @param <T>       the type of option
      * @param extension an extension key used to obtain a validation option
      */
     protected final <T> T getFieldOption(GeneratedExtension<FieldOptions, T> extension) {
-        final T option = fieldDescriptor.getOptions().getExtension(extension);
+        final T option = fieldDescriptor.getOptions()
+                                        .getExtension(extension);
         return option;
     }
 

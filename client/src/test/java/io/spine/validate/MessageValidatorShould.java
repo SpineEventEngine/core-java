@@ -53,6 +53,7 @@ import io.spine.test.validate.msg.EntityIdLongFieldValue;
 import io.spine.test.validate.msg.EntityIdMsgFieldValue;
 import io.spine.test.validate.msg.EntityIdRepeatedFieldValue;
 import io.spine.test.validate.msg.EntityIdStringFieldValue;
+import io.spine.test.validate.msg.MapRequiredMsgFieldValue;
 import io.spine.test.validate.msg.MaxNumberFieldValue;
 import io.spine.test.validate.msg.MinNumberFieldValue;
 import io.spine.test.validate.msg.PatternStringFieldValue;
@@ -118,6 +119,22 @@ public class MessageValidatorShould {
     /*
      * Required option tests.
      */
+
+    @Test
+    public void find_out_that_map_required_field_has_no_values() {
+        validate(MapRequiredMsgFieldValue.getDefaultInstance());
+        assertIsValid(false);
+    }
+
+    @Test
+    public void find_out_that_map_required_field_has_valid_values() {
+        final MapRequiredMsgFieldValue validMsg = MapRequiredMsgFieldValue.newBuilder()
+                                                                     .putValue(newUuid(), newStringValue())
+                                                                     .putValue(newUuid(), newStringValue())
+                                                                     .build();
+        validate(validMsg);
+        assertIsValid(true);
+    }
 
     @Test
     public void find_out_that_required_Message_field_is_set() {
