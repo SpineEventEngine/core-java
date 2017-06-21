@@ -60,6 +60,10 @@ message RepeatedRequiredMsgFieldValue {
     repeated google.protobuf.StringValue value = 1 [(required) = true];
 }
 
+message MapRequiredMsgFieldValue {
+    map<string, google.protobuf.StringValue> value = 1 [(required) = true];
+}
+
 message RequiredEnumFieldValue {
     Time value = 1 [(required) = true];
 }
