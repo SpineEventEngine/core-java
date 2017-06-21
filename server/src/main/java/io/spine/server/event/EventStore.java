@@ -175,7 +175,7 @@ public class EventStore implements AutoCloseable {
     }
 
     /**
-     * Implement this method for storing the passed event.
+     * Stores the passed event.
      *
      * @param event the event to store.
      */
@@ -184,7 +184,7 @@ public class EventStore implements AutoCloseable {
     }
 
     /**
-     * Implement this method for storing the passed events.
+     * Stores the passed events.
      *
      * @param events the events to store.
      */

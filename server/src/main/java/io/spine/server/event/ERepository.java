@@ -185,6 +185,9 @@ class ERepository extends DefaultRecordBasedRepository<EventId, EEntity, Event> 
         }
     }
 
+    /**
+     * Transforms an {@link Event} to the {@linkplain EEntity Event Entity}.
+     */
     private enum EventToEEntity implements Function<Event, EEntity> {
         INSTANCE;
 
