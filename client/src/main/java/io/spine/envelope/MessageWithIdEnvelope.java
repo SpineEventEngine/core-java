@@ -23,7 +23,7 @@ package io.spine.envelope;
 import com.google.protobuf.Message;
 
 /**
- * An abstract {@code MessageEnvelope} or the messages which declare an ID.
+ * An abstract {@code MessageEnvelope} for the messages which declare an ID.
  *
  * @author Dmytro Dashenkov
  */
@@ -35,7 +35,7 @@ public abstract class MessageWithIdEnvelope<I extends Message, T>
     }
 
     /**
-     * Obtains the identifier of the object.
+     * Obtains the identifier of the message.
      */
     public abstract I getId();
 }
