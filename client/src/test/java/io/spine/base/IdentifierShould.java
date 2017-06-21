@@ -262,6 +262,7 @@ public class IdentifierShould {
         final String id = "abcdef";
         final Any packed = Identifier.pack(id);
 
+        @SuppressWarnings("unused") // Required to invoke the cast.
         final Message wrong = Identifier.unpack(packed);
     }
 }
