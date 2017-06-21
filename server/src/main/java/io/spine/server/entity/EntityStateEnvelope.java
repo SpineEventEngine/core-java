@@ -113,6 +113,9 @@ public final class EntityStateEnvelope<I, S extends Message>
         return null;
     }
 
+    /**
+     * Obtains the {@link Entity} ID.
+     */
     public I getId() {
         final I result = Identifier.unpack(entityId);
         return result;
