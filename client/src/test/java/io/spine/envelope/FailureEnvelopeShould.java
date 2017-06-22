@@ -23,7 +23,6 @@ import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.Failure;
-import io.spine.base.FailureId;
 import io.spine.base.Failures;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.TestActorRequestFactory;
@@ -37,10 +36,9 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alex Tymchenko
  */
-public class FailureEnvelopeShould extends MessageWithIdEnvelopeShould<Failure,
-                                                                       FailureId,
-                                                                       FailureEnvelope,
-                                                                       FailureClass> {
+public class FailureEnvelopeShould extends MessageEnvelopeShould<Failure,
+                                                                 FailureEnvelope,
+                                                                 FailureClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(FailureEnvelopeShould.class);
@@ -64,11 +62,6 @@ public class FailureEnvelopeShould extends MessageWithIdEnvelopeShould<Failure,
     @Override
     protected FailureClass getMessageClass(Failure obj) {
         return FailureClass.of(obj);
-    }
-
-    @Override
-    protected FailureId getId(Failure obj) {
-        return obj.getId();
     }
 
     @Test

@@ -161,6 +161,11 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
+    protected Message getId(EventEnvelope envelope) {
+        return envelope.getId();
+    }
+
+    @Override
     protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
         return new EventDispatcherRegistry();
     }

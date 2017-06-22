@@ -28,8 +28,6 @@ import io.spine.base.Error;
 import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.client.grpc.CommandServiceGrpc;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.server.bus.Mailing;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.UnsupportedCommandException;
@@ -40,6 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -90,7 +89,10 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         final Status errorStatus = Status.newBuilder()
                                          .setError(error)
                                          .build();
-        final IsSent response = Mailing.checkIn(CommandEnvelope.of(request), errorStatus);
+        final IsSent response = IsSent.newBuilder()
+                                      .setMessageId(pack(errorStatus))
+                                      .setStatus(errorStatus)
+                                      .build();
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

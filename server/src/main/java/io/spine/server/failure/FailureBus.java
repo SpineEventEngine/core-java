@@ -112,6 +112,11 @@ public class FailureBus extends CommandOutputBus<Failure,
         log().warn("No dispatcher defined for the failure class {}", message.getMessageClass());
     }
 
+    @Override
+    protected Message getId(FailureEnvelope envelope) {
+        return envelope.getId();
+    }
+
     /**
      * {@inheritDoc}
      *

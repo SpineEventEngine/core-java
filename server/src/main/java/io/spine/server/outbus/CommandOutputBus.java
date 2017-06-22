@@ -40,7 +40,6 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.bus.Mailing.checkIn;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -147,7 +146,7 @@ public abstract class CommandOutputBus<M extends Message,
                         final Status status = Status.newBuilder()
                                                     .setError(error)
                                                     .build();
-                        return checkIn(message, status);
+                        return setStatus(message, status);
                     }
                 }
         );
@@ -163,7 +162,7 @@ public abstract class CommandOutputBus<M extends Message,
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedEnvelope);
         }
-        final IsSent acknowledgement = checkIn(envelope);
+        final IsSent acknowledgement = acknowledge(envelope);
         return acknowledgement;
     }
 

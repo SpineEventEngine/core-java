@@ -30,7 +30,6 @@ import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
-import static io.spine.server.bus.Mailing.checkIn;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 
@@ -65,7 +64,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            final IsSent result = checkIn(envelope, status);
+            final IsSent result = commandBus.setStatus(envelope, status);
             return Optional.of(result);
         }
         return Optional.absent();

@@ -41,7 +41,6 @@ import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.base.CommandStatus.SCHEDULED;
 import static io.spine.base.Commands.isScheduled;
-import static io.spine.server.bus.Mailing.checkIn;
 import static io.spine.time.Time.getCurrentTime;
 
 /**
@@ -84,7 +83,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
             scheduleAndStore(envelope);
-            return of(checkIn(envelope));
+            return of(commandBus().acknowledge(envelope));
         }
         return absent();
     }

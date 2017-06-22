@@ -22,7 +22,6 @@ package io.spine.envelope;
 
 import com.google.protobuf.Message;
 import io.spine.base.Event;
-import io.spine.base.EventId;
 import io.spine.test.TestEventFactory;
 import io.spine.test.envelope.ProjectCreated;
 import io.spine.test.envelope.ProjectId;
@@ -33,10 +32,7 @@ import static io.spine.base.Identifier.newUuid;
 /**
  * @author Dmytro Dashenkov
  */
-public class EventEnvelopeShould extends MessageWithIdEnvelopeShould<Event,
-                                                                     EventId,
-                                                                     EventEnvelope,
-                                                                     EventClass> {
+public class EventEnvelopeShould extends MessageEnvelopeShould<Event, EventEnvelope, EventClass> {
 
     private final TestEventFactory eventFactory =
             TestEventFactory.newInstance(EventEnvelopeShould.class);
@@ -61,10 +57,5 @@ public class EventEnvelopeShould extends MessageWithIdEnvelopeShould<Event,
     @Override
     protected EventClass getMessageClass(Event obj) {
         return EventClass.of(obj);
-    }
-
-    @Override
-    protected EventId getId(Event obj) {
-        return obj.getId();
     }
 }

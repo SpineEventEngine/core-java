@@ -21,7 +21,6 @@
 package io.spine.envelope;
 
 import io.spine.base.Command;
-import io.spine.base.CommandId;
 import io.spine.test.TestActorRequestFactory;
 import io.spine.type.CommandClass;
 import org.junit.Test;
@@ -32,10 +31,9 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould extends MessageWithIdEnvelopeShould<Command,
-                                                                       CommandId,
-                                                                       CommandEnvelope,
-                                                                       CommandClass> {
+public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
+                                                                 CommandEnvelope,
+                                                                 CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
@@ -60,10 +58,5 @@ public class CommandEnvelopeShould extends MessageWithIdEnvelopeShould<Command,
     @Override
     protected CommandClass getMessageClass(Command obj) {
         return CommandClass.of(obj);
-    }
-
-    @Override
-    protected CommandId getId(Command obj) {
-        return obj.getId();
     }
 }

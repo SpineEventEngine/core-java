@@ -23,6 +23,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
@@ -47,7 +48,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.server.bus.Mailing.checkIn;
 import static java.lang.String.format;
 
 /**
@@ -183,7 +183,7 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = checkIn(envelope);
+            result = acknowledge(envelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
@@ -202,7 +202,7 @@ public class CommandBus extends Bus<Command,
                                .setError(error)
                                .build();
             }
-            result = checkIn(envelope, status);
+            result = setStatus(envelope, status);
         }
         return result;
     }
@@ -232,6 +232,11 @@ public class CommandBus extends Bus<Command,
         // Do nothing because this is the responsibility of `DeadCommandFilter`.
         //TODO:2017-03-30:alexander.yevsyukov: Handle dead messages in other buses using filters
         // and remove this method from the interface.
+    }
+
+    @Override
+    protected Message getId(CommandEnvelope envelope) {
+        return envelope.getId();
     }
 
     /**

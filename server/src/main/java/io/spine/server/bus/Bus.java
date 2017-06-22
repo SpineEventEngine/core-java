@@ -22,9 +22,12 @@ package io.spine.server.bus;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.IsSent;
+import io.spine.base.Responses;
+import io.spine.base.Status;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -36,6 +39,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Iterables.transform;
+import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.singleton;
 
@@ -142,11 +146,48 @@ public abstract class Bus<T extends Message,
     }
 
     /**
+     * Acknowledges the sent envelope.
+     *
+     * @param envelope the envelope to acknowledge
+     * @return the envelope acknowledgement
+     */
+    public final IsSent acknowledge(E envelope) {
+
+        return setStatus(envelope, Responses.statusOk());
+    }
+
+    /**
+     * Sets the given status to the sent envelope.
+     *
+     * @param envelope the envelope to provide with a status
+     * @param status   the status of the envelope
+     * @return the envelope posting result
+     */
+    public final IsSent setStatus(E envelope, Status status) {
+        checkNotNull(envelope);
+        checkNotNull(status);
+        checkArgument(isNotDefault(status));
+
+        final Message id = getId(envelope);
+        final Any packedId = pack(id);
+        final IsSent result = IsSent.newBuilder()
+                                    .setMessageId(packedId)
+                                    .setStatus(status)
+                                    .build();
+        return result;
+    }
+
+    /**
      * Handles the message, for which there is no dispatchers registered in the registry.
      *
      * @param message the message that has no target dispatchers, packed into an envelope
      */
     public abstract void handleDeadMessage(E message);
+
+    /**
+     * Retrieves the ID of the given {@link MessageEnvelope}.
+     */
+    protected abstract Message getId(E envelope);
 
     /**
      * Obtains the dispatcher registry.
