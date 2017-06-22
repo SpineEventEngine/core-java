@@ -185,7 +185,7 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = acknowledge(envelope.getId(), envelope);
+            result = acknowledge(envelope.getId());
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
@@ -204,7 +204,7 @@ public class CommandBus extends Bus<Command,
                                .setError(error)
                                .build();
             }
-            result = setStatus(envelope.getId(), envelope, status);
+            result = setStatus(envelope.getId(), status);
         }
         return result;
     }

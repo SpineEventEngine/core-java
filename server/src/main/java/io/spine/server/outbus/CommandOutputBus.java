@@ -148,7 +148,7 @@ public abstract class CommandOutputBus<M extends Message,
                         final Status status = Status.newBuilder()
                                                     .setError(error)
                                                     .build();
-                        return setStatus(getId(message), message, status);
+                        return setStatus(getId(message), status);
                     }
                 }
         );
@@ -164,7 +164,7 @@ public abstract class CommandOutputBus<M extends Message,
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedEnvelope);
         }
-        final IsSent acknowledgement = acknowledge(getId(envelope), envelope);
+        final IsSent acknowledgement = acknowledge(getId(envelope));
         return acknowledgement;
     }
 

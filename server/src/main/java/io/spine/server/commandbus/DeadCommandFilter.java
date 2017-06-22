@@ -65,7 +65,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(error)
                                         .build();
-            final IsSent result = setStatus(envelope.getId(), envelope, status);
+            final IsSent result = setStatus(envelope.getId(), status);
             return Optional.of(result);
         }
         return Optional.absent();

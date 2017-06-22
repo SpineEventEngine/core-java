@@ -25,7 +25,6 @@ import com.google.protobuf.Message;
 import io.spine.base.IsSent;
 import io.spine.base.Responses;
 import io.spine.base.Status;
-import io.spine.envelope.MessageEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -46,25 +45,22 @@ public class Buses {
     /**
      * Acknowledges the envelope posted.
      *
-     * @param envelope the envelope to acknowledge
+     * @param id the ID of the message to acknowledge
      * @return {@code IsSent} with an {@code OK} status
      */
-    public static <E extends MessageEnvelope<?>> IsSent acknowledge(Message id, E envelope) {
-        return setStatus(id, envelope, Responses.statusOk());
+    public static IsSent acknowledge(Message id) {
+        return setStatus(id, Responses.statusOk());
     }
 
     /**
      * Creates {@code IsSent} response for the given envelope and status.
      *
-     * @param envelope the envelope to provide with a status
-     * @param status   the status of the envelope
+     * @param id     the ID of the message to provide with the status
+     * @param status the status of the envelope
      * @return the {@code IsSent} response with the given envelope and status
      */
-    public static <E extends MessageEnvelope<?>> IsSent setStatus(Message id,
-                                                                  E envelope,
-                                                                  Status status) {
+    public static IsSent setStatus(Message id, Status status) {
         checkNotNull(id);
-        checkNotNull(envelope);
         checkNotNull(status);
         checkArgument(isNotDefault(status));
 

@@ -84,7 +84,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
         final Command command = envelope.getCommand();
         if (isScheduled(command)) {
             scheduleAndStore(envelope);
-            return of(acknowledge(envelope.getId(), envelope));
+            return of(acknowledge(envelope.getId()));
         }
         return absent();
     }

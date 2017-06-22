@@ -70,12 +70,12 @@ class ValidationFilter implements CommandBusFilter {
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 final Status status = missingTenantIdStatus(command);
-                return of(setStatus(envelope.getId(), envelope, status));
+                return of(setStatus(envelope.getId(), status));
             }
         } else {
             if (tenantSpecified) {
                 final Status status = tenantIdInapplicableStatus(command);
-                return of(setStatus(envelope.getId(), envelope, status));
+                return of(setStatus(envelope.getId(), status));
             }
         }
         return Optional.absent();
@@ -93,7 +93,7 @@ class ValidationFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(invalidCommand.getError())
                                         .build();
-            final Optional<IsSent> result = of(setStatus(envelope.getId(), envelope, status));
+            final Optional<IsSent> result = of(setStatus(envelope.getId(), status));
             return result;
         }
         return Optional.absent();
