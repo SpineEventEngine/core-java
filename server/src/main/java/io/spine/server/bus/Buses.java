@@ -22,6 +22,8 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.Error;
+import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.base.Responses;
 import io.spine.base.Status;
@@ -53,16 +55,39 @@ public class Buses {
     }
 
     /**
-     * Creates {@code IsSent} response for the given envelope and status.
+     * Creates {@code IsSent} response for the given message ID with the error status.
      *
-     * @param id     the ID of the message to provide with the status
-     * @param status the status of the envelope
-     * @return the {@code IsSent} response with the given envelope and status
+     * @param id    the ID of the message to provide with the status
+     * @param cause the cause of the message rejection
+     * @return the {@code IsSent} response with the given message ID
      */
-    public static IsSent setStatus(Message id, Status status) {
+    public static IsSent reject(Message id, Error cause) {
+        checkNotNull(cause);
+        checkArgument(isNotDefault(cause));
+        final Status status = Status.newBuilder()
+                                    .setError(cause)
+                                    .build();
+        return setStatus(id, status);
+    }
+
+    /**
+     * Creates {@code IsSent} response for the given message ID with the failure status.
+     *
+     * @param id    the ID of the message to provide with the status
+     * @param cause the cause of the message rejection
+     * @return the {@code IsSent} response with the given message ID
+     */
+    public static IsSent reject(Message id, Failure cause) {
+        checkNotNull(cause);
+        checkArgument(isNotDefault(cause));
+        final Status status = Status.newBuilder()
+                                    .setFailure(cause)
+                                    .build();
+        return setStatus(id, status);
+    }
+
+    private static IsSent setStatus(Message id, Status status) {
         checkNotNull(id);
-        checkNotNull(status);
-        checkArgument(isNotDefault(status));
 
         final Any packedId = pack(id);
         final IsSent result = IsSent.newBuilder()

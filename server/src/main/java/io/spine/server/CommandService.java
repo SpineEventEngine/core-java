@@ -26,7 +26,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.server.bus.Buses;
 import io.spine.server.commandbus.CommandBus;
@@ -86,10 +85,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
         final Error error = toError(unsupported);
-        final Status errorStatus = Status.newBuilder()
-                                         .setError(error)
-                                         .build();
-        final IsSent response = Buses.setStatus(request.getId(), errorStatus);
+        final IsSent response = Buses.reject(request.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

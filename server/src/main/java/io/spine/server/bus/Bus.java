@@ -30,12 +30,12 @@ import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.LinkedList;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Iterables.transform;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.singleton;
 
@@ -168,14 +168,13 @@ public abstract class Bus<T extends Message,
     /**
      * Filters the given messages.
      *
-     * <p>The implementations may apply some specific validation to the given messages.
+     * <p>Each message goes through the filter chain, specific to the {@code Bus} implementation.
      *
      * <p>If a message passes the filtering, it is included into the resulting {@link Iterable};
-     * otherwise, {@link StreamObserver#onNext StreamObserver.onNext} is called for that message.
+     * otherwise, {@link StreamObserver#onNext StreamObserver.onNext()} is called for that message.
      *
-     * <p>The filtering may cause {@link IsSent} instances with {@code OK} status for those message
-     * that can be handled during the filtering itself. Such messages are technically valid, but
-     * should not be processed further. An example is a scheduled Command.
+     * <p>Any filter in the filter chain may process the message by itself. In this case an observer
+     * is notified by the filter directly.
      *
      * @param messages the message to filter
      * @param observer the observer to receive the negative outcome of the operation
@@ -185,7 +184,7 @@ public abstract class Bus<T extends Message,
     private Iterable<T> filter(Iterable<T> messages, StreamObserver<IsSent> observer) {
         checkNotNull(messages);
         checkNotNull(observer);
-        final Collection<T> result = new LinkedList<>();
+        final Collection<T> result = newLinkedList();
         for (T message : messages) {
             final Optional<IsSent> response = preProcess(toEnvelope(message));
             if (response.isPresent()) {
@@ -246,11 +245,10 @@ public abstract class Bus<T extends Message,
     protected abstract IsSent doPost(E envelope);
 
     /**
-     * Posts each of the given envelopes into the bus and acknowledges the message posting with
-     * the {@code observer}.
+     * Posts each of the given envelopes into the bus and notifies the given observer.
      *
      * @param envelopes the envelopes to post
-     * @param observer  the observer of the message posting
+     * @param observer  the observer to be notified of the operation result
      * @see #doPost(MessageEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {

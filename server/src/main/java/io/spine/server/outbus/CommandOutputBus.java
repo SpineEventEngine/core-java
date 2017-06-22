@@ -27,7 +27,6 @@ import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
@@ -41,7 +40,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.bus.Buses.setStatus;
+import static io.spine.server.bus.Buses.reject;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -145,10 +144,7 @@ public abstract class CommandOutputBus<M extends Message,
                     public IsSent apply(@Nullable Throwable input) {
                         checkNotNull(input);
                         final Error error = Exceptions.toError(input);
-                        final Status status = Status.newBuilder()
-                                                    .setError(error)
-                                                    .build();
-                        return setStatus(getId(message), status);
+                        return reject(getId(message), error);
                     }
                 }
         );

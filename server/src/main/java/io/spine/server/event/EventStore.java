@@ -144,9 +144,6 @@ public class EventStore implements AutoCloseable {
     /**
      * Appends the passed events to the history of events.
      *
-     * <p>As storing events is {@linkplain TenantAwareOperation tenant-dependant}, the first Event
-     * from the {@link Iterable} is taken as tenant defining.
-     *
      * <p>If the passed {@link Iterable} is empty, no action is performed.
      *
      * <p>If the passed {@linkplain Event Events} belong to the different

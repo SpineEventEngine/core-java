@@ -40,16 +40,16 @@ public interface CommandBusFilter {
      *
      * <p>A filter can:
      * <ul>
-     *     <li>Accept the command (by returning {@code Optional.absent()};
-     *     <li>Reject the command with {@link io.spine.base.Error} status e.g. if it fails to pass
+     *     <li>accept the command (by returning {@code Optional.absent()};
+     *     <li>reject the command with {@link io.spine.base.Error} status e.g. if it fails to pass
      *         the validation;
-     *     <li>Reject the command with {@code OK} status. For example, a scheduled command may not
+     *     <li>reject the command with {@code OK} status. For example, a scheduled command may not
      *         pass a filter.
      * </ul>
      *
      * @param envelope      the envelope with the command to filter
      * @return {@code Optional.absent()} if the command passes the filter,
-     *         {@linkplain IsSent posting result} with either status otherwise
+     *         {@linkplain IsSent IsSent response} with either status otherwise
      */
     Optional<IsSent> accept(CommandEnvelope envelope);
 
