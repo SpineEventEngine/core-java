@@ -22,6 +22,7 @@ package io.spine.server.bus;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
@@ -38,6 +39,7 @@ import static io.spine.validate.Validate.isNotDefault;
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public class Buses {
 
     private Buses() {
