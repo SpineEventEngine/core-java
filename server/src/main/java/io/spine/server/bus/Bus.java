@@ -123,6 +123,9 @@ public abstract class Bus<T extends Message,
      * {@link RuntimeException}) instead of handling them. Otherwise, the {@code OK} status should
      * be expected.
      *
+     * <p>Note that the {@code observer} is always positive, i.e.
+     * {@link StreamObserver#onError StreamObserver.onError()} will never be called.
+     *
      * @param messages the message to post
      * @param observer the observer to receive outcome of the operation
      */
