@@ -20,7 +20,6 @@
 
 package io.spine.server.bus;
 
-import com.google.common.base.Converter;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
@@ -57,7 +56,7 @@ public abstract class Bus<T extends Message,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E>> implements AutoCloseable {
 
-    private final Converter<T, E> messageConverter = new MessageToEnvelope();
+    private final Function<T, E> messageConverter = new MessageToEnvelope();
 
     @Nullable
     private DispatcherRegistry<C, D> registry;
@@ -277,17 +276,12 @@ public abstract class Bus<T extends Message,
     /**
      * A function creating the instances of {@link MessageEnvelope} from the given message.
      */
-    private class MessageToEnvelope extends Converter<T, E> {
+    private class MessageToEnvelope implements Function<T, E> {
 
         @Override
-        public E doForward(T message) {
+        public E apply(@Nullable T message) {
+            checkNotNull(message);
             final E result = toEnvelope(message);
-            return result;
-        }
-
-        @Override
-        protected T doBackward(E envelope) {
-            final T result = envelope.getOuterObject();
             return result;
         }
     }
