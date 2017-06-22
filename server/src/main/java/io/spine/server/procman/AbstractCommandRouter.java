@@ -139,13 +139,14 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
         final SettableFuture<IsSent> finishFuture = SettableFuture.create();
         final StreamObserver<IsSent> observer = newAckingObserver(finishFuture);
         commandBus.post(command, observer);
+        final IsSent isSent;
         // Wait till the call is completed.
         try {
-            final IsSent isSent = finishFuture.get();
-            checkSent(command, isSent);
+            isSent = finishFuture.get();
         } catch (InterruptedException | ExecutionException e) {
             throw new IllegalStateException(e);
         }
+        checkSent(command, isSent);
         return command;
     }
 
