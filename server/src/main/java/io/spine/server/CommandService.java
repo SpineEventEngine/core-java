@@ -24,12 +24,12 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Response;
 import io.spine.client.grpc.CommandServiceGrpc;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.UnsupportedCommandException;
-import io.spine.type.CommandClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

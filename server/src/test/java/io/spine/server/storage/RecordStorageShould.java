@@ -62,15 +62,15 @@ import java.util.List;
 import java.util.Map;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Identifier.pack;
+import static io.spine.Identifier.pack;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.entity.TestTransaction.injectState;
+import static io.spine.server.entity.given.GivenLifecycleFlags.archived;
 import static io.spine.server.entity.storage.EntityRecordWithColumns.create;
 import static io.spine.test.Tests.assertMatchesMask;
-import static io.spine.test.Values.archived;
 import static io.spine.test.Verify.assertIteratorsEqual;
 import static io.spine.test.Verify.assertSize;
 import static io.spine.validate.Validate.isDefault;

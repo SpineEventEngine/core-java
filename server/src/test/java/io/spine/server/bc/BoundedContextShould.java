@@ -67,7 +67,7 @@ import static org.mockito.Mockito.verify;
  * Messages used in this test suite are defined in:
  * <ul>
  *     <li>spine/test/bc/project.proto - data types
- *     <li>spine/test/bc/commands.proto — commands
+ *     <li>spine/test/bc/command_factory_should.proto — commands
  *     <li>spine/test/bc/events.proto — events.
  * </ul>
  *

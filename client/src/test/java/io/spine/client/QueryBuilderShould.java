@@ -29,7 +29,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.protobuf.AnyPacker;
 import io.spine.test.client.TestEntity;
-import io.spine.test.validate.msg.ProjectId;
+import io.spine.test.queries.ProjectId;
 import io.spine.type.TypeName;
 import org.junit.Test;
 
@@ -39,7 +39,7 @@ import java.util.List;
 
 import static com.google.common.collect.Collections2.transform;
 import static com.google.protobuf.util.Timestamps.subtract;
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.either;
 import static io.spine.client.ColumnFilters.eq;

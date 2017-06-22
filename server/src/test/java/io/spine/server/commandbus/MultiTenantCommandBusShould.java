@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.base.Response;
 import io.spine.envelope.CommandEnvelope;
@@ -30,7 +31,6 @@ import io.spine.server.failure.FailureBus;
 import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
-import io.spine.type.CommandClass;
 import org.junit.Test;
 
 import java.util.Set;

@@ -61,7 +61,7 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.io.StreamObservers.ack;
+import static io.spine.grpc.StreamObservers.ack;
 
 /**
  * A container for storing the latest {@link io.spine.server.aggregate.Aggregate Aggregate}

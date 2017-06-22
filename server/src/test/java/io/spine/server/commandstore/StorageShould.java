@@ -24,6 +24,7 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
+import io.spine.Identifier;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
 import io.spine.base.CommandStatus;
@@ -33,15 +34,14 @@ import io.spine.base.Failure;
 import io.spine.base.FailureContext;
 import io.spine.base.FailureId;
 import io.spine.base.Failures;
-import io.spine.base.Identifier;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.server.tenant.TenantAwareTest;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
-import io.spine.type.TypeName;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -99,8 +99,9 @@ public class StorageShould extends TenantAwareTest {
 
     private static CommandRecord newStorageRecord() {
         final Command command = Given.Command.createProject();
-        final String commandType = TypeName.ofCommand(command)
-                                           .value();
+        final String commandType = CommandEnvelope.of(command)
+                                                  .getTypeName()
+                                                  .value();
 
         final CommandRecord.Builder builder =
                 CommandRecord.newBuilder()

@@ -21,7 +21,7 @@
 package io.spine.server.storage.memory;
 
 import io.grpc.ManagedChannel;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
 import io.spine.base.TenantId;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;

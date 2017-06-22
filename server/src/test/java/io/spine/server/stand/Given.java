@@ -23,13 +23,14 @@ package io.spine.server.stand;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.annotation.Subscribe;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.Enrichment;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
+import io.spine.base.Subscribe;
 import io.spine.base.Version;
+import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.Aggregate;
@@ -40,7 +41,6 @@ import io.spine.server.command.EventFactory;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Tests;
 import io.spine.test.projection.Project;
 import io.spine.test.projection.ProjectId;
@@ -53,7 +53,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 
 /**
  * @author Dmytro Dashenkov

@@ -21,8 +21,8 @@
 package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.base.EventContext;
-import io.spine.base.Identifier;
 import io.spine.protobuf.MessageField;
 
 /**

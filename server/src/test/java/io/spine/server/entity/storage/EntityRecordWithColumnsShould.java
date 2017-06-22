@@ -25,7 +25,7 @@ import com.google.common.testing.NullPointerTester;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.test.Given;
+import io.spine.server.entity.given.Given;
 import io.spine.test.entity.Project;
 import io.spine.testdata.Sample;
 import org.junit.Test;

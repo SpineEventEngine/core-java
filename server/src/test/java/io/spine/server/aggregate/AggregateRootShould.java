@@ -35,7 +35,7 @@ import org.junit.Test;
 
 import java.lang.reflect.Constructor;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static org.junit.Assert.assertNotNull;
 
 public class AggregateRootShould {
