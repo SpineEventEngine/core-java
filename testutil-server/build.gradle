@@ -30,7 +30,7 @@ dependencies {
     compile project(path: ':base')
 
     // Depend on `io.spine.server.entity` and other packages for the GivenXxx classes.
-    compile project(path: ':server-core')
+    compile project(path: ':server')
 
     // General purpose test utilities.
     compile project(path: ':testutil-base')

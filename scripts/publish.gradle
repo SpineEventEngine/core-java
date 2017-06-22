@@ -62,17 +62,7 @@ projectsToPublish.each {
 
         // Artifact IDs are composed as "spine-<project.name>". Example:
         //
-        //      "spine-server-core"
-        //
-        // Use the `-core` suffix to distinguish resulting JARs in the final assembly, such as WAR
-        // package. In addition, it this suffix serves as a type marker, helping to identify them
-        // among similar modules.
-        //
-        // Example:
-        //
-        //      "spine-server-core" (core Spine functionality for back-end)
-        //  vs.
-        //      "spine-server-gae" (Google AppEngine-based functionality for back-end)
+        //      "spine-server"
         //
         final String artifactIdForPublishing = "spine-${currentProject.name}"
 
