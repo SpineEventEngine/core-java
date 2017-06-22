@@ -42,11 +42,11 @@ import "spine/base/failure.proto";
 //
 message Response {
 
-    // The responce status.
+    // The response status.
     Status status = 1 [(required) = true];
 }
 
-// The responce status.
+// The response status.
 message Status {
     oneof status {
         // The request was accepted to execution.

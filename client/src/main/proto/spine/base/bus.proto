@@ -35,13 +35,13 @@ import "spine/base/response.proto";
 
 // The result of sending a message to a bus.
 //
-// The respone message brings the ID of the message which has been acknowlaged or rejected.
+// The respone message brings the ID of the message which has been acknowledged or rejected.
 //
 message IsSent {
 
     // The correlation ID of the message, i.e. the ID of the message which has been posted.
     google.protobuf.Any message_id = 1 [(required) = true];
 
-    // The responce status.
+    // The response status.
     base.Status status = 2 [(required) = true];
 }
