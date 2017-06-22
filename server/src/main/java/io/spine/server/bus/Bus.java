@@ -64,6 +64,16 @@ public abstract class Bus<T extends Message,
     @Nullable
     private DispatcherRegistry<C, D> registry;
 
+    private BusFilter<E> filter;
+
+    protected Bus(BusFilter<E> filter) {
+        this.filter = filter;
+    }
+
+    protected Bus() {
+        // TODO:2017-06-22:dmytro.dashenkov: Remove default ctor.
+    }
+
     /**
      * Registers the passed dispatcher.
      *
@@ -227,7 +237,7 @@ public abstract class Bus<T extends Message,
         checkNotNull(observer);
         final Collection<T> result = new LinkedList<>();
         for (T message : messages) {
-            final Optional<IsSent> response = preProcess(toEnvelope(message));
+            final Optional<IsSent> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -253,7 +263,10 @@ public abstract class Bus<T extends Message,
      * @return the result of message processing by this bus if any, or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    protected abstract Optional<IsSent> preProcess(E message);
+    private Optional<IsSent> filter(E message) {
+        final Optional<IsSent> filterOutput = filter.accept(message);
+        return filterOutput;
+    }
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.

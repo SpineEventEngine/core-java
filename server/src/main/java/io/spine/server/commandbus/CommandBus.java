@@ -166,12 +166,6 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
-    protected Optional<IsSent> preProcess(CommandEnvelope message) {
-        final Optional<IsSent> result = filterChain.accept(message);
-        return result;
-    }
-
-    @Override
     protected CommandEnvelope toEnvelope(Command message) {
         return CommandEnvelope.of(message);
     }

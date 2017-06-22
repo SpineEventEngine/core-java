@@ -23,17 +23,14 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
-import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -134,24 +131,25 @@ public abstract class CommandOutputBus<M extends Message,
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
-    @Override
-    protected Optional<IsSent> preProcess(final E message) {
-        final Optional<Throwable> violation = this.validate(message.getMessage());
-        final Optional<IsSent> result = violation.transform(
-                new Function<Throwable, IsSent>() {
-                    @Override
-                    public IsSent apply(@Nullable Throwable input) {
-                        checkNotNull(input);
-                        final Error error = Exceptions.toError(input);
-                        final Status status = Status.newBuilder()
-                                                    .setError(error)
-                                                    .build();
-                        return setStatus(message, status);
-                    }
-                }
-        );
-        return result;
-    }
+    // TODO:2017-06-22:dmytro.dashenkov: Remove.
+//    @Override
+//    protected Optional<IsSent> filter(final E message) {
+//        final Optional<Throwable> violation = this.validate(message.getMessage());
+//        final Optional<IsSent> result = violation.transform(
+//                new Function<Throwable, IsSent>() {
+//                    @Override
+//                    public IsSent apply(@Nullable Throwable input) {
+//                        checkNotNull(input);
+//                        final Error error = Exceptions.toError(input);
+//                        final Status status = Status.newBuilder()
+//                                                    .setError(error)
+//                                                    .build();
+//                        return setStatus(message, status);
+//                    }
+//                }
+//        );
+//        return result;
+//    }
 
     @Override
     protected IsSent doPost(E envelope) {
