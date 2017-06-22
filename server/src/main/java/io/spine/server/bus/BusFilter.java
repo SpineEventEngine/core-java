@@ -27,7 +27,7 @@ import io.spine.envelope.MessageEnvelope;
 /**
  * @author Dmytro Dashenkov
  */
-public interface BusFilter<E extends MessageEnvelope<?>> {
+public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
 
     /**
      * Accepts or rejects a passed command.
@@ -41,7 +41,7 @@ public interface BusFilter<E extends MessageEnvelope<?>> {
      *         pass a filter.
      * </ul>
      *
-     * @param envelope      the envelope with the message to filter
+     * @param envelope the envelope with the message to filter
      * @return {@code Optional.absent()} if the message passes the filter,
      *         {@linkplain IsSent posting result} with either status otherwise
      */

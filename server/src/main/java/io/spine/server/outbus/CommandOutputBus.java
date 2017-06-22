@@ -187,9 +187,4 @@ public abstract class CommandOutputBus<M extends Message,
     protected OutputDispatcherRegistry<C, D> registry() {
         return (OutputDispatcherRegistry<C, D>) super.registry();
     }
-
-    @Override
-    public void close() throws Exception {
-        registry().unregisterAll();
-    }
 }

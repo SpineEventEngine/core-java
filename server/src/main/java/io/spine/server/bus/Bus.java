@@ -22,6 +22,7 @@ package io.spine.server.bus;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
+import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
@@ -33,6 +34,7 @@ import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.LinkedList;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -64,14 +66,14 @@ public abstract class Bus<T extends Message,
     @Nullable
     private DispatcherRegistry<C, D> registry;
 
-    private BusFilter<E> filter;
+    private final FilterChain<E, T> filterChain;
 
-    protected Bus(BusFilter<E> filter) {
-        this.filter = filter;
+    protected Bus(Deque<BusFilter<E>> filters) {
+        this.filterChain = new FilterChain<>(filters);
     }
 
     protected Bus() {
-        // TODO:2017-06-22:dmytro.dashenkov: Remove default ctor.
+        this.filterChain = new FilterChain<>(Lists.<BusFilter<E>>newLinkedList());
     }
 
     /**
@@ -162,7 +164,6 @@ public abstract class Bus<T extends Message,
      * @return the envelope acknowledgement
      */
     public final IsSent acknowledge(E envelope) {
-
         return setStatus(envelope, Responses.statusOk());
     }
 
@@ -185,6 +186,12 @@ public abstract class Bus<T extends Message,
                                     .setStatus(status)
                                     .build();
         return result;
+    }
+
+    @Override
+    public void close() throws Exception {
+        filterChain.close();
+        registry().unregisterAll();
     }
 
     /**
@@ -264,7 +271,7 @@ public abstract class Bus<T extends Message,
      * {@link Optional#absent() Optional.absent()} otherwise
      */
     private Optional<IsSent> filter(E message) {
-        final Optional<IsSent> filterOutput = filter.accept(message);
+        final Optional<IsSent> filterOutput = filterChain.accept(message);
         return filterOutput;
     }
 
