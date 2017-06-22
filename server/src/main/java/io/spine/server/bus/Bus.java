@@ -240,7 +240,7 @@ public abstract class Bus<T extends Message,
     /**
      * Pre-processes the given message.
      *
-     * <p>The pre-processing may include e.g. validation.
+     * <p>The pre-processing may include validation.
      *
      * <p>If the given message is completely processed and should not be posted via
      * {@link #doPost doPost} method, the returned {@link Optional} contains a value with either

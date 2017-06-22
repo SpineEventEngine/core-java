@@ -54,7 +54,7 @@ import static io.spine.base.Events.getTenantId;
  */
 public class EventStore implements AutoCloseable {
 
-    private static final String DIFFERENT_TENANT_ERROR_TEMPLATE =
+    private static final String TENANT_MISMATCH_ERROR_MSG =
             "Events, that target different tenants, cannot be stored in a single operation. " +
                     System.lineSeparator() +
                     "Observed tenants are: %s";
@@ -85,18 +85,19 @@ public class EventStore implements AutoCloseable {
     private static void ensureSameTenant(Iterable<Event> events) {
         checkNotNull(events);
 
-        final Set<TenantId> tenants = FluentIterable.from(events)
-                                                    .transform(new Function<Event, TenantId>() {
-                                                        @Override
-                                                        public TenantId apply(
-                                                                @Nullable Event event) {
-                                                            checkNotNull(event);
-                                                            return getTenantId(event);
-                                                        }
-                                                    })
-                                                    .toSet();
+        final Set<TenantId> tenants =
+                FluentIterable.from(events)
+                              .transform(new Function<Event, TenantId>() {
+                                  @Override
+                                  public TenantId apply(
+                                          @Nullable Event event) {
+                                      checkNotNull(event);
+                                      return getTenantId(event);
+                                  }
+                              })
+                              .toSet();
         checkArgument(tenants.size() == 1,
-                      DIFFERENT_TENANT_ERROR_TEMPLATE,
+                      TENANT_MISMATCH_ERROR_MSG,
                       tenants);
     }
 
