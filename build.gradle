@@ -28,7 +28,7 @@ buildscript {
 
         spineRepository = 'http://maven.teamdev.com/repository/spine'
         spineSnapshotsRepository = 'http://maven.teamdev.com/repository/spine-snapshots'
-        spineVersion = '0.9.26-SNAPSHOT'
+        spineVersion = '0.9.28-SNAPSHOT'
 
         //TODO:2016-12-12:alexander.yevsyukov: Advance the plug-in version together with all
         // the components and change the version of the dependency below to
