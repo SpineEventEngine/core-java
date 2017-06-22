@@ -18,21 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.bus;
 
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.SPI;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.server.bus.BusFilter;
+import com.google.common.base.Optional;
+import io.spine.base.IsSent;
+import io.spine.envelope.MessageEnvelope;
 
 /**
- * A {@code CommandBus} can have several filters that can prevent a command to be
- * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posted}.
- *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-@SPI
-public interface CommandBusFilter extends BusFilter<CommandEnvelope> {
+public interface BusFilter<E extends MessageEnvelope<?>> {
 
-    void onClose(CommandBus commandBus);
+    /**
+     * Accepts or rejects a passed command.
+     *
+     * <p>A filter can:
+     * <ul>
+     *     <li>Accept the message (by returning {@code Optional.absent()};
+     *     <li>Reject the message with {@link io.spine.base.Error} status e.g. if it fails to pass
+     *         the validation;
+     *     <li>Reject the message with {@code OK} status. For example, a scheduled command may not
+     *         pass a filter.
+     * </ul>
+     *
+     * @param envelope      the envelope with the message to filter
+     * @return {@code Optional.absent()} if the message passes the filter,
+     *         {@linkplain IsSent posting result} with either status otherwise
+     */
+    Optional<IsSent> accept(E envelope);
 }
