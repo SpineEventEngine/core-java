@@ -26,7 +26,6 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
-import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -52,7 +51,7 @@ import static java.util.Collections.singleton;
  * @author Dmytro Dashenkov
  */
 public abstract class Bus<T extends Message,
-                          E extends MessageWithIdEnvelope<?, T>,
+                          E extends MessageEnvelope<T>,
                           C extends MessageClass,
                           D extends MessageDispatcher<C, E>> implements AutoCloseable {
 
@@ -209,7 +208,7 @@ public abstract class Bus<T extends Message,
      * <p>If the message should be posted to the Bus via {@link #doPost doPost}, the result of this
      * method is {@link Optional#absent() Optional.absent()}.
      *
-     * @param message the {@linkplain MessageWithIdEnvelope message envelope} to pre-process
+     * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
@@ -231,8 +230,7 @@ public abstract class Bus<T extends Message,
      *
      * <p>This method assumes that the given message has passed the filtering.
      *
-     * @return the result of mailing with {@linkplain MessageWithIdEnvelope#getId() the Message ID}
-     *         and:
+     * @return the result of mailing with the Message ID and:
      *         <ul>
      *             <li>{@link io.spine.base.Status.StatusCase#OK OK} status if the message has been
      *                 passed to the dispatcher;
@@ -252,7 +250,7 @@ public abstract class Bus<T extends Message,
      *
      * @param envelopes the envelopes to post
      * @param observer  the observer of the message posting
-     * @see #doPost(MessageWithIdEnvelope)
+     * @see #doPost(MessageEnvelope)
      */
     private void doPost(Iterable<E> envelopes, StreamObserver<IsSent> observer) {
         for (E message : envelopes) {

@@ -28,7 +28,6 @@ import io.spine.base.IsSent;
 import io.spine.base.Status;
 import io.spine.base.Status.StatusCase;
 import io.spine.envelope.EventEnvelope;
-import io.spine.envelope.MessageWithIdEnvelope;
 import io.spine.test.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import org.junit.Test;

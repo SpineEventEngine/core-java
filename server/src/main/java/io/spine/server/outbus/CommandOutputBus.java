@@ -28,7 +28,7 @@ import io.spine.base.Event;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.base.Status;
-import io.spine.envelope.MessageWithIdEnvelope;
+import io.spine.envelope.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -60,7 +60,7 @@ import static io.spine.server.bus.Mailing.checkIn;
  */
 @Internal
 public abstract class CommandOutputBus<M extends Message,
-                                       E extends MessageWithIdEnvelope<?, M>,
+                                       E extends MessageEnvelope<M>,
                                        C extends MessageClass,
                                        D extends MessageDispatcher<C,E>>
                 extends Bus<M, E, C, D> {

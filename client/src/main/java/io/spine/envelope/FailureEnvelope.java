@@ -36,7 +36,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * @author Alex Tymchenko
  */
-public class FailureEnvelope extends MessageWithIdEnvelope<FailureId, Failure> {
+public class FailureEnvelope extends AbstractMessageEnvelope<Failure> {
 
     /**
      * The failure message.
@@ -77,7 +77,9 @@ public class FailureEnvelope extends MessageWithIdEnvelope<FailureId, Failure> {
         return new FailureEnvelope(failure);
     }
 
-    @Override
+    /**
+     * Obtains the Failure ID.
+     */
     public FailureId getId() {
         return getOuterObject().getId();
     }

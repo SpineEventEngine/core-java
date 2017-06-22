@@ -27,7 +27,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.IsSent;
 import io.spine.base.Responses;
 import io.spine.base.Status;
-import io.spine.envelope.MessageWithIdEnvelope;
+import io.spine.envelope.MessageEnvelope;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -53,7 +53,8 @@ public final class Mailing {
      * @param envelope the envelope to check in
      * @return the envelope acknowledgement
      */
-    public static IsSent checkIn(MessageWithIdEnvelope<?, ?> envelope) {
+    public static IsSent checkIn(MessageEnvelope<?> envelope) {
+
         return checkIn(envelope, Responses.statusOk());
     }
 
@@ -64,7 +65,7 @@ public final class Mailing {
      * @param status   the status of the envelope
      * @return the envelope posting result
      */
-    public static IsSent checkIn(MessageWithIdEnvelope<?, ?> envelope, Status status) {
+    public static IsSent checkIn(MessageEnvelope<?> envelope, Status status) {
         checkNotNull(envelope);
         checkNotNull(status);
         checkArgument(isNotDefault(status));
