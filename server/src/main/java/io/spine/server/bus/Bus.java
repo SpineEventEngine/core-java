@@ -242,12 +242,12 @@ public abstract class Bus<T extends Message,
      *
      * <p>The pre-processing may include validation.
      *
-     * <p>If the given message is completely processed and should not be posted via
-     * {@link #doPost doPost} method, the returned {@link Optional} contains a value with either
+     * <p>If the given message is completely processed and should not be passed to the dispatchers
+     * via {@link #doPost doPost} method, the returned {@link Optional} contains a value with either
      * status.
      *
-     * <p>If the message should be posted to the Bus via {@link #doPost doPost}, the result of this
-     * method is {@link Optional#absent() Optional.absent()}.
+     * <p>If the message should be passed to the dispatchers via {@link #doPost doPost}, the result
+     * of this method is {@link Optional#absent() Optional.absent()}.
      *
      * @param message the {@linkplain MessageEnvelope message envelope} to pre-process
      * @return the result of message processing by this bus if any, or
