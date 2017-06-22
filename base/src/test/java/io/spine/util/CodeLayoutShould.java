@@ -18,34 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.validate;
+package io.spine.util;
 
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.StringValue;
 import io.spine.base.given.CommandFromCommands;
+import io.spine.test.Tests;
 import org.junit.Test;
 
+import static io.spine.util.CodeLayout.isCommandsFile;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class FieldValidatorShould {
+public class CodeLayoutShould {
 
     @Test
-    public void return_true_if_file_is_for_commands() {
-        final Descriptors.FileDescriptor file = CommandFromCommands.getDescriptor()
-                                                                   .getFile();
-
-        assertTrue(FieldValidator.isCommandsFile(file));
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(CodeLayout.class);
     }
 
     @Test
-    public void return_false_if_file_is_not_for_commands() {
-        final Descriptors.FileDescriptor file = StringValue.getDescriptor()
-                                                           .getFile();
+    public void tell_commands_file_by_its_descriptor() {
+        Descriptors.FileDescriptor file = CommandFromCommands.getDescriptor()
+                                                             .getFile();
+        assertTrue(isCommandsFile(file));
 
-        assertFalse(FieldValidator.isCommandsFile(file));
+        file = StringValue.getDescriptor()
+                          .getFile();
+
+        assertFalse(isCommandsFile(file));
     }
 }

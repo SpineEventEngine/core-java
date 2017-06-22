@@ -29,12 +29,12 @@ import com.google.protobuf.Message;
 import io.spine.base.FieldPath;
 import io.spine.option.IfMissingOption;
 import io.spine.option.OptionsProto;
+import io.spine.util.CodeLayout;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
@@ -86,7 +86,7 @@ abstract class FieldValidator<V> {
                                       .build();
         this.strict = strict;
         final FileDescriptor file = fieldDescriptor.getFile();
-        this.isCommandsFile = isCommandsFile(file);
+        this.isCommandsFile = CodeLayout.isCommandsFile(file);
         this.isFirstField = fieldDescriptor.getIndex() == 0;
         this.required = getFieldOption(OptionsProto.required);
         this.ifMissingOption = getFieldOption(OptionsProto.ifMissing);
@@ -99,24 +99,6 @@ abstract class FieldValidator<V> {
         } else {
             return ImmutableList.of((T) fieldValue);
         }
-    }
-
-    /**
-     * Checks if the file is for commands.
-     *
-     * @param file a descriptor of a {@code .proto} file to check
-     * @return {@code true} if the file name ends with {@code "commands"},
-     * {@code false} otherwise
-     */
-    static boolean isCommandsFile(FileDescriptor file) {
-        checkNotNull(file);
-
-        final String fqn = file.getName();
-        final int startIndexOfFileName = fqn.lastIndexOf('/') + 1;
-        final int endIndexOfFileName = fqn.lastIndexOf('.');
-        final String fileName = fqn.substring(startIndexOfFileName, endIndexOfFileName);
-        final boolean isCommandsFile = fileName.endsWith("commands");
-        return isCommandsFile;
     }
 
     /**
