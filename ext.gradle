@@ -17,28 +17,34 @@
 // (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 // OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //
-dependencies {
-    compile group: 'io.grpc', name: 'grpc-okhttp', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-protobuf', version: gRpcVersion
-    compile group: 'io.grpc', name: 'grpc-stub', version: gRpcVersion
 
-    compile project(path: ':core')
+/**
+ *  The versions of the libraries used.
+ *
+ *  This file is used in both module `build.gradle` scripts and in the integration tests,
+ *  as we want to manage the versions in a single source.
+ */
 
-    testCompile project(path: ":testutil-base")
-    //TODO:2017-06-20:alexander.yevsyukov: Remove after moving TestActorRequestFactory
-    testCompile project(path: ":testutil-server")
+def final SPINE_VERSION = '0.9.26-SNAPSHOT'
 
-    testCompile project(path: ":core", configuration: 'testArtifacts')
+ext {
+    spineVersion = SPINE_VERSION
+
+    guavaVersion = '20.0'
+
+    // NOTE: when updating Protobuf dependency, please check that
+    // `KnownTypes.addStandardProtobufTypes()` method is updated with new Message types that may be
+    // introduced in the new version of Protobuf.
+    protobufVersion = '3.3.0'
+    
+    gRpcVersion = '1.4.0'
+    slf4JVersion = '1.7.21'
+    jUnitVersion = '4.12'
+    mockitoVersion = '2.7.22'
+    
+    // We use Spine tools in the build process.
+    spineToolsVersion = '0.9.10-SNAPSHOT'
+
+    protobufGradlePluginVerison = '0.8.1'
 }
 
-apply from: gRpcScript
-
-apply from: generateDescriptorSetScript
-
-apply from: testArtifactsScript
-
-apply plugin: spineProtobufPluginId
-
-modelCompiler {
-    generateValidatingBuilders = true
-}
