@@ -22,12 +22,9 @@ package io.spine.server.bus;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.IsSent;
-import io.spine.base.Responses;
-import io.spine.base.Status;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
@@ -39,7 +36,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.isEmpty;
 import static com.google.common.collect.Iterables.transform;
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.validate.Validate.isNotDefault;
 import static java.util.Collections.singleton;
 
@@ -88,8 +84,6 @@ public abstract class Bus<T extends Message,
     /**
      * Posts the message to the bus.
      *
-     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
-     *
      * @param message  the message to post
      * @param observer the observer to receive outcome of the operation
      * @see #post(Iterable, StreamObserver) for posing multiple messages at once
@@ -105,17 +99,15 @@ public abstract class Bus<T extends Message,
     /**
      * Posts the given messages to the bus.
      *
-     * <p>Use the {@code Bus} class abstract methods to modify the behavior of posting.
+     * <p>The {@linkplain StreamObserver observer} serves to notify the consumer about the result
+     * of the call. The {@link StreamObserver#onNext StreamObserver.onNext()} is called for each
+     * message posted to the bus.
      *
-     * <p>The {@link StreamObserver} argument is the posting outcome observer;
-     * the {@link StreamObserver#onNext StreamObserver.onNext} will be called for each message
-     * passed to the bus.
+     * <p>In case the message is accepted by the bus, {@linkplain IsSent IsSent} with the
+     * {@link io.spine.base.Status.StatusCase#OK OK} status is passed to the observer.
      *
-     * <p>A valid message will result in
-     * an {@link io.spine.base.Status.StatusCase#OK OK} status {@link IsSent} instance.
-     *
-     * <p>An invalid message will result in an {@link io.spine.base.Error Error} status
-     * {@link IsSent} instance.
+     * <p>If the message cannot be sent due to some issues, a corresponding
+     * {@link io.spine.base.Error Error} status is passed in {@code IsSent} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
      * {@link io.spine.base.Failure} may result ether a {@link io.spine.base.Failure} status or
@@ -126,10 +118,10 @@ public abstract class Bus<T extends Message,
      * {@link RuntimeException}) instead of handling them. Otherwise, the {@code OK} status should
      * be expected.
      *
-     * <p>Note that the {@code observer} is always positive, i.e.
-     * {@link StreamObserver#onError StreamObserver.onError()} will never be called.
+     * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
+     * for the passed observer, since errors are propagated as statuses of {@code IsSent} response.
      *
-     * @param messages the message to post
+     * @param messages the messages to post
      * @param observer the observer to receive outcome of the operation
      */
     public final void post(Iterable<T> messages, StreamObserver<IsSent> observer) {
@@ -143,38 +135,6 @@ public abstract class Bus<T extends Message,
             doPost(envelopes, observer);
         }
         observer.onCompleted();
-    }
-
-    /**
-     * Acknowledges the sent envelope.
-     *
-     * @param envelope the envelope to acknowledge
-     * @return the envelope acknowledgement
-     */
-    public final IsSent acknowledge(E envelope) {
-
-        return setStatus(envelope, Responses.statusOk());
-    }
-
-    /**
-     * Sets the given status to the sent envelope.
-     *
-     * @param envelope the envelope to provide with a status
-     * @param status   the status of the envelope
-     * @return the envelope posting result
-     */
-    public final IsSent setStatus(E envelope, Status status) {
-        checkNotNull(envelope);
-        checkNotNull(status);
-        checkArgument(isNotDefault(status));
-
-        final Message id = getId(envelope);
-        final Any packedId = pack(id);
-        final IsSent result = IsSent.newBuilder()
-                                    .setMessageId(packedId)
-                                    .setStatus(status)
-                                    .build();
-        return result;
     }
 
     /**

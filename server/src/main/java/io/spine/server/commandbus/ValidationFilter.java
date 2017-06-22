@@ -35,6 +35,7 @@ import java.util.List;
 import static com.google.common.base.Optional.of;
 import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
 import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
+import static io.spine.server.bus.Buses.setStatus;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 import static io.spine.validate.Validate.isDefault;
@@ -69,12 +70,12 @@ class ValidationFilter implements CommandBusFilter {
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
                 final Status status = missingTenantIdStatus(command);
-                return of(commandBus.setStatus(envelope, status));
+                return of(setStatus(envelope.getId(), envelope, status));
             }
         } else {
             if (tenantSpecified) {
                 final Status status = tenantIdInapplicableStatus(command);
-                return of(commandBus.setStatus(envelope, status));
+                return of(setStatus(envelope.getId(), envelope, status));
             }
         }
         return Optional.absent();
@@ -92,7 +93,7 @@ class ValidationFilter implements CommandBusFilter {
             final Status status = Status.newBuilder()
                                         .setError(invalidCommand.getError())
                                         .build();
-            final Optional<IsSent> result = of(commandBus.setStatus(envelope, status));
+            final Optional<IsSent> result = of(setStatus(envelope.getId(), envelope, status));
             return result;
         }
         return Optional.absent();

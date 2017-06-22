@@ -48,6 +48,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.setStatus;
 import static java.lang.String.format;
 
 /**
@@ -183,7 +185,7 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = acknowledge(envelope);
+            result = acknowledge(envelope.getId(), envelope);
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
@@ -202,7 +204,7 @@ public class CommandBus extends Bus<Command,
                                .setError(error)
                                .build();
             }
-            result = setStatus(envelope, status);
+            result = setStatus(envelope.getId(), envelope, status);
         }
         return result;
     }
