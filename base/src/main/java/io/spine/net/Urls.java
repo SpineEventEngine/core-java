@@ -20,6 +20,8 @@
 
 package io.spine.net;
 
+import io.spine.annotation.Experimental;
+
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 
@@ -30,6 +32,7 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Mikhail Mikhaylov
  */
+@Experimental
 public class Urls {
 
     private Urls() {

@@ -21,7 +21,6 @@ dependencies {
     compile group: 'io.grpc', name: 'grpc-all', version: gRpcVersion
 
     compile project(path: ':client')
-    compile project(path: ':values')
 
     testCompile project(path: ":base", configuration: 'testArtifacts')
     testCompile project(path: ":client", configuration: 'testArtifacts')

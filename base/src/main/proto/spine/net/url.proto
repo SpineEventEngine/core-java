@@ -2,13 +2,15 @@ syntax = "proto3";
 
 package spine.net;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_package = "io.spine.net";
 option java_outer_classname = "UrlProto";
 
-import "spine/options.proto";
+option (experimental_all) = true;
 
 // Protobuf definition for URL.
 //

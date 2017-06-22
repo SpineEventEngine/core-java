@@ -20,6 +20,7 @@
 
 package io.spine.net;
 
+import io.spine.annotation.Experimental;
 import io.spine.net.Url.Record.QueryParameter;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -31,12 +32,13 @@ import static io.spine.util.Exceptions.newIllegalArgumentException;
  *
  * @author Mikhail Mikhaylov
  */
-@SuppressWarnings("UtilityClass")
+@Experimental
 public class UrlQueryParameters {
 
     private static final char SEPARATOR = '=';
 
     private UrlQueryParameters() {
+        // Prevent instantiation of this utility class.
     }
 
     /**

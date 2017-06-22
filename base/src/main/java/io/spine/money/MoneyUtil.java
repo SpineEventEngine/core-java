@@ -20,12 +20,15 @@
 
 package io.spine.money;
 
+import io.spine.annotation.Experimental;
+
 /**
  * The utility class containing convenience methods for working with {@link Money}.
  *
  * @author Alexander Litus
  * @see Money
  */
+@Experimental
 public class MoneyUtil {
 
     private MoneyUtil() {
