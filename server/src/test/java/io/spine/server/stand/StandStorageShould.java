@@ -29,6 +29,7 @@ import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.protobuf.AnyPacker;
+import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.FieldMasks;
 import io.spine.server.storage.RecordStorage;
@@ -84,11 +85,11 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     }
 
     @Override
-    protected abstract StandStorage getStorage();
+    protected abstract StandStorage getStorage(Class<? extends Entity> cls);
 
     @Test
     public void retrieve_all_records() {
-        final StandStorage storage = getStorage();
+        final StandStorage storage = getStorage(TestCounterEntity.class);
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER);
 
         final Iterator<EntityRecord> allRecords = storage.readAll();
@@ -97,7 +98,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
 
     @Test
     public void retrieve_records_by_ids() {
-        final StandStorage storage = getStorage();
+        final StandStorage storage = getStorage(TestCounterEntity.class);
         // Use a subset of IDs
         final List<AggregateStateId> ids = fill(storage, 10, DEFAULT_ID_SUPPLIER).subList(0, 5);
 
@@ -119,7 +120,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     @SuppressWarnings({"MethodWithMultipleLoops", "ConstantConditions"}) // OK for this test.
     private void checkByTypeRead(FieldMask fieldMask) {
         final boolean withFieldMask = !fieldMask.equals(FieldMask.getDefaultInstance());
-        final StandStorage storage = getStorage();
+        final StandStorage storage = getStorage(TestCounterEntity.class);
         final TypeUrl type = TypeUrl.from(Project.getDescriptor());
 
         final int projectsCount = 4;

@@ -113,8 +113,7 @@ public class FailureBusShould {
     @Test
     public void return_direct_DispatcherDelivery_if_none_customized() {
         final DispatcherFailureDelivery actual = failureBus.delivery();
-        final DispatcherFailureDelivery expected = DispatcherFailureDelivery.directDelivery();
-        assertEquals(expected, actual);
+        assertTrue(actual instanceof DispatcherFailureDelivery.DirectDelivery);
     }
 
     @Test   // as the FailureBus instances do not support enrichment yet.

@@ -236,6 +236,11 @@ public class Stand implements AutoCloseable {
         return multitenant;
     }
 
+    @VisibleForTesting
+    StandUpdateDelivery delivery() {
+        return delivery;
+    }
+
     /**
      * Subscribes for all further changes of an entity state, which satisfies the {@link Topic}.
      *

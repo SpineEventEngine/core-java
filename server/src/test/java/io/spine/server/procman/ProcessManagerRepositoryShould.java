@@ -116,9 +116,7 @@ public class ProcessManagerRepositoryShould
 
     @Override
     protected RecordBasedRepository<ProjectId, TestProcessManager, Project> createRepository() {
-        boundedContext = TestBoundedContextFactory.MultiTenant.newBoundedContext();
         final TestProcessManagerRepository repo = new TestProcessManagerRepository();
-        boundedContext.register(repo);
         return repo;
     }
 
@@ -163,20 +161,7 @@ public class ProcessManagerRepositoryShould
                                        .setMultitenant(true)
                                        .build();
 
-        boundedContext.getCommandBus()
-                      .register(new CommandDispatcher() {
-                          @Override
-                          public Set<CommandClass> getMessageClasses() {
-                              return CommandClass.setOf(AddTask.class);
-                          }
-
-                          @Override
-                          public void dispatch(CommandEnvelope envelope) {
-                              /* Simply swallow the command. We need this dispatcher for allowing
-                                 Process Manager under test to route the AddTask command. */
-                          }
-                      });
-
+        boundedContext.register(repository);
         TestProcessManager.clearMessageDeliveryHistory();
     }
 
