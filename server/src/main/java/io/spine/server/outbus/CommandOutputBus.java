@@ -28,17 +28,19 @@ import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.bus.Buses.reject;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -123,6 +125,11 @@ public abstract class CommandOutputBus<M extends Message,
      */
     protected CommandOutputDelivery<E, C, D> delivery() {
         return this.delivery;
+    }
+
+    @Override
+    protected Deque<? extends BusFilter<E>> createFilterChain() {
+        return newLinkedList();
     }
 
     /**

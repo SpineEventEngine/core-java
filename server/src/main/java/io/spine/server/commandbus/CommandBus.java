@@ -21,8 +21,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
@@ -36,16 +34,18 @@ import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
 import static io.spine.util.Exceptions.toError;
@@ -58,6 +58,7 @@ import static java.lang.String.format;
  * @author Mikhail Melnik
  * @author Alexander Litus
  * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
 public class CommandBus extends Bus<Command,
                                     CommandEnvelope,
@@ -66,7 +67,7 @@ public class CommandBus extends Bus<Command,
 
     private final CommandStore commandStore;
 
-    private CommandBusFilter filterChain;
+    private final Deque<CommandBusFilter> filters;
 
     private final CommandScheduler scheduler;
 
@@ -105,6 +106,7 @@ public class CommandBus extends Bus<Command,
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.failureBus = builder.failureBus;
+        this.filters = builder.getFilters();
     }
 
     /**
@@ -157,13 +159,24 @@ public class CommandBus extends Bus<Command,
         return this.failureBus;
     }
 
-    private void setFilterChain(CommandBusFilter filterChain) {
-        this.filterChain = filterChain;
-    }
+//    private void setFilterChain(CommandBusFilter filterChain) {
+//        this.filterChain = filterChain;
+//    }
 
     @Override
     protected CommandDispatcherRegistry createRegistry() {
         return new CommandDispatcherRegistry();
+    }
+
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
+    @Override
+    protected Deque<? extends BusFilter<CommandEnvelope>> createFilterChain() {
+        final CommandBusFilter deadCommandFilter = new DeadCommandFilter(this);
+        final CommandBusFilter validator = new ValidationFilter(this);
+        filters.push(scheduler);
+        filters.push(validator);
+        filters.push(deadCommandFilter);
+        return filters;
     }
 
     @Override
@@ -328,7 +341,7 @@ public class CommandBus extends Bus<Command,
 
         private FailureBus failureBus;
 
-        private final List<CommandBusFilter> filters = Lists.newArrayList();
+        private final Deque<CommandBusFilter> filters = newLinkedList();
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -401,8 +414,8 @@ public class CommandBus extends Bus<Command,
         /**
          * Obtains immutable list of added filters.
          */
-        public List<CommandBusFilter> getFilters() {
-            return ImmutableList.copyOf(filters);
+        public Deque<CommandBusFilter> getFilters() {
+            return filters;
         }
 
         /**
@@ -490,17 +503,17 @@ public class CommandBus extends Bus<Command,
             // Enforce creating the registry to make spying for CommandBus-es in tests work.
             commandBus.registry();
 
-            setFilterChain(commandBus);
+//            setFilterChain(commandBus);
             return commandBus;
         }
 
         private void setFilterChain(CommandBus commandBus) {
-            final CommandBusFilter filterChain = FilterChain.newBuilder()
-                                                            .setCommandBus(commandBus)
-                                                            .addFilters(getFilters())
-                                                            .setCommandScheduler(commandScheduler)
-                                                            .build();
-            commandBus.setFilterChain(filterChain);
+//            final CommandBusFilter filterChain = FilterChain.newBuilder()
+//                                                            .setCommandBus(commandBus)
+//                                                            .addFilters(getFilters())
+//                                                            .setCommandScheduler(commandScheduler)
+//                                                            .build();
+//            commandBus.setFilterChain(filterChain);
         }
     }
 }

@@ -39,7 +39,7 @@ public final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFi
 
     private boolean closed;
 
-    FilterChain(Deque<BusFilter<E>> chain) {
+    FilterChain(Deque<? extends BusFilter<E>> chain) {
         this.chain = newLinkedList(chain);
     }
 

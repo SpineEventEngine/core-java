@@ -22,7 +22,6 @@ package io.spine.server.bus;
 
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
-import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.IsSent;
@@ -62,15 +61,8 @@ public abstract class Bus<T extends Message,
     @Nullable
     private DispatcherRegistry<C, D> registry;
 
-    private final FilterChain<E, T> filterChain;
-
-    protected Bus(Deque<BusFilter<E>> filters) {
-        this.filterChain = new FilterChain<>(filters);
-    }
-
-    protected Bus() {
-        this.filterChain = new FilterChain<>(Lists.<BusFilter<E>>newLinkedList());
-    }
+    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    private FilterChain<E, T> filterChain;
 
     /**
      * Registers the passed dispatcher.
@@ -151,7 +143,7 @@ public abstract class Bus<T extends Message,
 
     @Override
     public void close() throws Exception {
-        filterChain.close();
+        filterChain().close();
         registry().unregisterAll();
     }
 
@@ -177,11 +169,22 @@ public abstract class Bus<T extends Message,
         return registry;
     }
 
+    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    protected final BusFilter<E> filterChain() {
+        if (filterChain == null) {
+            filterChain = new FilterChain<>(createFilterChain());
+        }
+        return filterChain;
+    }
+
     /**
      * Factory method for creating an instance of the registry for
      * dispatchers of the bus.
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
+
+    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    protected abstract Deque<? extends BusFilter<E>> createFilterChain();
 
     /**
      * Filters the given messages.
@@ -231,7 +234,7 @@ public abstract class Bus<T extends Message,
      * {@link Optional#absent() Optional.absent()} otherwise
      */
     private Optional<IsSent> filter(E message) {
-        final Optional<IsSent> filterOutput = filterChain.accept(message);
+        final Optional<IsSent> filterOutput = filterChain().accept(message);
         return filterOutput;
     }
 
