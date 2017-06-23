@@ -21,11 +21,20 @@
 package io.spine.base;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.GeneratedMessageV3;
+import com.google.protobuf.StringValue;
+import com.google.protobuf.util.Timestamps;
+import io.spine.protobuf.AnyPacker;
+import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
+import static io.spine.Identifier.newUuid;
 import static io.spine.base.Failures.FAILURE_ID_FORMAT;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * @author Alexander Yevsyukov
@@ -42,6 +51,7 @@ public class FailuresShould {
         new NullPointerTester()
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(CommandId.class, CommandId.getDefaultInstance())
+                .setDefault(ThrowableMessage.class, new TestThrowableMessage(newUuidValue()))
                 .testAllPublicStaticMethods(Failures.class);
     }
 
@@ -52,5 +62,42 @@ public class FailuresShould {
 
         final String expected = String.format(FAILURE_ID_FORMAT, commandId.getUuid());
         assertEquals(expected, actual.getValue());
+    }
+
+
+    @Test
+    public void convert_throwable_message_to_failure_message() {
+        final StringValue failureState = Wrapper.forString(newUuid());
+        final CommandContext context = CommandContext.newBuilder()
+                                                   .build();
+        final Command command = Command.newBuilder()
+                                     .setMessage(AnyPacker.pack(newUuidValue()))
+                                     .setContext(context)
+                                     .build();
+
+        final TestThrowableMessage throwableMessage = new TestThrowableMessage(failureState);
+        final Failure failureWrapper = Failures.toFailure(throwableMessage, command);
+
+        assertEquals(failureState, AnyPacker.unpack(failureWrapper.getMessage()));
+        assertFalse(failureWrapper.getContext()
+                                  .getStacktrace()
+                                  .isEmpty());
+        assertTrue(Timestamps.isValid(failureWrapper.getContext()
+                                                    .getTimestamp()));
+        final Command wrappedCommand = failureWrapper.getContext()
+                                                     .getCommand();
+        assertEquals(command, wrappedCommand);
+    }
+
+    /**
+     * Sample {@code ThrowableMessage} class used for test purposes only.
+     */
+    private static class TestThrowableMessage extends ThrowableMessage {
+
+        private static final long serialVersionUID = 0L;
+
+        private TestThrowableMessage(GeneratedMessageV3 message) {
+            super(message);
+        }
     }
 }
