@@ -21,6 +21,7 @@
 package io.spine.base;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.base.Throwables;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 
@@ -40,6 +41,35 @@ public final class Failures {
 
     private Failures() {
         // Prevent instantiation of this utility class.
+    }
+
+    /**
+     * Converts this {@code ThrowableMessage} into {@link Failure}.
+     *
+     * @param command the command which caused the failure
+     */
+    public static Failure toFailure(ThrowableMessage message, Command command) {
+        checkNotNull(message);
+        checkNotNull(command);
+
+        final Message state = message.getMessageThrown();
+        final Any packedState = pack(state);
+        final FailureContext context = createContext(message, command);
+        final FailureId id = generateId(command.getId());
+        return Failure.newBuilder()
+                      .setId(id)
+                      .setMessage(packedState)
+                      .setContext(context)
+                      .build();
+    }
+
+    private static FailureContext createContext(ThrowableMessage message, Command command) {
+        final String stacktrace = Throwables.getStackTraceAsString(message);
+        return FailureContext.newBuilder()
+                             .setTimestamp(message.getTimestamp())
+                             .setStacktrace(stacktrace)
+                             .setCommand(command)
+                             .build();
     }
 
     /**

@@ -28,6 +28,7 @@ import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
+import io.spine.base.ThrowableMessage;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
@@ -44,6 +45,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.base.Failures.toFailure;
 
 /**
  * Manages storage of commands received by a Bounded Context.
@@ -261,11 +263,15 @@ public class CommandStore implements AutoCloseable {
     public void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
         final Message commandMessage = commandEnvelope.getMessage();
         final CommandId commandId = commandEnvelope.getId();
-        if (cause instanceof FailureThrowable) {
-            final FailureThrowable failure = (FailureThrowable) cause;
-            log.failureHandling(failure, commandMessage, commandId);
-            updateStatus(commandEnvelope, failure.toFailure(commandEnvelope.getCommand()));
-        } else if (cause instanceof Exception) {
+        if (cause instanceof ThrowableMessage) {
+            final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+            log.failureHandling(throwableMessage, commandMessage, commandId);
+            updateStatus(commandEnvelope, toFailure(throwableMessage, commandEnvelope.getCommand()));
+        }  if (cause instanceof FailureThrowable) {
+            final FailureThrowable failureThrowable = (FailureThrowable) cause;
+            log.failureHandling(failureThrowable, commandMessage, commandId);
+            updateStatus(commandEnvelope, failureThrowable.toFailure(commandEnvelope.getCommand()));
+        }else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             log.errorHandling(exception, commandMessage, commandId);
             updateStatus(commandEnvelope, exception);
