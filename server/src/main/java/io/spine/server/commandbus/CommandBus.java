@@ -95,7 +95,7 @@ public class CommandBus extends Bus<Command,
      */
     private final boolean isThreadSpawnAllowed;
 
-    private final DeadCommandhandler deadCommandhandler;
+    private final DeadCommandHandler deadCommandHandler;
 
     // TODO:2017-06-23:dmytro.dashenkov: Document.
     @Nullable
@@ -116,7 +116,7 @@ public class CommandBus extends Bus<Command,
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.failureBus = builder.failureBus;
         this.filters = builder.getFilters();
-        this.deadCommandhandler = new DeadCommandhandler();
+        this.deadCommandHandler = new DeadCommandHandler();
     }
 
     /**
@@ -233,7 +233,7 @@ public class CommandBus extends Bus<Command,
 
     @Override
     protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
-        return deadCommandhandler;
+        return deadCommandHandler;
     }
 
     @Override
@@ -512,7 +512,7 @@ public class CommandBus extends Bus<Command,
         }
     }
 
-    private class DeadCommandhandler implements DeadMessageHandler<CommandEnvelope> {
+    private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
         @Override
         public Error handleDeadMessage(CommandEnvelope message) {
             final Command command = message.getCommand();

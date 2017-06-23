@@ -167,7 +167,7 @@ public abstract class Bus<T extends Message,
     }
 
     // TODO:2017-06-23:dmytro.dashenkov: Document.
-    protected final BusFilter<E> filterChain() {
+    private BusFilter<E> filterChain() {
         if (filterChain == null) {
             final Deque<BusFilter<E>> filters = createFilterChain();
             final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(this);
@@ -194,7 +194,8 @@ public abstract class Bus<T extends Message,
      * <p>Each message goes through the filter chain, specific to the {@code Bus} implementation.
      *
      * <p>If a message passes the filtering, it is included into the resulting {@link Iterable};
-     * otherwise, {@linkplain StreamObserver#onNext StreamObserver.onNext()} is called for that message.
+     * otherwise, {@linkplain StreamObserver#onNext StreamObserver.onNext()} is called for that
+     * message.
      *
      * <p>Any filter in the filter chain may process the message by itself. In this case an observer
      * is notified by the filter directly.
