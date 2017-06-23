@@ -20,7 +20,7 @@
 package io.spine.server.aggregate;
 
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
 
 /**
  * Exception is thrown if a command, which is intended to be used for an aggregate,

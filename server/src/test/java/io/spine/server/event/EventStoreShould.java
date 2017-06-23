@@ -32,10 +32,13 @@ import io.spine.base.EventContext;
 import io.spine.base.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.test.TestEventFactory;
+import io.spine.base.given.GivenCommandContext;
+import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.TaskAdded;
 import io.spine.testdata.Sample;
 import io.spine.time.Durations2;
+import io.spine.type.TypeName;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -49,9 +52,7 @@ import static com.google.protobuf.util.Timestamps.add;
 import static com.google.protobuf.util.Timestamps.subtract;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
 import static io.spine.time.Time.getCurrentTime;
-import static io.spine.type.TypeName.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.fail;
@@ -78,7 +79,7 @@ public class EventStoreShould {
 
     @BeforeClass
     public static void prepare() {
-        final CommandContext context = createCommandContext();
+        final CommandContext context = GivenCommandContext.withRandomUser();
         eventFactory = TestEventFactory.newInstance(EventStoreShould.class, context);
     }
 

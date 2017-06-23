@@ -23,7 +23,7 @@ package io.spine.testdata;
 import io.spine.server.entity.EntityRecord;
 import io.spine.test.Values;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.Wrappers.pack;
 
 /**

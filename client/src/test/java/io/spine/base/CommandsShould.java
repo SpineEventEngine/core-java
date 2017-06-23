@@ -30,31 +30,38 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Int64Value;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
+import io.spine.Identifier;
+import io.spine.base.given.GivenCommandContext;
+import io.spine.client.ActorRequestFactory;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
-import io.spine.test.TestActorRequestFactory;
 import io.spine.test.Values;
-import io.spine.test.commands.TestCommand;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
+import io.spine.type.TypeName;
+import io.spine.type.TypeUrl;
 import org.junit.Test;
 
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
+import static io.spine.Identifier.newUuid;
 import static io.spine.base.Commands.sameActorAndTenant;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
 import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Values.newUserUuid;
-import static io.spine.testdata.TestCommandContextFactory.createCommandContext;
+import static io.spine.test.Values.newUuidValue;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class CommandsShould {
@@ -62,8 +69,8 @@ public class CommandsShould {
     private static final FileDescriptor DEFAULT_FILE_DESCRIPTOR = Any.getDescriptor()
                                                                      .getFile();
 
-    private final TestActorRequestFactory requestFactory = TestActorRequestFactory.newInstance(
-            CommandsShould.class);
+    private final TestActorRequestFactory requestFactory =
+            TestActorRequestFactory.newInstance(CommandsShould.class);
 
     @Test
     public void have_private_ctor() {
@@ -124,7 +131,8 @@ public class CommandsShould {
     public void generate_command_ids() {
         final CommandId id = Commands.generateId();
 
-        assertFalse(Identifier.toString(id).isEmpty());
+        assertFalse(Identifier.toString(id)
+                              .isEmpty());
     }
 
     @Test
@@ -167,28 +175,14 @@ public class CommandsShould {
                                       .size());
     }
 
-    @Test
-    public void return_true_if_file_is_for_commands() {
-        final FileDescriptor file = TestCommand.getDescriptor()
-                                               .getFile();
-
-        assertTrue(Commands.isCommandsFile(file));
-    }
-
-    @Test
-    public void return_false_if_file_is_not_for_commands() {
-        final FileDescriptor file = StringValue.getDescriptor()
-                                               .getFile();
-
-        assertFalse(Commands.isCommandsFile(file));
-    }
 
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
-        final CommandContext context = createCommandContext(/*delay=*/seconds(10));
-        final Command cmd = requestFactory.command().createBasedOnContext(
-                                                             StringValue.getDefaultInstance(),
-                                                             context);
+        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(10));
+        final Command cmd = requestFactory.command()
+                                          .createBasedOnContext(
+                                                  StringValue.getDefaultInstance(),
+                                                  context);
         assertTrue(Commands.isScheduled(cmd));
     }
 
@@ -200,7 +194,7 @@ public class CommandsShould {
 
     @Test(expected = IllegalArgumentException.class)
     public void when_set_negative_delay_then_throw_exception() {
-        final CommandContext context = createCommandContext(/*delay=*/seconds(-10));
+        final CommandContext context = GivenCommandContext.withScheduledDelayOf(seconds(-10));
         final Command cmd = requestFactory.command()
                                           .createBasedOnContext(StringValue.getDefaultInstance(),
                                                                 context);
@@ -225,5 +219,31 @@ public class CommandsShould {
     public void return_value_id_when_checked() {
         final CommandId id = Commands.generateId();
         assertEquals(id, Commands.checkValid(id));
+    }
+
+    @Test
+    public void obtain_type_of_command() {
+        final Command command = requestFactory.command()
+                                              .create(newUuidValue());
+
+        final TypeName typeName = CommandEnvelope.of(command)
+                                                 .getTypeName();
+        assertNotNull(typeName);
+        assertEquals(StringValue.class.getSimpleName(), typeName.getSimpleName());
+    }
+
+    @Test
+    public void obtain_type_url_of_command() {
+        final ActorRequestFactory factory =
+                TestActorRequestFactory.newInstance(CommandsShould.class);
+        final StringValue message = Wrapper.forString(newUuid());
+        final Command command = factory.command()
+                                       .create(message);
+
+        final TypeUrl typeUrl = CommandEnvelope.of(command)
+                                               .getTypeName()
+                                               .toUrl();
+
+        assertEquals(TypeUrl.of(StringValue.class), typeUrl);
     }
 }

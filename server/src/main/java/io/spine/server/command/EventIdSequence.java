@@ -22,9 +22,9 @@ package io.spine.server.command;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Strings;
+import io.spine.Identifier;
 import io.spine.base.CommandId;
 import io.spine.base.EventId;
-import io.spine.base.Identifier;
 
 import java.util.concurrent.atomic.AtomicInteger;
 

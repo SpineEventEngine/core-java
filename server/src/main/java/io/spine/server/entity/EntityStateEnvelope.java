@@ -24,7 +24,7 @@ import com.google.common.base.Objects;
 import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
 import io.spine.base.TenantId;
 import io.spine.base.Version;
 import io.spine.envelope.MessageEnvelope;

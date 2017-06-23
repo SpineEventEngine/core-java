@@ -26,7 +26,7 @@ option java_package="io.spine.test.event.enrichment";
 option java_multiple_files = true;
 
 import "spine/options.proto";
-import "spine/time/zone_offset.proto";
+import "spine/time/zone.proto";
 import "spine/people/person_name.proto";
 
 message ProjectCreatedEnrichmentAnotherPackage {

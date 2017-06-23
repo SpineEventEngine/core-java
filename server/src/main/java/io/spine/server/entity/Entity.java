@@ -21,12 +21,13 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.reflect.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
- * A server-side object with an {@link io.spine.base.Identifier#checkSupported(Class) identity}.
+ * A server-side object with an {@link Identifier#checkSupported(Class) identity}.
  *
  * <p>A state of an entity is defined as a Protobuf message.
  *

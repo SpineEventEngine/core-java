@@ -19,9 +19,9 @@
  */
 package io.spine.server.failure;
 
+import io.spine.base.FailureClass;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.type.FailureClass;
 
 /**
  * Responsible for delivering the business failures to the corresponding subscribers.

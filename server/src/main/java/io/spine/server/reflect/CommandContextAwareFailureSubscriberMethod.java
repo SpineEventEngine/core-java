@@ -22,6 +22,7 @@ package io.spine.server.reflect;
 
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
+import io.spine.base.Subscribe;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -32,7 +33,7 @@ import java.lang.reflect.Method;
  * <p>The signature of such a method is following:
  * <pre>
  *     {@code
- *     {@link io.spine.annotation.Subscribe {@literal @}Subscribe}
+ *     {@link Subscribe {@literal @}Subscribe}
  *     public void on(FailureMessage failure, CommandContext context);
  *     }
  * </pre>

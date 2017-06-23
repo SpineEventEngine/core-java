@@ -30,7 +30,7 @@ import io.spine.test.bc.event.ProjectCreated;
 import io.spine.test.bc.event.ProjectStarted;
 import io.spine.test.bc.event.TaskAdded;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.time.Time.getCurrentTime;
 

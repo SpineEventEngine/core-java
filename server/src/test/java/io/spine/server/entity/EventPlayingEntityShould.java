@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Event;
 import io.spine.base.Version;
-import io.spine.test.TestEventFactory;
+import io.spine.server.command.TestEventFactory;
 import io.spine.test.Values;
 import io.spine.validate.StringValueVBuilder;
 import io.spine.validate.ValidatingBuilder;
