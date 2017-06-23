@@ -25,7 +25,6 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterators;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.reflect.GenericTypeIndex;
 import io.spine.server.BoundedContext;
 import io.spine.server.stand.Stand;
 import io.spine.server.storage.Storage;
@@ -33,6 +32,7 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.type.ClassName;
 import io.spine.type.KnownTypes;
 import io.spine.type.TypeUrl;
+import io.spine.util.GenericTypeIndex;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

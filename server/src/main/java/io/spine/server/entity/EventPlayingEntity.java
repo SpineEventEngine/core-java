@@ -25,7 +25,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.Version;
-import io.spine.reflect.GenericTypeIndex;
+import io.spine.util.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidatingBuilders;
 

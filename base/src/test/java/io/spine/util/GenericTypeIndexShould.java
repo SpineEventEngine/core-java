@@ -18,13 +18,13 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.reflect;
+package io.spine.util;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.test.Tests;
 import org.junit.Test;
 
-import static io.spine.reflect.GenericTypeIndex.Default.getArgument;
+import static io.spine.util.GenericTypeIndex.Default.getArgument;
 import static org.junit.Assert.assertEquals;
 
 /**
