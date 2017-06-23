@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.base.Version;
-import io.spine.base.Versions;
+import io.spine.core.Versions;
 import io.spine.server.entity.failure.CannotModifyArchivedEntity;
 import io.spine.server.entity.failure.CannotModifyDeletedEntity;
 

@@ -28,7 +28,7 @@ import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Log;

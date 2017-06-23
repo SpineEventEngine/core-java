@@ -24,7 +24,7 @@ import com.google.protobuf.StringValue;
 import io.spine.base.TenantId;
 import io.spine.base.UserId;
 import io.spine.base.Version;
-import io.spine.base.Versions;
+import io.spine.core.Versions;
 import io.spine.protobuf.Wrapper;
 import io.spine.time.Time;
 

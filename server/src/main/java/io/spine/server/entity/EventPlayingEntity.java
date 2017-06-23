@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.Events.getMessage;
+import static io.spine.core.Events.getMessage;
 import static io.spine.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
 
 /**

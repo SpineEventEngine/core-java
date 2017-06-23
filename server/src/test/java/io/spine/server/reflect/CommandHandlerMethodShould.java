@@ -25,7 +25,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;

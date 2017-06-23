@@ -27,10 +27,11 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Event;
-import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.IsSent;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Subscribe;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
@@ -59,7 +60,7 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * <li>Expose a {@code public} method that accepts an event message as the first parameter
  * and an {@link EventContext EventContext} as the second
  * (optional) parameter.
- * <li>Mark the method with the {@link io.spine.base.Subscribe @Subscribe} annotation.
+ * <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
  * <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
  * instance of {@code EventBus} directly, or rely on message delivery
  * from an {@link EventDispatcher}. An example of such a dispatcher is
@@ -91,7 +92,7 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.server.projection.Projection Projection
- * @see io.spine.base.Subscribe @Subscribe
+ * @see Subscribe @Subscribe
  */
 public class EventBus extends CommandOutputBus<Event,
                                                EventEnvelope,

@@ -26,7 +26,7 @@ import io.spine.base.Command;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
 import io.spine.base.TenantId;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
 
 import java.util.List;

@@ -25,7 +25,7 @@ import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
 import io.spine.base.EventContext;
-import io.spine.base.Subscribe;
+import io.spine.core.Subscribe;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;

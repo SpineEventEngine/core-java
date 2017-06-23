@@ -23,9 +23,10 @@ package io.spine.server.commandbus;
 import com.google.common.testing.NullPointerTester;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
-import io.spine.base.CommandClass;
 import io.spine.base.Error;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.failure.FailureBus;
@@ -269,7 +270,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     /**
      * The dispatcher that remembers that
-     * {@link CommandDispatcher#dispatch(io.spine.envelope.MessageEnvelope) dispatch()}
+     * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()}
      * was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {

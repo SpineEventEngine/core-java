@@ -21,8 +21,8 @@ package io.spine.server.event;
 
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.EventClass;
 import io.spine.base.EventValidationError;
+import io.spine.core.EventClass;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;

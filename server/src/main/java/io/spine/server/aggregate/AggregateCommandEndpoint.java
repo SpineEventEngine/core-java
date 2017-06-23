@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.LifecycleFlags;
 import io.spine.server.tenant.TenantAwareOperation;
 

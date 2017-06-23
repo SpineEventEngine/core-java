@@ -17,13 +17,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.base;
+package io.spine.core;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
+import io.spine.base.CommandContext;
+import io.spine.base.Event;
+import io.spine.base.EventContext;
+import io.spine.base.EventId;
+import io.spine.base.TenantId;
+import io.spine.base.UserId;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
 import io.spine.time.Timestamps2;

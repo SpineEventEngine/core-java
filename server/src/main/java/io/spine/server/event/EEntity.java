@@ -24,8 +24,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventId;
-import io.spine.base.Events;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.server.entity.AbstractEntity;
 import io.spine.type.TypeName;
 

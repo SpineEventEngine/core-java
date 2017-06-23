@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.envelope;
+package io.spine.core;
 
 import com.google.protobuf.Message;
 import io.spine.base.Event;
-import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.EventId;
-import io.spine.base.Events;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;

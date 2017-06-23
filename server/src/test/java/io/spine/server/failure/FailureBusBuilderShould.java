@@ -19,7 +19,7 @@
  */
 package io.spine.server.failure;
 
-import io.spine.envelope.FailureEnvelope;
+import io.spine.core.FailureEnvelope;
 import io.spine.test.Tests;
 import org.junit.Test;
 

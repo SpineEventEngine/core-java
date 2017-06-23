@@ -24,11 +24,12 @@ import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
 import io.spine.base.given.GivenEvent;
+import io.spine.core.EventPredicates;
 import org.junit.Test;
 
-import static io.spine.base.EventPredicates.isAfter;
-import static io.spine.base.EventPredicates.isBefore;
-import static io.spine.base.EventPredicates.isBetween;
+import static io.spine.core.EventPredicates.isAfter;
+import static io.spine.core.EventPredicates.isBefore;
+import static io.spine.core.EventPredicates.isBetween;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;

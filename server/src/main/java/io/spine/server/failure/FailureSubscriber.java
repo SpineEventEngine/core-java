@@ -23,8 +23,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.FailureClass;
-import io.spine.envelope.FailureEnvelope;
+import io.spine.core.FailureClass;
+import io.spine.core.FailureEnvelope;
 import io.spine.server.reflect.FailureSubscriberMethod;
 import io.spine.server.tenant.CommandOperation;
 

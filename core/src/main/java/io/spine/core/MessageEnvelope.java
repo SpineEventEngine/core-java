@@ -18,39 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
-import com.google.common.testing.NullPointerTester;
-import org.junit.Test;
-
-import static io.spine.base.Failures.FAILURE_ID_FORMAT;
-import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static org.junit.Assert.assertEquals;
+import com.google.protobuf.Message;
+import io.spine.type.MessageClass;
 
 /**
+ * A common interface for obtaining messages from wrapping objects.
+ *
+ * @param <T> the type of the object that wraps a message
+ * @author Alex Tymchenko
  * @author Alexander Yevsyukov
  */
-public class FailuresShould {
+public interface MessageEnvelope<T> {
 
-    @Test
-    public void have_utility_ctor() {
-        assertHasPrivateParameterlessCtor(Failures.class);
-    }
+    /**
+     * Obtains the object which contains the message of interest.
+     */
+    T getOuterObject();
 
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Command.class, Command.getDefaultInstance())
-                .setDefault(CommandId.class, CommandId.getDefaultInstance())
-                .testAllPublicStaticMethods(Failures.class);
-    }
+    /**
+     * Obtains the message.
+     */
+    Message getMessage();
 
-    @Test
-    public void generate_failure_id_upon_command_id() {
-        final CommandId commandId = Commands.generateId();
-        final FailureId actual = Failures.generateId(commandId);
-
-        final String expected = String.format(FAILURE_ID_FORMAT, commandId.getUuid());
-        assertEquals(expected, actual.getValue());
-    }
+    /**
+     * Obtains the message class.
+     */
+    MessageClass getMessageClass();
 }

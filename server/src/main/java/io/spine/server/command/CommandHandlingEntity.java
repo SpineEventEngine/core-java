@@ -28,7 +28,7 @@ import io.spine.base.FailureThrowable;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.validate.ValidatingBuilder;

@@ -17,10 +17,11 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
+import io.spine.base.Failure;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

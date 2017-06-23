@@ -18,47 +18,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.envelope;
+package io.spine.core;
 
-import java.util.Objects;
+import io.spine.base.Error;
+import io.spine.base.Response;
+import io.spine.base.Status;
+import org.junit.Test;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
-/**
- * Abstract base for classes implementing {@link MessageEnvelope}.
- *
- * @param <T> the type of the object that wraps a message
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
- */
-public abstract class AbstractMessageEnvelope<T> implements MessageEnvelope<T> {
+public class ResponsesShould {
 
-    private final T object;
-
-    AbstractMessageEnvelope(T object) {
-        checkNotNull(object);
-        this.object = object;
+    @Test
+    public void have_private_constructor() {
+        assertHasPrivateParameterlessCtor(Responses.class);
     }
 
-    @Override
-    public T getOuterObject() {
-        return object;
+    @Test
+    public void return_OK_response() {
+        checkNotNull(Responses.ok());
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(object);
+    @Test
+    public void recognize_OK_response() {
+        assertTrue(Responses.isOk(Responses.ok()));
     }
 
-    @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
-            return true;
-        }
-        if (obj == null || getClass() != obj.getClass()) {
-            return false;
-        }
-        final AbstractMessageEnvelope other = (AbstractMessageEnvelope) obj;
-        return Objects.equals(this.object, other.object);
+    @Test
+    public void return_false_if_not_OK_response() {
+        final Status status = Status.newBuilder()
+                                    .setError(Error.getDefaultInstance())
+                                    .build();
+        final Response error = Response.newBuilder()
+                                       .setStatus(status)
+                                       .build();
+        assertFalse(Responses.isOk(error));
     }
 }

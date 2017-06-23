@@ -23,8 +23,8 @@ package io.spine.server.event;
 import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
-import io.spine.base.EventClass;
 import io.spine.base.EventValidationError;
+import io.spine.core.EventClass;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
 

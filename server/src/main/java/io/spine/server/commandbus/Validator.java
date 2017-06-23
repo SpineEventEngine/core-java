@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.idfunc.GetTargetIdFromCommand;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;

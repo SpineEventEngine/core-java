@@ -25,7 +25,7 @@ import com.google.protobuf.Timestamp;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;

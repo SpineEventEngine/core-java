@@ -25,8 +25,8 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.CommandContext;
-import io.spine.base.FailureClass;
-import io.spine.base.Subscribe;
+import io.spine.core.FailureClass;
+import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

@@ -18,47 +18,41 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.test.Tests;
+import io.spine.base.Command;
+import io.spine.base.CommandId;
+import io.spine.base.FailureId;
 import org.junit.Test;
 
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
-public class ErrorsShould {
+/**
+ * @author Alexander Yevsyukov
+ */
+public class FailuresShould {
 
     @Test
-    public void have_private_constructor() {
-        Tests.assertHasPrivateParameterlessCtor(Errors.class);
+    public void have_utility_ctor() {
+        assertHasPrivateParameterlessCtor(Failures.class);
     }
 
     @Test
-    public void create_Error_by_Exception() {
-        final String msg = "create_error_by_exception";
-        final Exception exception = new NullPointerException(msg);
-        final Error error = Errors.fromException(exception);
-
-        assertEquals(msg, error.getMessage());
-        assertEquals(exception.getClass()
-                              .getName(), error.getType());
-    }
-
-    @Test
-    public void create_Error_by_Throwable() {
-        final String msg = "create_Error_by_Throwable";
-        final Throwable throwable = new IllegalStateException(msg);
-
-        final Error error = Errors.fromThrowable(throwable);
-        assertEquals(msg, error.getMessage());
-        assertEquals(throwable.getClass()
-                              .getName(), error.getType());
-    }
-
-    @Test
-    public void pass_the_null_tolerance_check() {
+    public void pass_null_tolerance_check() {
         new NullPointerTester()
-                .setDefault(Exception.class, new RuntimeException("null check"))
-                .testAllPublicStaticMethods(Errors.class);
+                .setDefault(Command.class, Command.getDefaultInstance())
+                .setDefault(CommandId.class, CommandId.getDefaultInstance())
+                .testAllPublicStaticMethods(Failures.class);
+    }
+
+    @Test
+    public void generate_failure_id_upon_command_id() {
+        final CommandId commandId = Commands.generateId();
+        final FailureId actual = Failures.generateId(commandId);
+
+        final String expected = String.format(Failures.FAILURE_ID_FORMAT, commandId.getUuid());
+        assertEquals(expected, actual.getValue());
     }
 }

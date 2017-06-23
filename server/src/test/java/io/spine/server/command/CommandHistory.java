@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Commands;
+import io.spine.core.Commands;
 
 import java.util.List;
 

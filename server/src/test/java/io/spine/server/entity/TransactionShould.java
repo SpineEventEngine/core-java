@@ -35,7 +35,7 @@ import org.mockito.ArgumentMatcher;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.Versions.newVersion;
+import static io.spine.core.Versions.newVersion;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;

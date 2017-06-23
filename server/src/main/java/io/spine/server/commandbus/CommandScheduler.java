@@ -27,7 +27,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
 import io.spine.base.IsSent;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Sets.newHashSet;
 import static com.google.protobuf.util.Timestamps.checkValid;
 import static io.spine.base.CommandStatus.SCHEDULED;
-import static io.spine.base.Commands.isScheduled;
+import static io.spine.core.Commands.isScheduled;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.time.Time.getCurrentTime;
 

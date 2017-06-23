@@ -23,6 +23,7 @@ package io.spine.base;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandAttribute;
 import io.spine.protobuf.Wrapper;
 import io.spine.time.Time;
 import org.junit.Before;

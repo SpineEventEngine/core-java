@@ -20,8 +20,8 @@
 package io.spine.server.commandbus;
 
 import io.spine.annotation.Internal;
-import io.spine.base.CommandClass;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
 
 import java.util.Set;
 

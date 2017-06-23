@@ -24,7 +24,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Command;
 import io.spine.base.CommandId;
 
-import static io.spine.base.Commands.getTenantId;
+import static io.spine.core.Commands.getTenantId;
 
 /**
  * A tenant-aware operation performed in response to a command or in relation to a command.

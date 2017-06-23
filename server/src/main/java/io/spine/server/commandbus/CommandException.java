@@ -26,7 +26,7 @@ import com.google.protobuf.Value;
 import io.spine.base.Command;
 import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.type.ClassName;
 import io.spine.type.TypeName;
 

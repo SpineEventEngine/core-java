@@ -27,7 +27,7 @@ import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;

@@ -21,6 +21,7 @@
 package io.spine.base;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.core.Versions;
 import io.spine.test.Values;
 import org.junit.Test;
 

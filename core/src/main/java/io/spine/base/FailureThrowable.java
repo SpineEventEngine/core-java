@@ -26,6 +26,7 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.Failures;
 
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.time.Time.getCurrentTime;

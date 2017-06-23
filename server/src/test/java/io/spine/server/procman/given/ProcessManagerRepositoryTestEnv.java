@@ -25,7 +25,7 @@ import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
 import io.spine.base.CommandContext;
 import io.spine.base.EventContext;
-import io.spine.base.Subscribe;
+import io.spine.core.Subscribe;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.procman.CommandRouted;

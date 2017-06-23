@@ -30,7 +30,7 @@ import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
 import io.spine.base.TenantId;
-import io.spine.base.given.GivenCommandContext;
+import io.spine.core.given.GivenCommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;

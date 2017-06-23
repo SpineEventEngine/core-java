@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.base.TenantId;
 import io.spine.base.Version;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.string.Stringifiers;
 
 import javax.annotation.Nullable;

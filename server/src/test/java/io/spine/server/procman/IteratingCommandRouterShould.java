@@ -27,7 +27,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Commands;
+import io.spine.core.Commands;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.time.Time;
 import org.junit.Test;

@@ -33,7 +33,7 @@ import io.spine.base.Status;
 import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;

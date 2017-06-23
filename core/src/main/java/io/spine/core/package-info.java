@@ -18,18 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
-
-import io.spine.core.CommandClass;
-import io.spine.core.CommandEnvelope;
-import io.spine.server.bus.MessageDispatcher;
-
 /**
- * Delivers commands to their handlers.
- *
- * <p>A dispatcher can deliver more than one class of commands.
- *
- * @author Alexander Yevsyukov
+ * This package provides generated classes and interfaces with general data types for building
+ * event-sourcing applications.
  */
-public interface CommandDispatcher extends MessageDispatcher<CommandClass, CommandEnvelope> {
-}
+
+@ParametersAreNonnullByDefault
+package io.spine.core;
+
+import javax.annotation.ParametersAreNonnullByDefault;

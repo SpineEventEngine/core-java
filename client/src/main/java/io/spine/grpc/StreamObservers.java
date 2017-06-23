@@ -27,7 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.core.Responses;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -35,7 +35,7 @@ import java.util.List;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.base.Responses.ok;
+import static io.spine.core.Responses.ok;
 
 /**
  * A utility class for the routines related to

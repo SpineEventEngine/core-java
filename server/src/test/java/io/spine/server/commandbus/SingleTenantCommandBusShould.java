@@ -27,7 +27,7 @@ import io.spine.base.CommandValidationError;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;

@@ -18,14 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.envelope;
+package io.spine.core;
 
 import com.google.protobuf.Message;
 import io.spine.base.Command;
-import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.CommandId;
-import io.spine.base.Commands;
 import io.spine.base.TenantId;
 import io.spine.type.TypeName;
 

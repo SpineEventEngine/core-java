@@ -35,7 +35,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.base.Versions.checkIsIncrement;
+import static io.spine.core.Versions.checkIsIncrement;
 import static io.spine.server.entity.InvalidEntityStateException.onConstraintViolations;
 import static io.spine.util.Exceptions.illegalStateWithCauseOf;
 import static java.lang.String.format;

@@ -24,7 +24,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Version;
-import io.spine.base.Versions;
+import io.spine.core.Versions;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.test.TimeTests;

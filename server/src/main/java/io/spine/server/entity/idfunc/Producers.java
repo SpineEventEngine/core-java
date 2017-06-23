@@ -24,7 +24,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.EventContext;
-import io.spine.base.Events;
+import io.spine.core.Events;
 
 import java.util.Set;
 

@@ -39,7 +39,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static io.spine.base.Versions.newVersion;
+import static io.spine.core.Versions.newVersion;
 import static io.spine.test.Verify.assertInstanceOf;
 import static io.spine.test.Verify.assertSize;
 import static org.junit.Assert.assertEquals;

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Predicate;
@@ -26,6 +26,11 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
+import io.spine.base.ActorContext;
+import io.spine.base.Command;
+import io.spine.base.CommandContext;
+import io.spine.base.CommandId;
+import io.spine.base.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;

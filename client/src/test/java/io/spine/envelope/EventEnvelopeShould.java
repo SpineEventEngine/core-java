@@ -22,7 +22,8 @@ package io.spine.envelope;
 
 import com.google.protobuf.Message;
 import io.spine.base.Event;
-import io.spine.base.EventClass;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.envelope.ProjectCreated;
 import io.spine.test.envelope.ProjectId;

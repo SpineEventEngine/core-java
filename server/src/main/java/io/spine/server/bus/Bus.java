@@ -24,8 +24,9 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.FailureThrowable;
 import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -114,7 +115,7 @@ public abstract class Bus<T extends Message,
      * an {@link io.spine.base.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
      * the {@link io.spine.base.Failure} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws
-     * the {@linkplain io.spine.base.FailureThrowable FailureThrowables} (wrapped in a
+     * the {@linkplain FailureThrowable FailureThrowables} (wrapped in a
      * {@link RuntimeException}) instead of handling them. Otherwise, the {@code OK} status should
      * be expected.
      *
@@ -237,7 +238,7 @@ public abstract class Bus<T extends Message,
      *             <li>{@link io.spine.base.Failure Failure} status, if a {@code Failure} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
-     *                 a {@link io.spine.base.FailureThrowable FailureThrowable}, has been thrown
+     *                 a {@link FailureThrowable FailureThrowable}, has been thrown
      *                 during the message posting.
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API

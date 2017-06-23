@@ -25,8 +25,8 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
-import io.spine.base.Subscribe;
 import io.spine.base.UserId;
+import io.spine.core.Subscribe;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
@@ -47,7 +47,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.base.Enrichments.getEnrichment;
+import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.server.event.Given.AnEvent.projectStarted;
 import static io.spine.server.event.Given.Enrichment.GetProjectMaxMemberCount;

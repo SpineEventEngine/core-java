@@ -26,8 +26,8 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
-import io.spine.base.Responses;
 import io.spine.base.Status;
+import io.spine.core.Responses;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
