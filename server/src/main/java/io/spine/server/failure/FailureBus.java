@@ -25,8 +25,7 @@ import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Failure;
 import io.spine.base.FailureClass;
-import io.spine.base.Response;
-import io.spine.base.Subscribe;
+import io.spine.base.IsSent;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.outbus.CommandOutputBus;
@@ -37,6 +36,7 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.Set;
 
+import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -46,10 +46,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.base.FailureThrowable
- * @see Subscribe Subscribe @Subscribe
+ * @see io.spine.base.Subscribe @Subscribe
  */
-public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
-        FailureClass, FailureDispatcher> {
+public class FailureBus extends CommandOutputBus<Failure,
+                                                 FailureEnvelope,
+        FailureClass,
+                                                 FailureDispatcher> {
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
@@ -65,15 +67,20 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
         return new Builder();
     }
 
-
+    /**
+     * {@inheritDoc}
+     *
+     * <p>Performs no action.
+     */
     @Override
-    protected void store(Failure message) {
+    protected void store(Iterable<Failure> message) {
         // do nothing for now.
     }
 
     @Override
-    protected boolean validateMessage(Message message, StreamObserver<Response> responseObserver) {
-        return true;
+    public Optional<Throwable> validate(Message message) {
+        checkNotNull(message);
+        return absent();
     }
 
     /**
@@ -89,20 +96,24 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
     }
 
     @Override
-    protected FailureEnvelope createEnvelope(Failure message) {
-        final FailureEnvelope result = FailureEnvelope.of(message);
-        return result;
-    }
-
-    @Override
     protected OutputDispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
         return new FailureDispatcherRegistry();
     }
 
     @Override
-    public void handleDeadMessage(FailureEnvelope message,
-                                  StreamObserver<Response> responseObserver) {
+    protected FailureEnvelope toEnvelope(Failure message) {
+        final FailureEnvelope result = FailureEnvelope.of(message);
+        return result;
+    }
+
+    @Override
+    public void handleDeadMessage(FailureEnvelope message) {
         log().warn("No dispatcher defined for the failure class {}", message.getMessageClass());
+    }
+
+    @Override
+    protected Message getId(FailureEnvelope envelope) {
+        return envelope.getId();
     }
 
     /**
@@ -144,8 +155,8 @@ public class FailureBus extends CommandOutputBus<Failure, FailureEnvelope,
      * @param failure the business failure to deliver to the dispatchers.
      * @see #post(Message, StreamObserver)
      */
-    public void post(Failure failure) {
-        post(failure, StreamObservers.<Response>noOpObserver());
+    public final void post(Failure failure) {
+        post(failure, StreamObservers.<IsSent>noOpObserver());
     }
 
     /** The {@code Builder} for {@code FailureBus}. */

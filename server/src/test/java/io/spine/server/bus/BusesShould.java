@@ -18,25 +18,37 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
-import com.google.common.util.concurrent.MoreExecutors;
-import io.spine.server.BoundedContext;
+import com.google.common.testing.NullPointerTester;
+import com.google.protobuf.Any;
+import com.google.protobuf.Message;
+import io.spine.base.Error;
+import io.spine.base.Failure;
+import org.junit.Test;
+
+import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
 /**
  * @author Dmytro Dashenkov
  */
-public class EventStoreLocalImplShould extends EventStoreShould {
+public class BusesShould {
 
-    @Override
-    protected EventStore creteStore() {
-        final BoundedContext bc = BoundedContext.newBuilder()
-                                                .setMultitenant(false)
-                                                .build();
-        return EventStore.newBuilder()
-                         .setStorageFactory(bc.getStorageFactory())
-                         .setStreamExecutor(MoreExecutors.directExecutor())
-                         .withDefaultLogger()
-                         .build();
+    @Test
+    public void have_private_util_ctor() {
+        assertHasPrivateParameterlessCtor(Buses.class);
+    }
+
+    @Test
+    public void not_accept_nulls() {
+        new NullPointerTester()
+                .setDefault(Message.class, Any.getDefaultInstance())
+                .setDefault(Error.class, Error.newBuilder()
+                                              .setCode(1)
+                                              .build())
+                .setDefault(Failure.class, Failure.newBuilder()
+                                                  .setMessage(Any.getDefaultInstance())
+                                                  .build())
+                .testAllPublicStaticMethods(Buses.class);
     }
 }

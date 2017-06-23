@@ -112,9 +112,9 @@ public abstract class ProcessManager<I,
      */
     @Override
     protected List<Event> dispatchCommand(CommandEnvelope envelope) {
-            final List<? extends Message> messages = super.dispatchCommand(envelope);
-            final List<Event> result = toEvents(messages, envelope);
-            return result;
+        final List<? extends Message> messages = super.dispatchCommand(envelope);
+        final List<Event> result = toEvents(messages, envelope);
+        return result;
     }
 
     /**

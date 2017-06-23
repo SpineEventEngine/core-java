@@ -200,7 +200,7 @@ public class Stand implements AutoCloseable {
 
             @Override
             public void run() {
-                final Object id = envelope.getEntityId();
+                final Object id = envelope.getId();
                 final Message entityState = envelope.getMessage();
                 final Any packedState = AnyPacker.pack(entityState);
 

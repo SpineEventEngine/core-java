@@ -20,11 +20,11 @@
 
 package io.spine.server.commandbus;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
-import io.spine.base.Response;
+import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 
 import java.util.List;
@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 /**
  * The chain of {@code CommandBusFilter}s that {@link CommandBus} applies before
- * {@linkplain CommandBus#post(Command, StreamObserver) posting} a command.
+ * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posting} a command.
  *
  * @author Alexander Yevsyukov
  */
@@ -50,13 +50,14 @@ final class FilterChain implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
         for (CommandBusFilter filter : filters) {
-            if (!filter.accept(envelope, responseObserver)) {
-                return false;
+            final Optional<IsSent> result = filter.accept(envelope);
+            if (result.isPresent()) {
+                return result;
             }
         }
-        return true;
+        return Optional.absent();
     }
 
     @Override

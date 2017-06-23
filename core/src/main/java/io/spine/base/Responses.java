@@ -29,11 +29,14 @@ import com.google.protobuf.Empty;
  */
 public final class Responses {
 
+    private static final Status STATUS_OK = Status.newBuilder()
+                                                  .setOk(Empty.getDefaultInstance())
+                                                  .build();
+
     /** The response returned on successful acceptance of a message for processing. */
     private static final Response RESPONSE_OK = Response.newBuilder()
-                                                        .setOk(Empty.getDefaultInstance())
+                                                        .setStatus(STATUS_OK)
                                                         .build();
-
     private Responses() {
         // Prevent instantiation of this utility class.
     }
@@ -44,13 +47,20 @@ public final class Responses {
     }
 
     /**
+     * Returns the {@code OK} {@link Status} instance.
+     */
+    public static Status statusOk() {
+        return STATUS_OK;
+    }
+
+    /**
      * Checks if the response is OK.
      *
      * @return {@code true} if the passed response represents `ok` status,
      * {@code false} otherwise
      */
     public static boolean isOk(Response response) {
-        final boolean result = response.getStatusCase() == Response.StatusCase.OK;
+        final boolean result = response.getStatus().getStatusCase() == Status.StatusCase.OK;
         return result;
     }
 }

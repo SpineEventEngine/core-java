@@ -227,9 +227,7 @@ public abstract class AggregateRepository<I, A extends Aggregate<I, ?, ?>>
      * Posts passed events to {@link EventBus}.
      */
     private void postEvents(Iterable<Event> events) {
-        for (Event event : events) {
-            getEventBus().post(event);
-        }
+        getEventBus().post(events);
     }
 
     /**

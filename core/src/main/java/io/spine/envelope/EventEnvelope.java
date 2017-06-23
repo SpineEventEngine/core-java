@@ -24,6 +24,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Event;
 import io.spine.base.EventClass;
 import io.spine.base.EventContext;
+import io.spine.base.EventId;
 import io.spine.base.Events;
 import io.spine.type.TypeName;
 
@@ -54,6 +55,14 @@ public final class EventEnvelope extends AbstractMessageEnvelope<Event> {
     public static EventEnvelope of(Event event) {
         checkNotNull(event);
         return new EventEnvelope(event);
+    }
+
+    /**
+     * Obtains the event ID.
+     */
+    public EventId getId() {
+        final EventId result = getOuterObject().getId();
+        return result;
     }
 
     /**

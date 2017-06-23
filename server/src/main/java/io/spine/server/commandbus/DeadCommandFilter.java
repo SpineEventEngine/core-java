@@ -21,14 +21,17 @@
 package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandClass;
-import io.spine.base.Response;
+import io.spine.base.Error;
+import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.server.bus.Buses.reject;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 
 /**
  * Filters out commands that do not have registered dispatchers.
@@ -50,16 +53,18 @@ class DeadCommandFilter implements CommandBusFilter {
     }
 
     @Override
-    public boolean accept(CommandEnvelope envelope, StreamObserver<Response> responseObserver) {
+    public Optional<IsSent> accept(CommandEnvelope envelope) {
         if (!hasDispatcher(envelope.getMessageClass())) {
             final Command command = envelope.getCommand();
             final CommandException unsupported = new UnsupportedCommandException(command);
-            commandBus.commandStore()
-                      .storeWithError(command, unsupported);
-            responseObserver.onError(invalidArgumentWithCause(unsupported, unsupported.getError()));
-            return false;
+            commandBus.commandStore().storeWithError(command, unsupported);
+            final Throwable throwable = invalidArgumentWithCause(unsupported,
+                                                                 unsupported.getError());
+            final Error error = toError(throwable, UNSUPPORTED_COMMAND.getNumber());
+            final IsSent result = reject(envelope.getId(), error);
+            return Optional.of(result);
         }
-        return true;
+        return Optional.absent();
     }
 
     @Override

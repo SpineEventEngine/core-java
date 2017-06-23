@@ -26,7 +26,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.Response;
+import io.spine.base.IsSent;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.grpc.StreamObservers;
@@ -79,7 +79,7 @@ public class AggregateRepositoryViewsShould {
     private void postCommand(String cmd) {
         final Command command =
                 requestFactory.command().create(SHRepository.createCommandMessage(id, cmd));
-        boundedContext.getCommandBus().post(command, StreamObservers.<Response>noOpObserver());
+        boundedContext.getCommandBus().post(command, StreamObservers.<IsSent>noOpObserver());
     }
 
     @Test

@@ -20,24 +20,27 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
-import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
+import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.reject;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -56,10 +59,11 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alex Tymchenko
  */
 @Internal
-public abstract class CommandOutputBus< M extends Message,
-                                        E extends MessageEnvelope<M>,
-                                        C extends MessageClass,
-                                        D extends MessageDispatcher<C,E>> extends Bus<M, E, C, D> {
+public abstract class CommandOutputBus<M extends Message,
+                                       E extends MessageEnvelope<M>,
+                                       C extends MessageClass,
+                                       D extends MessageDispatcher<C,E>>
+                extends Bus<M, E, C, D> {
 
     /**
      * The strategy to deliver the messages to the dispatchers.
@@ -100,32 +104,11 @@ public abstract class CommandOutputBus< M extends Message,
      * <p>The message also must satisfy validation constraints defined in its Protobuf type.
      *
      * @param message          the command output message to check
-     * @param responseObserver the observer to obtain the result of the call;
-     *                         {@link StreamObserver#onError(Throwable)} is called if
-     *                         a message is unsupported or invalid
-     * @return {@code true} if a message is supported and valid and can be posted,
-     * {@code false} otherwise
+     * @return a {@link Throwable} representing the found violation or
+     *         {@link Optional#absent() Optional.absent()} if the given {@link Message} can be
+     *         posted to this bus
      */
-    public boolean validate(Message message, StreamObserver<Response> responseObserver) {
-        if (!validateMessage(message, responseObserver)) {
-            return false;
-        }
-        responseObserver.onNext(Responses.ok());
-        responseObserver.onCompleted();
-        return true;
-    }
-
-    protected abstract void store(M message);
-
-    /**
-     * Validates the message and notifies the observer of those (if any).
-     *
-     * <p>Does not call {@link StreamObserver#onNext(Object) StreamObserver.onNext(..)} or
-     * {@link StreamObserver#onCompleted() StreamObserver.onCompleted(..)}
-     * for the given {@code responseObserver}.
-     */
-    protected abstract boolean validateMessage(Message message,
-                                               StreamObserver<Response> responseObserver);
+    public abstract Optional<Throwable> validate(Message message);
 
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
@@ -144,8 +127,6 @@ public abstract class CommandOutputBus< M extends Message,
         return this.delivery;
     }
 
-    protected abstract E createEnvelope(M message);
-
     /**
      * {@inheritDoc}
      *
@@ -154,38 +135,33 @@ public abstract class CommandOutputBus< M extends Message,
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
-    /**
-     * Validates and posts the message for handling.
-     *
-     * <p>If the message is invalid, the {@code responseObserver} is notified of an error.
-     *
-     * <p>If the message is valid, it {@linkplain #store(Message) may be stored} in the associated
-     * store before passing it to dispatchers.
-     *
-     * <p>The {@code responseObserver} is then notified of a successful acknowledgement of the
-     * passed message.
-     *
-     * @param message          the message to be handled
-     * @param responseObserver the observer to be notified
-     * @see #validateMessage(Message, StreamObserver)
-     */
     @Override
-    public void post(M message, StreamObserver<Response> responseObserver) {
-        checkNotNull(responseObserver);
+    protected Optional<IsSent> preProcess(final E message) {
+        final Optional<Throwable> violation = this.validate(message.getMessage());
+        final Optional<IsSent> result = violation.transform(
+                new Function<Throwable, IsSent>() {
+                    @Override
+                    public IsSent apply(@Nullable Throwable input) {
+                        checkNotNull(input);
+                        final Error error = Exceptions.toError(input);
+                        return reject(getId(message), error);
+                    }
+                }
+        );
+        return result;
+    }
 
-        final boolean validationPassed = validateMessage(message, responseObserver);
+    @Override
+    protected IsSent doPost(E envelope) {
+        final M enriched = enrich(envelope.getOuterObject());
+        final E enrichedEnvelope = toEnvelope(enriched);
+        final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
-        if (validationPassed) {
-            responseObserver.onNext(Responses.ok());
-            store(message);
-            final M enriched = enrich(message);
-            final int dispatchersCalled = callDispatchers(createEnvelope(enriched));
-
-            if (dispatchersCalled == 0) {
-                handleDeadMessage(createEnvelope(message), responseObserver);
-            }
-            responseObserver.onCompleted();
+        if (dispatchersCalled == 0) {
+            handleDeadMessage(enrichedEnvelope);
         }
+        final IsSent acknowledgement = acknowledge(getId(envelope));
+        return acknowledgement;
     }
 
     /**

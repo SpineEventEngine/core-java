@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Function;
+import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.Event;
@@ -28,7 +29,6 @@ import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.Events;
 import io.spine.base.Response;
-import io.spine.base.Responses;
 import io.spine.base.Subscribe;
 import io.spine.envelope.EventEnvelope;
 import io.spine.grpc.StreamObservers;
@@ -52,10 +52,13 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.common.collect.Maps.newHashMap;
+import static io.spine.server.event.Given.EventMessage.projectCreated;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -293,20 +296,17 @@ public class EventBusShould {
     public void assure_that_event_is_valid_and_subscriber_registered() {
         eventBus.register(new ProjectCreatedSubscriber());
 
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
-                                                  responseObserver);
-        assertTrue(isValid);
-        assertResponseIsOk(responseObserver);
+        final Optional<Throwable> violation =
+                eventBus.validate(projectCreated());
+        assertFalse(violation.isPresent());
     }
 
     @Test
     public void assure_that_event_is_valid_and_dispatcher_registered() {
         eventBus.register(new BareDispatcher());
 
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
-                                                  responseObserver);
-        assertTrue(isValid);
-        assertResponseIsOk(responseObserver);
+        final Optional<Throwable> violation = eventBus.validate(projectCreated());
+        assertFalse(violation.isPresent());
     }
 
     @Test
@@ -322,20 +322,18 @@ public class EventBusShould {
                                           .build();
         eventBus.register(new ProjectCreatedSubscriber());
 
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
-                                                  responseObserver);
-
-        assertFalse(isValid);
-        assertReturnedExceptionAndNoResponse(InvalidEventException.class, responseObserver);
+        final Optional<Throwable> violation = eventBus.validate(projectCreated());
+        assertTrue(violation.isPresent());
+        final Throwable actualError = violation.get().getCause();
+        assertThat(actualError, instanceOf(InvalidEventException.class));
     }
 
     @Test
     public void call_onError_if_event_is_unsupported() {
-        final boolean isValid = eventBus.validate(Given.EventMessage.projectCreated(),
-                                                  responseObserver);
-
-        assertFalse(isValid);
-        assertReturnedExceptionAndNoResponse(UnsupportedEventException.class, responseObserver);
+        final Optional<Throwable> violation = eventBus.validate(projectCreated());
+        assertTrue(violation.isPresent());
+        final Throwable actualError = violation.get().getCause();
+        assertThat(actualError, instanceOf(UnsupportedEventException.class));
     }
 
     @Test
@@ -449,23 +447,6 @@ public class EventBusShould {
     @Test(expected = NullPointerException.class)
     public void not_accept_null_function_passed_as_field_enrichment_configuration_param() {
         eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
-    }
-
-    private static void assertResponseIsOk(MemoizingObserver responseObserver) {
-        assertEquals(Responses.ok(), responseObserver.firstResponse());
-        assertTrue(responseObserver.isCompleted());
-        assertNull(responseObserver.getError());
-    }
-
-    private static void assertReturnedExceptionAndNoResponse(
-            Class<? extends Exception> exceptionClass,
-            MemoizingObserver responseObserver) {
-        final Throwable error = responseObserver.getError();
-
-        assertNotNull(error);
-        final Throwable cause = error.getCause();
-        assertEquals(exceptionClass, cause.getClass());
-        assertTrue(responseObserver.responses().isEmpty());
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {

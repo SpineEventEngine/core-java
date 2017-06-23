@@ -19,23 +19,17 @@
 //
 syntax = "proto3";
 
-package spine.client;
+package spine.test.envelope;
 
-// We put gRPC-based classes into `grpc` sub-package, which is annotated as `@Internal`
-// to hide implementation details from the public API of the framework.
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.client.grpc";
+option java_package="io.spine.test.envelope";
+option java_outer_classname = "AggregateEventsProto";
 option java_multiple_files = true;
-option java_outer_classname = "CommandServiceProto";
-option java_generate_equals_and_hash = true;
 
 import "spine/options.proto";
-import "spine/base/command.proto";
-import "spine/base/bus.proto";
+import "spine/test/envelope/project.proto";
 
-// A service for sending commands from clients.
-service CommandService {
-
-    // Request to handle a command.
-    rpc Post(base.Command) returns (base.IsSent);
+// A test event for the {@link io.spine.envelope.MessageEnvelope} tests.
+message ProjectCreated {
+    ProjectId project_id = 1;
 }
