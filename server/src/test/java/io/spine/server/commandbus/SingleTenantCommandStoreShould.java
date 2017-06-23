@@ -22,7 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.base.Command;
-import io.spine.test.TestActorRequestFactory;
+import io.spine.client.TestActorRequestFactory;
 
 /**
  * @author Alexander Yevsyukov

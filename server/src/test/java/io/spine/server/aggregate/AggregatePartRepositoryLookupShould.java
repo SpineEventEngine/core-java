@@ -113,7 +113,7 @@ public class AggregatePartRepositoryLookupShould {
 
     private static class ProjectPart extends AggregatePart<ProjectId,
                                                            Project,
-                                                           ProjectVBuilder,
+            ProjectVBuilder,
                                                            ProjectRoot> {
         private ProjectPart(ProjectRoot root) {
             super(root);
@@ -155,9 +155,9 @@ public class AggregatePartRepositoryLookupShould {
     }
 
     private static class TaskAggregatePart extends AggregatePart<TaskId,
-                                                                     Task,
-                                                                     TaskVBuilder,
-                                                                     TaskRoot> {
+                                                                 Task,
+                                                                 TaskVBuilder,
+                                                                 TaskRoot> {
         private TaskAggregatePart(TaskRoot root) {
             super(root);
         }

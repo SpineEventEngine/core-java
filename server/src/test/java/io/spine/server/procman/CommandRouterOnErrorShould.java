@@ -23,13 +23,13 @@ package io.spine.server.procman;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandDispatcher;
-import io.spine.type.CommandClass;
 import org.junit.Test;
 
 import java.util.Set;

@@ -22,12 +22,12 @@ package io.spine.envelope;
 
 import com.google.protobuf.Message;
 import io.spine.base.Event;
-import io.spine.test.TestEventFactory;
+import io.spine.base.EventClass;
+import io.spine.server.command.TestEventFactory;
 import io.spine.test.envelope.ProjectCreated;
 import io.spine.test.envelope.ProjectId;
-import io.spine.type.EventClass;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 
 /**
  * @author Dmytro Dashenkov

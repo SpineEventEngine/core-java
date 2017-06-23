@@ -21,8 +21,8 @@
 package io.spine.envelope;
 
 import io.spine.base.Command;
-import io.spine.test.TestActorRequestFactory;
-import io.spine.type.CommandClass;
+import io.spine.base.CommandClass;
+import io.spine.client.TestActorRequestFactory;
 import org.junit.Test;
 
 import static io.spine.test.Values.newUuidValue;

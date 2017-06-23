@@ -25,11 +25,9 @@ import io.spine.base.Command;
 import io.spine.base.Failure;
 import io.spine.base.FailureClass;
 import io.spine.base.Failures;
-import io.spine.protobuf.AnyPacker;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.protobuf.AnyPacker;
 import io.spine.test.failures.Failures.CannotPerformBusinessOperation;
-import io.spine.type.FailureClass;
-import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;

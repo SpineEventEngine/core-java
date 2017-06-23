@@ -27,12 +27,11 @@ import io.spine.base.CommandId;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
 import io.spine.base.Status;
-import io.spine.io.StreamObservers;
-import io.spine.io.StreamObservers.MemoizingObserver;
+import io.spine.client.TestActorRequestFactory;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.transport.GrpcContainer;
-import io.spine.test.TestActorRequestFactory;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -41,6 +40,7 @@ import java.io.IOException;
 import java.util.Set;
 
 import static io.spine.base.Status.StatusCase.ERROR;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -57,7 +57,7 @@ public class CommandServiceShould {
     private BoundedContext projectsContext;
 
     private BoundedContext customersContext;
-    private final MemoizingObserver<IsSent> responseObserver = StreamObservers.memoizingObserver();
+    private final MemoizingObserver<IsSent> responseObserver = memoizingObserver();
 
     @Before
     public void setUp() {
@@ -115,7 +115,7 @@ public class CommandServiceShould {
     }
 
     private void verifyPostsCommand(Command cmd) {
-        final MemoizingObserver<IsSent> observer = StreamObservers.memoizingObserver();
+        final MemoizingObserver<IsSent> observer = memoizingObserver();
         service.post(cmd, observer);
 
         assertNull(observer.getError());

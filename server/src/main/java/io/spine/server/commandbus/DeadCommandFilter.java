@@ -22,10 +22,10 @@ package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;

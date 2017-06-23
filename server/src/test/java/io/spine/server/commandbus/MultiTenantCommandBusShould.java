@@ -26,7 +26,7 @@ import io.spine.base.Command;
 import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.io.StreamObservers;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.failure.FailureBus;
 import io.spine.test.command.AddTask;

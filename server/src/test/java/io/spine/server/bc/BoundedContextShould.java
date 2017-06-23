@@ -24,7 +24,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Response;
 import io.spine.base.Responses;
-import io.spine.io.StreamObservers.MemoizingObserver;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
@@ -50,7 +50,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.io.StreamObservers.memoizingObserver;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
