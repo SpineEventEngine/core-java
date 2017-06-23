@@ -27,7 +27,6 @@ import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.Errors;
 import io.spine.base.Failure;
-import io.spine.base.FailureThrowable;
 import io.spine.base.ThrowableMessage;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.commandbus.CommandException;
@@ -266,12 +265,9 @@ public class CommandStore implements AutoCloseable {
         if (cause instanceof ThrowableMessage) {
             final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
             log.failureHandling(throwableMessage, commandMessage, commandId);
-            updateStatus(commandEnvelope, toFailure(throwableMessage, commandEnvelope.getCommand()));
-        }  if (cause instanceof FailureThrowable) {
-            final FailureThrowable failureThrowable = (FailureThrowable) cause;
-            log.failureHandling(failureThrowable, commandMessage, commandId);
-            updateStatus(commandEnvelope, failureThrowable.toFailure(commandEnvelope.getCommand()));
-        }else if (cause instanceof Exception) {
+            updateStatus(commandEnvelope,
+                         toFailure(throwableMessage, commandEnvelope.getCommand()));
+        } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             log.errorHandling(exception, commandMessage, commandId);
             updateStatus(commandEnvelope, exception);
