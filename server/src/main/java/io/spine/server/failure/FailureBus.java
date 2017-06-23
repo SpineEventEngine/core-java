@@ -30,6 +30,7 @@ import io.spine.base.IsSent;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import org.slf4j.Logger;
@@ -38,7 +39,6 @@ import org.slf4j.LoggerFactory;
 import javax.annotation.Nullable;
 import java.util.Set;
 
-import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.util.Exceptions.toError;
 
@@ -79,13 +79,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     protected void store(Iterable<Failure> message) {
         // do nothing for now.
     }
-
-    @Override
-    public Optional<Throwable> validate(Message message) {
-        checkNotNull(message);
-        return absent();
-    }
-
+    
     /**
      * Always returns the original {@code Failure}, as the enrichment is not supported
      * for the business failures yet.
@@ -110,11 +104,6 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    public void handleDeadMessage(FailureEnvelope message) {
-        log().warn("No dispatcher defined for the failure class {}", message.getMessageClass());
-    }
-
-    @Override
     protected Message getId(FailureEnvelope envelope) {
         return envelope.getId();
     }
@@ -122,6 +111,11 @@ public class FailureBus extends CommandOutputBus<Failure,
     @Override
     protected DeadMessageHandler<FailureEnvelope> getDeadMessageHandler() {
         return DeadFailureHandler.INSTANCE;
+    }
+
+    @Override
+    protected EnvelopeValidator<FailureEnvelope> getValidator() {
+        return NoOpValidotor.INSTANCE;
     }
 
     /**
@@ -214,6 +208,16 @@ public class FailureBus extends CommandOutputBus<Failure,
             final Exception exception = new UnsupportedFailureException(message.getMessage());
             final Error error = toError(exception);
             return error;
+        }
+    }
+
+    private enum NoOpValidotor implements EnvelopeValidator<FailureEnvelope> {
+        INSTANCE;
+
+        @Override
+        public Optional<Throwable> validate(FailureEnvelope envelope) {
+            checkNotNull(envelope);
+            return Optional.absent();
         }
     }
 

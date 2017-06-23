@@ -21,38 +21,12 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
-import com.google.protobuf.Message;
-import io.spine.base.Error;
-import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.server.bus.Buses.reject;
-import static io.spine.util.Exceptions.toError;
 
 /**
  * @author Dmytro Dashenkov
  */
-final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message> extends AbstractBusFilter<E> {
+public interface EnvelopeValidator<E extends MessageEnvelope<?>> {
 
-    private final Bus<T, E, ?, ?> bus;
-    private final EnvelopeValidator<E> validator;
-
-    ValidatingFilter(Bus<T, E, ?, ?> bus) {
-        this.bus = bus;
-        this.validator = bus.getValidator();
-    }
-
-    @Override
-    public Optional<IsSent> accept(E envelope) {
-        checkNotNull(envelope);
-        final Optional<Throwable> violation = validator.validate(envelope);
-        if (violation.isPresent()) {
-            final Error error = toError(violation.get());
-            final IsSent result = reject(bus.getId(envelope), error);
-            return Optional.of(result);
-        } else {
-            return Optional.absent();
-        }
-    }
+    Optional<Throwable> validate(E envelope);
 }

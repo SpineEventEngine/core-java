@@ -20,9 +20,9 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
@@ -32,6 +32,7 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
+import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -41,6 +42,8 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.reject;
+import static java.lang.String.format;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -94,21 +97,6 @@ public abstract class CommandOutputBus<M extends Message,
                     }
                 });
     }
-
-    /**
-     * Verifies that a message can be posted to this {@code CommandOutputBus}.
-     *
-     * <p>A command output can be posted if its message has either dispatcher or handler
-     * registered with this {@code CommandOutputBus}.
-     *
-     * <p>The message also must satisfy validation constraints defined in its Protobuf type.
-     *
-     * @param message          the command output message to check
-     * @return a {@link Throwable} representing the found violation or
-     *         {@link Optional#absent() Optional.absent()} if the given {@link Message} can be
-     *         posted to this bus
-     */
-    public abstract Optional<Throwable> validate(Message message);
 
     /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
@@ -166,11 +154,19 @@ public abstract class CommandOutputBus<M extends Message,
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
+        final IsSent result;
+        final Message id = getId(envelope);
         if (dispatchersCalled == 0) {
-            handleDeadMessage(enrichedEnvelope);
+            final Exception exception = new IllegalStateException(
+                    format("Message %s has no dispatchers.",
+                           envelope.getMessage())
+            );
+            final Error error = Exceptions.toError(exception);
+            result = reject(id, error);
+        } else {
+            result = acknowledge(id);
         }
-        final IsSent acknowledgement = acknowledge(getId(envelope));
-        return acknowledgement;
+        return result;
     }
 
     /**

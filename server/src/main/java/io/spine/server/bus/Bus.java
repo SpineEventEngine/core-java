@@ -148,18 +148,13 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Handles the message, for which there is no dispatchers registered in the registry.
-     *
-     * @param message the message that has no target dispatchers, packed into an envelope
-     */
-    public abstract void handleDeadMessage(E message);
-
-    /**
      * Retrieves the ID of the given {@link MessageEnvelope}.
      */
     protected abstract Message getId(E envelope);
 
     protected abstract DeadMessageHandler<E> getDeadMessageHandler();
+
+    protected abstract EnvelopeValidator<E> getValidator();
 
     /**
      * Obtains the dispatcher registry.
@@ -176,7 +171,7 @@ public abstract class Bus<T extends Message,
         if (filterChain == null) {
             final Deque<BusFilter<E>> filters = createFilterChain();
             final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(this);
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>();
+            final BusFilter<E> validatingFilter = new ValidatingFilter<>(this);
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);

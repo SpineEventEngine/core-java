@@ -27,12 +27,10 @@ import io.spine.base.CommandValidationError;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
-import io.spine.test.Tests;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.event.TaskAdded;
 import io.spine.test.failure.InvalidProjectName;
@@ -98,11 +96,6 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
                           TENANT_INAPPLICABLE,
                           InvalidCommandException.class,
                           cmd);
-    }
-
-    @Test
-    public void do_nothing_in_handleDeadMessage() {
-        commandBus.handleDeadMessage(Tests.<CommandEnvelope>nullRef());
     }
 
     @Test

@@ -22,7 +22,6 @@ package io.spine.server.commandbus;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
@@ -36,6 +35,7 @@ import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
@@ -96,6 +96,10 @@ public class CommandBus extends Bus<Command,
     private final boolean isThreadSpawnAllowed;
 
     private final DeadCommandhandler deadCommandhandler;
+
+    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    @Nullable
+    private CommandValidator commandValidator;
 
     /**
      * Creates new instance according to the passed {@link Builder}.
@@ -165,10 +169,6 @@ public class CommandBus extends Bus<Command,
         return this.failureBus;
     }
 
-//    private void setFilterChain(CommandBusFilter filterChain) {
-//        this.filterChain = filterChain;
-//    }
-
     @Override
     protected CommandDispatcherRegistry createRegistry() {
         return new CommandDispatcherRegistry();
@@ -226,18 +226,6 @@ public class CommandBus extends Bus<Command,
         return registry().getDispatcher(commandClass);
     }
 
-    /**
-     * Does nothing because commands for which are no registered dispatchers
-     * are rejected by a built-in {@link CommandBusFilter} invoked when such a command is
-     * {@linkplain #post(com.google.protobuf.Message, StreamObserver) posted} to the bus.
-     */
-    @Override
-    public void handleDeadMessage(CommandEnvelope message) {
-        // Do nothing because this is the responsibility of `DeadCommandFilter`.
-        //TODO:2017-03-30:alexander.yevsyukov: Handle dead messages in other buses using filters
-        // and remove this method from the interface.
-    }
-
     @Override
     protected Message getId(CommandEnvelope envelope) {
         return envelope.getId();
@@ -246,6 +234,14 @@ public class CommandBus extends Bus<Command,
     @Override
     protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
         return deadCommandhandler;
+    }
+
+    @Override
+    protected EnvelopeValidator<CommandEnvelope> getValidator() {
+        if (commandValidator == null) {
+            commandValidator = new CommandValidator(this);
+        }
+        return commandValidator;
     }
 
     /**
@@ -421,7 +417,9 @@ public class CommandBus extends Bus<Command,
         /**
          * Obtains immutable list of added filters.
          */
-        public Deque<BusFilter<CommandEnvelope>> getFilters() {
+        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a private method.
+        @VisibleForTesting
+        Deque<BusFilter<CommandEnvelope>> getFilters() {
             return filters;
         }
 
@@ -510,17 +508,7 @@ public class CommandBus extends Bus<Command,
             // Enforce creating the registry to make spying for CommandBus-es in tests work.
             commandBus.registry();
 
-//            setFilterChain(commandBus);
             return commandBus;
-        }
-
-        private void setFilterChain(CommandBus commandBus) {
-//            final CommandBusFilter filterChain = FilterChain.newBuilder()
-//                                                            .setCommandBus(commandBus)
-//                                                            .addFilters(getFilters())
-//                                                            .setCommandScheduler(commandScheduler)
-//                                                            .build();
-//            commandBus.setFilterChain(filterChain);
         }
     }
 

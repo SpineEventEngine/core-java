@@ -34,23 +34,21 @@ import io.spine.base.IsSent;
 import io.spine.envelope.EventEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
-import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -111,8 +109,11 @@ public class EventBus extends CommandOutputBus<Event,
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
+    private final MessageValidator eventMessageValidator;
+
     /** The validator for events posted to the bus. */
-    private final MessageValidator eventValidator;
+    @Nullable
+    private EventValidator eventValidator;
 
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
@@ -124,18 +125,13 @@ public class EventBus extends CommandOutputBus<Event,
     private EventBus(Builder builder) {
         super(checkNotNull(builder.dispatcherEventDelivery));
         this.eventStore = builder.eventStore;
-        this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
+        this.eventMessageValidator = builder.eventValidator;
     }
 
     /** Creates a builder for new {@code EventBus}. */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @VisibleForTesting
-    MessageValidator getEventValidator() {
-        return eventValidator;
     }
 
     @VisibleForTesting
@@ -155,14 +151,6 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    public void handleDeadMessage(EventEnvelope message) {
-        final Event event = message.getOuterObject();
-        log().warn("No subscriber or dispatcher defined for the event class: {}",
-                   event.getClass()
-                        .getName());
-    }
-
-    @Override
     protected Message getId(EventEnvelope envelope) {
         return envelope.getId();
     }
@@ -170,6 +158,14 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
         return DeadEventHandler.INSTANCE;
+    }
+
+    @Override
+    protected EnvelopeValidator<EventEnvelope> getValidator() {
+        if (eventValidator == null) {
+            eventValidator = new EventValidator(eventMessageValidator, this);
+        }
+        return eventValidator;
     }
 
     @Override
@@ -231,25 +227,6 @@ public class EventBus extends CommandOutputBus<Event,
         eventStore.appendAll(events);
     }
 
-    @Override
-    public Optional<Throwable> validate(Message event) {
-        checkNotNull(event);
-
-        final EventClass eventClass = EventClass.of(event);
-        Throwable result = null;
-        if (isUnsupportedEvent(eventClass)) {
-            final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            result = invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError());
-        }
-        final List<ConstraintViolation> violations = eventValidator.validate(event);
-        if (!violations.isEmpty()) {
-            final InvalidEventException invalidEvent =
-                    InvalidEventException.onConstraintViolations(event, violations);
-            result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
-        }
-        return Optional.fromNullable(result);
-    }
-
     /**
      * Add a new field enrichment translation function.
      *
@@ -276,7 +253,7 @@ public class EventBus extends CommandOutputBus<Event,
         }
     }
 
-    private boolean isUnsupportedEvent(EventClass eventClass) {
+    boolean isUnsupportedEvent(EventClass eventClass) {
         final boolean isUnsupported = !registry().hasDispatchersFor(eventClass);
         return isUnsupported;
     }
