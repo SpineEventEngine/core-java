@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Set;
 
 import static io.spine.base.Commands.sameActorAndTenant;
+import static java.util.Collections.unmodifiableList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -76,6 +77,14 @@ public abstract class AbstractCommandRouterShould<T extends AbstractCommandRoute
 
     T router() {
         return router;
+    }
+
+    public List<Message> getMessages() {
+        return unmodifiableList(messages);
+    }
+
+    public TestActorRequestFactory getRequestFactory() {
+        return requestFactory;
     }
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK as we return immutable impl.

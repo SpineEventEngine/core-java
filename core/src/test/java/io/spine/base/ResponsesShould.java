@@ -46,8 +46,11 @@ public class ResponsesShould {
 
     @Test
     public void return_false_if_not_OK_response() {
+        final Status status = Status.newBuilder()
+                                    .setError(Error.getDefaultInstance())
+                                    .build();
         final Response error = Response.newBuilder()
-                                       .setError(Error.getDefaultInstance())
+                                       .setStatus(status)
                                        .build();
         assertFalse(Responses.isOk(error));
     }

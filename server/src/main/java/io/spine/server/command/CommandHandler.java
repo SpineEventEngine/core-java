@@ -128,9 +128,7 @@ public abstract class CommandHandler implements CommandDispatcher {
 
     /** Posts passed events to {@link EventBus}. */
     private void postEvents(Iterable<Event> events) {
-        for (Event event : events) {
-            eventBus.post(event);
-        }
+        eventBus.post(events);
     }
 
     /**

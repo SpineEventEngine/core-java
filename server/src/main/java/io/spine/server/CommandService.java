@@ -25,8 +25,10 @@ import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
 import io.spine.base.CommandClass;
-import io.spine.base.Response;
+import io.spine.base.Error;
+import io.spine.base.IsSent;
 import io.spine.client.grpc.CommandServiceGrpc;
+import io.spine.server.bus.Buses;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.UnsupportedCommandException;
@@ -36,7 +38,7 @@ import org.slf4j.LoggerFactory;
 import java.util.Map;
 import java.util.Set;
 
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 
 /**
  * The {@code CommandService} allows client applications to post commands and
@@ -67,7 +69,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     @SuppressWarnings("MethodDoesntCallSuperMethod")
     // as we override default implementation with `unimplemented` status.
     @Override
-    public void post(Command request, StreamObserver<Response> responseObserver) {
+    public void post(Command request, StreamObserver<IsSent> responseObserver) {
         final CommandClass commandClass = CommandClass.of(request);
         final BoundedContext boundedContext = boundedContextMap.get(commandClass);
         if (boundedContext == null) {
@@ -79,10 +81,13 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
     }
 
     private static void handleUnsupported(Command request,
-                                          StreamObserver<Response> responseObserver) {
+                                          StreamObserver<IsSent> responseObserver) {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
-        responseObserver.onError(invalidArgumentWithCause(unsupported, unsupported.getError()));
+        final Error error = toError(unsupported);
+        final IsSent response = Buses.reject(request.getId(), error);
+        responseObserver.onNext(response);
+        responseObserver.onCompleted();
     }
 
     public static class Builder {

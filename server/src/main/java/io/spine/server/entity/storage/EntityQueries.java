@@ -116,8 +116,7 @@ public final class EntityQueries {
         final Collection<I> ids = new LinkedList<>();
         for (EntityId entityId : idFilter.getIdsList()) {
             final Any wrappedMessageId = entityId.getId();
-            @SuppressWarnings("unchecked") // Checked at runtime
-            final I genericId = (I) Identifier.unpack(wrappedMessageId);
+            final I genericId = Identifier.unpack(wrappedMessageId);
             ids.add(genericId);
         }
         return ids;

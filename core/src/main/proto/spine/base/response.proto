@@ -30,6 +30,7 @@ option java_outer_classname = "ResponseProto";
 option java_package = "io.spine.base";
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/any.proto";
 
 import "spine/base/error.proto";
 import "spine/base/failure.proto";
@@ -41,6 +42,13 @@ import "spine/base/failure.proto";
 // only upon receiving the `ok` status.
 //
 message Response {
+
+    // The response status.
+    Status status = 1 [(required) = true];
+}
+
+// The response status.
+message Status {
     oneof status {
         // The request was accepted to execution.
         google.protobuf.Empty ok = 1;

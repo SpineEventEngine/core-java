@@ -29,8 +29,7 @@ import io.spine.annotation.Internal;
 import io.spine.base.Event;
 import io.spine.base.EventClass;
 import io.spine.base.EventContext;
-import io.spine.base.Response;
-import io.spine.base.Subscribe;
+import io.spine.base.IsSent;
 import io.spine.envelope.EventEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.event.enrich.EventEnricher;
@@ -60,7 +59,7 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * <li>Expose a {@code public} method that accepts an event message as the first parameter
  * and an {@link EventContext EventContext} as the second
  * (optional) parameter.
- * <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
+ * <li>Mark the method with the {@link io.spine.base.Subscribe @Subscribe} annotation.
  * <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
  * instance of {@code EventBus} directly, or rely on message delivery
  * from an {@link EventDispatcher}. An example of such a dispatcher is
@@ -92,9 +91,12 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.server.projection.Projection Projection
- * @see Subscribe @Subscribe
+ * @see io.spine.base.Subscribe @Subscribe
  */
-public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass, EventDispatcher> {
+public class EventBus extends CommandOutputBus<Event,
+                                               EventEnvelope,
+        EventClass,
+                                               EventDispatcher> {
 
     /*
      * NOTE: Even though, the EventBus has a private constructor and
@@ -150,8 +152,7 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @Override
-    public void handleDeadMessage(EventEnvelope message,
-                                  StreamObserver<Response> responseObserver) {
+    public void handleDeadMessage(EventEnvelope message) {
         final Event event = message.getOuterObject();
         log().warn("No subscriber or dispatcher defined for the event class: {}",
                    event.getClass()
@@ -159,14 +160,18 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @Override
-    protected EventEnvelope createEnvelope(Event message) {
-        final EventEnvelope result = EventEnvelope.of(message);
-        return result;
+    protected Message getId(EventEnvelope envelope) {
+        return envelope.getId();
     }
 
     @Override
     protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
         return new EventDispatcherRegistry();
+    }
+
+    @Override
+    protected EventEnvelope toEnvelope(Event message) {
+        return EventEnvelope.of(message);
     }
 
     /** Returns {@link EventStore} associated with the bus. */
@@ -175,19 +180,33 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     /**
-     * Validates and posts the event for handling.
+     * Posts the event for handling.
      *
-     * <p>Does performs the same as the
+     * <p>Performs the same action as the
      * {@linkplain CommandOutputBus#post(Message, StreamObserver)} parent method}, but does not
      * require any response observer.
-     *
-     * <p>This method should be used if the callee does not care about the event acknowledgement.
      *
      * @param event the event to be handled
      * @see CommandOutputBus#post(Message, StreamObserver)
      */
-    public void post(Event event) {
-        post(event, StreamObservers.<Response>noOpObserver());
+    public final void post(Event event) {
+        post(event, StreamObservers.<IsSent>noOpObserver());
+    }
+
+    /**
+     * Posts the events for handling.
+     *
+     * <p>Performs the same action as the
+     * {@linkplain CommandOutputBus#post(Iterable, StreamObserver)} parent method}, but does not
+     * require any response observer.
+     *
+     * <p>This method should be used if the callee does not care about the events acknowledgement.
+     *
+     * @param events the events to be handled
+     * @see CommandOutputBus#post(Message, StreamObserver)
+     */
+    public final void post(Iterable<Event> events) {
+        post(events, StreamObservers.<IsSent>noOpObserver());
     }
 
     @Override
@@ -200,28 +219,27 @@ public class EventBus extends CommandOutputBus<Event, EventEnvelope, EventClass,
     }
 
     @Override
-    protected void store(Event event) {
-        eventStore.append(event);
+    protected void store(Iterable<Event> events) {
+        eventStore.appendAll(events);
     }
 
     @Override
-    protected boolean validateMessage(Message event, StreamObserver<Response> responseObserver) {
+    public Optional<Throwable> validate(Message event) {
+        checkNotNull(event);
+
         final EventClass eventClass = EventClass.of(event);
+        Throwable result = null;
         if (isUnsupportedEvent(eventClass)) {
             final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            responseObserver.onError(
-                    invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError()));
-            return false;
+            result = invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError());
         }
         final List<ConstraintViolation> violations = eventValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException invalidEvent =
                     InvalidEventException.onConstraintViolations(event, violations);
-            responseObserver.onError(invalidArgumentWithCause(invalidEvent,
-                                                              invalidEvent.getError()));
-            return false;
+            result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
         }
-        return true;
+        return Optional.fromNullable(result);
     }
 
     /**

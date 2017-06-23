@@ -20,86 +20,43 @@
 
 package io.spine.envelope;
 
-import com.google.common.testing.EqualsTester;
-import com.google.common.testing.NullPointerTester;
-import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.CommandClass;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.time.Time;
-import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.test.Values.newUuidValue;
-import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotEquals;
-import static org.junit.Assert.assertNotNull;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class CommandEnvelopeShould {
+public class CommandEnvelopeShould extends MessageEnvelopeShould<Command,
+                                                                 CommandEnvelope,
+                                                                 CommandClass> {
 
     private final TestActorRequestFactory requestFactory =
             TestActorRequestFactory.newInstance(CommandEnvelopeShould.class);
 
-    private Command command;
-    private CommandEnvelope envelope;
-
-    @Before
-    public void setUp() {
-        command = requestFactory.command().create(newUuidValue());
-        envelope = CommandEnvelope.of(command);
-    }
-
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .setDefault(Command.class, Command.getDefaultInstance())
-                .testAllPublicStaticMethods(CommandEnvelope.class);
-    }
-
-    @Test
-    public void obtain_command() {
-        assertEquals(command, envelope.getCommand());
-    }
-
     @Test
     public void obtain_command_context() {
+        final Command command = outerObject();
+        final CommandEnvelope envelope = toEnvelope(command);
         assertEquals(command.getContext(), envelope.getCommandContext());
     }
 
-    @Test
-    public void extract_command_message() {
-        final Message commandMessage = envelope.getMessage();
-        assertNotNull(commandMessage);
-        assertFalse(isDefault(commandMessage));
+    @Override
+    protected Command outerObject() {
+        return requestFactory.command().create(newUuidValue());
     }
 
-    @Test
-    public void obtain_command_class() {
-        assertEquals(CommandClass.of(command), envelope.getMessageClass());
+    @Override
+    protected CommandEnvelope toEnvelope(Command obj) {
+        return CommandEnvelope.of(obj);
     }
 
-    @Test
-    public void obtain_command_id() {
-        assertEquals(command.getId(), envelope.getCommandId());
-    }
-
-    @Test
-    public void have_equals() {
-        final Command anotherCommand = requestFactory.command()
-                                                     .create(Time.getCurrentTime());
-
-        new EqualsTester().addEqualityGroup(envelope)
-                          .addEqualityGroup(CommandEnvelope.of(anotherCommand))
-                          .testEquals();
-    }
-
-    @Test
-    public void have_hashCode() {
-        assertNotEquals(System.identityHashCode(envelope), envelope.hashCode());
+    @Override
+    protected CommandClass getMessageClass(Command obj) {
+        return CommandClass.of(obj);
     }
 }

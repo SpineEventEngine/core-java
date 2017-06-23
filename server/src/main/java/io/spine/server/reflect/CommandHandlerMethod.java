@@ -167,7 +167,7 @@ public class CommandHandlerMethod extends HandlerMethod<CommandContext> {
         checkNotNull(envelope);
 
         final EventFactory eventFactory = EventFactory.newBuilder()
-                .setCommandId(envelope.getCommandId())
+                .setCommandId(envelope.getId())
                 .setProducerId(producerId)
                 .setMaxEventCount(eventMessages.size())
                 .setCommandContext(envelope.getCommandContext())

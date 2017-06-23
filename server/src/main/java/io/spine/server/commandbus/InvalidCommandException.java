@@ -84,7 +84,7 @@ public class InvalidCommandException extends CommandException {
                             .value()
                             .getName(),
                 TypeName.of(commandMessage),
-                Identifier.toString(envelope.getCommandId()));
+                Identifier.toString(envelope.getId()));
         final Error error = unknownTenantError(commandMessage, errMsg);
         return new InvalidCommandException(errMsg, command, error);
     }
@@ -95,7 +95,7 @@ public class InvalidCommandException extends CommandException {
      */
     public static Error unknownTenantError(Message commandMessage, String errorText) {
         final Error.Builder error = Error.newBuilder()
-                .setType(CommandValidationError.getDescriptor().getFullName())
+                .setType(InvalidCommandException.class.getCanonicalName())
                 .setCode(CommandValidationError.TENANT_UNKNOWN.getNumber())
                 .setMessage(errorText)
                 .putAllAttributes(commandTypeAttribute(commandMessage));
@@ -110,7 +110,7 @@ public class InvalidCommandException extends CommandException {
                 "CommandBus, but has tenant_id: %s attribute set in the command context.",
                 cmd.getMessageClass(),
                 typeName,
-                cmd.getCommandId(),
+                cmd.getId(),
                 cmd.getTenantId());
         final Error error = inapplicableTenantError(cmd.getMessage(), errMsg);
         return new InvalidCommandException(errMsg, command, error);
@@ -119,8 +119,7 @@ public class InvalidCommandException extends CommandException {
     private static Error inapplicableTenantError(Message commandMessage, String errMsg) {
         final Error.Builder error =
                 Error.newBuilder()
-                     .setType(CommandValidationError.getDescriptor()
-                                                    .getFullName())
+                     .setType(InvalidCommandException.class.getCanonicalName())
                      .setCode(CommandValidationError.TENANT_INAPPLICABLE.getNumber())
                      .setMessage(errMsg)
                      .putAllAttributes(commandTypeAttribute(commandMessage));

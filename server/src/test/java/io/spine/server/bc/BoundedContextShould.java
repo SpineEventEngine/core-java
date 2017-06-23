@@ -22,9 +22,9 @@ package io.spine.server.bc;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.grpc.stub.StreamObserver;
 import io.spine.base.Response;
 import io.spine.base.Responses;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.BoundedContext;
@@ -50,11 +50,11 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -153,13 +153,13 @@ public class BoundedContextShould {
     @Test
     public void notify_integration_event_subscriber() {
         registerAll();
-        final TestResponseObserver observer = new TestResponseObserver();
+        final MemoizingObserver<Response> observer = memoizingObserver();
         final IntegrationEvent event = Given.AnIntegrationEvent.projectCreated();
         final Message msg = unpack(event.getMessage());
 
         boundedContext.notify(event, observer);
 
-        assertEquals(Responses.ok(), observer.getResponseHandled());
+        assertEquals(Responses.ok(), observer.firstResponse());
         assertEquals(subscriber.getHandledEvent(), msg);
     }
 
@@ -168,10 +168,8 @@ public class BoundedContextShould {
         final BoundedContext boundedContext = BoundedContext.newBuilder()
                                                             .setMultitenant(true)
                                                             .build();
-        final TestEventSubscriber sub = new TestEventSubscriber();
-        boundedContext.getEventBus()
-                      .register(sub);
 
+        // Unsupported message.
         final Any invalidMsg = AnyPacker.pack(ProjectCreated.getDefaultInstance());
         final IntegrationEvent event =
                 Given.AnIntegrationEvent.projectCreated()
@@ -179,9 +177,10 @@ public class BoundedContextShould {
                                         .setMessage(invalidMsg)
                                         .build();
 
-        boundedContext.notify(event, new TestResponseObserver());
+        final MemoizingObserver<Response> observer = memoizingObserver();
+        boundedContext.notify(event, observer);
 
-        assertNull(sub.getHandledEvent());
+        assertNotNull(observer.getError());
     }
 
     @Test
@@ -325,27 +324,5 @@ public class BoundedContextShould {
 
         assertFalse(boundedContext.findRepository(SecretProject.class)
                                   .isPresent());
-    }
-
-    private static class TestResponseObserver implements StreamObserver<Response> {
-
-        private Response responseHandled;
-
-        @Override
-        public void onNext(Response response) {
-            this.responseHandled = response;
-        }
-
-        @Override
-        public void onError(Throwable throwable) {
-        }
-
-        @Override
-        public void onCompleted() {
-        }
-
-        private Response getResponseHandled() {
-            return responseHandled;
-        }
     }
 }
