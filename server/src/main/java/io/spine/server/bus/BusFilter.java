@@ -21,12 +21,18 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
+import io.spine.annotation.SPI;
 import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 
 /**
+ * The filter for the messages posted to the bus.
+ *
+ * <p>A bus may have several filters which can a message from being posted.
+ *
  * @author Dmytro Dashenkov
  */
+@SPI
 public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
 
     /**
@@ -34,10 +40,10 @@ public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
      *
      * <p>A filter can:
      * <ul>
-     *     <li>Accept the message (by returning {@code Optional.absent()};
-     *     <li>Reject the message with {@link io.spine.base.Error} status e.g. if it fails to pass
+     *     <li>accept the message (by returning {@code Optional.absent()};
+     *     <li>reject the message with {@link io.spine.base.Error} status e.g. if it fails to pass
      *         the validation;
-     *     <li>Reject the message with {@code OK} status. For example, a scheduled command may not
+     *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
      *         pass a filter.
      * </ul>
      *

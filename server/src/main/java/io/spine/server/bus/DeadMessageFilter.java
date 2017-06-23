@@ -30,6 +30,9 @@ import io.spine.type.MessageClass;
 import java.util.Collection;
 
 /**
+ * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
+ * the bus.
+ *
  * @author Dmytro Dashenkov
  */
 final class DeadMessageFilter<T extends Message,

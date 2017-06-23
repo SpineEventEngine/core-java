@@ -23,10 +23,15 @@ package io.spine.server.bus;
 import io.spine.envelope.MessageEnvelope;
 
 /**
+ * The implementation base for the {@linkplain BusFilter BusFilters}.
+ *
+ * <p>This class defines the default no-op {@link BusFilter#close() BusFilter.close()} behavior.
+ *
  * @author Dmytro Dashenkov
  */
 public abstract class AbstractBusFilter<E extends MessageEnvelope<?>> implements BusFilter<E> {
 
+    @SuppressWarnings("NoopMethodInAbstractClass") // Default impl.
     @Override
     public void close() throws Exception {
         // NoOp

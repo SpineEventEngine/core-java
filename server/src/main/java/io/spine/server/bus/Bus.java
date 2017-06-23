@@ -159,8 +159,14 @@ public abstract class Bus<T extends Message,
      */
     protected abstract Message getId(E envelope);
 
+    /**
+     * Obtains the instance of {@link DeadMessageHandler} for this bus.
+     */
     protected abstract DeadMessageHandler<E> getDeadMessageHandler();
 
+    /**
+     * Obtains the instance of {@link EnvelopeValidator} for this bus.
+     */
     protected abstract EnvelopeValidator<E> getValidator();
 
     /**

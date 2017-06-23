@@ -24,9 +24,21 @@ import io.spine.base.Error;
 import io.spine.envelope.MessageEnvelope;
 
 /**
+ * A functional interface for the function which handles a dead message.
+ *
+ * <p>If a message with no target dispatchers found is passed to the bus, it will result in a call
+ * to this function. The function handles such message and produces an {@link Error} as a response.
+ *
  * @author Dmytro Dashenkov
  */
 public interface DeadMessageHandler<E extends MessageEnvelope<?>> {
 
+    /**
+     * Handles the dead message in a bus-specific way and produces an {@link Error} for notifying
+     * the poster about the absence of dispatchers.
+     *
+     * @param message the dead message
+     * @return the // TODO:2017-06-23:dmytro.dashenkov: Complete.
+     */
     Error handleDeadMessage(E message);
 }
