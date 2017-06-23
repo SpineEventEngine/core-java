@@ -33,7 +33,7 @@ import static com.google.common.collect.Lists.newLinkedList;
 /**
  * @author Dmytro Dashenkov
  */
-public final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E>{
+final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E>{
 
     private final Deque<BusFilter<E>> chain;
 
