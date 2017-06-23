@@ -27,7 +27,6 @@ import io.spine.server.storage.StorageFactory;
 import io.spine.test.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
@@ -35,6 +34,7 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -136,13 +136,12 @@ public class EventBusBuilderShould {
         assertTrue(actualValue instanceof DispatcherEventDelivery.DirectDelivery);
     }
 
-    @Ignore // TODO:2017-06-23:dmytro.dashenkov: Re-enable.
     @Test
     public void set_event_validator_if_not_set_explicitly() {
-//        assertNotNull(EventBus.newBuilder()
-//                              .setStorageFactory(storageFactory)
-//                              .build()
-//                              .getEventValidator());
+        assertNotNull(EventBus.newBuilder()
+                              .setStorageFactory(storageFactory)
+                              .build()
+                              .getMessageValidator());
     }
 
     @Test

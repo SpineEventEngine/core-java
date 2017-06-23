@@ -97,7 +97,13 @@ public class CommandBus extends Bus<Command,
 
     private final DeadCommandHandler deadCommandHandler;
 
-    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    /**
+     * Tha validator for the commands posted into this bus.
+     *
+     * <p>The valuse is effectively final, though should be initialized lazily.
+     *
+     * @see #getValidator() to getreive the non-null value of the validator
+     */
     @Nullable
     private CommandValidator commandValidator;
 

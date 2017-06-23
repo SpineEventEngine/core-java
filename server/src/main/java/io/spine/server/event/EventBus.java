@@ -178,6 +178,11 @@ public class EventBus extends CommandOutputBus<Event,
         return EventEnvelope.of(message);
     }
 
+    @VisibleForTesting
+    MessageValidator getMessageValidator() {
+        return eventMessageValidator;
+    }
+
     /** Returns {@link EventStore} associated with the bus. */
     public EventStore getEventStore() {
         return eventStore;

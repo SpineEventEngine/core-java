@@ -128,26 +128,6 @@ public abstract class CommandOutputBus<M extends Message,
     @Override
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
-    // TODO:2017-06-22:dmytro.dashenkov: Remove.
-//    @Override
-//    protected Optional<IsSent> filter(final E message) {
-//        final Optional<Throwable> violation = this.validate(message.getMessage());
-//        final Optional<IsSent> result = violation.transform(
-//                new Function<Throwable, IsSent>() {
-//                    @Override
-//                    public IsSent apply(@Nullable Throwable input) {
-//                        checkNotNull(input);
-//                        final Error error = Exceptions.toError(input);
-//                        final Status status = Status.newBuilder()
-//                                                    .setError(error)
-//                                                    .build();
-//                        return setStatus(message, status);
-//                    }
-//                }
-//        );
-//        return result;
-//    }
-
     @Override
     protected IsSent doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());

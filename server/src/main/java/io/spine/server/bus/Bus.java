@@ -29,6 +29,7 @@ import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
+import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 
@@ -61,7 +62,13 @@ public abstract class Bus<T extends Message,
     @Nullable
     private DispatcherRegistry<C, D> registry;
 
-    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    /**
+     * The chain of filters for this bus.
+     *
+     * <p>This field is effectively final, but is initialized lazily.
+     *
+     * @see #filterChain() for the non-null filter chain value
+     */
     private FilterChain<E, T> filterChain;
 
     /**
@@ -166,10 +173,22 @@ public abstract class Bus<T extends Message,
         return registry;
     }
 
-    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    /**
+     * Initializes the {@code Bus.filterChain} field upon the first invocation and obtains
+     * the value of the field.
+     *
+     * <p>Adds the {@link DeadMessageFilter} and the {@link ValidatingFilter} to the chain, so that
+     * a chain always has the following format:
+     *
+     * <pre>
+     *     {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters if any...
+     * </pre>
+     *
+     * @return the value of the bus filter chain
+     */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            final Deque<BusFilter<E>> filters = createFilterChain();
+            final Deque<BusFilter<E>> filters = new ArrayDeque<>(createFilterChain());
             final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(this);
             final BusFilter<E> validatingFilter = new ValidatingFilter<>(this);
             filters.push(deadMsgFilter);
@@ -180,12 +199,19 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Factory method for creating an instance of the registry for
-     * dispatchers of the bus.
+     * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
-    // TODO:2017-06-23:dmytro.dashenkov: Document.
+    /**
+     * Creates a {@link Deque} of the custom {@linkplain BusFilter bus filters} for current this
+     * instance of {@code Bus}.
+     *
+     * <p>This method should be invoked only once when initializing
+     * the {@linkplain #filterChain() filter chain} of this bus.
+     *
+     * @return a dequeue of the bus custom filters
+     */
     protected abstract Deque<BusFilter<E>> createFilterChain();
 
     /**
