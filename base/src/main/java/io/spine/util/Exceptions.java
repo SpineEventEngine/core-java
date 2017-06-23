@@ -51,7 +51,7 @@ public final class Exceptions {
      * return type as shown below:
      *
      * <pre>
-     *   import static com.teamdev.commons.Exceptions.unsupported;
+     *   import static io.spine.util.Exceptions.unsupported;
      *   ...
      *   T doSomething() {
      *      throw unsupported("Cannot do this");
@@ -76,7 +76,7 @@ public final class Exceptions {
      * return type as shown below:
      *
      * <pre>
-     *   import static com.teamdev.commons.Exceptions.unsupported;
+     *   import static static io.spine.util.Exceptions.unsupported;
      *   ...
      *   T doSomething() {
      *      throw unsupported();
