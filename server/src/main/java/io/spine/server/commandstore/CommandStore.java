@@ -45,7 +45,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.Failures.toFailure;
+import static io.spine.core.Failures.toFailure;
 
 /**
  * Manages storage of commands received by a Bounded Context.
