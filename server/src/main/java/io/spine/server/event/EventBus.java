@@ -95,7 +95,7 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  */
 public class EventBus extends CommandOutputBus<Event,
                                                EventEnvelope,
-        EventClass,
+                                               EventClass,
                                                EventDispatcher> {
 
     /*

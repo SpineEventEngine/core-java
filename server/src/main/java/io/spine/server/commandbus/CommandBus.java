@@ -277,7 +277,6 @@ public class CommandBus extends Bus<Command,
     @Override
     public void close() throws Exception {
         super.close();
-        filterChain.onClose(this);
         commandStore.close();
         failureBus.close();
     }

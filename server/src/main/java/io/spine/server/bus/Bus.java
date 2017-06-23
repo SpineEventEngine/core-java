@@ -23,7 +23,6 @@ package io.spine.server.bus;
 import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.Lists;
-import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.IsSent;
@@ -33,7 +32,6 @@ import io.spine.type.MessageClass;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.LinkedList;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -149,6 +147,12 @@ public abstract class Bus<T extends Message,
             doPost(envelopes, observer);
         }
         observer.onCompleted();
+    }
+
+    @Override
+    public void close() throws Exception {
+        filterChain.close();
+        registry().unregisterAll();
     }
 
     /**

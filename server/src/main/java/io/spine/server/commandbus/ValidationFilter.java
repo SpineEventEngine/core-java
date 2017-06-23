@@ -44,7 +44,7 @@ import static io.spine.validate.Validate.isDefault;
  *
  * @author Alexander Yevsyukov
  */
-class ValidationFilter implements CommandBusFilter {
+class ValidationFilter extends AbstractCommandBusFilter {
 
     private final CommandBus commandBus;
 
@@ -93,11 +93,6 @@ class ValidationFilter implements CommandBusFilter {
             return result;
         }
         return Optional.absent();
-    }
-
-    @Override
-    public void onClose(CommandBus commandBus) {
-        // Do nothing.
     }
 
     private Error missingTenantIdStatus(Command command) {

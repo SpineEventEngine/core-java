@@ -61,9 +61,9 @@ final class FilterChain implements CommandBusFilter {
     }
 
     @Override
-    public void onClose(CommandBus commandBus) {
+    public void close() throws Exception {
         for (CommandBusFilter filter : filters.reverse()) {
-            filter.onClose(commandBus);
+            filter.close();
         }
     }
 

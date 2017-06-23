@@ -20,17 +20,16 @@
 
 package io.spine.server.commandbus;
 
-import io.grpc.stub.StreamObserver;
-import io.spine.annotation.SPI;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.server.bus.BusFilter;
-
 /**
- * A {@code CommandBus} can have several filters that can prevent a command to be
- * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posted}.
+ * // TODO:2017-06-23:dmytro.dashenkov: Document.
  *
- * @author Alexander Yevsyukov
+ * @author Dmytro Dashenkov
  */
-@SPI
-public interface CommandBusFilter extends BusFilter<CommandEnvelope> {
+public abstract class AbstractCommandBusFilter implements CommandBusFilter {
+
+    @SuppressWarnings("NoopMethodInAbstractClass") // Default behavior
+    @Override
+    public void close() throws Exception {
+        // NoOp
+    }
 }

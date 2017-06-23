@@ -38,7 +38,7 @@ import static io.spine.util.Exceptions.toError;
  *
  * @author Alexander Yevsyukov
  */
-class DeadCommandFilter implements CommandBusFilter {
+class DeadCommandFilter extends AbstractCommandBusFilter {
 
     private final CommandBus commandBus;
 
@@ -65,10 +65,5 @@ class DeadCommandFilter implements CommandBusFilter {
             return Optional.of(result);
         }
         return Optional.absent();
-    }
-
-    @Override
-    public void onClose(CommandBus commandBus) {
-        // Do nothing.
     }
 }

@@ -97,7 +97,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public void onClose(CommandBus commandBus) {
+    public void close() {
         shutdown();
     }
 
