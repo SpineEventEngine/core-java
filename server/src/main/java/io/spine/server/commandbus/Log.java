@@ -22,8 +22,9 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.base.FailureThrowable;
 import io.spine.core.CommandId;
+import io.spine.base.FailureThrowable;
+import io.spine.base.ThrowableMessage;
 import io.spine.type.TypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,9 +53,17 @@ public class Log {
         log().error(msg, exception);
     }
 
-    public void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
+    public void failureHandling(ThrowableMessage flr, Message commandMessage, CommandId commandId) {
         final String msg = formatMessageTypeAndId(
                 "Business failure occurred when handling command `%s` (ID: `%s`)",
+                commandMessage,
+                commandId);
+        log().warn(msg, flr);
+    }
+
+    public void failureHandling(FailureThrowable flr, Message commandMessage, CommandId commandId) {
+        final String msg = formatMessageTypeAndId(
+                "Business failure throwable occurred when handling command `%s` (ID: `%s`)",
                 commandMessage,
                 commandId);
         log().warn(msg, flr);

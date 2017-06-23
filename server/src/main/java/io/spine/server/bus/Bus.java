@@ -116,6 +116,7 @@ public abstract class Bus<T extends Message,
      * the {@link io.spine.core.Failure} status may only pop up if the {@link MessageDispatcher}
      * processes the message sequentially and throws
      * the {@linkplain FailureThrowable FailureThrowables} (wrapped in a
+     * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages} (wrapped in a
      * {@link RuntimeException}) instead of handling them. Otherwise, the {@code OK} status should
      * be expected.
      *
@@ -238,7 +239,7 @@ public abstract class Bus<T extends Message,
      *             <li>{@link io.spine.core.Failure Failure} status, if a {@code Failure} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
-     *                 a {@link FailureThrowable FailureThrowable}, has been thrown
+     *                 a {@link io.spine.base.ThrowableMessage ThrowableMessage}, has been thrown
      *                 during the message posting.
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API

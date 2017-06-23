@@ -29,6 +29,9 @@ import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.base.FailureThrowable;
+import io.spine.core.IsSent;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.CommandEnvelope;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
@@ -46,6 +49,7 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.core.Failures.toFailure;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
 import static io.spine.util.Exceptions.toError;
@@ -189,7 +193,12 @@ public class CommandBus extends Bus<Command,
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
 
-            if (cause instanceof FailureThrowable) {
+            if (cause instanceof ThrowableMessage) {
+                final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+                final Failure failure = toFailure(throwableMessage, envelope.getCommand());
+                failureBus().post(failure);
+                result = reject(envelope.getId(), failure);
+            } if (cause instanceof FailureThrowable) {
                 final FailureThrowable failureThrowable = (FailureThrowable) cause;
                 final Failure failure = failureThrowable.toFailure(envelope.getCommand());
                 failureBus().post(failure);
