@@ -25,6 +25,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.Version;
@@ -32,7 +33,6 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.Assign;
 import io.spine.server.command.EventFactory;
-import io.spine.type.CommandClass;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;

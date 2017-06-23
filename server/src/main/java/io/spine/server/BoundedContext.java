@@ -54,7 +54,7 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.io.StreamObservers.ack;
+import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
 import static java.lang.String.format;
@@ -492,7 +492,7 @@ public final class BoundedContext
 
         /**
          * Ensures that the value of the passed flag is equal to the value of
-         * the {@link BoundedContext.Builder#multitenant}.
+         * the {@link Builder#multitenant}.
          *
          * @throws IllegalStateException if the flags values do not match
          */

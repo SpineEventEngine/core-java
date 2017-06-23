@@ -21,9 +21,9 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
+import io.spine.Identifier;
 import io.spine.base.CommandId;
 import io.spine.base.FailureThrowable;
-import io.spine.base.Identifier;
 import io.spine.type.TypeName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import io.grpc.Status;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
-import io.spine.base.MetadataConverter;
+import io.spine.grpc.MetadataConverter;
 import io.spine.server.transport.Statuses;
 import org.junit.Test;
 

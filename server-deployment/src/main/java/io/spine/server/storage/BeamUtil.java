@@ -22,7 +22,7 @@ package io.spine.server.storage;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Identifier;
+import io.spine.Identifier;
 import org.apache.beam.sdk.coders.BigEndianIntegerCoder;
 import org.apache.beam.sdk.coders.BigEndianLongCoder;
 import org.apache.beam.sdk.coders.Coder;

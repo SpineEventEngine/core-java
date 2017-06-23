@@ -153,7 +153,7 @@ class Rescheduler {
         final Message msg = commandEnvelope.getMessage();
         final CommandId id = commandEnvelope.getId();
 
-        final Error error = CommandExpiredException.commandExpiredError(msg);
+        final Error error = CommandExpiredException.commandExpired(command);
         commandStore().setToError(commandEnvelope, error);
         log().errorExpiredCommand(msg, id);
     }

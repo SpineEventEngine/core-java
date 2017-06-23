@@ -20,9 +20,9 @@
 
 package io.spine.server.event;
 
+import io.spine.base.EventClass;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.bus.MessageDispatcher;
-import io.spine.type.EventClass;
 
 /**
  * {@code EventDispatcher} delivers events to subscribers.

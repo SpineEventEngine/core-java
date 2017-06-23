@@ -26,7 +26,7 @@ import io.spine.test.storage.command.CreateProject;
 import io.spine.test.storage.command.StartProject;
 import io.spine.test.storage.event.ProjectCreated;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 
 public class Given {
 

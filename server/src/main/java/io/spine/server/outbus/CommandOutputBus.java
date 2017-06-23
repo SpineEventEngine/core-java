@@ -37,6 +37,8 @@ import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.reject;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
@@ -160,7 +162,7 @@ public abstract class CommandOutputBus<M extends Message,
         if (dispatchersCalled == 0) {
             handleDeadMessage(enrichedEnvelope);
         }
-        final IsSent acknowledgement = acknowledge(envelope);
+        final IsSent acknowledgement = acknowledge(getId(envelope));
         return acknowledgement;
     }
 

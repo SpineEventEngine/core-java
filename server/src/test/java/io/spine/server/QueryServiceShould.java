@@ -20,13 +20,13 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import io.spine.annotation.Subscribe;
 import io.spine.base.EventContext;
 import io.spine.base.Responses;
+import io.spine.base.Subscribe;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
-import io.spine.io.StreamObservers;
-import io.spine.io.StreamObservers.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.projection.Projection;
 import io.spine.server.projection.ProjectionRepository;
 import io.spine.server.stand.Stand;

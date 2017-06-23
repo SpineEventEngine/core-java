@@ -19,14 +19,9 @@
  */
 package io.spine.server.commandbus;
 
-import com.google.protobuf.Message;
 import io.spine.base.Command;
-import io.spine.base.Commands;
+import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
-import io.spine.type.CommandClass;
-import io.spine.type.TypeName;
-
-import static java.lang.String.format;
 
 /**
  * Exception that is thrown when a scheduled command was not delivered to the target in time.
@@ -41,29 +36,16 @@ public class CommandExpiredException extends CommandException {
     private static final long serialVersionUID = 0L;
 
     public CommandExpiredException(Command command) {
-        super(messageFormat(command), command, commandExpiredError(Commands.getMessage(command)));
-    }
-
-    private static String messageFormat(Command command) {
-        final CommandClass commandClass = CommandClass.of(command);
-        final String typeName = TypeName.ofCommand(command)
-                                        .value();
-        final String result = format(
-                "A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.",
-                commandClass,
-                typeName
-        );
-        return result;
+        super(messageFormat(
+                "A scheduled command expired. Command class: `%s`; Protobuf type: `%s`.", command),
+              command,
+              commandExpired(command));
     }
 
     /** Creates an instance of the command expired error. */
-    public static Error commandExpiredError(Message commandMessage) {
-        final String errMsg = format("Scheduled command of type `%s` expired.",
-                                     CommandClass.of(commandMessage));
-        final Error.Builder error = Error.newBuilder()
-                .setType(CommandExpiredException.class.getCanonicalName())
-                .setMessage(errMsg)
-                .putAllAttributes(commandTypeAttribute(commandMessage));
-        return error.build();
+    static Error commandExpired(Command command) {
+        final String format = "Scheduled command of type `%s` expired.";
+        final CommandValidationError errorCode = CommandValidationError.EXPIRED;
+        return createError(format, command, errorCode);
     }
 }

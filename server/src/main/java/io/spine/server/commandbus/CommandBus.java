@@ -25,21 +25,19 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.base.Failure;
 import io.spine.base.FailureThrowable;
-import io.spine.base.Identifier;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
-import io.spine.type.CommandClass;
-import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -48,6 +46,9 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
+import static io.spine.server.bus.Buses.acknowledge;
+import static io.spine.server.bus.Buses.reject;
+import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
 /**
@@ -177,26 +178,20 @@ public class CommandBus extends Bus<Command,
         try {
             dispatcher.dispatch(envelope);
             commandStore.setCommandStatusOk(envelope);
-            result = acknowledge(envelope);
+            result = acknowledge(envelope.getId());
         } catch (RuntimeException e) {
             final Throwable cause = getRootCause(e);
             commandStore.updateCommandStatus(envelope, cause, log);
 
-            final Status status;
             if (cause instanceof FailureThrowable) {
                 final FailureThrowable failureThrowable = (FailureThrowable) cause;
                 final Failure failure = failureThrowable.toFailure(envelope.getCommand());
-                status = Status.newBuilder()
-                               .setFailure(failure)
-                               .build();
                 failureBus().post(failure);
+                result = reject(envelope.getId(), failure);
             } else {
-                final Error error = Exceptions.toError(cause);
-                status = Status.newBuilder()
-                               .setError(error)
-                               .build();
+                final Error error = toError(cause);
+                result = reject(envelope.getId(), error);
             }
-            result = setStatus(envelope, status);
         }
         return result;
     }

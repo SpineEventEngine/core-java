@@ -24,20 +24,20 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.annotation.Subscribe;
 import io.spine.base.Event;
+import io.spine.base.EventClass;
 import io.spine.base.EventContext;
+import io.spine.base.Events;
 import io.spine.base.Response;
+import io.spine.base.Subscribe;
 import io.spine.envelope.EventEnvelope;
-import io.spine.io.StreamObservers;
-import io.spine.io.StreamObservers.MemoizingObserver;
+import io.spine.grpc.StreamObservers;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
-import io.spine.test.EventTests;
 import io.spine.test.event.ProjectCreated;
 import io.spine.test.event.ProjectId;
-import io.spine.type.EventClass;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import org.junit.Before;
@@ -200,8 +200,8 @@ public class EventBusShould {
         eventBus.post(event);
 
         // Exclude event ID from comparison.
-        assertEquals(event.getMessage(), subscriber.getEventHandled().getMessage());
-        assertEquals(event.getContext(), subscriber.getEventHandled().getContext());
+        assertEquals(Events.getMessage(event), subscriber.getEventMessage());
+        assertEquals(event.getContext(), subscriber.getEventContext());
     }
 
     @Test
@@ -451,15 +451,21 @@ public class EventBusShould {
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {
 
-        private Event eventHandled;
+        private Message eventMessage;
+        private EventContext eventContext;
 
         @Subscribe
         public void on(ProjectCreated eventMsg, EventContext context) {
-            this.eventHandled = EventTests.createEvent(eventMsg, context);
+            this.eventMessage = eventMsg;
+            this.eventContext = context;
         }
 
-        private Event getEventHandled() {
-            return eventHandled;
+        public Message getEventMessage() {
+            return eventMessage;
+        }
+
+        public EventContext getEventContext() {
+            return eventContext;
         }
     }
 

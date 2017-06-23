@@ -32,7 +32,7 @@ import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
 import io.spine.client.Topic;
 import io.spine.client.grpc.SubscriptionServiceGrpc;
-import io.spine.io.StreamObservers;
+import io.spine.grpc.StreamObservers;
 import io.spine.server.stand.Stand;
 import io.spine.type.TypeName;
 import io.spine.type.TypeUrl;

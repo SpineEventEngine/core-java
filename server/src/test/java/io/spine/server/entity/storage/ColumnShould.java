@@ -27,7 +27,7 @@ import io.spine.server.entity.AbstractEntity;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.EntityWithLifecycle;
 import io.spine.server.entity.VersionableEntity;
-import io.spine.test.Given;
+import io.spine.server.entity.given.Given;
 import org.junit.Test;
 
 import javax.annotation.Nullable;

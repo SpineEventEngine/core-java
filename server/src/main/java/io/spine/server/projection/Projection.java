@@ -24,10 +24,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.base.Event;
+import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.EventSubscriberMethod;
-import io.spine.type.EventClass;
 import io.spine.validate.ValidatingBuilder;
 
 import java.lang.reflect.InvocationTargetException;

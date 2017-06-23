@@ -26,7 +26,7 @@ import io.spine.test.reflect.command.CreateProject;
 import io.spine.test.reflect.command.StartProject;
 import io.spine.test.reflect.event.ProjectCreated;
 
-import static io.spine.base.Identifier.newUuid;
+import static io.spine.Identifier.newUuid;
 
 class Given {
 
@@ -90,10 +90,9 @@ class Given {
         }
 
         public static InvalidProjectName  invalidProjectName(ProjectId id) {
-            final InvalidProjectName invalidProjectName =
-                    InvalidProjectName.newBuilder()
-                                                      .setProjectId(id)
-                                                      .build();
+            final InvalidProjectName invalidProjectName = InvalidProjectName.newBuilder()
+                                                                            .setProjectId(id)
+                                                                            .build();
             return invalidProjectName;
         }
     }

@@ -24,21 +24,20 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Sets;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.client.grpc.CommandServiceGrpc;
+import io.spine.server.bus.Buses;
 import io.spine.server.commandbus.CommandBus;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.UnsupportedCommandException;
-import io.spine.type.CommandClass;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
 import java.util.Set;
 
-import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -86,13 +85,7 @@ public class CommandService extends CommandServiceGrpc.CommandServiceImplBase {
         final CommandException unsupported = new UnsupportedCommandException(request);
         log().error("Unsupported command posted to CommandService", unsupported);
         final Error error = toError(unsupported);
-        final Status errorStatus = Status.newBuilder()
-                                         .setError(error)
-                                         .build();
-        final IsSent response = IsSent.newBuilder()
-                                      .setMessageId(pack(errorStatus))
-                                      .setStatus(errorStatus)
-                                      .build();
+        final IsSent response = Buses.reject(request.getId(), error);
         responseObserver.onNext(response);
         responseObserver.onCompleted();
     }

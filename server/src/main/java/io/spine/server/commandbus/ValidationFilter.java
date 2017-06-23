@@ -25,7 +25,6 @@ import io.grpc.StatusRuntimeException;
 import io.spine.base.Command;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.base.TenantId;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.validate.ConstraintViolation;
@@ -35,6 +34,7 @@ import java.util.List;
 import static com.google.common.base.Optional.of;
 import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
 import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
+import static io.spine.server.bus.Buses.reject;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 import static io.spine.validate.Validate.isDefault;
@@ -68,13 +68,13 @@ class ValidationFilter implements CommandBusFilter {
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final Status status = missingTenantIdStatus(command);
-                return of(commandBus.setStatus(envelope, status));
+                final Error error = missingTenantIdStatus(command);
+                return of(reject(envelope.getId(), error));
             }
         } else {
             if (tenantSpecified) {
-                final Status status = tenantIdInapplicableStatus(command);
-                return of(commandBus.setStatus(envelope, status));
+                final Error error = tenantIdInapplicableStatus(command);
+                return of(reject(envelope.getId(), error));
             }
         }
         return Optional.absent();
@@ -89,10 +89,7 @@ class ValidationFilter implements CommandBusFilter {
                     InvalidCommandException.onConstraintViolations(command, violations);
             commandBus.commandStore()
                       .storeWithError(command, invalidCommand);
-            final Status status = Status.newBuilder()
-                                        .setError(invalidCommand.getError())
-                                        .build();
-            final Optional<IsSent> result = of(commandBus.setStatus(envelope, status));
+            final Optional<IsSent> result = of(reject(envelope.getId(), invalidCommand.getError()));
             return result;
         }
         return Optional.absent();
@@ -103,20 +100,17 @@ class ValidationFilter implements CommandBusFilter {
         // Do nothing.
     }
 
-    private Status missingTenantIdStatus(Command command) {
+    private Error missingTenantIdStatus(Command command) {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore().storeWithError(command, noTenantDefined);
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(noTenantDefined, noTenantDefined.getError());
         final Error error = toError(exception, TENANT_UNKNOWN.getNumber());
-        final Status status = Status.newBuilder()
-                                    .setError(error)
-                                    .build();
-        return status;
+        return error;
     }
 
-    private Status tenantIdInapplicableStatus(Command command) {
+    private Error tenantIdInapplicableStatus(Command command) {
         final CommandException tenantIdInapplicable =
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()
@@ -124,9 +118,6 @@ class ValidationFilter implements CommandBusFilter {
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(tenantIdInapplicable, tenantIdInapplicable.getError());
         final Error error = toError(exception, TENANT_INAPPLICABLE.getNumber());
-        final Status status = Status.newBuilder()
-                                    .setError(error)
-                                    .build();
-        return status;
+        return error;
     }
 }

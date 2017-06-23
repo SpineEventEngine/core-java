@@ -25,6 +25,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
+import io.spine.base.CommandClass;
 import io.spine.base.CommandContext;
 import io.spine.base.Event;
 import io.spine.base.EventContext;
@@ -36,7 +37,6 @@ import io.spine.server.command.CommandHandlingEntity;
 import io.spine.server.command.EventFactory;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.server.reflect.EventApplierMethod;
-import io.spine.type.CommandClass;
 import io.spine.validate.ValidatingBuilder;
 
 import javax.annotation.CheckReturnValue;

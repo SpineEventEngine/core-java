@@ -22,14 +22,14 @@ package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
 import io.spine.base.Command;
+import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.envelope.CommandEnvelope;
-import io.spine.type.CommandClass;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.server.bus.Buses.reject;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 
@@ -61,10 +61,7 @@ class DeadCommandFilter implements CommandBusFilter {
             final Throwable throwable = invalidArgumentWithCause(unsupported,
                                                                  unsupported.getError());
             final Error error = toError(throwable, UNSUPPORTED_COMMAND.getNumber());
-            final Status status = Status.newBuilder()
-                                        .setError(error)
-                                        .build();
-            final IsSent result = commandBus.setStatus(envelope, status);
+            final IsSent result = reject(envelope.getId(), error);
             return Optional.of(result);
         }
         return Optional.absent();
