@@ -29,6 +29,23 @@ syntax = "proto3";
 //      option (spine.base.internal) = true;
 //
 
+// The custom `type_url_prefix` option allows to define specify custom type URL prefix for messages
+// defined in a proto file. This option is declared in this file. Other proto files must import
+// `options.proto` to be able to specify custom type URL prefix.
+//
+// It is recommended that the import statement is provided before the line with `type_url_prefix`
+// option to make it obvious that custom option is defined in the imported file.
+//
+// For example:
+//
+// syntax = "proto3";
+//
+// package my.package;
+//
+// import "spine/options.proto";
+//
+// option (type_url_prefix) = "type.example.org";
+//
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;

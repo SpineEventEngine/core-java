@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package spine.time;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
@@ -30,7 +32,6 @@ option java_package = "io.spine.time";
 import "google/protobuf/timestamp.proto";
 import "google/protobuf/duration.proto";
 
-import "spine/options.proto";
 import "spine/time/zone.proto";
 
 // Enum representing the 12 months of the year.
