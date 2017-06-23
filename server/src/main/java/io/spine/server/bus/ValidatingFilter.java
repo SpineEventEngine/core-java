@@ -32,12 +32,14 @@ import static io.spine.server.bus.Buses.reject;
 /**
  * @author Dmytro Dashenkov
  */
-final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message> extends AbstractBusFilter<E> {
+final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>
+        extends AbstractBusFilter<E> {
 
     private final Bus<T, E, ?, ?> bus;
     private final EnvelopeValidator<E> validator;
 
     ValidatingFilter(Bus<T, E, ?, ?> bus) {
+        super();
         this.bus = bus;
         this.validator = bus.getValidator();
     }

@@ -42,6 +42,7 @@ final class DeadMessageFilter<T extends Message,
     private final DeadMessageHandler<E> deadMessageHandler;
 
     DeadMessageFilter(Bus<T, E, C, D> bus) {
+        super();
         this.bus = bus;
         this.deadMessageHandler = bus.getDeadMessageHandler();
     }
