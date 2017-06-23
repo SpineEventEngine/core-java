@@ -25,14 +25,14 @@ import com.google.common.collect.Queues;
 import com.google.common.util.concurrent.SettableFuture;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.CommandFactory;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.IsSent;
+import io.spine.core.Status;
 import io.spine.server.commandbus.CommandBus;
 
 import java.util.Iterator;
@@ -189,8 +189,8 @@ abstract class AbstractCommandRouter<T extends AbstractCommandRouter> {
     }
 
     /**
-     * Creates a {@code CommandFactory} using the {@linkplain io.spine.base.UserId actor},
-     * {@linkplain io.spine.base.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
+     * Creates a {@code CommandFactory} using the {@linkplain io.spine.core.UserId actor},
+     * {@linkplain io.spine.core.TenantId tenant ID} and {@linkplain io.spine.time.ZoneOffset
      * zone offset} from the given command context.
      */
     private static CommandFactory commandFactory(CommandContext sourceContext) {

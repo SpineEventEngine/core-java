@@ -21,7 +21,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.test.reflect.event.ProjectCreated;
 import org.junit.Test;

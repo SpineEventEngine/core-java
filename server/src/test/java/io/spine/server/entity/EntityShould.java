@@ -23,7 +23,7 @@ package io.spine.server.entity;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.core.Versions;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;

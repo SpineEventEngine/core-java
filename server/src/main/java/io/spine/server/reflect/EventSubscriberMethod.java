@@ -23,8 +23,8 @@ package io.spine.server.reflect;
 import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
 import io.spine.core.EventClass;
+import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 
 import javax.annotation.CheckReturnValue;

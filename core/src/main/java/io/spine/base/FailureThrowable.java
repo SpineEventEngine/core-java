@@ -26,6 +26,10 @@ import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.annotation.Internal;
+import io.spine.core.Command;
+import io.spine.core.Failure;
+import io.spine.core.FailureContext;
+import io.spine.core.FailureId;
 import io.spine.core.Failures;
 
 import static io.spine.protobuf.AnyPacker.pack;

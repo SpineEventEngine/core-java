@@ -21,7 +21,7 @@
 package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 
 /**
  * Obtains a set of entity IDs from an event message and its context.

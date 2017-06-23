@@ -21,8 +21,8 @@ package io.spine.server.failure;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.server.reflect.FailureSubscriberMethod;

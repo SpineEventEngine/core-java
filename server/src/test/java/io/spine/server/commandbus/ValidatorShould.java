@@ -21,9 +21,9 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Any;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.protobuf.AnyPacker;
@@ -47,7 +47,7 @@ public class ValidatorShould {
 
     @Test
     public void validate_command_and_return_nothing_if_it_is_valid() {
-        final Command cmd = Given.Command.createProject();
+        final Command cmd = Given.ACommand.createProject();
 
         final List<ConstraintViolation> violations = validator.validate(CommandEnvelope.of(cmd));
 

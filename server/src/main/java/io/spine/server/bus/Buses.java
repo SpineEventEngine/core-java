@@ -24,10 +24,10 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.base.Failure;
-import io.spine.base.IsSent;
-import io.spine.base.Status;
+import io.spine.core.Failure;
+import io.spine.core.IsSent;
 import io.spine.core.Responses;
+import io.spine.core.Status;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

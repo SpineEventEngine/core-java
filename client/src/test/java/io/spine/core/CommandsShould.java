@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableList;
@@ -33,8 +33,6 @@ import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.CommandEnvelope;
-import io.spine.core.Commands;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;

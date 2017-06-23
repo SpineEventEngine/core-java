@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.core.Versions;
 import io.spine.test.Values;
 import org.junit.Test;
 

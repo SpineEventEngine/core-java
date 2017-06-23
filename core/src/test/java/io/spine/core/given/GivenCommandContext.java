@@ -22,11 +22,11 @@ package io.spine.core.given;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.ActorContext;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandContext.Schedule;
-import io.spine.base.TenantId;
-import io.spine.base.UserId;
+import io.spine.core.ActorContext;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandContext.Schedule;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.test.Values.newUserId;

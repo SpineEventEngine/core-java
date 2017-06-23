@@ -21,7 +21,7 @@
 package io.spine.server.bc.given;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventId;
+import io.spine.core.EventId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;

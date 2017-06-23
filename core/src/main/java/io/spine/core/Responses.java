@@ -21,8 +21,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Empty;
-import io.spine.base.Response;
-import io.spine.base.Status;
 
 /**
  * Utilities for working with {@link Response Response} objects.

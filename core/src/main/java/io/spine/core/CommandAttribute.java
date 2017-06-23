@@ -21,7 +21,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Any;
-import io.spine.base.CommandContext;
 import io.spine.protobuf.Attribute;
 
 import java.util.Map;

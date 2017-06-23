@@ -26,11 +26,6 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.TenantId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.string.Stringifier;
 import io.spine.string.StringifierRegistry;
@@ -45,7 +40,7 @@ import java.util.UUID;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.EMPTY_ID;
-import static io.spine.base.CommandContext.Schedule;
+import static io.spine.core.CommandContext.Schedule;
 import static io.spine.validate.Validate.isNotDefault;
 
 /**

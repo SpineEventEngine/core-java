@@ -19,29 +19,45 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.core;
+
+import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.core";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "BusProto";
-option java_package = "io.spine.base";
+option java_outer_classname = "ResponseProto";
 
 import "google/protobuf/empty.proto";
 import "google/protobuf/any.proto";
 
-import "spine/options.proto";
-import "spine/base/response.proto";
+import "spine/base/error.proto";
+import "spine/core/failure.proto";
 
-// The result of sending a message to a bus.
+// The result of a call returned by a service.
 //
-// The respone message brings the ID of the message which has been acknowledged or rejected.
+// A service may return either `ok` or an `error` (technical failure) or a `business_failure`.
+// The client may expect results (returned via a separate call to read-side or via event stream)
+// only upon receiving the `ok` status.
 //
-message IsSent {
-
-    // The correlation ID of the message, i.e. the ID of the message which has been posted.
-    google.protobuf.Any message_id = 1 [(required) = true];
+message Response {
 
     // The response status.
-    base.Status status = 2 [(required) = true];
+    Status status = 1 [(required) = true];
+}
+
+// The response status.
+message Status {
+    oneof status {
+        // The request was accepted to execution.
+        google.protobuf.Empty ok = 1;
+
+        // The technical error occurred upon receiving the request and no further
+        // processing would occur.
+        base.Error error = 2;
+
+        // It is not possible to satisfy the request because of the business failure.
+        Failure failure = 3;
+    }
 }

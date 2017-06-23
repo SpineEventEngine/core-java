@@ -23,7 +23,7 @@ package io.spine.server.reflect;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Empty;
 import com.google.protobuf.StringValue;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.test.Tests;
 import org.junit.Before;
 import org.junit.Test;

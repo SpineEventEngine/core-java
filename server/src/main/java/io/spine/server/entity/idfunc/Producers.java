@@ -23,7 +23,7 @@ package io.spine.server.entity.idfunc;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.core.Events;
 
 import java.util.Set;

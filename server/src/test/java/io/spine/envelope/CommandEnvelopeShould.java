@@ -20,8 +20,8 @@
 
 package io.spine.envelope;
 
-import io.spine.base.Command;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import org.junit.Test;

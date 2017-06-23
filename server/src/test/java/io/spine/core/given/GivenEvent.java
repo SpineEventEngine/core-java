@@ -18,14 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base.given;
+package io.spine.core.given;
 
 import com.google.protobuf.Message;
-import io.spine.base.Enrichment;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.EventsShould;
-import io.spine.base.Version;
+import io.spine.core.Enrichment;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.EventsShould;
+import io.spine.core.Version;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;

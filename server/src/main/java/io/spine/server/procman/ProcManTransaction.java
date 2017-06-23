@@ -21,8 +21,8 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
-import io.spine.base.Version;
+import io.spine.core.EventContext;
+import io.spine.core.Version;
 import io.spine.server.entity.Transaction;
 import io.spine.server.entity.TransactionListener;
 import io.spine.validate.ValidatingBuilder;

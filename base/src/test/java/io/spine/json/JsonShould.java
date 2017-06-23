@@ -25,7 +25,7 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.JsonFormat;
-import io.spine.base.UserId;
+import io.spine.core.UserId;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.type.KnownTypes;

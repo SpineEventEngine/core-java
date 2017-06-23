@@ -21,9 +21,9 @@ package io.spine.server.procman;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
 import io.spine.protobuf.AnyPacker;
 
 import java.util.List;

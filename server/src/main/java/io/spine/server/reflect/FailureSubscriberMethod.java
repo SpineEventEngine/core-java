@@ -24,7 +24,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandContext;
+import io.spine.core.CommandContext;
 import io.spine.core.FailureClass;
 import io.spine.core.Subscribe;
 

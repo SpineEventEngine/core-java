@@ -26,7 +26,7 @@ import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.base.Response;
+import io.spine.core.Response;
 import io.spine.core.Responses;
 
 import javax.annotation.Nullable;

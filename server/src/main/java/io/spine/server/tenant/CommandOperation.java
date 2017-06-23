@@ -21,8 +21,8 @@
 package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
 
 import static io.spine.core.Commands.getTenantId;
 

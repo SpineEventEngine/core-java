@@ -21,9 +21,9 @@ package io.spine.envelope;
 
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.Failure;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.Failures;

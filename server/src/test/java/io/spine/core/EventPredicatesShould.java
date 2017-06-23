@@ -18,13 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.base.Predicate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import io.spine.base.given.GivenEvent;
-import io.spine.core.EventPredicates;
+import io.spine.core.given.GivenEvent;
 import org.junit.Test;
 
 import static io.spine.core.EventPredicates.isAfter;

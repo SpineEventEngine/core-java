@@ -19,44 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.core;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_package = "io.spine.base";
+option java_package = "io.spine.core";
+option java_outer_classname = "VersionProto";
 option java_multiple_files = true;
-option java_outer_classname = "EnrichmentProto";
 option java_generate_equals_and_hash = true;
 
-import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
-// The message containing enrichment attributes for the outer message.
-//
-// A message can be enriched with one or more messages.
-// Or, this process can be disabled.
-//
-// Examples of enriched messages: `Event` and `Failure`.
-//
-message Enrichment {
+// A version number with timestamp of the version creation.
+message Version {
 
-    oneof mode {
-
-        // The instruction not to enrich the outer message.
-        bool do_not_enrich = 1;
-
-        // The container for the enrichments.
-        Container container = 2;
-    }
-
-    // A container for event enrichments.
+    // A zero-based version number.
     //
-    // This wrapper type is required because maps are not allowed in `oneof`s.
+    // When numbering versions of entities the zero value is reserved for
+    // the "pre-initialization" version of an entity.
     //
-    message Container {
+    int32 number = 1 [(required) = true];
 
-        // A map from a fully qualified Protobuf type name of an enrichment,
-        // to its wrapped instance.
-        map<string, google.protobuf.Any> items = 1;
-    }
+    // A moment in time when the new version was created.
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 }

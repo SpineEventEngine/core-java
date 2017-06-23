@@ -30,7 +30,7 @@ import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
 import com.google.protobuf.UInt64Value;
 import io.spine.Identifier.Type;
-import io.spine.base.CommandId;
+import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.identifiers.NestedMessageId;

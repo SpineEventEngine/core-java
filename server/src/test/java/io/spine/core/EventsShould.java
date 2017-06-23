@@ -17,7 +17,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
@@ -25,12 +25,9 @@ import com.google.protobuf.DoubleValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.given.GivenEvent;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.core.Commands;
-import io.spine.core.EventEnvelope;
-import io.spine.core.Events;
+import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.EventFactory;
 import io.spine.string.Stringifiers;

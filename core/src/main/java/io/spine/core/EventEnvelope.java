@@ -21,9 +21,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Message;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.EventId;
 import io.spine.type.TypeName;
 
 import static com.google.common.base.Preconditions.checkNotNull;

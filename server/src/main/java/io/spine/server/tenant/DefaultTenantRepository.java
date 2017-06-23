@@ -22,7 +22,7 @@ package io.spine.server.tenant;
 
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 import io.spine.time.Time;
 
 /**

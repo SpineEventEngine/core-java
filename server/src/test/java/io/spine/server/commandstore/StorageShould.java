@@ -25,16 +25,16 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import io.spine.Identifier;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
 import io.spine.base.Error;
-import io.spine.base.Failure;
-import io.spine.base.FailureContext;
-import io.spine.base.FailureId;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
 import io.spine.core.Commands;
+import io.spine.core.Failure;
+import io.spine.core.FailureContext;
+import io.spine.core.FailureId;
 import io.spine.core.Failures;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Given;
@@ -50,11 +50,11 @@ import java.util.Iterator;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.CommandStatus.ERROR;
-import static io.spine.base.CommandStatus.FAILURE;
-import static io.spine.base.CommandStatus.OK;
-import static io.spine.base.CommandStatus.RECEIVED;
-import static io.spine.base.CommandStatus.SCHEDULED;
+import static io.spine.core.CommandStatus.ERROR;
+import static io.spine.core.CommandStatus.FAILURE;
+import static io.spine.core.CommandStatus.OK;
+import static io.spine.core.CommandStatus.RECEIVED;
+import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
 import static io.spine.protobuf.Wrappers.pack;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
@@ -98,7 +98,7 @@ public class StorageShould extends TenantAwareTest {
     }
 
     private static CommandRecord newStorageRecord() {
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         final String commandType = CommandEnvelope.of(command)
                                                   .getTypeName()
                                                   .value();
@@ -130,7 +130,7 @@ public class StorageShould extends TenantAwareTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_and_read_command() {
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         final CommandId commandId = command.getId();
 
         repository.store(command);
@@ -142,7 +142,7 @@ public class StorageShould extends TenantAwareTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_error() {
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         final CommandId commandId = command.getId();
         final Error error = newError();
 
@@ -172,7 +172,7 @@ public class StorageShould extends TenantAwareTest {
     @SuppressWarnings("OptionalGetWithoutIsPresent") // We get right after we store.
     @Test
     public void store_command_with_status() {
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         final CommandId commandId = command.getId();
         final CommandStatus status = SCHEDULED;
 
@@ -184,14 +184,14 @@ public class StorageShould extends TenantAwareTest {
 
     @Test
     public void load_commands_by_status() {
-        final List<Command> commands = ImmutableList.of(Given.Command.createProject(),
-                                                        Given.Command.addTask(),
-                                                        Given.Command.startProject());
+        final List<Command> commands = ImmutableList.of(Given.ACommand.createProject(),
+                                                        Given.ACommand.addTask(),
+                                                        Given.ACommand.startProject());
         final CommandStatus status = SCHEDULED;
 
         store(commands, status);
         // store an extra command with another status
-        repository.store(Given.Command.createProject(), ERROR);
+        repository.store(Given.ACommand.createProject(), ERROR);
 
         final Iterator<CommandRecord> iterator = repository.iterator(status);
         final List<Command> actualCommands = newArrayList(toCommandIterator(iterator));
@@ -251,7 +251,7 @@ public class StorageShould extends TenantAwareTest {
 
     @Test
     public void convert_cmd_to_record() {
-        final Command command = Given.Command.createProject();
+        final Command command = Given.ACommand.createProject();
         final CommandStatus status = RECEIVED;
 
         final CommandRecord record = newRecordBuilder(command, status, null).build();
@@ -290,21 +290,21 @@ public class StorageShould extends TenantAwareTest {
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_to_closed_storage() throws Exception {
         repository.close();
-        repository.store(Given.Command.createProject());
+        repository.store(Given.ACommand.createProject());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_error_to_closed_storage() throws
                                                                                    Exception {
         repository.close();
-        repository.store(Given.Command.createProject(), newError());
+        repository.store(Given.ACommand.createProject(), newError());
     }
 
     @Test(expected = IllegalStateException.class)
     public void throw_exception_if_try_to_store_cmd_with_status_to_closed_storage() throws
                                                                                     Exception {
         repository.close();
-        repository.store(Given.Command.createProject(), OK);
+        repository.store(Given.ACommand.createProject(), OK);
     }
 
     @Test(expected = IllegalStateException.class)

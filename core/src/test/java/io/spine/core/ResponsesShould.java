@@ -21,8 +21,6 @@
 package io.spine.core;
 
 import io.spine.base.Error;
-import io.spine.base.Response;
-import io.spine.base.Status;
 import org.junit.Test;
 
 import static com.google.common.base.Preconditions.checkNotNull;

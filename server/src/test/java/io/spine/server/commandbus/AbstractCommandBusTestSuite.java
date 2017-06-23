@@ -22,18 +22,18 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
-import io.spine.base.IsSent;
-import io.spine.base.Status;
-import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.CommandValidationError;
+import io.spine.core.IsSent;
+import io.spine.core.Status;
+import io.spine.core.TenantId;
 import io.spine.grpc.StreamObservers;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.command.Assign;
@@ -54,11 +54,11 @@ import org.mockito.ArgumentCaptor;
 import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
-import static io.spine.base.CommandStatus.SCHEDULED;
-import static io.spine.base.CommandValidationError.INVALID_COMMAND;
+import static io.spine.core.CommandStatus.SCHEDULED;
+import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
-import static io.spine.server.commandbus.Given.Command.createProject;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.test.Values.newTenantUuid;
 import static io.spine.test.Verify.assertContainsAll;
 import static io.spine.test.Verify.assertSize;
@@ -239,7 +239,7 @@ public abstract class AbstractCommandBusTestSuite {
     }
 
     protected Command newCommand() {
-        return Given.Command.createProject();
+        return Given.ACommand.createProject();
     }
 
     protected void checkResult(Command cmd) {

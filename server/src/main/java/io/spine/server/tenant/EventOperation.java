@@ -21,7 +21,7 @@
 package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
-import io.spine.base.Event;
+import io.spine.core.Event;
 
 import static io.spine.core.Events.getTenantId;
 

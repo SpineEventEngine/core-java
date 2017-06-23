@@ -21,7 +21,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Timestamp;
-import io.spine.base.Version;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.time.Time.getCurrentTime;

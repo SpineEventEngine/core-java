@@ -21,8 +21,8 @@ package io.spine.server.entity;
 
 import com.google.common.collect.Lists;
 import com.google.protobuf.Message;
-import io.spine.base.Event;
-import io.spine.base.Version;
+import io.spine.core.Event;
+import io.spine.core.Version;
 import io.spine.server.command.EventFactory;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Transaction.Phase;

@@ -23,11 +23,6 @@ package io.spine.core;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.Failure;
-import io.spine.base.FailureContext;
-import io.spine.base.FailureId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;

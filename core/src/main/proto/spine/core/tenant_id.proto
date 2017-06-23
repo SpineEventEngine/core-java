@@ -19,19 +19,37 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.core;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.core";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
-option java_outer_classname = "UserIdProto";
-option java_package = "io.spine.base";
+option java_outer_classname = "TenantIdProto";
 
-// A string-based identifier of the user.
-message UserId {
-    // User ID value.
-    string value = 1;
+import "spine/net/internet_domain.proto";
+import "spine/net/email_address.proto";
+
+// An identifier of a tenant in a multi-tenant application.
+//
+// Commands sent in such application must have non-default value of
+// the `tenant_id` field in `CommandContext`.
+//
+message TenantId {
+    oneof kind {
+        // The tenant has Internet domain name.
+        net.InternetDomain domain = 1;
+
+        // The tenant is a person or an organization without a domain name.
+        net.EmailAddress email = 2;
+
+        // reserved 3 to 19;
+
+        // Application-specific value.
+        string value = 20;
+    }
+
+    reserved 3 to 19;
 }
-

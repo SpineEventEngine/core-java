@@ -23,6 +23,6 @@
  */
 
 @ParametersAreNonnullByDefault
-package io.spine.base.given;
+package io.spine.core.given;
 
 import javax.annotation.ParametersAreNonnullByDefault;

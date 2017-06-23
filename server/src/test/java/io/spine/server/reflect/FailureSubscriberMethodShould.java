@@ -20,7 +20,7 @@
 package io.spine.server.reflect;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.CommandContext;
+import io.spine.core.CommandContext;
 import io.spine.core.Subscribe;
 import io.spine.test.failure.command.UpdateProjectName;
 import io.spine.test.reflect.ReflectFailures;

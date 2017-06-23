@@ -21,7 +21,6 @@ package io.spine.core;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
-import io.spine.base.Failure;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

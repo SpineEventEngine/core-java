@@ -22,9 +22,9 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
@@ -37,11 +37,11 @@ import java.util.concurrent.CountDownLatch;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
-import static io.spine.base.CommandStatus.SCHEDULED;
+import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
-import static io.spine.server.commandbus.Given.Command.startProject;
+import static io.spine.server.commandbus.Given.ACommand.addTask;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
+import static io.spine.server.commandbus.Given.ACommand.startProject;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.time.Durations2.minutes;
 import static io.spine.time.Time.getCurrentTime;

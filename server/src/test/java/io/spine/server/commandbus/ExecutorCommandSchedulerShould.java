@@ -22,10 +22,10 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.core.given.GivenCommandContext;
 import org.junit.After;
 import org.junit.Before;
@@ -111,7 +111,7 @@ public class ExecutorCommandSchedulerShould {
     public void throw_exception_if_is_shutdown() {
         scheduler.shutdown();
         try {
-            scheduler.schedule(Given.Command.createProject());
+            scheduler.schedule(Given.ACommand.createProject());
         } catch (IllegalStateException expected) {
             // is OK as it is shutdown
             return;

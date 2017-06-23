@@ -19,22 +19,22 @@
 //
 syntax = "proto3";
 
-package spine.base;
+package spine.core;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.core";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "FailureProto";
-option java_package = "io.spine.base";
 
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-import "spine/base/command.proto";
-import "spine/base/enrichment.proto";
-import "spine/base/version.proto";
+import "spine/core/command.proto";
+import "spine/core/enrichment.proto";
+import "spine/core/version.proto";
 
 // Failure identifier.
 message FailureId {

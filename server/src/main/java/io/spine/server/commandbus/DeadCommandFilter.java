@@ -21,14 +21,14 @@
 package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
-import io.spine.base.Command;
 import io.spine.base.Error;
-import io.spine.base.IsSent;
+import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.IsSent;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.server.bus.Buses.reject;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;

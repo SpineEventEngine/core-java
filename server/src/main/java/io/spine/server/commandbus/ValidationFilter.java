@@ -22,18 +22,18 @@ package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
 import io.grpc.StatusRuntimeException;
-import io.spine.base.Command;
 import io.spine.base.Error;
-import io.spine.base.IsSent;
-import io.spine.base.TenantId;
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.IsSent;
+import io.spine.core.TenantId;
 import io.spine.validate.ConstraintViolation;
 
 import java.util.List;
 
 import static com.google.common.base.Optional.of;
-import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
-import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
+import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.core.CommandValidationError.TENANT_UNKNOWN;
 import static io.spine.server.bus.Buses.reject;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;

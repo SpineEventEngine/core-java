@@ -23,11 +23,11 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.StringValue;
 import io.netty.util.internal.ConcurrentSet;
 import io.spine.Identifier;
-import io.spine.base.CommandContext;
-import io.spine.base.Version;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.EventEnvelope;
+import io.spine.core.Version;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.entity.AbstractVersionableEntity;
@@ -244,7 +244,7 @@ public class StandPostShould {
             @Override
             public void perform(BoundedContext context) {
                 // Init repository
-                final ProjectionRepository repository = Given.projectionRepo(context);
+                final ProjectionRepository repository = Given.projectionRepo();
                 repository.initStorage(storageFactory(context.isMultitenant()));
 
                 // Dispatch an update from projection repo

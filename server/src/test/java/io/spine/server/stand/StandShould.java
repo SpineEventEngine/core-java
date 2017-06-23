@@ -31,9 +31,6 @@ import com.google.protobuf.Descriptors;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
-import io.spine.base.TenantId;
-import io.spine.base.Version;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
@@ -45,7 +42,10 @@ import io.spine.client.Subscriptions;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.Topic;
+import io.spine.core.Response;
 import io.spine.core.Responses;
+import io.spine.core.TenantId;
+import io.spine.core.Version;
 import io.spine.grpc.StreamObservers;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.people.PersonName;
@@ -199,7 +199,7 @@ public class StandShould extends TenantAwareTest {
         checkTypesEmpty(stand);
 
         final StandTestProjectionRepository standTestProjectionRepo =
-                new StandTestProjectionRepository(boundedContext);
+                new StandTestProjectionRepository();
         stand.registerTypeSupplier(standTestProjectionRepo);
         checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
 
@@ -209,7 +209,7 @@ public class StandShould extends TenantAwareTest {
                    knownAggregateTypes.isEmpty());
 
         final StandTestProjectionRepository anotherTestProjectionRepo =
-                new StandTestProjectionRepository(boundedContext);
+                new StandTestProjectionRepository();
         stand.registerTypeSupplier(anotherTestProjectionRepo);
         checkHasExactlyOne(stand.getExposedTypes(), Project.getDescriptor());
     }
@@ -250,7 +250,7 @@ public class StandShould extends TenantAwareTest {
 
 
         final StandTestProjectionRepository standTestProjectionRepo =
-                new StandTestProjectionRepository(boundedContext);
+                new StandTestProjectionRepository();
         stand.registerTypeSupplier(standTestProjectionRepo);
 
         final Topic projectProjections = requestFactory.topic().allOf(Project.class);
@@ -1402,7 +1402,7 @@ public class StandShould extends TenantAwareTest {
                 new CustomerAggregateRepository(boundedContext);
         stand.registerTypeSupplier(customerAggregateRepo);
         final StandTestProjectionRepository projectProjectionRepo =
-                new StandTestProjectionRepository(boundedContext);
+                new StandTestProjectionRepository();
         stand.registerTypeSupplier(projectProjectionRepo);
         return stand;
     }

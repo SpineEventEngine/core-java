@@ -22,7 +22,7 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandContext;
+import io.spine.core.CommandContext;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.test.aggregate.Project;

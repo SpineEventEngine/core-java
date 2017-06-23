@@ -20,10 +20,6 @@
 package io.spine.core;
 
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Failure;
-import io.spine.base.FailureId;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

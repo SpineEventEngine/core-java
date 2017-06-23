@@ -23,7 +23,7 @@ package io.spine.server.projection.given;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.server.entity.TestEntityWithStringColumn;
 import io.spine.server.projection.Projection;

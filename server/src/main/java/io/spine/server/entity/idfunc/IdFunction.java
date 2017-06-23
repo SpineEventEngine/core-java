@@ -21,7 +21,7 @@
 package io.spine.server.entity.idfunc;
 
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 
 import java.io.Serializable;
 
@@ -31,7 +31,7 @@ import java.io.Serializable;
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
  * @param <C> either {@link EventContext EventContext} or
- *          {@link io.spine.base.CommandContext CommandContext} type
+ *          {@link io.spine.core.CommandContext CommandContext} type
  * @see io.spine.server.entity.Entity Entity
  */
 interface IdFunction<I, M extends Message, C extends Message> extends Serializable {

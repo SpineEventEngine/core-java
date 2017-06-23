@@ -22,7 +22,6 @@ package io.spine.core;
 
 import com.google.common.base.Predicate;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Event;
 import io.spine.time.Timestamps2;
 
 import javax.annotation.Nullable;

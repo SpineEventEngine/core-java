@@ -24,12 +24,12 @@ import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.Version;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.Version;
 import io.spine.protobuf.Wrapper;
 
 import javax.annotation.Nullable;

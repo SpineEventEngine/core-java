@@ -18,11 +18,12 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
+import io.spine.base.FailureThrowable;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.protobuf.AnyPacker;
 import io.spine.protobuf.Wrapper;

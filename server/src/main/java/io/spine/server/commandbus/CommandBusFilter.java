@@ -23,8 +23,8 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.base.IsSent;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.IsSent;
 
 /**
  * A {@code CommandBus} can have several filters that can prevent a command to be

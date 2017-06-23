@@ -29,8 +29,8 @@ import com.google.protobuf.Descriptors.FieldDescriptor.JavaType;
 import com.google.protobuf.Descriptors.FieldDescriptor.Type;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.Event;
+import io.spine.core.Command;
+import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.type.TypeUrl;
 

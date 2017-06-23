@@ -21,12 +21,12 @@ syntax = "proto3";
 
 package spine.test.commands;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.commands";
 option java_multiple_files = true;
 option java_outer_classname = "CommandsShouldProto";
-
-import "spine/options.proto";
 
 message TestCommand {
     string value = 1;

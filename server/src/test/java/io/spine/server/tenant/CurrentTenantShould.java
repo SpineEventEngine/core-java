@@ -21,7 +21,7 @@
 package io.spine.server.tenant;
 
 import com.google.common.base.Optional;
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 import io.spine.test.Tests;
 import org.junit.Test;
 

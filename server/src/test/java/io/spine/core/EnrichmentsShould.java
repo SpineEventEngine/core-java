@@ -18,15 +18,14 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.base;
+package io.spine.core;
 
 import com.google.common.base.Optional;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.given.GivenEvent;
-import io.spine.core.Enrichments;
+import io.spine.core.given.GivenEvent;
 import io.spine.protobuf.Wrapper;
 import io.spine.server.command.TestEventFactory;
 import io.spine.time.Time;
@@ -35,10 +34,10 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.base.given.GivenEvent.context;
 import static io.spine.core.Enrichments.getEnrichment;
 import static io.spine.core.Enrichments.getEnrichments;
 import static io.spine.core.Enrichments.isEnrichmentEnabled;
+import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.protobuf.Wrapper.forBoolean;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

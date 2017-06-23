@@ -22,13 +22,13 @@ package io.spine.server;
 
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Response;
 import io.spine.client.Subscription;
 import io.spine.client.SubscriptionUpdate;
 import io.spine.client.Target;
 import io.spine.client.Targets;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.client.Topic;
+import io.spine.core.Response;
 import io.spine.server.entity.AbstractVersionableEntity;
 import io.spine.server.entity.VersionableEntity;
 import io.spine.server.stand.Stand;

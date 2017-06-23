@@ -24,8 +24,8 @@ import com.google.common.base.Optional;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.IsSent;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.IsSent;
 
 import java.util.List;
 
