@@ -30,8 +30,7 @@ import static io.spine.util.Exceptions.illegalArgumentWithCauseOf;
  * Utility for injecting a Mockito spy in a private field of an object.
  *
  * <p>Although, it's a not recommended way of testing, in some cases such an approach is needed for
- * testing interactions in a complex objects like {@link io.spine.server.BoundedContext
- * BoundedContext}.
+ * testing interactions in complex objects.
  *
  * @author Alexander Yevsyukov
  */
