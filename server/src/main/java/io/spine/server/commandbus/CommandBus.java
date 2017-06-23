@@ -28,8 +28,6 @@ import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.core.Failure;
-import io.spine.core.IsSent;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
