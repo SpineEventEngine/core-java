@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package spine.change;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
@@ -29,7 +31,6 @@ option java_package = "io.spine.change";
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/options.proto";
 import "spine/time/time.proto";
 
 //

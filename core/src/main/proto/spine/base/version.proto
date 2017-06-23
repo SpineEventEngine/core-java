@@ -19,38 +19,28 @@
 //
 syntax = "proto3";
 
-package spine.change;
+package spine.base;
 
 import "spine/options.proto";
 
 option (type_url_prefix) = "type.spine.io";
-option java_generate_equals_and_hash = true;
+option java_package = "io.spine.base";
+option java_outer_classname = "VersionProto";
 option java_multiple_files = true;
-option java_outer_classname = "ValueMismatchProto";
-option java_package = "io.spine.change";
+option java_generate_equals_and_hash = true;
 
-import "google/protobuf/any.proto";
+import "google/protobuf/timestamp.proto";
 
-// The failure to handle a command because an entity contains a value different than expected in a command.
-message ValueMismatch {
+// A version number with timestamp of the version creation.
+message Version {
 
-    option (required_field) = "expected|actual";
-
-    // The value which a command expected in an entity field.
+    // A zero-based version number.
     //
-    // This field is not populated if the command expects to initialize the attribute.
+    // When numbering versions of entities the zero value is reserved for
+    // the "pre-initialization" version of an entity.
     //
-    google.protobuf.Any expected = 1;
+    int32 number = 1 [(required) = true];
 
-    // The value discovered in the field (instead of the expected).
-    //
-    // This field is not populated if the entity does not have the attribute set.
-    //
-    google.protobuf.Any actual = 2;
-
-    // The value which a command could have set if expected value was discovered in the entity.
-    google.protobuf.Any new_value = 3;
-
-    // The version of the entity which generated the failure.
-    int32 version = 4;
+    // A moment in time when the new version was created.
+    google.protobuf.Timestamp timestamp = 2 [(required) = true];
 }

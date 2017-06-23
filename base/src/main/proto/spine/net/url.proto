@@ -14,8 +14,9 @@ option (experimental_all) = true;
 
 // Protobuf definition for URL.
 //
-// Can be defined in raw string form or as a structurized parsed record. Validity of URL is not guaranteed,
-// if the raw form is used.
+// Can be defined in raw string form or as a structurized parsed record. Validity of URL is not
+// guaranteed, if the raw form is used.
+//
 message Url {
     oneof value {
         string raw = 1;

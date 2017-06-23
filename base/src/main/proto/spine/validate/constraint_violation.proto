@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package spine.validate;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_generate_equals_and_hash = false;
 option java_multiple_files = true;
@@ -29,7 +31,6 @@ option java_package = "io.spine.validate";
 
 import "google/protobuf/any.proto";
 
-import "spine/options.proto";
 import "spine/base/field_path.proto";
 
 // A validation constraint violation for a message field.
