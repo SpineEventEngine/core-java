@@ -26,12 +26,14 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
+import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.EventClass;
 import io.spine.base.EventContext;
 import io.spine.base.IsSent;
 import io.spine.envelope.EventEnvelope;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -49,6 +51,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -162,6 +165,11 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected Message getId(EventEnvelope envelope) {
         return envelope.getId();
+    }
+
+    @Override
+    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
+        return DeadEventHandler.INSTANCE;
     }
 
     @Override
@@ -518,6 +526,17 @@ public class EventBus extends CommandOutputBus<Event,
 
             final EventBus result = new EventBus(this);
             return result;
+        }
+    }
+
+    private enum DeadEventHandler implements DeadMessageHandler<EventEnvelope> {
+        INSTANCE;
+
+        @Override
+        public Error handleDeadMessage(EventEnvelope message) {
+            final Exception exception = new UnsupportedEventException(message.getMessage());
+            final Error error = toError(exception);
+            return error;
         }
     }
 

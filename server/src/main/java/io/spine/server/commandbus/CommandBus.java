@@ -35,6 +35,7 @@ import io.spine.envelope.CommandEnvelope;
 import io.spine.server.Environment;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
@@ -46,8 +47,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newLinkedList;
+import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
+import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
@@ -67,7 +70,7 @@ public class CommandBus extends Bus<Command,
 
     private final CommandStore commandStore;
 
-    private final Deque<CommandBusFilter> filters;
+    private final Deque<BusFilter<CommandEnvelope>> filters;
 
     private final CommandScheduler scheduler;
 
@@ -92,6 +95,8 @@ public class CommandBus extends Bus<Command,
      */
     private final boolean isThreadSpawnAllowed;
 
+    private final DeadCommandhandler deadCommandhandler;
+
     /**
      * Creates new instance according to the passed {@link Builder}.
      */
@@ -107,6 +112,7 @@ public class CommandBus extends Bus<Command,
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.failureBus = builder.failureBus;
         this.filters = builder.getFilters();
+        this.deadCommandhandler = new DeadCommandhandler();
     }
 
     /**
@@ -170,12 +176,8 @@ public class CommandBus extends Bus<Command,
 
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
-    protected Deque<? extends BusFilter<CommandEnvelope>> createFilterChain() {
-        final CommandBusFilter deadCommandFilter = new DeadCommandFilter(this);
-        final CommandBusFilter validator = new ValidationFilter(this);
+    protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
         filters.push(scheduler);
-        filters.push(validator);
-        filters.push(deadCommandFilter);
         return filters;
     }
 
@@ -239,6 +241,11 @@ public class CommandBus extends Bus<Command,
     @Override
     protected Message getId(CommandEnvelope envelope) {
         return envelope.getId();
+    }
+
+    @Override
+    protected DeadMessageHandler<CommandEnvelope> getDeadMessageHandler() {
+        return deadCommandhandler;
     }
 
     /**
@@ -341,7 +348,7 @@ public class CommandBus extends Bus<Command,
 
         private FailureBus failureBus;
 
-        private final Deque<CommandBusFilter> filters = newLinkedList();
+        private final Deque<BusFilter<CommandEnvelope>> filters = newLinkedList();
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -414,7 +421,7 @@ public class CommandBus extends Bus<Command,
         /**
          * Obtains immutable list of added filters.
          */
-        public Deque<CommandBusFilter> getFilters() {
+        public Deque<BusFilter<CommandEnvelope>> getFilters() {
             return filters;
         }
 
@@ -514,6 +521,19 @@ public class CommandBus extends Bus<Command,
 //                                                            .setCommandScheduler(commandScheduler)
 //                                                            .build();
 //            commandBus.setFilterChain(filterChain);
+        }
+    }
+
+    private class DeadCommandhandler implements DeadMessageHandler<CommandEnvelope> {
+        @Override
+        public Error handleDeadMessage(CommandEnvelope message) {
+            final Command command = message.getCommand();
+            final CommandException unsupported = new UnsupportedCommandException(command);
+            commandStore().storeWithError(command, unsupported);
+            final Throwable throwable = invalidArgumentWithCause(unsupported,
+                                                                 unsupported.getError());
+            final Error error = toError(throwable, UNSUPPORTED_COMMAND.getNumber());
+            return error;
         }
     }
 }

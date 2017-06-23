@@ -159,6 +159,8 @@ public abstract class Bus<T extends Message,
      */
     protected abstract Message getId(E envelope);
 
+    protected abstract DeadMessageHandler<E> getDeadMessageHandler();
+
     /**
      * Obtains the dispatcher registry.
      */
@@ -172,7 +174,12 @@ public abstract class Bus<T extends Message,
     // TODO:2017-06-23:dmytro.dashenkov: Document.
     protected final BusFilter<E> filterChain() {
         if (filterChain == null) {
-            filterChain = new FilterChain<>(createFilterChain());
+            final Deque<BusFilter<E>> filters = createFilterChain();
+            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(this);
+            final BusFilter<E> validatingFilter = new ValidatingFilter<>();
+            filters.push(deadMsgFilter);
+            filters.push(validatingFilter);
+            filterChain = new FilterChain<>(filters);
         }
         return filterChain;
     }
@@ -184,7 +191,7 @@ public abstract class Bus<T extends Message,
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
     // TODO:2017-06-23:dmytro.dashenkov: Document.
-    protected abstract Deque<? extends BusFilter<E>> createFilterChain();
+    protected abstract Deque<BusFilter<E>> createFilterChain();
 
     /**
      * Filters the given messages.

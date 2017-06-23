@@ -23,11 +23,13 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
+import io.spine.base.Error;
 import io.spine.base.Failure;
 import io.spine.base.FailureClass;
 import io.spine.base.IsSent;
 import io.spine.envelope.FailureEnvelope;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import org.slf4j.Logger;
@@ -38,6 +40,7 @@ import java.util.Set;
 
 import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.util.Exceptions.toError;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -50,7 +53,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  */
 public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureEnvelope,
-        FailureClass,
+                                                 FailureClass,
                                                  FailureDispatcher> {
 
     /**
@@ -114,6 +117,11 @@ public class FailureBus extends CommandOutputBus<Failure,
     @Override
     protected Message getId(FailureEnvelope envelope) {
         return envelope.getId();
+    }
+
+    @Override
+    protected DeadMessageHandler<FailureEnvelope> getDeadMessageHandler() {
+        return DeadFailureHandler.INSTANCE;
     }
 
     /**
@@ -195,6 +203,17 @@ public class FailureBus extends CommandOutputBus<Failure,
             }
 
             return new FailureBus(this);
+        }
+    }
+
+    private enum DeadFailureHandler implements DeadMessageHandler<FailureEnvelope> {
+        INSTANCE;
+
+        @Override
+        public Error handleDeadMessage(FailureEnvelope message) {
+            final Exception exception = new UnsupportedFailureException(message.getMessage());
+            final Error error = toError(exception);
+            return error;
         }
     }
 

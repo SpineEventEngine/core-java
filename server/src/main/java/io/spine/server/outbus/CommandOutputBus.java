@@ -128,7 +128,7 @@ public abstract class CommandOutputBus<M extends Message,
     }
 
     @Override
-    protected Deque<? extends BusFilter<E>> createFilterChain() {
+    protected Deque<BusFilter<E>> createFilterChain() {
         return newLinkedList();
     }
 
