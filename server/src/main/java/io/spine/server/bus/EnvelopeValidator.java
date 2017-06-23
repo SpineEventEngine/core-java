@@ -21,6 +21,7 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
+import io.spine.base.Error;
 import io.spine.envelope.MessageEnvelope;
 
 /**
@@ -28,5 +29,5 @@ import io.spine.envelope.MessageEnvelope;
  */
 public interface EnvelopeValidator<E extends MessageEnvelope<?>> {
 
-    Optional<Throwable> validate(E envelope);
+    Optional<Error> validate(E envelope);
 }

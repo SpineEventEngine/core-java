@@ -21,6 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Optional;
+import io.spine.base.Error;
 import io.spine.base.Event;
 import io.spine.base.EventClass;
 import io.spine.envelope.EventEnvelope;
@@ -32,6 +33,7 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 
 /**
  * @author Dmytro Dashenkov
@@ -48,7 +50,7 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
     }
 
     @Override
-    public Optional<Throwable> validate(EventEnvelope envelope) {
+    public Optional<Error> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
 
         final Event event = envelope.getOuterObject();
@@ -64,6 +66,10 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
                     InvalidEventException.onConstraintViolations(event, violations);
             result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
         }
-        return Optional.fromNullable(result);
+        if (result == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(toError(result));
+        }
     }
 }

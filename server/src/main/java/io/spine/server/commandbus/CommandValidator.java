@@ -23,15 +23,22 @@ package io.spine.server.commandbus;
 import com.google.common.base.Optional;
 import io.grpc.StatusRuntimeException;
 import io.spine.base.Command;
+import io.spine.base.Error;
 import io.spine.base.TenantId;
 import io.spine.envelope.CommandEnvelope;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
+import io.spine.validate.ValidationError;
 
 import java.util.List;
 
 import static com.google.common.base.Optional.of;
+import static io.spine.base.CommandValidationError.INVALID_COMMAND;
+import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
+import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
+import static io.spine.util.Exceptions.toError;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -46,42 +53,51 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     @Override
-    public Optional<Throwable> validate(CommandEnvelope envelope) {
-        final Optional<Throwable> tenantCheckResult = isTenantIdValid(envelope);
+    public Optional<Error> validate(CommandEnvelope envelope) {
+        final Optional<Error> tenantCheckResult = isTenantIdValid(envelope);
         if (tenantCheckResult.isPresent()) {
             return tenantCheckResult;
         }
-        final Optional<Throwable> commandValid = isCommandValid(envelope);
+        final Optional<Error> commandValid = isCommandValid(envelope);
         return commandValid;
     }
 
-    private Optional<Throwable> isTenantIdValid(CommandEnvelope envelope) {
+    private Optional<Error> isTenantIdValid(CommandEnvelope envelope) {
         final TenantId tenantId = envelope.getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final Throwable result = missingTenantIdStatus(command);
-                return of(result);
+                final Throwable exception = missingTenantIdStatus(command);
+                final Error error = toError(exception, TENANT_UNKNOWN.getNumber());
+                return of(error);
             }
         } else {
             if (tenantSpecified) {
-                final Throwable result = tenantIdInapplicableStatus(command);
-                return of(result);
+                final Throwable exception = tenantIdInapplicableStatus(command);
+                final Error error = toError(exception, TENANT_INAPPLICABLE.getNumber());
+                return of(error);
             }
         }
         return Optional.absent();
     }
 
-    private Optional<Throwable> isCommandValid(CommandEnvelope envelope) {
+    private Optional<Error> isCommandValid(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
                                                               .validate(envelope);
         if (!violations.isEmpty()) {
-            final CommandException invalidCommand =
-                    InvalidCommandException.onConstraintViolations(command, violations);
+            final ValidationError validationError =
+                    ValidationError.newBuilder()
+                                   .addAllConstraintViolation(violations)
+                                   .build();
+            final CommandException invalidCommand = onConstraintViolations(command, violations);
             commandBus.commandStore().storeWithError(command, invalidCommand);
-            return of((Throwable) invalidCommand);
+            final Error incompleteError = toError(invalidCommand, INVALID_COMMAND.getNumber());
+            final Error error = incompleteError.toBuilder()
+                                               .setValidationError(validationError)
+                                               .build();
+            return of(error);
         }
         return Optional.absent();
     }
@@ -89,7 +105,8 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     private Throwable missingTenantIdStatus(Command command) {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
-        commandBus.commandStore().storeWithError(command, noTenantDefined);
+        commandBus.commandStore()
+                  .storeWithError(command, noTenantDefined);
         final StatusRuntimeException exception =
                 invalidArgumentWithCause(noTenantDefined, noTenantDefined.getError());
         return exception;

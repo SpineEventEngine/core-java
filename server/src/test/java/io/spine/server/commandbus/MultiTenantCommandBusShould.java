@@ -189,8 +189,6 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
         new NullPointerTester()
                 .setDefault(Command.class, Command.getDefaultInstance())
                 .setDefault(StreamObserver.class, StreamObservers.noOpObserver())
-                .ignore(CommandBus.class.getDeclaredMethod("handleDeadMessage",
-                                                           CommandEnvelope.class)) // NoOp method
                 .testAllPublicInstanceMethods(commandBus);
     }
 

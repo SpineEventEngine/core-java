@@ -23,7 +23,6 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Message;
 import io.spine.base.Command;
 import io.spine.base.CommandContext;
-import io.spine.base.CommandValidationError;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.client.TestActorRequestFactory;
@@ -80,8 +79,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         checkCommandError(observer.firstResponse(),
                           INVALID_COMMAND,
-                          CommandValidationError.getDescriptor().getFullName(),
-                          InvalidCommandException.class,
+                          InvalidCommandException.class.getCanonicalName(),
                           cmd);
     }
 

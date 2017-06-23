@@ -115,7 +115,7 @@ public class FailureBus extends CommandOutputBus<Failure,
 
     @Override
     protected EnvelopeValidator<FailureEnvelope> getValidator() {
-        return NoOpValidotor.INSTANCE;
+        return NoOpValidator.INSTANCE;
     }
 
     /**
@@ -211,11 +211,11 @@ public class FailureBus extends CommandOutputBus<Failure,
         }
     }
 
-    private enum NoOpValidotor implements EnvelopeValidator<FailureEnvelope> {
+    private enum NoOpValidator implements EnvelopeValidator<FailureEnvelope> {
         INSTANCE;
 
         @Override
-        public Optional<Throwable> validate(FailureEnvelope envelope) {
+        public Optional<Error> validate(FailureEnvelope envelope) {
             checkNotNull(envelope);
             return Optional.absent();
         }
