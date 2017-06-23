@@ -41,6 +41,7 @@ import org.junit.Test;
 
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
 import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.core.Failures.toFailure;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
@@ -114,8 +115,8 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final MemoizingObserver<IsSent> observer = memoizingObserver();
         commandBus.post(addTaskCommand, observer);
 
-        final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
-        final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
+        final InvalidProjectName throwable = faultyHandler.getThrowable();
+        final Failure expectedFailure = toFailure(throwable, addTaskCommand);
         final IsSent isSent = observer.firstResponse();
         final Failure actualFailure = isSent.getStatus().getFailure();
         assertTrue(isNotDefault(actualFailure));

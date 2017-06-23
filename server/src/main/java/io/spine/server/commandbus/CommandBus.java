@@ -28,7 +28,8 @@ import io.grpc.stub.StreamObserver;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.base.FailureThrowable;
+import io.spine.core.Failure;
+import io.spine.core.IsSent;
 import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
@@ -194,11 +195,6 @@ public class CommandBus extends Bus<Command,
             if (cause instanceof ThrowableMessage) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 final Failure failure = toFailure(throwableMessage, envelope.getCommand());
-                failureBus().post(failure);
-                result = reject(envelope.getId(), failure);
-            } if (cause instanceof FailureThrowable) {
-                final FailureThrowable failureThrowable = (FailureThrowable) cause;
-                final Failure failure = failureThrowable.toFailure(envelope.getCommand());
                 failureBus().post(failure);
                 result = reject(envelope.getId(), failure);
             } else {

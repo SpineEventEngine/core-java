@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
 import io.spine.base.FailureThrowable;
+import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandContext;
@@ -123,9 +124,8 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         final ProcessingStatus status = getStatus(commandId, tenantId);
 
         assertEquals(CommandStatus.FAILURE, status.getCode());
-        assertEquals(failure.toFailure(command)
-                            .getMessage(), status.getFailure()
-                                                 .getMessage());
+        assertEquals(toFailure(failure, command).getMessage(),
+                     status.getFailure().getMessage());
     }
 
     private ProcessingStatus getStatus(CommandId commandId, final TenantId tenantId) {
@@ -269,7 +269,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
      * Throwables
      ********************/
 
-    private static class TestFailure extends FailureThrowable {
+    private static class TestFailure extends ThrowableMessage {
         private static final long serialVersionUID = 0L;
 
         private TestFailure() {
