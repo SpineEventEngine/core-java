@@ -31,7 +31,6 @@ import io.spine.base.Command;
 import io.spine.base.CommandClass;
 import io.spine.base.Error;
 import io.spine.base.Failure;
-import io.spine.base.FailureThrowable;
 import io.spine.base.IsSent;
 import io.spine.base.ThrowableMessage;
 import io.spine.envelope.CommandEnvelope;
@@ -194,11 +193,6 @@ public class CommandBus extends Bus<Command,
             if (cause instanceof ThrowableMessage) {
                 final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
                 final Failure failure = toFailure(throwableMessage, envelope.getCommand());
-                failureBus().post(failure);
-                result = reject(envelope.getId(), failure);
-            } if (cause instanceof FailureThrowable) {
-                final FailureThrowable failureThrowable = (FailureThrowable) cause;
-                final Failure failure = failureThrowable.toFailure(envelope.getCommand());
                 failureBus().post(failure);
                 result = reject(envelope.getId(), failure);
             } else {

@@ -30,6 +30,7 @@ import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.base.Failures.FAILURE_ID_FORMAT;
+import static io.spine.base.Failures.toFailure;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
@@ -76,7 +77,7 @@ public class FailuresShould {
                                      .build();
 
         final TestThrowableMessage throwableMessage = new TestThrowableMessage(failureState);
-        final Failure failureWrapper = Failures.toFailure(throwableMessage, command);
+        final Failure failureWrapper = toFailure(throwableMessage, command);
 
         assertEquals(failureState, AnyPacker.unpack(failureWrapper.getMessage()));
         assertFalse(failureWrapper.getContext()
