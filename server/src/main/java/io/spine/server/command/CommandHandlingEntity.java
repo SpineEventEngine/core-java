@@ -23,7 +23,6 @@ package io.spine.server.command;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.base.Command;
 import io.spine.base.CommandContext;
 import io.spine.base.ThrowableMessage;
 import io.spine.change.MessageMismatch;
@@ -52,7 +51,8 @@ import java.util.List;
  * <p>The method may throw one or more throwables derived from
  * {@link io.spine.base.ThrowableMessage ThrowableMessage}.
  * Throwing a {@code ThrowableMessage} indicates that the passed command cannot be handled
- * because of a {@linkplain io.spine.base.Failures#toFailure(ThrowableMessage, Command)
+ * because of a
+ * {@linkplain io.spine.base.Failures#toFailure(ThrowableMessage, io.spine.base.Command)
  * business failure}.
  *
  * {@inheritDoc}
