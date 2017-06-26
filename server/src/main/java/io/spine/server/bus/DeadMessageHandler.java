@@ -25,7 +25,7 @@ import io.spine.base.Error;
 import io.spine.core.MessageEnvelope;
 
 /**
- * A functional interface for the function which handles a dead message.
+ * An interface defining a function which handles a dead message.
  *
  * <p>If a message with no target dispatchers found is passed to the bus, it will result in a call
  * to this function. The function handles such message and produces an {@link Error} as a response.

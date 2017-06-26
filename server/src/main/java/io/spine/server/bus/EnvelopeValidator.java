@@ -25,7 +25,7 @@ import io.spine.base.Error;
 import io.spine.core.MessageEnvelope;
 
 /**
- * A functional interface defining the validator for a {@link MessageEnvelope}.
+ * An interface defining the validator for a {@link MessageEnvelope}.
  *
  * @param <E> the type of the {@link MessageEnvelope} to validate
  * @author Dmytro Dashenkov
