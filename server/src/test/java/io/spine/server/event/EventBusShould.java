@@ -33,6 +33,7 @@ import io.spine.envelope.EventEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.BoundedContext;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.event.ProjectCreated;
@@ -52,6 +53,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
@@ -396,6 +398,13 @@ public class EventBusShould {
     @Test(expected = NullPointerException.class)
     public void not_accept_null_function_passed_as_field_enrichment_configuration_param() {
         eventBus.addFieldEnrichment(ProjectId.class, String.class, null);
+    }
+
+    @Test
+    public void create_validator_once() {
+        final EnvelopeValidator<EventEnvelope> validator = eventBus.getValidator();
+        assertNotNull(validator);
+        assertSame(validator, eventBus.getValidator());
     }
 
     private static class ProjectCreatedSubscriber extends EventSubscriber {

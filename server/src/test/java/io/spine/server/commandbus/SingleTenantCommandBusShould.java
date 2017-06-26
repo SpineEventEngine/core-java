@@ -26,7 +26,9 @@ import io.spine.base.CommandContext;
 import io.spine.base.Failure;
 import io.spine.base.IsSent;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.envelope.CommandEnvelope;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.event.EventBus;
@@ -46,6 +48,8 @@ import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -111,6 +115,13 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final Failure actualFailure = isSent.getStatus().getFailure();
         assertTrue(isNotDefault(actualFailure));
         assertEquals(unpack(expectedFailure.getMessage()), unpack(actualFailure.getMessage()));
+    }
+
+    @Test
+    public void create_validator_once() {
+        final EnvelopeValidator<CommandEnvelope> validator = commandBus.getValidator();
+        assertNotNull(validator);
+        assertSame(validator, commandBus.getValidator());
     }
 
     @Override
