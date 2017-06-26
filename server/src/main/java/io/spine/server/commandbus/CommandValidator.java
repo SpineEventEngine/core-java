@@ -42,6 +42,11 @@ import static io.spine.util.Exceptions.toError;
 import static io.spine.validate.Validate.isDefault;
 
 /**
+ * A validator for a command.
+ *
+ * <p>Checks if the tenant ID is valid and {@link Validator#validate(CommandEnvelope) validates}
+ * the command message.
+ *
  * @author Dmytro Dashenkov
  */
 final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
@@ -68,13 +73,13 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final Throwable exception = missingTenantIdStatus(command);
+                final Throwable exception = missingTenantId(command);
                 final Error error = toError(exception, TENANT_UNKNOWN.getNumber());
                 return of(error);
             }
         } else {
             if (tenantSpecified) {
-                final Throwable exception = tenantIdInapplicableStatus(command);
+                final Throwable exception = tenantIdInapplicable(command);
                 final Error error = toError(exception, TENANT_INAPPLICABLE.getNumber());
                 return of(error);
             }
@@ -102,7 +107,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         return Optional.absent();
     }
 
-    private Throwable missingTenantIdStatus(Command command) {
+    private Throwable missingTenantId(Command command) {
         final CommandException noTenantDefined =
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore()
@@ -112,7 +117,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         return exception;
     }
 
-    private Throwable tenantIdInapplicableStatus(Command command) {
+    private Throwable tenantIdInapplicable(Command command) {
         final CommandException tenantIdInapplicable =
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()

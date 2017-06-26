@@ -32,7 +32,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.IsSent;
-import io.spine.core.Subscribe;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
@@ -61,7 +60,7 @@ import static io.spine.util.Exceptions.toError;
  * <li>Expose a {@code public} method that accepts an event message as the first parameter
  * and an {@link EventContext EventContext} as the second
  * (optional) parameter.
- * <li>Mark the method with the {@link io.spine.base.Subscribe @Subscribe} annotation.
+ * <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
  * <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
  * instance of {@code EventBus} directly, or rely on message delivery
  * from an {@link EventDispatcher}. An example of such a dispatcher is
@@ -93,7 +92,7 @@ import static io.spine.util.Exceptions.toError;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.server.projection.Projection Projection
- * @see io.spine.base.Subscribe @Subscribe
+ * @see io.spine.core.Subscribe @Subscribe
  */
 public class EventBus extends CommandOutputBus<Event,
                                                EventEnvelope,
@@ -512,6 +511,9 @@ public class EventBus extends CommandOutputBus<Event,
         }
     }
 
+    /**
+     * Produces an {@link Error} based on an {@link UnsupportedEventException} upon a dead event.
+     */
     private enum DeadEventHandler implements DeadMessageHandler<EventEnvelope> {
         INSTANCE;
 

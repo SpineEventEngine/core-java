@@ -519,6 +519,10 @@ public class CommandBus extends Bus<Command,
         }
     }
 
+    /**
+     * Produces an {@link Error} based on an {@link UnsupportedCommandException} upon a dead
+     * command.
+     */
     private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
         @Override
         public Error handleDeadMessage(CommandEnvelope message) {

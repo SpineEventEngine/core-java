@@ -22,7 +22,6 @@ package io.spine.server.outbus;
 import com.google.common.base.Function;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Failure;
 import io.spine.core.IsSent;
@@ -32,7 +31,6 @@ import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
-import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -40,9 +38,9 @@ import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.bus.Buses.reject;
 import static java.lang.String.format;
 
 /**
@@ -134,18 +132,10 @@ public abstract class CommandOutputBus<M extends Message,
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
-        final IsSent result;
         final Message id = getId(envelope);
-        if (dispatchersCalled == 0) {
-            final Exception exception = new IllegalStateException(
-                    format("Message %s has no dispatchers.",
-                           envelope.getMessage())
-            );
-            final Error error = Exceptions.toError(exception);
-            result = reject(id, error);
-        } else {
-            result = acknowledge(id);
-        }
+        checkState(dispatchersCalled != 0,
+                   format("Message %s has no dispatchers.", envelope.getMessage()));
+        final IsSent result = acknowledge(id);
         return result;
     }
 
