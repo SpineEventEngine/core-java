@@ -223,7 +223,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     /**
-     * Generates an {@link Error} based on an {@link UnsupportedFailureException} upon a dead
+     * Generates an {@link Error} based on an {@link UnhandledFailureException} upon a dead
      * message.
      */
     private enum DeadFailureHandler implements DeadMessageHandler<FailureEnvelope> {
@@ -231,7 +231,7 @@ public class FailureBus extends CommandOutputBus<Failure,
 
         @Override
         public Error handleDeadMessage(FailureEnvelope message) {
-            final Exception exception = new UnsupportedFailureException(message.getMessage());
+            final Exception exception = new UnhandledFailureException(message.getMessage());
             final Error error = toError(exception);
             return error;
         }

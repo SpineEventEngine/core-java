@@ -31,11 +31,11 @@ import static java.lang.String.format;
  *
  * @author Dmytro Dashenkov
  */
-public class UnsupportedFailureException extends RuntimeException {
+public class UnhandledFailureException extends RuntimeException {
 
     private static final long serialVersionUID = 0L;
 
-    public UnsupportedFailureException(Message failureMsg) {
+    public UnhandledFailureException(Message failureMsg) {
         super(msgFormat(failureMsg));
     }
 
