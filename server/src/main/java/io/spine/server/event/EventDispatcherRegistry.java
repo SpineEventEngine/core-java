@@ -39,7 +39,7 @@ class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, Event
      * {@inheritDoc}
      *
      * <p>Overrides to expose this method to
-     * {@linkplain EventBus#isUnsupportedEvent(EventClass)}  EventBus}.
+     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
      */
     @Override
     protected boolean hasDispatchersFor(EventClass eventClass) {

@@ -268,11 +268,6 @@ public class EventBus extends CommandOutputBus<Event,
         }
     }
 
-    boolean isUnsupportedEvent(EventClass eventClass) {
-        final boolean isUnsupported = !registry().hasDispatchersFor(eventClass);
-        return isUnsupported;
-    }
-
     @Override
     public void close() throws Exception {
         super.close();
