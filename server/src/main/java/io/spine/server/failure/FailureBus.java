@@ -201,7 +201,8 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     /**
-     * Generates an {@link UnsupportedFailureException} upon a dead message.
+     * Generates an {@link Error} based on an {@link UnsupportedFailureException} upon a dead
+     * message.
      */
     private enum DeadFailureHandler implements DeadMessageHandler<FailureEnvelope> {
         INSTANCE;

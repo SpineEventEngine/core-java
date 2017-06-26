@@ -66,7 +66,7 @@ final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E>
     /**
      * Closes all the filters in the chain and deletes them from the chain.
      *
-     * <p>The filters are closed in the reversed order comparing to the order of invoking them.
+     * <p>The filters are closed in the reversed order comparing to the invocation order.
      *
      * @throws IllegalStateException on a repetitive call
      * @throws Exception             if a filter throws an {@link Exception}

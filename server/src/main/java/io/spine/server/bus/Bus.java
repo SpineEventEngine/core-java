@@ -209,7 +209,7 @@ public abstract class Bus<T extends Message,
     protected abstract DispatcherRegistry<C, D> createRegistry();
 
     /**
-     * Creates a {@link Deque} of the custom {@linkplain BusFilter bus filters} for current this
+     * Creates a {@link Deque} of the custom {@linkplain BusFilter bus filters} for the current
      * instance of {@code Bus}.
      *
      * <p>This method should be invoked only once when initializing

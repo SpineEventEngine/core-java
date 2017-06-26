@@ -26,9 +26,9 @@ import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 
 /**
- * The filter for the messages posted to the bus.
+ * The filter for the messages posted to a bus.
  *
- * <p>A bus may have several filters which can a message from being posted.
+ * <p>A bus may have several filters which can prevent a message from being posted.
  *
  * @author Dmytro Dashenkov
  */
@@ -36,13 +36,13 @@ import io.spine.envelope.MessageEnvelope;
 public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
 
     /**
-     * Accepts or rejects a passed command.
+     * Accepts or rejects a passed message.
      *
      * <p>A filter can:
      * <ul>
      *     <li>accept the message (by returning {@code Optional.absent()};
-     *     <li>reject the message with {@link io.spine.base.Error} status e.g. if it fails to pass
-     *         the validation;
+     *     <li>reject the message with {@link io.spine.base.Error Error} status e.g. if it fails
+     *         to pass the validation;
      *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
      *         pass a filter.
      * </ul>
