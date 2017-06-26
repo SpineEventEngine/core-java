@@ -29,6 +29,7 @@ import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
@@ -37,9 +38,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -57,11 +60,14 @@ public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureClass,
                                                  FailureDispatcher> {
 
+    private final Deque<BusFilter<FailureEnvelope>> filters;
+
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private FailureBus(Builder builder) {
         super(checkNotNull(builder.dispatcherFailureDelivery));
+        this.filters = builder.getFilters();
     }
 
     /**
@@ -96,6 +102,12 @@ public class FailureBus extends CommandOutputBus<Failure,
     @Override
     protected OutputDispatcherRegistry<FailureClass, FailureDispatcher> createRegistry() {
         return new FailureDispatcherRegistry();
+    }
+
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
+    @Override
+    protected Deque<BusFilter<FailureEnvelope>> createFilterChain() {
+        return filters;
     }
 
     @Override
@@ -173,7 +185,10 @@ public class FailureBus extends CommandOutputBus<Failure,
         @Nullable
         private DispatcherFailureDelivery dispatcherFailureDelivery;
 
-        private Builder(){
+        private final Deque<BusFilter<FailureEnvelope>> filters;
+
+        private Builder() {
+            this.filters = newLinkedList();
         }
 
         /**
@@ -190,6 +205,29 @@ public class FailureBus extends CommandOutputBus<Failure,
 
         public Optional<DispatcherFailureDelivery> getDispatcherFailureDelivery() {
             return Optional.fromNullable(dispatcherFailureDelivery);
+        }
+
+        /**
+         * Adds the given {@linkplain BusFilter filter} to the builder.
+         *
+         * <p>The order of appending the filters to the builder is the order of the filters in
+         * the resulting bus.
+         *
+         * @param filter the filter to append
+         */
+        public Builder appendFilter(BusFilter<FailureEnvelope> filter) {
+            checkNotNull(filter);
+            this.filters.offer(filter);
+            return this;
+        }
+
+        /**
+         * Obtains the {@linkplain BusFilter bus filters} of this builder.
+         *
+         * @see #appendFilter(BusFilter)
+         */
+        public Deque<BusFilter<FailureEnvelope>> getFilters() {
+            return newLinkedList(filters);
         }
 
         public FailureBus build() {

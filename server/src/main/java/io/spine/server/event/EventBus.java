@@ -33,6 +33,7 @@ import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
@@ -44,11 +45,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.annotation.Nullable;
+import java.util.Deque;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -111,10 +114,11 @@ public class EventBus extends CommandOutputBus<Event,
 
     private final MessageValidator eventMessageValidator;
 
+    private final Deque<BusFilter<EventEnvelope>> filters;
+
     /** The validator for events posted to the bus. */
     @Nullable
     private EventValidator eventValidator;
-
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
     private EventEnricher enricher;
@@ -127,6 +131,7 @@ public class EventBus extends CommandOutputBus<Event,
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
+        this.filters = builder.getFilters();
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -171,6 +176,12 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected OutputDispatcherRegistry<EventClass, EventDispatcher> createRegistry() {
         return new EventDispatcherRegistry();
+    }
+
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
+    @Override
+    protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
+        return filters;
     }
 
     @Override
@@ -355,8 +366,10 @@ public class EventBus extends CommandOutputBus<Event,
         @Nullable
         private EventEnricher enricher;
 
+        private final Deque<BusFilter<EventEnvelope>> filters;
+
         private Builder() {
-            // Prevent instantiation from outside.
+            this.filters = newLinkedList();
         }
 
         /**
@@ -469,6 +482,29 @@ public class EventBus extends CommandOutputBus<Event,
 
         public Optional<EventEnricher> getEnricher() {
             return Optional.fromNullable(enricher);
+        }
+
+        /**
+         * Adds the given {@linkplain BusFilter filter} to the builder.
+         *
+         * <p>The order of appending the filters to the builder is the order of the filters in
+         * the resulting bus.
+         *
+         * @param filter the filter to append
+         */
+        public Builder appendFilter(BusFilter<EventEnvelope> filter) {
+            checkNotNull(filter);
+            this.filters.offer(filter);
+            return this;
+        }
+
+        /**
+         * Obtains the {@linkplain BusFilter bus filters} of this builder.
+         *
+         * @see #appendFilter(BusFilter)
+         */
+        public Deque<BusFilter<EventEnvelope>> getFilters() {
+            return newLinkedList(filters);
         }
 
         /**

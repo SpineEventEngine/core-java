@@ -22,6 +22,7 @@ package io.spine.server.event;
 
 import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
 import io.spine.test.Tests;
@@ -29,6 +30,7 @@ import io.spine.validate.MessageValidator;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.Deque;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
@@ -161,6 +163,21 @@ public class EventBusBuilderShould {
                                        .setEnricher(enricher)
                                        .getEnricher()
                                        .get());
+    }
+
+    @Test
+    public void append_filters() {
+        @SuppressWarnings("unchecked")
+        final BusFilter<EventEnvelope> first = mock(BusFilter.class);
+        @SuppressWarnings("unchecked")
+        final BusFilter<EventEnvelope> second = mock(BusFilter.class);
+
+        final EventBus.Builder builder = EventBus.newBuilder();
+        builder.appendFilter(first)
+               .appendFilter(second);
+        final Deque<BusFilter<EventEnvelope>> filters = builder.getFilters();
+        assertEquals(first, filters.pop());
+        assertEquals(second, filters.pop());
     }
 
     @Test(expected = IllegalStateException.class)

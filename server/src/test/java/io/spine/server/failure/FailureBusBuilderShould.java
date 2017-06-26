@@ -20,10 +20,14 @@
 package io.spine.server.failure;
 
 import io.spine.core.FailureEnvelope;
+import io.spine.server.bus.BusFilter;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import java.util.Deque;
+
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.mock;
 
 /**
  * @author Alex Tymchenko
@@ -45,6 +49,22 @@ public class FailureBusBuilderShould {
                                          .getDispatcherFailureDelivery()
                                          .get());
     }
+
+    @Test
+    public void append_filters() {
+        @SuppressWarnings("unchecked")
+        final BusFilter<FailureEnvelope> first = mock(BusFilter.class);
+        @SuppressWarnings("unchecked")
+        final BusFilter<FailureEnvelope> second = mock(BusFilter.class);
+
+        final FailureBus.Builder builder = FailureBus.newBuilder();
+        builder.appendFilter(first)
+               .appendFilter(second);
+        final Deque<BusFilter<FailureEnvelope>> filters = builder.getFilters();
+        assertEquals(first, filters.pop());
+        assertEquals(second, filters.pop());
+    }
+
 
     private static DispatcherFailureDelivery deliveryForTests() {
         return new DispatcherFailureDelivery() {

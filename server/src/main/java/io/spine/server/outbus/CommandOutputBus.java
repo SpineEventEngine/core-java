@@ -27,19 +27,16 @@ import io.spine.core.Failure;
 import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
-import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
-import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.server.bus.Buses.acknowledge;
 import static java.lang.String.format;
 
@@ -111,11 +108,6 @@ public abstract class CommandOutputBus<M extends Message,
      */
     protected CommandOutputDelivery<E, C, D> delivery() {
         return this.delivery;
-    }
-
-    @Override
-    protected Deque<BusFilter<E>> createFilterChain() {
-        return newLinkedList();
     }
 
     /**
