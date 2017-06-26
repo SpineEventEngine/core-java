@@ -29,7 +29,6 @@ import io.spine.envelope.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
-import java.util.ArrayDeque;
 import java.util.Collection;
 import java.util.Deque;
 
@@ -194,7 +193,7 @@ public abstract class Bus<T extends Message,
      */
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
-            final Deque<BusFilter<E>> filters = new ArrayDeque<>(createFilterChain());
+            final Deque<BusFilter<E>> filters = createFilterChain();
             final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(this);
             final BusFilter<E> validatingFilter = new ValidatingFilter<>(this);
             filters.push(deadMsgFilter);

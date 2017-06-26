@@ -30,6 +30,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
 
 /**
+ * A filter validating the {@linkplain MessageEnvelope envelopes} with the given
+ * {@link EnvelopeValidator}.
+ *
  * @author Dmytro Dashenkov
  */
 final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>

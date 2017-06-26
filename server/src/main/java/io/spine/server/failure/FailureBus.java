@@ -200,6 +200,9 @@ public class FailureBus extends CommandOutputBus<Failure,
         }
     }
 
+    /**
+     * Generates an {@link UnsupportedFailureException} upon a dead message.
+     */
     private enum DeadFailureHandler implements DeadMessageHandler<FailureEnvelope> {
         INSTANCE;
 
@@ -211,6 +214,9 @@ public class FailureBus extends CommandOutputBus<Failure,
         }
     }
 
+    /**
+     * Performs no validation and reports the given message valid.
+     */
     private enum NoOpValidator implements EnvelopeValidator<FailureEnvelope> {
         INSTANCE;
 

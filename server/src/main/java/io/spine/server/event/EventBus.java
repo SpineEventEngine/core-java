@@ -163,7 +163,7 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected EnvelopeValidator<EventEnvelope> getValidator() {
         if (eventValidator == null) {
-            eventValidator = new EventValidator(eventMessageValidator, this);
+            eventValidator = new EventValidator(eventMessageValidator);
         }
         return eventValidator;
     }

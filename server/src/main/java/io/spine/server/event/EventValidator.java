@@ -21,9 +21,9 @@
 package io.spine.server.event;
 
 import com.google.common.base.Optional;
+import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.base.Event;
-import io.spine.base.EventClass;
 import io.spine.envelope.EventEnvelope;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
@@ -32,21 +32,24 @@ import io.spine.validate.MessageValidator;
 import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.event.InvalidEventException.onConstraintViolations;
 import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 
 /**
+ * The {@link EventEnvelope} validator.
+ *
+ * <p>Checks if the message of the passed event is {@linkplain MessageValidator#validate(Message)
+ * valid}.
+ *
  * @author Dmytro Dashenkov
  */
 final class EventValidator implements EnvelopeValidator<EventEnvelope> {
 
     private final MessageValidator messageValidator;
 
-    private final EventBus eventBus;
-
-    EventValidator(MessageValidator messageValidator, EventBus eventBus) {
+    EventValidator(MessageValidator messageValidator) {
         this.messageValidator = messageValidator;
-        this.eventBus = eventBus;
     }
 
     @Override
@@ -54,16 +57,10 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
         checkNotNull(envelope);
 
         final Event event = envelope.getOuterObject();
-        final EventClass eventClass = EventClass.of(event);
         Throwable result = null;
-        if (eventBus.isUnsupportedEvent(eventClass)) {
-            final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            result = invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError());
-        }
         final List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
-            final InvalidEventException invalidEvent =
-                    InvalidEventException.onConstraintViolations(event, violations);
+            final InvalidEventException invalidEvent = onConstraintViolations(event, violations);
             result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
         }
         if (result == null) {

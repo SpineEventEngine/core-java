@@ -25,21 +25,29 @@ import io.spine.base.IsSent;
 import io.spine.envelope.MessageEnvelope;
 
 import java.util.Deque;
+import java.util.Queue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.collect.Lists.newLinkedList;
 
 /**
+ * A {@link BusFilter} representing a chain of other bus filters.
+ *
+ * <p>The initial ordering of the filters is preserved. The filters are called sequentially in
+ * the order of the initial {@link Queue}.
+ *
+ * <p>The {@link #close() close()} method closes all the underlying filters.
+ *
  * @author Dmytro Dashenkov
  */
-final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E>{
+final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E> {
 
     private final Deque<BusFilter<E>> chain;
 
     private boolean closed;
 
-    FilterChain(Deque<? extends BusFilter<E>> chain) {
+    FilterChain(Queue<? extends BusFilter<E>> chain) {
         this.chain = newLinkedList(chain);
     }
 
@@ -61,7 +69,7 @@ final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E>
      * <p>The filters are closed in the reversed order comparing to the order of invoking them.
      *
      * @throws IllegalStateException on a repetitive call
-     * @throws Exception if a filter throws an {@link Exception}
+     * @throws Exception             if a filter throws an {@link Exception}
      */
     @Override
     public void close() throws Exception {

@@ -27,9 +27,13 @@ import io.spine.type.TypeName;
 import static java.lang.String.format;
 
 /**
+ * Exception that is thrown when unhandled failure is thrown.
+ *
  * @author Dmytro Dashenkov
  */
 public class UnsupportedFailureException extends RuntimeException {
+
+    private static final long serialVersionUID = 0L;
 
     public UnsupportedFailureException(Message failureMsg) {
         super(msgFormat(failureMsg));
