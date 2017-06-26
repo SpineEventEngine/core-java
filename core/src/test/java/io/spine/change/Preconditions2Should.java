@@ -25,20 +25,20 @@ import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.ByteString;
 import org.junit.Test;
 
-import static io.spine.change.Preconditions.checkNewValueNotEmpty;
+import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 
-public class PreconditionsShould {
+public class Preconditions2Should {
 
     @Test
     public void have_private_constructor() {
-        assertHasPrivateParameterlessCtor(Preconditions.class);
+        assertHasPrivateParameterlessCtor(Preconditions2.class);
     }
 
     @Test
     public void pass_null_tolerance_test() {
         new NullPointerTester()
-                .testStaticMethods(Preconditions.class, Visibility.PACKAGE);
+                .testStaticMethods(Preconditions2.class, Visibility.PACKAGE);
     }
 
     @Test(expected = IllegalArgumentException.class)

@@ -25,7 +25,7 @@ import com.google.protobuf.StringValue;
 import io.spine.protobuf.Wrapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.change.Preconditions.checkNotEqual;
+import static io.spine.change.Preconditions2.checkNotEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
