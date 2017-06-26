@@ -31,7 +31,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("OverloadedMethodsWithSameNumberOfParameters")
-public final class Preconditions {
+final class Preconditions {
 
     private static final String NEW_VALUE_CANNOT_BE_EMPTY =
             "newValue cannot be empty";
@@ -51,7 +51,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if values are equal
      */
-    public static void checkNotEqual(int previousValue, int newValue) {
+    static void checkNotEqual(int previousValue, int newValue) {
         checkArgument(newValue != previousValue, VALUES_CANNOT_BE_EQUAL);
     }
 
@@ -60,7 +60,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if values are equal
      */
-    public static void checkNotEqual(long previousValue, long newValue) {
+    static void checkNotEqual(long previousValue, long newValue) {
         checkArgument(newValue != previousValue, VALUES_CANNOT_BE_EQUAL);
     }
 
@@ -69,7 +69,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if values are equal
      */
-    public static void checkNotEqual(float previousValue, float newValue) {
+    static void checkNotEqual(float previousValue, float newValue) {
         checkArgument(Float.compare(newValue, previousValue) != 0,
                       VALUES_CANNOT_BE_EQUAL);
     }
@@ -79,7 +79,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if values are equal
      */
-    public static void checkNotEqual(double previousValue, double newValue) {
+    static void checkNotEqual(double previousValue, double newValue) {
         checkArgument(Double.compare(newValue, previousValue) != 0,
                       VALUES_CANNOT_BE_EQUAL);
     }
@@ -89,7 +89,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if values are equal
      */
-    public static <T> void checkNotEqual(T previousValue, T newValue) {
+    static <T> void checkNotEqual(T previousValue, T newValue) {
         checkNotNull(previousValue);
         checkNotNull(newValue);
         checkArgument(!newValue.equals(previousValue), VALUES_CANNOT_BE_EQUAL);
@@ -100,7 +100,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if parameter is empty
      */
-    public static void checkNewValueNotEmpty(ByteString newValue) {
+    static void checkNewValueNotEmpty(ByteString newValue) {
         checkNotNull(newValue);
         checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
     }
@@ -110,7 +110,7 @@ public final class Preconditions {
      *
      * @throws IllegalArgumentException in case if parameter is empty
      */
-    public static void checkNewValueNotEmpty(String newValue) {
+    static void checkNewValueNotEmpty(String newValue) {
         checkNotNull(newValue);
         checkArgument(!newValue.isEmpty(), NEW_VALUE_CANNOT_BE_EMPTY);
     }

@@ -21,6 +21,7 @@
 package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
+import com.google.common.testing.NullPointerTester.Visibility;
 import com.google.protobuf.ByteString;
 import org.junit.Test;
 
@@ -37,7 +38,7 @@ public class PreconditionsShould {
     @Test
     public void pass_null_tolerance_test() {
         new NullPointerTester()
-                .testAllPublicStaticMethods(Preconditions.class);
+                .testStaticMethods(Preconditions.class, Visibility.PACKAGE);
     }
 
     @Test(expected = IllegalArgumentException.class)
