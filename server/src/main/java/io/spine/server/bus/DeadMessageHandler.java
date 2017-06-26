@@ -38,7 +38,7 @@ public interface DeadMessageHandler<E extends MessageEnvelope<?>> {
      * the poster about the absence of dispatchers.
      *
      * @param message the dead message
-     * @return the // TODO:2017-06-23:dmytro.dashenkov: Complete.
+     * @return the {@link Error} describing the dead message
      */
     Error handleDeadMessage(E message);
 }
