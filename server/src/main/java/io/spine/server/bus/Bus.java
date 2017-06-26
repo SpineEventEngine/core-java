@@ -251,9 +251,7 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Pre-processes the given message.
-     *
-     * <p>The pre-processing may include validation.
+     * Feeds the given message to the bus filters.
      *
      * <p>If the given message is completely processed and should not be passed to the dispatchers
      * via {@link #doPost doPost} method, the returned {@link Optional} contains a value with either
