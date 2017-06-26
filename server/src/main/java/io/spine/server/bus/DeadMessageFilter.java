@@ -29,6 +29,8 @@ import io.spine.type.MessageClass;
 
 import java.util.Collection;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 /**
  * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
  * the bus.
@@ -41,25 +43,27 @@ final class DeadMessageFilter<T extends Message,
                               D extends MessageDispatcher<C, E>>
         extends AbstractBusFilter<E> {
 
-    private final Bus<T, E, C, D> bus;
+    private final Bus.IdConverter<E> idConverter;
     private final DeadMessageHandler<E> deadMessageHandler;
+    private final DispatcherRegistry<C, D> registry;
 
-    DeadMessageFilter(Bus<T, E, C, D> bus) {
+    DeadMessageFilter(Bus.IdConverter<E> idConverter,
+                      DeadMessageHandler<E> deadMessageHandler,
+                      DispatcherRegistry<C, D> registry) {
         super();
-        this.bus = bus;
-        this.deadMessageHandler = bus.getDeadMessageHandler();
+        this.idConverter = checkNotNull(idConverter);
+        this.deadMessageHandler = checkNotNull(deadMessageHandler);
+        this.registry = checkNotNull(registry);
     }
 
     @Override
     public Optional<IsSent> accept(E envelope) {
-        final DispatcherRegistry<C, D> registry = bus.registry();
         @SuppressWarnings("unchecked")
         final C cls = (C) envelope.getMessageClass();
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
             final Error error = deadMessageHandler.handleDeadMessage(envelope);
-            final IsSent result = Buses.reject(bus.getIdConverter()
-                                                  .apply(envelope),
+            final IsSent result = Buses.reject(idConverter.apply(envelope),
                                                error);
             return Optional.of(result);
         } else {

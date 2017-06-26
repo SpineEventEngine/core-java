@@ -70,7 +70,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #filterChain() for the non-null filter chain value
      */
-    private FilterChain<E, T> filterChain;
+    private FilterChain<E> filterChain;
 
     /**
      * Registers the passed dispatcher.
@@ -190,8 +190,11 @@ public abstract class Bus<T extends Message,
     private BusFilter<E> filterChain() {
         if (filterChain == null) {
             final Deque<BusFilter<E>> filters = createFilterChain();
-            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(this);
-            final BusFilter<E> validatingFilter = new ValidatingFilter<>(this);
+            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getIdConverter(),
+                                                                       getDeadMessageHandler(),
+                                                                       registry());
+            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getIdConverter(),
+                                                                         getValidator());
             filters.push(deadMsgFilter);
             filters.push(validatingFilter);
             filterChain = new FilterChain<>(filters);

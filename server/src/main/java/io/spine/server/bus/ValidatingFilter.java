@@ -38,13 +38,13 @@ import static io.spine.server.bus.Buses.reject;
 final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>
         extends AbstractBusFilter<E> {
 
-    private final Bus<T, E, ?, ?> bus;
+    private final Bus.IdConverter<E> idConverter;
     private final EnvelopeValidator<E> validator;
 
-    ValidatingFilter(Bus<T, E, ?, ?> bus) {
+    ValidatingFilter(Bus.IdConverter<E> idConverter, EnvelopeValidator<E> validator) {
         super();
-        this.bus = bus;
-        this.validator = bus.getValidator();
+        this.idConverter = checkNotNull(idConverter);
+        this.validator = checkNotNull(validator);
     }
 
     @Override
@@ -52,8 +52,7 @@ final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>
         checkNotNull(envelope);
         final Optional<Error> violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            final IsSent result = reject(bus.getIdConverter()
-                                            .apply(envelope),
+            final IsSent result = reject(idConverter.apply(envelope),
                                          violation.get());
             return Optional.of(result);
         } else {
