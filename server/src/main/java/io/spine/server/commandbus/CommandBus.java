@@ -409,7 +409,7 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
-        public Builder addFilter(BusFilter<CommandEnvelope> filter) {
+        public Builder appendFilter(BusFilter<CommandEnvelope> filter) {
             checkNotNull(filter);
             filters.add(filter);
             return this;
@@ -422,7 +422,7 @@ public class CommandBus extends Bus<Command,
         }
 
         /**
-         * Obtains immutable list of added filters.
+         * Obtains the added filters.
          */
         @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a private method.
         @VisibleForTesting

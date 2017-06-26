@@ -140,7 +140,7 @@ public class CommandBusBuilderShould {
         final BusFilter<CommandEnvelope> filter = mock(BusFilter.class);
 
         assertTrue(CommandBus.newBuilder()
-                             .addFilter(filter)
+                             .appendFilter(filter)
                              .getFilters()
                              .contains(filter));
     }
@@ -151,7 +151,7 @@ public class CommandBusBuilderShould {
         final BusFilter<CommandEnvelope> filter = mock(BusFilter.class);
 
         assertFalse(CommandBus.newBuilder()
-                              .addFilter(filter)
+                              .appendFilter(filter)
                               .removeFilter(filter)
                               .getFilters()
                               .contains(filter));
