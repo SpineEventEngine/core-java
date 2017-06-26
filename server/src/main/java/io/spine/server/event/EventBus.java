@@ -493,9 +493,7 @@ public class EventBus extends CommandOutputBus<Event,
             if (eventStoreStreamExecutor == null) {
                 eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
-            /* The assert below prevents false warning for possible `null` value passed
-               to EventStore.Builder.setStreamExecutor(). */
-            assert (eventStoreStreamExecutor != null);
+            checkNotNull(eventStoreStreamExecutor);
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
