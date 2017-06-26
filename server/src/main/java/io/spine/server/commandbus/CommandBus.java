@@ -409,13 +409,13 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
-        public Builder addFilter(CommandBusFilter filter) {
+        public Builder addFilter(BusFilter<CommandEnvelope> filter) {
             checkNotNull(filter);
             filters.add(filter);
             return this;
         }
 
-        public Builder removeFilter(CommandBusFilter filter) {
+        public Builder removeFilter(BusFilter<CommandEnvelope> filter) {
             checkNotNull(filter);
             filters.remove(filter);
             return this;

@@ -20,6 +20,8 @@
 
 package io.spine.server.commandbus;
 
+import io.spine.core.CommandEnvelope;
+import io.spine.server.bus.BusFilter;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -134,7 +136,8 @@ public class CommandBusBuilderShould {
 
     @Test
     public void allow_adding_filter() {
-        final CommandBusFilter filter = mock(CommandBusFilter.class);
+        @SuppressWarnings("unchecked")
+        final BusFilter<CommandEnvelope> filter = mock(BusFilter.class);
 
         assertTrue(CommandBus.newBuilder()
                              .addFilter(filter)
@@ -144,7 +147,8 @@ public class CommandBusBuilderShould {
 
     @Test
     public void allow_removing_filter() {
-        final CommandBusFilter filter = mock(CommandBusFilter.class);
+        @SuppressWarnings("unchecked")
+        final BusFilter<CommandEnvelope> filter = mock(BusFilter.class);
 
         assertFalse(CommandBus.newBuilder()
                               .addFilter(filter)
