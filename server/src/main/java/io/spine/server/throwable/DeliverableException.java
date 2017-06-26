@@ -18,42 +18,25 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.failure;
+package io.spine.server.throwable;
 
-import com.google.protobuf.Message;
+import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.core.FailureClass;
-import io.spine.server.bus.UnhandledMessage;
-import io.spine.type.TypeName;
-import io.spine.util.Exceptions;
-
-import static java.lang.String.format;
 
 /**
- * Exception that is thrown when unhandled failure is thrown.
+ * An interface for the {@link Exception} types which may be serialized within a protobuf message.
+ *
+ * <p>This interface is designed to be implemented in {@link Throwable} types only.
  *
  * @author Dmytro Dashenkov
  */
-public class UnhandledFailureException extends RuntimeException implements UnhandledMessage {
+@SuppressWarnings("NonExceptionNameEndsWithException")
+    // The interface is designed to be implemented in Throwable types.
+@Internal
+public interface DeliverableException {
 
-    private static final long serialVersionUID = 0L;
-
-    public UnhandledFailureException(Message failureMsg) {
-        super(msgFormat(failureMsg));
-    }
-
-    private static String msgFormat(Message msg) {
-        final FailureClass cls = FailureClass.of(msg);
-        final String typeName = TypeName.of(msg).value();
-        final String result = format(
-                "There is no registered handler for the failure class: `%s`. Protobuf type: `%s`",
-                cls, typeName
-        );
-        return result;
-    }
-
-    @Override
-    public Error toError() {
-        return Exceptions.toError(this);
-    }
+    /**
+     * Converts this {@link Exception} into an {@link Error io.spine.base.Error}.
+     */
+    Error toError();
 }

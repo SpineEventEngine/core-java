@@ -22,6 +22,8 @@ package io.spine.server.commandbus;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
+import io.spine.server.bus.UnhandledMessage;
+import io.spine.util.Exceptions;
 
 /**
  * Exception that is thrown when unsupported command is obtained
@@ -30,7 +32,7 @@ import io.spine.core.CommandValidationError;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class UnsupportedCommandException extends CommandException {
+public class UnsupportedCommandException extends CommandException implements UnhandledMessage {
 
     private static final long serialVersionUID = 0L;
 
@@ -47,5 +49,10 @@ public class UnsupportedCommandException extends CommandException {
         final String format = "Commands of the type `%s` are not supported.";
         final CommandValidationError errorCode = CommandValidationError.UNSUPPORTED_COMMAND;
         return createError(format, command, errorCode);
+    }
+
+    @Override
+    public Error toError() {
+        return Exceptions.toError(this);
     }
 }
