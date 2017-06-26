@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  *     <li>returns {@code void};
  *     <li>accepts an event derived from {@link com.google.protobuf.Message Message}
  *          as the first parameter;
- *     <li>(optional) accepts an {@link io.spine.base.EventContext EventContext}
+ *     <li>(optional) accepts an {@link io.spine.core.EventContext EventContext}
  *          as the second parameter.
  * </ul>
  *
@@ -54,7 +54,7 @@ import java.lang.annotation.Target;
  *          as the first parameter;
  *     <li>(optional) accepts a command derived from {@link com.google.protobuf.Message Message}
  *          as the second parameter;
- *     <li>(optional) accepts an {@link io.spine.base.CommandContext CommandContext}
+ *     <li>(optional) accepts an {@link io.spine.core.CommandContext CommandContext}
  *          as the second or the third parameter.
  * </ul>
  *
