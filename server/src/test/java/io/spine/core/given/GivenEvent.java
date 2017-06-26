@@ -31,8 +31,8 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.time.Time;
 
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.TimeTests.Past.minutesAgo;
-import static io.spine.test.Values.newUuidValue;
 
 /**
  * @author Alexander Yevsyukov

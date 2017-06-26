@@ -18,31 +18,45 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testdata;
+package io.spine.core;
 
-import io.spine.core.TestVersions;
-import io.spine.server.entity.EntityRecord;
+import com.google.common.testing.NullPointerTester;
+import io.spine.test.Tests;
+import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.core.TestIdentifiers.newUserId;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 /**
- * Creates {@link EntityRecord}s for tests.
- *
- * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-public class TestEntityStorageRecordFactory {
+public class TestIdentifiersShould {
 
-    private TestEntityStorageRecordFactory() {
+    @Test
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(TestIdentifiers.class);
     }
 
-    /** Creates a new record with all fields set. */
-    public static EntityRecord newEntityStorageRecord() {
-        final EntityRecord.Builder builder =
-                EntityRecord.newBuilder()
-                         .setState(pack(newUuid()))
-                         .setVersion(TestVersions.newVersionWithNumber(5));
-                            // set any non-default (non-zero) value
-        return builder.build();
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(TestIdentifiers.class);
+    }
+
+    @Test
+    public void create_UserId_by_string() {
+
+        final String testIdString = "12345";
+        final UserId userId = newUserId(testIdString);
+
+        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
+
+        assertEquals(expected, userId);
+    }
+
+    @Test
+    public void create_new_UUID_based_UserId() {
+        assertFalse(TestIdentifiers.newUserUuid().getValue().isEmpty());
     }
 }

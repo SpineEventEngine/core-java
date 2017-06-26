@@ -18,28 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.test;
-
-import com.google.protobuf.StringValue;
-import io.spine.core.TenantId;
-import io.spine.core.UserId;
-import io.spine.core.Version;
-import io.spine.core.Versions;
-import io.spine.protobuf.Wrapper;
-import io.spine.time.Time;
-
-import java.util.concurrent.ThreadLocalRandom;
+package io.spine.core;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.Identifier.newUuid;
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
- * Collection of factory methods for test values.
+ * Collection of factory methods for creating identifiers for tests.
  *
  * @author Alexander Yevsyukov
  */
-public class Values {
+public class TestIdentifiers {
 
     /**
      * The prefix for generated tenant identifiers.
@@ -51,7 +41,7 @@ public class Values {
      */
     private static final String USER_PREFIX = "user-";
 
-    private Values() {
+    private TestIdentifiers() {
         // Prevent instantiation of this utility class.
     }
 
@@ -101,38 +91,6 @@ public class Values {
      */
     public static TenantId newTenantId(Class<?> testClass) {
         return newTenantId(testClass.getSimpleName());
-    }
-
-    /**
-     * Generates a {@code StringValue} with generated UUID.
-     *
-     * <p>Use this method when you need to generate a test {@code Message} value
-     * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
-     */
-    public static StringValue newUuidValue() {
-        return Wrapper.forString(newUuid());
-    }
-
-    /**
-     * Factory method for creating versions from tests.
-     */
-    public static Version newVersionWithNumber(int number) {
-        return Versions.newVersion(number, Time.getCurrentTime());
-    }
-
-    /**
-     * Generates a random integer in the range [0, max).
-     */
-    public static int random(int max) {
-        return random(0, max);
-    }
-
-    /**
-     * Generates a random integer in the range [min, max).
-     */
-    public static int random(int min, int max) {
-        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
-        return randomNum;
     }
 
 }

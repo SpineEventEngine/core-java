@@ -35,8 +35,8 @@ import io.spine.time.ZoneOffsets;
 import io.spine.validate.ValidationException;
 import org.junit.Test;
 
-import static io.spine.test.Values.newTenantUuid;
-import static io.spine.test.Values.newUserUuid;
+import static io.spine.core.TestIdentifiers.newTenantUuid;
+import static io.spine.core.TestIdentifiers.newUserUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 

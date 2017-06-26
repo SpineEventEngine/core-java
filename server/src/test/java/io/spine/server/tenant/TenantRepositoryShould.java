@@ -27,7 +27,7 @@ import io.spine.server.BoundedContext;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Values.newTenantUuid;
+import static io.spine.core.TestIdentifiers.newTenantUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;

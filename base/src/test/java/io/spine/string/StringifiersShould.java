@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import io.spine.Identifier;
 import io.spine.json.Json;
-import io.spine.test.Values;
+import io.spine.test.TestValues;
 import io.spine.test.identifiers.IdWithPrimitiveFields;
 import org.junit.Test;
 
@@ -123,7 +123,7 @@ public class StringifiersShould {
         final Stringifier<StringValue> messageStringifier =
                 StringifierRegistry.getStringifier(StringValue.class);
 
-        final StringValue expected = Values.newUuidValue();
+        final StringValue expected = TestValues.newUuidValue();
         final String idValue = Json.toJson(expected);
 
         final StringValue parsed = messageStringifier.reverse()

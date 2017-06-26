@@ -25,8 +25,8 @@ import io.spine.core.TenantId;
 import io.spine.test.Tests;
 import org.junit.Test;
 
+import static io.spine.core.TestIdentifiers.newTenantId;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Values.newTenantId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

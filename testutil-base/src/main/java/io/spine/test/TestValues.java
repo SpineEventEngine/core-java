@@ -18,31 +18,48 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.testdata;
+package io.spine.test;
 
-import io.spine.core.TestVersions;
-import io.spine.server.entity.EntityRecord;
+import com.google.protobuf.StringValue;
+import io.spine.protobuf.Wrapper;
+
+import java.util.concurrent.ThreadLocalRandom;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.protobuf.Wrappers.pack;
 
 /**
- * Creates {@link EntityRecord}s for tests.
+ * Utility factories for test values.
  *
- * @author Alexander Litus
+ * @author Alexander Yevsyukov
  */
-public class TestEntityStorageRecordFactory {
+public class TestValues {
 
-    private TestEntityStorageRecordFactory() {
+    private TestValues() {
+        // Prevent instantiation of this utility class.
     }
 
-    /** Creates a new record with all fields set. */
-    public static EntityRecord newEntityStorageRecord() {
-        final EntityRecord.Builder builder =
-                EntityRecord.newBuilder()
-                         .setState(pack(newUuid()))
-                         .setVersion(TestVersions.newVersionWithNumber(5));
-                            // set any non-default (non-zero) value
-        return builder.build();
+    /**
+     * Generates a {@code StringValue} with generated UUID.
+     *
+     * <p>Use this method when you need to generate a test {@code Message} value
+     * but do not want to resort to {@code Timestamp} via {@code Timestamps#getCurrentTime()}.
+     */
+    public static StringValue newUuidValue() {
+        return Wrapper.forString(newUuid());
+    }
+
+    /**
+     * Generates a random integer in the range [0, max).
+     */
+    public static int random(int max) {
+        return random(0, max);
+    }
+
+    /**
+     * Generates a random integer in the range [min, max).
+     */
+    public static int random(int min, int max) {
+        int randomNum = ThreadLocalRandom.current().nextInt(min, max);
+        return randomNum;
     }
 }

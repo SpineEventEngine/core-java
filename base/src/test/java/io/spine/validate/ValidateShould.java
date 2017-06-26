@@ -28,8 +28,8 @@ import io.spine.test.Tests;
 import io.spine.type.TypeName;
 import org.junit.Test;
 
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Values.newUuidValue;
 import static io.spine.validate.Validate.checkBounds;
 import static io.spine.validate.Validate.checkDefault;
 import static io.spine.validate.Validate.checkNotDefault;

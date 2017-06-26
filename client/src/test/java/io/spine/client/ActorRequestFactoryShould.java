@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.core.ActorContext;
 import io.spine.core.UserId;
-import io.spine.test.Values;
+import io.spine.test.TestValues;
 import io.spine.test.client.TestEntity;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -34,7 +34,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.Values.newUserId;
+import static io.spine.core.TestIdentifiers.newUserId;
 import static io.spine.time.Timestamps2.isLaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -132,7 +132,7 @@ public abstract class ActorRequestFactoryShould {
                             TestEntity.class)
                 .setDefault((new TypeToken<Set<? extends Message>>() {
                             }).getRawType(),
-                            newHashSet(Values.newUuidValue()))
+                            newHashSet(TestValues.newUuidValue()))
                 .testInstanceMethods(factory(), NullPointerTester.Visibility.PUBLIC);
     }
 

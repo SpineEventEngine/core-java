@@ -36,7 +36,6 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
-import io.spine.test.Values;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
@@ -50,12 +49,12 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Commands.sameActorAndTenant;
+import static io.spine.core.TestIdentifiers.newTenantUuid;
+import static io.spine.core.TestIdentifiers.newUserUuid;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
-import static io.spine.test.Values.newTenantUuid;
-import static io.spine.test.Values.newUserUuid;
-import static io.spine.test.Values.newUuidValue;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 import static org.junit.Assert.assertEquals;
@@ -122,7 +121,7 @@ public class CommandsShould {
                                                          minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
-                .setDefault(UserId.class, Values.newUserUuid())
+                .setDefault(UserId.class, TestIdentifiers.newUserUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 

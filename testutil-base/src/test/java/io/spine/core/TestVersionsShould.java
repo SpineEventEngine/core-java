@@ -18,45 +18,30 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.test;
+package io.spine.core;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.core.UserId;
+import io.spine.test.TestValues;
+import io.spine.test.Tests;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUserId;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class ValuesShould {
+public class TestVersionsShould {
 
     @Test
     public void have_utility_ctor() {
-        Tests.hasPrivateParameterlessCtor(Values.class);
+        Tests.assertHasPrivateParameterlessCtor(TestVersions.class);
     }
 
     @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(Values.class);
-    }
+    public void generate_version_by_number() {
+        final int number = TestValues.random(100);
 
-    @Test
-    public void create_UserId_by_string() {
+        final Version version = TestVersions.newVersionWithNumber(number);
 
-        final String testIdString = "12345";
-        final UserId userId = newUserId(testIdString);
-
-        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
-
-        assertEquals(expected, userId);
-    }
-
-    @Test
-    public void create_new_UUID_based_UserId() {
-        assertFalse(Values.newUserUuid().getValue().isEmpty());
+        assertEquals(number, version.getNumber());
     }
 }

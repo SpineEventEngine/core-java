@@ -36,7 +36,7 @@ import io.spine.test.command.ProjectId;
 import io.spine.test.command.StartProject;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.Values.newUserId;
+import static io.spine.core.TestIdentifiers.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {

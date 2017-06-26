@@ -31,8 +31,8 @@ import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Failures.toFailure;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
-import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;

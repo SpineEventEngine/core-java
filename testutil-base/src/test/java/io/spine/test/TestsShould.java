@@ -24,7 +24,6 @@ import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Tests.hasPrivateParameterlessCtor;
-import static io.spine.test.Values.newUserId;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -60,11 +59,6 @@ public class TestsShould {
     @Test
     public void return_null_reference() {
         assertNull(Tests.nullRef());
-    }
-
-    @Test(expected = NullPointerException.class)
-    public void do_not_accept_null_UseId_value() {
-        newUserId(Tests.<String>nullRef());
     }
 
     @Test

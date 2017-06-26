@@ -26,7 +26,7 @@ import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUuidValue;
+import static io.spine.test.TestValues.newUuidValue;
 import static org.junit.Assert.assertEquals;
 
 /**

@@ -29,7 +29,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.test.Values.newUserId;
+import static io.spine.core.TestIdentifiers.newUserId;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.ZoneOffsets.UTC;
 

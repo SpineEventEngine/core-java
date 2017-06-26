@@ -33,7 +33,7 @@ import io.spine.validate.ValidationException;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.test.Values.newUuidValue;
+import static io.spine.test.TestValues.newUuidValue;
 
 /**
  * @author Alexander Yevsyukov

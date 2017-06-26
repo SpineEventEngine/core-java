@@ -42,10 +42,10 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
+import static io.spine.core.TestIdentifiers.newUserId;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
 import static io.spine.server.command.TestEventFactory.newInstance;
-import static io.spine.test.Values.newUserId;
 import static io.spine.time.Durations2.seconds;
 import static io.spine.time.Time.getCurrentTime;
 
