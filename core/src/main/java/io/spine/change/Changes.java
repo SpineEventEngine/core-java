@@ -31,8 +31,8 @@ import io.spine.time.OffsetDateTime;
 import io.spine.time.OffsetTime;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.change.Preconditions.checkNewValueNotEmpty;
-import static io.spine.change.Preconditions.checkNotEqual;
+import static io.spine.change.Preconditions2.checkNewValueNotEmpty;
+import static io.spine.change.Preconditions2.checkNotEqual;
 
 /**
  * Utility class for working with field changes.

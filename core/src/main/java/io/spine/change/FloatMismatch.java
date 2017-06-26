@@ -21,22 +21,22 @@
 package io.spine.change;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.Int64Value;
+import com.google.protobuf.FloatValue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.change.Preconditions.checkNotNullOrEqual;
+import static io.spine.change.Preconditions2.checkNotNullOrEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.protobuf.Wrappers.pack;
 
 /**
- * Utility class for working with {@code long} values in {@link ValueMismatch}es.
+ * Utility class for working with {@code float} values in {@link ValueMismatch}es.
  *
  * @author Alexander Yevsyukov
  */
-public final class LongMismatch {
+public final class FloatMismatch {
 
-    private LongMismatch() {
-        // Prevent instantiation.
+    private FloatMismatch() {
+        // Prevent instantiation of this utility class.
     }
 
     /**
@@ -48,8 +48,8 @@ public final class LongMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch expectedZero(long actual, long newValue, int version) {
-        return of(0L, actual, newValue, version);
+    public static ValueMismatch expectedZero(float actual, float newValue, int version) {
+        return of(0.0f, actual, newValue, version);
     }
 
     /**
@@ -61,8 +61,8 @@ public final class LongMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch expectedNonZero(long expected, long newValue, int version) {
-        return of(expected, 0L, newValue, version);
+    public static ValueMismatch expectedNonZero(float expected, float newValue, int version) {
+        return of(expected, 0.0f, newValue, version);
     }
 
     /**
@@ -75,16 +75,16 @@ public final class LongMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(long expected, long actual,
-                                                long newValue, int version) {
+    public static ValueMismatch unexpectedValue(float expected, float actual,
+                                                float newValue, int version) {
         checkNotNullOrEqual(expected, actual);
         return of(expected, actual, newValue, version);
     }
 
     /**
-     * Creates a new instance of {@code ValueMismatch} with the passed values for a long attribute.
+     * Creates a new instance of {@code ValueMismatch} with the passed values for a float attribute.
      */
-    public static ValueMismatch of(long expected, long actual, long newValue, int version) {
+    public static ValueMismatch of(float expected, float actual, float newValue, int version) {
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
                                                            .setExpected(pack(expected))
                                                            .setActual(pack(actual))
@@ -93,39 +93,39 @@ public final class LongMismatch {
         return builder.build();
     }
 
-    private static long unpacked(Any any) {
-        final Int64Value unpacked = unpack(any, Int64Value.class);
+    private static float unpacked(Any any) {
+        final FloatValue unpacked = unpack(any, FloatValue.class);
         return unpacked.getValue();
     }
 
     /**
-     * Obtains expected long value from the passed mismatch.
+     * Obtains expected float value from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-long values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
-    public static long unpackExpected(ValueMismatch mismatch) {
+    public static float unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
     /**
-     * Obtains actual long value from the passed mismatch.
+     * Obtains actual float value from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-long values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
-    public static long unpackActual(ValueMismatch mismatch) {
+    public static float unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
     /**
-     * Obtains new long value from the passed mismatch.
+     * Obtains new float value from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-long values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
      */
-    public static long unpackNewValue(ValueMismatch mismatch) {
+    public static float unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
