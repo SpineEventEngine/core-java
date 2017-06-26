@@ -25,12 +25,12 @@ import com.google.protobuf.Duration;
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
 import io.spine.base.Error;
-import io.spine.base.TenantId;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.TenantId;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.tenant.TenantAwareFunction0;
 import io.spine.server.tenant.TenantAwareOperation;
@@ -41,7 +41,7 @@ import java.util.Iterator;
 import java.util.Set;
 
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.base.CommandStatus.SCHEDULED;
+import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.Timestamps2.isLaterThan;
 

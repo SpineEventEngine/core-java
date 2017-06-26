@@ -19,7 +19,7 @@
  */
 package io.spine.server.failure;
 
-import io.spine.base.FailureClass;
+import io.spine.core.FailureClass;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 
 import java.util.Set;

@@ -24,8 +24,8 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.IsSent;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import javax.annotation.Nullable;
@@ -114,19 +114,18 @@ public abstract class Bus<T extends Message,
      * message posted to the bus.
      *
      * <p>In case the message is accepted by the bus, {@linkplain IsSent IsSent} with the
-     * {@link io.spine.base.Status.StatusCase#OK OK} status is passed to the observer.
+     * {@link io.spine.core.Status.StatusCase#OK OK} status is passed to the observer.
      *
      * <p>If the message cannot be sent due to some issues, a corresponding
      * {@link io.spine.base.Error Error} status is passed in {@code IsSent} instance.
      *
      * <p>Depending on the underlying {@link MessageDispatcher}, a message which causes a business
-     * {@link io.spine.base.Failure} may result ether a {@link io.spine.base.Failure} status or
-     * an {@link io.spine.base.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
-     * the {@link io.spine.base.Failure} status may only pop up if the {@link MessageDispatcher}
-     * processes the message sequentially and throws
-     * the {@linkplain io.spine.base.FailureThrowable FailureThrowables} (wrapped in a
-     * {@link RuntimeException}) instead of handling them. Otherwise, the {@code OK} status should
-     * be expected.
+     * {@link io.spine.core.Failure} may result ether a {@link io.spine.core.Failure} status or
+     * an {@link io.spine.core.Status.StatusCase#OK OK} status {@link IsSent} instance. Usually,
+     * the {@link io.spine.core.Failure} status may only pop up if the {@link MessageDispatcher}
+     * processes the message sequentially and throws the failure (wrapped in a
+     * the {@linkplain io.spine.base.ThrowableMessage ThrowableMessages}) instead of handling them.
+     * Otherwise, the {@code OK} status should be expected.
      *
      * <p>Note that {@linkplain StreamObserver#onError StreamObserver.onError()} is never called
      * for the passed observer, since errors are propagated as statuses of {@code IsSent} response.
@@ -290,12 +289,12 @@ public abstract class Bus<T extends Message,
      *
      * @return the result of mailing with the Message ID and:
      *         <ul>
-     *             <li>{@link io.spine.base.Status.StatusCase#OK OK} status if the message has been
+     *             <li>{@link io.spine.core.Status.StatusCase#OK OK} status if the message has been
      *                 passed to the dispatcher;
-     *             <li>{@link io.spine.base.Failure Failure} status, if a {@code Failure} has
+     *             <li>{@link io.spine.core.Failure Failure} status, if a {@code Failure} has
      *                 happened during the message handling (if applicable);
      *             <li>{@link io.spine.base.Error Error} status if a {@link Throwable}, which is not
-     *                 a {@link io.spine.base.FailureThrowable FailureThrowable}, has been thrown
+     *                 a {@link io.spine.base.ThrowableMessage ThrowableMessage}, has been thrown
      *                 during the message posting.
      *         </ul>
      * @see #post(Message, StreamObserver) for the public API

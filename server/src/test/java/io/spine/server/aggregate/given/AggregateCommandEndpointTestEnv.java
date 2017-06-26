@@ -20,8 +20,8 @@
 
 package io.spine.server.aggregate.given;
 
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.server.aggregate.Aggregate;
 import io.spine.server.aggregate.AggregateRepository;
 import io.spine.server.aggregate.Apply;

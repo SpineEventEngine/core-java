@@ -22,7 +22,7 @@
  * This package provides classes that wrap {@code Message} objects that
  * hold other {@code Message} objects if interest.
  *
- * <p>For example, {@link io.spine.envelope.CommandEnvelope CommandEnvelope}
+ * <p>For example, {@link io.spine.core.CommandEnvelope CommandEnvelope}
  * holds {@link io.spine.base.Command Command} and provides access to its message,
  * context, type, etc.
  */

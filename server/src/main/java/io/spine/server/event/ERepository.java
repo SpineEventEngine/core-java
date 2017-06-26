@@ -25,11 +25,11 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Event;
-import io.spine.base.EventId;
 import io.spine.client.ColumnFilter;
 import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
+import io.spine.core.Event;
+import io.spine.core.EventId;
 import io.spine.server.entity.DefaultRecordBasedRepository;
 import io.spine.server.storage.RecordStorage;
 

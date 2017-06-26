@@ -21,7 +21,7 @@
 package io.spine.test;
 
 import com.google.common.testing.NullPointerTester;
-import io.spine.base.UserId;
+import io.spine.core.UserId;
 import org.junit.Test;
 
 import static io.spine.test.Values.newUserId;

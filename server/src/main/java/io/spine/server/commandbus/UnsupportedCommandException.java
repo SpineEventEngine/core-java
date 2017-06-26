@@ -19,9 +19,9 @@
  */
 package io.spine.server.commandbus;
 
-import io.spine.base.Command;
-import io.spine.base.CommandValidationError;
 import io.spine.base.Error;
+import io.spine.core.Command;
+import io.spine.core.CommandValidationError;
 
 /**
  * Exception that is thrown when unsupported command is obtained

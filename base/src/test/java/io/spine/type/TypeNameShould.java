@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Descriptors;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.UInt64Value;
-import io.spine.base.Command;
+import io.spine.core.Command;
 import io.spine.option.IfMissingOption;
 import org.junit.Test;
 

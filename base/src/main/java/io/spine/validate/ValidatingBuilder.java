@@ -24,7 +24,7 @@ import com.google.protobuf.Descriptors.FieldDescriptor;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.protobuf.Messages;
-import io.spine.reflect.GenericTypeIndex;
+import io.spine.util.GenericTypeIndex;
 
 import java.lang.reflect.Method;
 

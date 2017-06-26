@@ -22,7 +22,7 @@ package io.spine.test;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
+import io.spine.core.Command;
 import io.spine.time.Time;
 import org.junit.Assert;
 import org.junit.Test;

@@ -22,8 +22,8 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
-import io.spine.base.TenantId;
 import io.spine.client.ActorRequestFactory;
+import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandTest;

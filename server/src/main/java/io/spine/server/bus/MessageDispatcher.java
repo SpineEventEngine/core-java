@@ -20,7 +20,7 @@
 
 package io.spine.server.bus;
 
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Set;

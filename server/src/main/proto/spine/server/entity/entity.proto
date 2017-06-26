@@ -21,17 +21,18 @@ syntax = "proto3";
 
 package spine.server.entity;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
+option java_package = "io.spine.server.entity";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "EntityProto";
-option java_package = "io.spine.server.entity";
 
 import "google/protobuf/any.proto";
 
-import "spine/options.proto";
-import "spine/base/version.proto";
+import "spine/core/version.proto";
 
 // The record for passing information about an entity.
 message EntityRecord {
@@ -44,7 +45,7 @@ message EntityRecord {
     google.protobuf.Any state = 2;
 
     // The version of the entity.
-    base.Version version = 3;
+    core.Version version = 3;
 
     // The lifecycle flags of the entity.
     LifecycleFlags lifecycle_flags = 4;

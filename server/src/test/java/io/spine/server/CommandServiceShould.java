@@ -22,12 +22,12 @@ package io.spine.server;
 
 import com.google.common.collect.Sets;
 import com.google.protobuf.StringValue;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
 import io.spine.base.Error;
-import io.spine.base.IsSent;
-import io.spine.base.Status;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
+import io.spine.core.IsSent;
+import io.spine.core.Status;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.commandbus.UnsupportedCommandException;
@@ -39,7 +39,7 @@ import org.junit.Test;
 import java.io.IOException;
 import java.util.Set;
 
-import static io.spine.base.Status.StatusCase.ERROR;
+import static io.spine.core.Status.StatusCase.ERROR;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;

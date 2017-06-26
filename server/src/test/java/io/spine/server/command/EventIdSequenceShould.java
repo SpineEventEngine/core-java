@@ -20,7 +20,7 @@
 
 package io.spine.server.command;
 
-import io.spine.base.Commands;
+import io.spine.core.Commands;
 import org.junit.Test;
 
 import static io.spine.server.command.EventIdSequence.LEADING_ZERO;

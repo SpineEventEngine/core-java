@@ -24,10 +24,10 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.base.Error;
-import io.spine.base.Failure;
-import io.spine.base.FailureClass;
-import io.spine.base.IsSent;
-import io.spine.envelope.FailureEnvelope;
+import io.spine.core.Failure;
+import io.spine.core.FailureClass;
+import io.spine.core.FailureEnvelope;
+import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
@@ -48,8 +48,9 @@ import static io.spine.util.Exceptions.toError;
  *
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
- * @see io.spine.base.FailureThrowable
- * @see io.spine.base.Subscribe @Subscribe
+ * @see io.spine.base.ThrowableMessage
+ * @see io.spine.core.Failures
+ * @see io.spine.core.Subscribe @Subscribe
  */
 public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureEnvelope,
@@ -79,7 +80,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     protected void store(Iterable<Failure> message) {
         // do nothing for now.
     }
-    
+
     /**
      * Always returns the original {@code Failure}, as the enrichment is not supported
      * for the business failures yet.

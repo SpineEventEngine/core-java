@@ -24,7 +24,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.Failure;
+import io.spine.core.Failure;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;

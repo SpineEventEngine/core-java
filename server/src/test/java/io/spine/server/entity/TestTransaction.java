@@ -21,8 +21,8 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
-import io.spine.base.Version;
+import io.spine.core.EventContext;
+import io.spine.core.Version;
 
 /**
  * A utility class providing various test-only methods, which in production mode are allowed

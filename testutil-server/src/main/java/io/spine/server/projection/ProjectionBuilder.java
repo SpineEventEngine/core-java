@@ -21,7 +21,7 @@
 package io.spine.server.projection;
 
 import com.google.protobuf.Message;
-import io.spine.base.Version;
+import io.spine.core.Version;
 import io.spine.server.entity.EntityBuilder;
 import io.spine.validate.ValidatingBuilder;
 

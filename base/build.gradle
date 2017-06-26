@@ -19,7 +19,6 @@
 //
 dependencies {
     testCompile project(path: ":testutil-base")
-    testCompile project(path: ":testutil-server")
 }
 
 apply from: gRpcScript

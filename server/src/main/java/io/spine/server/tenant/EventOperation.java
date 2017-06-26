@@ -21,9 +21,9 @@
 package io.spine.server.tenant;
 
 import io.spine.annotation.Internal;
-import io.spine.base.Event;
+import io.spine.core.Event;
 
-import static io.spine.base.Events.getTenantId;
+import static io.spine.core.Events.getTenantId;
 
 /**
  * A tenant-aware operation performed in relation to an event.

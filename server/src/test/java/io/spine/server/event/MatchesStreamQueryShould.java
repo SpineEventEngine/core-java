@@ -22,8 +22,8 @@ package io.spine.server.event;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
-import io.spine.base.Event;
 import io.spine.base.FieldFilter;
+import io.spine.core.Event;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.envelope.ProjectCreated;

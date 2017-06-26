@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.protobuf.Message;
-import io.spine.base.Version;
+import io.spine.core.Version;
 
 /**
  * An entity with version and timestamp of the last modification.

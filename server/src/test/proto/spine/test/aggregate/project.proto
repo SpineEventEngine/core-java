@@ -21,11 +21,11 @@ syntax = "proto3";
 
 package spine.test.aggregate;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.aggregate";
 option java_multiple_files = true;
-
-import "spine/options.proto";
 
 message ProjectId {
     string id = 1;
@@ -40,27 +40,19 @@ enum Status {
 }
 
 message Project {
-
     ProjectId id = 1;
-
     string name = 2;
-
     repeated Task task = 3;
-
     Status status = 4;
 }
 
 message ProjectLifecycle {
-
     ProjectId id = 1;
-
     Status status = 2;
 }
 
 message ProjectDefinition {
-
     ProjectId id = 1;
-
     string name = 2;
 }
 

@@ -23,7 +23,7 @@ import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.UserId;
+import io.spine.core.UserId;
 import io.spine.time.Time;
 import org.junit.Test;
 

@@ -23,12 +23,13 @@ package io.spine.server.commandbus;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.CommandContext;
-import io.spine.base.TenantId;
-import io.spine.base.UserId;
-import io.spine.base.given.GivenCommandContext;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
+import io.spine.core.given.GivenCommandContext;
 import io.spine.test.command.AddTask;
 import io.spine.test.command.CreateProject;
 import io.spine.test.command.ProjectId;
@@ -51,75 +52,75 @@ public class Given {
                         .build();
     }
 
-    public static class Command {
+    public static class ACommand {
 
         private static final UserId USER_ID = newUserId(newUuid());
         private static final ProjectId PROJECT_ID = newProjectId();
 
-        private Command() {
+        private ACommand() {
             // Prevent construction from outside.
         }
 
         /**
-         * Creates a new {@link Command} with the given command message,
-         * serId and timestamp using default {@link Command} instance.
+         * Creates a new {@link ACommand} with the given command message,
+         * serId and timestamp using default {@link ACommand} instance.
          */
-        private static io.spine.base.Command create(Message command, UserId userId,
-                                                    Timestamp when) {
+        private static Command create(Message command, UserId userId,
+                                      Timestamp when) {
             final TenantId generatedTenantId = TenantId.newBuilder()
                                                        .setValue(newUuid())
                                                        .build();
             final TestActorRequestFactory factory =
                     TestActorRequestFactory.newInstance(userId, generatedTenantId);
-            final io.spine.base.Command result = factory.createCommand(command, when);
+            final Command result = factory.createCommand(command, when);
             return result;
         }
 
-        public static io.spine.base.Command withMessage(Message message) {
+        public static Command withMessage(Message message) {
             return create(message, USER_ID, getCurrentTime());
         }
 
-        public static io.spine.base.Command addTask() {
+        public static Command addTask() {
             return addTask(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        static io.spine.base.Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
+        static Command addTask(UserId userId, ProjectId projectId, Timestamp when) {
             final AddTask command = CommandMessage.addTask(projectId);
             return create(command, userId, when);
         }
 
-        /** Creates a new {@link Command} with default properties (current time etc). */
-        public static io.spine.base.Command createProject() {
+        /** Creates a new {@link ACommand} with default properties (current time etc). */
+        public static Command createProject() {
             return createProject(getCurrentTime());
         }
 
-        static io.spine.base.Command createProject(Timestamp when) {
+        static Command createProject(Timestamp when) {
             return createProject(USER_ID, PROJECT_ID, when);
         }
 
-        static io.spine.base.Command createProject(Duration delay) {
+        static Command createProject(Duration delay) {
 
             final CreateProject projectMessage = CommandMessage.createProjectMessage();
             final CommandContext commandContext = GivenCommandContext.withScheduledDelayOf(delay);
-            final CommandFactory commandFactory = TestActorRequestFactory.newInstance(Command.class)
-                                                                         .command();
-            final io.spine.base.Command cmd = commandFactory.createBasedOnContext(projectMessage,
-                                                                                    commandContext);
+            final CommandFactory commandFactory =
+                    TestActorRequestFactory.newInstance(ACommand.class)
+                                           .command();
+            final Command cmd = commandFactory.createBasedOnContext(projectMessage, commandContext);
             return cmd;
         }
 
-        static io.spine.base.Command createProject(UserId userId,
+        static Command createProject(UserId userId,
                                                      ProjectId projectId,
                                                      Timestamp when) {
             final CreateProject command = CommandMessage.createProjectMessage(projectId);
             return create(command, userId, when);
         }
 
-        public static io.spine.base.Command startProject() {
+        public static Command startProject() {
             return startProject(USER_ID, PROJECT_ID, getCurrentTime());
         }
 
-        static io.spine.base.Command startProject(UserId userId,
+        static Command startProject(UserId userId,
                                                     ProjectId projectId,
                                                     Timestamp when) {
             final StartProject command = CommandMessage.startProject(projectId);

@@ -21,14 +21,14 @@
 package io.spine.server.commandstore;
 
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.Errors;
-import io.spine.base.Failure;
-import io.spine.base.FailureThrowable;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.base.ThrowableMessage;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
+import io.spine.core.Failure;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Log;
@@ -44,6 +44,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
+import static io.spine.core.Failures.toFailure;
 
 /**
  * Manages storage of commands received by a Bounded Context.
@@ -261,10 +262,11 @@ public class CommandStore implements AutoCloseable {
     public void updateCommandStatus(CommandEnvelope commandEnvelope, Throwable cause, Log log) {
         final Message commandMessage = commandEnvelope.getMessage();
         final CommandId commandId = commandEnvelope.getId();
-        if (cause instanceof FailureThrowable) {
-            final FailureThrowable failure = (FailureThrowable) cause;
-            log.failureHandling(failure, commandMessage, commandId);
-            updateStatus(commandEnvelope, failure.toFailure(commandEnvelope.getCommand()));
+        if (cause instanceof ThrowableMessage) {
+            final ThrowableMessage throwableMessage = (ThrowableMessage) cause;
+            log.failureHandling(throwableMessage, commandMessage, commandId);
+            updateStatus(commandEnvelope,
+                         toFailure(throwableMessage, commandEnvelope.getCommand()));
         } else if (cause instanceof Exception) {
             final Exception exception = (Exception) cause;
             log.errorHandling(exception, commandMessage, commandId);

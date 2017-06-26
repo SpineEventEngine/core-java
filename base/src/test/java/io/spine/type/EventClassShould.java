@@ -23,7 +23,7 @@ package io.spine.type;
 import com.google.protobuf.BoolValue;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
-import io.spine.base.EventClass;
+import io.spine.core.EventClass;
 import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;

@@ -24,12 +24,12 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.EventClass;
-import io.spine.base.Events;
-import io.spine.envelope.CommandEnvelope;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
+import io.spine.core.Events;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
@@ -85,19 +85,19 @@ public class CommandHandlerShould {
 
     @Test
     public void handle_command() {
-        assertHandles(Given.Command.createProject());
+        assertHandles(Given.ACommand.createProject());
     }
 
     @Test
     public void handle_several_commands() {
-        assertHandles(Given.Command.createProject());
-        assertHandles(Given.Command.addTask());
-        assertHandles(Given.Command.startProject());
+        assertHandles(Given.ACommand.createProject());
+        assertHandles(Given.ACommand.addTask());
+        assertHandles(Given.ACommand.startProject());
     }
 
     @Test
     public void post_generated_events_to_event_bus() {
-        final Command cmd = Given.Command.startProject();
+        final Command cmd = Given.ACommand.startProject();
 
         final EventCatcher eventCatcher = new EventCatcher();
         eventBus.register(eventCatcher);

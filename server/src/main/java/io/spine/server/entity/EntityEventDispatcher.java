@@ -20,7 +20,7 @@
 
 package io.spine.server.entity;
 
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventEnvelope;
 import io.spine.server.event.EventDispatcher;
 
 import java.util.Set;

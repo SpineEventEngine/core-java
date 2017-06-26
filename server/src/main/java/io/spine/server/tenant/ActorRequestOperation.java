@@ -19,7 +19,7 @@
  */
 package io.spine.server.tenant;
 
-import io.spine.base.ActorContext;
+import io.spine.core.ActorContext;
 
 /**
  * A tenant-aware operation performed in relation to a request sent by an actor.

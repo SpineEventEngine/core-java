@@ -20,7 +20,7 @@
 
 package io.spine.server.event;
 
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;

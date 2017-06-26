@@ -25,12 +25,12 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.TenantId;
-import io.spine.base.UserId;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 

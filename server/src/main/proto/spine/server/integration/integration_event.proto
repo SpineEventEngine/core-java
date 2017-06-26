@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package spine.server.integration;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.integration";
 option java_multiple_files = true;
@@ -30,12 +32,12 @@ option java_generate_equals_and_hash = true;
 import "google/protobuf/any.proto";
 import "google/protobuf/timestamp.proto";
 
-import "spine/options.proto";
-import "spine/base/event.proto";
+import "spine/core/event.proto";
 
 // An integration event is sent between loosely coupled parts of a system.
 // Typically these parts would be implemented as Bounded Contexts.
 message IntegrationEvent {
+
     // An event message wrapped to `Any`.
     google.protobuf.Any message = 1;
 
@@ -45,8 +47,9 @@ message IntegrationEvent {
 
 // Meta-information about an event.
 message IntegrationEventContext {
+
     // An id of the event.
-    base.EventId event_id = 1;
+    core.EventId event_id = 1;
 
     // When the event occurred.
     google.protobuf.Timestamp timestamp = 2;

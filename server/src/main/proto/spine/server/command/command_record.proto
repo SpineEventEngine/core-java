@@ -21,6 +21,8 @@ syntax = "proto3";
 
 package spine.server.command;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.server.commandbus";
@@ -30,10 +32,9 @@ option java_generate_equals_and_hash = true;
 
 import "google/protobuf/timestamp.proto";
 
-import "spine/options.proto";
-import "spine/base/command.proto";
 import "spine/base/error.proto";
-import "spine/base/failure.proto";
+import "spine/core/command.proto";
+import "spine/core/failure.proto";
 
 // This type defines the way commands are stored in command storage.
 //
@@ -44,13 +45,13 @@ message CommandRecord {
     option (SPI_type) = true;
 
     // The ID of the command.
-    base.CommandId command_id = 1;
+    core.CommandId command_id = 1;
 
     // A short name of Protobuf command type.
     string command_type = 2;
 
     // The command.
-    base.Command command = 3;
+    core.Command command = 3;
 
     // The status of command processing.
     //
@@ -67,7 +68,7 @@ message CommandRecord {
 message ProcessingStatus {
 
     // The code of the status.
-    base.CommandStatus code = 1;
+    core.CommandStatus code = 1;
 
     // The `cause` provides additional information on what went wrong
     // if the value of `status` is `ERROR` or `FAILURE`.
@@ -76,6 +77,6 @@ message ProcessingStatus {
         base.Error error = 2;
 
         // A business failure occurred during command processing.
-        base.Failure failure = 3;
+        core.Failure failure = 3;
     }
 }

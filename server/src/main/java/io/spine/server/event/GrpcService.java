@@ -21,9 +21,9 @@
 package io.spine.server.event;
 
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Event;
-import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.core.Event;
+import io.spine.core.Response;
+import io.spine.core.Responses;
 import io.spine.server.event.grpc.EventStoreGrpc;
 
 /**

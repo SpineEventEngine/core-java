@@ -21,7 +21,7 @@
 package io.spine.server.entity;
 
 import com.google.common.base.Predicates;
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 import io.spine.server.BoundedContext;
 import io.spine.server.entity.given.RepositoryTestEnv.ProjectEntity;
 import io.spine.server.entity.given.RepositoryTestEnv.RepoForEntityWithUnsupportedId;

@@ -21,8 +21,8 @@
 package io.spine.server.reflect;
 
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
-import io.spine.base.Subscribe;
+import io.spine.core.CommandContext;
+import io.spine.core.Subscribe;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

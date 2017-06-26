@@ -27,8 +27,8 @@ import com.google.common.collect.FluentIterable;
 import com.google.protobuf.TextFormat;
 import io.grpc.ServerServiceDefinition;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Event;
-import io.spine.base.TenantId;
+import io.spine.core.Event;
+import io.spine.core.TenantId;
 import io.spine.server.event.grpc.EventStoreGrpc;
 import io.spine.server.storage.StorageFactory;
 import io.spine.server.tenant.EventOperation;
@@ -45,7 +45,7 @@ import java.util.concurrent.Executor;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.Iterables.tryFind;
-import static io.spine.base.Events.getTenantId;
+import static io.spine.core.Events.getTenantId;
 
 /**
  * A store of all events in a bounded context.

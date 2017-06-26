@@ -26,7 +26,7 @@ import com.google.common.collect.FluentIterable;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.server.event.enrich.EventEnricher.SupportsFieldConversion;
 import io.spine.server.reflect.Field;
 

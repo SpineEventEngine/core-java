@@ -21,7 +21,7 @@
 package io.spine.server.commandbus;
 
 import io.spine.annotation.SPI;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.bus.BusFilter;
 
 /**
