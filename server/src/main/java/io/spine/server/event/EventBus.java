@@ -51,7 +51,6 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -301,7 +300,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     /** The {@code Builder} for {@code EventBus}. */
-    public static class Builder {
+    public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 
@@ -366,10 +365,9 @@ public class EventBus extends CommandOutputBus<Event,
         @Nullable
         private EventEnricher enricher;
 
-        private final Deque<BusFilter<EventEnvelope>> filters;
-
         private Builder() {
-            this.filters = newLinkedList();
+            super();
+            // Prevent direct instantiation.
         }
 
         /**
@@ -485,34 +483,12 @@ public class EventBus extends CommandOutputBus<Event,
         }
 
         /**
-         * Adds the given {@linkplain BusFilter filter} to the builder.
-         *
-         * <p>The order of appending the filters to the builder is the order of the filters in
-         * the resulting bus.
-         *
-         * @param filter the filter to append
-         */
-        public Builder appendFilter(BusFilter<EventEnvelope> filter) {
-            checkNotNull(filter);
-            this.filters.offer(filter);
-            return this;
-        }
-
-        /**
-         * Obtains the {@linkplain BusFilter bus filters} of this builder.
-         *
-         * @see #appendFilter(BusFilter)
-         */
-        public Deque<BusFilter<EventEnvelope>> getFilters() {
-            return newLinkedList(filters);
-        }
-
-        /**
          * Builds an instance of {@link EventBus}.
          *
          * <p>This method is supposed to be called internally when building an enclosing
          * {@code BoundedContext}.
          */
+        @Override
         @Internal
         public EventBus build() {
             final String message = "Either storageFactory or eventStore must be " +
@@ -544,6 +520,11 @@ public class EventBus extends CommandOutputBus<Event,
 
             final EventBus result = new EventBus(this);
             return result;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
     }
 

@@ -19,52 +19,39 @@
  */
 package io.spine.server.failure;
 
+import io.spine.core.Failure;
 import io.spine.core.FailureEnvelope;
-import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.BusBuilderShould;
 import io.spine.test.Tests;
 import org.junit.Test;
 
-import java.util.Deque;
-
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.mock;
 
 /**
  * @author Alex Tymchenko
  */
-public class FailureBusBuilderShould {
+public class FailureBusBuilderShould extends BusBuilderShould<FailureBus.Builder,
+                                                              FailureEnvelope,
+                                                              Failure> {
+
+    @Override
+    protected FailureBus.Builder builder() {
+        return FailureBus.newBuilder();
+    }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_DispatcherDelivery() {
-        FailureBus.newBuilder()
-                  .setDispatcherFailureDelivery(Tests.<DispatcherFailureDelivery>nullRef());
+        builder().setDispatcherFailureDelivery(Tests.<DispatcherFailureDelivery>nullRef());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")    //It's fine as for the Builder tests.
     @Test
     public void return_set_DispatcherDelivery() {
         final DispatcherFailureDelivery delivery = deliveryForTests();
-        assertEquals(delivery, FailureBus.newBuilder()
-                                         .setDispatcherFailureDelivery(delivery)
-                                         .getDispatcherFailureDelivery()
-                                         .get());
+        assertEquals(delivery, builder().setDispatcherFailureDelivery(delivery)
+                                        .getDispatcherFailureDelivery()
+                                        .get());
     }
-
-    @Test
-    public void append_filters() {
-        @SuppressWarnings("unchecked")
-        final BusFilter<FailureEnvelope> first = mock(BusFilter.class);
-        @SuppressWarnings("unchecked")
-        final BusFilter<FailureEnvelope> second = mock(BusFilter.class);
-
-        final FailureBus.Builder builder = FailureBus.newBuilder();
-        builder.appendFilter(first)
-               .appendFilter(second);
-        final Deque<BusFilter<FailureEnvelope>> filters = builder.getFilters();
-        assertEquals(first, filters.pop());
-        assertEquals(second, filters.pop());
-    }
-
 
     private static DispatcherFailureDelivery deliveryForTests() {
         return new DispatcherFailureDelivery() {

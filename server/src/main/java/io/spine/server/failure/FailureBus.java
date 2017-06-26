@@ -42,7 +42,6 @@ import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.util.Exceptions.toError;
 
 /**
@@ -175,7 +174,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     /** The {@code Builder} for {@code FailureBus}. */
-    public static class Builder {
+    public static class Builder extends AbstractBuilder<FailureEnvelope, Failure, Builder> {
 
         /**
          * Optional {@code DispatcherFailureDelivery} for calling the dispatchers.
@@ -185,10 +184,9 @@ public class FailureBus extends CommandOutputBus<Failure,
         @Nullable
         private DispatcherFailureDelivery dispatcherFailureDelivery;
 
-        private final Deque<BusFilter<FailureEnvelope>> filters;
-
         private Builder() {
-            this.filters = newLinkedList();
+            super();
+            // Prevent direct instantiation.
         }
 
         /**
@@ -207,35 +205,18 @@ public class FailureBus extends CommandOutputBus<Failure,
             return Optional.fromNullable(dispatcherFailureDelivery);
         }
 
-        /**
-         * Adds the given {@linkplain BusFilter filter} to the builder.
-         *
-         * <p>The order of appending the filters to the builder is the order of the filters in
-         * the resulting bus.
-         *
-         * @param filter the filter to append
-         */
-        public Builder appendFilter(BusFilter<FailureEnvelope> filter) {
-            checkNotNull(filter);
-            this.filters.offer(filter);
-            return this;
-        }
-
-        /**
-         * Obtains the {@linkplain BusFilter bus filters} of this builder.
-         *
-         * @see #appendFilter(BusFilter)
-         */
-        public Deque<BusFilter<FailureEnvelope>> getFilters() {
-            return newLinkedList(filters);
-        }
-
+        @Override
         public FailureBus build() {
             if(dispatcherFailureDelivery == null) {
                 dispatcherFailureDelivery = DispatcherFailureDelivery.directDelivery();
             }
 
             return new FailureBus(this);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
     }
 

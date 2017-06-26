@@ -31,6 +31,7 @@ import io.spine.type.MessageClass;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
+import java.util.Queue;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -326,6 +327,57 @@ public abstract class Bus<T extends Message,
      */
     private Function<T, E> toEnvelope() {
         return messageConverter;
+    }
+
+    public abstract static class AbstractBuilder<E extends MessageEnvelope<T>,
+            T extends Message,
+            B extends AbstractBuilder<E, T, B>> {
+
+        private final Queue<BusFilter<E>> filters;
+
+        protected AbstractBuilder() {
+            this.filters = newLinkedList();
+        }
+
+        /**
+         * Adds the given {@linkplain BusFilter filter} to the builder.
+         *
+         * <p>The order of appending the filters to the builder is the order of the filters in
+         * the resulting bus.
+         *
+         * @param filter the filter to append
+         */
+        public B appendFilter(BusFilter<E> filter) {
+            checkNotNull(filter);
+            this.filters.offer(filter);
+            return self();
+        }
+
+        /**
+         * Removes the specified filter from the filter queue.
+         *
+         * <p>If the filter is not present in the queue, no action is performed.
+         *
+         * @param filter the filter to delete
+         */
+        public B removeFilter(BusFilter<E> filter) {
+            checkNotNull(filter);
+            this.filters.remove(filter);
+            return self();
+        }
+
+        /**
+         * Obtains the {@linkplain BusFilter bus filters} of this builder.
+         *
+         * @see #appendFilter(BusFilter)
+         */
+        public Deque<BusFilter<E>> getFilters() {
+            return newLinkedList(filters);
+        }
+
+        public abstract Bus<?, E, ?, ?> build();
+
+        protected abstract B self();
     }
 
     /**

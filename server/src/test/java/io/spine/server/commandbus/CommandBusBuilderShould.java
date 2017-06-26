@@ -20,8 +20,9 @@
 
 package io.spine.server.commandbus;
 
+import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
-import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
@@ -41,9 +42,16 @@ import static org.mockito.Mockito.mock;
  * @author Alexander Yevsyukov
  */
 @SuppressWarnings("ConstantConditions")
-public class CommandBusBuilderShould {
+public class CommandBusBuilderShould extends BusBuilderShould<CommandBus.Builder,
+                                                              CommandEnvelope,
+                                                              Command> {
 
     private CommandStore commandStore;
+
+    @Override
+    protected CommandBus.Builder builder() {
+        return CommandBus.newBuilder();
+    }
 
     @Before
     public void setUp() {
@@ -57,8 +65,7 @@ public class CommandBusBuilderShould {
 
     @Test(expected = NullPointerException.class)
     public void not_accept_null_CommandStore() {
-        CommandBus.newBuilder()
-                  .setCommandStore(Tests.<CommandStore>nullRef());
+        builder().setCommandStore(Tests.<CommandStore>nullRef());
     }
 
     @Test(expected = IllegalStateException.class)
@@ -69,9 +76,8 @@ public class CommandBusBuilderShould {
 
     @Test
     public void create_new_instance() {
-        final CommandBus commandBus = CommandBus.newBuilder()
-                                                .setCommandStore(commandStore)
-                                                .build();
+        final CommandBus commandBus = builder().setCommandStore(commandStore)
+                                               .build();
         assertNotNull(commandBus);
     }
 
@@ -79,9 +85,8 @@ public class CommandBusBuilderShould {
     public void allow_to_specify_command_scheduler() {
         final CommandScheduler expectedScheduler = mock(CommandScheduler.class);
 
-        final CommandBus.Builder builder = CommandBus.newBuilder()
-                                                     .setCommandStore(commandStore)
-                                                     .setCommandScheduler(expectedScheduler);
+        final CommandBus.Builder builder = builder().setCommandStore(commandStore)
+                                                    .setCommandScheduler(expectedScheduler);
 
         assertEquals(expectedScheduler, builder.getCommandScheduler()
                                                .get());
@@ -97,18 +102,16 @@ public class CommandBusBuilderShould {
     public void allow_to_specify_failure_bus() {
         final FailureBus expectedFailureBus = mock(FailureBus.class);
 
-        final CommandBus.Builder builder = CommandBus.newBuilder()
-                                                     .setCommandStore(commandStore)
-                                                     .setFailureBus(expectedFailureBus);
+        final CommandBus.Builder builder = builder().setCommandStore(commandStore)
+                                                    .setFailureBus(expectedFailureBus);
         assertEquals(expectedFailureBus, builder.getFailureBus()
                                                 .get());
     }
 
     @Test
     public void specify_if_thread_spawn_allowed() {
-        assertTrue(CommandBus.newBuilder()
-                             .setThreadSpawnAllowed(true)
-                             .isThreadSpawnAllowed());
+        assertTrue(builder().setThreadSpawnAllowed(true)
+                            .isThreadSpawnAllowed());
 
         assertFalse(CommandBus.newBuilder()
                               .setThreadSpawnAllowed(false)
@@ -117,43 +120,17 @@ public class CommandBusBuilderShould {
 
     @Test
     public void verify_if_multitenant() {
-        assertTrue(CommandBus.newBuilder()
-                             .setMultitenant(true)
+        assertTrue(builder().setMultitenant(true)
+                            .isMultitenant());
+        assertFalse(builder().setMultitenant(false)
                              .isMultitenant());
-        assertFalse(CommandBus.newBuilder()
-                              .setMultitenant(false)
-                              .isMultitenant());
     }
 
     @Test
     public void set_command_store() {
         final CommandStore commandStore = mock(CommandStore.class);
 
-        assertEquals(commandStore, CommandBus.newBuilder()
-                                             .setCommandStore(commandStore)
-                                             .getCommandStore());
-    }
-
-    @Test
-    public void allow_adding_filter() {
-        @SuppressWarnings("unchecked")
-        final BusFilter<CommandEnvelope> filter = mock(BusFilter.class);
-
-        assertTrue(CommandBus.newBuilder()
-                             .appendFilter(filter)
-                             .getFilters()
-                             .contains(filter));
-    }
-
-    @Test
-    public void allow_removing_filter() {
-        @SuppressWarnings("unchecked")
-        final BusFilter<CommandEnvelope> filter = mock(BusFilter.class);
-
-        assertFalse(CommandBus.newBuilder()
-                              .appendFilter(filter)
-                              .removeFilter(filter)
-                              .getFilters()
-                              .contains(filter));
+        assertEquals(commandStore, builder().setCommandStore(commandStore)
+                                            .getCommandStore());
     }
 }

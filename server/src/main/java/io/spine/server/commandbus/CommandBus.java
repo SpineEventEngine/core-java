@@ -46,7 +46,6 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static com.google.common.collect.Lists.newLinkedList;
 import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.core.Failures.toFailure;
 import static io.spine.server.bus.Buses.acknowledge;
@@ -317,7 +316,7 @@ public class CommandBus extends Bus<Command,
     /**
      * The {@code Builder} for {@code CommandBus}.
      */
-    public static class Builder {
+    public static class Builder extends AbstractBuilder<CommandEnvelope, Command, Builder> {
 
         /**
          * The multi-tenancy flag for the {@code CommandBus} to build.
@@ -350,8 +349,6 @@ public class CommandBus extends Bus<Command,
         private boolean autoReschedule;
 
         private FailureBus failureBus;
-
-        private final Deque<BusFilter<CommandEnvelope>> filters = newLinkedList();
 
         /**
          * Checks whether the manual {@link Thread} spawning is allowed within
@@ -409,27 +406,6 @@ public class CommandBus extends Bus<Command,
             return this;
         }
 
-        public Builder appendFilter(BusFilter<CommandEnvelope> filter) {
-            checkNotNull(filter);
-            filters.add(filter);
-            return this;
-        }
-
-        public Builder removeFilter(BusFilter<CommandEnvelope> filter) {
-            checkNotNull(filter);
-            filters.remove(filter);
-            return this;
-        }
-
-        /**
-         * Obtains the added filters.
-         */
-        @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a private method.
-        @VisibleForTesting
-        Deque<BusFilter<CommandEnvelope>> getFilters() {
-            return filters;
-        }
-
         /**
          * Enables or disables creating threads for {@code CommandBus} operations.
          *
@@ -469,6 +445,7 @@ public class CommandBus extends Bus<Command,
         }
 
         private Builder() {
+            super();
             // Do not allow creating builder instances directly.
         }
 
@@ -478,6 +455,7 @@ public class CommandBus extends Bus<Command,
          * <p>This method is supposed to be called internally when building an enclosing
          * {@code BoundedContext}.
          */
+        @Override
         @Internal
         public CommandBus build() {
             checkState(
@@ -507,6 +485,11 @@ public class CommandBus extends Bus<Command,
             }
 
             return commandBus;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
         }
 
         private CommandBus createCommandBus() {
