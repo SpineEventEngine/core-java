@@ -45,7 +45,7 @@ final class FilterChain<E extends MessageEnvelope<T>, T> implements BusFilter<E>
 
     private final Deque<BusFilter<E>> chain;
 
-    private boolean closed;
+    private volatile boolean closed;
 
     FilterChain(Queue<? extends BusFilter<E>> chain) {
         this.chain = newLinkedList(chain);

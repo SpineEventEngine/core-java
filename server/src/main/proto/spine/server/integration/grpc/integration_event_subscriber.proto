@@ -32,7 +32,7 @@ import "spine/core/bus.proto";
 import "spine/server/integration/integration_event.proto";
 
 // A service for notifying integration event subscribers.
-// A Bounded Context is a typical integration event subscriber.is
+// A Bounded Context is a typical integration event subscriber.
 service IntegrationEventSubscriber {
     // Notifies a subscriber about an integration event.
     // The response is `ok` if the event is successfully received by the subscriber.

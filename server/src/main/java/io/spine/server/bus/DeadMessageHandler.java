@@ -20,6 +20,7 @@
 
 package io.spine.server.bus;
 
+import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.core.MessageEnvelope;
 
@@ -31,6 +32,7 @@ import io.spine.core.MessageEnvelope;
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public interface DeadMessageHandler<E extends MessageEnvelope<?>> {
 
     /**

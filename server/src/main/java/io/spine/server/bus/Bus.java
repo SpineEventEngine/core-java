@@ -330,8 +330,8 @@ public abstract class Bus<T extends Message,
     }
 
     public abstract static class AbstractBuilder<E extends MessageEnvelope<T>,
-            T extends Message,
-            B extends AbstractBuilder<E, T, B>> {
+                                                 T extends Message,
+                                                 B extends AbstractBuilder<E, T, B>> {
 
         private final Queue<BusFilter<E>> filters;
 

@@ -70,7 +70,7 @@ public class CommandBus extends Bus<Command,
 
     private final CommandStore commandStore;
 
-    private final Deque<BusFilter<CommandEnvelope>> filters;
+    private final Deque<BusFilter<CommandEnvelope>> filterChain;
 
     private final CommandScheduler scheduler;
 
@@ -121,7 +121,7 @@ public class CommandBus extends Bus<Command,
         this.log = builder.log;
         this.isThreadSpawnAllowed = builder.threadSpawnAllowed;
         this.failureBus = builder.failureBus;
-        this.filters = builder.getFilters();
+        this.filterChain = builder.getFilters();
         this.deadCommandHandler = new DeadCommandHandler();
     }
 
@@ -183,8 +183,8 @@ public class CommandBus extends Bus<Command,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for a protected factory method
     @Override
     protected Deque<BusFilter<CommandEnvelope>> createFilterChain() {
-        filters.push(scheduler);
-        return filters;
+        filterChain.push(scheduler);
+        return filterChain;
     }
 
     @Override

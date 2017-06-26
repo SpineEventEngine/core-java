@@ -20,6 +20,7 @@
 
 package io.spine.server.bus;
 
+import io.spine.annotation.Internal;
 import io.spine.core.MessageEnvelope;
 
 /**
@@ -29,9 +30,11 @@ import io.spine.core.MessageEnvelope;
  *
  * @author Dmytro Dashenkov
  */
+@Internal
 public abstract class AbstractBusFilter<E extends MessageEnvelope<?>> implements BusFilter<E> {
 
-    @SuppressWarnings("NoopMethodInAbstractClass") // Default impl.
+    @SuppressWarnings("NoopMethodInAbstractClass")
+        // Do nothing by default, but allow customization.
     @Override
     public void close() throws Exception {
         // NoOp
