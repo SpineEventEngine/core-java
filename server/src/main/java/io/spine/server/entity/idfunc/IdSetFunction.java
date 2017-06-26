@@ -31,7 +31,7 @@ import java.util.Set;
  *
  * @param <I> the type of entity IDs
  * @param <M> the type of messages to get IDs from
- * @param <C> either {@link EventContext EventContext} or \
+ * @param <C> either {@link EventContext EventContext} or
  *              {@link io.spine.core.CommandContext CommandContext} type
  * @author Alexander Yevsyukov
  */
