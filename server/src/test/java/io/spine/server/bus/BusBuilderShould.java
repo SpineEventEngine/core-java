@@ -32,11 +32,16 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 
 /**
+ * The abstract test suite for the tests of the builders of buses.
+ *
  * @author Dmytro Dashenkov
+ * @see io.spine.server.commandbus.CommandBusBuilderShould
+ * @see io.spine.server.event.EventBusBuilderShould
+ * @see io.spine.server.failure.FailureBusBuilderShould
  */
 public abstract class BusBuilderShould<B extends Bus.AbstractBuilder<E, T, ?>,
-                                      E extends MessageEnvelope<T>,
-                                      T extends Message> {
+                                       E extends MessageEnvelope<T>,
+                                       T extends Message> {
 
     protected abstract B builder();
 
