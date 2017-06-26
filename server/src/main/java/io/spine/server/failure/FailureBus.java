@@ -27,8 +27,10 @@ import io.spine.base.Error;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
+import io.spine.core.FailureId;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
@@ -110,14 +112,14 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected FailureEnvelope toEnvelope(Failure message) {
-        final FailureEnvelope result = FailureEnvelope.of(message);
-        return result;
+    protected IdConverter<FailureEnvelope> getIdConverter() {
+        return FailureIdConverter.INSTANCE;
     }
 
     @Override
-    protected Message getId(FailureEnvelope envelope) {
-        return envelope.getId();
+    protected FailureEnvelope toEnvelope(Failure message) {
+        final FailureEnvelope result = FailureEnvelope.of(message);
+        return result;
     }
 
     @Override
@@ -245,6 +247,17 @@ public class FailureBus extends CommandOutputBus<Failure,
         public Optional<Error> validate(FailureEnvelope envelope) {
             checkNotNull(envelope);
             return Optional.absent();
+        }
+    }
+
+    private enum FailureIdConverter implements Bus.IdConverter<FailureEnvelope> {
+        INSTANCE;
+
+        @Nullable
+        @Override
+        public FailureId apply(@Nullable FailureEnvelope input) {
+            checkNotNull(input);
+            return input.getId();
         }
     }
 

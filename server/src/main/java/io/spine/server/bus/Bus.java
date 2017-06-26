@@ -28,6 +28,7 @@ import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
@@ -154,11 +155,6 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Retrieves the ID of the given {@link MessageEnvelope}.
-     */
-    protected abstract Message getId(E envelope);
-
-    /**
      * Obtains the instance of {@link DeadMessageHandler} for this bus.
      */
     protected abstract DeadMessageHandler<E> getDeadMessageHandler();
@@ -218,6 +214,8 @@ public abstract class Bus<T extends Message,
      * @return a dequeue of the bus custom filters
      */
     protected abstract Deque<BusFilter<E>> createFilterChain();
+
+    protected abstract IdConverter<E> getIdConverter();
 
     /**
      * Filters the given messages.
@@ -391,5 +389,20 @@ public abstract class Bus<T extends Message,
             final E result = toEnvelope(message);
             return result;
         }
+    }
+
+    /**
+     * A functional interface defining the function which receives a {@link MessageEnvelope} as
+     * a parameter and returns the ID of the message enclosed in that parameter.
+     *
+     * @param <E> the type of the envelope
+     */
+    public interface IdConverter<E extends MessageEnvelope<?>> extends Function<E, Message> {
+
+        @SuppressWarnings({"AbstractMethodOverridesAbstractMethod", "NullableProblems"})
+            // Changes nullability contract.
+        @Nonnull
+        @Override
+        Message apply(@Nullable E input);
     }
 }

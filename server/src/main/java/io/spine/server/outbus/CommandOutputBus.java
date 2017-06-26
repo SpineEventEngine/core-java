@@ -124,7 +124,7 @@ public abstract class CommandOutputBus<M extends Message,
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
-        final Message id = getId(envelope);
+        final Message id = getIdConverter().apply(envelope);
         checkState(dispatchersCalled != 0,
                    format("Message %s has no dispatchers.", envelope.getMessage()));
         final IsSent result = acknowledge(id);

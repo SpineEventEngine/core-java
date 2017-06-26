@@ -58,7 +58,9 @@ final class DeadMessageFilter<T extends Message,
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
             final Error error = deadMessageHandler.handleDeadMessage(envelope);
-            final IsSent result = Buses.reject(bus.getId(envelope), error);
+            final IsSent result = Buses.reject(bus.getIdConverter()
+                                                  .apply(envelope),
+                                               error);
             return Optional.of(result);
         } else {
             return Optional.absent();

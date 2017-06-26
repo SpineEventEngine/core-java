@@ -31,8 +31,10 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
@@ -155,11 +157,6 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected Message getId(EventEnvelope envelope) {
-        return envelope.getId();
-    }
-
-    @Override
     protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
         return DeadEventHandler.INSTANCE;
     }
@@ -181,6 +178,11 @@ public class EventBus extends CommandOutputBus<Event,
     @Override
     protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
         return filters;
+    }
+
+    @Override
+    protected IdConverter<EventEnvelope> getIdConverter() {
+        return EventIdConverter.INSTANCE;
     }
 
     @Override
@@ -532,6 +534,16 @@ public class EventBus extends CommandOutputBus<Event,
             final Exception exception = new UnsupportedEventException(message.getMessage());
             final Error error = toError(exception);
             return error;
+        }
+    }
+
+    private enum EventIdConverter implements Bus.IdConverter<EventEnvelope> {
+        INSTANCE;
+
+        @Override
+        public EventId apply(@Nullable EventEnvelope input) {
+            checkNotNull(input);
+            return input.getId();
         }
     }
 

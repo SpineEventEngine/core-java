@@ -21,7 +21,6 @@ package io.spine.server.commandbus;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
-import com.google.protobuf.Message;
 import io.spine.Identifier;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
@@ -29,6 +28,7 @@ import io.spine.base.ThrowableMessage;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
 import io.spine.core.Failure;
 import io.spine.core.IsSent;
 import io.spine.server.Environment;
@@ -188,6 +188,11 @@ public class CommandBus extends Bus<Command,
     }
 
     @Override
+    protected Bus.IdConverter<CommandEnvelope> getIdConverter() {
+        return CommandIdConverter.INSTANCE;
+    }
+
+    @Override
     protected CommandEnvelope toEnvelope(Command message) {
         return CommandEnvelope.of(message);
     }
@@ -230,11 +235,6 @@ public class CommandBus extends Bus<Command,
 
     private Optional<CommandDispatcher> getDispatcher(CommandClass commandClass) {
         return registry().getDispatcher(commandClass);
-    }
-
-    @Override
-    protected Message getId(CommandEnvelope envelope) {
-        return envelope.getId();
     }
 
     @Override
@@ -516,6 +516,16 @@ public class CommandBus extends Bus<Command,
                                                                  unsupported.getError());
             final Error error = toError(throwable, UNSUPPORTED_COMMAND.getNumber());
             return error;
+        }
+    }
+
+    private enum CommandIdConverter implements Bus.IdConverter<CommandEnvelope> {
+        INSTANCE;
+
+        @Override
+        public CommandId apply(@Nullable CommandEnvelope input) {
+            checkNotNull(input);
+            return input.getId();
         }
     }
 }

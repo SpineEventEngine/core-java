@@ -52,7 +52,9 @@ final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>
         checkNotNull(envelope);
         final Optional<Error> violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            final IsSent result = reject(bus.getId(envelope), violation.get());
+            final IsSent result = reject(bus.getIdConverter()
+                                            .apply(envelope),
+                                         violation.get());
             return Optional.of(result);
         } else {
             return Optional.absent();
