@@ -21,21 +21,20 @@ syntax = "proto3";
 
 package spine.test.failure;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option (SPI_all) = true;
 option java_package = "io.spine.test.failure";
 // Keep all the failures under the same outer class called `ProjectFailures`.
 option java_generate_equals_and_hash = true;
 
-import "spine/options.proto";
 import "spine/test/failure/project.proto";
 
 message InvalidProjectName {
-
     ProjectId project_id = 1;
 }
 
 message MissingOwner {
-
     ProjectId project_id = 1;
 }

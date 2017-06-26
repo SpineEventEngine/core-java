@@ -23,11 +23,11 @@ package io.spine.server.command;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 
 import javax.annotation.Nullable;
 

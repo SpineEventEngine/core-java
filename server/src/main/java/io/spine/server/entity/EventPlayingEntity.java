@@ -22,10 +22,10 @@ package io.spine.server.entity;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Event;
-import io.spine.base.EventContext;
-import io.spine.base.Version;
-import io.spine.reflect.GenericTypeIndex;
+import io.spine.core.Event;
+import io.spine.core.EventContext;
+import io.spine.core.Version;
+import io.spine.util.GenericTypeIndex;
 import io.spine.validate.ValidatingBuilder;
 import io.spine.validate.ValidatingBuilders;
 
@@ -33,7 +33,7 @@ import javax.annotation.Nullable;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.Events.getMessage;
+import static io.spine.core.Events.getMessage;
 import static io.spine.server.entity.EventPlayingEntity.GenericParameter.STATE_BUILDER;
 
 /**

@@ -21,7 +21,7 @@
 package io.spine.server.event;
 
 import com.google.common.base.Predicate;
-import io.spine.base.Event;
+import io.spine.core.Event;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -33,7 +33,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
  *
  * <p>The predicate ignores the time of bounds and matches only
  * the {@link io.spine.base.FieldFilter fields} of the event message and
- * the {@link io.spine.base.EventContext}.
+ * the {@link io.spine.core.EventContext EventContext}.
  *
  * @author Alexander Yevsyukov
  * @author Dmytro Dashenkov

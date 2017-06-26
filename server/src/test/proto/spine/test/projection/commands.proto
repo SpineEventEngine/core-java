@@ -21,12 +21,13 @@ syntax = "proto3";
 
 package spine.test.projection.command;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.projection.command";
 option java_outer_classname = "ProjectionCommandsProto";
 option java_multiple_files = true;
 
-import "spine/options.proto";
 import "spine/test/projection/project.proto";
 
 message CreateProject {

@@ -25,7 +25,7 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Any;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Event;
+import io.spine.core.Event;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.entity.Entity;
 import io.spine.server.event.Given.EventMessage;

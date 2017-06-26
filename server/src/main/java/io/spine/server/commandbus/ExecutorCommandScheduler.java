@@ -21,12 +21,12 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
-import io.spine.base.Command;
+import io.spine.core.Command;
 
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
-import static io.spine.base.CommandContext.Schedule;
+import static io.spine.core.CommandContext.Schedule;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 
 /**

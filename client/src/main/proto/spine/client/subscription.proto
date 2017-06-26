@@ -21,22 +21,21 @@ syntax = "proto3";
 
 package spine.client;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
+option java_package = "io.spine.client";
 option java_generate_equals_and_hash = true;
 option java_multiple_files = true;
 option java_outer_classname = "SubscriptionProto";
-option java_package = "io.spine.client";
-
 
 import "google/protobuf/any.proto";
 import "google/protobuf/field_mask.proto";
 
-import "spine/options.proto";
-import "spine/ui/language.proto";
-import "spine/base/user_id.proto";
-import "spine/base/tenant_id.proto";
-import "spine/base/actor_context.proto";
-import "spine/base/response.proto";
+import "spine/core/user_id.proto";
+import "spine/core/tenant_id.proto";
+import "spine/core/actor_context.proto";
+import "spine/core/response.proto";
 import "spine/client/entities.proto";
 
 // Topic identifier.
@@ -68,7 +67,7 @@ message Topic {
     google.protobuf.FieldMask field_mask = 3;
 
     // Service information about the environment in which the topic was created.
-    base.ActorContext context = 4 [(required) = true,
+    core.ActorContext context = 4 [(required) = true,
                                    (valid) = true,
                                    (if_invalid).msg_format = "Invalid actor context"];
 
@@ -84,7 +83,7 @@ message SubscriptionUpdate {
 
     // Represents the base part of the response,
     //   i.e. whether the Topic subscription has been acked or not.
-    base.Response response = 2 [(required) = true];
+    core.Response response = 2 [(required) = true];
 
     // Reserved for more subscription update attributes.
     reserved 3 to 9;

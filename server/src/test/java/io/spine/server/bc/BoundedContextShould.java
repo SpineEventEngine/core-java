@@ -22,8 +22,8 @@ package io.spine.server.bc;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import io.spine.base.Response;
-import io.spine.base.Responses;
+import io.spine.core.Response;
+import io.spine.core.Responses;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.option.EntityOption;
 import io.spine.protobuf.AnyPacker;

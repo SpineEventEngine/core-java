@@ -23,7 +23,7 @@ import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.util.concurrent.MoreExecutors;
 import io.spine.annotation.Internal;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.MessageEnvelope;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

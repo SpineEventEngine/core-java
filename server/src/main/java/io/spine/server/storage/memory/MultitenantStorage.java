@@ -20,7 +20,7 @@
 
 package io.spine.server.storage.memory;
 
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 import io.spine.server.tenant.TenantFunction;
 
 import javax.annotation.Nullable;

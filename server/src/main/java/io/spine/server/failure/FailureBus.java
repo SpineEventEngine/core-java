@@ -23,10 +23,10 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Failure;
-import io.spine.base.FailureClass;
-import io.spine.base.IsSent;
-import io.spine.envelope.FailureEnvelope;
+import io.spine.core.Failure;
+import io.spine.core.FailureClass;
+import io.spine.core.FailureEnvelope;
+import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -46,8 +46,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.base.ThrowableMessage
- * @see io.spine.base.Failures
- * @see io.spine.base.Subscribe @Subscribe
+ * @see io.spine.core.Failures
+ * @see io.spine.core.Subscribe @Subscribe
  */
 public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureEnvelope,

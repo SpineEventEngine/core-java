@@ -24,10 +24,10 @@ import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
-import io.spine.base.Event;
-import io.spine.base.Failure;
-import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.Event;
+import io.spine.core.Failure;
+import io.spine.core.IsSent;
+import io.spine.core.MessageEnvelope;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
@@ -43,7 +43,7 @@ import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
 
 /**
- * A base bus responsible for delivering the {@link io.spine.base.Command command} output.
+ * A base bus responsible for delivering the {@link io.spine.core.Command command} output.
  *
  * <p>The typical output artifacts of the command processing are:
  *

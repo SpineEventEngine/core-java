@@ -21,14 +21,14 @@
 package io.spine.server.commandstore;
 
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
 import io.spine.base.Error;
 import io.spine.base.Errors;
-import io.spine.base.Failure;
 import io.spine.base.ThrowableMessage;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
+import io.spine.core.Failure;
 import io.spine.server.commandbus.CommandException;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.Log;
@@ -44,7 +44,7 @@ import java.util.Iterator;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.base.Failures.toFailure;
+import static io.spine.core.Failures.toFailure;
 
 /**
  * Manages storage of commands received by a Bounded Context.

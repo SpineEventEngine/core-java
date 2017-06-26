@@ -22,11 +22,11 @@ package io.spine.client;
 
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.base.ActorContext;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.TenantId;
-import io.spine.base.UserId;
+import io.spine.core.ActorContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.TenantId;
+import io.spine.core.UserId;
 import io.spine.test.TimeTests;
 import io.spine.test.commands.RequiredFieldCommand;
 import io.spine.time.Timestamps2;

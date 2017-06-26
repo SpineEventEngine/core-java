@@ -24,7 +24,7 @@ import com.google.common.collect.Lists;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.base.UserId;
+import io.spine.core.UserId;
 import io.spine.test.Tests;
 import io.spine.type.TypeUrl;
 import org.junit.Test;

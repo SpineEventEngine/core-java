@@ -22,11 +22,11 @@ package io.spine.server.command;
 
 import com.google.protobuf.Empty;
 import com.google.protobuf.Message;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.Commands;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.Commands;
 import io.spine.test.Tests;
 import io.spine.test.command.event.MandatoryFieldEvent;
 import io.spine.validate.ValidationException;

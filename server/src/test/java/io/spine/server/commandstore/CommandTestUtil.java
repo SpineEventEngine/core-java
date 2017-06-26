@@ -20,10 +20,10 @@
 
 package io.spine.server.commandstore;
 
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.test.command.CreateProject;
 

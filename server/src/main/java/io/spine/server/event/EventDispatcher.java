@@ -20,8 +20,8 @@
 
 package io.spine.server.event;
 
-import io.spine.base.EventClass;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventClass;
+import io.spine.core.EventEnvelope;
 import io.spine.server.bus.MessageDispatcher;
 
 /**

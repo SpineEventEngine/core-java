@@ -20,7 +20,7 @@
 
 package io.spine.server.tenant;
 
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 import io.spine.test.Tests;
 import org.junit.Test;
 

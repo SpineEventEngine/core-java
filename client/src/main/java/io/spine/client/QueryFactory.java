@@ -23,7 +23,7 @@ package io.spine.client;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.base.ActorContext;
+import io.spine.core.ActorContext;
 
 import javax.annotation.Nullable;
 import java.util.Arrays;

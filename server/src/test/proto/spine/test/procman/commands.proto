@@ -21,12 +21,13 @@ syntax = "proto3";
 
 package spine.test.procman.command;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package="io.spine.test.procman.command";
 option java_outer_classname = "ProcmanCommandsProto";
 option java_multiple_files = true;
 
-import "spine/options.proto";
 import "spine/test/procman/project.proto";
 
 message CreateProject {

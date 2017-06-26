@@ -22,7 +22,7 @@ package io.spine.server.entity;
 
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.reflect.GenericTypeIndex;
+import io.spine.util.GenericTypeIndex;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

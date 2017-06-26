@@ -20,11 +20,11 @@
 package io.spine.server;
 
 import com.google.common.collect.Sets;
-import io.spine.base.EventContext;
-import io.spine.base.Responses;
-import io.spine.base.Subscribe;
 import io.spine.client.Query;
 import io.spine.client.QueryResponse;
+import io.spine.core.EventContext;
+import io.spine.core.Responses;
+import io.spine.core.Subscribe;
 import io.spine.grpc.StreamObservers;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.projection.Projection;

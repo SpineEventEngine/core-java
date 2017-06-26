@@ -22,7 +22,7 @@ package io.spine.server.storage.memory;
 
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Timestamp;
-import io.spine.base.TenantId;
+import io.spine.core.TenantId;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.projection.ProjectionStorage;
 import io.spine.server.storage.RecordStorage;

@@ -27,7 +27,7 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.Multimap;
 import com.google.protobuf.Internal;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
+import io.spine.core.EventContext;
 import io.spine.option.OptionsProto;
 import io.spine.server.reflect.Field;
 import org.slf4j.Logger;

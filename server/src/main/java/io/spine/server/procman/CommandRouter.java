@@ -21,8 +21,8 @@
 package io.spine.server.procman;
 
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
 import io.spine.server.commandbus.CommandBus;
 
 /**

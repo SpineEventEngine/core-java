@@ -23,7 +23,7 @@ package io.spine.server.aggregate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.BoundedContext;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregatePart;
 import io.spine.server.aggregate.given.AggregatePartTestEnv.AnAggregateRoot;

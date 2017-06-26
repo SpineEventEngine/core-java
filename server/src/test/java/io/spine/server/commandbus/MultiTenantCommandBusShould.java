@@ -22,10 +22,11 @@ package io.spine.server.commandbus;
 
 import com.google.common.testing.NullPointerTester;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Command;
-import io.spine.base.CommandClass;
 import io.spine.base.Error;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandClass;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.failure.FailureBus;
@@ -35,11 +36,11 @@ import org.junit.Test;
 
 import java.util.Set;
 
-import static io.spine.base.CommandValidationError.TENANT_UNKNOWN;
-import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
-import static io.spine.base.Status.StatusCase.ERROR;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
+import static io.spine.core.CommandValidationError.TENANT_UNKNOWN;
+import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.server.commandbus.Given.ACommand.addTask;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -269,7 +270,7 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
     /**
      * The dispatcher that remembers that
-     * {@link CommandDispatcher#dispatch(io.spine.envelope.MessageEnvelope) dispatch()}
+     * {@link CommandDispatcher#dispatch(MessageEnvelope) dispatch()}
      * was called.
      */
     private static class AddTaskDispatcher implements CommandDispatcher {

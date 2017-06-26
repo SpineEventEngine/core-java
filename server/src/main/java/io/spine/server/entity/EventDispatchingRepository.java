@@ -22,8 +22,8 @@ package io.spine.server.entity;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.base.EventContext;
-import io.spine.envelope.EventEnvelope;
+import io.spine.core.EventContext;
+import io.spine.core.EventEnvelope;
 import io.spine.server.entity.idfunc.EventTargetsFunction;
 import io.spine.server.entity.idfunc.Producers;
 import io.spine.server.tenant.EventOperation;

@@ -25,11 +25,11 @@ import com.google.common.base.Function;
 import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import io.spine.Identifier;
-import io.spine.base.Command;
-import io.spine.base.CommandId;
-import io.spine.base.CommandStatus;
 import io.spine.base.Error;
-import io.spine.base.Failure;
+import io.spine.core.Command;
+import io.spine.core.CommandId;
+import io.spine.core.CommandStatus;
+import io.spine.core.Failure;
 import io.spine.server.commandbus.CommandRecord;
 import io.spine.server.commandbus.ProcessingStatus;
 import io.spine.server.entity.DefaultRecordBasedRepository;
@@ -38,7 +38,7 @@ import javax.annotation.Nullable;
 import java.util.Iterator;
 
 import static com.google.common.collect.Iterators.transform;
-import static io.spine.base.CommandStatus.RECEIVED;
+import static io.spine.core.CommandStatus.RECEIVED;
 
 /**
  * The storage of commands and their processing status.

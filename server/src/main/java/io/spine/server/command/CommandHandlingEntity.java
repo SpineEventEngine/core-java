@@ -23,12 +23,12 @@ package io.spine.server.command;
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.base.CommandContext;
 import io.spine.base.ThrowableMessage;
 import io.spine.change.MessageMismatch;
 import io.spine.change.StringMismatch;
 import io.spine.change.ValueMismatch;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
 import io.spine.server.entity.EventPlayingEntity;
 import io.spine.server.reflect.CommandHandlerMethod;
 import io.spine.validate.ValidatingBuilder;
@@ -52,7 +52,7 @@ import java.util.List;
  * {@link io.spine.base.ThrowableMessage ThrowableMessage}.
  * Throwing a {@code ThrowableMessage} indicates that the passed command cannot be handled
  * because of a
- * {@linkplain io.spine.base.Failures#toFailure(ThrowableMessage, io.spine.base.Command)
+ * {@linkplain io.spine.core.Failures#toFailure(ThrowableMessage, io.spine.core.Command)
  * business failure}.
  *
  * {@inheritDoc}

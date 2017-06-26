@@ -23,7 +23,7 @@ package io.spine.server.entity.idfunc;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.CommandContext;
+import io.spine.core.CommandContext;
 
 /**
  * Obtains a command target entity ID based on a command message and context.
@@ -39,6 +39,7 @@ public class GetTargetIdFromCommand<I, M extends Message>
         extends GetIdByFieldIndex<I, M, CommandContext>
         implements IdCommandFunction<I, M> {
 
+    private static final long serialVersionUID = 0L;
     private static final int ID_FIELD_INDEX = 0;
 
     private GetTargetIdFromCommand() {

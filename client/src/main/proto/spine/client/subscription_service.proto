@@ -21,16 +21,16 @@ syntax = "proto3";
 
 package spine.client;
 
+import "spine/options.proto";
+
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.client.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "SubscriptionServiceProto";
 option java_generate_equals_and_hash = true;
 
-
-import "spine/options.proto";
 import "spine/client/subscription.proto";
-import "spine/base/response.proto";
+import "spine/core/response.proto";
 
 // A service for subscribing to the read-side changes by clients.
 service SubscriptionService {
@@ -53,5 +53,5 @@ service SubscriptionService {
     //
     // Clients will stop receiving the SubscriptionUpdate after this method is called.
     // The subscription is destroyed as a result of invocation.
-    rpc Cancel (Subscription) returns (base.Response);
+    rpc Cancel (Subscription) returns (core.Response);
 }

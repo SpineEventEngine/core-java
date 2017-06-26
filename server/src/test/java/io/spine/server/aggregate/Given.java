@@ -23,10 +23,10 @@ package io.spine.server.aggregate;
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
 import com.google.protobuf.Timestamp;
-import io.spine.base.Command;
-import io.spine.base.Event;
-import io.spine.base.UserId;
 import io.spine.client.TestActorRequestFactory;
+import io.spine.core.Command;
+import io.spine.core.Event;
+import io.spine.core.UserId;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AddTask;
@@ -119,7 +119,7 @@ class Given {
         /**
          * Creates a new {@link ACommand} with the given command message,
          * userId and timestamp using default
-         * {@link io.spine.base.CommandId CommandId} instance.
+         * {@link io.spine.core.CommandId CommandId} instance.
          */
         static Command create(Message command, UserId userId, Timestamp when) {
             final Command result = TestActorRequestFactory.newInstance(userId)
