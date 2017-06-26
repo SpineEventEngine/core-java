@@ -22,8 +22,8 @@ package io.spine.server.bus;
 
 import com.google.common.base.Optional;
 import io.spine.annotation.SPI;
-import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.IsSent;
+import io.spine.core.MessageEnvelope;
 
 /**
  * The filter for the messages posted to a bus.

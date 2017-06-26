@@ -23,8 +23,8 @@ package io.spine.server.bus;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.IsSent;
+import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
 import java.util.Collection;

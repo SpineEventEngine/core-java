@@ -47,7 +47,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
 import static com.google.common.collect.Lists.newLinkedList;
-import static io.spine.base.CommandValidationError.UNSUPPORTED_COMMAND;
+import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.core.Failures.toFailure;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;

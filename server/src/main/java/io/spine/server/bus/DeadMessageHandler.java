@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import io.spine.base.Error;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.MessageEnvelope;
 
 /**
  * A functional interface for the function which handles a dead message.

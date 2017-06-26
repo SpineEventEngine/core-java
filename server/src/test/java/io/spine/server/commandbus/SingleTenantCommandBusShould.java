@@ -21,12 +21,12 @@
 package io.spine.server.commandbus;
 
 import com.google.protobuf.Message;
-import io.spine.base.Command;
-import io.spine.base.CommandContext;
-import io.spine.base.Failure;
-import io.spine.base.IsSent;
 import io.spine.client.TestActorRequestFactory;
-import io.spine.envelope.CommandEnvelope;
+import io.spine.core.Command;
+import io.spine.core.CommandContext;
+import io.spine.core.CommandEnvelope;
+import io.spine.core.Failure;
+import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.command.Assign;
@@ -38,12 +38,13 @@ import io.spine.test.failure.InvalidProjectName;
 import io.spine.test.failure.ProjectId;
 import org.junit.Test;
 
-import static io.spine.base.CommandValidationError.INVALID_COMMAND;
-import static io.spine.base.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.core.CommandValidationError.INVALID_COMMAND;
+import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
+import static io.spine.core.Failures.toFailure;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.server.commandbus.Given.Command.addTask;
-import static io.spine.server.commandbus.Given.Command.createProject;
+import static io.spine.server.commandbus.Given.ACommand.addTask;
+import static io.spine.server.commandbus.Given.ACommand.createProject;
 import static io.spine.server.tenant.TenantAwareOperation.isTenantSet;
 import static io.spine.validate.Validate.isNotDefault;
 import static org.junit.Assert.assertEquals;
@@ -109,8 +110,8 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
         final MemoizingObserver<IsSent> observer = memoizingObserver();
         commandBus.post(addTaskCommand, observer);
 
-        final InvalidProjectName failureThrowable = faultyHandler.getThrowable();
-        final Failure expectedFailure = failureThrowable.toFailure(addTaskCommand);
+        final InvalidProjectName throwable = faultyHandler.getThrowable();
+        final Failure expectedFailure = toFailure(throwable, addTaskCommand);
         final IsSent isSent = observer.firstResponse();
         final Failure actualFailure = isSent.getStatus().getFailure();
         assertTrue(isNotDefault(actualFailure));

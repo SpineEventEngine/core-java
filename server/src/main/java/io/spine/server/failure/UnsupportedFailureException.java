@@ -21,7 +21,7 @@
 package io.spine.server.failure;
 
 import com.google.protobuf.Message;
-import io.spine.base.FailureClass;
+import io.spine.core.FailureClass;
 import io.spine.type.TypeName;
 
 import static java.lang.String.format;

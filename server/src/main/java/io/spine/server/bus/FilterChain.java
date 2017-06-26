@@ -21,8 +21,8 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
-import io.spine.base.IsSent;
-import io.spine.envelope.MessageEnvelope;
+import io.spine.core.IsSent;
+import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
 import java.util.Queue;
