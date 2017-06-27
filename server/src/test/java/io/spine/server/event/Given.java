@@ -27,8 +27,8 @@ import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
 import io.spine.core.Event;
 import io.spine.core.EventId;
-import io.spine.core.TestIdentifiers;
 import io.spine.core.UserId;
+import io.spine.core.given.GivenUserId;
 import io.spine.people.PersonName;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.enrich.EventEnricher;
@@ -226,7 +226,7 @@ public class Given {
                 if (id == null) {
                     return null;
                 }
-                return TestIdentifiers.newUserId("Project owner " + id.getId());
+                return GivenUserId.of("Project owner " + id.getId());
             }
         }
 

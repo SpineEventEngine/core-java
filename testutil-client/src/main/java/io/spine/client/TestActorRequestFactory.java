@@ -34,7 +34,7 @@ import io.spine.core.UserId;
 import io.spine.time.ZoneOffset;
 import io.spine.time.ZoneOffsets;
 
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 
 /**
  * The command factory, which allows generating commands as if the were
@@ -58,7 +58,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static TestActorRequestFactory newInstance(String actor, ZoneOffset zoneOffset) {
-        return newInstance(newUserId(actor), zoneOffset);
+        return newInstance(of(actor), zoneOffset);
     }
 
     public static TestActorRequestFactory newInstance(UserId actor, ZoneOffset zoneOffset) {
@@ -78,7 +78,7 @@ public class TestActorRequestFactory extends ActorRequestFactory {
     }
 
     public static TestActorRequestFactory newInstance(Class<?> testClass, TenantId tenantId) {
-        return new TestActorRequestFactory(newUserId(testClass.getName()),
+        return new TestActorRequestFactory(of(testClass.getName()),
                                            ZoneOffsets.UTC, tenantId);
     }
 

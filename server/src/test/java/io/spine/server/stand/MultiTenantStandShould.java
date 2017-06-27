@@ -40,7 +40,7 @@ import org.junit.Test;
 
 import java.util.Map;
 
-import static io.spine.core.TestIdentifiers.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -53,7 +53,7 @@ public class MultiTenantStandShould extends StandShould {
     @Override
     @Before
     public void setUp() {
-        final TenantId tenantId = newTenantUuid();
+        final TenantId tenantId = newUuid();
 
         setCurrentTenant(tenantId);
         setMultitenant(true);
@@ -69,7 +69,7 @@ public class MultiTenantStandShould extends StandShould {
     public void not_allow_reading_aggregate_records_for_another_tenant() {
         final Stand stand = doCheckReadingCustomersById(15);
 
-        final TenantId anotherTenant = newTenantUuid();
+        final TenantId anotherTenant = newUuid();
         final ActorRequestFactory requestFactory = createRequestFactory(anotherTenant);
 
         final Query readAllCustomers = requestFactory.query().all(Customer.class);
@@ -96,7 +96,7 @@ public class MultiTenantStandShould extends StandShould {
                                                                                    Customer.class);
 
         // --- Another Tenant
-        final TenantId anotherTenant = newTenantUuid();
+        final TenantId anotherTenant = newUuid();
         final ActorRequestFactory anotherFactory = createRequestFactory(anotherTenant);
         final MemoizeEntityUpdateCallback anotherCallback = subscribeToAllOf(stand,
                                                                              anotherFactory,

@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.time.Time.getCurrentTime;
 
 public class Given {
@@ -111,7 +111,7 @@ public class Given {
 
     static class ACommand {
 
-        private static final UserId USER_ID = newUserId(newUuid());
+        private static final UserId USER_ID = of(newUuid());
         private static final ProjectId PROJECT_ID = newProjectId();
 
         /* This hack is just for the testing purposes.
@@ -168,7 +168,7 @@ public class Given {
                                               .setCustomerId(customerId)
                                               .setCustomer(customer)
                                               .build();
-            final UserId userId = newUserId(Identifier.newUuid());
+            final UserId userId = of(Identifier.newUuid());
             final Command result = create(msg, userId, getCurrentTime());
             return result;
         }

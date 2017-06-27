@@ -56,7 +56,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.CommandValidationError.INVALID_COMMAND;
-import static io.spine.core.TestIdentifiers.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.AnyPacker.unpack;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
@@ -193,7 +193,7 @@ public abstract class AbstractCommandBusTestSuite {
                            .setStorageFactory(storageFactory)
                            .build();
         requestFactory = this.multitenant
-                            ? TestActorRequestFactory.newInstance(getClass(), newTenantUuid())
+                            ? TestActorRequestFactory.newInstance(getClass(), newUuid())
                             : TestActorRequestFactory.newInstance(getClass());
         createProjectHandler = new CreateProjectHandler();
         observer = StreamObservers.memoizingObserver();

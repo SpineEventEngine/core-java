@@ -46,7 +46,7 @@ import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.client.ColumnFilters.all;
 import static io.spine.client.ColumnFilters.eq;
 import static io.spine.client.CompositeColumnFilter.CompositeOperator.ALL;
-import static io.spine.core.TestIdentifiers.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.protobuf.AnyPacker.pack;
 import static io.spine.server.entity.TestTransaction.archive;
 import static io.spine.server.entity.TestTransaction.delete;
@@ -87,7 +87,7 @@ public abstract class RecordBasedRepositoryShould<E extends AbstractVersionableE
     @Before
     public void setUp() {
         this.repository = createRepository();
-        setCurrentTenant(newTenantUuid());
+        setCurrentTenant(newUuid());
     }
 
     @After

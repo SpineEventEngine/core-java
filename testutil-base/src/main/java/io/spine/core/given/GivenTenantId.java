@@ -18,10 +18,11 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.core.given;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.Identifier.newUuid;
+import io.spine.Identifier;
+import io.spine.core.TenantId;
+
 import static io.spine.validate.Validate.checkNotEmptyOrBlank;
 
 /**
@@ -29,48 +30,22 @@ import static io.spine.validate.Validate.checkNotEmptyOrBlank;
  *
  * @author Alexander Yevsyukov
  */
-public class TestIdentifiers {
+public class GivenTenantId {
 
     /**
      * The prefix for generated tenant identifiers.
      */
     private static final String TENANT_PREFIX = "tenant-";
-    
-    /**
-     * The prefix for generated user identifiers.
-     */
-    private static final String USER_PREFIX = "user-";
 
-    private TestIdentifiers() {
+    private GivenTenantId() {
         // Prevent instantiation of this utility class.
-    }
-
-    /**
-     * Creates a new user ID instance by passed string value.
-     *
-     * @param value new user ID value
-     * @return new instance
-     */
-    public static UserId newUserId(String value) {
-        checkNotNull(value);
-
-        return UserId.newBuilder()
-                .setValue(value)
-                .build();
-    }
-
-    /**
-     * Generates a new UUID-based {@code UserId}.
-     */
-    public static UserId newUserUuid() {
-        return newUserId(USER_PREFIX + newUuid());
     }
 
     /**
      * Generates a new UUID-based {@code TenantId}.
      */
-    public static TenantId newTenantUuid() {
-        return newTenantId(TENANT_PREFIX + newUuid());
+    public static TenantId newUuid() {
+        return of(TENANT_PREFIX + Identifier.newUuid());
     }
 
     /**
@@ -79,8 +54,9 @@ public class TestIdentifiers {
      * @param value must be non-null, not empty, and not-blank
      * @return new {@code TenantId}
      */
-    public static TenantId newTenantId(String value) {
-        checkNotEmptyOrBlank(value, TenantId.class.getSimpleName());
+    @SuppressWarnings("DuplicateStringLiteralInspection")
+    public static TenantId of(String value) {
+        checkNotEmptyOrBlank(value, "value");
         return TenantId.newBuilder()
                        .setValue(value)
                        .build();
@@ -89,8 +65,7 @@ public class TestIdentifiers {
     /**
      * Creates a test instance of {@code TenantId} with the simple name of the passed test class.
      */
-    public static TenantId newTenantId(Class<?> testClass) {
-        return newTenantId(testClass.getSimpleName());
+    public static TenantId nameOf(Class<?> testClass) {
+        return of(testClass.getSimpleName());
     }
-
 }

@@ -27,7 +27,7 @@ import io.spine.server.BoundedContext;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.core.TestIdentifiers.newTenantUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
@@ -51,7 +51,7 @@ public class TenantRepositoryShould {
 
     @Test
     public void cache_passed_value() {
-        final TenantId tenantId = newTenantUuid();
+        final TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
         repository.keep(tenantId);
@@ -61,7 +61,7 @@ public class TenantRepositoryShould {
 
     @Test
     public void un_cache_values() {
-        final TenantId tenantId = newTenantUuid();
+        final TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
         assertTrue(repository.unCache(tenantId));
@@ -70,7 +70,7 @@ public class TenantRepositoryShould {
 
     @Test
     public void clear_cache() {
-        final TenantId tenantId = newTenantUuid();
+        final TenantId tenantId = newUuid();
 
         repository.keep(tenantId);
 

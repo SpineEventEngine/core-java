@@ -34,7 +34,7 @@ import java.util.Set;
 
 import static com.google.common.collect.Sets.newHashSet;
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.time.Timestamps2.isLaterThan;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
@@ -49,7 +49,7 @@ import static org.junit.Assert.assertTrue;
  */
 public abstract class ActorRequestFactoryShould {
 
-    private final UserId actor = newUserId(newUuid());
+    private final UserId actor = of(newUuid());
     private final ZoneOffset zoneOffset = ZoneOffsets.UTC;
 
     protected ActorRequestFactory.Builder builder() {

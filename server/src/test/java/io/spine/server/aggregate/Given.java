@@ -42,7 +42,7 @@ import java.util.List;
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
 import static io.spine.server.command.TestEventFactory.newInstance;
@@ -81,7 +81,7 @@ class Given {
 
     static class ACommand {
 
-        private static final UserId USER_ID = newUserId(newUuid());
+        private static final UserId USER_ID = of(newUuid());
         private static final ProjectId PROJECT_ID = Sample.messageOfType(ProjectId.class);
 
         private ACommand() {

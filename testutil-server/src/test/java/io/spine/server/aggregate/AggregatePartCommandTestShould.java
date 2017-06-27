@@ -22,8 +22,10 @@ package io.spine.server.aggregate;
 
 import com.google.protobuf.Timestamp;
 import com.google.protobuf.UInt32Value;
+import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.core.TenantId;
+import io.spine.core.given.GivenUserId;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandTest;
@@ -33,8 +35,6 @@ import io.spine.validate.UInt32ValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.spine.Identifier.newUuid;
-import static io.spine.core.TestIdentifiers.newUserUuid;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -44,6 +44,16 @@ import static org.junit.Assert.assertTrue;
 public class AggregatePartCommandTestShould {
 
     private AggregatePartCommandTest<Timestamp, TimerCounter> aggregatePartCommandTest;
+
+    private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
+        return ActorRequestFactory.newBuilder()
+                                  .setActor(GivenUserId.newUuid())
+                                  .setZoneOffset(ZoneOffsets.UTC)
+                                  .setTenantId(TenantId.newBuilder()
+                                                       .setValue(clazz.getSimpleName())
+                                                       .build())
+                                  .build();
+    }
 
     @Before
     public void setUp() {
@@ -61,15 +71,6 @@ public class AggregatePartCommandTestShould {
                                            .isPresent());
     }
 
-    private static ActorRequestFactory newRequestFactory(Class<?> clazz) {
-        return ActorRequestFactory.newBuilder()
-                                  .setActor(newUserUuid())
-                                  .setZoneOffset(ZoneOffsets.UTC)
-                                  .setTenantId(TenantId.newBuilder()
-                                                       .setValue(clazz.getSimpleName())
-                                                       .build())
-                                  .build();
-    }
     /**
      * Ensures existence of the constructor in {@link AggregatePartCommandTest} class.
      *
@@ -87,9 +88,9 @@ public class AggregatePartCommandTestShould {
      * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
     private static final class TimerCounter extends AggregatePart<String,
-                                                                      UInt32Value,
+            UInt32Value,
             UInt32ValueVBuilder,
-                                                                      TimerCounterRoot> {
+            TimerCounterRoot> {
         private TimerCounter(TimerCounterRoot root) {
             super(root);
         }
@@ -109,7 +110,7 @@ public class AggregatePartCommandTestShould {
      * The test harness class that tests how {@code TimerCounterPart} handles its command.
      */
     private static class TimerCountingTest
-                   extends AggregatePartCommandTest<Timestamp, TimerCounter> {
+            extends AggregatePartCommandTest<Timestamp, TimerCounter> {
 
         protected TimerCountingTest(ActorRequestFactory requestFactory) {
             super(requestFactory);
@@ -122,7 +123,8 @@ public class AggregatePartCommandTestShould {
         @Override
         protected TimerCounter createAggregatePart() {
             final TimerCounterRoot root = new TimerCounterRoot(BoundedContext.newBuilder()
-                                                                             .build(), newUuid());
+                                                                             .build(),
+                                                               Identifier.newUuid());
             final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
                                              .withRoot(root)
                                              .withId(getClass().getName())

@@ -18,37 +18,42 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.tenant;
+package io.spine.core.given;
 
-import com.google.protobuf.Timestamp;
-import io.spine.time.Time;
+import com.google.common.testing.NullPointerTester;
+import io.spine.Identifier;
+import io.spine.test.Tests;
 import org.junit.Test;
 
-import static io.spine.core.given.GivenTenantId.newUuid;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
  */
-public class TenantAwareFunction0Should {
+public class GivenTenantIdShould {
 
-    @Test(expected = IllegalStateException.class)
-    public void require_current_tenant_set() {
-        final TenantAwareFunction0<Timestamp> whichTime = new TenantAwareFunction0<Timestamp>() {
-            @Override
-            public Timestamp apply() {
-                return Time.getCurrentTime();
-            }
-        };
+    @Test
+    public void have_utility_ctor() {
+        Tests.assertHasPrivateParameterlessCtor(GivenTenantId.class);
+    }
 
-        // This should pass.
-        new TenantAwareOperation(newUuid()) {
-            @Override
-            public void run() {
-                whichTime.execute();
-            }
-        }.execute();
+    @Test
+    public void pass_null_tolerance_check() {
+        new NullPointerTester()
+                .testAllPublicStaticMethods(GivenTenantId.class);
+    }
 
-        // This should fail.
-        whichTime.execute();
+    @Test
+    public void create_by_string_value() {
+        final String expected = Identifier.newUuid();
+
+        assertEquals(expected, GivenTenantId.of(expected)
+                                            .getValue());
+    }
+
+    @Test
+    public void create_by_test_class_name() {
+        assertEquals(getClass().getSimpleName(), GivenTenantId.nameOf(getClass())
+                                                              .getValue());
     }
 }

@@ -34,6 +34,7 @@ import io.spine.Identifier;
 import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;
+import io.spine.core.given.GivenUserId;
 import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.time.Durations2;
@@ -47,10 +48,8 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
-import static io.spine.Identifier.newUuid;
 import static io.spine.core.Commands.sameActorAndTenant;
-import static io.spine.core.TestIdentifiers.newTenantUuid;
-import static io.spine.core.TestIdentifiers.newUserUuid;
+import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
@@ -96,8 +95,8 @@ public class CommandsShould {
     public void check_if_contexts_have_same_actor_and_tenantId() {
         final ActorContext.Builder actorContext =
                 ActorContext.newBuilder()
-                            .setActor(newUserUuid())
-                            .setTenantId(newTenantUuid());
+                            .setActor(GivenUserId.newUuid())
+                            .setTenantId(newUuid());
         final CommandContext c1 =
                 CommandContext.newBuilder()
                               .setActorContext(actorContext)
@@ -121,7 +120,7 @@ public class CommandsShould {
                                                          minutesAgo(1)))
                 .setDefault(CommandContext.class, requestFactory.createCommandContext())
                 .setDefault(ZoneOffset.class, ZoneOffsets.UTC)
-                .setDefault(UserId.class, TestIdentifiers.newUserUuid())
+                .setDefault(UserId.class, GivenUserId.newUuid())
                 .testStaticMethods(Commands.class, NullPointerTester.Visibility.PACKAGE);
     }
 
@@ -172,7 +171,6 @@ public class CommandsShould {
         assertEquals(3, FluentIterable.from(filter)
                                       .size());
     }
-
 
     @Test
     public void when_command_delay_is_set_then_consider_it_scheduled() {
@@ -234,7 +232,7 @@ public class CommandsShould {
     public void obtain_type_url_of_command() {
         final ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsShould.class);
-        final StringValue message = Wrapper.forString(newUuid());
+        final StringValue message = Wrapper.forString(Identifier.newUuid());
         final Command command = factory.command()
                                        .create(message);
 

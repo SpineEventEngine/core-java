@@ -29,7 +29,7 @@ import io.spine.core.TenantId;
 import io.spine.core.UserId;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.time.ZoneOffsets.UTC;
 
@@ -45,7 +45,7 @@ public class GivenCommandContext {
 
     /** Creates a new {@link CommandContext} instance. */
     public static CommandContext withRandomUser() {
-        final UserId userId = newUserId(newUuid());
+        final UserId userId = of(newUuid());
         final Timestamp now = getCurrentTime();
         return withUserAndTime(userId, now);
     }

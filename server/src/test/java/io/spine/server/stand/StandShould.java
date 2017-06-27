@@ -96,7 +96,7 @@ import static io.spine.client.QueryValidationError.INVALID_QUERY;
 import static io.spine.client.QueryValidationError.UNSUPPORTED_QUERY_TARGET;
 import static io.spine.client.TopicValidationError.INVALID_TOPIC;
 import static io.spine.client.TopicValidationError.UNSUPPORTED_TOPIC_TARGET;
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.grpc.StreamObservers.noOpObserver;
 import static io.spine.server.stand.Given.StandTestProjection;
@@ -155,7 +155,7 @@ public class StandShould extends TenantAwareTest {
 
     protected static ActorRequestFactory createRequestFactory(@Nullable TenantId tenant) {
         final ActorRequestFactory.Builder builder = ActorRequestFactory.newBuilder()
-                                                         .setActor(newUserId(newUuid()))
+                                                         .setActor(of(newUuid()))
                                                          .setZoneOffset(ZoneOffsets.UTC);
         if (tenant != null) {
             builder.setTenantId(tenant);

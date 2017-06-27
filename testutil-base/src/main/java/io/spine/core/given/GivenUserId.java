@@ -18,45 +18,47 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.core.given;
 
-import com.google.common.testing.NullPointerTester;
-import io.spine.test.Tests;
-import org.junit.Test;
+import io.spine.Identifier;
+import io.spine.core.UserId;
 
-import static io.spine.core.TestIdentifiers.newUserId;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
+ * Factory methods for creating test values of {@link io.spine.core.UserId UserId}.
+ *
  * @author Alexander Yevsyukov
  */
-public class TestIdentifiersShould {
+public class GivenUserId {
 
-    @Test
-    public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TestIdentifiers.class);
+    /**
+     * The prefix for generated user identifiers.
+     */
+    private static final String USER_PREFIX = "user-";
+
+    private GivenUserId() {
+        // Prevent instantiation of this utility class.
     }
 
-    @Test
-    public void pass_null_tolerance_check() {
-        new NullPointerTester()
-                .testAllPublicStaticMethods(TestIdentifiers.class);
+    /**
+     * Creates a new user ID instance by passed string value.
+     *
+     * @param value new user ID value
+     * @return new instance
+     */
+    public static UserId of(String value) {
+        checkNotNull(value);
+
+        return UserId.newBuilder()
+                .setValue(value)
+                .build();
     }
 
-    @Test
-    public void create_UserId_by_string() {
-
-        final String testIdString = "12345";
-        final UserId userId = newUserId(testIdString);
-
-        final UserId expected = UserId.newBuilder().setValue(testIdString).build();
-
-        assertEquals(expected, userId);
-    }
-
-    @Test
-    public void create_new_UUID_based_UserId() {
-        assertFalse(TestIdentifiers.newUserUuid().getValue().isEmpty());
+    /**
+     * Generates a new UUID-based {@code UserId}.
+     */
+    public static UserId newUuid() {
+        return of(USER_PREFIX + Identifier.newUuid());
     }
 }

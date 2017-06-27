@@ -32,7 +32,7 @@ import org.junit.Test;
 import java.util.Iterator;
 
 import static io.spine.Identifier.newUuid;
-import static io.spine.core.TestIdentifiers.newUserId;
+import static io.spine.core.given.GivenUserId.of;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
@@ -46,7 +46,7 @@ public class AnyPackerShould {
     private final StringValue googleMsg = Wrapper.forString(newUuid());
 
     /** A message with different type URL. */
-    private final UserId spineMsg = newUserId(newUuid());
+    private final UserId spineMsg = of(newUuid());
 
     @Test
     public void have_private_constructor() {
