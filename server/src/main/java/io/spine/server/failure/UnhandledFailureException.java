@@ -65,6 +65,11 @@ public class UnhandledFailureException extends RuntimeException implements Messa
         return this;
     }
 
+    /**
+     * Builds an {@link Error io.spine.base.Error} from this exception.
+     *
+     * <p>This method is called in the constructor; it uses the exception message and stack trace.
+     */
     private Error buildError() {
         final Error error = Error.newBuilder()
                                  .setType(UnhandledFailureException.class.getCanonicalName())
