@@ -21,53 +21,55 @@
 package io.spine.change;
 
 import com.google.protobuf.Any;
-import com.google.protobuf.FloatValue;
+import com.google.protobuf.StringValue;
+import io.spine.protobuf.Wrapper;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.change.Preconditions.checkNotNullOrEqual;
+import static io.spine.change.Preconditions2.checkNotEqual;
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrappers.pack;
 
 /**
- * Utility class for working with {@code float} values in {@link ValueMismatch}es.
+ * Utility class for working with string values in ValueMismatches.
  *
  * @author Alexander Yevsyukov
  */
-public final class FloatMismatch {
+public final class StringMismatch {
 
-    private FloatMismatch() {
+    private StringMismatch() {
         // Prevent instantiation of this utility class.
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering not zero value,
-     * when a zero amount was expected by a command.
+     * Creates {@code ValueMismatch} for the case of discovering a non-empty value,
+     * when an empty string was expected by a command.
      *
-     * @param actual   the value discovered instead of zero
+     * @param actual   the value discovered instead of the empty string
      * @param newValue the new value requested in the command
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch expectedZero(float actual, float newValue, int version) {
-        return of(0.0f, actual, newValue, version);
+    public static ValueMismatch expectedEmpty(String actual, String newValue, int version) {
+        checkNotNull(actual);
+        checkNotNull(newValue);
+        return of("", actual, newValue, version);
     }
 
     /**
-     * Creates {@code ValueMismatch} for the case of discovering zero value,
-     * when a non zero amount was expected by a command.
+     * Creates a {@code ValueMismatch} for a command that wanted to clear a string value,
+     * but discovered that the field is already empty.
      *
      * @param expected the value of the field that the command wanted to clear
-     * @param newValue the new value requested in the command
      * @param version  the version of the entity in which the mismatch is discovered
-     * @return new {@code ValueMismatch} instance
+     * @return new ValueMismatch instance
      */
-    public static ValueMismatch expectedNonZero(float expected, float newValue, int version) {
-        return of(expected, 0.0f, newValue, version);
+    public static ValueMismatch expectedNotEmpty(String expected, int version) {
+        checkNotNull(expected);
+        return of(expected, "", "", version);
     }
 
     /**
      * Creates {@code ValueMismatch} for the case of discovering a value
-     * different than by a command.
+     * different than expected by a command.
      *
      * @param expected the value expected by the command
      * @param actual   the value discovered instead of the expected string
@@ -75,57 +77,62 @@ public final class FloatMismatch {
      * @param version  the version of the entity in which the mismatch is discovered
      * @return new {@code ValueMismatch} instance
      */
-    public static ValueMismatch unexpectedValue(float expected, float actual,
-                                                float newValue, int version) {
-        checkNotNullOrEqual(expected, actual);
+    public static ValueMismatch unexpectedValue(String expected, String actual,
+                                                String newValue, int version) {
+        checkNotNull(expected);
+        checkNotNull(actual);
+        checkNotNull(newValue);
+        checkNotEqual(expected, actual);
+
         return of(expected, actual, newValue, version);
     }
 
     /**
-     * Creates a new instance of {@code ValueMismatch} with the passed values for a float attribute.
+     * Creates a new instance of {@code ValueMismatch} with the passed values.
      */
-    public static ValueMismatch of(float expected, float actual, float newValue, int version) {
+    private static ValueMismatch of(String expected, String actual, String newValue, int version) {
+        final Wrapper<String, StringValue> wrapper = Wrapper.forString();
         final ValueMismatch.Builder builder = ValueMismatch.newBuilder()
-                                                           .setExpected(pack(expected))
-                                                           .setActual(pack(actual))
-                                                           .setNewValue(pack(newValue))
+                                                           .setExpected(wrapper.pack(expected))
+                                                           .setActual(wrapper.pack(actual))
+                                                           .setNewValue(wrapper.pack(newValue))
                                                            .setVersion(version);
         return builder.build();
     }
 
-    private static float unpacked(Any any) {
-        final FloatValue unpacked = unpack(any, FloatValue.class);
+    private static String unpacked(Any any) {
+        final StringValue unpacked = unpack(any, StringValue.class);
         return unpacked.getValue();
     }
 
     /**
-     * Obtains expected float value from the passed mismatch.
+     * Obtains expected string from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
-    public static float unpackExpected(ValueMismatch mismatch) {
+    public static String unpackExpected(ValueMismatch mismatch) {
         checkNotNull(mismatch);
         final Any expected = mismatch.getExpected();
         return unpacked(expected);
     }
 
     /**
-     * Obtains actual float value from the passed mismatch.
+     * Obtains actual string from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
-    public static float unpackActual(ValueMismatch mismatch) {
+    public static String unpackActual(ValueMismatch mismatch) {
         checkNotNull(mismatch);
         final Any actual = mismatch.getActual();
         return unpacked(actual);
     }
 
     /**
-     * Obtains new float value from the passed mismatch.
+     * Obtains new value string from the passed mismatch.
      *
-     * @throws RuntimeException if the passed instance represent a mismatch of non-float values
+     * @throws RuntimeException if the passed instance represent a mismatch of non-string values
      */
-    public static float unpackNewValue(ValueMismatch mismatch) {
+    public static String unpackNewValue(ValueMismatch mismatch) {
         checkNotNull(mismatch);
         final Any newValue = mismatch.getNewValue();
         return unpacked(newValue);
