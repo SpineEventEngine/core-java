@@ -27,8 +27,6 @@ import com.google.protobuf.Int64Value;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import com.google.protobuf.UInt32Value;
-import com.google.protobuf.UInt64Value;
 import io.spine.Identifier.Type;
 import io.spine.core.CommandId;
 import io.spine.protobuf.AnyPacker;
@@ -43,8 +41,6 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.protobuf.Wrapper.forLong;
 import static io.spine.protobuf.Wrapper.forString;
-import static io.spine.protobuf.Wrapper.forUnsignedInteger;
-import static io.spine.protobuf.Wrapper.forUnsignedLong;
 import static io.spine.test.Values.newUuidValue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -234,20 +230,20 @@ public class IdentifierShould {
 
     @Test
     public void recognize_type_by_supported_message_type() {
-        assertTrue(Type.INTEGER.matchMessage(forUnsignedInteger(10)));
-        assertTrue(Type.LONG.matchMessage(forUnsignedLong(1020L)));
+        assertTrue(Type.INTEGER.matchMessage(forInteger(10)));
+        assertTrue(Type.LONG.matchMessage(forLong(1020L)));
         assertTrue(Type.STRING.matchMessage(forString("")));
         assertTrue(Type.MESSAGE.matchMessage(Timestamp.getDefaultInstance()));
 
         assertFalse(Type.MESSAGE.matchMessage(StringValue.getDefaultInstance()));
-        assertFalse(Type.MESSAGE.matchMessage(UInt32Value.getDefaultInstance()));
-        assertFalse(Type.MESSAGE.matchMessage(UInt64Value.getDefaultInstance()));
+        assertFalse(Type.MESSAGE.matchMessage(Int32Value.getDefaultInstance()));
+        assertFalse(Type.MESSAGE.matchMessage(Int64Value.getDefaultInstance()));
     }
 
     @Test
     public void create_values_depending_on_wrapper_message_type() {
-        assertEquals(10, Type.INTEGER.fromMessage(forUnsignedInteger(10)));
-        assertEquals(1024L, Type.LONG.fromMessage(forUnsignedLong(1024L)));
+        assertEquals(10, Type.INTEGER.fromMessage(forInteger(10)));
+        assertEquals(1024L, Type.LONG.fromMessage(forLong(1024L)));
 
         final String value = getClass().getSimpleName();
         assertEquals(value, Type.STRING.fromMessage(forString(value)));

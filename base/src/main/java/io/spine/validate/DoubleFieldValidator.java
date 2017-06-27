@@ -20,10 +20,8 @@
 
 package io.spine.validate;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.FieldPath;
-import io.spine.protobuf.Wrapper;
 
 import static java.lang.Math.abs;
 
@@ -55,12 +53,5 @@ class DoubleFieldValidator extends FloatFieldValidatorBase<Double> {
     protected Double getAbs(Double value) {
         final Double abs = abs(value);
         return abs;
-    }
-
-    @Override
-    protected Any wrap(Double value) {
-        final Any any = Wrapper.forDouble()
-                               .pack(value);
-        return any;
     }
 }
