@@ -21,6 +21,7 @@
 package io.spine.util;
 
 import com.google.common.testing.NullPointerTester;
+import io.spine.base.Error;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
@@ -28,6 +29,7 @@ import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.util.Exceptions.unsupported;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Litus
@@ -52,9 +54,10 @@ public class ExceptionsShould {
 
     @Test
     public void pass_the_null_tolerance_check() {
+        final Exception defaultException = new RuntimeException("");
         new NullPointerTester()
-                .setDefault(Exception.class, new RuntimeException(""))
-                .setDefault(Throwable.class, new Error())
+                .setDefault(Exception.class, defaultException)
+                .setDefault(Throwable.class, defaultException)
                 .testAllPublicStaticMethods(Exceptions.class);
     }
 
@@ -77,5 +80,31 @@ public class ExceptionsShould {
     public void throw_formatted_ISE_with_cause() {
         newIllegalStateException(new RuntimeException(getClass().getSimpleName()),
                                             "%s %s", "taram", "param");
+    }
+
+    @Test
+    public void convert_DeliverableException_to_Error() {
+        final Throwable throwable = new TestException();
+        final Error actualError = Exceptions.toError(throwable);
+        assertEquals(TestException.ERROR, actualError);
+    }
+
+    private static class TestException extends Exception implements DeliverableException {
+
+        private static final long serialVersionUID = 0L;
+
+        private static final Error ERROR = Error.newBuilder()
+                                                .setType(TestException.class.getName())
+                                                .build();
+
+        @Override
+        public Error asError() {
+            return ERROR;
+        }
+
+        @Override
+        public Throwable asThrowable() {
+            return this;
+        }
     }
 }
