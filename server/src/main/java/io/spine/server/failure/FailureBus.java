@@ -62,14 +62,14 @@ public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureClass,
                                                  FailureDispatcher> {
 
-    private final Deque<BusFilter<FailureEnvelope>> filters;
+    private final Deque<BusFilter<FailureEnvelope>> filterChain;
 
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private FailureBus(Builder builder) {
         super(checkNotNull(builder.dispatcherFailureDelivery));
-        this.filters = builder.getFilters();
+        this.filterChain = builder.getFilters();
     }
 
     /**
@@ -109,7 +109,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
     protected Deque<BusFilter<FailureEnvelope>> createFilterChain() {
-        return filters;
+        return filterChain;
     }
 
     @Override
