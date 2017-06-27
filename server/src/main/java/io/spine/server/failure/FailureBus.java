@@ -39,6 +39,7 @@ import io.spine.validate.MessageInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -253,6 +254,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     private enum FailureIdConverter implements Bus.IdConverter<FailureEnvelope> {
         INSTANCE;
 
+        @Nonnull
         @Override
         public FailureId apply(@Nullable FailureEnvelope input) {
             checkNotNull(input);

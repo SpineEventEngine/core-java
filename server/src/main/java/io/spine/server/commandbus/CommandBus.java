@@ -39,6 +39,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
@@ -517,6 +518,7 @@ public class CommandBus extends Bus<Command,
     private enum CommandIdConverter implements Bus.IdConverter<CommandEnvelope> {
         INSTANCE;
 
+        @Nonnull
         @Override
         public CommandId apply(@Nullable CommandEnvelope input) {
             checkNotNull(input);
