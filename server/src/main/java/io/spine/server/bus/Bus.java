@@ -420,8 +420,8 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * A functional interface defining the function which receives a {@link MessageEnvelope} as
-     * a parameter and returns the ID of the message enclosed in that parameter.
+     * The function which receives a {@link MessageEnvelope} as a parameter and returns the ID of
+     * the message enclosed in that parameter.
      *
      * @param <E> the type of the envelope
      */

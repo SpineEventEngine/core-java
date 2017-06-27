@@ -25,7 +25,6 @@ import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
 
 import java.util.Deque;
-import java.util.Queue;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
@@ -35,7 +34,7 @@ import static com.google.common.collect.Lists.newLinkedList;
  * A {@link BusFilter} representing a chain of other bus filters.
  *
  * <p>The initial ordering of the filters is preserved. The filters are called sequentially in
- * the order of the initial {@link Queue}.
+ * the order direct of the initial {@link Deque}.
  *
  * <p>The {@link #close() close()} method closes all the underlying filters.
  *

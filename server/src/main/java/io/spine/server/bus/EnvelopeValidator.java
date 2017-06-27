@@ -38,7 +38,7 @@ public interface EnvelopeValidator<E extends MessageEnvelope<?>> {
      * @param envelope the envelope to validate
      * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
      *         the cause of the validation failure
-     * @see MessageInvalid for the detailed description of the returned values
+     * @see MessageInvalid for the detailed description of the returned value
      */
     Optional<MessageInvalid> validate(E envelope);
 }
