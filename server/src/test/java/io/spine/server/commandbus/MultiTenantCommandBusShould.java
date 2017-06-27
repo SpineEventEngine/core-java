@@ -26,6 +26,7 @@ import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandClass;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandValidationError;
 import io.spine.core.MessageEnvelope;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.command.CommandHandler;
@@ -126,7 +127,8 @@ public class MultiTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         checkCommandError(observer.firstResponse(),
                           UNSUPPORTED_COMMAND,
-                          UnsupportedCommandException.class, command);
+                          CommandValidationError.getDescriptor().getFullName(),
+                          command);
     }
 
     /*

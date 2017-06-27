@@ -36,6 +36,7 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
@@ -46,11 +47,9 @@ import java.util.Set;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 import static com.google.common.base.Throwables.getRootCause;
-import static io.spine.core.CommandValidationError.UNSUPPORTED_COMMAND;
 import static io.spine.core.Failures.toFailure;
 import static io.spine.server.bus.Buses.acknowledge;
 import static io.spine.server.bus.Buses.reject;
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 import static io.spine.util.Exceptions.toError;
 import static java.lang.String.format;
 
@@ -507,15 +506,13 @@ public class CommandBus extends Bus<Command,
      * command.
      */
     private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
+
         @Override
-        public Error handleDeadMessage(CommandEnvelope message) {
+        public MessageUnhandled handleDeadMessage(CommandEnvelope message) {
             final Command command = message.getCommand();
-            final CommandException unsupported = new UnsupportedCommandException(command);
-            commandStore().storeWithError(command, unsupported);
-            final Throwable throwable = invalidArgumentWithCause(unsupported,
-                                                                 unsupported.getError());
-            final Error error = toError(throwable, UNSUPPORTED_COMMAND.getNumber());
-            return error;
+            final UnsupportedCommandException exception = new UnsupportedCommandException(command);
+            commandStore().storeWithError(command, exception);
+            return exception;
         }
     }
 

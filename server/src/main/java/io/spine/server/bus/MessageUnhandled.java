@@ -30,5 +30,5 @@ import io.spine.server.throwable.DeliverableException;
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface UnhandledMessage extends DeliverableException {
+public interface MessageUnhandled extends DeliverableException {
 }

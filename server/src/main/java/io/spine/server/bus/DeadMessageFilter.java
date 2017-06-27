@@ -30,6 +30,7 @@ import io.spine.type.MessageClass;
 import java.util.Collection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static io.spine.server.bus.Buses.reject;
 
 /**
  * The {@link BusFilter} preventing the messages that have no dispatchers from being posted to
@@ -62,9 +63,9 @@ final class DeadMessageFilter<T extends Message,
         final C cls = (C) envelope.getMessageClass();
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
-            final Error error = deadMessageHandler.handleDeadMessage(envelope);
-            final IsSent result = Buses.reject(idConverter.apply(envelope),
-                                               error);
+            final MessageUnhandled exception = deadMessageHandler.handleDeadMessage(envelope);
+            final Error error = exception.toError();
+            final IsSent result = reject(idConverter.apply(envelope), error);
             return Optional.of(result);
         } else {
             return Optional.absent();

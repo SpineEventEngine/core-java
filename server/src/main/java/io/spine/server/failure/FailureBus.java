@@ -34,6 +34,7 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import org.slf4j.Logger;
@@ -44,7 +45,6 @@ import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static io.spine.util.Exceptions.toError;
 
 /**
  * Dispatches the business failures that occur during the command processing
@@ -230,10 +230,10 @@ public class FailureBus extends CommandOutputBus<Failure,
         INSTANCE;
 
         @Override
-        public Error handleDeadMessage(FailureEnvelope message) {
-            final Exception exception = new UnhandledFailureException(message.getMessage());
-            final Error error = toError(exception);
-            return error;
+        public MessageUnhandled handleDeadMessage(FailureEnvelope envelope) {
+            final Message message = envelope.getMessage();
+            final MessageUnhandled exception = new UnhandledFailureException(message);
+            return exception;
         }
     }
 

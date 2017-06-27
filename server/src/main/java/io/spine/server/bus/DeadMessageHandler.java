@@ -42,5 +42,5 @@ public interface DeadMessageHandler<E extends MessageEnvelope<?>> {
      * @param message the dead message
      * @return the {@link Error} describing the dead message
      */
-    Error handleDeadMessage(E message);
+    MessageUnhandled handleDeadMessage(E message);
 }

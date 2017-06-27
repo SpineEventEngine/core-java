@@ -23,7 +23,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
-import io.spine.server.bus.UnhandledMessage;
+import io.spine.server.bus.MessageUnhandled;
 import io.spine.type.TypeName;
 import io.spine.util.Exceptions;
 
@@ -35,7 +35,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Litus
  */
-public class UnsupportedEventException extends EventException implements UnhandledMessage {
+public class UnsupportedEventException extends EventException implements MessageUnhandled {
 
     private static final long serialVersionUID = 0L;
 

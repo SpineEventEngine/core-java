@@ -22,8 +22,7 @@ package io.spine.server.commandbus;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandValidationError;
-import io.spine.server.bus.UnhandledMessage;
-import io.spine.util.Exceptions;
+import io.spine.server.bus.MessageUnhandled;
 
 /**
  * Exception that is thrown when unsupported command is obtained
@@ -32,7 +31,7 @@ import io.spine.util.Exceptions;
  * @author Mikhail Melnik
  * @author Alexander Yevsyukov
  */
-public class UnsupportedCommandException extends CommandException implements UnhandledMessage {
+public class UnsupportedCommandException extends CommandException implements MessageUnhandled {
 
     private static final long serialVersionUID = 0L;
 
@@ -53,6 +52,6 @@ public class UnsupportedCommandException extends CommandException implements Unh
 
     @Override
     public Error toError() {
-        return Exceptions.toError(this);
+        return getError();
     }
 }

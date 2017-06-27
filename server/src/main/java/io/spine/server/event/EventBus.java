@@ -38,6 +38,7 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
+import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -53,7 +54,6 @@ import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.util.Exceptions.toError;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -530,10 +530,10 @@ public class EventBus extends CommandOutputBus<Event,
         INSTANCE;
 
         @Override
-        public Error handleDeadMessage(EventEnvelope message) {
-            final Exception exception = new UnsupportedEventException(message.getMessage());
-            final Error error = toError(exception);
-            return error;
+        public MessageUnhandled handleDeadMessage(EventEnvelope envelope) {
+            final Message message = envelope.getMessage();
+            final UnsupportedEventException exception = new UnsupportedEventException(message);
+            return exception;
         }
     }
 
