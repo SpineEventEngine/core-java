@@ -18,8 +18,10 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.core.given;
 
+import io.spine.core.Version;
+import io.spine.core.Versions;
 import io.spine.time.Time;
 
 /**
@@ -27,16 +29,16 @@ import io.spine.time.Time;
  *
  * @author Alexander Yevsyukov
  */
-public class TestVersions {
+public class GivenVersion {
 
-    private TestVersions() {
+    private GivenVersion() {
         // Prevent instantiation of this utility class.
     }
 
     /**
      * Creates {@link Version} with the passed number and current time.
      */
-    public static Version newVersionWithNumber(int number) {
+    public static Version withNumber(int number) {
         return Versions.newVersion(number, Time.getCurrentTime());
     }
 }

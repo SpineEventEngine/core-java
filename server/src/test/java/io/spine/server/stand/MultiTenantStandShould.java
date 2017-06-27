@@ -28,8 +28,8 @@ import io.spine.client.QueryResponse;
 import io.spine.client.Topic;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
-import io.spine.core.TestVersions;
 import io.spine.core.Version;
+import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.storage.memory.InMemoryStorageFactory;
 import io.spine.test.commandservice.customer.Customer;
@@ -108,7 +108,7 @@ public class MultiTenantStandShould extends StandShould {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         final Any packedState = AnyPacker.pack(customer);

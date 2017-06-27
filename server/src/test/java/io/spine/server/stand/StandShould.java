@@ -45,8 +45,8 @@ import io.spine.client.Topic;
 import io.spine.core.Response;
 import io.spine.core.Responses;
 import io.spine.core.TenantId;
-import io.spine.core.TestVersions;
 import io.spine.core.Version;
+import io.spine.core.given.GivenVersion;
 import io.spine.grpc.StreamObservers;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.people.PersonName;
@@ -266,7 +266,7 @@ public class StandShould extends TenantAwareTest {
         verify(executor, never()).execute(any(Runnable.class));
 
         final ProjectId someId = ProjectId.getDefaultInstance();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(someId, Project.getDefaultInstance(), stateVersion));
 
         verify(executor, times(1)).execute(any(Runnable.class));
@@ -295,7 +295,7 @@ public class StandShould extends TenantAwareTest {
         final CustomerAggregate customerAggregate = customerAggregateRepo.create(customerId);
         final Customer customerState = customerAggregate.getState();
         final TypeUrl customerType = TypeUrl.of(Customer.class);
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
 
         verify(standStorageMock, never()).write(any(AggregateStateId.class), any(EntityRecordWithColumns.class));
 
@@ -408,7 +408,7 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         final Any packedState = AnyPacker.pack(customer);
@@ -429,7 +429,7 @@ public class StandShould extends TenantAwareTest {
                                                                               .next();
         final ProjectId projectId = sampleData.getKey();
         final Project project = sampleData.getValue();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(projectId, project, stateVersion));
 
         final Any packedState = AnyPacker.pack(project);
@@ -451,7 +451,7 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         assertNull(memoizeCallback.newEntityState);
@@ -486,7 +486,7 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         final Any packedState = AnyPacker.pack(customer);
@@ -507,7 +507,7 @@ public class StandShould extends TenantAwareTest {
                                                                                  .next();
         final CustomerId customerId = sampleData.getKey();
         final Customer customer = sampleData.getValue();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(customerId, customer, stateVersion));
 
         verify(callback, never()).onStateChanged(any(Any.class));
@@ -534,7 +534,7 @@ public class StandShould extends TenantAwareTest {
         for (Map.Entry<CustomerId, Customer> sampleEntry : sampleCustomers.entrySet()) {
             final CustomerId customerId = sampleEntry.getKey();
             final Customer customer = sampleEntry.getValue();
-            final Version stateVersion = TestVersions.newVersionWithNumber(1);
+            final Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(customerId, customer, stateVersion));
         }
 
@@ -568,7 +568,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
         final Query customerQuery = requestFactory.query().all(Customer.class);
@@ -690,7 +690,7 @@ public class StandShould extends TenantAwareTest {
             // Has new ID each time
             final Customer customer = getSampleCustomer();
             customers.add(customer);
-            final Version stateVersion = TestVersions.newVersionWithNumber(1);
+            final Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(customer.getId(), customer, stateVersion));
         }
 
@@ -718,7 +718,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
         // FieldMask with invalid type URLs.
@@ -1061,7 +1061,7 @@ public class StandShould extends TenantAwareTest {
         final Stand stand = prepareStandWithAggregateRepo(createStandStorage());
 
         final Customer sampleCustomer = getSampleCustomer();
-        final Version stateVersion = TestVersions.newVersionWithNumber(1);
+        final Version stateVersion = GivenVersion.withNumber(1);
         stand.update(asEnvelope(sampleCustomer.getId(), sampleCustomer, stateVersion));
 
         final String[] paths = new String[fieldIndexes.length];
@@ -1138,7 +1138,7 @@ public class StandShould extends TenantAwareTest {
                                                          .setId(CustomerId.newBuilder()
                                                                           .setNumber(i))
                                                          .build();
-            final Version stateVersion = TestVersions.newVersionWithNumber(1);
+            final Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(customer.getId(), customer, stateVersion));
 
             ids.add(customer.getId());
@@ -1316,7 +1316,7 @@ public class StandShould extends TenantAwareTest {
         // Trigger the aggregate state updates.
         for (CustomerId id : sampleCustomers.keySet()) {
             final Customer sampleCustomer = sampleCustomers.get(id);
-            final Version stateVersion = TestVersions.newVersionWithNumber(1);
+            final Version stateVersion = GivenVersion.withNumber(1);
             stand.update(asEnvelope(id, sampleCustomer, stateVersion));
         }
     }

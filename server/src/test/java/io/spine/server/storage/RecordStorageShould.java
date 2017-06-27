@@ -35,8 +35,8 @@ import io.spine.client.CompositeColumnFilter;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.core.TestVersions;
 import io.spine.core.Version;
+import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.EntityRecord;
 import io.spine.server.entity.EventPlayingEntity;
@@ -114,7 +114,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final Any wrappedState = pack(state);
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(wrappedState)
-                                                .setVersion(TestVersions.newVersionWithNumber(0))
+                                                .setVersion(GivenVersion.withNumber(0))
                                                 .build();
         return record;
     }
@@ -124,7 +124,7 @@ public abstract class RecordStorageShould<I, S extends RecordStorage<I>>
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setEntityId(pack(id))
                                                 .setState(wrappedState)
-                                                .setVersion(TestVersions.newVersionWithNumber(0))
+                                                .setVersion(GivenVersion.withNumber(0))
                                                 .build();
         return record;
     }

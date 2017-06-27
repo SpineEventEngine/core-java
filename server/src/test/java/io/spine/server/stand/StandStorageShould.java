@@ -28,7 +28,7 @@ import com.google.protobuf.Any;
 import com.google.protobuf.FieldMask;
 import com.google.protobuf.Message;
 import io.spine.Identifier;
-import io.spine.core.TestVersions;
+import io.spine.core.given.GivenVersion;
 import io.spine.protobuf.AnyPacker;
 import io.spine.server.entity.Entity;
 import io.spine.server.entity.EntityRecord;
@@ -199,7 +199,7 @@ public abstract class StandStorageShould extends RecordStorageShould<AggregateSt
     private static EntityRecord newRecord(Message state) {
         final EntityRecord record = EntityRecord.newBuilder()
                                                 .setState(AnyPacker.pack(state))
-                                                .setVersion(TestVersions.newVersionWithNumber(1))
+                                                .setVersion(GivenVersion.withNumber(1))
                                                 .build();
         return record;
     }

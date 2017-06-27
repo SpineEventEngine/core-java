@@ -18,8 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.core;
+package io.spine.core.given;
 
+import io.spine.core.Version;
 import io.spine.test.TestValues;
 import io.spine.test.Tests;
 import org.junit.Test;
@@ -29,18 +30,18 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alexander Yevsyukov
  */
-public class TestVersionsShould {
+public class GivenVersionShould {
 
     @Test
     public void have_utility_ctor() {
-        Tests.assertHasPrivateParameterlessCtor(TestVersions.class);
+        Tests.assertHasPrivateParameterlessCtor(GivenVersion.class);
     }
 
     @Test
     public void generate_version_by_number() {
         final int number = TestValues.random(100);
 
-        final Version version = TestVersions.newVersionWithNumber(number);
+        final Version version = GivenVersion.withNumber(number);
 
         assertEquals(number, version.getNumber());
     }
