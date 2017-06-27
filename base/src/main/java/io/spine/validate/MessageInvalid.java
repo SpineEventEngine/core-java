@@ -18,19 +18,18 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.bus;
+package io.spine.validate;
 
 import io.spine.annotation.Internal;
 import io.spine.util.DeliverableException;
 
 /**
- * An interface for the {@linkplain Exception exceptions} which are thrown upon an unhandled message
- * being posted into a {@link Bus}.
+ * An interface for the {@link Exception} types which are thrown upon an invalid message.
  *
  * <p>Except the methods declared in {@link DeliverableException}, this type is a marker interface.
  *
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface MessageUnhandled extends DeliverableException {
+public interface MessageInvalid extends DeliverableException {
 }

@@ -27,6 +27,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.validate.MessageInvalid;
 
 import java.util.Map;
 
@@ -38,7 +39,7 @@ import java.util.Map;
  *
  * @author Alexander Litus
  */
-public class InvalidEventException extends EventException {
+public class InvalidEventException extends EventException implements MessageInvalid {
 
     private static final long serialVersionUID = 0L;
 
