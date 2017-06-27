@@ -26,7 +26,7 @@ import io.grpc.StatusRuntimeException;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.grpc.MetadataConverter;
-import io.spine.util.DeliverableException;
+import io.spine.util.MessageRejection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Status.INVALID_ARGUMENT;
@@ -48,13 +48,13 @@ public class Statuses {
      * {@code Status.INVALID_ARGUMENT} with the passed cause.
      *
      * <p>Resulting {@code StatusRuntimeException} will contain the passed
-     * {@link DeliverableException} transformed to
+     * {@link MessageRejection} transformed to
      * the {@linkplain StatusRuntimeException#getTrailers() metadata}.
      *
      * @param cause the exception cause
      * @return the constructed {@code StatusRuntimeException}
      */
-    public static StatusRuntimeException invalidArgumentWithCause(DeliverableException cause) {
+    public static StatusRuntimeException invalidArgumentWithCause(MessageRejection cause) {
         checkNotNull(cause);
         return createException(cause.asThrowable(), cause.asError());
     }
@@ -62,7 +62,7 @@ public class Statuses {
     /**
      * Constructs the {@code StatusRuntimeException} with the given causer and error.
      *
-     * @see #invalidArgumentWithCause(DeliverableException)
+     * @see #invalidArgumentWithCause(MessageRejection)
      */
     private static StatusRuntimeException createException(Throwable cause, Error error) {
         final Metadata metadata = MetadataConverter.toMetadata(error);

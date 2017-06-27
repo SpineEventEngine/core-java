@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
-import io.spine.util.DeliverableException;
+import io.spine.util.MessageRejection;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -37,7 +37,7 @@ import java.util.Map;
  *
  * @author Alexander Litus
  */
-public abstract class EventException extends RuntimeException implements DeliverableException {
+public abstract class EventException extends RuntimeException implements MessageRejection {
 
     private static final long serialVersionUID = 0L;
 

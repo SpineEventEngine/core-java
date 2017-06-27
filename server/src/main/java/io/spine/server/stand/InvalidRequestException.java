@@ -22,7 +22,7 @@ package io.spine.server.stand;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.util.DeliverableException;
+import io.spine.util.MessageRejection;
 
 /**
  * A base class for exceptions fired in case an invalid request
@@ -30,7 +30,7 @@ import io.spine.util.DeliverableException;
  *
  * @author Alex Tymchenko
  */
-public class InvalidRequestException extends RuntimeException implements DeliverableException {
+public class InvalidRequestException extends RuntimeException implements MessageRejection {
 
     private static final long serialVersionUID = 0L;
 

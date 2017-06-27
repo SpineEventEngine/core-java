@@ -24,16 +24,21 @@ import io.spine.annotation.Internal;
 import io.spine.base.Error;
 
 /**
- * An interface for the {@link Exception} types which may be serialized within a protobuf message.
+ * The report about a message being rejected from processing.
+ *
+ * <p>Such message could be:
+ * <ul>
+ *     <li>an event;
+ *     <li>a command;
+ *     <li>an actor request (query, topic or subscription).
+ * </ul>
  *
  * <p>This interface is designed to be implemented in {@link Throwable} types only.
  *
  * @author Dmytro Dashenkov
  */
-@SuppressWarnings("NonExceptionNameEndsWithException")
-    // The interface is designed to be implemented in Throwable types.
 @Internal
-public interface DeliverableException {
+public interface MessageRejection {
 
     /**
      * Converts this {@link Exception} into an {@link Error io.spine.base.Error}.
@@ -41,7 +46,7 @@ public interface DeliverableException {
     Error asError();
 
     /**
-     * Obtains the instance of this exception whose compile-time type is
+     * Obtains the instance of this error whose compile-time type is
      * {@link Throwable java.lang.Throwable}.
      */
     Throwable asThrowable();

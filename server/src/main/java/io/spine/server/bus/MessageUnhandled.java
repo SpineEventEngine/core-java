@@ -21,16 +21,16 @@
 package io.spine.server.bus;
 
 import io.spine.annotation.Internal;
-import io.spine.util.DeliverableException;
+import io.spine.util.MessageRejection;
 
 /**
  * An interface for the {@linkplain Exception exceptions} which are thrown upon an unhandled message
  * being posted into a {@link Bus}.
  *
- * <p>Except the methods declared in {@link DeliverableException}, this type is a marker interface.
+ * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
  *
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface MessageUnhandled extends DeliverableException {
+public interface MessageUnhandled extends MessageRejection {
 }

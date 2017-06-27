@@ -89,7 +89,7 @@ public class ExceptionsShould {
         assertEquals(TestException.ERROR, actualError);
     }
 
-    private static class TestException extends Exception implements DeliverableException {
+    private static class TestException extends Exception implements MessageRejection {
 
         private static final long serialVersionUID = 0L;
 

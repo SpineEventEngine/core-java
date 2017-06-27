@@ -21,15 +21,15 @@
 package io.spine.validate;
 
 import io.spine.annotation.Internal;
-import io.spine.util.DeliverableException;
+import io.spine.util.MessageRejection;
 
 /**
  * An interface for the {@link Exception} types which are thrown upon an invalid message.
  *
- * <p>Except the methods declared in {@link DeliverableException}, this type is a marker interface.
+ * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
  *
  * @author Dmytro Dashenkov
  */
 @Internal
-public interface MessageInvalid extends DeliverableException {
+public interface MessageInvalid extends MessageRejection {
 }

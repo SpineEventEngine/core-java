@@ -194,8 +194,8 @@ public final class Exceptions {
         checkNotNull(throwable);
         final Throwable cause = getRootCause(throwable);
         final Error error;
-        if (cause instanceof DeliverableException) {
-            final DeliverableException deliverable = (DeliverableException) cause;
+        if (cause instanceof MessageRejection) {
+            final MessageRejection deliverable = (MessageRejection) cause;
             error = deliverable.asError();
         } else {
             error = Error.newBuilder()
