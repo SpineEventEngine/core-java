@@ -25,6 +25,7 @@ import io.spine.core.given.GivenVersion;
 import org.junit.Test;
 
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
+import static org.junit.Assert.assertEquals;
 
 /**
  * @author Alexander Yevsyukov
@@ -49,5 +50,12 @@ public class VersionsShould {
                 GivenVersion.withNumber(2),
                 GivenVersion.withNumber(1)
         );
+    }
+
+    @Test
+    public void increment() {
+        final Version v1 = GivenVersion.withNumber(1);
+        assertEquals(v1.getNumber() + 1, Versions.increment(v1)
+                                                 .getNumber());
     }
 }
