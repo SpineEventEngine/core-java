@@ -80,7 +80,7 @@ public class QueryServiceShould {
            .on(projectsContext);
 
         final Given.ProjectAggregateRepository projectRepo =
-                new Given.ProjectAggregateRepository(projectsContext);
+                new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         projectDetailsRepository = spy(new ProjectDetailsRepository());
         projectsContext.register(projectDetailsRepository);
@@ -97,7 +97,7 @@ public class QueryServiceShould {
            .on(customersContext);
 
         final Given.CustomerAggregateRepository customerRepo =
-                new Given.CustomerAggregateRepository(customersContext);
+                new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 

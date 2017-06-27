@@ -27,6 +27,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.Event;
 import io.spine.core.UserId;
+import io.spine.core.given.GivenUserId;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.aggregate.ProjectId;
 import io.spine.test.aggregate.command.AddTask;
@@ -41,8 +42,6 @@ import java.util.List;
 
 import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.util.Timestamps.add;
-import static io.spine.Identifier.newUuid;
-import static io.spine.core.given.GivenUserId.of;
 import static io.spine.server.aggregate.Given.EventMessage.projectCreated;
 import static io.spine.server.aggregate.Given.EventMessage.taskAdded;
 import static io.spine.server.command.TestEventFactory.newInstance;
@@ -81,7 +80,7 @@ class Given {
 
     static class ACommand {
 
-        private static final UserId USER_ID = of(newUuid());
+        private static final UserId USER_ID = GivenUserId.newUuid();
         private static final ProjectId PROJECT_ID = Sample.messageOfType(ProjectId.class);
 
         private ACommand() {

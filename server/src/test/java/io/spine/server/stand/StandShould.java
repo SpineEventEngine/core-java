@@ -223,7 +223,7 @@ public class StandShould extends TenantAwareTest {
         checkTypesEmpty(stand);
 
         final CustomerAggregateRepository customerAggregateRepo =
-                new CustomerAggregateRepository(boundedContext);
+                new CustomerAggregateRepository();
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final Descriptors.Descriptor customerEntityDescriptor = Customer.getDescriptor();
@@ -232,7 +232,7 @@ public class StandShould extends TenantAwareTest {
 
         @SuppressWarnings("LocalVariableNamingConvention")
         final CustomerAggregateRepository anotherCustomerAggregateRepo =
-                new CustomerAggregateRepository(boundedContext);
+                new CustomerAggregateRepository();
         stand.registerTypeSupplier(anotherCustomerAggregateRepo);
         checkHasExactlyOne(stand.getExposedTypes(), customerEntityDescriptor);
         checkHasExactlyOne(stand.getExposedAggregateTypes(), customerEntityDescriptor);
@@ -287,7 +287,7 @@ public class StandShould extends TenantAwareTest {
 
 
         final CustomerAggregateRepository customerAggregateRepo =
-                new CustomerAggregateRepository(boundedContext);
+                new CustomerAggregateRepository();
         stand.registerTypeSupplier(customerAggregateRepo);
 
         final int numericIdValue = 17;
@@ -1399,7 +1399,7 @@ public class StandShould extends TenantAwareTest {
         assertNotNull(stand);
 
         final CustomerAggregateRepository customerAggregateRepo =
-                new CustomerAggregateRepository(boundedContext);
+                new CustomerAggregateRepository();
         stand.registerTypeSupplier(customerAggregateRepo);
         final StandTestProjectionRepository projectProjectionRepo =
                 new StandTestProjectionRepository();

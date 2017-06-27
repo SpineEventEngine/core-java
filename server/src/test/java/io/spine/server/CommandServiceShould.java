@@ -66,7 +66,7 @@ public class CommandServiceShould {
                                         .setMultitenant(true)
                                         .build();
         final Given.ProjectAggregateRepository projectRepo =
-                new Given.ProjectAggregateRepository(projectsContext);
+                new Given.ProjectAggregateRepository();
         projectsContext.register(projectRepo);
         boundedContexts.add(projectsContext);
 
@@ -75,7 +75,7 @@ public class CommandServiceShould {
                                          .setMultitenant(true)
                                          .build();
         final Given.CustomerAggregateRepository customerRepo =
-                new Given.CustomerAggregateRepository(customersContext);
+                new Given.CustomerAggregateRepository();
         customersContext.register(customerRepo);
         boundedContexts.add(customersContext);
 
