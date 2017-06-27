@@ -23,7 +23,6 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
-import io.spine.base.Error;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
@@ -34,7 +33,6 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.validate.MessageInvalid;
@@ -225,16 +223,16 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     /**
-     * Generates an {@link Error} based on an {@link UnhandledFailureException} upon a dead
+     * Generates an {@link UnhandledFailureException} upon a dead
      * message.
      */
     private enum DeadFailureHandler implements DeadMessageHandler<FailureEnvelope> {
         INSTANCE;
 
         @Override
-        public MessageUnhandled handleDeadMessage(FailureEnvelope envelope) {
+        public UnhandledFailureException handleDeadMessage(FailureEnvelope envelope) {
             final Message message = envelope.getMessage();
-            final MessageUnhandled exception = new UnhandledFailureException(message);
+            final UnhandledFailureException exception = new UnhandledFailureException(message);
             return exception;
         }
     }
@@ -255,7 +253,6 @@ public class FailureBus extends CommandOutputBus<Failure,
     private enum FailureIdConverter implements Bus.IdConverter<FailureEnvelope> {
         INSTANCE;
 
-        @Nullable
         @Override
         public FailureId apply(@Nullable FailureEnvelope input) {
             checkNotNull(input);

@@ -36,7 +36,6 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.commandstore.CommandStore;
 import io.spine.server.failure.FailureBus;
 
@@ -99,7 +98,7 @@ public class CommandBus extends Bus<Command,
     /**
      * Tha validator for the commands posted into this bus.
      *
-     * <p>The valuse is effectively final, though should be initialized lazily.
+     * <p>The value is effectively final, though should be initialized lazily.
      *
      * @see #getValidator() to getreive the non-null value of the validator
      */
@@ -502,13 +501,12 @@ public class CommandBus extends Bus<Command,
     }
 
     /**
-     * Produces an {@link Error} based on an {@link UnsupportedCommandException} upon a dead
-     * command.
+     * Produces an {@link UnsupportedCommandException} upon a dead command.
      */
     private class DeadCommandHandler implements DeadMessageHandler<CommandEnvelope> {
 
         @Override
-        public MessageUnhandled handleDeadMessage(CommandEnvelope message) {
+        public UnsupportedCommandException handleDeadMessage(CommandEnvelope message) {
             final Command command = message.getCommand();
             final UnsupportedCommandException exception = new UnsupportedCommandException(command);
             commandStore().storeWithError(command, exception);

@@ -26,7 +26,6 @@ import com.google.common.util.concurrent.MoreExecutors;
 import com.google.protobuf.Message;
 import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Internal;
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
@@ -38,7 +37,6 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
 import io.spine.server.bus.DeadMessageHandler;
 import io.spine.server.bus.EnvelopeValidator;
-import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -115,7 +113,7 @@ public class EventBus extends CommandOutputBus<Event,
 
     private final MessageValidator eventMessageValidator;
 
-    private final Deque<BusFilter<EventEnvelope>> filters;
+    private final Deque<BusFilter<EventEnvelope>> filterChain;
 
     /** The validator for events posted to the bus. */
     @Nullable
@@ -132,7 +130,7 @@ public class EventBus extends CommandOutputBus<Event,
         this.eventStore = builder.eventStore;
         this.enricher = builder.enricher;
         this.eventMessageValidator = builder.eventValidator;
-        this.filters = builder.getFilters();
+        this.filterChain = builder.getFilters();
     }
 
     /** Creates a builder for new {@code EventBus}. */
@@ -177,7 +175,7 @@ public class EventBus extends CommandOutputBus<Event,
     @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
     @Override
     protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
-        return filters;
+        return filterChain;
     }
 
     @Override
@@ -524,13 +522,13 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     /**
-     * Produces an {@link Error} based on an {@link UnsupportedEventException} upon a dead event.
+     * Produces an {@link UnsupportedEventException} upon a dead event.
      */
     private enum DeadEventHandler implements DeadMessageHandler<EventEnvelope> {
         INSTANCE;
 
         @Override
-        public MessageUnhandled handleDeadMessage(EventEnvelope envelope) {
+        public UnsupportedEventException handleDeadMessage(EventEnvelope envelope) {
             final Message message = envelope.getMessage();
             final UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;
