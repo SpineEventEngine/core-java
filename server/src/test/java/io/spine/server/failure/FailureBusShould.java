@@ -19,6 +19,7 @@
  */
 package io.spine.server.failure;
 
+import io.spine.base.Error;
 import io.spine.change.StringChange;
 import io.spine.client.CommandFactory;
 import io.spine.client.TestActorRequestFactory;
@@ -29,8 +30,10 @@ import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
 import io.spine.core.Failures;
+import io.spine.core.IsSent;
 import io.spine.core.Subscribe;
 import io.spine.core.TenantId;
+import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.server.commandbus.Given;
 import io.spine.test.failure.ProjectId;
 import io.spine.test.failure.command.RemoveOwner;
@@ -47,6 +50,8 @@ import java.util.concurrent.Executor;
 import static com.google.common.collect.Maps.newHashMap;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Failures.getMessage;
+import static io.spine.core.Status.StatusCase.ERROR;
+import static io.spine.grpc.StreamObservers.memoizingObserver;
 import static io.spine.test.failure.ProjectFailures.InvalidProjectName;
 import static io.spine.test.failure.ProjectFailures.MissingOwner;
 import static org.junit.Assert.assertEquals;
@@ -323,6 +328,18 @@ public class FailureBusShould {
 
         failureBus.register(subscriber);
         failureBus.post(missingOwnerFailure());
+    }
+
+    @Test
+    public void report_dead_messages() {
+        final MemoizingObserver<IsSent> observer = memoizingObserver();
+        failureBus.post(missingOwnerFailure(), observer);
+        assertTrue(observer.isCompleted());
+        final IsSent result = observer.firstResponse();
+        assertNotNull(result);
+        assertEquals(ERROR, result.getStatus().getStatusCase());
+        final Error error = result.getStatus().getError();
+        assertEquals(UnhandledFailureException.class.getCanonicalName(), error.getType());
     }
 
     @Test
