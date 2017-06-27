@@ -21,24 +21,19 @@
 package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
-import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.ValidationError;
 
 import java.util.List;
 
 import static com.google.common.base.Optional.of;
-import static io.spine.core.CommandValidationError.INVALID_COMMAND;
-import static io.spine.core.CommandValidationError.TENANT_INAPPLICABLE;
-import static io.spine.core.CommandValidationError.TENANT_UNKNOWN;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
-import static io.spine.util.Exceptions.toError;
+import static io.spine.server.commandbus.InvalidCommandException.onInapplicableTenantId;
+import static io.spine.server.commandbus.InvalidCommandException.onMissingTenantId;
 import static io.spine.validate.Validate.isDefault;
 
 /**
@@ -73,14 +68,14 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final Throwable exception = missingTenantId(command);
-                final Error error = toError(exception, TENANT_UNKNOWN.getNumber());
+                final CommandException exception = missingTenantId(command);
+                final Error error = exception.asError();
                 return of(error);
             }
         } else {
             if (tenantSpecified) {
-                final Throwable exception = tenantIdInapplicable(command);
-                final Error error = toError(exception, TENANT_INAPPLICABLE.getNumber());
+                final CommandException exception = tenantIdInapplicable(command);
+                final Error error = exception.asError();
                 return of(error);
             }
         }
@@ -91,37 +86,26 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
                                                               .validate(envelope);
+        Error result = null;
         if (!violations.isEmpty()) {
-            final ValidationError validationError =
-                    ValidationError.newBuilder()
-                                   .addAllConstraintViolation(violations)
-                                   .build();
             final CommandException invalidCommand = onConstraintViolations(command, violations);
             commandBus.commandStore().storeWithError(command, invalidCommand);
-            final Error incompleteError = toError(invalidCommand, INVALID_COMMAND.getNumber());
-            final Error error = incompleteError.toBuilder()
-                                               .setValidationError(validationError)
-                                               .build();
-            return of(error);
+            result = invalidCommand.asError();
         }
-        return Optional.absent();
+        return Optional.fromNullable(result);
     }
 
-    private Throwable missingTenantId(Command command) {
-        final CommandException noTenantDefined =
-                InvalidCommandException.onMissingTenantId(command);
+    private CommandException missingTenantId(Command command) {
+        final CommandException noTenantDefined = onMissingTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, noTenantDefined);
-        final StatusRuntimeException exception = invalidArgumentWithCause(noTenantDefined);
-        return exception;
+        return noTenantDefined;
     }
 
-    private Throwable tenantIdInapplicable(Command command) {
-        final CommandException tenantIdInapplicable =
-                InvalidCommandException.onInapplicableTenantId(command);
+    private CommandException tenantIdInapplicable(Command command) {
+        final CommandException tenantIdInapplicable = onInapplicableTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, tenantIdInapplicable);
-        final StatusRuntimeException exception = invalidArgumentWithCause(tenantIdInapplicable);
-        return exception;
+        return tenantIdInapplicable;
     }
 }

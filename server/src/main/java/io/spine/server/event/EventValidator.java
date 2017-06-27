@@ -33,8 +33,6 @@ import java.util.List;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.event.InvalidEventException.onConstraintViolations;
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
-import static io.spine.util.Exceptions.toError;
 
 /**
  * The {@link EventEnvelope} validator.
@@ -57,16 +55,13 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
         checkNotNull(envelope);
 
         final Event event = envelope.getOuterObject();
-        Throwable result = null;
+        Error result = null;
         final List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
             final InvalidEventException exception = onConstraintViolations(event, violations);
-            result = invalidArgumentWithCause(exception);
+            result = exception.asError();
         }
-        if (result == null) {
-            return Optional.absent();
-        } else {
-            return Optional.of(toError(result));
-        }
+        final Optional<Error> optionalResult = Optional.fromNullable(result);
+        return optionalResult;
     }
 }
