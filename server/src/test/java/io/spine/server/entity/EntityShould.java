@@ -169,13 +169,13 @@ public class EntityShould {
     @Test
     public void check_entity_state_when_set_it() {
         final TestEntity spyEntityNew = spy(entityNew);
-        spyEntityNew.updateState(state, Versions.create());
+        spyEntityNew.updateState(state, Versions.zero());
         verify(spyEntityNew).checkEntityState(eq(state));
     }
 
     @Test(expected = NullPointerException.class)
     public void throw_exception_if_try_to_set_null_state() {
-        entityNew.updateState(Tests.<Project>nullRef(), Versions.create());
+        entityNew.updateState(Tests.<Project>nullRef(), Versions.zero());
     }
 
     private static class BareBonesEntity extends AbstractVersionableEntity<Long, StringValue> {

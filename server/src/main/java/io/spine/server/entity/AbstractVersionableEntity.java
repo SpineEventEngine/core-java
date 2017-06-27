@@ -70,7 +70,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
      */
     protected AbstractVersionableEntity(I id) {
         super(id);
-        setVersion(Versions.create());
+        setVersion(Versions.zero());
         setVisible();
     }
 
@@ -92,7 +92,7 @@ public abstract class AbstractVersionableEntity<I, S extends Message>
     protected void init() {
         super.init();
         setState(getDefaultState());
-        setVersion(Versions.create());
+        setVersion(Versions.zero());
         setVisible();
     }
 

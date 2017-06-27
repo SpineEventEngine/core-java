@@ -47,7 +47,7 @@ public final class Versions {
     /**
      * Creates a new instance with the zero number and current system time.
      */
-    public static Version create() {
+    public static Version zero() {
         return create(0, getCurrentTime());
     }
 
