@@ -32,7 +32,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Deque;
-import java.util.Queue;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -70,6 +69,7 @@ public abstract class Bus<T extends Message,
      *
      * @see #filterChain() for the non-null filter chain value
      */
+    @Nullable
     private FilterChain<E> filterChain;
 
     /**
@@ -148,6 +148,12 @@ public abstract class Bus<T extends Message,
         observer.onCompleted();
     }
 
+    /**
+     * Closes the {@linkplain BusFilter filters} of this bus and unregisters all the dispatchers.
+     *
+     * @throws Exception if either filters or the {@linkplain DispatcherRegistry} throws
+     *         an exception
+     */
     @Override
     public void close() throws Exception {
         filterChain().close();
@@ -330,12 +336,22 @@ public abstract class Bus<T extends Message,
         return messageConverter;
     }
 
+    /**
+     * The implementation base for the bus builders.
+     *
+     * @param <E> the type of {@link MessageEnvelope} posted by the bus
+     * @param <T> the type of {@link Message} posted by the bus
+     * @param <B> the own type of the builder
+     */
     public abstract static class AbstractBuilder<E extends MessageEnvelope<T>,
                                                  T extends Message,
                                                  B extends AbstractBuilder<E, T, B>> {
 
-        private final Queue<BusFilter<E>> filters;
+        private final Deque<BusFilter<E>> filters;
 
+        /**
+         * Creates a new instance of the bus builder.
+         */
         protected AbstractBuilder() {
             this.filters = newLinkedList();
         }
@@ -376,8 +392,17 @@ public abstract class Bus<T extends Message,
             return newLinkedList(filters);
         }
 
+        /**
+         * Creates new instance of {@code Bus} with the set parameters.
+         *
+         * <p>It is recommended to specify explicitly the resulting type of the bus in the return
+         * type when overriding this method.
+         */
         public abstract Bus<?, E, ?, ?> build();
 
+        /**
+         * @return {@code this} reference to avoid redundant casts
+         */
         protected abstract B self();
     }
 
