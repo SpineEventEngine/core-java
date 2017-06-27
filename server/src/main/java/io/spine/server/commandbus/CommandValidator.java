@@ -112,8 +112,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
                 InvalidCommandException.onMissingTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, noTenantDefined);
-        final StatusRuntimeException exception =
-                invalidArgumentWithCause(noTenantDefined, noTenantDefined.getError());
+        final StatusRuntimeException exception = invalidArgumentWithCause(noTenantDefined);
         return exception;
     }
 
@@ -122,8 +121,7 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
                 InvalidCommandException.onInapplicableTenantId(command);
         commandBus.commandStore()
                   .storeWithError(command, tenantIdInapplicable);
-        final StatusRuntimeException exception =
-                invalidArgumentWithCause(tenantIdInapplicable, tenantIdInapplicable.getError());
+        final StatusRuntimeException exception = invalidArgumentWithCause(tenantIdInapplicable);
         return exception;
     }
 }

@@ -64,7 +64,7 @@ final class DeadMessageFilter<T extends Message,
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
             final MessageUnhandled exception = deadMessageHandler.handleDeadMessage(envelope);
-            final Error error = exception.toError();
+            final Error error = exception.asError();
             final IsSent result = reject(idConverter.apply(envelope), error);
             return Optional.of(result);
         } else {

@@ -45,7 +45,7 @@ public class InvalidEventExceptionShould {
                 singletonList(ConstraintViolation.getDefaultInstance()));
 
         assertNotNull(exception.getMessage());
-        assertNotNull(exception.getError());
+        assertNotNull(exception.asError());
         assertEquals(msg, exception.getEventMessage());
     }
 }

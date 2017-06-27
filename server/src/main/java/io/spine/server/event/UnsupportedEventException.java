@@ -25,7 +25,6 @@ import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.type.TypeName;
-import io.spine.util.Exceptions;
 
 import static java.lang.String.format;
 
@@ -65,10 +64,5 @@ public class UnsupportedEventException extends EventException implements Message
                 .putAllAttributes(eventTypeAttribute(eventMessage))
                 .setMessage(errMsg);
         return error.build();
-    }
-
-    @Override
-    public Error toError() {
-        return Exceptions.toError(this);
     }
 }

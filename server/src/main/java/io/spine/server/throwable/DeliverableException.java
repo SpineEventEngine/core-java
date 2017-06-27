@@ -38,5 +38,11 @@ public interface DeliverableException {
     /**
      * Converts this {@link Exception} into an {@link Error io.spine.base.Error}.
      */
-    Error toError();
+    Error asError();
+
+    /**
+     * Obtains the instance of this exception whose compile-time type is
+     * {@link Throwable java.lang.Throwable}.
+     */
+    Throwable asThrowable();
 }

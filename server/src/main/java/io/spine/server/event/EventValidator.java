@@ -60,8 +60,8 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
         Throwable result = null;
         final List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
-            final InvalidEventException invalidEvent = onConstraintViolations(event, violations);
-            result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
+            final InvalidEventException exception = onConstraintViolations(event, violations);
+            result = invalidArgumentWithCause(exception);
         }
         if (result == null) {
             return Optional.absent();

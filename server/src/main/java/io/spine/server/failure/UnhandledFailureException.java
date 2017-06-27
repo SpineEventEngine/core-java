@@ -53,7 +53,12 @@ public class UnhandledFailureException extends RuntimeException implements Messa
     }
 
     @Override
-    public Error toError() {
+    public Error asError() {
         return Exceptions.toError(this);
+    }
+
+    @Override
+    public Throwable asThrowable() {
+        return this;
     }
 }

@@ -49,9 +49,4 @@ public class UnsupportedCommandException extends CommandException implements Mes
         final CommandValidationError errorCode = CommandValidationError.UNSUPPORTED_COMMAND;
         return createError(format, command, errorCode);
     }
-
-    @Override
-    public Error toError() {
-        return getError();
-    }
 }
