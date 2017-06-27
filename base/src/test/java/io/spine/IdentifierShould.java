@@ -39,6 +39,7 @@ import org.junit.Test;
 
 import static io.spine.Identifier.EMPTY_ID;
 import static io.spine.Identifier.NULL_ID;
+import static io.spine.Identifier.checkSupported;
 import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.Wrapper.forInteger;
 import static io.spine.protobuf.Wrapper.forLong;
@@ -54,6 +55,16 @@ import static org.junit.Assert.assertTrue;
 public class IdentifierShould {
 
     private static final String TEST_ID = "someTestId 1234567890 !@#$%^&()[]{}-+=_";
+
+    @Test
+    public void accept_supported_classes() {
+        checkSupported(Integer.class);
+        checkSupported(Long.class);
+        checkSupported(String.class);
+        // Pass a couple of Message-based classes to verify that messages are supported.
+        checkSupported(StringValue.class);
+        checkSupported(Timestamp.class);
+    }
 
     @SuppressWarnings("UnnecessaryBoxing") // We want to make the unsupported type obvious.
     @Test(expected = IllegalArgumentException.class)
