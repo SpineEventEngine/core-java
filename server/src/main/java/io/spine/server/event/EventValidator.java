@@ -22,11 +22,11 @@ package io.spine.server.event;
 
 import com.google.common.base.Optional;
 import com.google.protobuf.Message;
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageInvalid;
 import io.spine.validate.MessageValidator;
 
 import java.util.List;
@@ -51,17 +51,15 @@ final class EventValidator implements EnvelopeValidator<EventEnvelope> {
     }
 
     @Override
-    public Optional<Error> validate(EventEnvelope envelope) {
+    public Optional<MessageInvalid> validate(EventEnvelope envelope) {
         checkNotNull(envelope);
 
         final Event event = envelope.getOuterObject();
-        Error result = null;
+        MessageInvalid result = null;
         final List<ConstraintViolation> violations = messageValidator.validate(event);
         if (!violations.isEmpty()) {
-            final InvalidEventException exception = onConstraintViolations(event, violations);
-            result = exception.asError();
+            result = onConstraintViolations(event, violations);
         }
-        final Optional<Error> optionalResult = Optional.fromNullable(result);
-        return optionalResult;
+        return Optional.fromNullable(result);
     }
 }

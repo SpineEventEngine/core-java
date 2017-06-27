@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
+import io.spine.validate.MessageInvalid;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;
@@ -50,10 +51,10 @@ final class ValidatingFilter<E extends MessageEnvelope<T>, T extends Message>
     @Override
     public Optional<IsSent> accept(E envelope) {
         checkNotNull(envelope);
-        final Optional<Error> violation = validator.validate(envelope);
+        final Optional<MessageInvalid> violation = validator.validate(envelope);
         if (violation.isPresent()) {
-            final IsSent result = reject(idConverter.apply(envelope),
-                                         violation.get());
+            final Error error = violation.get().asError();
+            final IsSent result = reject(idConverter.apply(envelope), error);
             return Optional.of(result);
         } else {
             return Optional.absent();

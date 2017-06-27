@@ -37,6 +37,7 @@ import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.validate.MessageInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +45,7 @@ import javax.annotation.Nullable;
 import java.util.Deque;
 import java.util.Set;
 
+import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 /**
@@ -244,9 +246,9 @@ public class FailureBus extends CommandOutputBus<Failure,
         INSTANCE;
 
         @Override
-        public Optional<Error> validate(FailureEnvelope envelope) {
+        public Optional<MessageInvalid> validate(FailureEnvelope envelope) {
             checkNotNull(envelope);
-            return Optional.absent();
+            return absent();
         }
     }
 

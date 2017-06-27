@@ -21,15 +21,16 @@
 package io.spine.server.commandbus;
 
 import com.google.common.base.Optional;
-import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageInvalid;
 
 import java.util.List;
 
+import static com.google.common.base.Optional.absent;
 import static com.google.common.base.Optional.of;
 import static io.spine.server.commandbus.InvalidCommandException.onConstraintViolations;
 import static io.spine.server.commandbus.InvalidCommandException.onInapplicableTenantId;
@@ -53,59 +54,55 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
     }
 
     @Override
-    public Optional<Error> validate(CommandEnvelope envelope) {
-        final Optional<Error> tenantCheckResult = isTenantIdValid(envelope);
+    public Optional<MessageInvalid> validate(CommandEnvelope envelope) {
+        final Optional<MessageInvalid> tenantCheckResult = isTenantIdValid(envelope);
         if (tenantCheckResult.isPresent()) {
             return tenantCheckResult;
         }
-        final Optional<Error> commandValid = isCommandValid(envelope);
+        final Optional<MessageInvalid> commandValid = isCommandValid(envelope);
         return commandValid;
     }
 
-    private Optional<Error> isTenantIdValid(CommandEnvelope envelope) {
+    private Optional<MessageInvalid> isTenantIdValid(CommandEnvelope envelope) {
         final TenantId tenantId = envelope.getTenantId();
         final boolean tenantSpecified = !isDefault(tenantId);
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final CommandException exception = missingTenantId(command);
-                final Error error = exception.asError();
-                return of(error);
+                final MessageInvalid exception = missingTenantId(command);
+                return of(exception);
             }
         } else {
             if (tenantSpecified) {
-                final CommandException exception = tenantIdInapplicable(command);
-                final Error error = exception.asError();
-                return of(error);
+                final MessageInvalid exception = tenantIdInapplicable(command);
+                return of(exception);
             }
         }
-        return Optional.absent();
+        return absent();
     }
 
-    private Optional<Error> isCommandValid(CommandEnvelope envelope) {
+    private Optional<MessageInvalid> isCommandValid(CommandEnvelope envelope) {
         final Command command = envelope.getCommand();
         final List<ConstraintViolation> violations = Validator.getInstance()
                                                               .validate(envelope);
-        Error result = null;
+        InvalidCommandException exception = null;
         if (!violations.isEmpty()) {
-            final CommandException invalidCommand = onConstraintViolations(command, violations);
-            commandBus.commandStore().storeWithError(command, invalidCommand);
-            result = invalidCommand.asError();
+            exception = onConstraintViolations(command, violations);
+            commandBus.commandStore().storeWithError(command, exception);
+
         }
-        return Optional.fromNullable(result);
+        return Optional.<MessageInvalid>fromNullable(exception);
     }
 
-    private CommandException missingTenantId(Command command) {
-        final CommandException noTenantDefined = onMissingTenantId(command);
-        commandBus.commandStore()
-                  .storeWithError(command, noTenantDefined);
+    private InvalidCommandException missingTenantId(Command command) {
+        final InvalidCommandException noTenantDefined = onMissingTenantId(command);
+        commandBus.commandStore().storeWithError(command, noTenantDefined);
         return noTenantDefined;
     }
 
-    private CommandException tenantIdInapplicable(Command command) {
-        final CommandException tenantIdInapplicable = onInapplicableTenantId(command);
-        commandBus.commandStore()
-                  .storeWithError(command, tenantIdInapplicable);
+    private InvalidCommandException tenantIdInapplicable(Command command) {
+        final InvalidCommandException tenantIdInapplicable = onInapplicableTenantId(command);
+        commandBus.commandStore().storeWithError(command, tenantIdInapplicable);
         return tenantIdInapplicable;
     }
 }

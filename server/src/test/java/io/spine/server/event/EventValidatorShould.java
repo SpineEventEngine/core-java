@@ -30,6 +30,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.ConstraintViolation;
+import io.spine.validate.MessageInvalid;
 import io.spine.validate.MessageValidator;
 import org.junit.Test;
 
@@ -58,9 +59,9 @@ public class EventValidatorShould {
 
         final EventValidator eventValidator = new EventValidator(messageValidator);
 
-        final Optional<Error> error = eventValidator.validate(EventEnvelope.of(event));
+        final Optional<MessageInvalid> error = eventValidator.validate(EventEnvelope.of(event));
         assertTrue(error.isPresent());
-        final Error actualError = error.get();
+        final Error actualError = error.get().asError();
         assertEquals(EventValidationError.getDescriptor().getFullName(),
                      actualError.getType());
     }
