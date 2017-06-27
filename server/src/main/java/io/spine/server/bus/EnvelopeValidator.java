@@ -21,7 +21,6 @@
 package io.spine.server.bus;
 
 import com.google.common.base.Optional;
-import io.spine.base.Error;
 import io.spine.core.MessageEnvelope;
 import io.spine.validate.MessageInvalid;
 
@@ -38,7 +37,8 @@ public interface EnvelopeValidator<E extends MessageEnvelope<?>> {
      *
      * @param envelope the envelope to validate
      * @return {@link Optional#absent() Optional.absent()} if the envelope passes the validation or
-     *         the {@linkplain Error cause} of the validation failure
+     *         the cause of the validation failure
+     * @see MessageInvalid for the detailed description of the returned values
      */
     Optional<MessageInvalid> validate(E envelope);
 }
