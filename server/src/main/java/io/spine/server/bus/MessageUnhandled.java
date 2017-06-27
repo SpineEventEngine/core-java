@@ -21,7 +21,7 @@
 package io.spine.server.bus;
 
 import io.spine.annotation.Internal;
-import io.spine.server.throwable.DeliverableException;
+import io.spine.util.DeliverableException;
 
 /**
  * An interface for the {@linkplain Exception exceptions} which are thrown upon an unhandled message

@@ -18,7 +18,7 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.throwable;
+package io.spine.util;
 
 import io.spine.annotation.Internal;
 import io.spine.base.Error;

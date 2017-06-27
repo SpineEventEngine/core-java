@@ -27,7 +27,7 @@ import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
-import io.spine.server.throwable.DeliverableException;
+import io.spine.util.DeliverableException;
 import io.spine.type.ClassName;
 import io.spine.type.TypeName;
 

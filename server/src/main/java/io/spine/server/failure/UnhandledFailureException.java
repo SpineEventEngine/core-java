@@ -25,8 +25,8 @@ import io.spine.base.Error;
 import io.spine.core.FailureClass;
 import io.spine.server.bus.MessageUnhandled;
 import io.spine.type.TypeName;
-import io.spine.util.Exceptions;
 
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static java.lang.String.format;
 
 /**
@@ -38,8 +38,11 @@ public class UnhandledFailureException extends RuntimeException implements Messa
 
     private static final long serialVersionUID = 0L;
 
+    private final Error error;
+
     public UnhandledFailureException(Message failureMsg) {
         super(msgFormat(failureMsg));
+        this.error = buildError();
     }
 
     private static String msgFormat(Message msg) {
@@ -54,11 +57,20 @@ public class UnhandledFailureException extends RuntimeException implements Messa
 
     @Override
     public Error asError() {
-        return Exceptions.toError(this);
+        return error;
     }
 
     @Override
     public Throwable asThrowable() {
         return this;
+    }
+
+    private Error buildError() {
+        final Error error = Error.newBuilder()
+                                 .setType(UnhandledFailureException.class.getCanonicalName())
+                                 .setMessage(getMessage())
+                                 .setStacktrace(getStackTraceAsString(this))
+                                 .build();
+        return error;
     }
 }

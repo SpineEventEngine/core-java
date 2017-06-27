@@ -25,6 +25,7 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
+import io.spine.core.CommandValidationError;
 import io.spine.core.Failure;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
@@ -84,7 +85,7 @@ public class SingleTenantCommandBusShould extends AbstractCommandBusTestSuite {
 
         checkCommandError(observer.firstResponse(),
                           INVALID_COMMAND,
-                          InvalidCommandException.class.getCanonicalName(),
+                          CommandValidationError.getDescriptor().getFullName(),
                           cmd);
     }
 

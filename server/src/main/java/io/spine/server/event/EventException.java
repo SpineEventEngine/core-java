@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.throwable.DeliverableException;
+import io.spine.util.DeliverableException;
 import io.spine.type.TypeName;
 
 import java.util.Map;

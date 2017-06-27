@@ -25,6 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventValidationError;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
@@ -60,7 +61,7 @@ public class EventValidatorShould {
         final Optional<Error> error = eventValidator.validate(EventEnvelope.of(event));
         assertTrue(error.isPresent());
         final Error actualError = error.get();
-        assertEquals(InvalidEventException.class.getCanonicalName(),
+        assertEquals(EventValidationError.getDescriptor().getFullName(),
                      actualError.getType());
     }
 }

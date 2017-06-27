@@ -26,11 +26,11 @@ import io.spine.base.Error;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandId;
+import io.spine.core.CommandValidationError;
 import io.spine.core.IsSent;
 import io.spine.core.Status;
 import io.spine.grpc.StreamObservers.MemoizingObserver;
 import io.spine.protobuf.AnyPacker;
-import io.spine.server.commandbus.UnsupportedCommandException;
 import io.spine.server.transport.GrpcContainer;
 import org.junit.After;
 import org.junit.Before;
@@ -140,7 +140,7 @@ public class CommandServiceShould {
         final Status status = result.getStatus();
         assertEquals(ERROR, status.getStatusCase());
         final Error error = status.getError();
-        assertEquals(UnsupportedCommandException.class.getCanonicalName(), error.getType());
+        assertEquals(CommandValidationError.getDescriptor().getFullName(), error.getType());
     }
 
     @Test
