@@ -26,6 +26,7 @@ import io.spine.server.BoundedContext;
 import io.spine.server.bus.BusBuilderShould;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.storage.StorageFactory;
+import io.spine.server.storage.StorageFactorySwitch;
 import io.spine.test.Tests;
 import io.spine.validate.MessageValidator;
 import org.junit.Before;
@@ -220,6 +221,17 @@ public class EventBusBuilderShould extends BusBuilderShould<EventBus.Builder,
         } catch (InterruptedException e) {
             fail("The specified executor was not used.");
         }
+    }
+
+    @Test
+    public void allow_custom_message_validators() {
+        final StorageFactory storageFactory = StorageFactorySwitch.newInstance("test", false)
+                                                                  .get();
+        final MessageValidator validator = mock(MessageValidator.class);
+        final EventBus eventBus = builder().setEventValidator(validator)
+                                           .setStorageFactory(storageFactory)
+                                           .build();
+        assertEquals(validator, eventBus.getMessageValidator());
     }
 
     private static void ensureExecutorDirect(Executor streamExecutor) {
