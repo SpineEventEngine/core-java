@@ -364,7 +364,7 @@ public abstract class Bus<T extends Message,
          *
          * @param filter the filter to append
          */
-        public B appendFilter(BusFilter<E> filter) {
+        public final B appendFilter(BusFilter<E> filter) {
             checkNotNull(filter);
             this.filters.offer(filter);
             return self();
@@ -377,7 +377,7 @@ public abstract class Bus<T extends Message,
          *
          * @param filter the filter to delete
          */
-        public B removeFilter(BusFilter<E> filter) {
+        public final B removeFilter(BusFilter<E> filter) {
             checkNotNull(filter);
             this.filters.remove(filter);
             return self();
@@ -388,7 +388,7 @@ public abstract class Bus<T extends Message,
          *
          * @see #appendFilter(BusFilter)
          */
-        public Deque<BusFilter<E>> getFilters() {
+        public final Deque<BusFilter<E>> getFilters() {
             return newLinkedList(filters);
         }
 
