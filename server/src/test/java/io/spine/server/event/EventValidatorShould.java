@@ -30,7 +30,7 @@ import io.spine.server.command.TestEventFactory;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 import io.spine.validate.MessageValidator;
 import org.junit.Test;
 

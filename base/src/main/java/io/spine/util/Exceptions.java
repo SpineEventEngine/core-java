@@ -193,17 +193,11 @@ public final class Exceptions {
     public static Error toError(Throwable throwable) {
         checkNotNull(throwable);
         final Throwable cause = getRootCause(throwable);
-        final Error error;
-        if (cause instanceof MessageRejection) {
-            final MessageRejection deliverable = (MessageRejection) cause;
-            error = deliverable.asError();
-        } else {
-            error = Error.newBuilder()
-                         .setType(cause.getClass().getCanonicalName())
-                         .setMessage(cause.getMessage())
-                         .setStacktrace(getStackTraceAsString(cause))
-                         .build();
-        }
+        final Error error = Error.newBuilder()
+                                 .setType(cause.getClass().getCanonicalName())
+                                 .setMessage(cause.getMessage())
+                                 .setStacktrace(getStackTraceAsString(cause))
+                                 .build();
         return error;
     }
 }

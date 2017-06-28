@@ -22,7 +22,7 @@ package io.spine.server.stand;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.Message;
 import io.spine.base.Error;
-import io.spine.util.MessageRejection;
+import io.spine.core.MessageRejection;
 
 /**
  * A base class for exceptions fired in case an invalid request

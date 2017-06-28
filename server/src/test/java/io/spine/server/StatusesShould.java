@@ -26,7 +26,7 @@ import io.grpc.StatusRuntimeException;
 import io.spine.base.Error;
 import io.spine.grpc.MetadataConverter;
 import io.spine.server.event.UnsupportedEventException;
-import io.spine.util.MessageRejection;
+import io.spine.core.MessageRejection;
 import io.spine.server.transport.Statuses;
 import io.spine.test.event.ProjectCreated;
 import io.spine.testdata.Sample;

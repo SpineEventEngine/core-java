@@ -22,8 +22,10 @@ package io.spine.util;
 
 import com.google.common.testing.NullPointerTester;
 import io.spine.base.Error;
+import io.spine.core.MessageRejection;
 import org.junit.Test;
 
+import static com.google.common.base.Throwables.getStackTraceAsString;
 import static io.spine.Identifier.newUuid;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.util.Exceptions.newIllegalArgumentException;
@@ -84,22 +86,33 @@ public class ExceptionsShould {
 
     @Test
     public void convert_DeliverableException_to_Error() {
-        final Throwable throwable = new TestException();
+        final TestException throwable = new TestException();
         final Error actualError = Exceptions.toError(throwable);
-        assertEquals(TestException.ERROR, actualError);
+        assertEquals(throwable.asError(), actualError);
     }
 
     private static class TestException extends Exception implements MessageRejection {
 
         private static final long serialVersionUID = 0L;
 
-        private static final Error ERROR = Error.newBuilder()
-                                                .setType(TestException.class.getName())
-                                                .build();
+        private static final String MESSAGE = TestException.class.getSimpleName();
+
+        private static final String TYPE = TestException.class.getCanonicalName();
+
+        private static final Error ERROR_TEMPLATE = Error.newBuilder()
+                                                         .setMessage(MESSAGE)
+                                                         .setType(TYPE)
+                                                         .build();
+
+        private TestException() {
+            super(MESSAGE);
+        }
 
         @Override
         public Error asError() {
-            return ERROR;
+            return ERROR_TEMPLATE.toBuilder()
+                                 .setStacktrace(getStackTraceAsString(this))
+                                 .build();
         }
 
         @Override

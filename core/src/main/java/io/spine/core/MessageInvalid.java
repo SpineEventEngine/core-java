@@ -18,10 +18,9 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.validate;
+package io.spine.core;
 
 import io.spine.annotation.Internal;
-import io.spine.util.MessageRejection;
 
 /**
  * An interface for the {@link Exception} types which are thrown upon an invalid message.

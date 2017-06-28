@@ -27,7 +27,7 @@ import io.spine.core.EventClass;
 import io.spine.core.EventValidationError;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 
 import java.util.Map;
 

@@ -27,7 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
-import io.spine.util.MessageRejection;
+import io.spine.core.MessageRejection;
 import io.spine.type.TypeName;
 
 import java.util.Map;

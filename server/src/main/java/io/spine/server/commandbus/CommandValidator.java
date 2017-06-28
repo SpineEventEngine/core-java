@@ -26,7 +26,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.TenantId;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 
 import java.util.List;
 

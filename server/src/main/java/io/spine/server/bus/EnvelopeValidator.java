@@ -22,7 +22,7 @@ package io.spine.server.bus;
 
 import com.google.common.base.Optional;
 import io.spine.core.MessageEnvelope;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 
 /**
  * An interface defining the validator for a {@link MessageEnvelope}.

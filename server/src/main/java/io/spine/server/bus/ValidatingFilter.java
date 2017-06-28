@@ -25,7 +25,7 @@ import com.google.protobuf.Message;
 import io.spine.base.Error;
 import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.server.bus.Buses.reject;

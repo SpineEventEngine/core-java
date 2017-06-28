@@ -31,7 +31,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 
 import java.util.Map;
 

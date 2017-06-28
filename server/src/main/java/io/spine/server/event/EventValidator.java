@@ -26,7 +26,7 @@ import io.spine.core.Event;
 import io.spine.core.EventEnvelope;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.validate.ConstraintViolation;
-import io.spine.validate.MessageInvalid;
+import io.spine.core.MessageInvalid;
 import io.spine.validate.MessageValidator;
 
 import java.util.List;
