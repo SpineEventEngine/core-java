@@ -87,10 +87,8 @@ public class AggregatePartCommandTestShould {
     /**
      * A dummy aggregate part that counts the number of commands it receives as {@code Timestamp}s.
      */
-    private static final class TimerCounter extends AggregatePart<String,
-            UInt32Value,
-            UInt32ValueVBuilder,
-            TimerCounterRoot> {
+    private static final class TimerCounter
+            extends AggregatePart<String, UInt32Value, UInt32ValueVBuilder, TimerCounterRoot> {
         private TimerCounter(TimerCounterRoot root) {
             super(root);
         }
@@ -112,19 +110,20 @@ public class AggregatePartCommandTestShould {
     private static class TimerCountingTest
             extends AggregatePartCommandTest<Timestamp, TimerCounter> {
 
-        protected TimerCountingTest(ActorRequestFactory requestFactory) {
+        private static final BoundedContext boundedContext = BoundedContext.newBuilder()
+                                                                           .build();
+
+        private TimerCountingTest(ActorRequestFactory requestFactory) {
             super(requestFactory);
         }
 
-        protected TimerCountingTest() {
+        private TimerCountingTest() {
             super();
         }
 
         @Override
         protected TimerCounter createAggregatePart() {
-            final TimerCounterRoot root = new TimerCounterRoot(BoundedContext.newBuilder()
-                                                                             .build(),
-                                                               Identifier.newUuid());
+            final TimerCounterRoot root = new TimerCounterRoot(boundedContext, Identifier.newUuid());
             final TimerCounter result = Given.aggregatePartOfClass(TimerCounter.class)
                                              .withRoot(root)
                                              .withId(getClass().getName())
@@ -138,13 +137,7 @@ public class AggregatePartCommandTestShould {
     }
 
     private static class TimerCounterRoot extends AggregateRoot<String> {
-        /**
-         * Creates an new instance.
-         *
-         * @param boundedContext the bounded context to which the aggregate belongs
-         * @param id             the ID of the aggregate
-         */
-        protected TimerCounterRoot(BoundedContext boundedContext, String id) {
+        TimerCounterRoot(BoundedContext boundedContext, String id) {
             super(boundedContext, id);
         }
     }
