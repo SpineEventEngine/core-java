@@ -162,8 +162,8 @@ public final class Identifier<I> {
      * <li>For classes implementing {@link Message Message} — the value
      * of the message itself
      * <li>For {@code String} — {@link StringValue StringValue}
-     * <li>For {@code Long} — {@link Int64Value UInt64Value}
-     * <li>For {@code Integer} — {@link Int32Value UInt32Value}
+     * <li>For {@code Long} — {@link Int64Value Int64Value}
+     * <li>For {@code Integer} — {@link Int32Value Int32Value}
      * </ul>
      *
      * @param id  the value to wrap
@@ -184,8 +184,8 @@ public final class Identifier<I> {
      * <p>Returned type depends on the type of the message wrapped into {@code Any}:
      * <ul>
      * <li>{@code String} for unwrapped {@link StringValue StringValue}
-     * <li>{@code Integer} for unwrapped {@link Int32Value UInt32Value}
-     * <li>{@code Long} for unwrapped {@link Int64Value UInt64Value}
+     * <li>{@code Integer} for unwrapped {@link Int32Value Int32Value}
+     * <li>{@code Long} for unwrapped {@link Int64Value Int64Value}
      * <li>unwrapped {@code Message} instance if its type is none of the above
      * </ul>
      *

@@ -101,8 +101,8 @@ public final class TypeConverter {
      * Converts the given value to a corresponding Protobuf {@link Message} type.
      *
      * @param value the {@link Object} value to convert
-     * @param <T> the converted object type
-     * @param <M> the resulting message type
+     * @param <T>   the converted object type
+     * @param <M>   the resulting message type
      * @return the wrapped value
      */
     public static <T, M extends Message> M toMessage(T value) {
