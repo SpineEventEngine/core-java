@@ -66,7 +66,7 @@ public final class TypeConverter {
     }
 
     /**
-     * Performs the {@link Any} to {@link Object} mapping.
+     * Converts the given {@link Any} value to a Java {@link Object}.
      *
      * @param message the {@link Any} value to convert
      * @param target  the conversion target class
@@ -83,11 +83,12 @@ public final class TypeConverter {
     }
 
     /**
-     * Performs the {@link Object} to {@link Any} mapping.
+     * Converts the given value to Protobuf {@link Any}.
      *
      * @param value the {@link Object} value to convert
      * @param <T>   the converted object type
      * @return the packed value
+     * @see #toMessage(Object)
      */
     public static <T> Any toAny(T value) {
         checkNotNull(value);
@@ -96,6 +97,14 @@ public final class TypeConverter {
         return result;
     }
 
+    /**
+     * Converts the given value to a corresponding Protobuf {@link Message} type.
+     *
+     * @param value the {@link Object} value to convert
+     * @param <T> the converted object type
+     * @param <M> the resulting message type
+     * @return the wrapped value
+     */
     public static <T, M extends Message> M toMessage(T value) {
         @SuppressWarnings("unchecked") // Must be checked at runtime
         final Class<T> srcClass = (Class<T>) value.getClass();
