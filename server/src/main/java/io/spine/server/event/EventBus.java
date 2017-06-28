@@ -35,7 +35,7 @@ import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
@@ -156,8 +156,8 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    protected DeadMessageHandler<EventEnvelope> getDeadMessageHandler() {
-        return DeadEventHandler.INSTANCE;
+    protected DeadMessageTap<EventEnvelope> getDeadMessageHandler() {
+        return DeadEventTap.INSTANCE;
     }
 
     @Override
@@ -525,11 +525,11 @@ public class EventBus extends CommandOutputBus<Event,
     /**
      * Produces an {@link UnsupportedEventException} upon a dead event.
      */
-    private enum DeadEventHandler implements DeadMessageHandler<EventEnvelope> {
+    private enum DeadEventTap implements DeadMessageTap<EventEnvelope> {
         INSTANCE;
 
         @Override
-        public UnsupportedEventException handleDeadMessage(EventEnvelope envelope) {
+        public UnsupportedEventException capture(EventEnvelope envelope) {
             final Message message = envelope.getMessage();
             final UnsupportedEventException exception = new UnsupportedEventException(message);
             return exception;

@@ -45,15 +45,15 @@ final class DeadMessageFilter<T extends Message,
         extends AbstractBusFilter<E> {
 
     private final Bus.IdConverter<E> idConverter;
-    private final DeadMessageHandler<E> deadMessageHandler;
+    private final DeadMessageTap<E> deadMessageTap;
     private final DispatcherRegistry<C, D> registry;
 
     DeadMessageFilter(Bus.IdConverter<E> idConverter,
-                      DeadMessageHandler<E> deadMessageHandler,
+                      DeadMessageTap<E> deadMessageTap,
                       DispatcherRegistry<C, D> registry) {
         super();
         this.idConverter = checkNotNull(idConverter);
-        this.deadMessageHandler = checkNotNull(deadMessageHandler);
+        this.deadMessageTap = checkNotNull(deadMessageTap);
         this.registry = checkNotNull(registry);
     }
 
@@ -63,7 +63,7 @@ final class DeadMessageFilter<T extends Message,
         final C cls = (C) envelope.getMessageClass();
         final Collection<D> dispatchers = registry.getDispatchers(cls);
         if (dispatchers.isEmpty()) {
-            final MessageUnhandled exception = deadMessageHandler.handleDeadMessage(envelope);
+            final MessageUnhandled exception = deadMessageTap.capture(envelope);
             final Error error = exception.asError();
             final IsSent result = reject(idConverter.apply(envelope), error);
             return Optional.of(result);

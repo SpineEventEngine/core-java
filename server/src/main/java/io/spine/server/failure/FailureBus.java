@@ -31,7 +31,7 @@ import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
 import io.spine.server.bus.Bus;
 import io.spine.server.bus.BusFilter;
-import io.spine.server.bus.DeadMessageHandler;
+import io.spine.server.bus.DeadMessageTap;
 import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
@@ -124,8 +124,8 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    protected DeadMessageHandler<FailureEnvelope> getDeadMessageHandler() {
-        return DeadFailureHandler.INSTANCE;
+    protected DeadMessageTap<FailureEnvelope> getDeadMessageHandler() {
+        return DeadFailureTap.INSTANCE;
     }
 
     @Override
@@ -227,11 +227,11 @@ public class FailureBus extends CommandOutputBus<Failure,
      * Generates an {@link UnhandledFailureException} upon a dead
      * message.
      */
-    private enum DeadFailureHandler implements DeadMessageHandler<FailureEnvelope> {
+    private enum DeadFailureTap implements DeadMessageTap<FailureEnvelope> {
         INSTANCE;
 
         @Override
-        public UnhandledFailureException handleDeadMessage(FailureEnvelope envelope) {
+        public UnhandledFailureException capture(FailureEnvelope envelope) {
             final Message message = envelope.getMessage();
             final UnhandledFailureException exception = new UnhandledFailureException(message);
             return exception;

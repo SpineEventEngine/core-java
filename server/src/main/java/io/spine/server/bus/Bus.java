@@ -161,9 +161,9 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Obtains the instance of {@link DeadMessageHandler} for this bus.
+     * Obtains the instance of {@link DeadMessageTap} for this bus.
      */
-    protected abstract DeadMessageHandler<E> getDeadMessageHandler();
+    protected abstract DeadMessageTap<E> getDeadMessageHandler();
 
     /**
      * Obtains the instance of {@link EnvelopeValidator} for this bus.
