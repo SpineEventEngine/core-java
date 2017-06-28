@@ -26,7 +26,6 @@ import io.spine.client.TestActorRequestFactory;
 import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
-import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.time.Durations2;
 import org.junit.Test;
@@ -38,6 +37,7 @@ import java.util.concurrent.CountDownLatch;
 import static com.google.common.collect.Lists.newArrayList;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.CommandStatus.SCHEDULED;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.commandbus.CommandScheduler.setSchedule;
 import static io.spine.server.commandbus.Given.ACommand.addTask;
 import static io.spine.server.commandbus.Given.ACommand.createProject;
@@ -198,7 +198,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @Test
     public void update_schedule_options() {
         final Command cmd = requestFactory.command()
-                                          .create(Wrapper.forString(newUuid()));
+                                          .create(toMessage(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
         final Duration delay = Durations2.minutes(5);
 
@@ -214,7 +214,7 @@ public class CommandSchedulingShould extends AbstractCommandBusTestSuite {
     @Test
     public void update_scheduling_time() {
         final Command cmd = requestFactory.command()
-                                          .create(Wrapper.forString(newUuid()));
+                                          .create(toMessage(newUuid()));
         final Timestamp schedulingTime = getCurrentTime();
 
         final Command cmdUpdated = CommandScheduler.setSchedulingTime(cmd, schedulingTime);

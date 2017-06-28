@@ -22,7 +22,6 @@ package io.spine.change;
 
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
 import static io.spine.change.MessageMismatch.expectedDefault;
@@ -31,14 +30,15 @@ import static io.spine.change.MessageMismatch.unexpectedValue;
 import static io.spine.change.MessageMismatch.unpackActual;
 import static io.spine.change.MessageMismatch.unpackExpected;
 import static io.spine.change.MessageMismatch.unpackNewValue;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 
 public class MessageMismatchShould {
 
-    private static final StringValue EXPECTED = Wrapper.forString("expected_value");
-    private static final StringValue ACTUAL = Wrapper.forString("actual-value");
-    private static final StringValue NEW_VALUE = Wrapper.forString("new-value");
+    private static final StringValue EXPECTED = toMessage("expected_value");
+    private static final StringValue ACTUAL = toMessage("actual-value");
+    private static final StringValue NEW_VALUE = toMessage("new-value");
     private static final StringValue DEFAULT_VALUE = StringValue.getDefaultInstance();
     private static final int VERSION = 1;
 

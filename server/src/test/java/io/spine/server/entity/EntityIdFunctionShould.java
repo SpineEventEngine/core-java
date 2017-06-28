@@ -23,9 +23,9 @@ package io.spine.server.entity;
 import com.google.common.base.Function;
 import com.google.protobuf.StringValue;
 import io.spine.client.EntityId;
-import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toAny;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -40,7 +40,7 @@ public class EntityIdFunctionShould {
                 new RecordBasedRepository.EntityIdFunction<>(StringValue.class);
 
         final EntityId wrongType = EntityId.newBuilder()
-                                           .setId(Wrapper.forLong().pack(100L))
+                                           .setId(toAny(100L))
                                            .build();
         func.apply(wrongType);
     }
@@ -52,7 +52,7 @@ public class EntityIdFunctionShould {
 
         final String value = "abcd";
         final EntityId type = EntityId.newBuilder()
-                                      .setId(Wrapper.forString().pack(value))
+                                      .setId(toAny(value))
                                       .build();
         final StringValue result = func.apply(type);
         assertNotNull(result);

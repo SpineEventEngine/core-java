@@ -34,7 +34,6 @@ import io.spine.core.EventContext;
 import io.spine.core.Events;
 import io.spine.core.Subscribe;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.commandbus.CommandBus;
@@ -62,6 +61,7 @@ import java.util.Set;
 
 import static io.spine.core.Commands.getMessage;
 import static io.spine.protobuf.AnyPacker.unpack;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.procman.ProcManTransaction.start;
 import static io.spine.server.procman.ProcessManagerDispatcher.dispatch;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
@@ -231,7 +231,7 @@ public class ProcessManagerShould {
 
     @Test
     public void create_iterating_router() {
-        final StringValue commandMessage = Wrapper.forString("create_iterating_router");
+        final StringValue commandMessage = toMessage("create_iterating_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));
@@ -254,7 +254,7 @@ public class ProcessManagerShould {
 
     @Test
     public void create_router() {
-        final StringValue commandMessage = Wrapper.forString("create_router");
+        final StringValue commandMessage = toMessage("create_router");
         final CommandContext commandContext = requestFactory.createCommandContext();
 
         processManager.setCommandBus(mock(CommandBus.class));

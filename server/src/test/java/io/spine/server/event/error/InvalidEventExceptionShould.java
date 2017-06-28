@@ -21,11 +21,11 @@
 package io.spine.server.event.error;
 
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.event.InvalidEventException;
 import io.spine.validate.ConstraintViolation;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -38,7 +38,7 @@ public class InvalidEventExceptionShould {
 
     @Test
     public void create_exception_with_violations() {
-        final StringValue msg = Wrapper.forString("");
+        final StringValue msg = toMessage("");
 
         final InvalidEventException exception = InvalidEventException.onConstraintViolations(
                 msg,
