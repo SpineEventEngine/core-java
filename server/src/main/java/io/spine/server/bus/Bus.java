@@ -395,8 +395,8 @@ public abstract class Bus<T extends Message,
         /**
          * Creates new instance of {@code Bus} with the set parameters.
          *
-         * <p>It is recommended to specify explicitly the resulting type of the bus in the return
-         * type when overriding this method.
+         * <p>It is recommended to specify the exact resulting type of the bus in the return type
+         * when overriding this method.
          */
         public abstract Bus<?, E, ?, ?> build();
 

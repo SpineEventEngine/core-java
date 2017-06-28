@@ -34,9 +34,8 @@ import io.spine.core.MessageEnvelope;
 public abstract class AbstractBusFilter<E extends MessageEnvelope<?>> implements BusFilter<E> {
 
     @SuppressWarnings("NoopMethodInAbstractClass")
-        // Do nothing by default, but allow customization.
     @Override
     public void close() throws Exception {
-        // NoOp
+        // Do nothing by default, but allow customization.
     }
 }
