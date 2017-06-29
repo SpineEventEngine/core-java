@@ -28,8 +28,10 @@ import io.spine.core.IsSent;
 import io.spine.core.MessageEnvelope;
 import io.spine.type.MessageClass;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Collection;
+import java.util.Deque;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -59,6 +61,16 @@ public abstract class Bus<T extends Message,
 
     @Nullable
     private DispatcherRegistry<C, D> registry;
+
+    /**
+     * The chain of filters for this bus.
+     *
+     * <p>This field is effectively final, but is initialized lazily.
+     *
+     * @see #filterChain() for the non-null filter chain value
+     */
+    @Nullable
+    private FilterChain<E> filterChain;
 
     /**
      * Registers the passed dispatcher.
@@ -137,16 +149,26 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Handles the message, for which there is no dispatchers registered in the registry.
+     * Closes the {@linkplain BusFilter filters} of this bus and unregisters all the dispatchers.
      *
-     * @param message the message that has no target dispatchers, packed into an envelope
+     * @throws Exception if either filters or the {@linkplain DispatcherRegistry} throws
+     *         an exception
      */
-    public abstract void handleDeadMessage(E message);
+    @Override
+    public void close() throws Exception {
+        filterChain().close();
+        registry().unregisterAll();
+    }
 
     /**
-     * Retrieves the ID of the given {@link MessageEnvelope}.
+     * Obtains the instance of {@link DeadMessageTap} for this bus.
      */
-    protected abstract Message getId(E envelope);
+    protected abstract DeadMessageTap<E> getDeadMessageHandler();
+
+    /**
+     * Obtains the instance of {@link EnvelopeValidator} for this bus.
+     */
+    protected abstract EnvelopeValidator<E> getValidator();
 
     /**
      * Obtains the dispatcher registry.
@@ -159,10 +181,55 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Factory method for creating an instance of the registry for
-     * dispatchers of the bus.
+     * Initializes the {@code Bus.filterChain} field upon the first invocation and obtains
+     * the value of the field.
+     *
+     * <p>Adds the {@link DeadMessageFilter} and the {@link ValidatingFilter} to the chain, so that
+     * a chain always has the following format:
+     *
+     * <pre>
+     *     {@link ValidatingFilter} -> {@link DeadMessageFilter} -> custom filters if any...
+     * </pre>
+     *
+     * @return the value of the bus filter chain
+     */
+    private BusFilter<E> filterChain() {
+        if (filterChain == null) {
+            final Deque<BusFilter<E>> filters = createFilterChain();
+            final BusFilter<E> deadMsgFilter = new DeadMessageFilter<>(getIdConverter(),
+                                                                       getDeadMessageHandler(),
+                                                                       registry());
+            final BusFilter<E> validatingFilter = new ValidatingFilter<>(getIdConverter(),
+                                                                         getValidator());
+            filters.push(deadMsgFilter);
+            filters.push(validatingFilter);
+            filterChain = new FilterChain<>(filters);
+        }
+        return filterChain;
+    }
+
+    /**
+     * Factory method for creating an instance of the registry for dispatchers of the bus.
      */
     protected abstract DispatcherRegistry<C, D> createRegistry();
+
+    /**
+     * Creates a {@link Deque} of the custom {@linkplain BusFilter bus filters} for the current
+     * instance of {@code Bus}.
+     *
+     * <p>This method should be invoked only once when initializing
+     * the {@linkplain #filterChain() filter chain} of this bus.
+     *
+     * @return a dequeue of the bus custom filters
+     */
+    protected abstract Deque<BusFilter<E>> createFilterChain();
+
+    /**
+     * Obtains the {@link IdConverter} for this type of {@code Bus}.
+     *
+     * @return a function converting a {@link MessageEnvelope} to an ID
+     */
+    protected abstract IdConverter<E> getIdConverter();
 
     /**
      * Filters the given messages.
@@ -170,7 +237,8 @@ public abstract class Bus<T extends Message,
      * <p>Each message goes through the filter chain, specific to the {@code Bus} implementation.
      *
      * <p>If a message passes the filtering, it is included into the resulting {@link Iterable};
-     * otherwise, {@linkplain StreamObserver#onNext StreamObserver.onNext()} is called for that message.
+     * otherwise, {@linkplain StreamObserver#onNext StreamObserver.onNext()} is called for that
+     * message.
      *
      * <p>Any filter in the filter chain may process the message by itself. In this case an observer
      * is notified by the filter directly.
@@ -185,7 +253,7 @@ public abstract class Bus<T extends Message,
         checkNotNull(observer);
         final Collection<T> result = newLinkedList();
         for (T message : messages) {
-            final Optional<IsSent> response = preProcess(toEnvelope(message));
+            final Optional<IsSent> response = filter(toEnvelope(message));
             if (response.isPresent()) {
                 observer.onNext(response.get());
             } else {
@@ -196,9 +264,7 @@ public abstract class Bus<T extends Message,
     }
 
     /**
-     * Pre-processes the given message.
-     *
-     * <p>The pre-processing may include validation.
+     * Feeds the given message to the bus filters.
      *
      * <p>If the given message is completely processed and should not be passed to the dispatchers
      * via {@link #doPost doPost} method, the returned {@link Optional} contains a value with either
@@ -211,7 +277,10 @@ public abstract class Bus<T extends Message,
      * @return the result of message processing by this bus if any, or
      * {@link Optional#absent() Optional.absent()} otherwise
      */
-    protected abstract Optional<IsSent> preProcess(E message);
+    private Optional<IsSent> filter(E message) {
+        final Optional<IsSent> filterOutput = filterChain().accept(message);
+        return filterOutput;
+    }
 
     /**
      * Packs the given message of type {@code T} into an envelope of type {@code E}.
@@ -273,6 +342,76 @@ public abstract class Bus<T extends Message,
     }
 
     /**
+     * The implementation base for the bus builders.
+     *
+     * @param <E> the type of {@link MessageEnvelope} posted by the bus
+     * @param <T> the type of {@link Message} posted by the bus
+     * @param <B> the own type of the builder
+     */
+    public abstract static class AbstractBuilder<E extends MessageEnvelope<T>,
+                                                 T extends Message,
+                                                 B extends AbstractBuilder<E, T, B>> {
+
+        private final Deque<BusFilter<E>> filters;
+
+        /**
+         * Creates a new instance of the bus builder.
+         */
+        protected AbstractBuilder() {
+            this.filters = newLinkedList();
+        }
+
+        /**
+         * Adds the given {@linkplain BusFilter filter} to the builder.
+         *
+         * <p>The order of appending the filters to the builder is the order of the filters in
+         * the resulting bus.
+         *
+         * @param filter the filter to append
+         */
+        public final B appendFilter(BusFilter<E> filter) {
+            checkNotNull(filter);
+            this.filters.offer(filter);
+            return self();
+        }
+
+        /**
+         * Removes the specified filter from the filter queue.
+         *
+         * <p>If the filter is not present in the queue, no action is performed.
+         *
+         * @param filter the filter to delete
+         */
+        public final B removeFilter(BusFilter<E> filter) {
+            checkNotNull(filter);
+            this.filters.remove(filter);
+            return self();
+        }
+
+        /**
+         * Obtains the {@linkplain BusFilter bus filters} of this builder.
+         *
+         * @see #appendFilter(BusFilter)
+         */
+        public final Deque<BusFilter<E>> getFilters() {
+            return newLinkedList(filters);
+        }
+
+        /**
+         * Creates new instance of {@code Bus} with the set parameters.
+         *
+         * <p>It is recommended to specify the exact resulting type of the bus in the return type
+         * when overriding this method.
+         */
+        public abstract Bus<?, E, ?, ?> build();
+
+        /**
+         * @return {@code this} reference to avoid redundant casts
+         */
+        protected abstract B self();
+    }
+
+    /**
      * A function creating the instances of {@link MessageEnvelope} from the given message.
      */
     private class MessageToEnvelope implements Function<T, E> {
@@ -283,5 +422,20 @@ public abstract class Bus<T extends Message,
             final E result = toEnvelope(message);
             return result;
         }
+    }
+
+    /**
+     * The function which receives a {@link MessageEnvelope} as a parameter and returns the ID of
+     * the message enclosed in that parameter.
+     *
+     * @param <E> the type of the envelope
+     */
+    public interface IdConverter<E extends MessageEnvelope<?>> extends Function<E, Message> {
+
+        @SuppressWarnings({"AbstractMethodOverridesAbstractMethod", "NullableProblems"})
+            // Changes nullability contract.
+        @Nonnull
+        @Override
+        Message apply(@Nullable E input);
     }
 }

@@ -30,7 +30,6 @@ import io.spine.client.CompositeColumnFilter.CompositeOperator;
 import io.spine.client.EntityFilters;
 import io.spine.client.EntityId;
 import io.spine.client.EntityIdFilter;
-import io.spine.protobuf.TypeConverter;
 import io.spine.server.entity.Entity;
 
 import java.util.Collection;
@@ -40,6 +39,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.collect.HashMultimap.create;
 import static com.google.common.primitives.Primitives.wrap;
+import static io.spine.protobuf.TypeConverter.toObject;
 
 /**
  * A utility class for working with {@link EntityQuery} instances.
@@ -103,7 +103,7 @@ public final class EntityQueries {
     private static void checkFilterType(Column column, ColumnFilter filter) {
         final Class<?> expectedType = column.getType();
         final Any filterConvent = filter.getValue();
-        final Object filterValue = TypeConverter.toObject(filterConvent, expectedType);
+        final Object filterValue = toObject(filterConvent, expectedType);
         final Class<?> actualType = filterValue.getClass();
         checkArgument(wrap(expectedType).isAssignableFrom(wrap(actualType)),
                       "Column type mismatch. Column %s cannot have value %s.",

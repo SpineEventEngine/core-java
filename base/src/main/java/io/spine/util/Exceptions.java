@@ -20,7 +20,6 @@
 
 package io.spine.util;
 
-import io.spine.annotation.Internal;
 import io.spine.base.Error;
 
 import java.util.Locale;
@@ -199,24 +198,6 @@ public final class Exceptions {
                                  .setMessage(cause.getMessage())
                                  .setStacktrace(getStackTraceAsString(cause))
                                  .build();
-        return error;
-    }
-
-    /**
-     * Creates a Protobuf error from the given {@link Throwable} with the given error code.
-     *
-     * <p>The error code may represent a number in an enum or a native error number (ERRNO).
-     *
-     * @param throwable the {@code Throwable} to convert
-     * @param errorCode the error code to include in the resulting {@link Error}
-     * @return new instance of {@link Error}
-     * @see #toError(Throwable) as the recommended overload
-     */
-    @Internal
-    public static Error toError(Throwable throwable, int errorCode) {
-        final Error error = toError(throwable).toBuilder()
-                                              .setCode(errorCode)
-                                              .build();
         return error;
     }
 }

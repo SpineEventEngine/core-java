@@ -34,6 +34,7 @@ import java.util.Iterator;
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.given.GivenUserId.of;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -43,7 +44,7 @@ import static org.junit.Assert.assertSame;
 public class AnyPackerShould {
 
     /** A message with type URL standard to Google Protobuf. */
-    private final StringValue googleMsg = Wrapper.forString(newUuid());
+    private final StringValue googleMsg = toMessage(newUuid());
 
     /** A message with different type URL. */
     private final UserId spineMsg = of(newUuid());

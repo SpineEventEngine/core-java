@@ -149,7 +149,7 @@ public class CommandStore implements AutoCloseable {
      *                  to store
      */
     public void storeWithError(Command command, CommandException exception) {
-        store(command, exception.getError());
+        store(command, exception.asError());
     }
 
     /**

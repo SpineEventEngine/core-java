@@ -26,12 +26,12 @@ import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
 import io.spine.base.ThrowableMessage;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Failures.toFailure;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -68,7 +68,7 @@ public class FailuresShould {
 
     @Test
     public void convert_throwable_message_to_failure_message() {
-        final StringValue failureState = Wrapper.forString(newUuid());
+        final StringValue failureState = toMessage(newUuid());
         final CommandContext context = CommandContext.newBuilder()
                                                    .build();
         final Command command = Command.newBuilder()

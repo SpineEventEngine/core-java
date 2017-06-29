@@ -51,6 +51,7 @@ import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
 import static io.spine.test.TestValues.newUuidValue;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
@@ -134,7 +135,7 @@ public class CommandsShould {
 
     @Test
     public void extract_message_from_command() {
-        final StringValue message = Wrapper.forString("extract_message_from_command");
+        final StringValue message = toMessage("extract_message_from_command");
 
         final Command command = requestFactory.createCommand(message);
         assertEquals(message, Commands.getMessage(command));
@@ -232,7 +233,7 @@ public class CommandsShould {
     public void obtain_type_url_of_command() {
         final ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsShould.class);
-        final StringValue message = Wrapper.forString(Identifier.newUuid());
+        final StringValue message = toMessage(newUuid());
         final Command command = factory.command()
                                        .create(message);
 

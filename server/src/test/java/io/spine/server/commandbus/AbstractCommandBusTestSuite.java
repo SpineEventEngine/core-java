@@ -116,14 +116,12 @@ public abstract class AbstractCommandBusTestSuite {
         checkCommandError(sendingResult,
                           validationError,
                           exceptionClass.getCanonicalName(),
-                          exceptionClass,
                           cmd);
     }
 
     static void checkCommandError(IsSent sendingResult,
                                   CommandValidationError validationError,
                                   String errorType,
-                                  Class<? extends CommandException> exceptionClass,
                                   Command cmd) {
         final Status status = sendingResult.getStatus();
         assertEquals(status.getStatusCase(), Status.StatusCase.ERROR);

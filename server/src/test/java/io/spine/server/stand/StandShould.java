@@ -904,7 +904,7 @@ public class StandShould extends TenantAwareTest {
         assertEquals(query, queryException.getRequest());
 
         assertEquals(UNSUPPORTED_QUERY_TARGET.getNumber(),
-                     queryException.getError()
+                     queryException.asError()
                                    .getCode());
     }
 
@@ -917,10 +917,10 @@ public class StandShould extends TenantAwareTest {
         assertEquals(invalidQuery, queryException.getRequest());
 
         assertEquals(INVALID_QUERY.getNumber(),
-                     queryException.getError()
+                     queryException.asError()
                                    .getCode());
 
-        final ValidationError validationError = queryException.getError()
+        final ValidationError validationError = queryException.asError()
                                                               .getValidationError();
         assertTrue(Validate.isNotDefault(validationError));
     }
@@ -933,7 +933,7 @@ public class StandShould extends TenantAwareTest {
         assertEquals(topic, topicException.getRequest());
 
         assertEquals(UNSUPPORTED_TOPIC_TARGET.getNumber(),
-                     topicException.getError()
+                     topicException.asError()
                                    .getCode());
     }
 
@@ -946,10 +946,10 @@ public class StandShould extends TenantAwareTest {
         assertEquals(invalidTopic, topicException.getRequest());
 
         assertEquals(INVALID_TOPIC.getNumber(),
-                     topicException.getError()
+                     topicException.asError()
                                    .getCode());
 
-        final ValidationError validationError = topicException.getError()
+        final ValidationError validationError = topicException.asError()
                                                               .getValidationError();
         assertTrue(Validate.isNotDefault(validationError));
     }
@@ -963,10 +963,10 @@ public class StandShould extends TenantAwareTest {
         assertEquals(invalidSubscription, exception.getRequest());
 
         assertEquals(SubscriptionValidationError.INVALID_SUBSCRIPTION.getNumber(),
-                     exception.getError()
+                     exception.asError()
                               .getCode());
 
-        final ValidationError validationError = exception.getError()
+        final ValidationError validationError = exception.asError()
                                                          .getValidationError();
         assertTrue(Validate.isNotDefault(validationError));
     }
@@ -980,7 +980,7 @@ public class StandShould extends TenantAwareTest {
         assertEquals(subscription, exception.getRequest());
 
         assertEquals(SubscriptionValidationError.UNKNOWN_SUBSCRIPTION.getNumber(),
-                     exception.getError()
+                     exception.asError()
                               .getCode());
     }
 

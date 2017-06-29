@@ -26,6 +26,7 @@ import io.grpc.StatusRuntimeException;
 import io.spine.annotation.Internal;
 import io.spine.base.Error;
 import io.spine.grpc.MetadataConverter;
+import io.spine.core.MessageRejection;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.grpc.Status.INVALID_ARGUMENT;
@@ -44,20 +45,26 @@ public class Statuses {
 
     /**
      * Creates an instance of {@code StatusRuntimeException} of status
-     * {@code Status.INVALID_ARGUMENT} with the passed cause and the {@link Error}.
+     * {@code Status.INVALID_ARGUMENT} with the passed cause.
      *
-     * <p>Resulting {@code StatusRuntimeException} will contain the passed {@link Error}
-     * transformed to the {@linkplain StatusRuntimeException#getTrailers() metadata}.
-     *
-     * <p>NOTE: The cause is not transmitted from a server to a client.
+     * <p>Resulting {@code StatusRuntimeException} will contain the passed
+     * {@link MessageRejection} transformed to
+     * the {@linkplain StatusRuntimeException#getTrailers() metadata}.
      *
      * @param cause the exception cause
-     * @param error the error to be passed to a client
      * @return the constructed {@code StatusRuntimeException}
      */
-    public static StatusRuntimeException invalidArgumentWithCause(Exception cause, Error error) {
+    public static StatusRuntimeException invalidArgumentWithCause(MessageRejection cause) {
         checkNotNull(cause);
-        checkNotNull(error);
+        return createException(cause.asThrowable(), cause.asError());
+    }
+
+    /**
+     * Constructs the {@code StatusRuntimeException} with the given cause and error.
+     *
+     * @see #invalidArgumentWithCause(MessageRejection)
+     */
+    private static StatusRuntimeException createException(Throwable cause, Error error) {
         final Metadata metadata = MetadataConverter.toMetadata(error);
         final StatusRuntimeException result = INVALID_ARGUMENT.withCause(cause)
                                                               .asRuntimeException(metadata);

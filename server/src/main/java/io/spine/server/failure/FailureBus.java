@@ -26,14 +26,22 @@ import io.grpc.stub.StreamObserver;
 import io.spine.core.Failure;
 import io.spine.core.FailureClass;
 import io.spine.core.FailureEnvelope;
+import io.spine.core.FailureId;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
+import io.spine.core.MessageInvalid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Deque;
 import java.util.Set;
 
 import static com.google.common.base.Optional.absent;
@@ -54,11 +62,14 @@ public class FailureBus extends CommandOutputBus<Failure,
                                                  FailureClass,
                                                  FailureDispatcher> {
 
+    private final Deque<BusFilter<FailureEnvelope>> filterChain;
+
     /**
      * Creates a new instance according to the pre-configured {@code Builder}.
      */
     private FailureBus(Builder builder) {
         super(checkNotNull(builder.dispatcherFailureDelivery));
+        this.filterChain = builder.getFilters();
     }
 
     /**
@@ -78,12 +89,6 @@ public class FailureBus extends CommandOutputBus<Failure,
         // do nothing for now.
     }
 
-    @Override
-    public Optional<Throwable> validate(Message message) {
-        checkNotNull(message);
-        return absent();
-    }
-
     /**
      * Always returns the original {@code Failure}, as the enrichment is not supported
      * for the business failures yet.
@@ -101,6 +106,17 @@ public class FailureBus extends CommandOutputBus<Failure,
         return new FailureDispatcherRegistry();
     }
 
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
+    @Override
+    protected Deque<BusFilter<FailureEnvelope>> createFilterChain() {
+        return filterChain;
+    }
+
+    @Override
+    protected IdConverter<FailureEnvelope> getIdConverter() {
+        return FailureIdConverter.INSTANCE;
+    }
+
     @Override
     protected FailureEnvelope toEnvelope(Failure message) {
         final FailureEnvelope result = FailureEnvelope.of(message);
@@ -108,13 +124,13 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     @Override
-    public void handleDeadMessage(FailureEnvelope message) {
-        log().warn("No dispatcher defined for the failure class {}", message.getMessageClass());
+    protected DeadMessageTap<FailureEnvelope> getDeadMessageHandler() {
+        return DeadFailureTap.INSTANCE;
     }
 
     @Override
-    protected Message getId(FailureEnvelope envelope) {
-        return envelope.getId();
+    protected EnvelopeValidator<FailureEnvelope> getValidator() {
+        return NoOpValidator.INSTANCE;
     }
 
     /**
@@ -161,7 +177,7 @@ public class FailureBus extends CommandOutputBus<Failure,
     }
 
     /** The {@code Builder} for {@code FailureBus}. */
-    public static class Builder {
+    public static class Builder extends AbstractBuilder<FailureEnvelope, Failure, Builder> {
 
         /**
          * Optional {@code DispatcherFailureDelivery} for calling the dispatchers.
@@ -171,7 +187,9 @@ public class FailureBus extends CommandOutputBus<Failure,
         @Nullable
         private DispatcherFailureDelivery dispatcherFailureDelivery;
 
-        private Builder(){
+        private Builder() {
+            super();
+            // Prevent direct instantiation.
         }
 
         /**
@@ -190,12 +208,57 @@ public class FailureBus extends CommandOutputBus<Failure,
             return Optional.fromNullable(dispatcherFailureDelivery);
         }
 
+        @Override
         public FailureBus build() {
             if(dispatcherFailureDelivery == null) {
                 dispatcherFailureDelivery = DispatcherFailureDelivery.directDelivery();
             }
 
             return new FailureBus(this);
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
+
+    /**
+     * Generates an {@link UnhandledFailureException} upon a dead
+     * message.
+     */
+    private enum DeadFailureTap implements DeadMessageTap<FailureEnvelope> {
+        INSTANCE;
+
+        @Override
+        public UnhandledFailureException capture(FailureEnvelope envelope) {
+            final Message message = envelope.getMessage();
+            final UnhandledFailureException exception = new UnhandledFailureException(message);
+            return exception;
+        }
+    }
+
+    /**
+     * Performs no validation and reports the given message valid.
+     */
+    private enum NoOpValidator implements EnvelopeValidator<FailureEnvelope> {
+        INSTANCE;
+
+        @Override
+        public Optional<MessageInvalid> validate(FailureEnvelope envelope) {
+            checkNotNull(envelope);
+            return absent();
+        }
+    }
+
+    private enum FailureIdConverter implements Bus.IdConverter<FailureEnvelope> {
+        INSTANCE;
+
+        @Nonnull
+        @Override
+        public FailureId apply(@Nullable FailureEnvelope input) {
+            checkNotNull(input);
+            return input.getId();
         }
     }
 

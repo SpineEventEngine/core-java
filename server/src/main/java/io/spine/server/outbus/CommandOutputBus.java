@@ -20,10 +20,8 @@
 package io.spine.server.outbus;
 
 import com.google.common.base.Function;
-import com.google.common.base.Optional;
 import com.google.protobuf.Message;
 import io.spine.annotation.Internal;
-import io.spine.base.Error;
 import io.spine.core.Event;
 import io.spine.core.Failure;
 import io.spine.core.IsSent;
@@ -32,15 +30,15 @@ import io.spine.server.bus.Bus;
 import io.spine.server.bus.MessageDispatcher;
 import io.spine.server.delivery.Delivery;
 import io.spine.type.MessageClass;
-import io.spine.util.Exceptions;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.google.common.base.Preconditions.checkState;
 import static io.spine.server.bus.Buses.acknowledge;
-import static io.spine.server.bus.Buses.reject;
+import static java.lang.String.format;
 
 /**
  * A base bus responsible for delivering the {@link io.spine.core.Command command} output.
@@ -96,21 +94,6 @@ public abstract class CommandOutputBus<M extends Message,
     }
 
     /**
-     * Verifies that a message can be posted to this {@code CommandOutputBus}.
-     *
-     * <p>A command output can be posted if its message has either dispatcher or handler
-     * registered with this {@code CommandOutputBus}.
-     *
-     * <p>The message also must satisfy validation constraints defined in its Protobuf type.
-     *
-     * @param message          the command output message to check
-     * @return a {@link Throwable} representing the found violation or
-     *         {@link Optional#absent() Optional.absent()} if the given {@link Message} can be
-     *         posted to this bus
-     */
-    public abstract Optional<Throwable> validate(Message message);
-
-    /**
      * Enriches the message posted to this instance of {@code CommandOutputBus}.
      *
      * @param originalMessage the original message posted to the bus
@@ -136,32 +119,16 @@ public abstract class CommandOutputBus<M extends Message,
     protected abstract OutputDispatcherRegistry<C, D> createRegistry();
 
     @Override
-    protected Optional<IsSent> preProcess(final E message) {
-        final Optional<Throwable> violation = this.validate(message.getMessage());
-        final Optional<IsSent> result = violation.transform(
-                new Function<Throwable, IsSent>() {
-                    @Override
-                    public IsSent apply(@Nullable Throwable input) {
-                        checkNotNull(input);
-                        final Error error = Exceptions.toError(input);
-                        return reject(getId(message), error);
-                    }
-                }
-        );
-        return result;
-    }
-
-    @Override
     protected IsSent doPost(E envelope) {
         final M enriched = enrich(envelope.getOuterObject());
         final E enrichedEnvelope = toEnvelope(enriched);
         final int dispatchersCalled = callDispatchers(enrichedEnvelope);
 
-        if (dispatchersCalled == 0) {
-            handleDeadMessage(enrichedEnvelope);
-        }
-        final IsSent acknowledgement = acknowledge(getId(envelope));
-        return acknowledgement;
+        final Message id = getIdConverter().apply(envelope);
+        checkState(dispatchersCalled != 0,
+                   format("Message %s has no dispatchers.", envelope.getMessage()));
+        final IsSent result = acknowledge(id);
+        return result;
     }
 
     /**
@@ -186,10 +153,5 @@ public abstract class CommandOutputBus<M extends Message,
     @Override
     protected OutputDispatcherRegistry<C, D> registry() {
         return (OutputDispatcherRegistry<C, D>) super.registry();
-    }
-
-    @Override
-    public void close() throws Exception {
-        registry().unregisterAll();
     }
 }

@@ -30,26 +30,29 @@ import io.spine.core.Event;
 import io.spine.core.EventClass;
 import io.spine.core.EventContext;
 import io.spine.core.EventEnvelope;
+import io.spine.core.EventId;
 import io.spine.core.IsSent;
-import io.spine.core.Subscribe;
 import io.spine.grpc.StreamObservers;
+import io.spine.server.bus.Bus;
+import io.spine.server.bus.BusFilter;
+import io.spine.server.bus.DeadMessageTap;
+import io.spine.server.bus.EnvelopeValidator;
 import io.spine.server.event.enrich.EventEnricher;
 import io.spine.server.outbus.CommandOutputBus;
 import io.spine.server.outbus.OutputDispatcherRegistry;
 import io.spine.server.storage.StorageFactory;
-import io.spine.validate.ConstraintViolation;
 import io.spine.validate.MessageValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
+import java.util.Deque;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
 
 /**
  * Dispatches incoming events to subscribers, and provides ways for registering those subscribers.
@@ -60,7 +63,7 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * <li>Expose a {@code public} method that accepts an event message as the first parameter
  * and an {@link EventContext EventContext} as the second
  * (optional) parameter.
- * <li>Mark the method with the {@link Subscribe @Subscribe} annotation.
+ * <li>Mark the method with the {@link io.spine.core.Subscribe @Subscribe} annotation.
  * <li>{@linkplain #register(io.spine.server.bus.MessageDispatcher)} Register} with an
  * instance of {@code EventBus} directly, or rely on message delivery
  * from an {@link EventDispatcher}. An example of such a dispatcher is
@@ -92,11 +95,11 @@ import static io.spine.server.transport.Statuses.invalidArgumentWithCause;
  * @author Alexander Yevsyuov
  * @author Alex Tymchenko
  * @see io.spine.server.projection.Projection Projection
- * @see Subscribe @Subscribe
+ * @see io.spine.core.Subscribe @Subscribe
  */
 public class EventBus extends CommandOutputBus<Event,
                                                EventEnvelope,
-        EventClass,
+                                               EventClass,
                                                EventDispatcher> {
 
     /*
@@ -109,9 +112,13 @@ public class EventBus extends CommandOutputBus<Event,
     /** The {@code EventStore} to which put events before they get handled. */
     private final EventStore eventStore;
 
-    /** The validator for events posted to the bus. */
-    private final MessageValidator eventValidator;
+    private final MessageValidator eventMessageValidator;
 
+    private final Deque<BusFilter<EventEnvelope>> filterChain;
+
+    /** The validator for events posted to the bus. */
+    @Nullable
+    private EventValidator eventValidator;
     /** The enricher for posted events or {@code null} if the enrichment is not supported. */
     @Nullable
     private EventEnricher enricher;
@@ -122,18 +129,14 @@ public class EventBus extends CommandOutputBus<Event,
     private EventBus(Builder builder) {
         super(checkNotNull(builder.dispatcherEventDelivery));
         this.eventStore = builder.eventStore;
-        this.eventValidator = builder.eventValidator;
         this.enricher = builder.enricher;
+        this.eventMessageValidator = builder.eventValidator;
+        this.filterChain = builder.getFilters();
     }
 
     /** Creates a builder for new {@code EventBus}. */
     public static Builder newBuilder() {
         return new Builder();
-    }
-
-    @VisibleForTesting
-    MessageValidator getEventValidator() {
-        return eventValidator;
     }
 
     @VisibleForTesting
@@ -153,16 +156,16 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     @Override
-    public void handleDeadMessage(EventEnvelope message) {
-        final Event event = message.getOuterObject();
-        log().warn("No subscriber or dispatcher defined for the event class: {}",
-                   event.getClass()
-                        .getName());
+    protected DeadMessageTap<EventEnvelope> getDeadMessageHandler() {
+        return DeadEventTap.INSTANCE;
     }
 
     @Override
-    protected Message getId(EventEnvelope envelope) {
-        return envelope.getId();
+    protected EnvelopeValidator<EventEnvelope> getValidator() {
+        if (eventValidator == null) {
+            eventValidator = new EventValidator(eventMessageValidator);
+        }
+        return eventValidator;
     }
 
     @Override
@@ -170,9 +173,25 @@ public class EventBus extends CommandOutputBus<Event,
         return new EventDispatcherRegistry();
     }
 
+    @SuppressWarnings("ReturnOfCollectionOrArrayField") // OK for this method.
+    @Override
+    protected Deque<BusFilter<EventEnvelope>> createFilterChain() {
+        return filterChain;
+    }
+
+    @Override
+    protected IdConverter<EventEnvelope> getIdConverter() {
+        return EventIdConverter.INSTANCE;
+    }
+
     @Override
     protected EventEnvelope toEnvelope(Event message) {
         return EventEnvelope.of(message);
+    }
+
+    @VisibleForTesting
+    MessageValidator getMessageValidator() {
+        return eventMessageValidator;
     }
 
     /** Returns {@link EventStore} associated with the bus. */
@@ -224,25 +243,6 @@ public class EventBus extends CommandOutputBus<Event,
         eventStore.appendAll(events);
     }
 
-    @Override
-    public Optional<Throwable> validate(Message event) {
-        checkNotNull(event);
-
-        final EventClass eventClass = EventClass.of(event);
-        Throwable result = null;
-        if (isUnsupportedEvent(eventClass)) {
-            final UnsupportedEventException unsupportedEvent = new UnsupportedEventException(event);
-            result = invalidArgumentWithCause(unsupportedEvent, unsupportedEvent.getError());
-        }
-        final List<ConstraintViolation> violations = eventValidator.validate(event);
-        if (!violations.isEmpty()) {
-            final InvalidEventException invalidEvent =
-                    InvalidEventException.onConstraintViolations(event, violations);
-            result = invalidArgumentWithCause(invalidEvent, invalidEvent.getError());
-        }
-        return Optional.fromNullable(result);
-    }
-
     /**
      * Add a new field enrichment translation function.
      *
@@ -267,11 +267,6 @@ public class EventBus extends CommandOutputBus<Event,
         } else {
             enricher.registerFieldEnrichment(eventFieldClass, enrichmentFieldClass, function);
         }
-    }
-
-    private boolean isUnsupportedEvent(EventClass eventClass) {
-        final boolean isUnsupported = !registry().hasDispatchersFor(eventClass);
-        return isUnsupported;
     }
 
     @Override
@@ -301,7 +296,7 @@ public class EventBus extends CommandOutputBus<Event,
     }
 
     /** The {@code Builder} for {@code EventBus}. */
-    public static class Builder {
+    public static class Builder extends AbstractBuilder<EventEnvelope, Event, Builder> {
 
         private static final String MSG_EVENT_STORE_CONFIGURED = "EventStore already configured.";
 
@@ -367,7 +362,8 @@ public class EventBus extends CommandOutputBus<Event,
         private EventEnricher enricher;
 
         private Builder() {
-            // Prevent instantiation from outside.
+            super();
+            // Prevent direct instantiation.
         }
 
         /**
@@ -488,6 +484,7 @@ public class EventBus extends CommandOutputBus<Event,
          * <p>This method is supposed to be called internally when building an enclosing
          * {@code BoundedContext}.
          */
+        @Override
         @Internal
         public EventBus build() {
             final String message = "Either storageFactory or eventStore must be " +
@@ -497,9 +494,7 @@ public class EventBus extends CommandOutputBus<Event,
             if (eventStoreStreamExecutor == null) {
                 eventStoreStreamExecutor = MoreExecutors.directExecutor();
             }
-            /* The assert below prevents false warning for possible `null` value passed
-               to EventStore.Builder.setStreamExecutor(). */
-            assert (eventStoreStreamExecutor != null);
+            checkNotNull(eventStoreStreamExecutor);
 
             if (eventStore == null) {
                 eventStore = EventStore.newBuilder()
@@ -519,6 +514,36 @@ public class EventBus extends CommandOutputBus<Event,
 
             final EventBus result = new EventBus(this);
             return result;
+        }
+
+        @Override
+        protected Builder self() {
+            return this;
+        }
+    }
+
+    /**
+     * Produces an {@link UnsupportedEventException} upon a dead event.
+     */
+    private enum DeadEventTap implements DeadMessageTap<EventEnvelope> {
+        INSTANCE;
+
+        @Override
+        public UnsupportedEventException capture(EventEnvelope envelope) {
+            final Message message = envelope.getMessage();
+            final UnsupportedEventException exception = new UnsupportedEventException(message);
+            return exception;
+        }
+    }
+
+    private enum EventIdConverter implements Bus.IdConverter<EventEnvelope> {
+        INSTANCE;
+
+        @Nonnull
+        @Override
+        public EventId apply(@Nullable EventEnvelope input) {
+            checkNotNull(input);
+            return input.getId();
         }
     }
 

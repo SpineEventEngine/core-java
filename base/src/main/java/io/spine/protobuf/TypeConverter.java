@@ -39,7 +39,7 @@ import io.spine.annotation.Internal;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
+import static io.spine.protobuf.AnyPacker.unpack;
 
 /**
  * A utility for converting the {@linkplain Message Protobuf Messages} (in form of {@link Any}) into
@@ -66,7 +66,7 @@ public final class TypeConverter {
     }
 
     /**
-     * Performs the {@link Any} to {@link Object} mapping.
+     * Converts the given {@link Any} value to a Java {@link Object}.
      *
      * @param message the {@link Any} value to convert
      * @param target  the conversion target class
@@ -76,75 +76,89 @@ public final class TypeConverter {
     public static <T> T toObject(Any message, Class<T> target) {
         checkNotNull(message);
         checkNotNull(target);
-        final AnyCaster<T> caster = AnyCaster.forType(target);
-        final T result = caster.convert(message);
+        final MessageCaster<? super Message, T> caster = MessageCaster.forType(target);
+        final Message genericMessage = unpack(message);
+        final T result = caster.convert(genericMessage);
         return result;
     }
 
     /**
-     * Performs the {@link Object} to {@link Any} mapping.
+     * Converts the given value to Protobuf {@link Any}.
      *
      * @param value the {@link Object} value to convert
      * @param <T>   the converted object type
      * @return the packed value
+     * @see #toMessage(Object)
      */
     public static <T> Any toAny(T value) {
         checkNotNull(value);
-        @SuppressWarnings("unchecked") // Must be checked at runtime
-        final Class<T> srcClass = (Class<T>) value.getClass();
-        final AnyCaster<T> caster = AnyCaster.forType(srcClass);
-        final Message message = caster.reverse()
-                                      .convert(value);
-        checkNotNull(message);
+        final Message message = toMessage(value);
         final Any result = AnyPacker.pack(message);
         return result;
     }
 
     /**
-     * The {@link Function} performing the described type conversion.
+     * Converts the given value to a corresponding Protobuf {@link Message} type.
+     *
+     * @param value the {@link Object} value to convert
+     * @param <T>   the converted object type
+     * @param <M>   the resulting message type
+     * @return the wrapped value
      */
-    private abstract static class AnyCaster<T> extends Converter<Any, T> {
-
-        private static <T> AnyCaster<T> forType(Class<T> cls) {
-            checkNotNull(cls);
-            if (Message.class.isAssignableFrom(cls)) {
-                return new MessageTypeCaster<>();
-            } else if (ByteString.class.isAssignableFrom(cls)) {
-                @SuppressWarnings("unchecked") // Logically checked
-                final AnyCaster<T> result = (AnyCaster<T>) new BytesCaster();
-                return result;
-            } else {
-                return new PrimitiveTypeCaster<>();
-            }
-        }
-
-        @Override
-        protected T doForward(Any input) {
-            return toObject(input);
-        }
-
-        @Override
-        protected Any doBackward(T t) {
-            final Message message = toMessage(t);
-            return AnyPacker.pack(message);
-        }
-
-        protected abstract T toObject(Any input);
-
-        protected abstract Message toMessage(T input);
+    public static <T, M extends Message> M toMessage(T value) {
+        @SuppressWarnings("unchecked") // Must be checked at runtime
+        final Class<T> srcClass = (Class<T>) value.getClass();
+        final MessageCaster<M, T> caster = MessageCaster.forType(srcClass);
+        final M message = caster.reverse().convert(value);
+        checkNotNull(message);
+        return message;
     }
 
-    private static class BytesCaster extends AnyCaster<ByteString> {
+    /**
+     * The {@link Function} performing the described type conversion.
+     */
+    private abstract static class MessageCaster<M extends Message, T> extends Converter<M, T> {
 
-        @Override
-        protected ByteString toObject(Any input) {
-            final BytesValue bytes = AnyPacker.unpack(input);
-            final ByteString result = bytes.getValue();
+        private static <M extends Message, T> MessageCaster<M, T> forType(Class<T> cls) {
+            checkNotNull(cls);
+            final MessageCaster<?, ?> caster;
+            if (Message.class.isAssignableFrom(cls)) {
+                caster = new MessageTypeCaster();
+            } else if (ByteString.class.isAssignableFrom(cls)) {
+                caster = new BytesCaster();
+            } else {
+                caster = new PrimitiveTypeCaster<>();
+            }
+            @SuppressWarnings("unchecked") // Logically checked.
+            final MessageCaster<M, T> result = (MessageCaster<M, T>) caster;
             return result;
         }
 
         @Override
-        protected Message toMessage(ByteString input) {
+        protected T doForward(M input) {
+            return toObject(input);
+        }
+
+        @Override
+        protected M doBackward(T t) {
+            return toMessage(t);
+        }
+
+        protected abstract T toObject(M input);
+
+        protected abstract M toMessage(T input);
+    }
+
+    private static class BytesCaster extends MessageCaster<BytesValue, ByteString> {
+
+        @Override
+        protected ByteString toObject(BytesValue input) {
+            final ByteString result = input.getValue();
+            return result;
+        }
+
+        @Override
+        protected BytesValue toMessage(ByteString input) {
             final BytesValue bytes = BytesValue.newBuilder()
                                                .setValue(input)
                                                .build();
@@ -152,28 +166,24 @@ public final class TypeConverter {
         }
     }
 
-    private static class MessageTypeCaster<T> extends AnyCaster<T> {
+    private static class MessageTypeCaster extends MessageCaster<Message, Message> {
 
         @Override
-        protected T toObject(Any input) {
-            final Message unpacked = AnyPacker.unpack(input);
-            @SuppressWarnings("unchecked") final T result = (T) unpacked;
-            return result;
+        protected Message toObject(Message input) {
+            return input;
         }
 
         @Override
-        protected Message toMessage(T input) {
-            checkState(input instanceof Message);
-            final Message result = (Message) input;
-            return result;
+        protected Message toMessage(Message input) {
+            return input;
         }
     }
 
-    private static class PrimitiveTypeCaster<T> extends AnyCaster<T> {
+    private static class PrimitiveTypeCaster<M extends Message, T> extends MessageCaster<M, T> {
 
-        private static final ImmutableMap<Class, Converter<? extends Message, ?>>
+        private static final ImmutableMap<Class<?>, Converter<? extends Message, ?>>
                 PROTO_WRAPPER_TO_HANDLER =
-                ImmutableMap.<Class, Converter<? extends Message, ?>>builder()
+                ImmutableMap.<Class<?>, Converter<? extends Message, ?>>builder()
                         .put(Int32Value.class, new Int32Handler())
                         .put(Int64Value.class, new Int64Handler())
                         .put(UInt32Value.class, new UInt32Handler())
@@ -183,9 +193,9 @@ public final class TypeConverter {
                         .put(BoolValue.class, new BoolHandler())
                         .put(StringValue.class, new StringHandler())
                         .build();
-        private static final ImmutableMap<Class, Converter<? extends Message, ?>>
+        private static final ImmutableMap<Class<?>, Converter<? extends Message, ?>>
                 PRIMITIVE_TO_HANDLER =
-                ImmutableMap.<Class, Converter<? extends Message, ?>>builder()
+                ImmutableMap.<Class<?>, Converter<? extends Message, ?>>builder()
                         .put(Integer.class, new Int32Handler())
                         .put(Long.class, new Int64Handler())
                         .put(Float.class, new FloatHandler())
@@ -195,28 +205,28 @@ public final class TypeConverter {
                         .build();
 
         @Override
-        protected T toObject(Any input) {
-            final Message unpacked = AnyPacker.unpack(input);
-            final Class boxedType = unpacked.getClass();
-            @SuppressWarnings("unchecked") final Function<Message, T> typeUnpacker =
-                    (Function<Message, T>) PROTO_WRAPPER_TO_HANDLER.get(boxedType);
+        protected T toObject(M input) {
+            final Class<?> boxedType = input.getClass();
+            @SuppressWarnings("unchecked")
+            final Converter<M, T> typeUnpacker =
+                    (Converter<M, T>) PROTO_WRAPPER_TO_HANDLER.get(boxedType);
             checkArgument(typeUnpacker != null,
                           "Could not find a primitive type for %s.",
                           boxedType.getCanonicalName());
-            final T result = typeUnpacker.apply(unpacked);
+            final T result = typeUnpacker.convert(input);
             return result;
         }
 
         @Override
-        protected Message toMessage(T input) {
+        protected M toMessage(T input) {
             final Class<?> cls = input.getClass();
-            @SuppressWarnings("unchecked") final Converter<Message, T> converter =
-                    (Converter<Message, T>) PRIMITIVE_TO_HANDLER.get(cls);
+            @SuppressWarnings("unchecked")
+            final Converter<M, T> converter =
+                    (Converter<M, T>) PRIMITIVE_TO_HANDLER.get(cls);
             checkArgument(converter != null,
                           "Could not find a wrapper type for %s.",
                           cls.getCanonicalName());
-            final Message result = converter.reverse()
-                                            .convert(input);
+            final M result = converter.reverse().convert(input);
             return result;
         }
     }

@@ -22,10 +22,10 @@ package io.spine.base;
 import com.google.protobuf.GeneratedMessageV3;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.util.Timestamps;
-import io.spine.protobuf.Wrapper;
 import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -36,7 +36,7 @@ public class ThrowableMessageShould {
 
     @Test
     public void create_instance() {
-        final StringValue message = Wrapper.forString(newUuid());
+        final StringValue message = toMessage(newUuid());
 
         final ThrowableMessage throwableMessage = new TestThrowableMessage(message);
 

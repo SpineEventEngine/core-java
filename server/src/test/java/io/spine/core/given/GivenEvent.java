@@ -26,11 +26,11 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.EventsShould;
 import io.spine.core.Version;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.command.TestEventFactory;
 import io.spine.test.Tests;
 import io.spine.time.Time;
 
+import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 
@@ -40,8 +40,7 @@ import static io.spine.test.TimeTests.Past.minutesAgo;
 public class GivenEvent {
 
     public static final TestEventFactory eventFactory =
-            TestEventFactory.newInstance(Wrapper.forString()
-                                                .pack(GivenEvent.class.getSimpleName()),
+            TestEventFactory.newInstance(toAny(GivenEvent.class.getSimpleName()),
                                          EventsShould.class);
 
     private GivenEvent() {

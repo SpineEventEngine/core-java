@@ -22,6 +22,7 @@ package io.spine.server.commandbus;
 
 import com.google.protobuf.Duration;
 import com.google.protobuf.Message;
+import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.base.Error;
 import io.spine.base.ThrowableMessage;
@@ -32,7 +33,7 @@ import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.CommandStatus;
 import io.spine.core.TenantId;
-import io.spine.protobuf.Wrapper;
+import io.spine.protobuf.TypeConverter;
 import io.spine.server.command.Assign;
 import io.spine.server.command.CommandHandler;
 import io.spine.server.tenant.TenantAwareFunction;
@@ -273,7 +274,7 @@ public abstract class CommandStoreShould extends AbstractCommandBusTestSuite {
         private static final long serialVersionUID = 0L;
 
         private TestFailure() {
-            super(Wrapper.forString(TestFailure.class.getName()));
+            super(TypeConverter.<String, StringValue>toMessage(TestFailure.class.getName()));
         }
     }
 
