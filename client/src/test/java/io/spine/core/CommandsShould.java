@@ -35,7 +35,6 @@ import io.spine.client.ActorRequestFactory;
 import io.spine.client.TestActorRequestFactory;
 import io.spine.core.given.GivenCommandContext;
 import io.spine.core.given.GivenUserId;
-import io.spine.protobuf.Wrapper;
 import io.spine.string.Stringifiers;
 import io.spine.time.Durations2;
 import io.spine.time.ZoneOffset;
@@ -50,8 +49,8 @@ import static com.google.common.collect.Lists.newArrayList;
 import static com.google.protobuf.Descriptors.FileDescriptor;
 import static io.spine.core.Commands.sameActorAndTenant;
 import static io.spine.core.given.GivenTenantId.newUuid;
-import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.protobuf.TypeConverter.toMessage;
+import static io.spine.test.TestValues.newUuidValue;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.TimeTests.Past.minutesAgo;
 import static io.spine.test.TimeTests.Past.secondsAgo;
@@ -233,7 +232,7 @@ public class CommandsShould {
     public void obtain_type_url_of_command() {
         final ActorRequestFactory factory =
                 TestActorRequestFactory.newInstance(CommandsShould.class);
-        final StringValue message = toMessage(newUuid());
+        final StringValue message = toMessage(Identifier.newUuid());
         final Command command = factory.command()
                                        .create(message);
 
