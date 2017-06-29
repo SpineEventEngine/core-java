@@ -60,7 +60,7 @@ public class Statuses {
     }
 
     /**
-     * Constructs the {@code StatusRuntimeException} with the given causer and error.
+     * Constructs the {@code StatusRuntimeException} with the given cause and error.
      *
      * @see #invalidArgumentWithCause(MessageRejection)
      */
