@@ -102,9 +102,6 @@ public abstract class EventException extends RuntimeException implements Message
         return eventMessage;
     }
 
-    /**
-     * Returns an error occurred.
-     */
     @Override
     public Error asError() {
         return error;

@@ -107,7 +107,6 @@ public abstract class CommandException extends RuntimeException implements Messa
         return command;
     }
 
-    /** Returns an error occurred. */
     @Override
     public Error asError() {
         return error;
