@@ -56,7 +56,7 @@ import static io.spine.core.CommandStatus.OK;
 import static io.spine.core.CommandStatus.RECEIVED;
 import static io.spine.core.CommandStatus.SCHEDULED;
 import static io.spine.core.Commands.generateId;
-import static io.spine.protobuf.Wrappers.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.server.commandbus.Given.CommandMessage.createProjectMessage;
 import static io.spine.server.commandstore.CommandTestUtil.checkRecord;
 import static io.spine.server.commandstore.Records.newRecordBuilder;
@@ -365,7 +365,7 @@ public class StorageShould extends TenantAwareTest {
     }
 
     private static Failure newFailure() {
-        final Any packedFailureMessage = pack("newFailure");
+        final Any packedFailureMessage = toAny("newFailure");
         final FailureId id = Failures.generateId(Commands.generateId());
         return Failure.newBuilder()
                       .setId(id)

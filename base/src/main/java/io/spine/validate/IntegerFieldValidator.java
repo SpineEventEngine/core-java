@@ -20,10 +20,8 @@
 
 package io.spine.validate;
 
-import com.google.protobuf.Any;
 import com.google.protobuf.Descriptors.FieldDescriptor;
 import io.spine.base.FieldPath;
-import io.spine.protobuf.Wrapper;
 
 import static java.lang.Math.abs;
 
@@ -56,12 +54,5 @@ class IntegerFieldValidator extends NumberFieldValidator<Integer> {
     protected Integer getAbs(Integer value) {
         final Integer abs = abs(value);
         return abs;
-    }
-
-    @Override
-    protected Any wrap(Integer value) {
-        final Any any = Wrapper.forInteger()
-                               .pack(value);
-        return any;
     }
 }

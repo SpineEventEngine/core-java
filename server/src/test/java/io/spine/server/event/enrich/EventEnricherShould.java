@@ -27,7 +27,6 @@ import io.spine.core.Event;
 import io.spine.core.EventContext;
 import io.spine.core.Subscribe;
 import io.spine.core.UserId;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.TestEventFactory;
 import io.spine.server.event.EventBus;
@@ -48,6 +47,7 @@ import org.junit.Test;
 
 import static io.spine.Identifier.newUuid;
 import static io.spine.core.Enrichments.getEnrichment;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.command.TestEventFactory.newInstance;
 import static io.spine.server.event.Given.AnEvent.projectStarted;
 import static io.spine.server.event.Given.Enrichment.GetProjectMaxMemberCount;
@@ -187,14 +187,14 @@ public class EventEnricherShould {
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_no_such_enrichment_registered() {
-        final Event dummyEvent = createEvent(Wrapper.forString(newUuid()));
+        final Event dummyEvent = createEvent(toMessage(newUuid()));
 
         assertFalse(enricher.canBeEnriched(dummyEvent));
     }
 
     @Test
     public void confirm_that_event_can_not_be_enriched_if_enrichment_disabled() {
-        final Event event = createEvent(Wrapper.forString(newUuid()));
+        final Event event = createEvent(toMessage(newUuid()));
         final Event notEnrichableEvent =
                 event.toBuilder()
                      .setContext(event.getContext()

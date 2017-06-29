@@ -22,7 +22,6 @@ package io.spine.server.command;
 
 import com.google.protobuf.Any;
 import com.google.protobuf.Message;
-import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
 import io.spine.core.CommandContext;
 import io.spine.core.CommandId;
@@ -31,7 +30,6 @@ import io.spine.core.EventContext;
 import io.spine.core.EventId;
 import io.spine.core.Version;
 import io.spine.protobuf.AnyPacker;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.integration.IntegrationEvent;
 import io.spine.server.integration.IntegrationEventContext;
 import io.spine.validate.ValidationException;
@@ -41,6 +39,7 @@ import javax.annotation.Nullable;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static io.spine.protobuf.AnyPacker.pack;
+import static io.spine.protobuf.TypeConverter.toAny;
 import static io.spine.time.Time.getCurrentTime;
 import static io.spine.validate.Validate.checkValid;
 import static io.spine.validate.Validate.isNotDefault;
@@ -138,12 +137,11 @@ public class EventFactory {
     }
 
     private static EventContext toEventContext(IntegrationEventContext value) {
-        final StringValue producerId = Wrapper.forString(value.getBoundedContextName());
         final Timestamp timestamp = value.getTimestamp();
-        final Any producerAny = pack(producerId);
+        final Any producerId = toAny(value.getBoundedContextName());
         return EventContext.newBuilder()
                            .setTimestamp(timestamp)
-                           .setProducerId(producerAny)
+                           .setProducerId(producerId)
                            .build();
     }
 
