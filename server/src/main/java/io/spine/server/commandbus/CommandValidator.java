@@ -69,13 +69,13 @@ final class CommandValidator implements EnvelopeValidator<CommandEnvelope> {
         final Command command = envelope.getCommand();
         if (commandBus.isMultitenant()) {
             if (!tenantSpecified) {
-                final MessageInvalid exception = missingTenantId(command);
-                return of(exception);
+                final MessageInvalid report = missingTenantId(command);
+                return of(report);
             }
         } else {
             if (tenantSpecified) {
-                final MessageInvalid exception = tenantIdInapplicable(command);
-                return of(exception);
+                final MessageInvalid report = tenantIdInapplicable(command);
+                return of(report);
             }
         }
         return absent();

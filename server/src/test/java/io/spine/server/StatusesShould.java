@@ -46,16 +46,15 @@ public class StatusesShould {
     @Test
     @SuppressWarnings("ThrowableResultOfMethodCallIgnored")
     public void create_invalid_argument_status_exception() {
-
-        final MessageRejection exception =
+        final MessageRejection rejection =
                 new UnsupportedEventException(Sample.messageOfType(ProjectCreated.class));
-        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(exception);
+        final StatusRuntimeException statusRuntimeEx = invalidArgumentWithCause(rejection);
         final Error actualError = MetadataConverter.toError(statusRuntimeEx.getTrailers())
                                                    .get();
         assertEquals(Status.INVALID_ARGUMENT.getCode(), statusRuntimeEx.getStatus()
                                                                        .getCode());
-        assertEquals(exception, statusRuntimeEx.getCause());
-        assertEquals(exception.asError(), actualError);
+        assertEquals(rejection, statusRuntimeEx.getCause());
+        assertEquals(rejection.asError(), actualError);
     }
 
     @Test
