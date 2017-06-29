@@ -19,7 +19,9 @@
  */
 package io.spine.server.failure;
 
+import io.spine.core.Failure;
 import io.spine.core.FailureEnvelope;
+import io.spine.server.bus.BusBuilderShould;
 import io.spine.test.Tests;
 import org.junit.Test;
 
@@ -28,22 +30,27 @@ import static org.junit.Assert.assertEquals;
 /**
  * @author Alex Tymchenko
  */
-public class FailureBusBuilderShould {
+public class FailureBusBuilderShould extends BusBuilderShould<FailureBus.Builder,
+                                                              FailureEnvelope,
+                                                              Failure> {
+
+    @Override
+    protected FailureBus.Builder builder() {
+        return FailureBus.newBuilder();
+    }
 
     @Test(expected = NullPointerException.class)
     public void do_not_accept_null_DispatcherDelivery() {
-        FailureBus.newBuilder()
-                  .setDispatcherFailureDelivery(Tests.<DispatcherFailureDelivery>nullRef());
+        builder().setDispatcherFailureDelivery(Tests.<DispatcherFailureDelivery>nullRef());
     }
 
     @SuppressWarnings("OptionalGetWithoutIsPresent")    //It's fine as for the Builder tests.
     @Test
     public void return_set_DispatcherDelivery() {
         final DispatcherFailureDelivery delivery = deliveryForTests();
-        assertEquals(delivery, FailureBus.newBuilder()
-                                         .setDispatcherFailureDelivery(delivery)
-                                         .getDispatcherFailureDelivery()
-                                         .get());
+        assertEquals(delivery, builder().setDispatcherFailureDelivery(delivery)
+                                        .getDispatcherFailureDelivery()
+                                        .get());
     }
 
     private static DispatcherFailureDelivery deliveryForTests() {

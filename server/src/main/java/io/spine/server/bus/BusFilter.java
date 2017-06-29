@@ -18,40 +18,38 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.commandbus;
+package io.spine.server.bus;
 
 import com.google.common.base.Optional;
-import io.grpc.stub.StreamObserver;
 import io.spine.annotation.SPI;
-import io.spine.core.CommandEnvelope;
 import io.spine.core.IsSent;
+import io.spine.core.MessageEnvelope;
 
 /**
- * A {@code CommandBus} can have several filters that can prevent a command to be
- * {@linkplain CommandBus#post(com.google.protobuf.Message, StreamObserver) posted}.
+ * The filter for the messages posted to a bus.
  *
- * @author Alexander Yevsyukov
+ * <p>A bus may have several filters which can prevent a message from being posted.
+ *
+ * @author Dmytro Dashenkov
  */
 @SPI
-public interface CommandBusFilter {
+public interface BusFilter<E extends MessageEnvelope<?>> extends AutoCloseable {
 
     /**
-     * Accepts or rejects a passed command.
+     * Accepts or rejects a passed message.
      *
      * <p>A filter can:
      * <ul>
-     *     <li>accept the command (by returning {@code Optional.absent()};
-     *     <li>reject the command with {@link io.spine.base.Error} status e.g. if it fails to pass
-     *         the validation;
-     *     <li>reject the command with {@code OK} status. For example, a scheduled command may not
+     *     <li>accept the message (by returning {@code Optional.absent()};
+     *     <li>reject the message with {@link io.spine.base.Error Error} status e.g. if it fails
+     *         to pass the validation;
+     *     <li>reject the message with {@code OK} status. For example, a scheduled command may not
      *         pass a filter.
      * </ul>
      *
-     * @param envelope      the envelope with the command to filter
-     * @return {@code Optional.absent()} if the command passes the filter,
-     *         {@linkplain IsSent IsSent response} with either status otherwise
+     * @param envelope the envelope with the message to filter
+     * @return {@code Optional.absent()} if the message passes the filter,
+     *         {@linkplain IsSent posting result} with either status otherwise
      */
-    Optional<IsSent> accept(CommandEnvelope envelope);
-
-    void onClose(CommandBus commandBus);
+    Optional<IsSent> accept(E envelope);
 }

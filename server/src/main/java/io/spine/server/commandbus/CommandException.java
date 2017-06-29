@@ -27,6 +27,7 @@ import io.spine.base.Error;
 import io.spine.core.Command;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandValidationError;
+import io.spine.core.MessageRejection;
 import io.spine.type.ClassName;
 import io.spine.type.TypeName;
 
@@ -39,7 +40,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-public abstract class CommandException extends RuntimeException {
+public abstract class CommandException extends RuntimeException implements MessageRejection {
 
     /**
      * The name of the attribute of the command type reported in an error.
@@ -106,9 +107,14 @@ public abstract class CommandException extends RuntimeException {
         return command;
     }
 
-    /** Returns an error occurred. */
-    public Error getError() {
+    @Override
+    public Error asError() {
         return error;
+    }
+
+    @Override
+    public Throwable asThrowable() {
+        return this;
     }
 
     /**

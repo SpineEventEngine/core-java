@@ -18,42 +18,24 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
-import io.spine.core.EventClass;
-import io.spine.server.outbus.OutputDispatcherRegistry;
-
-import java.util.Set;
+import io.spine.annotation.Internal;
+import io.spine.core.MessageEnvelope;
 
 /**
- * The registry of objects that dispatch event to handlers.
+ * The implementation base for the {@linkplain BusFilter BusFilters}.
  *
- * <p>There can be multiple dispatchers per event class.
+ * <p>This class defines the default no-op {@link BusFilter#close() BusFilter.close()} behavior.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
+@Internal
+public abstract class AbstractBusFilter<E extends MessageEnvelope<?>> implements BusFilter<E> {
 
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
-     */
+    @SuppressWarnings("NoopMethodInAbstractClass")
     @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
-     */
-    @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
+    public void close() throws Exception {
+        // Do nothing by default, but allow customization.
     }
 }

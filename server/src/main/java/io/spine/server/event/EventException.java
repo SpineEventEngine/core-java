@@ -27,6 +27,7 @@ import com.google.protobuf.Message;
 import com.google.protobuf.Value;
 import io.spine.base.Error;
 import io.spine.protobuf.AnyPacker;
+import io.spine.core.MessageRejection;
 import io.spine.type.TypeName;
 
 import java.util.Map;
@@ -36,7 +37,7 @@ import java.util.Map;
  *
  * @author Alexander Litus
  */
-public abstract class EventException extends RuntimeException {
+public abstract class EventException extends RuntimeException implements MessageRejection {
 
     private static final long serialVersionUID = 0L;
 
@@ -101,10 +102,13 @@ public abstract class EventException extends RuntimeException {
         return eventMessage;
     }
 
-    /**
-     * Returns an error occurred.
-     */
-    public Error getError() {
+    @Override
+    public Error asError() {
         return error;
+    }
+
+    @Override
+    public Throwable asThrowable() {
+        return this;
     }
 }

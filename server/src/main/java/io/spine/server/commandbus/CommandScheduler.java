@@ -28,6 +28,7 @@ import io.spine.core.CommandContext;
 import io.spine.core.CommandEnvelope;
 import io.spine.core.CommandId;
 import io.spine.core.IsSent;
+import io.spine.server.bus.BusFilter;
 
 import javax.annotation.CheckReturnValue;
 import javax.annotation.Nullable;
@@ -50,7 +51,7 @@ import static io.spine.time.Time.getCurrentTime;
  * @author Alexander Litus
  * @author Alexander Yevsyukov
  */
-public abstract class CommandScheduler implements CommandBusFilter {
+public abstract class CommandScheduler implements BusFilter<CommandEnvelope> {
 
     private static final Set<CommandId> scheduledCommandIds = newHashSet();
 
@@ -97,7 +98,7 @@ public abstract class CommandScheduler implements CommandBusFilter {
     }
 
     @Override
-    public void onClose(CommandBus commandBus) {
+    public void close() {
         shutdown();
     }
 

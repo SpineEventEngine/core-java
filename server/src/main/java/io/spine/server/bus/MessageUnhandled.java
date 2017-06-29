@@ -18,42 +18,19 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
-import io.spine.core.EventClass;
-import io.spine.server.outbus.OutputDispatcherRegistry;
-
-import java.util.Set;
+import io.spine.annotation.Internal;
+import io.spine.core.MessageRejection;
 
 /**
- * The registry of objects that dispatch event to handlers.
+ * An interface for the {@link MessageRejection} types which report an unhandled message being
+ * posted into a {@link Bus}.
  *
- * <p>There can be multiple dispatchers per event class.
+ * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
-     */
-    @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
-     */
-    @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
-    }
+@Internal
+public interface MessageUnhandled extends MessageRejection {
 }

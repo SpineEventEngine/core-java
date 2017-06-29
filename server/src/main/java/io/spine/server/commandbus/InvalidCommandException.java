@@ -31,6 +31,7 @@ import io.spine.core.CommandValidationError;
 import io.spine.type.TypeName;
 import io.spine.validate.ConstraintViolation;
 import io.spine.validate.ConstraintViolations.ExceptionFactory;
+import io.spine.core.MessageInvalid;
 
 import java.util.Map;
 
@@ -44,7 +45,7 @@ import static java.lang.String.format;
  *
  * @author Alexander Yevsyukov
  */
-public class InvalidCommandException extends CommandException {
+public class InvalidCommandException extends CommandException implements MessageInvalid {
 
     private static final long serialVersionUID = 0L;
 

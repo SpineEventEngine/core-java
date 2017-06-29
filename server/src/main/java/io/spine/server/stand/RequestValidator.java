@@ -187,8 +187,7 @@ abstract class RequestValidator<M extends Message> {
 
     private static void feedToResponse(InvalidRequestException cause,
                                        StreamObserver<?> responseObserver) {
-        final StatusRuntimeException validationException =
-                invalidArgumentWithCause(cause, cause.getError());
+        final StatusRuntimeException validationException = invalidArgumentWithCause(cause);
         responseObserver.onError(validationException);
     }
 

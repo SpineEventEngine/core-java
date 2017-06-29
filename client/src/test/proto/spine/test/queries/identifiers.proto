@@ -19,7 +19,7 @@
 //
 syntax = "proto3";
 
-package spine.test.validate.msg;
+package spine.test.queries;
 
 import "spine/options.proto";
 

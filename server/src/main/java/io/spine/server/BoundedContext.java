@@ -27,7 +27,7 @@ import io.grpc.stub.StreamObserver;
 import io.spine.annotation.Experimental;
 import io.spine.annotation.Internal;
 import io.spine.core.Event;
-import io.spine.core.Response;
+import io.spine.core.IsSent;
 import io.spine.option.EntityOption.Visibility;
 import io.spine.server.command.EventFactory;
 import io.spine.server.commandbus.CommandBus;
@@ -54,7 +54,6 @@ import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
-import static io.spine.grpc.StreamObservers.ack;
 import static io.spine.util.Exceptions.newIllegalStateException;
 import static io.spine.validate.Validate.checkNameNotEmptyOrBlank;
 import static java.lang.String.format;
@@ -238,17 +237,9 @@ public final class BoundedContext
      */
     @Experimental
     @Override
-    public void notify(IntegrationEvent integrationEvent,
-                       StreamObserver<Response> responseObserver) {
+    public void notify(IntegrationEvent integrationEvent, StreamObserver<IsSent> observer) {
         final Event event = EventFactory.toEvent(integrationEvent);
-        final Optional<Throwable> violation = eventBus.validate(event);
-        final boolean isValid = !violation.isPresent();
-        if (isValid) {
-            eventBus.post(event);
-            ack(responseObserver);
-        } else {
-            responseObserver.onError(violation.get());
-        }
+        eventBus.post(event, observer);
     }
 
     /** Obtains instance of {@link CommandBus} of this {@code BoundedContext}. */

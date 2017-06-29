@@ -18,42 +18,32 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-package io.spine.server.event;
+package io.spine.server.bus;
 
-import io.spine.core.EventClass;
-import io.spine.server.outbus.OutputDispatcherRegistry;
-
-import java.util.Set;
+import io.spine.annotation.Internal;
+import io.spine.core.MessageEnvelope;
 
 /**
- * The registry of objects that dispatch event to handlers.
+ * A definition of a handler for a dead message.
  *
- * <p>There can be multiple dispatchers per event class.
+ * <p>If a message with no target dispatchers found is passed to the bus, it will result in a call
+ * to {@link DeadMessageTap#capture
+ * DeadMessageTap.capture(MessageEnvelope)}. The method produces
+ * {@link MessageUnhandled} instance describing the dead message. It may also process the given
+ * message (e.g. store it into the bus store).
  *
- * @author Alexander Yevsyukov
- * @author Alex Tymchenko
+ * @author Dmytro Dashenkov
  */
-class EventDispatcherRegistry extends OutputDispatcherRegistry<EventClass, EventDispatcher> {
+@Internal
+public interface DeadMessageTap<E extends MessageEnvelope<?>> {
 
     /**
-     * {@inheritDoc}
+     * Handles the dead message in a bus-specific way and produces an {@link MessageUnhandled} which
+     * may be converted to a {@link Error} for notifying the poster about the absence of
+     * dispatchers.
      *
-     * <p>Overrides to expose this method to
-     * {@linkplain EventBus#hasDispatchers(EventClass)} EventBus}.
+     * @param message the dead message
+     * @return the {@link MessageUnhandled} instance describing the dead message
      */
-    @Override
-    protected boolean hasDispatchersFor(EventClass eventClass) {
-        return super.hasDispatchersFor(eventClass);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * <p>Overrides in order to expose itself to
-     * {@linkplain EventBus#getDispatchers(EventClass)}) EventBus}.
-     */
-    @Override
-    protected Set<EventDispatcher> getDispatchers(EventClass eventClass) {
-        return super.getDispatchers(eventClass);
-    }
+    MessageUnhandled capture(E message);
 }

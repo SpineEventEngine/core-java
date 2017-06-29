@@ -21,15 +21,14 @@ syntax = "proto3";
 
 package spine.server.integration.grpc;
 
-import "spine/options.proto";
-
 option (type_url_prefix) = "type.spine.io";
 option java_package = "io.spine.server.integration.grpc";
 option java_multiple_files = true;
 option java_outer_classname = "IntegrationEventSubscriberProto";
 option java_generate_equals_and_hash = true;
 
-import "spine/core/response.proto";
+import "spine/options.proto";
+import "spine/core/bus.proto";
 import "spine/server/integration/integration_event.proto";
 
 // A service for notifying integration event subscribers.
@@ -39,5 +38,5 @@ service IntegrationEventSubscriber {
     // The response is `ok` if the event is successfully received by the subscriber.
     // If the event is not handled because of a technical error, the response is `error`.
     // If the event cannot be handled because of business conditions, the response is `failure`.
-    rpc Notify(server.integration.IntegrationEvent) returns (core.Response);
+    rpc Notify(server.integration.IntegrationEvent) returns (spine.core.IsSent);
 }
