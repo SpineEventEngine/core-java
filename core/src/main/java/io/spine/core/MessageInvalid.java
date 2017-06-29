@@ -23,7 +23,7 @@ package io.spine.core;
 import io.spine.annotation.Internal;
 
 /**
- * An interface for the {@link Exception} types which are thrown upon an invalid message.
+ * An interface for the {@link MessageRejection} types which report a message being invalid.
  *
  * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
  *

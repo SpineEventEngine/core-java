@@ -24,8 +24,8 @@ import io.spine.annotation.Internal;
 import io.spine.core.MessageRejection;
 
 /**
- * An interface for the {@linkplain Exception exceptions} which are thrown upon an unhandled message
- * being posted into a {@link Bus}.
+ * An interface for the {@link MessageRejection} types which report an unhandled message being
+ * posted into a {@link Bus}.
  *
  * <p>Except the methods declared in {@link MessageRejection}, this type is a marker interface.
  *
