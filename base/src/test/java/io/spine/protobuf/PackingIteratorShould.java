@@ -30,10 +30,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import static io.spine.protobuf.AnyPacker.unpack;
-import static io.spine.protobuf.Wrapper.forInteger;
-import static io.spine.protobuf.Wrapper.forLong;
-import static io.spine.protobuf.Wrapper.forUnsignedInteger;
-import static io.spine.protobuf.Wrapper.forUnsignedLong;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.validate.Validate.isDefault;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -49,12 +46,11 @@ public class PackingIteratorShould {
 
     @Before
     public void setUp() {
-        list = Lists.<Message>newArrayList(
-                Wrapper.forString("one"),
-                forInteger(2),
-                forLong(3),
-                forUnsignedInteger(4),
-                forUnsignedLong(5));
+        list = Lists.newArrayList(toMessage("one"),
+                                  toMessage(2),
+                                  toMessage(3),
+                                  toMessage(4),
+                                  toMessage(5));
         packer = new PackingIterator(list.iterator());
     }
 

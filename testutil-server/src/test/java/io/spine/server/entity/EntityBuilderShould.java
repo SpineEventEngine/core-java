@@ -23,10 +23,10 @@ package io.spine.server.entity;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.StringValue;
 import com.google.protobuf.Timestamp;
-import io.spine.protobuf.Wrapper;
 import io.spine.time.Time;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
 
 @SuppressWarnings({"ConstantConditions" /* some of the methods test `null` arguments */,
@@ -65,7 +65,7 @@ public class EntityBuilderShould {
     public void create_entity() {
         final long id = 1024L;
         final int version = 100500;
-        final StringValue state = Wrapper.forString(getClass().getName());
+        final StringValue state = toMessage(getClass().getName());
         final Timestamp timestamp = Time.getCurrentTime();
 
         final VersionableEntity entity = givenEntity()
@@ -88,7 +88,7 @@ public class EntityBuilderShould {
 
         assertEquals(TestEntity.class, entity.getClass());
         assertEquals(0L, entity.getId());
-        assertEquals(Wrapper.forString(""), entity.getState());
+        assertEquals(toMessage(""), entity.getState());
         assertEquals(0, entity.getVersion().getNumber());
     }
 

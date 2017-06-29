@@ -30,8 +30,6 @@ import io.spine.core.Command;
 import io.spine.core.CommandContext;
 import io.spine.core.IsSent;
 import io.spine.grpc.StreamObservers;
-import io.spine.protobuf.Wrapper;
-import io.spine.protobuf.Wrappers;
 import io.spine.server.BoundedContext;
 import io.spine.server.command.Assign;
 import io.spine.server.entity.idfunc.IdCommandFunction;
@@ -39,8 +37,10 @@ import io.spine.validate.StringValueVBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.server.storage.LifecycleFlagField.archived;
 import static io.spine.server.storage.LifecycleFlagField.deleted;
+import static java.lang.String.format;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -127,7 +127,7 @@ public class AggregateRepositoryViewsShould {
         StringValue handle(StringValue commandMessage) {
             final String msg = commandMessage.getValue();
             // Transform the command to the event (the fact in the past).
-            return Wrapper.forString(msg + 'd');
+            return toMessage(msg + 'd');
         }
 
         @Apply
@@ -154,7 +154,7 @@ public class AggregateRepositoryViewsShould {
         private static final char SEPARATOR = '-';
 
         private static StringValue createCommandMessage(Long id, String msg) {
-            return Wrappers.format("%d%s" + msg, id, SEPARATOR);
+            return toMessage(format("%d%s%s", id, SEPARATOR, msg));
         }
 
         private static Long getId(StringValue commandMessage) {

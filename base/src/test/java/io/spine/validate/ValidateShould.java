@@ -23,11 +23,11 @@ package io.spine.validate;
 import com.google.common.testing.NullPointerTester;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
-import io.spine.protobuf.Wrapper;
 import io.spine.test.Tests;
 import io.spine.type.TypeName;
 import org.junit.Test;
 
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static io.spine.test.Values.newUuidValue;
 import static io.spine.validate.Validate.checkBounds;
@@ -59,7 +59,7 @@ public class ValidateShould {
 
     @Test
     public void verify_that_message_is_not_in_default_state() {
-        final Message msg = Wrapper.forString("check_if_message_is_not_in_default_state");
+        final Message msg = toMessage("check_if_message_is_not_in_default_state");
 
         assertTrue(isNotDefault(msg));
         assertFalse(isNotDefault(StringValue.getDefaultInstance()));

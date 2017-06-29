@@ -26,7 +26,6 @@ import com.google.protobuf.BoolValue;
 import com.google.protobuf.Message;
 import com.google.protobuf.StringValue;
 import io.spine.core.given.GivenEvent;
-import io.spine.protobuf.Wrapper;
 import io.spine.server.command.TestEventFactory;
 import io.spine.time.Time;
 import io.spine.type.TypeName;
@@ -39,7 +38,7 @@ import static io.spine.core.Enrichments.getEnrichments;
 import static io.spine.core.Enrichments.isEnrichmentEnabled;
 import static io.spine.core.given.GivenEvent.context;
 import static io.spine.protobuf.AnyPacker.pack;
-import static io.spine.protobuf.Wrapper.forBoolean;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static io.spine.test.Tests.assertHasPrivateParameterlessCtor;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -51,9 +50,9 @@ import static org.junit.Assert.assertTrue;
 public class EnrichmentsShould {
 
     private static final StringValue producerId =
-            Wrapper.forString(EnrichmentsShould.class.getSimpleName());
-    private final StringValue stringValue = Wrapper.forString(newUuid());
-    private final BoolValue boolValue = forBoolean(true);
+            toMessage(EnrichmentsShould.class.getSimpleName());
+    private final StringValue stringValue = toMessage(newUuid());
+    private final BoolValue boolValue = toMessage(true);
     private TestEventFactory eventFactory;
     private EventContext context;
 

@@ -30,6 +30,7 @@ import static io.spine.Identifier.newUuid;
 import static io.spine.protobuf.MessageField.getFieldDescriptor;
 import static io.spine.protobuf.MessageField.getFieldName;
 import static io.spine.protobuf.MessageField.toAccessorMethodName;
+import static io.spine.protobuf.TypeConverter.toMessage;
 import static org.junit.Assert.assertEquals;
 
 public class MessageFieldShould {
@@ -39,7 +40,7 @@ public class MessageFieldShould {
     @SuppressWarnings("DuplicateStringLiteralInspection")
     public static final String STR_VALUE_FIELD_NAME = "value";
 
-    private final StringValue stringValue = Wrapper.forString(newUuid());
+    private final StringValue stringValue = toMessage(newUuid());
 
     @Test
     public void accept_positive_index() {
